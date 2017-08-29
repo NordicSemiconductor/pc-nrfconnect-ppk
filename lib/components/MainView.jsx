@@ -35,9 +35,12 @@
  */
 
 import React from 'react';
+import Chart from '../containers/Chart';
 
 const MainView = () => (
-    <div className="core-main-view" />
+    <div className="core-main-view">
+        <Chart />
+    </div>
 );
 
 export default MainView;
