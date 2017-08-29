@@ -1,0 +1,41 @@
+{
+  "name": "pc-nrfconnect-ppk",
+  "version": "1.0.0",
+  "description": "Power Profiler",
+  "displayName": "Power Profiler",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk.git"
+  },
+  "author": "Nordic Semiconductor ASA",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "nrfconnect": "2.x"
+  },
+  "main": "dist/bundle.js",
+  "files": [
+    "dist/",
+    "icon.png",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "webpack --watch",
+    "webpack": "webpack",
+    "build": "cross-env NODE_ENV=production webpack",
+    "lint": "eslint components reducers",
+    "test": "jest --testResultsProcessor jest-bamboo-formatter",
+    "test-watch": "jest --watch",
+    "clean": "npm install rimraf && npm run clean-dist && npm run clean-modules",
+    "clean-dist": "rimraf dist",
+    "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
+  },
+  "devDependencies": {
+    "pc-nrfconnect-devdep": "https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#v1.0.0"
+  },
+  "dependencies": {},
+  "jest": {
+    "moduleNameMapper": {
+      "nrfconnect/core": "<rootDir>/mocks/coreMock.js"
+    }
+  }
+}
