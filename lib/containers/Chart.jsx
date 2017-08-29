@@ -46,10 +46,13 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
+const len = 600;
+const triggerLine = new Uint16Array(len);
+const averageLine = new Float32Array(len);
+
 const Chart = props => {
     const { triggerIndex, averageIndex } = props;
 
-    const len = 600;
     let triggerIndexStart = triggerIndex - len;
     if (triggerIndexStart < 0) {
         triggerIndexStart += triggerData.length;
@@ -58,12 +61,10 @@ const Chart = props => {
     if (averageIndexStart < 0) {
         averageIndexStart += averageData.length;
     }
-    const triggerLine = new Uint16Array(len);
     const triggerLineA = triggerData.slice(triggerIndexStart, triggerIndex);
     const triggerLineB = triggerData.slice(0, len - triggerLineA.length);
     triggerLine.set(triggerLineA);
     triggerLine.set(triggerLineB, triggerLineA.length);
-    const averageLine = new Float32Array(len);
     const averageLineA = averageData.slice(averageIndexStart, averageIndex);
     const averageLineB = averageData.slice(0, len - averageLineA.length);
     averageLine.set(averageLineA);
