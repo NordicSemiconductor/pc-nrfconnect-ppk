@@ -35,10 +35,16 @@
  */
 
 import React from 'react';
+import { Button, ButtonGroup } from 'react-bootstrap';
 import Info from '../containers/Info';
+import { trigger, average } from '../actions/rtt';
 
 const SidePanel = () => (
     <div className="core-side-panel">
+        <ButtonGroup>
+            <Button onClick={trigger}>Trigger</Button>
+            <Button onClick={average}>Average</Button>
+        </ButtonGroup>
         <Info />
     </div>
 );

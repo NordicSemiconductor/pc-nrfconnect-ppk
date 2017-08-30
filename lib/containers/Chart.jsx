@@ -78,15 +78,17 @@ const Chart = props => {
             borderColor: 'rgba(79, 140, 196, 1)',
             borderWidth: 1,
             fill: false,
-            data: Array.from(triggerLine).map((y, i) => ({ x: new Date(now - i), y })),
+            data: Array.prototype.map.call(triggerLine, (y, i) => ({ x: new Date(now - i), y })),
             pointRadius: 0,
+            yAxisID: 'y-trigger',
         }, {
             label: 'average',
             borderColor: 'rgba(179, 40, 96, 0.3)',
             borderWidth: 1,
             fill: false,
-            data: Array.from(averageLine).map((y, i) => ({ x: new Date(now - i), y })),
+            data: Array.prototype.map.call(averageLine, (y, i) => ({ x: new Date(now - i), y })),
             pointRadius: 0,
+            yAxisID: 'y-average',
         }],
     };
 
@@ -98,6 +100,23 @@ const Chart = props => {
             }],
             yAxes: [{
                 type: 'linear',
+                id: 'y-trigger',
+                position: 'right',
+                min: 0,
+                max: 65536,
+                ticks: {
+                    min: 0,
+                    max: 65536,
+                },
+            }, {
+                type: 'linear',
+                id: 'y-average',
+                min: -1,
+                max: 1,
+                ticks: {
+                    min: -1,
+                    max: 1,
+                },
             }],
         },
         redraw: true,
