@@ -40,31 +40,22 @@ import { connect } from 'react-redux';
 
 import { defaults, Line } from 'react-chartjs-2';
 
-import { triggerData, averageData } from '../actions/PPKActions';
+import { averageData } from '../actions/PPKActions';
 
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
 const len = 600;
-const triggerLine = new Uint16Array(len);
 const averageLine = new Float32Array(len);
 
 const Chart = props => {
-    const { triggerIndex, averageIndex } = props;
+    const { averageIndex } = props;
 
-    let triggerIndexStart = triggerIndex - len;
-    if (triggerIndexStart < 0) {
-        triggerIndexStart += triggerData.length;
-    }
     let averageIndexStart = averageIndex - len;
     if (averageIndexStart < 0) {
         averageIndexStart += averageData.length;
     }
-    const triggerLineA = triggerData.slice(triggerIndexStart, triggerIndex);
-    const triggerLineB = triggerData.slice(0, len - triggerLineA.length);
-    triggerLine.set(triggerLineA);
-    triggerLine.set(triggerLineB, triggerLineA.length);
     const averageLineA = averageData.slice(averageIndexStart, averageIndex);
     const averageLineB = averageData.slice(0, len - averageLineA.length);
     averageLine.set(averageLineA);
@@ -74,43 +65,28 @@ const Chart = props => {
 
     const chartData = {
         datasets: [{
-            label: 'trigger',
-            borderColor: 'rgba(79, 140, 196, 1)',
-            borderWidth: 1,
-            fill: false,
-            data: Array.prototype.map.call(triggerLine, (y, i) => ({ x: new Date(now - i), y })),
-            pointRadius: 0,
-            yAxisID: 'y-trigger',
-        }, {
             label: 'average',
             borderColor: 'rgba(179, 40, 96, 0.3)',
             borderWidth: 1,
             fill: false,
             data: Array.prototype.map.call(averageLine, (y, i) => ({ x: new Date(now - i), y })),
             pointRadius: 0,
-            yAxisID: 'y-average',
         }],
     };
 
     const chartOptions = {
         scales: {
             xAxes: [{
-                id: 'x-time',
                 type: 'time',
+                time: {
+                    unit: 'millisecond',
+                    displayFormats: {
+                        millisecond: 'ss.SSS',
+                    },
+                },
             }],
             yAxes: [{
                 type: 'linear',
-                id: 'y-trigger',
-                position: 'right',
-                min: 0,
-                max: 65536,
-                ticks: {
-                    min: 0,
-                    max: 65536,
-                },
-            }, {
-                type: 'linear',
-                id: 'y-average',
                 min: -1,
                 max: 1,
                 ticks: {
@@ -120,24 +96,22 @@ const Chart = props => {
             }],
         },
         redraw: true,
+        maintainAspectRatio: false,
     };
 
     return <Line data={chartData} options={chartOptions} />;
 };
 
 Chart.propTypes = {
-    triggerIndex: PropTypes.number,
     averageIndex: PropTypes.number,
 };
 
 Chart.defaultProps = {
-    triggerIndex: 0,
     averageIndex: 0,
 };
 
 export default connect(
     state => ({
-        triggerIndex: state.app.chart.triggerIndex,
-        averageIndex: state.app.chart.averageIndex,
+        averageIndex: state.app.app.chart.averageIndex,
     }),
 )(Chart);

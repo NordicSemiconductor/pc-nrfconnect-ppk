@@ -35,11 +35,17 @@
  */
 
 import React from 'react';
-import Chart from '../containers/Chart';
+import AverageChart from '../containers/AverageChart';
+import TriggerChart from '../containers/TriggerChart';
 
 const MainView = () => (
     <div className="core-main-view">
-        <Chart />
+        <div className="chart-container">
+            <AverageChart />
+        </div>
+        <div className="chart-container">
+            <TriggerChart />
+        </div>
     </div>
 );
 

@@ -38,25 +38,80 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-const Info = props => {
-    const { metadata } = props;
-    return (
-        <div>
-            { metadata.map((line, idx) => <div key={`${idx + 1}`}>{ line }</div>) }
-        </div>
-    );
+import { defaults, Line } from 'react-chartjs-2';
+
+import { triggerData } from '../actions/PPKActions';
+
+defaults.global.tooltips.enabled = false;
+defaults.global.legend.display = false;
+defaults.global.animation.duration = 0;
+
+const len = 600;
+const triggerLine = new Uint16Array(len);
+
+const Chart = props => {
+    const { triggerIndex } = props;
+
+    let triggerIndexStart = triggerIndex - len;
+    if (triggerIndexStart < 0) {
+        triggerIndexStart += triggerData.length;
+    }
+    const triggerLineA = triggerData.slice(triggerIndexStart, triggerIndex);
+    const triggerLineB = triggerData.slice(0, len - triggerLineA.length);
+    triggerLine.set(triggerLineA);
+    triggerLine.set(triggerLineB, triggerLineA.length);
+
+    const now = new Date();
+
+    const chartData = {
+        datasets: [{
+            label: 'trigger',
+            borderColor: 'rgba(79, 140, 196, 1)',
+            borderWidth: 1,
+            fill: false,
+            data: Array.prototype.map.call(triggerLine, (y, i) => ({ x: new Date(now - i), y })),
+            pointRadius: 0,
+        }],
+    };
+
+    const chartOptions = {
+        scales: {
+            xAxes: [{
+                type: 'time',
+                time: {
+                    unit: 'millisecond',
+                    displayFormats: {
+                        millisecond: 'ss.SSS',
+                    },
+                },
+            }],
+            yAxes: [{
+                type: 'linear',
+                min: 0,
+                max: 65536,
+                ticks: {
+                    min: 0,
+                    max: 65536,
+                },
+            }],
+        },
+        redraw: true,
+        maintainAspectRatio: false,
+    };
+
+    return <Line data={chartData} options={chartOptions} />;
 };
 
-Info.propTypes = {
-    metadata: PropTypes.arrayOf(PropTypes.string),
+Chart.propTypes = {
+    triggerIndex: PropTypes.number,
 };
 
-Info.defaultProps = {
-    metadata: [],
+Chart.defaultProps = {
+    triggerIndex: 0,
 };
 
 export default connect(
     state => ({
-        metadata: state.app.app.metadata,
+        triggerIndex: state.app.app.chart.triggerIndex,
     }),
-)(Info);
+)(Chart);
