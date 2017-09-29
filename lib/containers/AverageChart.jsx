@@ -34,84 +34,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-
-import { defaults, Line } from 'react-chartjs-2';
-
-import { averageData } from '../actions/PPKActions';
-
-defaults.global.tooltips.enabled = false;
-defaults.global.legend.display = false;
-defaults.global.animation.duration = 0;
-
-const len = 600;
-const averageLine = new Float32Array(len);
-
-const Chart = props => {
-    const { averageIndex } = props;
-
-    let averageIndexStart = averageIndex - len;
-    if (averageIndexStart < 0) {
-        averageIndexStart += averageData.length;
-    }
-    const averageLineA = averageData.slice(averageIndexStart, averageIndex);
-    const averageLineB = averageData.slice(0, len - averageLineA.length);
-    averageLine.set(averageLineA);
-    averageLine.set(averageLineB, averageLineA.length);
-
-    const now = new Date();
-
-    const chartData = {
-        datasets: [{
-            label: 'average',
-            borderColor: 'rgba(179, 40, 96, 0.3)',
-            borderWidth: 1,
-            fill: false,
-            data: Array.prototype.map.call(averageLine, (y, i) => ({ x: new Date(now - i), y })),
-            pointRadius: 0,
-        }],
-    };
-
-    const chartOptions = {
-        scales: {
-            xAxes: [{
-                type: 'time',
-                time: {
-                    unit: 'millisecond',
-                    displayFormats: {
-                        millisecond: 'ss.SSS',
-                    },
-                },
-            }],
-            yAxes: [{
-                type: 'linear',
-                min: -1,
-                max: 1,
-                ticks: {
-                    min: -1,
-                    max: 1,
-                },
-            }],
-        },
-        redraw: true,
-        maintainAspectRatio: false,
-    };
-
-    return <Line data={chartData} options={chartOptions} />;
-};
-
-Chart.propTypes = {
-    averageIndex: PropTypes.number,
-};
-
-Chart.defaultProps = {
-    averageIndex: 0,
-};
+import Chart from '../components/Chart';
 
 export default connect(
     state => ({
-        averageIndex: state.app.app.chart.averageIndex,
+        index: state.app.app.chart.averageIndex,
     }),
 )(Chart);

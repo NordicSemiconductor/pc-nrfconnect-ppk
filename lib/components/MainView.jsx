@@ -38,13 +38,15 @@ import React from 'react';
 import AverageChart from '../containers/AverageChart';
 import TriggerChart from '../containers/TriggerChart';
 
+import { triggerOptions, averageOptions } from '../actions/PPKActions';
+
 const MainView = () => (
     <div className="core-main-view">
         <div className="chart-container">
-            <AverageChart />
+            <AverageChart options={averageOptions} />
         </div>
         <div className="chart-container">
-            <TriggerChart />
+            <TriggerChart options={triggerOptions} />
         </div>
     </div>
 );
