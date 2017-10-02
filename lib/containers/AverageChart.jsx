@@ -46,7 +46,7 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
-const len = 600;
+const len = 5000;
 const averageLine = new Float32Array(len);
 
 const Chart = props => {
@@ -69,7 +69,7 @@ const Chart = props => {
             borderColor: 'rgba(179, 40, 96, 0.3)',
             borderWidth: 1,
             fill: false,
-            data: Array.prototype.map.call(averageLine, (y, i) => ({ x: new Date(now - i), y })),
+            data: Array.prototype.map.call(averageLine, (y, i) => ({ x: new Date(i - now), y })),
             pointRadius: 0,
         }],
     };
@@ -87,11 +87,11 @@ const Chart = props => {
             }],
             yAxes: [{
                 type: 'linear',
-                min: -1,
-                max: 1,
+                min: -10,
+                max: 20000,
                 ticks: {
                     min: -1,
-                    max: 1,
+                    max: 20000,
                 },
             }],
         },
