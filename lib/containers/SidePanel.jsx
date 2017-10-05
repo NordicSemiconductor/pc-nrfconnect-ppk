@@ -35,39 +35,34 @@
  */
 
 import React from 'react';
-import { logger } from 'nrfconnect/core';
-import reducers from './lib/reducers';
-import MainView from './lib/components/MainView';
-import SidePanel from './lib/containers/SidePanel';
-import * as PPKActions from './lib/actions/PPKActions';
-import './resources/css/index.less';
+import PropTypes from 'prop-types';
+import { Button, ButtonGroup } from 'react-bootstrap';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 
-export default {
-    onReady: () => {
-        logger.info('App initialized');
-    },
-    decorateMainView: () => () => <MainView />,
-    decorateSidePanel: () => () => <SidePanel />,
-    decorateNavMenu: NavMenu => (
-        props => (
-            <div className="nav-menu-wrap">
-                <NavMenu {...props} />
-                Power Profiler
-            </div>
-        )
-    ),
-    reduceApp: reducers,
-    middleware: store => next => action => { // eslint-disable-line
-        if (!action) {
-            return;
-        }
-        if (action.type === 'SERIAL_PORT_SELECTED') {
-            const { port } = action;
-            store.dispatch(PPKActions.open(port));
-        }
-        if (action.type === 'SERIAL_PORT_DESELECTED') {
-            store.dispatch(PPKActions.close());
-        }
-        next(action);
-    },
+import Info from '../containers/Info';
+
+import { startTrigger, startAverage } from '../actions/PPKActions';
+
+const SidePanel = props => (
+    <div className="core-side-panel">
+        <ButtonGroup>
+            <Button onClick={props.startTrigger}>Trigger</Button>
+            <Button onClick={props.startAverage}>Average</Button>
+        </ButtonGroup>
+        <Info />
+    </div>
+);
+
+SidePanel.propTypes = {
+    startTrigger: PropTypes.func.isRequired,
+    startAverage: PropTypes.func.isRequired,
 };
+
+export default connect(
+    () => ({}),
+    dispatch => Object.assign(
+        {},
+        bindActionCreators({ startTrigger, startAverage }, dispatch),
+    ),
+)(SidePanel);
