@@ -34,11 +34,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import Chart from '../components/Chart';
 
+const AverageChart = props => <Chart id="AVERAGE" {...props} />;
+
 export default connect(
-    state => ({
-        index: state.app.app.chart.averageIndex,
-    }),
-)(Chart);
+    state => {
+        const { cursor, window } = state.app.average;
+        return {
+            index: state.app.app.chart.averageIndex,
+            cursorBegin: cursor.begin,
+            cursorEnd: cursor.end,
+            windowBegin: window.begin,
+            windowEnd: window.end,
+            windowDuration: window.duration,
+        };
+    },
+)(AverageChart);
