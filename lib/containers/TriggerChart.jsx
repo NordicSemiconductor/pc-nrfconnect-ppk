@@ -42,14 +42,10 @@ const TriggerChart = props => <Chart id="TRIGGER" {...props} />;
 
 export default connect(
     state => {
-        const { cursor, window } = state.app.trigger;
+        const trigger = state.app.trigger;
         return {
             index: state.app.app.chart.triggerIndex,
-            cursorBegin: cursor.begin,
-            cursorEnd: cursor.end,
-            windowBegin: window.begin,
-            windowEnd: window.end,
-            windowDuration: window.duration,
+            ...trigger,
         };
     },
 )(TriggerChart);

@@ -42,14 +42,10 @@ const AverageChart = props => <Chart id="AVERAGE" {...props} />;
 
 export default connect(
     state => {
-        const { cursor, window } = state.app.average;
+        const average = state.app.average;
         return {
             index: state.app.app.chart.averageIndex,
-            cursorBegin: cursor.begin,
-            cursorEnd: cursor.end,
-            windowBegin: window.begin,
-            windowEnd: window.end,
-            windowDuration: window.duration,
+            ...average,
         };
     },
 )(AverageChart);

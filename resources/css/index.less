@@ -26,4 +26,24 @@
     height: 50%;
     width: 100%;
     position: relative;
+    padding-bottom: 40px;
+    .chart-bottom {
+        display: flex;
+        > * {
+            margin-right: 20px;
+        }
+        .chart-stats {
+            margin-left: 20px;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            background: white;
+            span {
+                margin: auto 20px;
+            }
+        }
+        .btn-group {
+            align-self: flex-end;
+        }
+    }
 }

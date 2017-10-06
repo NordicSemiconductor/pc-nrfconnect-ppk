@@ -37,6 +37,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
+import { Button, ButtonGroup } from 'react-bootstrap';
 
 import '../utils/chart.dragSelect'; // eslint-disable-line
 import '../utils/chart.zoomPan'; // eslint-disable-line
@@ -60,6 +61,7 @@ class Chart extends React.Component {
         this.onChartSizeUpdate = this.onChartSizeUpdate.bind(this);
         this.zoomPanCallback = this.zoomPanCallback.bind(this);
         this.dragSelectCallback = this.dragSelectCallback.bind(this);
+        this.resetCursor = this.dragSelectCallback.bind(this, 0, 0);
     }
 
     componentDidMount() {
@@ -81,37 +83,37 @@ class Chart extends React.Component {
         this.forceUpdate();
     }
 
-    dragSelectCallback(begin, end) {
+    dragSelectCallback(cursorBegin, cursorEnd) {
         const { id, dispatch } = this.props;
         dispatch({
             type: `CHART_${id}_CURSOR`,
-            begin,
-            end,
+            cursorBegin,
+            cursorEnd,
         });
     }
 
-    zoomPanCallback(windowBegin, windowEnd) {
+    zoomPanCallback(begin, end) {
         const { id, dispatch, options, windowDuration } = this.props;
 
-        if (typeof windowBegin === 'undefined') {
+        if (typeof begin === 'undefined') {
             dispatch({
                 type: `CHART_${id}_WINDOW`,
-                begin: 0,
-                end: 0,
-                duration: windowDuration,
+                windowBegin: 0,
+                windowEnd: 0,
+                windowDuration,
             });
             return;
         }
 
         const earliestDataTime =
             options.timestamp - ((options.data.length / options.samplesPerSecond) * 1e6);
-        const begin = Math.max(earliestDataTime, windowBegin);
-        const end = Math.min(options.timestamp, windowEnd);
+        const windowBegin = Math.max(earliestDataTime, begin);
+        const windowEnd = Math.min(options.timestamp, end);
         dispatch({
             type: `CHART_${id}_WINDOW`,
-            begin,
-            end,
-            duration: (end - begin),
+            windowBegin,
+            windowEnd,
+            windowDuration: (windowEnd - windowBegin),
         });
     }
 
@@ -125,8 +127,6 @@ class Chart extends React.Component {
 
         const end = windowEnd || options.timestamp;
         const begin = windowBegin || (end - windowDuration);
-        // const end = options.timestamp;
-        // const begin = (end - windowDuration);
 
         let iA = options.index - (((options.timestamp - begin) * options.samplesPerSecond) / 1e6);
         const iB = options.index - (((options.timestamp - end) * options.samplesPerSecond) / 1e6);
@@ -153,10 +153,50 @@ class Chart extends React.Component {
         }
     }
 
+    renderStats() {
+        const {
+            rms,
+            avg,
+            max,
+            charge,
+            cursorBegin,
+            cursorEnd,
+        } = this.props;
+
+        if (!cursorBegin) {
+            return (
+                <div className="chart-stats">
+                    <span>Set cursor by shift + left mouse button dragging in the chart.</span>
+                </div>
+            );
+        }
+
+        return (
+            <div className="chart-stats">
+                <span>
+                    cursor: {timestampToLabel(cursorBegin)}
+                    &ndash;{timestampToLabel(cursorEnd)}
+                </span>
+                <span>rms: <b>{rms}</b> nA</span>
+                <span>avg: <b>{avg}</b> nA</span>
+                <span>max: <b>{max}</b> nA</span>
+                <span>charge: <b>{charge}</b> nC</span>
+            </div>
+        );
+    }
+
     render() {
         this.calculateLineDataSets();
 
-        const { options, windowBegin, windowEnd, windowDuration } = this.props;
+        const {
+            id,
+            options,
+            cursorBegin,
+            cursorEnd,
+            windowBegin,
+            windowEnd,
+            windowDuration,
+        } = this.props;
 
         const end = windowEnd || options.timestamp;
         const begin = windowBegin || (end - windowDuration);
@@ -173,8 +213,11 @@ class Chart extends React.Component {
             }],
         };
 
-        const { min, max } = options.valueRange;
         const chartOptions = {
+            title: {
+                display: true,
+                text: `${id}`,
+            },
             scales: {
                 xAxes: [{
                     id: 'x-axis-0',
@@ -187,15 +230,23 @@ class Chart extends React.Component {
                         min: begin,
                         max: end,
                         callback: timestampToLabel,
+                        maxTicksLimit: 7,
                     },
                     gridLines: {
                         display: true,
                         drawBorder: true,
                         drawOnChartArea: false,
                     },
+                    cursor: {
+                        cursorBegin,
+                        cursorEnd,
+                    },
                 }],
                 yAxes: [{
-                    type: 'linear', min, max, ticks: { min, max },
+                    type: 'linear',
+                    min: options.valueRange.min,
+                    max: options.valueRange.max,
+                    ticks: { suggestedMax: 10, maxTicksLimit: 7 },
                 }],
             },
             redraw: true,
@@ -204,12 +255,22 @@ class Chart extends React.Component {
         };
 
         return (
-            <Line
-                ref={r => { if (r) this.chartInstance = r.chart_instance; }}
-                data={chartData}
-                options={chartOptions}
-                index={options.index}
-            />
+            <div className="chart-container">
+                <Line
+                    ref={r => { if (r) this.chartInstance = r.chart_instance; }}
+                    data={chartData}
+                    options={chartOptions}
+                    index={options.index}
+                />
+                <div className="chart-bottom">
+                    {this.renderStats()}
+                    <ButtonGroup>
+                        <Button bsStyle="primary" bsSize="small" onClick={this.resetCursor}>
+                            Clear Cursor
+                        </Button>
+                    </ButtonGroup>
+                </div>
+            </div>
         );
     }
 }
@@ -217,6 +278,12 @@ class Chart extends React.Component {
 Chart.propTypes = {
     dispatch: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
+    rms: PropTypes.number.isRequired,
+    avg: PropTypes.number.isRequired,
+    max: PropTypes.number.isRequired,
+    charge: PropTypes.number.isRequired,
+    cursorBegin: PropTypes.number.isRequired,
+    cursorEnd: PropTypes.number.isRequired,
     windowBegin: PropTypes.number.isRequired,
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
