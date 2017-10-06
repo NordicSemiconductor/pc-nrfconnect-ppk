@@ -38,7 +38,7 @@ import React from 'react';
 import { logger } from 'nrfconnect/core';
 import reducers from './lib/reducers';
 import MainView from './lib/components/MainView';
-import SidePanel from './lib/components/SidePanel';
+import SidePanel from './lib/containers/SidePanel';
 import * as PPKActions from './lib/actions/PPKActions';
 import './resources/css/index.less';
 

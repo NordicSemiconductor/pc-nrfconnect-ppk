@@ -34,11 +34,18 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import Chart from '../components/Chart';
 
+const TriggerChart = props => <Chart id="TRIGGER" {...props} />;
+
 export default connect(
-    state => ({
-        index: state.app.app.chart.triggerIndex,
-    }),
-)(Chart);
+    state => {
+        const trigger = state.app.trigger;
+        return {
+            index: state.app.app.chart.triggerIndex,
+            ...trigger,
+        };
+    },
+)(TriggerChart);
