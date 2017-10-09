@@ -37,93 +37,264 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
+import { Button, ButtonGroup } from 'react-bootstrap';
+
+import '../utils/chart.dragSelect'; // eslint-disable-line
+import '../utils/chart.zoomPan'; // eslint-disable-line
 
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
+const timestampToLabel = us => {
+    const d = new Date(us / 1e3);
+    const m = d.getMinutes();
+    const s = d.getSeconds();
+    const z = d.getMilliseconds();
+    return `${`${m}`.padStart(2, '0')}:${`${s}`.padStart(2, '0')}.${`${z}`.padStart(3, '0')}`;
+};
+
 class Chart extends React.Component {
     constructor(props) {
         super(props);
-        this.len = 0;
-        this.lineData = new props.options.DataType(this.len);
+        this.resizeLength(0);
+        this.onChartSizeUpdate = this.onChartSizeUpdate.bind(this);
+        this.zoomPanCallback = this.zoomPanCallback.bind(this);
+        this.dragSelectCallback = this.dragSelectCallback.bind(this);
+        this.resetCursor = this.dragSelectCallback.bind(this, 0, 0);
     }
 
     componentDidMount() {
-        this.onChartSizeUpdate({ width: this.chartRef.chart_instance.width });
+        const { dragSelect, zoomPan } = this.chartInstance;
+        // buggy for the first time
+        this.onChartSizeUpdate(this.chartInstance);
+        dragSelect.callback = this.dragSelectCallback;
+        zoomPan.callback = this.zoomPanCallback;
+        this.mounted = true;
     }
 
-    onChartSizeUpdate(size) {
-        if (this.len === size.width) {
+    onChartSizeUpdate(instance) {
+        const { left, right } = instance.chart.chartArea;
+        const width = Math.trunc(right - left);
+        if (this.len === width) {
             return;
         }
-        const { options } = this.props;
-        this.len = size.width;
-        this.lineData = new options.DataType(this.len);
+        this.resizeLength(width);
         this.forceUpdate();
     }
 
-    render() {
-        const { options } = this.props;
-        let indexStart = options.index - this.len;
-        if (indexStart < 0) {
-            indexStart += options.data.length;
+    dragSelectCallback(cursorBegin, cursorEnd) {
+        const { id, dispatch } = this.props;
+        dispatch({
+            type: `CHART_${id}_CURSOR`,
+            cursorBegin,
+            cursorEnd,
+        });
+    }
+
+    zoomPanCallback(begin, end) {
+        const { id, dispatch, options, windowDuration } = this.props;
+
+        if (typeof begin === 'undefined') {
+            dispatch({
+                type: `CHART_${id}_WINDOW`,
+                windowBegin: 0,
+                windowEnd: 0,
+                windowDuration,
+            });
+            return;
         }
-        const lineDataA = options.data.slice(indexStart, options.index);
-        const lineDataB = options.data.slice(0, this.len - lineDataA.length);
-        this.lineData.set(lineDataA);
-        this.lineData.set(lineDataB, lineDataA.length);
+
+        const earliestDataTime =
+            options.timestamp - ((options.data.length / options.samplesPerSecond) * 1e6);
+        const windowBegin = Math.max(earliestDataTime, begin);
+        const windowEnd = Math.min(options.timestamp, end);
+        dispatch({
+            type: `CHART_${id}_WINDOW`,
+            windowBegin,
+            windowEnd,
+            windowDuration: (windowEnd - windowBegin),
+        });
+    }
+
+    resizeLength(len) {
+        this.len = len;
+        this.lineData = new Array(this.len * 2);
+    }
+
+    calculateLineDataSets() {
+        const { options, windowBegin, windowEnd, windowDuration } = this.props;
+
+        const end = windowEnd || options.timestamp;
+        const begin = windowBegin || (end - windowDuration);
+
+        let iA = options.index - (((options.timestamp - begin) * options.samplesPerSecond) / 1e6);
+        const iB = options.index - (((options.timestamp - end) * options.samplesPerSecond) / 1e6);
+        const step = (iB - iA) / this.len;
+        iA = (iA + options.data.length) % options.data.length;
+
+        for (let i = 0, j = iA; i < this.len; i += 1, j += step) {
+            const ts = begin + (windowDuration * (i / this.len));
+            const k = Math.floor(j);
+            if (step > 1) {
+                let [min, max] = [Number.MAX_VALUE, -Number.MAX_VALUE];
+                const l = Math.floor(j + step);
+                for (let n = k; n < l; n += 1) {
+                    const v = options.data[n % options.data.length];
+                    if (v > max) max = v;
+                    if (v < min) min = v;
+                }
+                this.lineData[i * 2] = { x: ts, y: min };
+                this.lineData[(i * 2) + 1] = { x: ts, y: max };
+            } else {
+                this.lineData[i] = { x: ts, y: options.data[k % options.data.length] };
+                this.lineData[this.len + i] = undefined;
+            }
+        }
+    }
+
+    renderStats() {
+        const {
+            rms,
+            avg,
+            max,
+            charge,
+            cursorBegin,
+            cursorEnd,
+        } = this.props;
+
+        if (!cursorBegin) {
+            return (
+                <div className="chart-stats">
+                    <span>Set cursor by shift + left mouse button dragging in the chart.</span>
+                </div>
+            );
+        }
+
+        return (
+            <div className="chart-stats">
+                <span>
+                    cursor: {timestampToLabel(cursorBegin)}
+                    &ndash;{timestampToLabel(cursorEnd)}
+                </span>
+                <span>rms: <b>{rms}</b> nA</span>
+                <span>avg: <b>{avg}</b> nA</span>
+                <span>max: <b>{max}</b> nA</span>
+                <span>charge: <b>{charge}</b> nC</span>
+            </div>
+        );
+    }
+
+    render() {
+        this.calculateLineDataSets();
+
+        const {
+            id,
+            options,
+            cursorBegin,
+            cursorEnd,
+            windowBegin,
+            windowEnd,
+            windowDuration,
+        } = this.props;
+
+        const end = windowEnd || options.timestamp;
+        const begin = windowBegin || (end - windowDuration);
 
         const chartData = {
             datasets: [{
                 borderColor: options.color,
                 borderWidth: 1,
                 fill: false,
-                data: Array.from(this.lineData),
+                data: this.lineData,
                 pointRadius: 0,
+                lineTension: 0,
+                label: 'data0',
             }],
-            labels: [...Array(this.len).keys()].map(k => {
-                const t = (this.len - k - 1) * 1000;
-                const ts = new Date(options.timestamp.getTime() - (t / options.samplesPerSecond));
-                return `${`${ts.getSeconds()}`.padStart(2, '0')}.${`${ts.getMilliseconds()}`.padStart(3, '0')}`;
-            }),
         };
 
-        const { min, max } = options;
         const chartOptions = {
+            title: {
+                display: true,
+                text: `${id}`,
+            },
             scales: {
                 xAxes: [{
-                    type: 'category',
+                    id: 'x-axis-0',
+                    type: 'linear',
+                    min: begin,
+                    max: end,
                     ticks: {
                         maxRotation: 0,
                         autoSkipPadding: 25,
+                        min: begin,
+                        max: end,
+                        callback: timestampToLabel,
+                        maxTicksLimit: 7,
+                    },
+                    gridLines: {
+                        display: true,
+                        drawBorder: true,
+                        drawOnChartArea: false,
+                    },
+                    cursor: {
+                        cursorBegin,
+                        cursorEnd,
                     },
                 }],
                 yAxes: [{
-                    type: 'linear', min, max, ticks: { min, max },
+                    type: 'linear',
+                    min: options.valueRange.min,
+                    max: options.valueRange.max,
+                    ticks: { suggestedMax: 10, maxTicksLimit: 7 },
                 }],
             },
             redraw: true,
             maintainAspectRatio: false,
-            onResize: (instance, size) => {
-                this.onChartSizeUpdate(size);
-            },
+            onResize: this.onChartSizeUpdate,
         };
 
-        return <Line ref={r => { this.chartRef = r; }} data={chartData} options={chartOptions} />;
+        return (
+            <div className="chart-container">
+                <Line
+                    ref={r => { if (r) this.chartInstance = r.chart_instance; }}
+                    data={chartData}
+                    options={chartOptions}
+                    index={options.index}
+                />
+                <div className="chart-bottom">
+                    {this.renderStats()}
+                    <ButtonGroup>
+                        <Button bsStyle="primary" bsSize="small" onClick={this.resetCursor}>
+                            Clear Cursor
+                        </Button>
+                    </ButtonGroup>
+                </div>
+            </div>
+        );
     }
 }
 
 Chart.propTypes = {
+    dispatch: PropTypes.func.isRequired,
+    id: PropTypes.string.isRequired,
+    rms: PropTypes.number.isRequired,
+    avg: PropTypes.number.isRequired,
+    max: PropTypes.number.isRequired,
+    charge: PropTypes.number.isRequired,
+    cursorBegin: PropTypes.number.isRequired,
+    cursorEnd: PropTypes.number.isRequired,
+    windowBegin: PropTypes.number.isRequired,
+    windowEnd: PropTypes.number.isRequired,
+    windowDuration: PropTypes.number.isRequired,
     options: PropTypes.shape({
         DataType: PropTypes.func,
         // data: PropsTypes.instanceOf(...),
-        // index: PropTypes.number,
-        // timestamp: PropTypes.instanceOf(Date),
-        // samplesPerSecond: PropTypes.number,
-        // color: PropTypes.string,
-        // min: PropTypes.number,
-        // max: PropTypes.number,
+        index: PropTypes.number,
+        timestamp: PropTypes.number,
+        samplesPerSecond: PropTypes.number,
+        color: PropTypes.string,
+        valueRange: PropTypes.objectOf(PropTypes.number),
     }).isRequired,
 };
 

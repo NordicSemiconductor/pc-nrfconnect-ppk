@@ -34,40 +34,35 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const initialState = {
-    rms: 0,                // [nA]
-    avg: 0,                // [nA]
-    max: 0,                // [nA]
-    charge: 0,             // [nC]
-    cursorBegin: 0,        // [microseconds]
-    cursorEnd: 0,          // [microseconds]
-    windowBegin: 0,        // [microseconds]
-    windowEnd: 0,          // [microseconds]
-    windowDuration: 10000, // [microseconds]
-    triggerLevel: 2500,    // [uA]
-    enableExternalTrigger: false,
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Button, ButtonGroup } from 'react-bootstrap';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+
+import Info from '../containers/Info';
+
+import { startTrigger, startAverage } from '../actions/PPKActions';
+
+const SidePanel = props => (
+    <div className="core-side-panel">
+        <ButtonGroup>
+            <Button onClick={props.startTrigger}>Trigger</Button>
+            <Button onClick={props.startAverage}>Average</Button>
+        </ButtonGroup>
+        <Info />
+    </div>
+);
+
+SidePanel.propTypes = {
+    startTrigger: PropTypes.func.isRequired,
+    startAverage: PropTypes.func.isRequired,
 };
 
-export default function trigger(state = initialState, action) {
-    switch (action.type) {
-        case 'CHART_TRIGGER_CURSOR': {
-            const { cursorBegin, cursorEnd } = action;
-            return {
-                ...state,
-                cursorBegin,
-                cursorEnd,
-            };
-        }
-        case 'CHART_TRIGGER_WINDOW': {
-            const { windowBegin, windowEnd, windowDuration } = action;
-            return {
-                ...state,
-                windowBegin,
-                windowEnd,
-                windowDuration,
-            };
-        }
-        default:
-    }
-    return state;
-}
+export default connect(
+    () => ({}),
+    dispatch => Object.assign(
+        {},
+        bindActionCreators({ startTrigger, startAverage }, dispatch),
+    ),
+)(SidePanel);

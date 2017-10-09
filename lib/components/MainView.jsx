@@ -42,12 +42,8 @@ import { triggerOptions, averageOptions } from '../actions/PPKActions';
 
 const MainView = () => (
     <div className="core-main-view">
-        <div className="chart-container">
-            <AverageChart options={averageOptions} />
-        </div>
-        <div className="chart-container">
-            <TriggerChart options={triggerOptions} />
-        </div>
+        <AverageChart options={averageOptions} />
+        <TriggerChart options={triggerOptions} />
     </div>
 );
 
