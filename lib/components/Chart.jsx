@@ -288,7 +288,6 @@ Chart.propTypes = {
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
     options: PropTypes.shape({
-        DataType: PropTypes.func,
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,
         timestamp: PropTypes.number,
