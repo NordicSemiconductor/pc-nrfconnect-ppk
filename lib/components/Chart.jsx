@@ -122,19 +122,25 @@ class Chart extends React.Component {
         this.lineData = new Array(this.len * 2);
     }
 
-    calculateLineDataSets() {
+    calculateWindow() {
         const { options, windowBegin, windowEnd, windowDuration } = this.props;
 
-        const end = windowEnd || options.timestamp;
-        const begin = windowBegin || (end - windowDuration);
+        this.duration = windowDuration;
+        this.end = windowEnd || options.timestamp;
+        this.begin = windowBegin || (this.end - this.duration);
+    }
 
-        let iA = options.index - (((options.timestamp - begin) * options.samplesPerSecond) / 1e6);
-        const iB = options.index - (((options.timestamp - end) * options.samplesPerSecond) / 1e6);
+    calculateLineDataSets() {
+        const { options, index } = this.props;
+        this.calculateWindow();
+
+        let iA = index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
+        const iB = index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
         const step = (iB - iA) / this.len;
         iA = (iA + options.data.length) % options.data.length;
 
         for (let i = 0, j = iA; i < this.len; i += 1, j += step) {
-            const ts = begin + (windowDuration * (i / this.len));
+            const ts = this.begin + (this.duration * (i / this.len));
             const k = Math.floor(j);
             if (step > 1) {
                 let [min, max] = [Number.MAX_VALUE, -Number.MAX_VALUE];
@@ -193,13 +199,7 @@ class Chart extends React.Component {
             options,
             cursorBegin,
             cursorEnd,
-            windowBegin,
-            windowEnd,
-            windowDuration,
         } = this.props;
-
-        const end = windowEnd || options.timestamp;
-        const begin = windowBegin || (end - windowDuration);
 
         const chartData = {
             datasets: [{
@@ -222,13 +222,13 @@ class Chart extends React.Component {
                 xAxes: [{
                     id: 'x-axis-0',
                     type: 'linear',
-                    min: begin,
-                    max: end,
+                    min: this.begin,
+                    max: this.end,
                     ticks: {
                         maxRotation: 0,
                         autoSkipPadding: 25,
-                        min: begin,
-                        max: end,
+                        min: this.begin,
+                        max: this.end,
                         callback: timestampToLabel,
                         maxTicksLimit: 7,
                     },
@@ -260,7 +260,7 @@ class Chart extends React.Component {
                     ref={r => { if (r) this.chartInstance = r.chart_instance; }}
                     data={chartData}
                     options={chartOptions}
-                    index={options.index}
+                    update={options.update}
                 />
                 <div className="chart-bottom">
                     {this.renderStats()}
@@ -287,6 +287,7 @@ Chart.propTypes = {
     windowBegin: PropTypes.number.isRequired,
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
+    index: PropTypes.number.isRequired,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,

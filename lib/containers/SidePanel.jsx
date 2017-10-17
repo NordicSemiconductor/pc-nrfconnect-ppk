@@ -42,27 +42,25 @@ import { connect } from 'react-redux';
 
 import Info from '../containers/Info';
 
-import { startTrigger, startAverage } from '../actions/PPKActions';
+import { start } from '../actions/PPKActions';
 
 const SidePanel = props => (
     <div className="core-side-panel">
         <ButtonGroup>
-            <Button onClick={props.startTrigger}>Trigger</Button>
-            <Button onClick={props.startAverage}>Average</Button>
+            <Button onClick={props.start}>Start</Button>
         </ButtonGroup>
         <Info />
     </div>
 );
 
 SidePanel.propTypes = {
-    startTrigger: PropTypes.func.isRequired,
-    startAverage: PropTypes.func.isRequired,
+    start: PropTypes.func.isRequired,
 };
 
 export default connect(
     () => ({}),
     dispatch => Object.assign(
         {},
-        bindActionCreators({ startTrigger, startAverage }, dispatch),
+        bindActionCreators({ start }, dispatch),
     ),
 )(SidePanel);
