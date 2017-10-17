@@ -206,7 +206,7 @@ class Chart extends React.Component {
                 borderColor: options.color,
                 borderWidth: 1,
                 fill: false,
-                data: this.lineData,
+                data: Array.from(this.lineData),
                 pointRadius: 0,
                 lineTension: 0,
                 label: 'data0',
