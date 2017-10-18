@@ -43,9 +43,11 @@ const TriggerChart = props => <Chart id="TRIGGER" {...props} />;
 export default connect(
     state => {
         const trigger = state.app.trigger;
+        const update = state.app.app.chart.triggerIndex;
         return {
-            index: state.app.app.chart.triggerIndex,
             ...trigger,
+            index: 0,
+            update,
         };
     },
 )(TriggerChart);

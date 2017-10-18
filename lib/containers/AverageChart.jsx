@@ -43,9 +43,11 @@ const AverageChart = props => <Chart id="AVERAGE" {...props} />;
 export default connect(
     state => {
         const average = state.app.average;
+        const index = state.app.app.chart.averageIndex;
         return {
-            index: state.app.app.chart.averageIndex,
             ...average,
+            index,
+            update: index,
         };
     },
 )(AverageChart);
