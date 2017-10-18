@@ -46,14 +46,6 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
-const timestampToLabel = us => {
-    const d = new Date(us / 1e3);
-    const m = d.getMinutes();
-    const s = d.getSeconds();
-    const z = d.getMilliseconds();
-    return `${`${m}`.padStart(2, '0')}:${`${s}`.padStart(2, '0')}.${`${z}`.padStart(3, '0')}`;
-};
-
 class Chart extends React.Component {
     constructor(props) {
         super(props);
@@ -167,6 +159,7 @@ class Chart extends React.Component {
             charge,
             cursorBegin,
             cursorEnd,
+            timestampToLabel,
         } = this.props;
 
         if (!cursorBegin) {
@@ -199,6 +192,7 @@ class Chart extends React.Component {
             options,
             cursorBegin,
             cursorEnd,
+            timestampToLabel,
         } = this.props;
 
         const chartData = {
@@ -206,7 +200,7 @@ class Chart extends React.Component {
                 borderColor: options.color,
                 borderWidth: 1,
                 fill: false,
-                data: Array.from(this.lineData),
+                data: this.lineData.slice(),
                 pointRadius: 0,
                 lineTension: 0,
                 label: 'data0',
@@ -288,6 +282,7 @@ Chart.propTypes = {
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
     index: PropTypes.number.isRequired,
+    timestampToLabel: PropTypes.func.isRequired,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,
