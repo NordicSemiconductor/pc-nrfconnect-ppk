@@ -38,7 +38,17 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Chart from '../components/Chart';
 
-const AverageChart = props => <Chart id="AVERAGE" {...props} />;
+const timestampToLabel = us => {
+    const d = new Date(us / 1e3);
+    const m = d.getMinutes();
+    const s = d.getSeconds();
+    const z = d.getMilliseconds();
+    return `${`${m}`.padStart(2, '0')}:${`${s}`.padStart(2, '0')}.${`${z}`.padStart(3, '0')}`;
+};
+
+const AverageChart = props => (
+    <Chart id="AVERAGE" {...props} timestampToLabel={timestampToLabel} />
+);
 
 export default connect(
     state => {
