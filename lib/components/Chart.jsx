@@ -126,27 +126,33 @@ class Chart extends React.Component {
         const { options, index } = this.props;
         this.calculateWindow();
 
-        let iA = index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
+        const iA = index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
         const iB = index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
         const step = (iB - iA) / this.len;
-        iA = (iA + options.data.length) % options.data.length;
 
-        for (let i = 0, j = iA; i < this.len; i += 1, j += step) {
-            const ts = this.begin + (this.duration * (i / this.len));
-            const k = Math.floor(j);
-            if (step > 1) {
-                let [min, max] = [Number.MAX_VALUE, -Number.MAX_VALUE];
+        if (step > 1) {
+            for (let i = 0, j = iA; i < this.len; i += 1, j += step) {
+                const ts = this.begin + (this.duration * (i / this.len));
+                const k = Math.floor(j);
                 const l = Math.floor(j + step);
+                let [min, max] = [Number.MAX_VALUE, -Number.MAX_VALUE];
                 for (let n = k; n < l; n += 1) {
-                    const v = options.data[n % options.data.length];
+                    const v = options.data[(n + options.data.length) % options.data.length];
                     if (v > max) max = v;
                     if (v < min) min = v;
                 }
                 this.lineData[i * 2] = { x: ts, y: min };
                 this.lineData[(i * 2) + 1] = { x: ts, y: max };
-            } else {
-                this.lineData[i] = { x: ts, y: options.data[k % options.data.length] };
-                this.lineData[this.len + i] = undefined;
+            }
+        } else {
+            let i = 0;
+            for (let j = iA; j < iB; i += 1, j += 1) {
+                const ts = this.begin + (this.duration * ((i / step) / this.len));
+                const k = Math.floor(j + options.data.length) % options.data.length;
+                this.lineData[i] = { x: ts, y: options.data[k] };
+            }
+            for (; i < this.len * 2; i += 1) {
+                this.lineData[i] = undefined;
             }
         }
     }
@@ -202,7 +208,7 @@ class Chart extends React.Component {
                 fill: false,
                 data: this.lineData.slice(),
                 pointRadius: 0,
-                lineTension: 0,
+                lineTension: 0.2,
                 label: 'data0',
             }],
         };
