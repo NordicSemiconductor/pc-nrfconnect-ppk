@@ -126,35 +126,42 @@ class Chart extends React.Component {
         const { options, index } = this.props;
         this.calculateWindow();
 
-        const jA = index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
-        const jB = index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
-        const step = (jB - jA) / this.len;
+        const originalIndexBegin =
+            index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
+        const originalIndexEnd =
+            index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
+        const step = (originalIndexEnd - originalIndexBegin) / this.len;
 
         if (step > 1) {
-            for (let i = 0, j = jA; i < this.len; i += 1, j += step) {
-                const ts = this.begin + (this.duration * (i / this.len));
-                const k = Math.floor(j);
-                const l = Math.floor(j + step);
+            for (let mappedIndex = 0, originalIndex = originalIndexBegin;
+                mappedIndex < this.len;
+                mappedIndex += 1, originalIndex += step) {
+                const timestamp = this.begin + (this.duration * (mappedIndex / this.len));
+                const k = Math.floor(originalIndex);
+                const l = Math.floor(originalIndex + step);
                 let [min, max] = [Number.MAX_VALUE, -Number.MAX_VALUE];
                 for (let n = k; n < l; n += 1) {
                     const v = options.data[(n + options.data.length) % options.data.length];
                     if (v > max) max = v;
                     if (v < min) min = v;
                 }
-                this.lineData[i * 2] = { x: ts, y: min };
-                this.lineData[(i * 2) + 1] = { x: ts, y: max };
+                this.lineData[mappedIndex * 2] = { x: timestamp, y: min };
+                this.lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
             }
         } else {
-            let i = 0;
-            const jA2 = Math.floor(jA);
-            const jB2 = Math.ceil(jB);
-            for (let j = jA2; j < jB2; i += 1, j += 1) {
-                const k = (j + options.data.length) % options.data.length;
-                const ts = this.begin + (((j - jA) * 1e6) / options.samplesPerSecond);
-                this.lineData[i] = { x: ts, y: options.data[k] };
+            let mappedIndex = 0;
+            const originalIndexBeginFloored = Math.floor(originalIndexBegin);
+            const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
+            for (let originalIndex = originalIndexBeginFloored;
+                originalIndex < originalIndexEndCeiled;
+                mappedIndex += 1, originalIndex += 1) {
+                const k = (originalIndex + options.data.length) % options.data.length;
+                const timestamp = this.begin
+                    + (((originalIndex - originalIndexBegin) * 1e6) / options.samplesPerSecond);
+                this.lineData[mappedIndex] = { x: timestamp, y: options.data[k] };
             }
-            for (; i < this.len * 2; i += 1) {
-                this.lineData[i] = undefined;
+            for (; mappedIndex < this.len * 2; mappedIndex += 1) {
+                this.lineData[mappedIndex] = undefined;
             }
         }
     }
