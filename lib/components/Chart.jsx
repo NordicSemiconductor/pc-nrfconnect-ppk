@@ -46,29 +46,6 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
-const timestampToLabel = us => {
-    const d = new Date(us / 1e3);
-    const m = d.getMinutes();
-    const s = d.getSeconds();
-    const z = d.getMilliseconds();
-    return `${`${m}`.padStart(2, '0')}:${`${s}`.padStart(2, '0')}.${`${z}`.padStart(3, '0')}`;
-};
-
-const timestampDeltaToLabel = (us1, us2) => {
-    const d = new Date(us1 / 1e3);
-    const d2 = new Date(us2 / 1e3);
-    const s1 = d.getSeconds();
-    const m1 = d.getMilliseconds();
-    const s2 = d2.getSeconds();
-    const m2 = d2.getMilliseconds();
-
-    if (s2 >= s1) {
-        return (((s2 * 1e3) + m2) - ((s1 * 1e3) + m1));
-    }
-    const t = 60000 - ((s1 * 1e3) + m1);
-    return (((s2 * 1e3) + m2) + t);
-};
-
 class Chart extends React.Component {
     constructor(props) {
         super(props);
@@ -182,6 +159,7 @@ class Chart extends React.Component {
             charge,
             cursorBegin,
             cursorEnd,
+            timestampToLabel,
         } = this.props;
 
         if (!cursorBegin) {
@@ -213,6 +191,7 @@ class Chart extends React.Component {
             options,
             cursorBegin,
             cursorEnd,
+            timestampToLabel,
         } = this.props;
 
         const chartData = {
@@ -220,7 +199,7 @@ class Chart extends React.Component {
                 borderColor: options.color,
                 borderWidth: 1,
                 fill: false,
-                data: Array.from(this.lineData),
+                data: this.lineData.slice(),
                 pointRadius: 0,
                 lineTension: 0,
                 label: 'data0',
@@ -302,6 +281,7 @@ Chart.propTypes = {
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
     index: PropTypes.number.isRequired,
+    timestampToLabel: PropTypes.func.isRequired,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,

@@ -38,7 +38,11 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Chart from '../components/Chart';
 
-const TriggerChart = props => <Chart id="TRIGGER" {...props} />;
+const timestampToLabel = us => `${Math.floor(us)}\u00B5s`;
+
+const TriggerChart = props => (
+    <Chart id="TRIGGER" {...props} timestampToLabel={timestampToLabel} />
+);
 
 export default connect(
     state => {
