@@ -126,12 +126,12 @@ class Chart extends React.Component {
         const { options, index } = this.props;
         this.calculateWindow();
 
-        const iA = index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
-        const iB = index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
-        const step = (iB - iA) / this.len;
+        const jA = index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
+        const jB = index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
+        const step = (jB - jA) / this.len;
 
         if (step > 1) {
-            for (let i = 0, j = iA; i < this.len; i += 1, j += step) {
+            for (let i = 0, j = jA; i < this.len; i += 1, j += step) {
                 const ts = this.begin + (this.duration * (i / this.len));
                 const k = Math.floor(j);
                 const l = Math.floor(j + step);
@@ -146,9 +146,11 @@ class Chart extends React.Component {
             }
         } else {
             let i = 0;
-            for (let j = iA; j < iB; i += 1, j += 1) {
-                const ts = this.begin + (this.duration * ((i / step) / this.len));
-                const k = Math.floor(j + options.data.length) % options.data.length;
+            const jA2 = Math.floor(jA);
+            const jB2 = Math.ceil(jB);
+            for (let j = jA2; j < jB2; i += 1, j += 1) {
+                const k = (j + options.data.length) % options.data.length;
+                const ts = this.begin + (((j - jA) * 1e6) / options.samplesPerSecond);
                 this.lineData[i] = { x: ts, y: options.data[k] };
             }
             for (; i < this.len * 2; i += 1) {
