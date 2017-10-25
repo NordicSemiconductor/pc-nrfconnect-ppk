@@ -34,20 +34,44 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const initialState = {
-    vdd: 2444, // [1800 .. 3600] mV
+import React from 'react';
+import PropTypes from 'prop-types';
+import { DropdownButton, MenuItem } from 'react-bootstrap';
+
+class UnitSelector extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { selected: props.defaultSelected };
+        this.onSelect = this.onSelect.bind(this);
+    }
+    onSelect(key) {
+        this.setState({ selected: key });
+        const { onChange } = this.props;
+        onChange(key);
+    }
+    render() {
+        const { units, defaultSelected, onChange, ...rest } = this.props;
+        const { selected } = this.state;
+        const selectedUnit = units[selected];
+        const menuItems = units.map((unit, k) => (
+            <MenuItem
+                eventKey={`${k + 0}`}
+                key={`${k + 0}`}
+                onSelect={this.onSelect}
+            >{unit}</MenuItem>
+        ));
+        return (
+            <DropdownButton title={selectedUnit} {...rest} >
+                { menuItems }
+            </DropdownButton>
+        );
+    }
+}
+
+UnitSelector.propTypes = {
+    units: PropTypes.arrayOf(PropTypes.string).isRequired,
+    defaultSelected: PropTypes.number.isRequired,
+    onChange: PropTypes.func.isRequired,
 };
 
-export default function voltageRegulator(state = initialState, action) {
-    switch (action.type) {
-        case 'VOLTAGE_REGULATOR_VDD_MOVE': {
-            const { vdd } = action;
-            return {
-                ...state,
-                vdd,
-            };
-        }
-        default:
-    }
-    return state;
-}
+export default UnitSelector;

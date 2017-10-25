@@ -9,7 +9,7 @@
 .core-side-panel {
     height: 100%;
     flex: 0 0 300px;
-    .btn-group {
+    > * {
         margin-bottom: 20px;
     }
 }
@@ -45,5 +45,32 @@
         .btn-group {
             align-self: flex-end;
         }
+    }
+}
+
+.rangeslider {
+    margin-bottom: 40px;
+    .rangeslider__handle {
+        width: 10px;
+        border-radius: 5px;
+        transform: translate(-50%, -50%);
+        &:after {
+            display: none;
+        }
+    }
+    .rangeslider__labels .rangeslider__label-item {
+        transform: translate(-50%, 0);
+    }
+}
+
+.core-side-panel {
+    .glyphicon {
+        margin-right: 5px;
+    }
+}
+
+.btn-lg {
+    .glyphicon {
+        top: 2px;
     }
 }
