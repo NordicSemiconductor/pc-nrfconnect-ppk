@@ -126,27 +126,42 @@ class Chart extends React.Component {
         const { options, index } = this.props;
         this.calculateWindow();
 
-        let iA = index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
-        const iB = index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
-        const step = (iB - iA) / this.len;
-        iA = (iA + options.data.length) % options.data.length;
+        const originalIndexBegin =
+            index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
+        const originalIndexEnd =
+            index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
+        const step = (originalIndexEnd - originalIndexBegin) / this.len;
 
-        for (let i = 0, j = iA; i < this.len; i += 1, j += step) {
-            const ts = this.begin + (this.duration * (i / this.len));
-            const k = Math.floor(j);
-            if (step > 1) {
+        if (step > 1) {
+            for (let mappedIndex = 0, originalIndex = originalIndexBegin;
+                mappedIndex < this.len;
+                mappedIndex += 1, originalIndex += step) {
+                const timestamp = this.begin + (this.duration * (mappedIndex / this.len));
+                const k = Math.floor(originalIndex);
+                const l = Math.floor(originalIndex + step);
                 let [min, max] = [Number.MAX_VALUE, -Number.MAX_VALUE];
-                const l = Math.floor(j + step);
                 for (let n = k; n < l; n += 1) {
-                    const v = options.data[n % options.data.length];
+                    const v = options.data[(n + options.data.length) % options.data.length];
                     if (v > max) max = v;
                     if (v < min) min = v;
                 }
-                this.lineData[i * 2] = { x: ts, y: min };
-                this.lineData[(i * 2) + 1] = { x: ts, y: max };
-            } else {
-                this.lineData[i] = { x: ts, y: options.data[k % options.data.length] };
-                this.lineData[this.len + i] = undefined;
+                this.lineData[mappedIndex * 2] = { x: timestamp, y: min };
+                this.lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
+            }
+        } else {
+            let mappedIndex = 0;
+            const originalIndexBeginFloored = Math.floor(originalIndexBegin);
+            const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
+            for (let originalIndex = originalIndexBeginFloored;
+                originalIndex < originalIndexEndCeiled;
+                mappedIndex += 1, originalIndex += 1) {
+                const k = (originalIndex + options.data.length) % options.data.length;
+                const timestamp = this.begin
+                    + (((originalIndex - originalIndexBegin) * 1e6) / options.samplesPerSecond);
+                this.lineData[mappedIndex] = { x: timestamp, y: options.data[k] };
+            }
+            for (; mappedIndex < this.len * 2; mappedIndex += 1) {
+                this.lineData[mappedIndex] = undefined;
             }
         }
     }
@@ -201,7 +216,7 @@ class Chart extends React.Component {
                 fill: false,
                 data: this.lineData.slice(),
                 pointRadius: 0,
-                lineTension: 0,
+                lineTension: 0.2,
                 label: 'data0',
             }],
         };
