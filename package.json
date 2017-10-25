@@ -31,10 +31,13 @@
   },
   "devDependencies": {
     "chart.js": "^2.6.0",
-    "pc-nrfconnect-devdep": "https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#v1.0.0",
-    "react-chartjs-2": "^2.6.1"
+    "pc-nrfconnect-devdep": "https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#v1.1.0",
+    "react-bootstrap": "^0.31.3",
+    "react-chartjs-2": "^2.6.1",
+    "react-rangeslider": "^2.2.0"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
   "jest": {
     "moduleNameMapper": {
       "nrfconnect/core": "<rootDir>/mocks/coreMock.js"
