@@ -46,7 +46,15 @@ import { connect } from 'react-redux';
 
 import UnitSelector from '../components/UnitSelector';
 
-import { start } from '../actions/PPKActions';
+import {
+    start,
+    ppkUpdateRegulator,
+    ppkTriggerUpdateWindow,
+    ppkTriggerToggle,
+    ppkTriggerSet,
+    ppkTriggerSingleSet,
+    ppkToggleDUT,
+} from '../actions/PPKActions';
 
 const SidePanel = props => (
     <div className="core-side-panel">
@@ -57,49 +65,53 @@ const SidePanel = props => (
             </Button>
         </ButtonGroup>
         <ButtonGroup block vertical>
-            <Button bsSize="large" onClick={props.toggleDeviceUnderTest}>
-                <Glyphicon glyph={props.deviceUnderTest ? 'record' : 'remove-circle'} />
+            <Button bsSize="large" onClick={() => props.ppkToggleDUT(props.deviceRunning)}>
+                <Glyphicon glyph={props.deviceRunning ? 'record' : 'remove-circle'} />
                 Device Under Test
             </Button>
         </ButtonGroup>
         <Accordion defaultActiveKey="1">
-            <Panel header="Trigger" eventKey="1" defaultExpanded>
+            <Panel header="Trigger" eventKey="1" /* defaultExpanded */>
                 Window {props.triggerWindowLength} ms
                 <Slider
-                    min={1}
-                    max={100}
+                    min={(300 * 18) / 1e3}   // 300 bytes * sampling interval = 5.4 ms
+                    max={(6000 * 18) / 1e3} // 6000 bytes * sampling interval = 108 ms
                     value={props.triggerWindowLength}
-                    labels={{ 1: '1', 100: '100' }}
+                    labels={{ 1: '5.4', 100: '108' }}
                     format={n => `${n}ms`}
                     onChange={props.moveTriggerWindowLength}
                     tooltip={false}
-                    onChangeComplete={() => { console.log('Trigger window to be set to', props.triggerWindowLength, 'ms'); }}
+                    onChangeComplete={() => props.ppkTriggerUpdateWindow(props.triggerWindowLength)}
                 />
                 <ButtonGroup justified style={{ marginTop: 10 }}>
-                    <Button bsSize="large" style={{ width: '50%' }}>
+                    <Button bsSize="large" style={{ width: '50%' }} onClick={props.ppkTriggerSingleSet}>
                         <Glyphicon glyph="time" />
-                        Waiting...
+                        {props.triggerSingleWaiting ? 'Waiting..' : 'Single'}
                     </Button>
-                    <Button bsSize="large" style={{ width: '50%' }}>
-                        <Glyphicon glyph="flash" />
-                        Start
+                    <Button bsSize="large" style={{ width: '50%' }} onClick={props.ppkTriggerToggle}>
+                        <Glyphicon glyph={props.triggerRunning ? 'flash' : 'record'} />
+                        {props.triggerRunning ? 'Stop' : 'Start'}
                     </Button>
                 </ButtonGroup>
                 <InputGroup style={{ marginTop: 10 }}>
                     <InputGroup.Addon>Trigger level</InputGroup.Addon>
-                    <FormControl type="text" />
+                    <FormControl
+                        placeholder="3"
+                        type="text"
+                        onKeyPress={e => { if (e.key === 'Enter') { props.ppkTriggerSet(e.target.value, props.triggerUnit); } }}
+                    />
                     <UnitSelector
-                        defaultSelected={0}
+                        defaultSelected={1}
                         units={['\u00B5A', 'mA']}
                         componentClass={InputGroup.Button}
                         id="input-dropdown-addon"
-                        onChange={i => { console.log('Trigger level unit changed to:', ['\u00B5A', 'mA'][i]); }}
+                        onChange={i => { props.triggerUnitChanged(['uA', 'mA'][i]); }}
                     />
                 </InputGroup>
                 <Checkbox>external trigger</Checkbox>
                 <Checkbox>trigger filter</Checkbox>
             </Panel>
-            <Panel header="Voltage Regulator" eventKey="2">
+            <Panel header="Voltage Regulator" eventKey="2" defaultExpanded>
                 VDD {props.voltageRegulatorVdd} mV
                 <Slider
                     min={1850}
@@ -109,7 +121,7 @@ const SidePanel = props => (
                     format={n => `${n}mV`}
                     onChange={props.moveVoltageRegulatorVdd}
                     tooltip={false}
-                    onChangeComplete={() => { console.log('VDD to be set to', props.voltageRegulatorVdd, 'mV'); }}
+                    onChangeComplete={() => props.ppkUpdateRegulator(props.voltageRegulatorVdd)}
                 />
             </Panel>
             <Panel header="Switching Groups" eventKey="3">
@@ -121,7 +133,7 @@ const SidePanel = props => (
                     labels={{ 1: '1', 100: '100' }}
                     format={n => `${n}mA`}
                     tooltip={false}
-                    onChangeComplete={() => { console.log('foo'); }}
+                    onChangeComplete={() => { console.log(props.triggerUnit); }}
                 />
                 Switch down
                 <Slider
@@ -138,7 +150,7 @@ const SidePanel = props => (
             <Panel header="Resistor Calibration" eventKey="4">
                 <InputGroup>
                     <InputGroup.Addon>High</InputGroup.Addon>
-                    <FormControl type="text" defaultValue="2500" />
+                    <FormControl type="text" defaultValue="1.8" />
                     <UnitSelector
                         defaultSelected={0}
                         units={['\u00B5A', 'mA']}
@@ -149,7 +161,7 @@ const SidePanel = props => (
                 </InputGroup>
                 <InputGroup>
                     <InputGroup.Addon>Mid</InputGroup.Addon>
-                    <FormControl type="text" defaultValue="2500" />
+                    <FormControl type="text" defaultValue="29.0" />
                     <UnitSelector
                         defaultSelected={0}
                         units={['\u00B5A', 'mA']}
@@ -160,7 +172,7 @@ const SidePanel = props => (
                 </InputGroup>
                 <InputGroup>
                     <InputGroup.Addon>Low</InputGroup.Addon>
-                    <FormControl type="text" defaultValue="2500" />
+                    <FormControl type="text" defaultValue="490.0" />
                     <UnitSelector
                         defaultSelected={0}
                         units={['\u00B5A', 'mA']}
@@ -180,9 +192,21 @@ const SidePanel = props => (
 
 SidePanel.propTypes = {
     start: PropTypes.func.isRequired,
+    ppkUpdateRegulator: PropTypes.func.isRequired,
 
-    deviceUnderTest: PropTypes.bool.isRequired,
-    toggleDeviceUnderTest: PropTypes.func.isRequired,
+    deviceRunning: PropTypes.bool.isRequired,
+    triggerRunning: PropTypes.bool.isRequired,
+    triggerSingleWaiting: PropTypes.bool.isRequired,
+    ppkToggleDUT: PropTypes.func.isRequired,
+
+    ppkTriggerUpdateWindow: PropTypes.func.isRequired,
+    ppkTriggerToggle: PropTypes.func.isRequired,
+
+    triggerUnitChanged: PropTypes.func.isRequired,
+    ppkTriggerSet: PropTypes.func.isRequired,
+    ppkTriggerSingleSet: PropTypes.func.isRequired,
+    triggerUnit: PropTypes.string.isRequired,
+
 
     triggerWindowLength: PropTypes.number.isRequired,
     moveTriggerWindowLength: PropTypes.func.isRequired,
@@ -193,25 +217,39 @@ SidePanel.propTypes = {
 
 export default connect(
     state => ({
-        deviceUnderTest: state.app.app.deviceUnderTest,
+        deviceRunning: state.app.app.deviceRunning,
+        triggerRunning: state.app.app.triggerRunning,
+        triggerSingleWaiting: state.app.trigger.triggerSingleWaiting,
         triggerWindowLength: state.app.trigger.windowLength,
+        triggerUnit: state.app.trigger.triggerUnit,
         voltageRegulatorVdd: state.app.voltageRegulator.vdd,
     }),
     dispatch => Object.assign(
         {},
-        bindActionCreators({ start }, dispatch),
+        bindActionCreators({
+            start,
+            ppkUpdateRegulator,
+            ppkTriggerUpdateWindow,
+            ppkTriggerToggle,
+            ppkTriggerSet,
+            ppkTriggerSingleSet,
+            ppkToggleDUT,
+        }, dispatch),
         {
-            toggleDeviceUnderTest: () => dispatch({
-                type: 'DEVICE_UNDER_TEST_TOGGLE',
+            triggerUnitChanged: triggerUnit => dispatch({
+                type: 'TRIGGER_WINDOW_UNIT_CHANGE',
+                triggerUnit,
             }),
             moveTriggerWindowLength: windowLength => dispatch({
                 type: 'TRIGGER_WINDOW_LENGTH_MOVE',
                 windowLength,
             }),
-            moveVoltageRegulatorVdd: vdd => dispatch({
-                type: 'VOLTAGE_REGULATOR_VDD_MOVE',
-                vdd,
-            }),
+            moveVoltageRegulatorVdd: vdd => {
+                dispatch({
+                    type: 'VOLTAGE_REGULATOR_VDD_MOVE',
+                    vdd,
+                });
+            },
         },
     ),
 )(SidePanel);
