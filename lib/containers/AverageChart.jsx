@@ -46,6 +46,21 @@ const timestampToLabel = us => {
     return `${`${m}`.padStart(2, '0')}:${`${s}`.padStart(2, '0')}.${`${z}`.padStart(3, '0')}`;
 };
 
+// const timestampDeltaToLabel = (us1, us2) => {
+//     const d = new Date(us1 / 1e3);
+//     const d2 = new Date(us2 / 1e3);
+//     const s1 = d.getSeconds();
+//     const m1 = d.getMilliseconds();
+//     const s2 = d2.getSeconds();
+//     const m2 = d2.getMilliseconds();
+
+//     if (s2 >= s1) {
+//         return (((s2 * 1e3) + m2) - ((s1 * 1e3) + m1));
+//     }
+//     const t = 60000 - ((s1 * 1e3) + m1);
+//     return (((s2 * 1e3) + m2) + t);
+// };
+
 const AverageChart = props => (
     <Chart id="AVERAGE" {...props} timestampToLabel={timestampToLabel} />
 );
