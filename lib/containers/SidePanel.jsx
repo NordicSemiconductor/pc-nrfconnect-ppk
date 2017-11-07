@@ -74,8 +74,8 @@ const SidePanel = props => (
             <Panel header="Trigger" eventKey="1" /* defaultExpanded */>
                 Window {props.triggerWindowLength} ms
                 <Slider
-                    min={(300 * 18) / 1e3}   // 300 bytes * sampling interval = 5.4 ms
-                    max={(6000 * 18) / 1e3} // 6000 bytes * sampling interval = 108 ms
+                    min={(450 * 10) / 1e3}   // 450 bytes * sampling interval = 5.4 ms
+                    max={(6000 * 10) / 1e3} // 6000 bytes * sampling interval = 108 ms
                     value={props.triggerWindowLength}
                     labels={{ 1: '5.4', 100: '108' }}
                     format={n => `${n}ms`}
