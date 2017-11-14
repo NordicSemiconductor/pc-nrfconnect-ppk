@@ -55,6 +55,7 @@ import {
     ppkTriggerSet,
     ppkTriggerSingleSet,
     ppkToggleDUT,
+    updateResistors,
 } from '../actions/PPKActions';
 
 const SidePanel = props => (
@@ -155,39 +156,32 @@ const SidePanel = props => (
             <Panel header="Resistor Calibration" eventKey="4">
                 <InputGroup>
                     <InputGroup.Addon>High</InputGroup.Addon>
-                    <FormControl type="text" defaultValue="1.8" />
-                    <UnitSelector
-                        defaultSelected={0}
-                        units={['\u00B5A', 'mA']}
-                        componentClass={InputGroup.Button}
-                        id="input-dropdown-addon"
-                        onChange={i => { console.log('High SP unit changed to:', ['\u00B5A', 'mA'][i]); }}
+                    <FormControl
+                        type="text"
+                        defaultValue={props.resistorHigh}
+                        onKeyPress={e => { if (e.key === 'Enter') { props.updateHighResistor(e.target.value); } }}
                     />
                 </InputGroup>
                 <InputGroup>
                     <InputGroup.Addon>Mid</InputGroup.Addon>
-                    <FormControl type="text" defaultValue="29.0" />
-                    <UnitSelector
-                        defaultSelected={0}
-                        units={['\u00B5A', 'mA']}
-                        componentClass={InputGroup.Button}
-                        id="input-dropdown-addon"
-                        onChange={i => { console.log('Mid SP unit changed to:', ['\u00B5A', 'mA'][i]); }}
+                    <FormControl
+                        type="text"
+                        defaultValue={props.resistorMid}
+                        onKeyPress={e => { if (e.key === 'Enter') { props.updateMidResistor(e.target.value); } }}
                     />
                 </InputGroup>
                 <InputGroup>
                     <InputGroup.Addon>Low</InputGroup.Addon>
-                    <FormControl type="text" defaultValue="490.0" />
-                    <UnitSelector
-                        defaultSelected={0}
-                        units={['\u00B5A', 'mA']}
-                        componentClass={InputGroup.Button}
-                        id="input-dropdown-addon"
-                        onChange={i => { console.log('Low SP unit changed to:', ['\u00B5A', 'mA'][i]); }}
+                    <FormControl
+                        type="text"
+                        defaultValue={props.resistorLow}
+                        onKeyPress={e => { if (e.key === 'Enter') { props.updateLowResistor(e.target.value); } }}
                     />
                 </InputGroup>
                 <ButtonGroup justified style={{ marginTop: 10 }}>
-                    <Button style={{ width: '50%' }}><Glyphicon glyph="refresh" />Update</Button>
+                    <Button style={{ width: '50%' }} onClick={() => props.updateResistors()}>
+                        <Glyphicon glyph="refresh" />Update
+                    </Button>
                     <Button style={{ width: '50%' }}><Glyphicon glyph="ban-circle" />Reset</Button>
                 </ButtonGroup>
             </Panel>
@@ -220,6 +214,16 @@ SidePanel.propTypes = {
 
     voltageRegulatorVdd: PropTypes.number.isRequired,
     moveVoltageRegulatorVdd: PropTypes.func.isRequired,
+
+    resistorLow: PropTypes.number.isRequired,
+    resistorMid: PropTypes.number.isRequired,
+    resistorHigh: PropTypes.number.isRequired,
+
+    updateHighResistor: PropTypes.func.isRequired,
+    updateMidResistor: PropTypes.func.isRequired,
+    updateLowResistor: PropTypes.func.isRequired,
+    updateResistors: PropTypes.func.isRequired,
+
 };
 
 export default connect(
@@ -231,6 +235,10 @@ export default connect(
         triggerWindowLength: state.app.trigger.windowLength,
         triggerUnit: state.app.trigger.triggerUnit,
         voltageRegulatorVdd: state.app.voltageRegulator.vdd,
+
+        resistorLow: state.app.resistorCalibration.resLo,
+        resistorMid: state.app.resistorCalibration.resMid,
+        resistorHigh: state.app.resistorCalibration.resHi,
     }),
     dispatch => Object.assign(
         {},
@@ -243,6 +251,7 @@ export default connect(
             ppkTriggerSet,
             ppkTriggerSingleSet,
             ppkToggleDUT,
+            updateResistors,
         }, dispatch),
         {
             triggerUnitChanged: triggerUnit => dispatch({
@@ -259,6 +268,18 @@ export default connect(
                     vdd,
                 });
             },
+            updateHighResistor: resHi => dispatch({
+                type: 'RESISTOR_UPDATED',
+                resHi,
+            }),
+            updateMidResistor: resMid => dispatch({
+                type: 'RESISTOR_UPDATED',
+                resMid,
+            }),
+            updateLowResistor: resLow => dispatch({
+                type: 'RESISTOR_UPDATED',
+                resLow,
+            }),
         },
     ),
 )(SidePanel);
