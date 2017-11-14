@@ -48,6 +48,7 @@ import UnitSelector from '../components/UnitSelector';
 
 import {
     start,
+    stop,
     ppkUpdateRegulator,
     ppkTriggerUpdateWindow,
     ppkTriggerToggle,
@@ -59,14 +60,18 @@ import {
 const SidePanel = props => (
     <div className="core-side-panel">
         <ButtonGroup block vertical>
-            <Button bsStyle="primary" bsSize="large" onClick={props.start}>
+            <Button
+                bsStyle="primary"
+                bsSize="large"
+                onClick={props.rttRunning ? props.stop : props.start}
+            >
                 <Glyphicon glyph="play" />
-                Start Average
+                {props.rttRunning ? 'Stop' : 'Start'}
             </Button>
         </ButtonGroup>
         <ButtonGroup block vertical>
             <Button bsSize="large" onClick={() => props.ppkToggleDUT(props.deviceRunning)}>
-                <Glyphicon glyph={props.deviceRunning ? 'record' : 'remove-circle'} />
+                <Glyphicon glyph={props.deviceRunning ? 'remove-circle' : 'record'} />
                 Device Under Test
             </Button>
         </ButtonGroup>
@@ -77,7 +82,7 @@ const SidePanel = props => (
                     min={(450 * 10) / 1e3}   // 450 bytes * sampling interval = 5.4 ms
                     max={(6000 * 10) / 1e3} // 6000 bytes * sampling interval = 108 ms
                     value={props.triggerWindowLength}
-                    labels={{ 1: '5.4', 100: '108' }}
+                    labels={{ 1: '4500', 100: '60000' }}
                     format={n => `${n}ms`}
                     onChange={props.moveTriggerWindowLength}
                     tooltip={false}
@@ -192,9 +197,11 @@ const SidePanel = props => (
 
 SidePanel.propTypes = {
     start: PropTypes.func.isRequired,
+    stop: PropTypes.func.isRequired,
     ppkUpdateRegulator: PropTypes.func.isRequired,
 
     deviceRunning: PropTypes.bool.isRequired,
+    rttRunning: PropTypes.bool.isRequired,
     triggerRunning: PropTypes.bool.isRequired,
     triggerSingleWaiting: PropTypes.bool.isRequired,
     ppkToggleDUT: PropTypes.func.isRequired,
@@ -218,7 +225,8 @@ SidePanel.propTypes = {
 export default connect(
     state => ({
         deviceRunning: state.app.app.deviceRunning,
-        triggerRunning: state.app.app.triggerRunning,
+        rttRunning: state.app.app.rttRunning,
+        triggerRunning: state.app.trigger.triggerRunning,
         triggerSingleWaiting: state.app.trigger.triggerSingleWaiting,
         triggerWindowLength: state.app.trigger.windowLength,
         triggerUnit: state.app.trigger.triggerUnit,
@@ -228,6 +236,7 @@ export default connect(
         {},
         bindActionCreators({
             start,
+            stop,
             ppkUpdateRegulator,
             ppkTriggerUpdateWindow,
             ppkTriggerToggle,
