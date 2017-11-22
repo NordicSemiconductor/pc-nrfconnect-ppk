@@ -117,6 +117,8 @@ const SidePanel = props => (
                 <Checkbox>external trigger</Checkbox>
                 <Checkbox>trigger filter</Checkbox>
             </Panel>
+        </Accordion>
+        <Accordion>
             <Panel header="Voltage Regulator" eventKey="2" defaultExpanded>
                 VDD {props.voltageRegulatorVdd} mV
                 <Slider
@@ -130,7 +132,7 @@ const SidePanel = props => (
                     onChangeComplete={() => props.ppkUpdateRegulator(props.voltageRegulatorVdd)}
                 />
             </Panel>
-            <Panel header="Switching Groups" eventKey="3">
+            {/* <Panel header="Switching Groups" eventKey="3">
                 Switch up
                 <Slider
                     min={1}
@@ -152,7 +154,7 @@ const SidePanel = props => (
                     onChangeComplete={() => { console.log('foo'); }}
                 />
                 <Button block>Reset switching points</Button>
-            </Panel>
+            </Panel> */}
             <Panel header="Resistor Calibration" eventKey="4">
                 <InputGroup>
                     <InputGroup.Addon>High</InputGroup.Addon>
