@@ -47,8 +47,8 @@ import { connect } from 'react-redux';
 import UnitSelector from '../components/UnitSelector';
 
 import {
-    start,
-    stop,
+    averageStart,
+    averageStop,
     ppkUpdateRegulator,
     ppkTriggerUpdateWindow,
     ppkTriggerToggle,
@@ -56,6 +56,7 @@ import {
     ppkTriggerSingleSet,
     ppkToggleDUT,
     updateResistors,
+    resetResistors,
 } from '../actions/PPKActions';
 
 const SidePanel = props => (
@@ -64,16 +65,22 @@ const SidePanel = props => (
             <Button
                 bsStyle="primary"
                 bsSize="large"
-                onClick={props.rttRunning ? props.stop : props.start}
+                disabled={!props.rttRunning}
+                onClick={props.averageRunning ? props.averageStop : props.averageStart}
             >
                 <Glyphicon glyph="play" />
-                {props.rttRunning ? 'Stop' : 'Start'}
+                {props.averageRunning ? 'Stop' : 'Start'}
             </Button>
         </ButtonGroup>
         <ButtonGroup block vertical>
-            <Button bsSize="large" onClick={() => props.ppkToggleDUT(props.deviceRunning)}>
+            <Button
+                style={{ backgroundColor: 0xFF11AA }}
+                bsSize="large"
+                disabled={!props.rttRunning}
+                onClick={() => props.ppkToggleDUT(props.deviceRunning)}
+            >
                 <Glyphicon glyph={props.deviceRunning ? 'remove-circle' : 'record'} />
-                Device Under Test
+                {props.deviceRunning ? 'Power OFF' : 'Power ON'}
             </Button>
         </ButtonGroup>
         <Accordion defaultActiveKey="1">
@@ -90,11 +97,21 @@ const SidePanel = props => (
                     onChangeComplete={() => props.ppkTriggerUpdateWindow(props.triggerWindowLength)}
                 />
                 <ButtonGroup justified style={{ marginTop: 10 }}>
-                    <Button bsSize="large" style={{ width: '50%' }} onClick={props.ppkTriggerSingleSet}>
+                    <Button
+                        disabled={!props.rttRunning}
+                        bsSize="large"
+                        style={{ width: '50%' }}
+                        onClick={props.ppkTriggerSingleSet}
+                    >
                         <Glyphicon glyph="time" />
                         {props.triggerSingleWaiting ? 'Waiting..' : 'Single'}
                     </Button>
-                    <Button bsSize="large" style={{ width: '50%' }} onClick={props.ppkTriggerToggle}>
+                    <Button
+                        disabled={!props.rttRunning}
+                        bsSize="large"
+                        style={{ width: '50%' }}
+                        onClick={props.ppkTriggerToggle}
+                    >
                         <Glyphicon glyph={props.triggerRunning ? 'flash' : 'record'} />
                         {props.triggerRunning ? 'Stop' : 'Start'}
                     </Button>
@@ -114,8 +131,8 @@ const SidePanel = props => (
                         onChange={i => { props.triggerUnitChanged(['uA', 'mA'][i]); }}
                     />
                 </InputGroup>
-                <Checkbox>external trigger</Checkbox>
-                <Checkbox>trigger filter</Checkbox>
+                <Checkbox>External trigger</Checkbox>
+                {/* <Checkbox>trigger filter</Checkbox> */}
             </Panel>
         </Accordion>
         <Accordion>
@@ -160,31 +177,37 @@ const SidePanel = props => (
                     <InputGroup.Addon>High</InputGroup.Addon>
                     <FormControl
                         type="text"
-                        defaultValue={props.resistorHigh}
-                        onKeyPress={e => { if (e.key === 'Enter') { props.updateHighResistor(e.target.value); } }}
+                        value={props.resistorHigh}
+                        onChange={e => props.updateHighResistor(e.target.value)}
+                        onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
                     />
                 </InputGroup>
                 <InputGroup>
                     <InputGroup.Addon>Mid</InputGroup.Addon>
                     <FormControl
                         type="text"
-                        defaultValue={props.resistorMid}
-                        onKeyPress={e => { if (e.key === 'Enter') { props.updateMidResistor(e.target.value); } }}
+                        value={props.resistorMid}
+                        onChange={e => props.updateMidResistor(e.target.value)}
+                        onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
                     />
                 </InputGroup>
                 <InputGroup>
                     <InputGroup.Addon>Low</InputGroup.Addon>
                     <FormControl
                         type="text"
-                        defaultValue={props.resistorLow}
-                        onKeyPress={e => { if (e.key === 'Enter') { props.updateLowResistor(e.target.value); } }}
+                        value={props.resistorLow}
+                        onChange={e => props.updateLowResistor(e.target.value)}
+                        onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
                     />
                 </InputGroup>
                 <ButtonGroup justified style={{ marginTop: 10 }}>
                     <Button style={{ width: '50%' }} onClick={() => props.updateResistors()}>
                         <Glyphicon glyph="refresh" />Update
                     </Button>
-                    <Button style={{ width: '50%' }}><Glyphicon glyph="ban-circle" />Reset</Button>
+                    <Button
+                        style={{ width: '50%' }}
+                        onClick={() => props.resetResistors()}
+                    ><Glyphicon glyph="ban-circle" />Reset</Button>
                 </ButtonGroup>
             </Panel>
         </Accordion>
@@ -192,9 +215,11 @@ const SidePanel = props => (
 );
 
 SidePanel.propTypes = {
-    start: PropTypes.func.isRequired,
-    stop: PropTypes.func.isRequired,
     ppkUpdateRegulator: PropTypes.func.isRequired,
+
+    averageStart: PropTypes.func.isRequired,
+    averageStop: PropTypes.func.isRequired,
+    averageRunning: PropTypes.bool.isRequired,
 
     deviceRunning: PropTypes.bool.isRequired,
     rttRunning: PropTypes.bool.isRequired,
@@ -220,17 +245,22 @@ SidePanel.propTypes = {
     resistorLow: PropTypes.number.isRequired,
     resistorMid: PropTypes.number.isRequired,
     resistorHigh: PropTypes.number.isRequired,
+    // calibratedResistorLow: PropTypes.number.isRequired,
+    // calibratedResistorMid: PropTypes.number.isRequired,
+    // calibratedResistorHigh: PropTypes.number.isRequired,
 
     updateHighResistor: PropTypes.func.isRequired,
     updateMidResistor: PropTypes.func.isRequired,
     updateLowResistor: PropTypes.func.isRequired,
     updateResistors: PropTypes.func.isRequired,
+    resetResistors: PropTypes.func.isRequired,
 
 };
 
 export default connect(
     state => ({
         deviceRunning: state.app.app.deviceRunning,
+        averageRunning: state.app.average.averageRunning,
         rttRunning: state.app.app.rttRunning,
         triggerRunning: state.app.trigger.triggerRunning,
         triggerSingleWaiting: state.app.trigger.triggerSingleWaiting,
@@ -238,15 +268,18 @@ export default connect(
         triggerUnit: state.app.trigger.triggerUnit,
         voltageRegulatorVdd: state.app.voltageRegulator.vdd,
 
-        resistorLow: state.app.resistorCalibration.resLo,
-        resistorMid: state.app.resistorCalibration.resMid,
-        resistorHigh: state.app.resistorCalibration.resHi,
+        resistorLow: state.app.resistorCalibration.userResLo,
+        resistorMid: state.app.resistorCalibration.userResMid,
+        resistorHigh: state.app.resistorCalibration.userResHi,
+        // calibratedResistorLow: state.app.resistorCalibration.resLo,
+        // calibratedResistorMid: state.app.resistorCalibration.resMid,
+        // calibratedResistorHigh: state.app.resistorCalibration.resHi,
     }),
     dispatch => Object.assign(
         {},
         bindActionCreators({
-            start,
-            stop,
+            averageStart,
+            averageStop,
             ppkUpdateRegulator,
             ppkTriggerUpdateWindow,
             ppkTriggerToggle,
@@ -254,6 +287,7 @@ export default connect(
             ppkTriggerSingleSet,
             ppkToggleDUT,
             updateResistors,
+            resetResistors,
         }, dispatch),
         {
             triggerUnitChanged: triggerUnit => dispatch({
@@ -270,17 +304,17 @@ export default connect(
                     vdd,
                 });
             },
-            updateHighResistor: resHi => dispatch({
-                type: 'RESISTOR_UPDATED',
-                resHi,
+            updateHighResistor: userResHi => dispatch({
+                type: 'USER_RESISTOR_UPDATED',
+                userResHi,
             }),
-            updateMidResistor: resMid => dispatch({
-                type: 'RESISTOR_UPDATED',
-                resMid,
+            updateMidResistor: userResMid => dispatch({
+                type: 'USER_RESISTOR_UPDATED',
+                userResMid,
             }),
-            updateLowResistor: resLow => dispatch({
-                type: 'RESISTOR_UPDATED',
-                resLow,
+            updateLowResistor: userResLo => dispatch({
+                type: 'USER_RESISTOR_UPDATED',
+                userResLo,
             }),
         },
     ),
