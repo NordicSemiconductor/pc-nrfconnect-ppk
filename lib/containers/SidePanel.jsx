@@ -57,6 +57,7 @@ import {
     ppkToggleDUT,
     updateResistors,
     resetResistors,
+    externalTriggerToggled,
 } from '../actions/PPKActions';
 
 const SidePanel = props => (
@@ -131,7 +132,12 @@ const SidePanel = props => (
                         onChange={i => { props.triggerUnitChanged(['uA', 'mA'][i]); }}
                     />
                 </InputGroup>
-                <Checkbox>External trigger</Checkbox>
+                <Checkbox
+                    onClick={e => props.externalTriggerToggled(e.target.checked)}
+                    checked={props.externalTrigger}
+                >
+                External trigger
+                </Checkbox>
                 {/* <Checkbox>trigger filter</Checkbox> */}
             </Panel>
         </Accordion>
@@ -220,6 +226,7 @@ SidePanel.propTypes = {
     averageStart: PropTypes.func.isRequired,
     averageStop: PropTypes.func.isRequired,
     averageRunning: PropTypes.bool.isRequired,
+    externalTrigger: PropTypes.bool.isRequired,
 
     deviceRunning: PropTypes.bool.isRequired,
     rttRunning: PropTypes.bool.isRequired,
@@ -254,6 +261,7 @@ SidePanel.propTypes = {
     updateLowResistor: PropTypes.func.isRequired,
     updateResistors: PropTypes.func.isRequired,
     resetResistors: PropTypes.func.isRequired,
+    externalTriggerToggled: PropTypes.func.isRequired,
 
 };
 
@@ -261,6 +269,7 @@ export default connect(
     state => ({
         deviceRunning: state.app.app.deviceRunning,
         averageRunning: state.app.average.averageRunning,
+        externalTrigger: state.app.trigger.externalTrigger,
         rttRunning: state.app.app.rttRunning,
         triggerRunning: state.app.trigger.triggerRunning,
         triggerSingleWaiting: state.app.trigger.triggerSingleWaiting,
@@ -271,9 +280,6 @@ export default connect(
         resistorLow: state.app.resistorCalibration.userResLo,
         resistorMid: state.app.resistorCalibration.userResMid,
         resistorHigh: state.app.resistorCalibration.userResHi,
-        // calibratedResistorLow: state.app.resistorCalibration.resLo,
-        // calibratedResistorMid: state.app.resistorCalibration.resMid,
-        // calibratedResistorHigh: state.app.resistorCalibration.resHi,
     }),
     dispatch => Object.assign(
         {},
@@ -288,6 +294,7 @@ export default connect(
             ppkToggleDUT,
             updateResistors,
             resetResistors,
+            externalTriggerToggled,
         }, dispatch),
         {
             triggerUnitChanged: triggerUnit => dispatch({
