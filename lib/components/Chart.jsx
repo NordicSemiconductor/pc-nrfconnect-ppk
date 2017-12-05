@@ -188,7 +188,7 @@ class Chart extends React.Component {
         return (
             <div className="chart-stats">
                 <span>
-                    cursor &Delta;: {timestampDeltaToLabel(cursorBegin, cursorEnd)} ms
+                    cursor &Delta;: {timestampToLabel(cursorEnd - cursorBegin)} ms
                 </span>
                 <span>rms: <b>{rms}</b> nA</span>
                 <span>avg: <b>{avg}</b> nA</span>
