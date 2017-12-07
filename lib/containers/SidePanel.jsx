@@ -88,10 +88,11 @@ const SidePanel = props => (
             <Panel header="Trigger" eventKey="1" /* defaultExpanded */>
                 Window {props.triggerWindowLength} ms
                 <Slider
-                    min={(450 * 10) / 1e3}   // 450 bytes * sampling interval = 5.4 ms
-                    max={(6000 * 10) / 1e3} // 6000 bytes * sampling interval = 108 ms
+                    disabled={!props.rttRunning}
+                    min={(450 * 10) / 1e3}   // 450 bytes * sampling interval = 4.5 ms
+                    max={(6000 * 10) / 1e3} // 6000 bytes * sampling interval = 60 ms
                     value={props.triggerWindowLength}
-                    labels={{ 1: '4500', 100: '60000' }}
+                    labels={{ 1: '4.5', 100: '60' }}
                     format={n => `${n}ms`}
                     onChange={props.moveTriggerWindowLength}
                     tooltip={false}
@@ -99,16 +100,16 @@ const SidePanel = props => (
                 />
                 <ButtonGroup justified style={{ marginTop: 10 }}>
                     <Button
-                        disabled={!props.rttRunning}
+                        disabled={!props.rttRunning || props.externalTrigger}
                         bsSize="large"
                         style={{ width: '50%' }}
                         onClick={props.ppkTriggerSingleSet}
                     >
                         <Glyphicon glyph="time" />
-                        {props.triggerSingleWaiting ? 'Waiting..' : 'Single'}
+                        {props.triggerSingleWaiting ? 'Waiting...' : 'Single'}
                     </Button>
                     <Button
-                        disabled={!props.rttRunning}
+                        disabled={!props.rttRunning || props.externalTrigger}
                         bsSize="large"
                         style={{ width: '50%' }}
                         onClick={props.ppkTriggerToggle}
@@ -120,11 +121,13 @@ const SidePanel = props => (
                 <InputGroup style={{ marginTop: 10 }}>
                     <InputGroup.Addon>Trigger level</InputGroup.Addon>
                     <FormControl
+                        disabled={!props.rttRunning || props.externalTrigger}
                         placeholder="3"
                         type="text"
                         onKeyPress={e => { if (e.key === 'Enter') { props.ppkTriggerSet(e.target.value, props.triggerUnit); } }}
                     />
                     <UnitSelector
+                        disabled={!props.rttRunning || props.externalTrigger}
                         defaultSelected={1}
                         units={['\u00B5A', 'mA']}
                         componentClass={InputGroup.Button}
