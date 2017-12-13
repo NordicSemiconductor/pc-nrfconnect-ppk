@@ -34,6 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// For electron runtime optimization we need to avoid operator-assiment:
+/* eslint operator-assignment: off */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
@@ -123,27 +126,51 @@ class Chart extends React.Component {
     }
 
     calculateLineDataSets() {
-        const { options, index } = this.props;
+        const { options, index, cursorBegin, cursorEnd } = this.props;
         this.calculateWindow();
 
-        const originalIndexBegin =
-            index - (((options.timestamp - this.begin) * options.samplesPerSecond) / 1e6);
-        const originalIndexEnd =
-            index - (((options.timestamp - this.end) * options.samplesPerSecond) / 1e6);
+        const timestampToIndex = ts => (
+            index - (((options.timestamp - ts) * options.samplesPerSecond) / 1e6)
+        );
+
+        const originalIndexBegin = timestampToIndex(this.begin);
+        const originalIndexEnd = timestampToIndex(this.end);
         const step = (originalIndexEnd - originalIndexBegin) / this.len;
+
+        if (cursorBegin) {
+            this.calcBegin = cursorBegin;
+            this.calcEnd = cursorEnd;
+        } else {
+            this.calcBegin = this.begin;
+            this.calcEnd = this.end;
+        }
+        const calcIndexBegin = timestampToIndex(this.calcBegin);
+        const calcIndexEnd = timestampToIndex(this.calcEnd);
+        this.calcMax = 0;
+        this.calcSum = 0;
+        this.calcSqr = 0;
+        this.calcLen = 0;
 
         if (step > 1) {
             for (let mappedIndex = 0, originalIndex = originalIndexBegin;
                 mappedIndex < this.len;
-                mappedIndex += 1, originalIndex += step) {
+                mappedIndex = mappedIndex + 1, originalIndex = originalIndex + step) {
                 const timestamp = this.begin + (this.duration * (mappedIndex / this.len));
                 const k = Math.floor(originalIndex);
                 const l = Math.floor(originalIndex + step);
-                let [min, max] = [Number.MAX_VALUE, -Number.MAX_VALUE];
-                for (let n = k; n < l; n += 1) {
+                let min = Number.MAX_VALUE;
+                let max = -Number.MAX_VALUE;
+                for (let n = k; n < l; n = n + 1) {
                     const v = options.data[(n + options.data.length) % options.data.length];
                     if (v > max) max = v;
                     if (v < min) min = v;
+
+                    if (n >= calcIndexBegin && n < calcIndexEnd) {
+                        if (v > this.calcMax) this.calcMax = v;
+                        this.calcSum = this.calcSum + v;
+                        this.calcSqr = this.calcSqr + (v * v);
+                        this.calcLen = this.calcLen + 1;
+                    }
                 }
                 this.lineData[mappedIndex * 2] = { x: timestamp, y: min };
                 this.lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
@@ -152,48 +179,43 @@ class Chart extends React.Component {
             let mappedIndex = 0;
             const originalIndexBeginFloored = Math.floor(originalIndexBegin);
             const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
-            for (let originalIndex = originalIndexBeginFloored;
-                originalIndex < originalIndexEndCeiled;
-                mappedIndex += 1, originalIndex += 1) {
-                const k = (originalIndex + options.data.length) % options.data.length;
+            for (let n = originalIndexBeginFloored;
+                n < originalIndexEndCeiled;
+                mappedIndex = mappedIndex + 1, n = n + 1) {
+                const k = (n + options.data.length) % options.data.length;
+                const v = options.data[k];
                 const timestamp = this.begin
-                    + (((originalIndex - originalIndexBegin) * 1e6) / options.samplesPerSecond);
-                this.lineData[mappedIndex] = { x: timestamp, y: options.data[k] };
+                    + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
+                this.lineData[mappedIndex] = { x: timestamp, y: v };
+
+                if (n >= calcIndexBegin && n < calcIndexEnd) {
+                    if (v > this.calcMax) this.calcMax = v;
+                    this.calcSum = this.calcSum + v;
+                    this.calcSqr = this.calcSqr + (v * v);
+                    this.calcLen = this.calcLen + 1;
+                }
             }
-            for (; mappedIndex < this.len * 2; mappedIndex += 1) {
+            for (; mappedIndex < this.len + this.len; mappedIndex = mappedIndex + 1) {
                 this.lineData[mappedIndex] = undefined;
             }
         }
+        this.calcAvg = this.calcSum / (this.calcLen || 1);
+        this.calcRms = Math.sqrt(this.calcSqr / (this.calcLen || 1));
+        this.calcDelta = this.calcEnd - this.calcBegin;
+        this.calcCharge = this.calcAvg * (this.calcDelta / 1e6);
     }
 
     renderStats() {
-        const {
-            rms,
-            avg,
-            max,
-            charge,
-            cursorBegin,
-            cursorEnd,
-            timestampToLabel,
-        } = this.props;
-
-        if (!cursorBegin) {
-            return (
-                <div className="chart-stats">
-                    <span>Set cursor by shift + left mouse button dragging in the chart.</span>
-                </div>
-            );
-        }
-
+        const { timestampToLabel, cursorBegin } = this.props;
         return (
             <div className="chart-stats">
                 <span>
-                    cursor &Delta;: {timestampToLabel(cursorEnd - cursorBegin)} ms
+                    { cursorBegin ? 'cursor' : 'window' } &Delta;: {timestampToLabel(this.calcDelta)}
                 </span>
-                <span>rms: <b>{rms}</b> nA</span>
-                <span>avg: <b>{avg}</b> nA</span>
-                <span>max: <b>{max}</b> nA</span>
-                <span>charge: <b>{charge}</b> nC</span>
+                <span>rms: <b>{this.calcRms.toFixed(2)}</b> {'\u00B5A'}</span>
+                <span>avg: <b>{this.calcAvg.toFixed(2)}</b> {'\u00B5A'}</span>
+                <span>max: <b>{this.calcMax.toFixed(2)}</b> {'\u00B5A'}</span>
+                <span>charge: <b>{this.calcCharge.toFixed(2)}</b> {'\u00B5C'}</span>
             </div>
         );
     }
@@ -286,10 +308,6 @@ class Chart extends React.Component {
 Chart.propTypes = {
     dispatch: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
-    rms: PropTypes.number.isRequired,
-    avg: PropTypes.number.isRequired,
-    max: PropTypes.number.isRequired,
-    charge: PropTypes.number.isRequired,
     cursorBegin: PropTypes.number.isRequired,
     cursorEnd: PropTypes.number.isRequired,
     windowBegin: PropTypes.number.isRequired,
