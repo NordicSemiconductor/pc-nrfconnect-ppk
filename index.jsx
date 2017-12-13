@@ -63,10 +63,22 @@ export default {
         }
         if (action.type === 'SERIAL_PORT_SELECTED') {
             const { port } = action;
-            store.dispatch(PPKActions.open(port));
+            store.dispatch(PPKActions.validateFirmware(port.serialNumber, {
+                onValid: () => store.dispatch(PPKActions.open(port)),
+                onInvalid: () => store.dispatch({ type: 'FIRMWARE_DIALOG_SHOW', port }),
+            }));
         }
         if (action.type === 'SERIAL_PORT_DESELECTED') {
             store.dispatch(PPKActions.close());
+        }
+        if (action.type === 'FIRMWARE_DIALOG_UPDATE_REQUESTED') {
+            const { port } = action;
+            store.dispatch(PPKActions.programFirmware(port.serialNumber, {
+                onSuccess: () => {
+                    store.dispatch(PPKActions.open(port));
+                    store.dispatch({ type: 'FIRMWARE_DIALOG_HIDE' });
+                },
+            }));
         }
         next(action);
     },
