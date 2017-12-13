@@ -212,10 +212,10 @@ class Chart extends React.Component {
                 <span>
                     { cursorBegin ? 'cursor' : 'window' } &Delta;: {timestampToLabel(this.calcDelta)}
                 </span>
-                <span>rms: <b>{this.calcRms.toFixed(2)}</b> nA</span>
-                <span>avg: <b>{this.calcAvg.toFixed(2)}</b> nA</span>
-                <span>max: <b>{this.calcMax.toFixed(2)}</b> nA</span>
-                <span>charge: <b>{this.calcCharge.toFixed(2)}</b> nC</span>
+                <span>rms: <b>{this.calcRms.toFixed(2)}</b> {'\u00B5A'}</span>
+                <span>avg: <b>{this.calcAvg.toFixed(2)}</b> {'\u00B5A'}</span>
+                <span>max: <b>{this.calcMax.toFixed(2)}</b> {'\u00B5A'}</span>
+                <span>charge: <b>{this.calcCharge.toFixed(2)}</b> {'\u00B5C'}</span>
             </div>
         );
     }
