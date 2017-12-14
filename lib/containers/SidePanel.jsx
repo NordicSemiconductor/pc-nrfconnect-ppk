@@ -61,7 +61,7 @@ import {
 } from '../actions/PPKActions';
 
 const SidePanel = props => (
-    <div className="core-side-panel">
+    <div className={`core-side-panel${props.hidden ? ' hidden' : ''}`}>
         <ButtonGroup block vertical>
             <Button
                 bsStyle="primary"
@@ -139,7 +139,7 @@ const SidePanel = props => (
                     onClick={e => props.externalTriggerToggled(e.target.checked)}
                     checked={props.externalTrigger}
                 >
-                External trigger
+                    External trigger
                 </Checkbox>
                 {/* <Checkbox>trigger filter</Checkbox> */}
             </Panel>
@@ -266,6 +266,7 @@ SidePanel.propTypes = {
     resetResistors: PropTypes.func.isRequired,
     externalTriggerToggled: PropTypes.func.isRequired,
 
+    hidden: PropTypes.bool.isRequired,
 };
 
 export default connect(
@@ -283,6 +284,8 @@ export default connect(
         resistorLow: state.app.resistorCalibration.userResLo,
         resistorMid: state.app.resistorCalibration.userResMid,
         resistorHigh: state.app.resistorCalibration.userResHi,
+
+        hidden: state.app.app.fullView,
     }),
     dispatch => Object.assign(
         {},
