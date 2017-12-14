@@ -56,6 +56,10 @@ export default {
             </div>
         )
     ),
+    mapSerialPortSelectorState: (state, props) => ({
+        portIndicatorStatus: (state.app.app.portName !== null) ? 'on' : 'off',
+        ...props,
+    }),
     reduceApp: reducers,
     middleware: store => next => action => { // eslint-disable-line
         if (!action) {
