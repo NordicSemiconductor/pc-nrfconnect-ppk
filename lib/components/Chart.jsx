@@ -165,7 +165,7 @@ class Chart extends React.Component {
                     if (v > max) max = v;
                     if (v < min) min = v;
 
-                    if (n >= calcIndexBegin && n < calcIndexEnd) {
+                    if (v !== undefined && n >= calcIndexBegin && n < calcIndexEnd) {
                         if (v > this.calcMax) this.calcMax = v;
                         this.calcSum = this.calcSum + v;
                         this.calcSqr = this.calcSqr + (v * v);
@@ -188,7 +188,7 @@ class Chart extends React.Component {
                     + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
                 this.lineData[mappedIndex] = { x: timestamp, y: v };
 
-                if (n >= calcIndexBegin && n < calcIndexEnd) {
+                if (v !== undefined && n >= calcIndexBegin && n < calcIndexEnd) {
                     if (v > this.calcMax) this.calcMax = v;
                     this.calcSum = this.calcSum + v;
                     this.calcSqr = this.calcSqr + (v * v);
@@ -202,7 +202,7 @@ class Chart extends React.Component {
         this.calcAvg = this.calcSum / (this.calcLen || 1);
         this.calcRms = Math.sqrt(this.calcSqr / (this.calcLen || 1));
         this.calcDelta = this.calcEnd - this.calcBegin;
-        this.calcCharge = this.calcAvg * (this.calcDelta / 1e6);
+        this.calcCharge = this.calcAvg * ((this.calcDelta || 1) / 1e6);
     }
 
     renderStats() {
