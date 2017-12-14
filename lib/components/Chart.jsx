@@ -49,6 +49,33 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
+const timestampToLabel = (microseconds, index, array) => {
+    if (microseconds < 0) {
+        return undefined;
+    }
+    if (!array) {
+        return `${Number((microseconds / 1e3)).toFixed(3)} ms`;
+    }
+    if (index > 0 && index < array.length - 1) {
+        const first = array[0];
+        const last = array[array.length - 1];
+        const range = last - first;
+        if (microseconds - first < range / 8 || last - microseconds < range / 8) {
+            return undefined;
+        }
+    }
+
+    const d = new Date(microseconds / 1e3);
+    const h = d.getUTCHours().toString().padStart(2, '0');
+    const m = d.getUTCMinutes().toString().padStart(2, '0');
+    const s = d.getUTCSeconds().toString().padStart(2, '0');
+
+    const time = `${h}:${m}:${s}`;
+    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(3)}`.padStart(7, '0');
+
+    return [time, subsecond];
+};
+
 class Chart extends React.Component {
     constructor(props) {
         super(props);
@@ -206,7 +233,7 @@ class Chart extends React.Component {
     }
 
     renderStats() {
-        const { timestampToLabel, cursorBegin } = this.props;
+        const { cursorBegin } = this.props;
         return (
             <div className="chart-stats">
                 <span>
@@ -228,7 +255,6 @@ class Chart extends React.Component {
             options,
             cursorBegin,
             cursorEnd,
-            timestampToLabel,
         } = this.props;
 
         const chartData = {
@@ -314,7 +340,6 @@ Chart.propTypes = {
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
     index: PropTypes.number.isRequired,
-    timestampToLabel: PropTypes.func.isRequired,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,
