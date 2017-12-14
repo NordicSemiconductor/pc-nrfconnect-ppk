@@ -69,7 +69,7 @@ const SidePanel = props => (
                 disabled={!props.rttRunning}
                 onClick={props.averageRunning ? props.averageStop : props.averageStart}
             >
-                <Glyphicon glyph="play" />
+                <Glyphicon glyph={props.averageRunning ? 'stop' : 'play'} />
                 {props.averageRunning ? 'Stop' : 'Start'}
             </Button>
         </ButtonGroup>
