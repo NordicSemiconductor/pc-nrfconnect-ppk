@@ -60,6 +60,10 @@ import {
     externalTriggerToggled,
 } from '../actions/PPKActions';
 
+import {
+    ADC_SAMPLING_TIME_US,
+} from '../constants';
+
 const SidePanel = props => (
     <div className="core-side-panel">
         <ButtonGroup block vertical>
@@ -89,10 +93,10 @@ const SidePanel = props => (
                 Window {props.triggerWindowLength} ms
                 <Slider
                     disabled={!props.rttRunning}
-                    min={(450 * 10) / 1e3}   // 450 bytes * sampling interval = 4.5 ms
-                    max={(6000 * 10) / 1e3} // 6000 bytes * sampling interval = 60 ms
+                    min={(450 * ADC_SAMPLING_TIME_US) / 1e3}
+                    max={(4000 * ADC_SAMPLING_TIME_US) / 1e3}
                     value={props.triggerWindowLength}
-                    labels={{ 1: '4.5', 100: '60' }}
+                    labels={{ 1: '5.85', 100: '52' }}
                     format={n => `${n}ms`}
                     onChange={props.moveTriggerWindowLength}
                     tooltip={false}
@@ -122,7 +126,7 @@ const SidePanel = props => (
                     <InputGroup.Addon>Trigger level</InputGroup.Addon>
                     <FormControl
                         disabled={!props.rttRunning || props.externalTrigger}
-                        placeholder="3"
+                        placeholder="1"
                         type="text"
                         onKeyPress={e => { if (e.key === 'Enter') { props.ppkTriggerSet(e.target.value, props.triggerUnit); } }}
                     />
