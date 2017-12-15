@@ -159,7 +159,7 @@ const SidePanel = props => (
                     format={n => `${n}mV`}
                     onChange={props.moveVoltageRegulatorVdd}
                     tooltip={false}
-                    onChangeComplete={() => props.ppkUpdateRegulator(props.voltageRegulatorVdd)}
+                    onChangeComplete={() => props.ppkUpdateRegulator()}
                 />
             </Panel>
             {/* <Panel header="Switching Groups" eventKey="3">
