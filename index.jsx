@@ -37,7 +37,7 @@
 import React from 'react';
 import { logger } from 'nrfconnect/core';
 import reducers from './lib/reducers';
-import MainView from './lib/components/MainView';
+import MainView from './lib/containers/MainView';
 import SidePanel from './lib/containers/SidePanel';
 import * as PPKActions from './lib/actions/PPKActions';
 import * as FirmwareActions from './lib/actions/firmwareActions';
@@ -49,6 +49,10 @@ export default {
     },
     decorateMainView: () => () => <MainView />,
     decorateSidePanel: () => () => <SidePanel />,
+    mapLogViewerState: (state, props) => ({
+        ...props,
+        cssClass: `core-log-viewer${state.app.app.fullView ? ' hidden' : ''}`,
+    }),
     decorateNavMenu: NavMenu => (
         props => (
             <div className="nav-menu-wrap">
