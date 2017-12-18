@@ -34,7 +34,8 @@
     "pc-nrfconnect-devdep": "https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#v1.1.0",
     "react-bootstrap": "^0.31.3",
     "react-chartjs-2": "^2.6.1",
-    "react-rangeslider": "^2.2.0"
+    "react-rangeslider": "^2.2.0",
+    "mathjs": "^3.18.0"
   },
   "dependencies": {},
   "jest": {

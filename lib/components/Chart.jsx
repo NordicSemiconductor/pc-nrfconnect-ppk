@@ -41,6 +41,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
 import { Button, ButtonGroup } from 'react-bootstrap';
+import math from 'mathjs';
 
 import '../utils/chart.dragSelect'; // eslint-disable-line
 import '../utils/chart.zoomPan'; // eslint-disable-line
@@ -234,15 +235,18 @@ class Chart extends React.Component {
 
     renderStats() {
         const { cursorBegin } = this.props;
+        const renderValue = (label, value, unit) => {
+            const v = math.unit(value, unit).format({ notation: 'fixed', precision: 3 });
+            const [valStr, unitStr] = v.split(' ');
+            return <span>{label}: <b>{valStr}</b> {unitStr.replace('u', '\u00B5')}</span>;
+        };
         return (
             <div className="chart-stats">
-                <span>
-                    { cursorBegin ? 'cursor' : 'window' } &Delta;: {timestampToLabel(this.calcDelta)}
-                </span>
-                <span>rms: <b>{this.calcRms.toFixed(2)}</b> {'\u00B5A'}</span>
-                <span>avg: <b>{this.calcAvg.toFixed(2)}</b> {'\u00B5A'}</span>
-                <span>max: <b>{this.calcMax.toFixed(2)}</b> {'\u00B5A'}</span>
-                <span>charge: <b>{this.calcCharge.toFixed(2)}</b> {'\u00B5C'}</span>
+                { renderValue(`${cursorBegin ? 'cursor' : 'window'} \u0394`, this.calcDelta, 'us') }
+                { renderValue('rms', this.calcRms, 'uA') }
+                { renderValue('avg', this.calcAvg, 'uA') }
+                { renderValue('max', this.calcMax, 'uA') }
+                { renderValue('charge', this.calcCharge, 'uC') }
             </div>
         );
     }
