@@ -189,15 +189,20 @@ class Chart extends React.Component {
                 let max = -Number.MAX_VALUE;
                 for (let n = k; n < l; n = n + 1) {
                     const v = options.data[(n + options.data.length) % options.data.length];
-                    if (v > max) max = v;
-                    if (v < min) min = v;
-
-                    if (v !== undefined && n >= calcIndexBegin && n < calcIndexEnd) {
-                        if (v > this.calcMax) this.calcMax = v;
-                        this.calcSum = this.calcSum + v;
-                        this.calcSqr = this.calcSqr + (v * v);
-                        this.calcLen = this.calcLen + 1;
+                    if (v !== undefined) {
+                        if (v > max) max = v;
+                        if (v < min) min = v;
+                        if (n >= calcIndexBegin && n < calcIndexEnd) {
+                            if (v > this.calcMax) this.calcMax = v;
+                            this.calcSum = this.calcSum + v;
+                            this.calcSqr = this.calcSqr + (v * v);
+                            this.calcLen = this.calcLen + 1;
+                        }
                     }
+                }
+                if (min > max) {
+                    min = undefined;
+                    max = undefined;
                 }
                 this.lineData[mappedIndex * 2] = { x: timestamp, y: min };
                 this.lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
