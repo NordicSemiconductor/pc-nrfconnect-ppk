@@ -21,19 +21,20 @@
     "LICENSE"
   ],
   "scripts": {
-    "dev": "webpack --watch",
-    "webpack": "webpack",
-    "build": "cross-env NODE_ENV=production webpack",
-    "lint": "eslint components reducers",
-    "test": "jest --testResultsProcessor jest-bamboo-formatter",
-    "test-watch": "jest --watch",
-    "clean": "npm install rimraf && npm run clean-dist && npm run clean-modules",
+    "dev": "nrfconnect-scripts build-watch",
+    "webpack": "nrfconnect-scripts build-dev",
+    "build": "nrfconnect-scripts build-prod",
+    "lint": "nrfconnect-scripts lint lib index.jsx",
+    "lintfix": "nrfconnect-scripts lint --fix lib index.jsx",
+    "test": "nrfconnect-scripts test",
+    "test-watch": "nrfconnect-scripts test --watch",
+    "clean": "npm run clean-dist && npm run clean-modules",
     "clean-dist": "rimraf dist",
     "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
   },
   "devDependencies": {
     "chart.js": "^2.6.0",
-    "pc-nrfconnect-devdep": "https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#v1.1.0",
+    "pc-nrfconnect-devdep": "https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#v1.1.1",
     "react-bootstrap": "^0.31.3",
     "react-chartjs-2": "^2.6.1",
     "react-rangeslider": "^2.2.0",
