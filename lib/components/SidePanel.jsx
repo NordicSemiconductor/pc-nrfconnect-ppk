@@ -41,24 +41,7 @@ import { Accordion, Button, ButtonGroup, Checkbox, FormControl, Glyphicon, Input
 import Slider from 'react-rangeslider';
 import 'react-rangeslider/lib/index.css';
 
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-
 import UnitSelector from '../components/UnitSelector';
-
-import {
-    averageStart,
-    averageStop,
-    ppkUpdateRegulator,
-    ppkTriggerUpdateWindow,
-    ppkTriggerToggle,
-    ppkTriggerSet,
-    ppkTriggerSingleSet,
-    ppkToggleDUT,
-    updateResistors,
-    resetResistors,
-    externalTriggerToggled,
-} from '../actions/PPKActions';
 
 import {
     ADC_SAMPLING_TIME_US,
@@ -273,66 +256,4 @@ SidePanel.propTypes = {
     hidden: PropTypes.bool.isRequired,
 };
 
-export default connect(
-    state => ({
-        deviceRunning: state.app.app.deviceRunning,
-        averageRunning: state.app.average.averageRunning,
-        externalTrigger: state.app.trigger.externalTrigger,
-        rttRunning: state.app.app.rttRunning,
-        triggerRunning: state.app.trigger.triggerRunning,
-        triggerSingleWaiting: state.app.trigger.triggerSingleWaiting,
-        triggerWindowLength: state.app.trigger.windowLength,
-        triggerUnit: state.app.trigger.triggerUnit,
-        voltageRegulatorVdd: state.app.voltageRegulator.vdd,
-
-        resistorLow: state.app.resistorCalibration.userResLo,
-        resistorMid: state.app.resistorCalibration.userResMid,
-        resistorHigh: state.app.resistorCalibration.userResHi,
-
-        hidden: state.app.app.fullView,
-    }),
-    dispatch => Object.assign(
-        {},
-        bindActionCreators({
-            averageStart,
-            averageStop,
-            ppkUpdateRegulator,
-            ppkTriggerUpdateWindow,
-            ppkTriggerToggle,
-            ppkTriggerSet,
-            ppkTriggerSingleSet,
-            ppkToggleDUT,
-            updateResistors,
-            resetResistors,
-            externalTriggerToggled,
-        }, dispatch),
-        {
-            triggerUnitChanged: triggerUnit => dispatch({
-                type: 'TRIGGER_WINDOW_UNIT_CHANGE',
-                triggerUnit,
-            }),
-            moveTriggerWindowLength: windowLength => dispatch({
-                type: 'TRIGGER_WINDOW_LENGTH_MOVE',
-                windowLength,
-            }),
-            moveVoltageRegulatorVdd: vdd => {
-                dispatch({
-                    type: 'VOLTAGE_REGULATOR_VDD_MOVE',
-                    vdd,
-                });
-            },
-            updateHighResistor: userResHi => dispatch({
-                type: 'USER_RESISTOR_UPDATED',
-                userResHi,
-            }),
-            updateMidResistor: userResMid => dispatch({
-                type: 'USER_RESISTOR_UPDATED',
-                userResMid,
-            }),
-            updateLowResistor: userResLo => dispatch({
-                type: 'USER_RESISTOR_UPDATED',
-                userResLo,
-            }),
-        },
-    ),
-)(SidePanel);
+export default SidePanel;

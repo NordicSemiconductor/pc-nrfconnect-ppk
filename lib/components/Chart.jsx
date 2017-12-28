@@ -107,24 +107,15 @@ class Chart extends React.Component {
     }
 
     dragSelectCallback(cursorBegin, cursorEnd) {
-        const { id, dispatch } = this.props;
-        dispatch({
-            type: `CHART_${id}_CURSOR`,
-            cursorBegin,
-            cursorEnd,
-        });
+        const { chartCursor } = this.props;
+        chartCursor(cursorBegin, cursorEnd);
     }
 
     zoomPanCallback(begin, end) {
-        const { id, dispatch, options, windowDuration } = this.props;
+        const { chartWindow, chartReset, options, windowDuration } = this.props;
 
         if (typeof begin === 'undefined') {
-            dispatch({
-                type: `CHART_${id}_WINDOW`,
-                windowBegin: 0,
-                windowEnd: 0,
-                windowDuration,
-            });
+            chartReset(windowDuration);
             return;
         }
 
@@ -132,12 +123,8 @@ class Chart extends React.Component {
             options.timestamp - ((options.data.length / options.samplesPerSecond) * 1e6);
         const windowBegin = Math.max(earliestDataTime, begin);
         const windowEnd = Math.min(options.timestamp, end);
-        dispatch({
-            type: `CHART_${id}_WINDOW`,
-            windowBegin,
-            windowEnd,
-            windowDuration: (windowEnd - windowBegin),
-        });
+
+        chartWindow(windowBegin, windowEnd);
     }
 
     resizeLength(len) {
@@ -341,7 +328,9 @@ class Chart extends React.Component {
 }
 
 Chart.propTypes = {
-    dispatch: PropTypes.func.isRequired,
+    chartWindow: PropTypes.func.isRequired,
+    chartReset: PropTypes.func.isRequired,
+    chartCursor: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
     cursorBegin: PropTypes.number.isRequired,
     cursorEnd: PropTypes.number.isRequired,
