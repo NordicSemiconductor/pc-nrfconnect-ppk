@@ -145,29 +145,36 @@ const SidePanel = props => (
                     onChangeComplete={() => props.ppkUpdateRegulator()}
                 />
             </Panel>
-            {/* <Panel header="Switching Groups" eventKey="3">
+            <Panel header="Switching Groups" eventKey="3">
                 Switch up
                 <Slider
-                    min={1}
-                    max={100}
-                    value={50}
-                    labels={{ 1: '1', 100: '100' }}
+                    min={38}
+                    max={175}
+                    value={props.switchUpSliderPosition}
+                    labels={{ 60: `${props.switchUpLow.toFixed(2)} ${' uA'}`, 160: `${props.switchUpHigh.toFixed(2)} ${' mA'}` }}
                     format={n => `${n}mA`}
                     tooltip={false}
-                    onChangeComplete={() => { console.log(props.triggerUnit); }}
+                    onChange={props.switchingPointUpMoved}
+                    onChangeComplete={() => props.ppkSwitchingPointsUpSet()}
                 />
                 Switch down
                 <Slider
-                    min={1}
-                    max={100}
-                    value={50}
-                    labels={{ 1: '1', 100: '100' }}
+                    min={100}
+                    max={400}
+                    reverse={false}
+                    value={props.switchDownSliderPosition}
+                    labels={{ 110: `${props.switchDownLow.toFixed(2)} ${' uA'}`, 370: `${props.switchDownHigh.toFixed(2)} ${' mA'}` }}
                     format={n => `${n}mA`}
                     tooltip={false}
-                    onChangeComplete={() => { console.log('foo'); }}
+                    onChange={props.switchingPointDownMoved}
+                    onChangeComplete={() => props.ppkSwitchingPointsDownSet()}
                 />
-                <Button block>Reset switching points</Button>
-            </Panel> */}
+                <Button
+                    onClick={() => props.ppkSwitchingPointsReset()}
+                >
+                Reset switching points
+                </Button>
+            </Panel>
             <Panel header="Resistor Calibration" eventKey="4">
                 <InputGroup>
                     <InputGroup.Addon>High</InputGroup.Addon>
@@ -220,19 +227,16 @@ SidePanel.propTypes = {
 
     deviceRunning: PropTypes.bool.isRequired,
     rttRunning: PropTypes.bool.isRequired,
-    triggerRunning: PropTypes.bool.isRequired,
-    triggerSingleWaiting: PropTypes.bool.isRequired,
     ppkToggleDUT: PropTypes.func.isRequired,
 
+    triggerSingleWaiting: PropTypes.bool.isRequired,
+    triggerRunning: PropTypes.bool.isRequired,
     ppkTriggerUpdateWindow: PropTypes.func.isRequired,
     ppkTriggerToggle: PropTypes.func.isRequired,
-
     triggerUnitChanged: PropTypes.func.isRequired,
     ppkTriggerSet: PropTypes.func.isRequired,
     ppkTriggerSingleSet: PropTypes.func.isRequired,
     triggerUnit: PropTypes.string.isRequired,
-
-
     triggerWindowLength: PropTypes.number.isRequired,
     moveTriggerWindowLength: PropTypes.func.isRequired,
 
@@ -242,16 +246,27 @@ SidePanel.propTypes = {
     resistorLow: PropTypes.number.isRequired,
     resistorMid: PropTypes.number.isRequired,
     resistorHigh: PropTypes.number.isRequired,
-    // calibratedResistorLow: PropTypes.number.isRequired,
-    // calibratedResistorMid: PropTypes.number.isRequired,
-    // calibratedResistorHigh: PropTypes.number.isRequired,
 
     updateHighResistor: PropTypes.func.isRequired,
     updateMidResistor: PropTypes.func.isRequired,
     updateLowResistor: PropTypes.func.isRequired,
     updateResistors: PropTypes.func.isRequired,
     resetResistors: PropTypes.func.isRequired,
+
     externalTriggerToggled: PropTypes.func.isRequired,
+
+    switchUpHigh: PropTypes.number.isRequired,
+    switchUpLow: PropTypes.number.isRequired,
+    switchDownHigh: PropTypes.number.isRequired,
+    switchDownLow: PropTypes.number.isRequired,
+
+    switchUpSliderPosition: PropTypes.number.isRequired,
+    switchDownSliderPosition: PropTypes.number.isRequired,
+    switchingPointUpMoved: PropTypes.func.isRequired,
+    switchingPointDownMoved: PropTypes.func.isRequired,
+    ppkSwitchingPointsUpSet: PropTypes.func.isRequired,
+    ppkSwitchingPointsDownSet: PropTypes.func.isRequired,
+    ppkSwitchingPointsReset: PropTypes.func.isRequired,
 
     hidden: PropTypes.bool.isRequired,
 };
