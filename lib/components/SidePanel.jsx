@@ -151,7 +151,7 @@ const SidePanel = props => (
                     min={38}
                     max={175}
                     value={props.switchUpSliderPosition}
-                    labels={{ 60: `${props.switchUpLow.toFixed(2)} ${' uA'}`, 160: `${props.switchUpHigh.toFixed(2)} ${' mA'}` }}
+                    labels={{ 60: `${props.switchUpLow.toFixed(2)} uA`, 160: `${props.switchUpHigh.toFixed(2)} mA` }}
                     format={n => `${n}mA`}
                     tooltip={false}
                     onChange={props.switchingPointUpMoved}
@@ -163,7 +163,7 @@ const SidePanel = props => (
                     max={400}
                     reverse={false}
                     value={props.switchDownSliderPosition}
-                    labels={{ 110: `${props.switchDownLow.toFixed(2)} ${' uA'}`, 370: `${props.switchDownHigh.toFixed(2)} ${' mA'}` }}
+                    labels={{ 110: `${props.switchDownLow.toFixed(2)} uA`, 370: `${props.switchDownHigh.toFixed(2)} mA` }}
                     format={n => `${n}mA`}
                     tooltip={false}
                     onChange={props.switchingPointDownMoved}
