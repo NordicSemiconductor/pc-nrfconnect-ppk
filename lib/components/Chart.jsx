@@ -163,7 +163,6 @@ class Chart extends React.Component {
         const calcIndexEnd = timestampToIndex(this.calcEnd);
         this.calcMax = 0;
         this.calcSum = 0;
-        this.calcSqr = 0;
         this.calcLen = 0;
 
         if (step > 1) {
@@ -183,7 +182,6 @@ class Chart extends React.Component {
                         if (n >= calcIndexBegin && n < calcIndexEnd) {
                             if (v > this.calcMax) this.calcMax = v;
                             this.calcSum = this.calcSum + v;
-                            this.calcSqr = this.calcSqr + (v * v);
                             this.calcLen = this.calcLen + 1;
                         }
                     }
@@ -211,7 +209,6 @@ class Chart extends React.Component {
                 if (v !== undefined && n >= calcIndexBegin && n < calcIndexEnd) {
                     if (v > this.calcMax) this.calcMax = v;
                     this.calcSum = this.calcSum + v;
-                    this.calcSqr = this.calcSqr + (v * v);
                     this.calcLen = this.calcLen + 1;
                 }
             }
@@ -220,7 +217,6 @@ class Chart extends React.Component {
             }
         }
         this.calcAvg = this.calcSum / (this.calcLen || 1);
-        this.calcRms = Math.sqrt(this.calcSqr / (this.calcLen || 1));
         this.calcDelta = this.calcEnd - this.calcBegin;
         this.calcCharge = this.calcAvg * ((this.calcDelta || 1) / 1e6);
     }
@@ -235,7 +231,6 @@ class Chart extends React.Component {
         return (
             <div className="chart-stats">
                 { renderValue(`${cursorBegin ? 'cursor' : 'window'} \u0394`, this.calcDelta, 'us') }
-                { renderValue('rms', this.calcRms, 'uA') }
                 { renderValue('avg', this.calcAvg, 'uA') }
                 { renderValue('max', this.calcMax, 'uA') }
                 { renderValue('charge', this.calcCharge, 'uC') }
