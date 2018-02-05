@@ -40,7 +40,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
-import { Button, ButtonGroup } from 'react-bootstrap';
+import { Button, ButtonGroup, Glyphicon } from 'react-bootstrap';
 import math from 'mathjs';
 
 import '../utils/chart.dragSelect'; // eslint-disable-line
@@ -83,6 +83,7 @@ class Chart extends React.Component {
         this.resizeLength(0);
         this.onChartSizeUpdate = this.onChartSizeUpdate.bind(this);
         this.zoomPanCallback = this.zoomPanCallback.bind(this);
+        this.chartResetToLive = this.zoomPanCallback.bind(this, undefined, undefined);
         this.dragSelectCallback = this.dragSelectCallback.bind(this);
         this.resetCursor = this.dragSelectCallback.bind(this, 0, 0);
     }
@@ -317,8 +318,21 @@ class Chart extends React.Component {
                 <div className="chart-bottom">
                     {this.renderStats()}
                     <ButtonGroup>
-                        <Button bsStyle="primary" bsSize="small" onClick={this.resetCursor}>
-                            Clear Cursor
+                        <Button
+                            bsStyle="primary"
+                            bsSize="small"
+                            onClick={this.resetCursor}
+                            title="Clear Cursor"
+                        >
+                            <Glyphicon glyph="erase" />
+                        </Button>
+                        <Button
+                            bsStyle="primary"
+                            bsSize="small"
+                            onClick={this.chartResetToLive}
+                            title="Reset & Live"
+                        >
+                            <Glyphicon glyph="repeat" />
                         </Button>
                     </ButtonGroup>
                 </div>
