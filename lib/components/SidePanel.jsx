@@ -186,7 +186,7 @@ const SidePanel = props => {
                             Reset switching points
                         </Button>
                         <Checkbox
-                            onChange={e => props.spikeFilteringToggled(e.target.checked)}
+                            onChange={e => props.spikeFilteringToggle(e.target.checked)}
                             checked={props.spikeFiltering}
                         >
                             Spike filtering
@@ -274,7 +274,7 @@ SidePanel.propTypes = {
     resetResistors: PropTypes.func.isRequired,
 
     externalTriggerToggled: PropTypes.func.isRequired,
-    spikeFilteringToggled: PropTypes.func.isRequired,
+    spikeFilteringToggle: PropTypes.func.isRequired,
 
     switchUpHigh: PropTypes.number.isRequired,
     switchUpLow: PropTypes.number.isRequired,
