@@ -139,7 +139,6 @@ const SidePanel = props => {
                     >
                         External trigger
                     </Checkbox>
-                    {/* <Checkbox>trigger filter</Checkbox> */}
                 </Panel>
             </Accordion>
             <Accordion>
@@ -186,6 +185,12 @@ const SidePanel = props => {
                         >
                             Reset switching points
                         </Button>
+                        <Checkbox
+                            onChange={props.spikeFilteringToggle}
+                            checked={props.spikeFiltering}
+                        >
+                            Spike filtering
+                        </Checkbox>
                     </Panel>
                 }
                 {advancedMode &&
@@ -240,6 +245,7 @@ SidePanel.propTypes = {
     averageStop: PropTypes.func.isRequired,
     averageRunning: PropTypes.bool.isRequired,
     externalTrigger: PropTypes.bool.isRequired,
+    spikeFiltering: PropTypes.bool.isRequired,
 
     deviceRunning: PropTypes.bool.isRequired,
     rttRunning: PropTypes.bool.isRequired,
@@ -270,6 +276,7 @@ SidePanel.propTypes = {
     resetResistors: PropTypes.func.isRequired,
 
     externalTriggerToggled: PropTypes.func.isRequired,
+    spikeFilteringToggle: PropTypes.func.isRequired,
 
     switchUpHigh: PropTypes.number.isRequired,
     switchUpLow: PropTypes.number.isRequired,
