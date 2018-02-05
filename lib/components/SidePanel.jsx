@@ -188,6 +188,7 @@ const SidePanel = props => {
                         </Button>
                     </Panel>
                 }
+                {advancedMode &&
                 <Panel header="Resistor Calibration" eventKey="4">
                     <InputGroup>
                         <InputGroup.Addon>High</InputGroup.Addon>
@@ -226,6 +227,7 @@ const SidePanel = props => {
                         ><Glyphicon glyph="ban-circle" />Reset</Button>
                     </ButtonGroup>
                 </Panel>
+                }
             </Accordion>
         </div>
     );
