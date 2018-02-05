@@ -38,7 +38,8 @@
     "react-bootstrap": "^0.31.3",
     "react-chartjs-2": "^2.6.1",
     "react-rangeslider": "^2.2.0",
-    "mathjs": "^3.18.0"
+    "mathjs": "^3.18.0",
+    "mousetrap": "1.6.1"
   },
   "dependencies": {},
   "jest": {
