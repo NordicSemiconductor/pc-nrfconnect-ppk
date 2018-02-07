@@ -152,7 +152,7 @@ const SidePanel = props => {
                         format={n => `${n}mV`}
                         onChange={props.moveVoltageRegulatorVddAction}
                         tooltip={false}
-                        onChangeComplete={() => props.ppkUpdateRegulator()}
+                        onChangeComplete={props.ppkUpdateRegulator}
                     />
                 </Panel>
                 { advancedMode &&
@@ -166,7 +166,7 @@ const SidePanel = props => {
                             format={n => `${n}mA`}
                             tooltip={false}
                             onChange={props.switchingPointUpMoved}
-                            onChangeComplete={() => props.ppkSwitchingPointsUpSet()}
+                            onChangeComplete={props.ppkSwitchingPointsUpSet}
                         />
                         Switch down
                         <Slider
@@ -178,10 +178,10 @@ const SidePanel = props => {
                             format={n => `${n}mA`}
                             tooltip={false}
                             onChange={props.switchingPointDownMovedAction}
-                            onChangeComplete={() => props.ppkSwitchingPointsDownSet()}
+                            onChangeComplete={props.ppkSwitchingPointsDownSet}
                         />
                         <Button
-                            onClick={() => props.ppkSwitchingPointsReset()}
+                            onClick={props.ppkSwitchingPointsReset}
                         >
                             Reset switching points
                         </Button>
@@ -223,12 +223,12 @@ const SidePanel = props => {
                         />
                     </InputGroup>
                     <ButtonGroup justified style={{ marginTop: 10 }}>
-                        <Button style={{ width: '50%' }} onClick={() => props.updateResistors()}>
+                        <Button style={{ width: '50%' }} onClick={props.updateResistors}>
                             <Glyphicon glyph="refresh" />Update
                         </Button>
                         <Button
                             style={{ width: '50%' }}
-                            onClick={() => props.resetResistors()}
+                            onClick={props.resetResistors}
                         ><Glyphicon glyph="ban-circle" />Reset</Button>
                     </ButtonGroup>
                 </Panel>

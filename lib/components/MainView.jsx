@@ -47,7 +47,12 @@ const MainView = props => (
     <div className="core-main-view">
         <AverageChart options={averageOptions} />
         <TriggerChart options={triggerOptions} />
-        <Glyphicon bsSize="large" className="btnFullViewToggle" onClick={props.toggleFullView} glyph={props.fullView ? 'resize-small' : 'resize-full'} />
+        <Glyphicon
+            bsSize="large"
+            className="btnFullViewToggle"
+            onClick={props.toggleFullView}
+            glyph={props.fullView ? 'resize-small' : 'resize-full'}
+        />
     </div>
 );
 

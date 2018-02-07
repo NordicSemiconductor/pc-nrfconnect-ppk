@@ -46,8 +46,7 @@ class UnitSelector extends React.Component {
     }
     onSelect(key) {
         this.setState({ selected: key });
-        const { onChange } = this.props;
-        onChange(key);
+        this.props.onChange(key);
     }
     render() {
         const { units, defaultSelected, onChange, ...rest } = this.props;
