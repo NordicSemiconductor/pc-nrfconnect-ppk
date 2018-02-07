@@ -50,11 +50,11 @@ import {
 const SidePanel = props => {
     const {
         bindHotkey,
-        toggleAdvancedMode,
+        toggleAdvancedModeAction,
         advancedMode,
     } = props;
 
-    bindHotkey('alt+ctrl+shift+a', toggleAdvancedMode);
+    bindHotkey('alt+ctrl+shift+a', toggleAdvancedModeAction);
 
     return (
         <div className={`core-side-panel${props.hidden ? ' hidden' : ''}`}>
@@ -90,7 +90,7 @@ const SidePanel = props => {
                         value={props.triggerWindowLength}
                         labels={{ 1: '5.85', 100: '52' }}
                         format={n => `${n}ms`}
-                        onChange={props.moveTriggerWindowLength}
+                        onChange={props.moveTriggerWindowLengthAction}
                         tooltip={false}
                         onChangeComplete={
                             () => props.ppkTriggerUpdateWindow(props.triggerWindowLength)
@@ -130,7 +130,7 @@ const SidePanel = props => {
                             units={['\u00B5A', 'mA']}
                             componentClass={InputGroup.Button}
                             id="input-dropdown-addon"
-                            onChange={i => { props.triggerUnitChanged(['uA', 'mA'][i]); }}
+                            onChange={i => { props.triggerUnitChangeAction(['uA', 'mA'][i]); }}
                         />
                     </InputGroup>
                     <Checkbox
@@ -150,7 +150,7 @@ const SidePanel = props => {
                         value={props.voltageRegulatorVdd}
                         labels={{ 1850: '1850', 3600: '3600' }}
                         format={n => `${n}mV`}
-                        onChange={props.moveVoltageRegulatorVdd}
+                        onChange={props.moveVoltageRegulatorVddAction}
                         tooltip={false}
                         onChangeComplete={() => props.ppkUpdateRegulator()}
                     />
@@ -177,7 +177,7 @@ const SidePanel = props => {
                             labels={{ 110: `${props.switchDownLow.toFixed(2)} uA`, 370: `${props.switchDownHigh.toFixed(2)} mA` }}
                             format={n => `${n}mA`}
                             tooltip={false}
-                            onChange={props.switchingPointDownMoved}
+                            onChange={props.switchingPointDownMovedAction}
                             onChangeComplete={() => props.ppkSwitchingPointsDownSet()}
                         />
                         <Button
@@ -200,7 +200,7 @@ const SidePanel = props => {
                         <FormControl
                             type="text"
                             value={props.resistorHigh}
-                            onChange={e => props.updateHighResistor(e.target.value)}
+                            onChange={e => props.updateHighResistorAction(e.target.value)}
                             onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
                         />
                     </InputGroup>
@@ -209,7 +209,7 @@ const SidePanel = props => {
                         <FormControl
                             type="text"
                             value={props.resistorMid}
-                            onChange={e => props.updateMidResistor(e.target.value)}
+                            onChange={e => props.updateMidResistorAction(e.target.value)}
                             onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
                         />
                     </InputGroup>
@@ -218,7 +218,7 @@ const SidePanel = props => {
                         <FormControl
                             type="text"
                             value={props.resistorLow}
-                            onChange={e => props.updateLowResistor(e.target.value)}
+                            onChange={e => props.updateLowResistorAction(e.target.value)}
                             onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
                         />
                     </InputGroup>
@@ -255,23 +255,23 @@ SidePanel.propTypes = {
     triggerRunning: PropTypes.bool.isRequired,
     ppkTriggerUpdateWindow: PropTypes.func.isRequired,
     ppkTriggerToggle: PropTypes.func.isRequired,
-    triggerUnitChanged: PropTypes.func.isRequired,
+    triggerUnitChangeAction: PropTypes.func.isRequired,
     ppkTriggerSet: PropTypes.func.isRequired,
     ppkTriggerSingleSet: PropTypes.func.isRequired,
     triggerUnit: PropTypes.string.isRequired,
     triggerWindowLength: PropTypes.number.isRequired,
-    moveTriggerWindowLength: PropTypes.func.isRequired,
+    moveTriggerWindowLengthAction: PropTypes.func.isRequired,
 
     voltageRegulatorVdd: PropTypes.number.isRequired,
-    moveVoltageRegulatorVdd: PropTypes.func.isRequired,
+    moveVoltageRegulatorVddAction: PropTypes.func.isRequired,
 
     resistorLow: PropTypes.number.isRequired,
     resistorMid: PropTypes.number.isRequired,
     resistorHigh: PropTypes.number.isRequired,
 
-    updateHighResistor: PropTypes.func.isRequired,
-    updateMidResistor: PropTypes.func.isRequired,
-    updateLowResistor: PropTypes.func.isRequired,
+    updateHighResistorAction: PropTypes.func.isRequired,
+    updateMidResistorAction: PropTypes.func.isRequired,
+    updateLowResistorAction: PropTypes.func.isRequired,
     updateResistors: PropTypes.func.isRequired,
     resetResistors: PropTypes.func.isRequired,
 
@@ -286,13 +286,13 @@ SidePanel.propTypes = {
     switchUpSliderPosition: PropTypes.number.isRequired,
     switchDownSliderPosition: PropTypes.number.isRequired,
     switchingPointUpMoved: PropTypes.func.isRequired,
-    switchingPointDownMoved: PropTypes.func.isRequired,
+    switchingPointDownMovedAction: PropTypes.func.isRequired,
     ppkSwitchingPointsUpSet: PropTypes.func.isRequired,
     ppkSwitchingPointsDownSet: PropTypes.func.isRequired,
     ppkSwitchingPointsReset: PropTypes.func.isRequired,
 
     bindHotkey: PropTypes.func.isRequired,
-    toggleAdvancedMode: PropTypes.func.isRequired,
+    toggleAdvancedModeAction: PropTypes.func.isRequired,
     advancedMode: PropTypes.bool.isRequired,
 
     hidden: PropTypes.bool.isRequired,
