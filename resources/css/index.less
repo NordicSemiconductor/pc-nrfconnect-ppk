@@ -34,11 +34,37 @@
     }
 }
 
-.chart-container {
+.chart-outer {
     height: 50%;
     width: 100%;
     position: relative;
-    padding-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    .chart-top {
+        display: flex;
+        justify-content: space-between;
+        margin: 0px 24px;
+        > * {
+            margin: 10px 0;
+            display: inherit;
+        }
+        .progress {
+            display: inline;
+            width: 200px;
+            .progress-bar.background {
+                background-color: #a94442;
+            }
+            .progress-bar {
+                transition: none;
+                background-color: #28a328;
+            }
+        }
+    }
+    .chart-container {
+        position: relative;
+        height: ~'calc(100% - 80px)';
+    }
     .chart-bottom {
         display: flex;
         > * {

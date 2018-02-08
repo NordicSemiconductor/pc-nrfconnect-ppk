@@ -40,7 +40,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
-import { Button, ButtonGroup, Glyphicon } from 'react-bootstrap';
+import { Button, ButtonGroup, Glyphicon, ProgressBar } from 'react-bootstrap';
 import math from 'mathjs';
 
 import '../utils/chart.dragSelect'; // eslint-disable-line
@@ -50,18 +50,17 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
-const timestampToLabel = (microseconds, index, array) => {
-    if (microseconds < 0) {
-        return undefined;
-    }
+const timestampToLabel = (usecs, index, array) => {
+    const microseconds = Math.abs(usecs);
+    const sign = usecs < 0 ? '-' : '';
     if (!array) {
-        return `${Number((microseconds / 1e3)).toFixed(3)} ms`;
+        return `${sign}${Number((microseconds / 1e3)).toFixed(3)} ms`;
     }
     if (index > 0 && index < array.length - 1) {
         const first = array[0];
         const last = array[array.length - 1];
         const range = last - first;
-        if ((microseconds - first < range / 8) || (last - microseconds < range / 8)) {
+        if ((usecs - first < range / 8) || (last - usecs < range / 8)) {
             return undefined;
         }
     }
@@ -71,7 +70,7 @@ const timestampToLabel = (microseconds, index, array) => {
     const m = d.getUTCMinutes().toString().padStart(2, '0');
     const s = d.getUTCSeconds().toString().padStart(2, '0');
 
-    const time = `${h}:${m}:${s}`;
+    const time = `${sign}${h}:${m}:${s}`;
     const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(3)}`.padStart(7, '0');
 
     return [time, subsecond];
@@ -239,6 +238,35 @@ class Chart extends React.Component {
         );
     }
 
+    renderProgress() {
+        const {
+            bufferLength,
+            bufferRemaining,
+            averageRunning,
+        } = this.props;
+        return (
+            <span>
+                Buffer:&nbsp;
+                <ProgressBar>
+                    <ProgressBar
+                        className="background"
+                        max={bufferLength}
+                        now={bufferLength - bufferRemaining}
+                        label={bufferRemaining <= 0 ? 'FULL' : ''}
+                        key={1}
+                    />
+                    <ProgressBar
+                        max={bufferLength}
+                        now={bufferRemaining}
+                        label={`${Number((bufferRemaining / 1e6)).toFixed(1)} s`}
+                        active={averageRunning}
+                        key={2}
+                    />
+                </ProgressBar>
+            </span>
+        );
+    }
+
     render() {
         this.calculateLineDataSets();
 
@@ -247,6 +275,7 @@ class Chart extends React.Component {
             options,
             cursorBegin,
             cursorEnd,
+            bufferLength,
         } = this.props;
 
         const chartData = {
@@ -262,10 +291,6 @@ class Chart extends React.Component {
         };
 
         const chartOptions = {
-            title: {
-                display: true,
-                text: `${id}`,
-            },
             scales: {
                 xAxes: [{
                     id: 'x-axis-0',
@@ -303,13 +328,19 @@ class Chart extends React.Component {
         };
 
         return (
-            <div className="chart-container">
-                <Line
-                    ref={r => { if (r) this.chartInstance = r.chart_instance; }}
-                    data={chartData}
-                    options={chartOptions}
-                    update={options.update}
-                />
+            <div className="chart-outer">
+                <div className="chart-top">
+                    <span className="title">{ id }</span>
+                    { bufferLength !== null && this.renderProgress() }
+                </div>
+                <div className="chart-container">
+                    <Line
+                        ref={r => { if (r) this.chartInstance = r.chart_instance; }}
+                        data={chartData}
+                        options={chartOptions}
+                        update={options.update}
+                    />
+                </div>
                 <div className="chart-bottom">
                     {this.renderStats()}
                     <ButtonGroup>
@@ -336,6 +367,12 @@ class Chart extends React.Component {
     }
 }
 
+Chart.defaultProps = {
+    bufferLength: null,
+    bufferRemaining: null,
+    averageRunning: null,
+};
+
 Chart.propTypes = {
     chartWindow: PropTypes.func.isRequired,
     chartReset: PropTypes.func.isRequired,
@@ -347,6 +384,9 @@ Chart.propTypes = {
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
     index: PropTypes.number.isRequired,
+    bufferLength: PropTypes.number,
+    bufferRemaining: PropTypes.number,
+    averageRunning: PropTypes.bool,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,
