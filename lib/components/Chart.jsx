@@ -60,7 +60,7 @@ const timestampToLabel = (usecs, index, array) => {
         const first = array[0];
         const last = array[array.length - 1];
         const range = last - first;
-        if ((microseconds - first < range / 8) || (last - microseconds < range / 8)) {
+        if ((usecs - first < range / 8) || (last - usecs < range / 8)) {
             return undefined;
         }
     }
