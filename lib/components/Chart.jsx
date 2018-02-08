@@ -241,7 +241,7 @@ class Chart extends React.Component {
     renderProgress() {
         const {
             bufferLength,
-            remaining,
+            bufferRemaining,
             averageRunning,
         } = this.props;
         return (
@@ -251,14 +251,14 @@ class Chart extends React.Component {
                     <ProgressBar
                         className="background"
                         max={bufferLength}
-                        now={bufferLength - remaining}
-                        label={remaining <= 0 ? 'FULL' : ''}
+                        now={bufferLength - bufferRemaining}
+                        label={bufferRemaining <= 0 ? 'FULL' : ''}
                         key={1}
                     />
                     <ProgressBar
                         max={bufferLength}
-                        now={remaining}
-                        label={`${Number((remaining / 1e6)).toFixed(1)} s`}
+                        now={bufferRemaining}
+                        label={`${Number((bufferRemaining / 1e6)).toFixed(1)} s`}
                         active={averageRunning}
                         key={2}
                     />
@@ -369,7 +369,7 @@ class Chart extends React.Component {
 
 Chart.defaultProps = {
     bufferLength: null,
-    remaining: null,
+    bufferRemaining: null,
     averageRunning: null,
 };
 
@@ -385,7 +385,7 @@ Chart.propTypes = {
     windowDuration: PropTypes.number.isRequired,
     index: PropTypes.number.isRequired,
     bufferLength: PropTypes.number,
-    remaining: PropTypes.number,
+    bufferRemaining: PropTypes.number,
     averageRunning: PropTypes.bool,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
