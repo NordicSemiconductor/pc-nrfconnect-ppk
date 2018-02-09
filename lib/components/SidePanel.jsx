@@ -52,17 +52,18 @@ const SidePanel = props => {
         bindHotkey,
         toggleAdvancedModeAction,
         advancedMode,
+        rttRunning,
     } = props;
 
     bindHotkey('alt+ctrl+shift+a', toggleAdvancedModeAction);
 
     return (
-        <div className={`core-side-panel${props.hidden ? ' hidden' : ''}`}>
+        <div className={`core-side-panel${props.hidden ? ' hidden' : ''}${rttRunning ? '' : ' disabled'}`}>
             <ButtonGroup block vertical>
                 <Button
                     bsStyle="primary"
                     bsSize="large"
-                    disabled={!props.rttRunning}
+                    disabled={!rttRunning}
                     onClick={props.averageRunning ? props.averageStop : props.averageStart}
                 >
                     <Glyphicon glyph={props.averageRunning ? 'stop' : 'play'} />
@@ -73,7 +74,7 @@ const SidePanel = props => {
                 <Button
                     style={{ backgroundColor: 0xFF11AA }}
                     bsSize="large"
-                    disabled={!props.rttRunning}
+                    disabled={!rttRunning}
                     onClick={() => props.ppkToggleDUT(props.deviceRunning)}
                 >
                     <Glyphicon glyph={props.deviceRunning ? 'remove-circle' : 'record'} />
@@ -84,7 +85,7 @@ const SidePanel = props => {
                 <Panel header="Trigger" eventKey="1" /* defaultExpanded */>
                     Window {props.triggerWindowLength} ms
                     <Slider
-                        disabled={!props.rttRunning}
+                        disabled={!rttRunning}
                         min={(450 * ADC_SAMPLING_TIME_US) / 1e3}
                         max={(4000 * ADC_SAMPLING_TIME_US) / 1e3}
                         value={props.triggerWindowLength}
@@ -98,7 +99,7 @@ const SidePanel = props => {
                     />
                     <ButtonGroup justified style={{ marginTop: 10 }}>
                         <Button
-                            disabled={!props.rttRunning || props.externalTrigger}
+                            disabled={!rttRunning || props.externalTrigger}
                             bsSize="large"
                             style={{ width: '50%' }}
                             onClick={props.ppkTriggerSingleSet}
@@ -107,7 +108,7 @@ const SidePanel = props => {
                             {props.triggerSingleWaiting ? 'Waiting...' : 'Single'}
                         </Button>
                         <Button
-                            disabled={!props.rttRunning || props.externalTrigger}
+                            disabled={!rttRunning || props.externalTrigger}
                             bsSize="large"
                             style={{ width: '50%' }}
                             onClick={props.ppkTriggerToggle}
@@ -119,13 +120,13 @@ const SidePanel = props => {
                     <InputGroup style={{ marginTop: 10 }}>
                         <InputGroup.Addon>Trigger level</InputGroup.Addon>
                         <FormControl
-                            disabled={!props.rttRunning || props.externalTrigger}
+                            disabled={!rttRunning || props.externalTrigger}
                             placeholder="1"
                             type="text"
                             onKeyPress={e => { if (e.key === 'Enter') { props.ppkTriggerSet(e.target.value, props.triggerUnit); } }}
                         />
                         <UnitSelector
-                            disabled={!props.rttRunning || props.externalTrigger}
+                            disabled={!rttRunning || props.externalTrigger}
                             defaultSelected={1}
                             units={['\u00B5A', 'mA']}
                             componentClass={InputGroup.Button}
