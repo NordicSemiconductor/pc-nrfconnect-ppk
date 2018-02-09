@@ -52,13 +52,15 @@
         .progress {
             display: inline;
             width: 200px;
-            .progress-bar.background {
-                background-color: #a94442;
-            }
+            background-color: #a94442;
             .progress-bar {
+                float: right;
                 transition: none;
                 background-color: #28a328;
             }
+        }
+        .progress.full .progress-bar {
+            background-color: #a94442;
         }
     }
     .chart-container {

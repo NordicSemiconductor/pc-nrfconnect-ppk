@@ -244,27 +244,18 @@ class Chart extends React.Component {
             bufferRemaining,
             averageRunning,
         } = this.props;
-        return (
-            <span>
-                Buffer:&nbsp;
-                <ProgressBar>
-                    <ProgressBar
-                        className="background"
-                        max={bufferLength}
-                        now={bufferLength - bufferRemaining}
-                        label={bufferRemaining <= 0 ? 'FULL' : ''}
-                        key={1}
-                    />
-                    <ProgressBar
-                        max={bufferLength}
-                        now={bufferRemaining}
-                        label={`${Number((bufferRemaining / 1e6)).toFixed(1)} s`}
-                        active={averageRunning}
-                        key={2}
-                    />
-                </ProgressBar>
-            </span>
-        );
+        if (bufferRemaining > 0) {
+            return (
+                <ProgressBar
+                    max={bufferLength}
+                    now={bufferRemaining}
+                    label={`${Number((bufferRemaining / 1e6)).toFixed(1)} s`}
+                    active={averageRunning}
+                    key={2}
+                />
+            );
+        }
+        return <ProgressBar className="full" label="FULL" max={1} now={1} />;
     }
 
     render() {
@@ -331,7 +322,11 @@ class Chart extends React.Component {
             <div className="chart-outer">
                 <div className="chart-top">
                     <span className="title">{ id }</span>
-                    { bufferLength !== null && this.renderProgress() }
+                    { bufferLength !== null &&
+                        <span>
+                            Buffer:&nbsp; { this.renderProgress() }
+                        </span>
+                    }
                 </div>
                 <div className="chart-container">
                     <Line
