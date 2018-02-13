@@ -356,6 +356,7 @@ class Chart extends React.Component {
                         <Button
                             bsStyle="primary"
                             bsSize="small"
+                            disabled={!canReset}
                             onClick={this.resetCursor}
                             title="Clear Cursor"
                         >
