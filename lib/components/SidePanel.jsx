@@ -103,7 +103,7 @@ const SidePanel = props => {
                             bsSize="large"
                             style={{ width: '50%' }}
                             onClick={props.triggerSingleWaiting ?
-                                props.ppkTriggerToggle : props.ppkTriggerSingleSet}
+                                props.ppkTriggerStop : props.ppkTriggerSingleSet}
                         >
                             <Glyphicon glyph="time" />
                             {props.triggerSingleWaiting ? 'Waiting...' : 'Single'}
@@ -112,7 +112,8 @@ const SidePanel = props => {
                             disabled={!rttRunning || props.externalTrigger}
                             bsSize="large"
                             style={{ width: '50%' }}
-                            onClick={props.ppkTriggerToggle}
+                            onClick={props.triggerRunning ?
+                                props.ppkTriggerStop : props.ppkTriggerStart}
                         >
                             <Glyphicon glyph={props.triggerRunning ? 'flash' : 'record'} />
                             {props.triggerRunning ? 'Stop' : 'Start'}
@@ -256,7 +257,8 @@ SidePanel.propTypes = {
     triggerSingleWaiting: PropTypes.bool.isRequired,
     triggerRunning: PropTypes.bool.isRequired,
     ppkTriggerUpdateWindow: PropTypes.func.isRequired,
-    ppkTriggerToggle: PropTypes.func.isRequired,
+    ppkTriggerStart: PropTypes.func.isRequired,
+    ppkTriggerStop: PropTypes.func.isRequired,
     triggerUnitChangeAction: PropTypes.func.isRequired,
     ppkTriggerSet: PropTypes.func.isRequired,
     ppkTriggerSingleSet: PropTypes.func.isRequired,
