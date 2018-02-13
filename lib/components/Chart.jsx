@@ -268,7 +268,7 @@ class Chart extends React.Component {
             cursorEnd,
             bufferLength,
         } = this.props;
-
+        const chartCursorActive = ((cursorBegin !== 0) || (cursorEnd !== 0));
         const chartData = {
             datasets: [{
                 borderColor: options.color,
@@ -341,9 +341,10 @@ class Chart extends React.Component {
                     <ButtonGroup>
                         <Button
                             bsStyle="primary"
+                            disabled={!chartCursorActive}
                             bsSize="small"
                             onClick={this.resetCursor}
-                            title="Clear Cursor"
+                            title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
                         >
                             <Glyphicon glyph="erase" />
                         </Button>
