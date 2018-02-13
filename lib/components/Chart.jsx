@@ -141,7 +141,7 @@ class Chart extends React.Component {
     }
 
     calculateLineDataSets() {
-        const { options, index, cursorBegin, cursorEnd, yMax, yMin } = this.props;
+        const { options, index, cursorBegin, cursorEnd } = this.props;
         this.calculateWindow();
 
         const timestampToIndex = ts => (
@@ -190,10 +190,6 @@ class Chart extends React.Component {
                     min = undefined;
                     max = undefined;
                 }
-                if (yMin && min < yMin) min = yMin;
-                if (yMax && min > yMax) min = yMax;
-                if (yMin && max < yMin) max = yMin;
-                if (yMax && max > yMax) max = yMax;
                 this.lineData[mappedIndex * 2] = { x: timestamp, y: min };
                 this.lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
             }
@@ -223,6 +219,8 @@ class Chart extends React.Component {
         this.calcAvg = this.calcSum / (this.calcLen || 1);
         this.calcDelta = this.calcEnd - this.calcBegin;
         this.calcCharge = this.calcAvg * ((this.calcDelta || 1) / 1e6);
+
+        return step;
     }
 
     renderStats() {
@@ -263,7 +261,7 @@ class Chart extends React.Component {
     }
 
     render() {
-        this.calculateLineDataSets();
+        const step = this.calculateLineDataSets();
 
         const {
             id,
@@ -280,7 +278,9 @@ class Chart extends React.Component {
                 fill: false,
                 data: this.lineData.slice(),
                 pointRadius: 0,
-                lineTension: 0.2,
+                pointHoverRadius: 0,
+                pointHitRadius: 0,
+                lineTension: step > 0.3 ? 0 : 0.2,
                 label: 'data0',
             }],
         };
