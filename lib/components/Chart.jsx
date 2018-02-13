@@ -111,20 +111,20 @@ class Chart extends React.Component {
         chartCursor(cursorBegin, cursorEnd);
     }
 
-    zoomPanCallback(begin, end) {
+    zoomPanCallback(beginX, endX, beginY, endY) {
         const { chartWindow, chartReset, options, windowDuration } = this.props;
 
-        if (typeof begin === 'undefined') {
+        if (typeof beginX === 'undefined') {
             chartReset(windowDuration);
             return;
         }
 
         const earliestDataTime =
             options.timestamp - ((options.data.length / options.samplesPerSecond) * 1e6);
-        const windowBegin = Math.max(earliestDataTime, begin);
-        const windowEnd = Math.min(options.timestamp, end);
+        const windowBegin = Math.max(earliestDataTime, beginX);
+        const windowEnd = Math.min(options.timestamp, endX);
 
-        chartWindow(windowBegin, windowEnd);
+        chartWindow(windowBegin, windowEnd, beginY, endY);
     }
 
     resizeLength(len) {
@@ -219,6 +219,8 @@ class Chart extends React.Component {
         this.calcAvg = this.calcSum / (this.calcLen || 1);
         this.calcDelta = this.calcEnd - this.calcBegin;
         this.calcCharge = this.calcAvg * ((this.calcDelta || 1) / 1e6);
+
+        return step;
     }
 
     renderStats() {
@@ -259,7 +261,7 @@ class Chart extends React.Component {
     }
 
     render() {
-        this.calculateLineDataSets();
+        const step = this.calculateLineDataSets();
 
         const {
             id,
@@ -267,6 +269,9 @@ class Chart extends React.Component {
             cursorBegin,
             cursorEnd,
             bufferLength,
+            yMin,
+            yMax,
+            canReset,
         } = this.props;
         const chartCursorActive = ((cursorBegin !== 0) || (cursorEnd !== 0));
         const chartData = {
@@ -276,7 +281,9 @@ class Chart extends React.Component {
                 fill: false,
                 data: this.lineData.slice(),
                 pointRadius: 0,
-                lineTension: 0.2,
+                pointHoverRadius: 0,
+                pointHitRadius: 0,
+                lineTension: step > 0.3 ? 0 : 0.2,
                 label: 'data0',
             }],
         };
@@ -310,7 +317,14 @@ class Chart extends React.Component {
                     type: 'linear',
                     min: options.valueRange.min,
                     max: options.valueRange.max,
-                    ticks: { suggestedMax: 10, maxTicksLimit: 7 },
+                    fullWidth: 60,
+                    ticks: {
+                        suggestedMin: options.valueRange.min,
+                        suggestedMax: options.valueRange.max,
+                        min: yMin === null ? options.valueRange.min : yMin,
+                        max: yMax === null ? undefined : yMax,
+                        maxTicksLimit: 7,
+                    },
                 }],
             },
             redraw: true,
@@ -343,6 +357,7 @@ class Chart extends React.Component {
                             bsStyle="primary"
                             disabled={!chartCursorActive}
                             bsSize="small"
+                            disabled={!canReset}
                             onClick={this.resetCursor}
                             title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
                         >
@@ -351,6 +366,7 @@ class Chart extends React.Component {
                         <Button
                             bsStyle="primary"
                             bsSize="small"
+                            disabled={!canReset}
                             onClick={this.chartResetToLive}
                             title="Reset & Live"
                         >
@@ -367,6 +383,9 @@ Chart.defaultProps = {
     bufferLength: null,
     bufferRemaining: null,
     averageRunning: null,
+    yMin: null,
+    yMax: null,
+    canReset: true,
 };
 
 Chart.propTypes = {
@@ -379,10 +398,13 @@ Chart.propTypes = {
     windowBegin: PropTypes.number.isRequired,
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
+    yMin: PropTypes.number,
+    yMax: PropTypes.number,
     index: PropTypes.number.isRequired,
     bufferLength: PropTypes.number,
     bufferRemaining: PropTypes.number,
     averageRunning: PropTypes.bool,
+    canReset: PropTypes.bool,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,
