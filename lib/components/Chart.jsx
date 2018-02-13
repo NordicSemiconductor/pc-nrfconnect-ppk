@@ -111,20 +111,20 @@ class Chart extends React.Component {
         chartCursor(cursorBegin, cursorEnd);
     }
 
-    zoomPanCallback(begin, end) {
+    zoomPanCallback(beginX, endX, beginY, endY) {
         const { chartWindow, chartReset, options, windowDuration } = this.props;
 
-        if (typeof begin === 'undefined') {
+        if (typeof beginX === 'undefined') {
             chartReset(windowDuration);
             return;
         }
 
         const earliestDataTime =
             options.timestamp - ((options.data.length / options.samplesPerSecond) * 1e6);
-        const windowBegin = Math.max(earliestDataTime, begin);
-        const windowEnd = Math.min(options.timestamp, end);
+        const windowBegin = Math.max(earliestDataTime, beginX);
+        const windowEnd = Math.min(options.timestamp, endX);
 
-        chartWindow(windowBegin, windowEnd);
+        chartWindow(windowBegin, windowEnd, beginY, endY);
     }
 
     resizeLength(len) {
@@ -141,7 +141,7 @@ class Chart extends React.Component {
     }
 
     calculateLineDataSets() {
-        const { options, index, cursorBegin, cursorEnd } = this.props;
+        const { options, index, cursorBegin, cursorEnd, yMax, yMin } = this.props;
         this.calculateWindow();
 
         const timestampToIndex = ts => (
@@ -190,6 +190,10 @@ class Chart extends React.Component {
                     min = undefined;
                     max = undefined;
                 }
+                if (yMin && min < yMin) min = yMin;
+                if (yMax && min > yMax) min = yMax;
+                if (yMin && max < yMin) max = yMin;
+                if (yMax && max > yMax) max = yMax;
                 this.lineData[mappedIndex * 2] = { x: timestamp, y: min };
                 this.lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
             }
@@ -310,7 +314,14 @@ class Chart extends React.Component {
                     type: 'linear',
                     min: options.valueRange.min,
                     max: options.valueRange.max,
-                    ticks: { suggestedMax: 10, maxTicksLimit: 7 },
+                    fullWidth: 60,
+                    ticks: {
+                        suggestedMin: options.valueRange.min,
+                        suggestedMax: options.valueRange.max,
+                        min: this.props.yMin || options.valueRange.min,
+                        max: this.props.yMax || undefined,
+                        maxTicksLimit: 7,
+                    },
                 }],
             },
             redraw: true,
@@ -366,6 +377,8 @@ Chart.defaultProps = {
     bufferLength: null,
     bufferRemaining: null,
     averageRunning: null,
+    yMin: null,
+    yMax: null,
 };
 
 Chart.propTypes = {
@@ -378,6 +391,8 @@ Chart.propTypes = {
     windowBegin: PropTypes.number.isRequired,
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
+    yMin: PropTypes.number,
+    yMax: PropTypes.number,
     index: PropTypes.number.isRequired,
     bufferLength: PropTypes.number,
     bufferRemaining: PropTypes.number,
