@@ -268,7 +268,7 @@ class Chart extends React.Component {
             cursorEnd,
             bufferLength,
         } = this.props;
-        const chartCursorActive = ((cursorEnd - cursorBegin === 0) === false);
+        const chartCursorActive = ((cursorBegin !== 0) || (cursorEnd !== 0));
         const chartData = {
             datasets: [{
                 borderColor: options.color,
