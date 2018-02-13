@@ -102,7 +102,8 @@ const SidePanel = props => {
                             disabled={!rttRunning || props.externalTrigger}
                             bsSize="large"
                             style={{ width: '50%' }}
-                            onClick={props.ppkTriggerSingleSet}
+                            onClick={props.triggerSingleWaiting ?
+                                props.ppkTriggerToggle : props.ppkTriggerSingleSet}
                         >
                             <Glyphicon glyph="time" />
                             {props.triggerSingleWaiting ? 'Waiting...' : 'Single'}
@@ -259,6 +260,7 @@ SidePanel.propTypes = {
     triggerUnitChangeAction: PropTypes.func.isRequired,
     ppkTriggerSet: PropTypes.func.isRequired,
     ppkTriggerSingleSet: PropTypes.func.isRequired,
+    ppkDataReceivedAction: PropTypes.func.isRequired,
     triggerUnit: PropTypes.string.isRequired,
     triggerWindowLength: PropTypes.number.isRequired,
     moveTriggerWindowLengthAction: PropTypes.func.isRequired,
