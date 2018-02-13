@@ -269,6 +269,8 @@ class Chart extends React.Component {
             cursorBegin,
             cursorEnd,
             bufferLength,
+            yMin,
+            yMax,
         } = this.props;
 
         const chartData = {
@@ -318,8 +320,8 @@ class Chart extends React.Component {
                     ticks: {
                         suggestedMin: options.valueRange.min,
                         suggestedMax: options.valueRange.max,
-                        min: this.props.yMin || options.valueRange.min,
-                        max: this.props.yMax || undefined,
+                        min: yMin === null ? options.valueRange.min : yMin,
+                        max: yMax === null ? undefined : yMax,
                         maxTicksLimit: 7,
                     },
                 }],
