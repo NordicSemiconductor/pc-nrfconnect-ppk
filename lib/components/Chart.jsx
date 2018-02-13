@@ -271,6 +271,7 @@ class Chart extends React.Component {
             bufferLength,
             yMin,
             yMax,
+            canReset,
         } = this.props;
 
         const chartData = {
@@ -363,6 +364,7 @@ class Chart extends React.Component {
                         <Button
                             bsStyle="primary"
                             bsSize="small"
+                            disabled={!canReset}
                             onClick={this.chartResetToLive}
                             title="Reset & Live"
                         >
@@ -381,6 +383,7 @@ Chart.defaultProps = {
     averageRunning: null,
     yMin: null,
     yMax: null,
+    canReset: true,
 };
 
 Chart.propTypes = {
@@ -399,6 +402,7 @@ Chart.propTypes = {
     bufferLength: PropTypes.number,
     bufferRemaining: PropTypes.number,
     averageRunning: PropTypes.bool,
+    canReset: PropTypes.bool,
     options: PropTypes.shape({
         // data: PropsTypes.instanceOf(...),
         index: PropTypes.number,
