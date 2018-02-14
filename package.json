@@ -33,12 +33,12 @@
     "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
   },
   "devDependencies": {
-    "chart.js": "^2.6.0",
+    "chart.js": "2.6.0",
     "pc-nrfconnect-devdep": "https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#v1.2.1",
-    "react-bootstrap": "^0.31.3",
-    "react-chartjs-2": "^2.6.1",
-    "react-rangeslider": "^2.2.0",
-    "mathjs": "^3.18.0",
+    "react-bootstrap": "0.31.3",
+    "react-chartjs-2": "2.6.1",
+    "react-rangeslider": "2.2.0",
+    "mathjs": "3.18.0",
     "mousetrap": "1.6.1"
   },
   "dependencies": {},

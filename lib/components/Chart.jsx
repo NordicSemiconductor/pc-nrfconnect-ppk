@@ -85,15 +85,7 @@ class Chart extends React.Component {
         this.chartResetToLive = this.zoomPanCallback.bind(this, undefined, undefined);
         this.dragSelectCallback = this.dragSelectCallback.bind(this);
         this.resetCursor = this.dragSelectCallback.bind(this, 0, 0);
-    }
-
-    componentDidMount() {
-        const { dragSelect, zoomPan } = this.chartInstance;
-        // buggy for the first time
-        this.onChartSizeUpdate(this.chartInstance);
-        dragSelect.callback = this.dragSelectCallback;
-        zoomPan.callback = this.zoomPanCallback;
-        this.mounted = true;
+        this.registerPluginCallbacks = this.registerPluginCallbacks.bind(this);
     }
 
     onChartSizeUpdate(instance) {
@@ -104,6 +96,14 @@ class Chart extends React.Component {
         }
         this.resizeLength(width);
         this.forceUpdate();
+    }
+
+    registerPluginCallbacks(ref) {
+        if (!ref) return;
+        const { dragSelect, zoomPan } = ref.chart_instance;
+        this.onChartSizeUpdate(ref.chart_instance);
+        dragSelect.callback = this.dragSelectCallback;
+        zoomPan.callback = this.zoomPanCallback;
     }
 
     dragSelectCallback(cursorBegin, cursorEnd) {
@@ -344,7 +344,7 @@ class Chart extends React.Component {
                 </div>
                 <div className="chart-container">
                     <Line
-                        ref={r => { if (r) this.chartInstance = r.chart_instance; }}
+                        ref={this.registerPluginCallbacks}
                         data={chartData}
                         options={chartOptions}
                         update={options.update}
@@ -355,9 +355,8 @@ class Chart extends React.Component {
                     <ButtonGroup>
                         <Button
                             bsStyle="primary"
-                            disabled={!chartCursorActive}
+                            disabled={!chartCursorActive || !canReset}
                             bsSize="small"
-                            disabled={!canReset}
                             onClick={this.resetCursor}
                             title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
                         >
