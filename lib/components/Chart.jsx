@@ -86,6 +86,7 @@ class Chart extends React.Component {
         this.dragSelectCallback = this.dragSelectCallback.bind(this);
         this.resetCursor = this.dragSelectCallback.bind(this, 0, 0);
         this.registerPluginCallbacks = this.registerPluginCallbacks.bind(this);
+        this.chartPause = this.chartPause.bind(this);
     }
 
     onChartSizeUpdate(instance) {
@@ -125,6 +126,11 @@ class Chart extends React.Component {
         const windowEnd = Math.min(options.timestamp, endX);
 
         chartWindow(windowBegin, windowEnd, beginY, endY);
+    }
+
+    chartPause() {
+        const { chartWindow, options, windowDuration } = this.props;
+        chartWindow(options.timestamp - windowDuration, options.timestamp);
     }
 
     resizeLength(len) {
@@ -260,6 +266,35 @@ class Chart extends React.Component {
         return <ProgressBar className="full" label="FULL" max={1} now={1} />;
     }
 
+    renderResetButton() {
+        const { averageRunning, canReset, windowBegin, windowEnd } = this.props;
+        if (averageRunning !== null) {
+            const live = (windowBegin === 0) && (windowEnd === 0);
+            return (
+                <Button
+                    bsStyle="primary"
+                    bsSize="small"
+                    disabled={!averageRunning && live}
+                    onClick={live ? this.chartPause : this.chartResetToLive}
+                    title={live ? 'Pause' : 'Live'}
+                >
+                    <Glyphicon glyph={live ? 'pause' : 'step-forward'} />
+                </Button>
+            );
+        }
+        return (
+            <Button
+                bsStyle="primary"
+                bsSize="small"
+                disabled={!canReset}
+                onClick={this.chartResetToLive}
+                title="Reset & Live"
+            >
+                <Glyphicon glyph="repeat" />
+            </Button>
+        );
+    }
+
     render() {
         const step = this.calculateLineDataSets();
 
@@ -362,15 +397,7 @@ class Chart extends React.Component {
                         >
                             <Glyphicon glyph="erase" />
                         </Button>
-                        <Button
-                            bsStyle="primary"
-                            bsSize="small"
-                            disabled={!canReset}
-                            onClick={this.chartResetToLive}
-                            title="Reset & Live"
-                        >
-                            <Glyphicon glyph="repeat" />
-                        </Button>
+                        {this.renderResetButton()}
                     </ButtonGroup>
                 </div>
             </div>
