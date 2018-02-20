@@ -244,7 +244,7 @@ class Chart extends React.Component {
         const charge = this.calcAvg * ((this.calcDelta || 1) / 1e6);
         return (
             <div className="chart-stats">
-                { renderValue(`${cursorBegin !== null ? 'cursor' : 'window'} \u0394`, this.calcDelta, 'us') }
+                { renderValue(`${cursorBegin !== null ? 'marker' : 'window'} \u0394`, this.calcDelta, 'us') }
                 { renderValue('avg', this.calcAvg, 'uA') }
                 { renderValue('max', this.calcMax, 'uA') }
                 { renderValue('charge', charge, 'uC') }
