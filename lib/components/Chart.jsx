@@ -79,12 +79,17 @@ const timestampToLabel = (usecs, index, array) => {
 class Chart extends React.Component {
     constructor(props) {
         super(props);
+
+        this.calcDelta = 0;
+        this.calcAvg = 0;
+        this.calcMax = 0;
+
         this.resizeLength(0);
         this.onChartSizeUpdate = this.onChartSizeUpdate.bind(this);
         this.zoomPanCallback = this.zoomPanCallback.bind(this);
         this.chartResetToLive = this.zoomPanCallback.bind(this, undefined, undefined);
         this.dragSelectCallback = this.dragSelectCallback.bind(this);
-        this.resetCursor = this.dragSelectCallback.bind(this, 0, 0);
+        this.resetCursor = this.dragSelectCallback.bind(this, null, null);
         this.registerPluginCallbacks = this.registerPluginCallbacks.bind(this);
         this.chartPause = this.chartPause.bind(this);
     }
@@ -99,6 +104,11 @@ class Chart extends React.Component {
         this.forceUpdate();
     }
 
+    timestampToIndex(ts) {
+        const { options, index } = this.props;
+        return index - (((options.timestamp - ts) * options.samplesPerSecond) / 1e6);
+    }
+
     registerPluginCallbacks(ref) {
         if (!ref) return;
         const { dragSelect, zoomPan } = ref.chart_instance;
@@ -109,6 +119,7 @@ class Chart extends React.Component {
 
     dragSelectCallback(cursorBegin, cursorEnd) {
         const { chartCursor } = this.props;
+        this.recalculate(cursorBegin, cursorEnd);
         chartCursor(cursorBegin, cursorEnd);
     }
 
@@ -138,44 +149,24 @@ class Chart extends React.Component {
         this.lineData = new Array(this.len * 2);
     }
 
-    calculateWindow() {
-        const { options, windowBegin, windowEnd, windowDuration } = this.props;
-
-        this.duration = windowDuration;
-        this.end = windowEnd || options.timestamp;
-        this.begin = windowBegin || (this.end - this.duration);
-    }
-
     calculateLineDataSets() {
-        const { options, index, cursorBegin, cursorEnd } = this.props;
-        this.calculateWindow();
+        const {
+            options, cursorBegin,
+            windowBegin, windowEnd, windowDuration,
+        } = this.props;
 
-        const timestampToIndex = ts => (
-            index - (((options.timestamp - ts) * options.samplesPerSecond) / 1e6)
-        );
+        this.end = windowEnd || options.timestamp;
+        this.begin = windowBegin || (this.end - windowDuration);
 
-        const originalIndexBegin = timestampToIndex(this.begin);
-        const originalIndexEnd = timestampToIndex(this.end);
+        const originalIndexBegin = this.timestampToIndex(this.begin);
+        const originalIndexEnd = this.timestampToIndex(this.end);
         const step = (originalIndexEnd - originalIndexBegin) / this.len;
-
-        if (cursorBegin) {
-            this.calcBegin = cursorBegin;
-            this.calcEnd = cursorEnd;
-        } else {
-            this.calcBegin = this.begin;
-            this.calcEnd = this.end;
-        }
-        const calcIndexBegin = timestampToIndex(this.calcBegin);
-        const calcIndexEnd = timestampToIndex(this.calcEnd);
-        this.calcMax = 0;
-        this.calcSum = 0;
-        this.calcLen = 0;
 
         if (step > 1) {
             for (let mappedIndex = 0, originalIndex = originalIndexBegin;
                 mappedIndex < this.len;
                 mappedIndex = mappedIndex + 1, originalIndex = originalIndex + step) {
-                const timestamp = this.begin + (this.duration * (mappedIndex / this.len));
+                const timestamp = this.begin + (windowDuration * (mappedIndex / this.len));
                 const k = Math.floor(originalIndex);
                 const l = Math.floor(originalIndex + step);
                 let min = Number.MAX_VALUE;
@@ -185,11 +176,6 @@ class Chart extends React.Component {
                     if (v !== undefined) {
                         if (v > max) max = v;
                         if (v < min) min = v;
-                        if (n >= calcIndexBegin && n < calcIndexEnd) {
-                            if (v > this.calcMax) this.calcMax = v;
-                            this.calcSum = this.calcSum + v;
-                            this.calcLen = this.calcLen + 1;
-                        }
                     }
                 }
                 if (min > max) {
@@ -211,22 +197,41 @@ class Chart extends React.Component {
                 const timestamp = this.begin
                     + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
                 this.lineData[mappedIndex] = { x: timestamp, y: v };
-
-                if (v !== undefined && n >= calcIndexBegin && n < calcIndexEnd) {
-                    if (v > this.calcMax) this.calcMax = v;
-                    this.calcSum = this.calcSum + v;
-                    this.calcLen = this.calcLen + 1;
-                }
             }
             for (; mappedIndex < this.len + this.len; mappedIndex = mappedIndex + 1) {
                 this.lineData[mappedIndex] = undefined;
             }
         }
-        this.calcAvg = this.calcSum / (this.calcLen || 1);
-        this.calcDelta = this.calcEnd - this.calcBegin;
-        this.calcCharge = this.calcAvg * ((this.calcDelta || 1) / 1e6);
+
+        if (cursorBegin === null) {
+            this.recalculate(this.begin, this.end);
+        }
 
         return step;
+    }
+
+    recalculate(from, to) {
+        const { options } = this.props;
+        this.calcDelta = to - from;
+
+        const calcIndexBegin = Math.floor(this.timestampToIndex(from));
+        const calcIndexEnd = Math.floor(this.timestampToIndex(to));
+
+        let calcSum = 0;
+        let calcLen = 0;
+        this.calcMax = 0;
+
+        for (let n = calcIndexBegin; n < calcIndexEnd; n = n + 1) {
+            const k = (n + options.data.length) % options.data.length;
+            const v = options.data[k];
+            if (v !== undefined) {
+                if (v > this.calcMax) this.calcMax = v;
+                calcSum = calcSum + v;
+                calcLen = calcLen + 1;
+            }
+        }
+
+        this.calcAvg = calcSum / (calcLen || 1);
     }
 
     renderStats() {
@@ -236,12 +241,13 @@ class Chart extends React.Component {
             const [valStr, unitStr] = v.split(' ');
             return <span>{label}: <b>{valStr}</b> {unitStr.replace('u', '\u00B5')}</span>;
         };
+        const charge = this.calcAvg * ((this.calcDelta || 1) / 1e6);
         return (
             <div className="chart-stats">
-                { renderValue(`${cursorBegin ? 'cursor' : 'window'} \u0394`, this.calcDelta, 'us') }
+                { renderValue(`${cursorBegin !== null ? 'marker' : 'window'} \u0394`, this.calcDelta, 'us') }
                 { renderValue('avg', this.calcAvg, 'uA') }
                 { renderValue('max', this.calcMax, 'uA') }
-                { renderValue('charge', this.calcCharge, 'uC') }
+                { renderValue('charge', charge, 'uC') }
             </div>
         );
     }
@@ -308,7 +314,7 @@ class Chart extends React.Component {
             yMax,
             canReset,
         } = this.props;
-        const chartCursorActive = ((cursorBegin !== 0) || (cursorEnd !== 0));
+        const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
         const chartData = {
             datasets: [{
                 borderColor: options.color,
@@ -412,6 +418,8 @@ Chart.defaultProps = {
     yMin: null,
     yMax: null,
     canReset: true,
+    cursorBegin: null,
+    cursorEnd: null,
 };
 
 Chart.propTypes = {
@@ -419,8 +427,8 @@ Chart.propTypes = {
     chartReset: PropTypes.func.isRequired,
     chartCursor: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,
-    cursorBegin: PropTypes.number.isRequired,
-    cursorEnd: PropTypes.number.isRequired,
+    cursorBegin: PropTypes.number,
+    cursorEnd: PropTypes.number,
     windowBegin: PropTypes.number.isRequired,
     windowEnd: PropTypes.number.isRequired,
     windowDuration: PropTypes.number.isRequired,
