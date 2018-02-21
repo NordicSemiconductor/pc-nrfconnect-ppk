@@ -365,6 +365,7 @@ class Chart extends React.Component {
                         min: yMin === null ? options.valueRange.min : yMin,
                         max: yMax === null ? undefined : yMax,
                         maxTicksLimit: 7,
+                        callback: (uA => math.unit(uA, 'uA').format({ notation: 'fixed', precision: 3 })),
                     },
                 }],
             },
