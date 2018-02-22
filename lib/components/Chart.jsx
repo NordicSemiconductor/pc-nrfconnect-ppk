@@ -214,14 +214,14 @@ class Chart extends React.Component {
         const { options } = this.props;
         this.calcDelta = to - from;
 
-        const calcIndexBegin = Math.floor(this.timestampToIndex(from));
+        const calcIndexBegin = Math.ceil(this.timestampToIndex(from));
         const calcIndexEnd = Math.floor(this.timestampToIndex(to));
 
         let calcSum = 0;
         let calcLen = 0;
         this.calcMax = 0;
 
-        for (let n = calcIndexBegin; n < calcIndexEnd; n = n + 1) {
+        for (let n = calcIndexBegin; n <= calcIndexEnd; n = n + 1) {
             const k = (n + options.data.length) % options.data.length;
             const v = options.data[k];
             if (v !== undefined) {
@@ -321,10 +321,12 @@ class Chart extends React.Component {
                 borderWidth: 1,
                 fill: false,
                 data: this.lineData.slice(),
-                pointRadius: 0,
+                pointRadius: step > 0.2 ? 0 : 1.5,
                 pointHoverRadius: 0,
                 pointHitRadius: 0,
-                lineTension: step > 0.3 ? 0 : 0.2,
+                pointBackgroundColor: options.color,
+                pointBorderWidth: 0,
+                lineTension: step > 0.2 ? 0 : 0.2,
                 label: 'data0',
             }],
         };
