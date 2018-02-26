@@ -159,7 +159,7 @@ const SidePanel = props => {
                     />
                 </Panel>
                 { advancedMode &&
-                    <Panel header="Switching Groups" eventKey="3">
+                    <Panel header="Switch levels" eventKey="3">
                         Switch up
                         <Slider
                             min={38}
@@ -186,7 +186,7 @@ const SidePanel = props => {
                         <Button
                             onClick={props.ppkSwitchingPointsReset}
                         >
-                            Reset switching points
+                            Reset switch levels
                         </Button>
                         <Checkbox
                             onChange={props.spikeFilteringToggle}
