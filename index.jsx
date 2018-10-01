@@ -82,6 +82,7 @@ export default {
         if (!action) {
             return;
         }
+        const { dispatch } = store;
 
         switch (action.type) {
             case 'DEVICE_SELECTED':
@@ -90,16 +91,41 @@ export default {
 
             case 'DEVICE_DESELECTED':
                 logger.info('Deselecting device');
-                store.dispatch(PPKActions.close());
+                dispatch(PPKActions.close());
                 break;
 
-            case 'DEVICE_SETUP_COMPLETE':
+            // case 'DEVICE_SETUP_COMPLETE':
+            //     logger.info(`Opening device with s/n ${action.device.serialNumber}`);
+            //     setTimeout(() => {
+            //         dispatch(PPKActions.open(action.device.serialNumber));
+            //     }, 1000);
+            //     break;
+
+            case 'DEVICE_SETUP_COMPLETE': {
+                const device = action.device;
+                const serialNumber = device.serialNumber;
                 logger.info(`Opening device with s/n ${action.device.serialNumber}`);
-                setTimeout(() => {
-                    store.dispatch(PPKActions.open(action.device.serialNumber));
-                }, 1000);
+                if (action.device.traits.includes('jlink')) {
+                    dispatch(PPKActions.open(serialNumber));
+                    // dispatch(jlinkTargetActions.loadDeviceInfo(serialNumber));
+                    break;
+                }
+                if (action.device.traits.includes('nordicUsb')) {
+                    // dispatch(usbsdfuTargetActions.openDevice(action.device));
+                    break;
+                }
+                if (action.device.traits.includes('serialport')) {
+                    // const { vendorId, productId } = device.serialport;
+                    // const vid = parseInt(vendorId.toString(16), 16);
+                    // const pid = parseInt(productId.toString(16), 16);
+                    // if (vid === VendorId.NORDIC_SEMICONDUCTOR && USBProductIds.includes(pid)) {
+                    //     dispatch(usbsdfuTargetActions.openDevice(action.device));
+                    //     break;
+                    // }
+                }
+                logger.error('Unsupported device. The detected device is neither JLink device nor Nordic USB device.');
                 break;
-
+            }
             default:
         }
         next(action);
