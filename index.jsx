@@ -122,7 +122,7 @@ export default {
                     const vid = parseInt(vendorId.toString(16), 16);
                     const pid = parseInt(productId.toString(16), 16);
                     if (vid === VendorId.NORDIC_SEMICONDUCTOR && USBProductIds.includes(pid)) {
-                        dispatch(ppkUsbActions.open());
+                        dispatch(ppkUsbActions.open(device));
                         break;
                     }
                 }
