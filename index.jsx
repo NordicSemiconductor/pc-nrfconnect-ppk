@@ -96,25 +96,15 @@ export default {
                 dispatch(PPKActions.close());
                 break;
 
-            // case 'DEVICE_SETUP_COMPLETE':
-            //     logger.info(`Opening device with s/n ${action.device.serialNumber}`);
-            //     setTimeout(() => {
-            //         dispatch(PPKActions.open(action.device.serialNumber));
-            //     }, 1000);
-            //     break;
-
             case 'DEVICE_SETUP_COMPLETE': {
                 const device = action.device;
                 const serialNumber = device.serialNumber;
                 logger.info(`Opening device with s/n ${action.device.serialNumber}`);
-                console.log(action.device.traits);
                 if (action.device.traits.includes('jlink')) {
                     dispatch(PPKActions.open(serialNumber));
-                    // dispatch(jlinkTargetActions.loadDeviceInfo(serialNumber));
                     break;
                 }
                 if (action.device.traits.includes('nordicUsb')) {
-                    // dispatch(usbsdfuTargetActions.openDevice(action.device));
                     break;
                 }
                 if (action.device.traits.includes('serialport')) {
