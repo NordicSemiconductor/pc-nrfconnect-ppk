@@ -42,8 +42,6 @@ import MainView from './lib/containers/MainView';
 import SidePanel from './lib/containers/SidePanel';
 import ShoppingCartButton from './lib/components/ShoppingCartButton';
 import * as PPKActions from './lib/actions/PPKActions';
-import * as ppkUsbActions from './lib/actions/ppkUsbActions';
-import { VendorId, USBProductIds } from './lib/utils/devices';
 import './resources/css/index.less';
 
 export default {
@@ -97,26 +95,9 @@ export default {
                 break;
 
             case 'DEVICE_SETUP_COMPLETE': {
-                const device = action.device;
-                const serialNumber = device.serialNumber;
-                logger.info(`Opening device with s/n ${action.device.serialNumber}`);
-                if (action.device.traits.includes('jlink')) {
-                    dispatch(PPKActions.open(serialNumber));
-                    break;
-                }
-                if (action.device.traits.includes('nordicUsb')) {
-                    break;
-                }
-                if (action.device.traits.includes('serialport')) {
-                    const { vendorId, productId } = device.serialport;
-                    const vid = parseInt(vendorId.toString(16), 16);
-                    const pid = parseInt(productId.toString(16), 16);
-                    if (vid === VendorId.NORDIC_SEMICONDUCTOR && USBProductIds.includes(pid)) {
-                        dispatch(ppkUsbActions.open(device));
-                        break;
-                    }
-                }
-                logger.error('Unsupported device. The detected device is neither JLink device nor Nordic USB device.');
+                const { device } = action;
+                logger.info(`Opening device with s/n ${device.serialNumber}`);
+                dispatch(PPKActions.open(device));
                 break;
             }
             default:
