@@ -35,7 +35,7 @@
  */
 
 import React from 'react';
-import { logger, getAppDir } from 'nrfconnect/core';
+import { logger, getAppDir, startWatchingDevices, stopWatchingDevices } from 'nrfconnect/core';
 import path from 'path';
 import reducers from './lib/reducers';
 import MainView from './lib/containers/MainView';
@@ -91,10 +91,13 @@ export default {
 
             case 'DEVICE_DESELECTED':
                 logger.info('Deselecting device');
-                dispatch(PPKActions.close());
+                dispatch(PPKActions.close()).then(() => {
+                    dispatch(startWatchingDevices());
+                });
                 break;
 
             case 'DEVICE_SETUP_COMPLETE': {
+                dispatch(stopWatchingDevices());
                 const { device } = action;
                 logger.info(`Opening device with s/n ${device.serialNumber}`);
                 dispatch(PPKActions.open(device));
