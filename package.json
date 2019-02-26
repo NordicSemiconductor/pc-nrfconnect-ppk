@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfconnect-ppk",
-  "version": "2.1.0-alpha.0",
+  "version": "2.1.0",
   "description": "Power Profiler",
   "displayName": "Power Profiler",
   "repository": {
@@ -24,6 +24,7 @@
     "dev": "nrfconnect-scripts build-watch",
     "webpack": "nrfconnect-scripts build-dev",
     "build": "nrfconnect-scripts build-prod",
+    "nordic-publish": "nrfconnect-scripts nordic-publish",
     "lint": "nrfconnect-scripts lint lib index.jsx",
     "lintfix": "nrfconnect-scripts lint --fix lib index.jsx",
     "test": "nrfconnect-scripts test",
