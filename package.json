@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfconnect-ppk",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Power Profiler",
   "displayName": "Power Profiler",
   "repository": {
@@ -24,6 +24,7 @@
     "dev": "nrfconnect-scripts build-watch",
     "webpack": "nrfconnect-scripts build-dev",
     "build": "nrfconnect-scripts build-prod",
+    "nordic-publish": "nrfconnect-scripts nordic-publish",
     "lint": "nrfconnect-scripts lint lib index.jsx",
     "lintfix": "nrfconnect-scripts lint --fix lib index.jsx",
     "test": "nrfconnect-scripts test",
@@ -34,7 +35,7 @@
   },
   "devDependencies": {
     "chart.js": "2.6.0",
-    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:^1.2.2",
+    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:^1.3.5",
     "react-bootstrap": "0.31.3",
     "react-chartjs-2": "2.6.1",
     "react-rangeslider": "2.2.0",
