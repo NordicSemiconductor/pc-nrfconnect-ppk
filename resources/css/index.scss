@@ -65,7 +65,7 @@
     }
     .chart-container {
         position: relative;
-        height: ~'calc(100% - 80px)';
+        height: 'calc(100% - 80px)';
     }
     .chart-bottom {
         display: flex;
@@ -107,7 +107,7 @@
 }
 
 .core-side-panel {
-    .glyphicon {
+    .mdi {
         margin-right: 5px;
     }
 }
@@ -115,8 +115,12 @@
     pointer-events: none;
 }
 
+.hidden {
+    display: none;
+}
+
 .btn-lg {
-    .glyphicon {
+    .mdi {
         top: 2px;
     }
 }
@@ -129,4 +133,25 @@
     position: absolute;
     top: 8px;
     right: 8px;
+    font-size: 24px;
+}
+
+.accordion {
+    > .card:last-of-type {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    > .card {
+        overflow: visible;
+    }
+}
+
+.card-header {
+    padding: 0;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+.form-check {
+    padding-top: 1.25rem;
 }

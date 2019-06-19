@@ -36,7 +36,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 class UnitSelector extends React.Component {
     constructor(props) {
@@ -44,23 +45,30 @@ class UnitSelector extends React.Component {
         this.state = { selected: props.defaultSelected };
         this.onSelect = this.onSelect.bind(this);
     }
+
     onSelect(key) {
         this.setState({ selected: key });
-        this.props.onChange(key);
+        const { onChange } = this.props;
+        onChange(key);
     }
+
     render() {
-        const { units, defaultSelected, onChange, ...rest } = this.props;
+        const {
+            units, defaultSelected, onChange, ...rest
+        } = this.props;
         const { selected } = this.state;
         const selectedUnit = units[selected];
         const menuItems = units.map((unit, k) => (
-            <MenuItem
+            <Dropdown.Item
                 eventKey={`${k + 0}`}
                 key={`${k + 0}`}
                 onSelect={this.onSelect}
-            >{unit}</MenuItem>
+            >
+                {unit}
+            </Dropdown.Item>
         ));
         return (
-            <DropdownButton title={selectedUnit} {...rest} >
+            <DropdownButton title={selectedUnit} {...rest}>
                 { menuItems }
             </DropdownButton>
         );
