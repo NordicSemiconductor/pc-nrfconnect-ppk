@@ -35,14 +35,16 @@
  */
 
 import React from 'react';
-import { logger, getAppDir, startWatchingDevices, stopWatchingDevices } from 'nrfconnect/core';
+import {
+    logger, getAppDir, startWatchingDevices, stopWatchingDevices,
+} from 'nrfconnect/core';
 import path from 'path';
 import reducers from './lib/reducers';
 import MainView from './lib/containers/MainView';
 import SidePanel from './lib/containers/SidePanel';
 import ShoppingCartButton from './lib/components/ShoppingCartButton';
 import * as PPKActions from './lib/actions/PPKActions';
-import './resources/css/index.less';
+import './resources/css/index.scss';
 
 export default {
     onReady: () => {
@@ -52,8 +54,8 @@ export default {
         props => (
             <div className="logo-wrap">
                 <ShoppingCartButton
-                    url={'http://www.nordicsemi.com/eng/Buy-Online?search_token=nRF6707'}
-                    tooltip={'Open web page for buying Power Profiler Kit hardware'}
+                    url="http://www.nordicsemi.com/eng/Buy-Online?search_token=nRF6707"
+                    tooltip="Open web page for buying Power Profiler Kit hardware"
                 />
                 <Logo {...props} />
             </div>

@@ -40,8 +40,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
-import { Button, ButtonGroup, Glyphicon, ProgressBar } from 'react-bootstrap';
-import math from 'mathjs';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ProgressBar from 'react-bootstrap/ProgressBar';
+import { unit } from 'mathjs';
 
 import '../utils/chart.dragSelect'; // eslint-disable-line
 import '../utils/chart.zoomPan'; // eslint-disable-line
@@ -111,8 +113,8 @@ class Chart extends React.Component {
 
     registerPluginCallbacks(ref) {
         if (!ref) return;
-        const { dragSelect, zoomPan } = ref.chart_instance;
-        this.onChartSizeUpdate(ref.chart_instance);
+        const { dragSelect, zoomPan } = ref.chartInstance;
+        this.onChartSizeUpdate(ref.chartInstance);
         dragSelect.callback = this.dragSelectCallback;
         zoomPan.callback = this.zoomPanCallback;
     }
@@ -124,15 +126,17 @@ class Chart extends React.Component {
     }
 
     zoomPanCallback(beginX, endX, beginY, endY) {
-        const { chartWindow, chartReset, options, windowDuration } = this.props;
+        const {
+            chartWindow, chartReset, options, windowDuration,
+        } = this.props;
 
         if (typeof beginX === 'undefined') {
             chartReset(windowDuration);
             return;
         }
 
-        const earliestDataTime =
-            options.timestamp - ((options.data.length / options.samplesPerSecond) * 1e6);
+        const earliestDataTime = options.timestamp
+            - ((options.data.length / options.samplesPerSecond) * 1e6);
         const windowBegin = Math.max(earliestDataTime, beginX);
         const windowEnd = Math.min(options.timestamp, endX);
 
@@ -236,8 +240,8 @@ class Chart extends React.Component {
 
     renderStats() {
         const { cursorBegin } = this.props;
-        const renderValue = (label, value, unit) => {
-            const v = math.unit(value, unit).format({ notation: 'fixed', precision: 3 });
+        const renderValue = (label, value, unitArg) => {
+            const v = unit(value, unitArg).format({ notation: 'fixed', precision: 3 });
             const [valStr, unitStr] = v.split(' ');
             return <span>{label}: <b>{valStr}</b> {unitStr.replace('u', '\u00B5')}</span>;
         };
@@ -264,7 +268,7 @@ class Chart extends React.Component {
                     max={bufferLength}
                     now={bufferRemaining}
                     label={`${Number((bufferRemaining / 1e6)).toFixed(1)} s`}
-                    active={averageRunning}
+                    animated={averageRunning}
                     key={2}
                 />
             );
@@ -273,30 +277,32 @@ class Chart extends React.Component {
     }
 
     renderResetButton() {
-        const { averageRunning, canReset, windowBegin, windowEnd } = this.props;
+        const {
+            averageRunning, canReset, windowBegin, windowEnd,
+        } = this.props;
         if (averageRunning !== null) {
             const live = (windowBegin === 0) && (windowEnd === 0);
             return (
                 <Button
-                    bsStyle="primary"
-                    bsSize="small"
+                    variant="primary"
+                    size="sm"
                     disabled={!averageRunning && live}
                     onClick={live ? this.chartPause : this.chartResetToLive}
                     title={live ? 'Pause' : 'Live'}
                 >
-                    <Glyphicon glyph={live ? 'pause' : 'step-forward'} />
+                    <span className={`mdi mdi-${live ? 'pause' : 'step-forward'}`} />
                 </Button>
             );
         }
         return (
             <Button
-                bsStyle="primary"
-                bsSize="small"
+                variant="primary"
+                size="sm"
                 disabled={!canReset}
                 onClick={this.chartResetToLive}
                 title="Reset & Live"
             >
-                <Glyphicon glyph="repeat" />
+                <span className="mdi mdi-repeat" />
             </Button>
         );
     }
@@ -368,9 +374,9 @@ class Chart extends React.Component {
                         max: yMax === null ? undefined : yMax,
                         maxTicksLimit: 7,
                         callback: (uA => (
-                            math.unit(uA, 'uA')
-                            .format({ notation: 'fixed', precision: 3 })
-                            .replace('u', '\u00B5')
+                            unit(uA, 'uA')
+                                .format({ notation: 'fixed', precision: 3 })
+                                .replace('u', '\u00B5')
                         )),
                     },
                 }],
@@ -384,11 +390,11 @@ class Chart extends React.Component {
             <div className="chart-outer">
                 <div className="chart-top">
                     <span className="title">{ id }</span>
-                    { bufferLength !== null &&
+                    { bufferLength !== null && (
                         <span>
                             Buffer:&nbsp; { this.renderProgress() }
                         </span>
-                    }
+                    )}
                 </div>
                 <div className="chart-container">
                     <Line
@@ -402,13 +408,13 @@ class Chart extends React.Component {
                     {this.renderStats()}
                     <ButtonGroup>
                         <Button
-                            bsStyle="primary"
+                            variant="primary"
                             disabled={!chartCursorActive || !canReset}
-                            bsSize="small"
+                            size="sm"
                             onClick={this.resetCursor}
                             title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
                         >
-                            <Glyphicon glyph="erase" />
+                            <span className="mdi mdi-eraser" />
                         </Button>
                         {this.renderResetButton()}
                     </ButtonGroup>

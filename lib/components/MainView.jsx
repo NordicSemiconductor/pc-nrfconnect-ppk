@@ -36,22 +36,22 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Glyphicon } from 'react-bootstrap';
 
 import AverageChart from '../containers/AverageChart';
 import TriggerChart from '../containers/TriggerChart';
 
 import { triggerOptions, averageOptions } from '../actions/PPKActions';
 
-const MainView = props => (
+const MainView = ({ toggleFullView, fullView }) => (
     <div className="core-main-view">
         <AverageChart options={averageOptions} />
         <TriggerChart options={triggerOptions} />
-        <Glyphicon
-            bsSize="large"
-            className="btnFullViewToggle"
-            onClick={props.toggleFullView}
-            glyph={props.fullView ? 'resize-small' : 'resize-full'}
+        <span
+            onClick={toggleFullView}
+            className={`btnFullViewToggle mdi mdi-${fullView ? 'fullscreen-exit' : 'fullscreen'}`}
+            onKeyPress={() => {}}
+            role="button"
+            tabIndex={0}
         />
     </div>
 );

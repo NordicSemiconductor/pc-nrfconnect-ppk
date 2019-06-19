@@ -36,206 +36,315 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Accordion, Button, ButtonGroup, Checkbox, FormControl, Glyphicon, InputGroup, Panel } from 'react-bootstrap';
+import Accordion from 'react-bootstrap/Accordion';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Card from 'react-bootstrap/Card';
 
 import Slider from 'react-rangeslider';
 import 'react-rangeslider/lib/index.css';
 
-import UnitSelector from '../components/UnitSelector';
+import UnitSelector from './UnitSelector';
 
 import {
     ADC_SAMPLING_TIME_US,
 } from '../constants';
 
-const SidePanel = props => {
-    const {
-        bindHotkey,
-        toggleAdvancedModeAction,
-        advancedMode,
-        rttRunning,
-    } = props;
-
+const SidePanel = ({
+    ppkUpdateRegulator,
+    averageStart,
+    averageStop,
+    averageRunning,
+    externalTrigger,
+    spikeFiltering,
+    deviceRunning,
+    rttRunning,
+    ppkToggleDUT,
+    triggerSingleWaiting,
+    triggerRunning,
+    ppkTriggerUpdateWindow,
+    ppkTriggerStart,
+    ppkTriggerStop,
+    triggerUnitChangeAction,
+    ppkTriggerSet,
+    ppkTriggerSingleSet,
+    triggerUnit,
+    triggerWindowLength,
+    moveTriggerWindowLengthAction,
+    voltageRegulatorVdd,
+    moveVoltageRegulatorVddAction,
+    resistorLow,
+    resistorMid,
+    resistorHigh,
+    updateHighResistorAction,
+    updateMidResistorAction,
+    updateLowResistorAction,
+    updateResistors,
+    resetResistors,
+    externalTriggerToggled,
+    spikeFilteringToggle,
+    switchUpHigh,
+    switchUpLow,
+    switchDownHigh,
+    switchDownLow,
+    switchUpSliderPosition,
+    switchDownSliderPosition,
+    switchingPointUpMoved,
+    switchingPointDownMovedAction,
+    ppkSwitchingPointsUpSet,
+    ppkSwitchingPointsDownSet,
+    ppkSwitchingPointsReset,
+    bindHotkey,
+    toggleAdvancedModeAction,
+    advancedMode,
+    hidden,
+}) => {
     bindHotkey('alt+ctrl+shift+a', toggleAdvancedModeAction);
 
     return (
-        <div className={`core-side-panel${props.hidden ? ' hidden' : ''}${rttRunning ? '' : ' disabled'}`}>
-            <ButtonGroup block vertical>
+        <div className={`core-side-panel${hidden ? ' hidden' : ''}${rttRunning ? '' : ' disabled'}`}>
+            <div className="d-flex flex-column">
                 <Button
-                    bsStyle="primary"
-                    bsSize="large"
+                    variant="primary"
+                    size="lg"
                     disabled={!rttRunning}
-                    onClick={props.averageRunning ? props.averageStop : props.averageStart}
+                    onClick={averageRunning ? averageStop : averageStart}
                 >
-                    <Glyphicon glyph={props.averageRunning ? 'stop' : 'play'} />
-                    {props.averageRunning ? 'Stop' : 'Start'}
+                    <span className={`mdi mdi-${averageRunning ? 'stop' : 'play'}`} />
+                    {averageRunning ? 'Stop' : 'Start'}
                 </Button>
-            </ButtonGroup>
-            <ButtonGroup block vertical>
+            </div>
+            <div className="d-flex flex-column">
                 <Button
                     style={{ backgroundColor: 0xFF11AA }}
-                    bsSize="large"
+                    variant="light"
+                    size="lg"
                     disabled={!rttRunning}
-                    onClick={() => props.ppkToggleDUT(props.deviceRunning)}
+                    onClick={() => ppkToggleDUT(deviceRunning)}
                 >
-                    <Glyphicon glyph={props.deviceRunning ? 'remove-circle' : 'record'} />
-                    {props.deviceRunning ? 'Power OFF' : 'Power ON'}
+                    <span className={`mdi mdi-${deviceRunning ? 'close-circle-outline' : 'record-circle-outline'}`} />
+                    {deviceRunning ? 'Power OFF' : 'Power ON'}
                 </Button>
-            </ButtonGroup>
+            </div>
+
             <Accordion defaultActiveKey="1">
-                <Panel header="Trigger" eventKey="1" /* defaultExpanded */>
-                    Window {props.triggerWindowLength} ms
-                    <Slider
-                        disabled={!rttRunning}
-                        min={(450 * ADC_SAMPLING_TIME_US) / 1e3}
-                        max={(4000 * ADC_SAMPLING_TIME_US) / 1e3}
-                        value={props.triggerWindowLength}
-                        labels={{ 1: '5.85', 100: '52' }}
-                        format={n => `${n}ms`}
-                        onChange={props.moveTriggerWindowLengthAction}
-                        tooltip={false}
-                        onChangeComplete={
-                            () => props.ppkTriggerUpdateWindow(props.triggerWindowLength)
-                        }
-                    />
-                    <ButtonGroup justified style={{ marginTop: 10 }}>
-                        <Button
-                            disabled={!rttRunning || props.externalTrigger}
-                            bsSize="large"
-                            style={{ width: '50%' }}
-                            onClick={props.triggerSingleWaiting ?
-                                props.ppkTriggerStop : props.ppkTriggerSingleSet}
-                        >
-                            <Glyphicon glyph="time" />
-                            {props.triggerSingleWaiting ? 'Waiting...' : 'Single'}
-                        </Button>
-                        <Button
-                            disabled={!rttRunning || props.externalTrigger}
-                            bsSize="large"
-                            style={{ width: '50%' }}
-                            onClick={props.triggerRunning ?
-                                props.ppkTriggerStop : props.ppkTriggerStart}
-                        >
-                            <Glyphicon glyph={props.triggerRunning ? 'flash' : 'record'} />
-                            {props.triggerRunning ? 'Stop' : 'Start'}
-                        </Button>
-                    </ButtonGroup>
-                    <InputGroup style={{ marginTop: 10 }}>
-                        <InputGroup.Addon>Trigger level</InputGroup.Addon>
-                        <FormControl
-                            disabled={!rttRunning || props.externalTrigger}
-                            placeholder="1"
-                            type="text"
-                            onKeyPress={e => { if (e.key === 'Enter') { props.ppkTriggerSet(e.target.value, props.triggerUnit); } }}
-                        />
-                        <UnitSelector
-                            disabled={!rttRunning || props.externalTrigger}
-                            defaultSelected={1}
-                            units={['\u00B5A', 'mA']}
-                            componentClass={InputGroup.Button}
-                            id="input-dropdown-addon"
-                            onChange={i => { props.triggerUnitChangeAction(['uA', 'mA'][i]); }}
-                        />
-                    </InputGroup>
-                    <Checkbox
-                        onClick={e => props.externalTriggerToggled(e.target.checked)}
-                        checked={props.externalTrigger}
-                    >
-                        External trigger
-                    </Checkbox>
-                </Panel>
+                <Card>
+                    <Card.Header>
+                        <Accordion.Toggle as={Button} variant="link" eventKey="1">
+                            Trigger
+                        </Accordion.Toggle>
+                    </Card.Header>
+                    <Accordion.Collapse eventKey="1">
+                        <Card.Body>
+                            Window {triggerWindowLength} ms
+                            <Slider
+                                disabled={!rttRunning}
+                                min={(450 * ADC_SAMPLING_TIME_US) / 1e3}
+                                max={(4000 * ADC_SAMPLING_TIME_US) / 1e3}
+                                value={triggerWindowLength}
+                                labels={{ 1: '5.85', 100: '52' }}
+                                format={n => `${n}ms`}
+                                onChange={moveTriggerWindowLengthAction}
+                                tooltip={false}
+                                onChangeComplete={
+                                    () => ppkTriggerUpdateWindow(triggerWindowLength)
+                                }
+                            />
+                            <div className="d-flex flex-column">
+                                <ButtonGroup style={{ marginTop: 10 }}>
+                                    <Button
+                                        disabled={!rttRunning || externalTrigger}
+                                        size="lg"
+                                        variant="light"
+                                        style={{ width: '50%' }}
+                                        onClick={triggerSingleWaiting
+                                            ? ppkTriggerStop : ppkTriggerSingleSet}
+                                    >
+                                        <span className="mdi mdi-clock-outline" />
+                                        {triggerSingleWaiting ? 'Waiting...' : 'Single'}
+                                    </Button>
+                                    <Button
+                                        disabled={!rttRunning || externalTrigger}
+                                        size="lg"
+                                        variant="light"
+                                        style={{ width: '50%' }}
+                                        onClick={triggerRunning
+                                            ? ppkTriggerStop : ppkTriggerStart}
+                                    >
+                                        <span className={`mdi mdi-${triggerRunning ? 'flash' : 'record-circle-outline'}`} />
+                                        {triggerRunning ? 'Stop' : 'Start'}
+                                    </Button>
+                                </ButtonGroup>
+                            </div>
+                            <InputGroup style={{ marginTop: 10 }}>
+                                <InputGroup.Prepend>
+                                    <InputGroup.Text>Trigger level</InputGroup.Text>
+                                </InputGroup.Prepend>
+                                <Form.Control
+                                    disabled={!rttRunning || externalTrigger}
+                                    placeholder="1"
+                                    type="text"
+                                    onKeyPress={e => { if (e.key === 'Enter') { ppkTriggerSet(e.target.value, triggerUnit); } }}
+                                />
+                                <UnitSelector
+                                    disabled={!rttRunning || externalTrigger}
+                                    defaultSelected={1}
+                                    units={['\u00B5A', 'mA']}
+                                    id="input-dropdown-addon"
+                                    onChange={i => { triggerUnitChangeAction(['uA', 'mA'][i]); }}
+                                    as={InputGroup.Append}
+                                    variant="light"
+                                />
+                            </InputGroup>
+                            <Form.Group controlId="extTrigCheck">
+                                <Form.Check
+                                    type="checkbox"
+                                    onChange={e => externalTriggerToggled(e.target.checked)}
+                                    checked={externalTrigger}
+                                    label="External trigger"
+                                />
+                            </Form.Group>
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
             </Accordion>
-            <Accordion>
-                <Panel header="Voltage Regulator" eventKey="2" defaultExpanded>
-                    VDD {props.voltageRegulatorVdd} mV
-                    <Slider
-                        min={1850}
-                        max={3600}
-                        value={props.voltageRegulatorVdd}
-                        labels={{ 1850: '1850', 3600: '3600' }}
-                        format={n => `${n}mV`}
-                        onChange={props.moveVoltageRegulatorVddAction}
-                        tooltip={false}
-                        onChangeComplete={props.ppkUpdateRegulator}
-                    />
-                </Panel>
-                { advancedMode &&
-                    <Panel header="Switch levels" eventKey="3">
-                        Switch up
-                        <Slider
-                            min={38}
-                            max={175}
-                            value={props.switchUpSliderPosition}
-                            labels={{ 60: `${props.switchUpLow.toFixed(2)} uA`, 160: `${props.switchUpHigh.toFixed(2)} mA` }}
-                            format={n => `${n}mA`}
-                            tooltip={false}
-                            onChange={props.switchingPointUpMoved}
-                            onChangeComplete={props.ppkSwitchingPointsUpSet}
-                        />
-                        Switch down
-                        <Slider
-                            min={100}
-                            max={400}
-                            reverse={false}
-                            value={props.switchDownSliderPosition}
-                            labels={{ 110: `${props.switchDownLow.toFixed(2)} uA`, 370: `${props.switchDownHigh.toFixed(2)} mA` }}
-                            format={n => `${n}mA`}
-                            tooltip={false}
-                            onChange={props.switchingPointDownMovedAction}
-                            onChangeComplete={props.ppkSwitchingPointsDownSet}
-                        />
-                        <Button
-                            onClick={props.ppkSwitchingPointsReset}
-                        >
-                            Reset switch levels
-                        </Button>
-                        <Checkbox
-                            onChange={props.spikeFilteringToggle}
-                            checked={props.spikeFiltering}
-                        >
-                            Spike filtering
-                        </Checkbox>
-                    </Panel>
-                }
-                {advancedMode &&
-                <Panel header="Resistor Calibration" eventKey="4">
-                    <InputGroup>
-                        <InputGroup.Addon>High</InputGroup.Addon>
-                        <FormControl
-                            type="text"
-                            value={props.resistorHigh}
-                            onChange={e => props.updateHighResistorAction(e.target.value)}
-                            onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
-                        />
-                    </InputGroup>
-                    <InputGroup>
-                        <InputGroup.Addon>Mid</InputGroup.Addon>
-                        <FormControl
-                            type="text"
-                            value={props.resistorMid}
-                            onChange={e => props.updateMidResistorAction(e.target.value)}
-                            onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
-                        />
-                    </InputGroup>
-                    <InputGroup>
-                        <InputGroup.Addon>Low</InputGroup.Addon>
-                        <FormControl
-                            type="text"
-                            value={props.resistorLow}
-                            onChange={e => props.updateLowResistorAction(e.target.value)}
-                            onKeyPress={e => { if (e.key === 'Enter') { props.updateResistors(); } }}
-                        />
-                    </InputGroup>
-                    <ButtonGroup justified style={{ marginTop: 10 }}>
-                        <Button style={{ width: '50%' }} onClick={props.updateResistors}>
-                            <Glyphicon glyph="refresh" />Update
-                        </Button>
-                        <Button
-                            style={{ width: '50%' }}
-                            onClick={props.resetResistors}
-                        ><Glyphicon glyph="ban-circle" />Reset</Button>
-                    </ButtonGroup>
-                </Panel>
-                }
+            <Accordion defaultActiveKey="2">
+                <Card>
+                    <Card.Header>
+                        <Accordion.Toggle as={Button} variant="link" eventKey="2">
+                            Voltage Regulator
+                        </Accordion.Toggle>
+                    </Card.Header>
+                    <Accordion.Collapse eventKey="2">
+                        <Card.Body>
+                            VDD {voltageRegulatorVdd} mV
+                            <Slider
+                                min={1850}
+                                max={3600}
+                                value={voltageRegulatorVdd}
+                                labels={{ 1850: '1850', 3600: '3600' }}
+                                format={n => `${n}mV`}
+                                onChange={moveVoltageRegulatorVddAction}
+                                tooltip={false}
+                                onChangeComplete={ppkUpdateRegulator}
+                            />
+                        </Card.Body>
+                    </Accordion.Collapse>
+                </Card>
+                { advancedMode && (
+                    <Card>
+                        <Card.Header>
+                            <Accordion.Toggle as={Button} variant="link" eventKey="3">
+                                Switch levels
+                            </Accordion.Toggle>
+                        </Card.Header>
+                        <Accordion.Collapse eventKey="3">
+                            <Card.Body>
+                                Switch up
+                                <Slider
+                                    min={38}
+                                    max={175}
+                                    value={switchUpSliderPosition}
+                                    labels={{ 60: `${switchUpLow.toFixed(2)} uA`, 160: `${switchUpHigh.toFixed(2)} mA` }}
+                                    format={n => `${n}mA`}
+                                    tooltip={false}
+                                    onChange={switchingPointUpMoved}
+                                    onChangeComplete={ppkSwitchingPointsUpSet}
+                                />
+                                Switch down
+                                <Slider
+                                    min={100}
+                                    max={400}
+                                    reverse={false}
+                                    value={switchDownSliderPosition}
+                                    labels={{ 110: `${switchDownLow.toFixed(2)} uA`, 370: `${switchDownHigh.toFixed(2)} mA` }}
+                                    format={n => `${n}mA`}
+                                    tooltip={false}
+                                    onChange={switchingPointDownMovedAction}
+                                    onChangeComplete={ppkSwitchingPointsDownSet}
+                                />
+                                <Button
+                                    onClick={ppkSwitchingPointsReset}
+                                    variant="light"
+                                >
+                                    Reset switch levels
+                                </Button>
+                                <Form.Group controlId="spikeCheck">
+                                    <Form.Check
+                                        type="checkbox"
+                                        onChange={spikeFilteringToggle}
+                                        checked={spikeFiltering}
+                                        label="Spike filtering"
+                                    />
+                                </Form.Group>
+                            </Card.Body>
+                        </Accordion.Collapse>
+                    </Card>
+                )}
+                {advancedMode && (
+                    <Card>
+                        <Card.Header>
+                            <Accordion.Toggle as={Button} variant="link" eventKey="4">
+                                Resistor Calibration
+                            </Accordion.Toggle>
+                        </Card.Header>
+                        <Accordion.Collapse eventKey="4">
+                            <Card.Body>
+                                <InputGroup>
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text>High</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                    <Form.Control
+                                        type="text"
+                                        value={resistorHigh}
+                                        onChange={e => updateHighResistorAction(e.target.value)}
+                                        onKeyPress={e => { if (e.key === 'Enter') { updateResistors(); } }}
+                                    />
+                                </InputGroup>
+                                <InputGroup>
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text>Mid</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                    <Form.Control
+                                        type="text"
+                                        value={resistorMid}
+                                        onChange={e => updateMidResistorAction(e.target.value)}
+                                        onKeyPress={e => { if (e.key === 'Enter') { updateResistors(); } }}
+                                    />
+                                </InputGroup>
+                                <InputGroup>
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text>Low</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                    <Form.Control
+                                        type="text"
+                                        value={resistorLow}
+                                        onChange={e => updateLowResistorAction(e.target.value)}
+                                        onKeyPress={e => { if (e.key === 'Enter') { updateResistors(); } }}
+                                    />
+                                </InputGroup>
+                                <div className="d-flex flex-column">
+                                    <ButtonGroup style={{ marginTop: 10 }}>
+                                        <Button
+                                            onClick={updateResistors}
+                                            variant="light"
+                                        >
+                                            <span className="mdi mdi-refresh" />Update
+                                        </Button>
+                                        <Button
+                                            onClick={resetResistors}
+                                            variant="light"
+                                        >
+                                            <span className="mdi mdi-cancel" />Reset
+                                        </Button>
+                                    </ButtonGroup>
+                                </div>
+                            </Card.Body>
+                        </Accordion.Collapse>
+                    </Card>
+                )}
             </Accordion>
         </div>
     );

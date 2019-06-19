@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfconnect-ppk",
-  "version": "2.1.0",
+  "version": "2.2.0-alpha.0",
   "description": "Power Profiler",
   "displayName": "Power Profiler",
   "repository": {
@@ -10,7 +10,7 @@
   "author": "Nordic Semiconductor ASA",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
-    "nrfconnect": "^2.4.0"
+    "nrfconnect": "^2.8.0"
   },
   "main": "dist/bundle.js",
   "files": [
@@ -34,18 +34,12 @@
     "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
   },
   "devDependencies": {
-    "chart.js": "2.6.0",
-    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:^1.3.5",
-    "react-bootstrap": "0.31.3",
-    "react-chartjs-2": "2.6.1",
+    "chart.js": "2.8.0",
+    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:^3.0.0",
+    "react-chartjs-2": "2.7.6",
     "react-rangeslider": "2.2.0",
-    "mathjs": "3.18.0",
-    "mousetrap": "1.6.1"
+    "mathjs": "6.0.2",
+    "mousetrap": "1.6.3"
   },
-  "dependencies": {},
-  "jest": {
-    "moduleNameMapper": {
-      "nrfconnect/core": "<rootDir>/mocks/coreMock.js"
-    }
-  }
+  "dependencies": {}
 }

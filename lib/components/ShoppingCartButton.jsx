@@ -36,7 +36,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Glyphicon } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
 import { shell } from 'electron';
 
 const ShoppingCartButton = ({ url, tooltip }) => (
@@ -45,7 +45,7 @@ const ShoppingCartButton = ({ url, tooltip }) => (
         title={tooltip}
         onClick={() => shell.openItem(url)}
     >
-        <Glyphicon glyph="shopping-cart" />
+        <span className="mdi mdi-cart" />
     </Button>
 );
 
