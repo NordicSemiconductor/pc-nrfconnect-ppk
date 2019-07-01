@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfconnect-ppk",
-  "version": "2.2.0-alpha.0",
+  "version": "2.2.0",
   "description": "Power Profiler",
   "displayName": "Power Profiler",
   "repository": {
