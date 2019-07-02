@@ -75,7 +75,7 @@ export default {
             </div>
         )
     ),
-    mapSerialPortSelectorState: (state, props) => ({
+    mapDeviceSelectorState: (state, props) => ({
         portIndicatorStatus: (state.app.app.portName !== null) ? 'on' : 'off',
         ...props,
     }),
