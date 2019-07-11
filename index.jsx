@@ -46,7 +46,12 @@ import ShoppingCartButton from './lib/components/ShoppingCartButton';
 import * as PPKActions from './lib/actions/PPKActions';
 import './resources/css/index.scss';
 
+let globalDispatch;
+
 export default {
+    onInit: dispatch => {
+        globalDispatch = dispatch;
+    },
     onReady: () => {
         logger.info('App initialized');
     },
@@ -75,7 +80,7 @@ export default {
             </div>
         )
     ),
-    mapSerialPortSelectorState: (state, props) => ({
+    mapDeviceSelectorState: (state, props) => ({
         portIndicatorStatus: (state.app.app.portName !== null) ? 'on' : 'off',
         ...props,
     }),
@@ -124,5 +129,6 @@ export default {
             },
             needSerialport: false,
         },
+        releaseCurrentDevice: () => globalDispatch(PPKActions.close()),
     },
 };
