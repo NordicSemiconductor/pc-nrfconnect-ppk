@@ -7,7 +7,7 @@ Power Profiler app for [nRF Connect](https://github.com/NordicSemiconductor/pc-n
 The Power Profiler application is a tool to communicate with the The Power Profiler Kit (PPK), an affordable and flexible tool to obtain real-time current measurements of your designs.
 The PPK measures current consumption for a connected nRF5x Development Kit or any external board. It measures current from 1 μA up to 70 mA and gives a detailed picture of the current profile for the user application.
 
-All functionality is described in the [User Guide](http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.tools/dita/tools/power_profiler_kit/PPK_user_guide_Intro.html).
+All functionality is described in the [User Guide](https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html).
 
 ![Power Profiler app](resources/screenshot.png)
 ## Building from source
