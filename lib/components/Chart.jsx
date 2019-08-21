@@ -460,7 +460,7 @@ Chart.propTypes = {
         color: PropTypes.string,
         valueRange: PropTypes.objectOf(PropTypes.number),
         data: PropTypes.shapeof([]),
-        update: PropTypes.bool,
+        update: PropTypes.number,
     }).isRequired,
 };
 
