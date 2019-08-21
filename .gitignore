@@ -1,6 +1,10 @@
-node_modules
+.DS_Store
+.eslintrc
 .idea
+*.db
 dist
 jest.json
+log.txt
+node_modules
+npm-debug.log
 package-lock.json
-.vscode/settings.json

@@ -25,6 +25,7 @@
     "webpack": "nrfconnect-scripts build-dev",
     "build": "nrfconnect-scripts build-prod",
     "nordic-publish": "nrfconnect-scripts nordic-publish",
+    "lint-init": "nrfconnect-scripts lint-init",
     "lint": "nrfconnect-scripts lint lib index.jsx",
     "lintfix": "nrfconnect-scripts lint --fix lib index.jsx",
     "test": "nrfconnect-scripts test",
@@ -35,7 +36,7 @@
   },
   "devDependencies": {
     "chart.js": "2.8.0",
-    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:^3.0.0",
+    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:^3.1.0",
     "react-chartjs-2": "2.7.6",
     "react-rangeslider": "2.2.0",
     "mathjs": "6.0.2",

@@ -459,6 +459,8 @@ Chart.propTypes = {
         samplesPerSecond: PropTypes.number,
         color: PropTypes.string,
         valueRange: PropTypes.objectOf(PropTypes.number),
+        data: PropTypes.shapeof([]),
+        update: PropTypes.number,
     }).isRequired,
 };
 
