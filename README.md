@@ -4,38 +4,29 @@ Power Profiler app for [nRF Connect](https://github.com/NordicSemiconductor/pc-n
 
 ## Introduction
 
-The Power Profiler application is a tool to communicate with the The Power Profiler Kit (PPK), an affordable and flexible tool to obtain real-time current measurements of your designs.
+*nRF Connect Power Profiler* is a tool to communicate with the The Power Profiler Kit (PPK), an affordable and flexible tool to obtain real-time current measurements of your designs.
 The PPK measures current consumption for a connected nRF5x Development Kit or any external board. It measures current from 1 μA up to 70 mA and gives a detailed picture of the current profile for the user application.
 
 All functionality is described in the [User Guide](https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html).
 
-![Power Profiler app](resources/screenshot.png)
-## Building from source
+![screenshot](resources/screenshot.gif)
 
-### Dependencies
+## Installation
 
-To build the app you will need to install the following tools:
+See the [InfoCenter](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fstruct_nrftools%2Fstruct%2Fnrftools_nrfconnect.html) pages for information on how to install the application.
 
-* Node.js (>=6.9)
-* npm (>=5.6.0) / yarn (>=1.4.0)
+## Development
 
-### Clone the repository
+See the [app development](https://github.com/NordicSemiconductor/pc-nrfconnect-core/wiki) pages for details on how to develop apps for the nRF Connect for Desktop framework.
 
-Open a terminal, go to the following directory, and clone the repository:
+## Feedback
 
-- Linux/macOS: `cd $HOME/.nrfconnect-apps/local`
-- Windows: `cd %USERPROFILE%/.nrfconnect-apps/local`
+Please report issues on the [DevZone](https://devzone.nordicsemi.com) portal.
 
-Alternatively, clone the repository in a different directory and symlink it into `.nrfconnect-apps/local`.
+## Contributing
 
-### Building
+See the [Contributing](https://github.com/NordicSemiconductor/pc-nrfconnect-core/wiki/Contributing) file for details.
 
-After cloning the repository, install the required dependencies:
+## License
 
-    npm install
-
-Then build the app:
-
-    npm run dev
-
-If everything was successful, you should now be able to launch the app in nRF Connect.
+See the [LICENSE](LICENSE) file for details.
