@@ -453,13 +453,12 @@ Chart.propTypes = {
     averageRunning: PropTypes.bool,
     canReset: PropTypes.bool,
     options: PropTypes.shape({
-        // data: PropsTypes.instanceOf(...),
+        data: PropTypes.array,
         index: PropTypes.number,
         timestamp: PropTypes.number,
         samplesPerSecond: PropTypes.number,
         color: PropTypes.string,
         valueRange: PropTypes.objectOf(PropTypes.number),
-        data: PropTypes.shapeof([]),
         update: PropTypes.number,
     }).isRequired,
 };
