@@ -38,7 +38,8 @@
     "chart.js": "2.8.0",
     "mathjs": "6.0.2",
     "mousetrap": "1.6.3",
-    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:3.3.0",    "react-chartjs-2": "2.7.6",
+    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:3.3.0",
+    "react-chartjs-2": "2.7.6",
     "react-rangeslider": "2.2.0"
   },
   "dependencies": {}
