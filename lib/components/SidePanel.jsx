@@ -190,7 +190,6 @@ const SidePanel = ({
                                 />
                                 <UnitSelector
                                     disabled={!rttRunning || externalTrigger}
-                                    defaultSelected={1}
                                     units={['\u00B5A', 'mA']}
                                     id="input-dropdown-addon"
                                     onChange={i => { triggerUnitChangeAction(['uA', 'mA'][i]); }}
