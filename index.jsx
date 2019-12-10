@@ -123,7 +123,7 @@ export default {
             jprog: {
                 nrf52: {
                     fw: path.resolve(getAppDir(), 'firmware/ppk_nrfconnect.hex'),
-                    fwVersion: 'ppk-fw-2.0.0',
+                    fwVersion: 'ppk-fw-2.0.1',
                     fwIdAddress: 0x10000,
                 },
             },

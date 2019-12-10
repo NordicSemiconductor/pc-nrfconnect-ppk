@@ -34,50 +34,35 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
-class UnitSelector extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { selected: props.defaultSelected };
-        this.onSelect = this.onSelect.bind(this);
-    }
-
-    onSelect(key) {
-        this.setState({ selected: key });
-        const { onChange } = this.props;
-        onChange(key);
-    }
-
-    render() {
-        const {
-            units, defaultSelected, onChange, ...rest
-        } = this.props;
-        const { selected } = this.state;
-        const selectedUnit = units[selected];
-        const menuItems = units.map((unit, k) => (
-            <Dropdown.Item
-                eventKey={`${k + 0}`}
-                key={`${k + 0}`}
-                onSelect={this.onSelect}
-            >
-                {unit}
-            </Dropdown.Item>
-        ));
-        return (
-            <DropdownButton title={selectedUnit} {...rest}>
-                { menuItems }
-            </DropdownButton>
-        );
-    }
-}
+const UnitSelector = ({
+    units, onChange, ...rest
+}) => {
+    const [selected, setSelected] = useState(1);
+    const menuItems = units.map((unit, k) => (
+        <Dropdown.Item
+            // eventKey is passed to container accordion
+            // which we don't want to effect, so use the same key.
+            eventKey={1}
+            key={`${k + 0}`}
+            onSelect={() => { setSelected(k); onChange(k); }}
+        >
+            { unit }
+        </Dropdown.Item>
+    ));
+    return (
+        <DropdownButton title={units[selected]} {...rest}>
+            { menuItems }
+        </DropdownButton>
+    );
+};
 
 UnitSelector.propTypes = {
     units: PropTypes.arrayOf(PropTypes.string).isRequired,
-    defaultSelected: PropTypes.number.isRequired,
     onChange: PropTypes.func.isRequired,
 };
 

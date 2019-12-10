@@ -1,3 +1,7 @@
+## Version 2.3.1
+### Bugfixes
+- Fix updating voltage regulator #105
+
 ## Version 2.3.0
 ### Updates
 - Updated RTT API calls for nRFConnect 3.3 #103
