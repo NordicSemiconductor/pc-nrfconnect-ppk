@@ -46,33 +46,15 @@ import Card from 'react-bootstrap/Card';
 import Slider from 'react-rangeslider';
 import 'react-rangeslider/lib/index.css';
 
-import UnitSelector from './UnitSelector';
-
-import {
-    ADC_SAMPLING_TIME_US,
-} from '../constants';
-
 const SidePanel = ({
     ppkUpdateRegulator,
     averageStart,
     averageStop,
     averageRunning,
-    externalTrigger,
     spikeFiltering,
     deviceRunning,
     rttRunning,
     ppkToggleDUT,
-    triggerSingleWaiting,
-    triggerRunning,
-    ppkTriggerUpdateWindow,
-    ppkTriggerStart,
-    ppkTriggerStop,
-    triggerUnitChangeAction,
-    ppkTriggerSet,
-    ppkTriggerSingleSet,
-    triggerUnit,
-    triggerWindowLength,
-    moveTriggerWindowLengthAction,
     voltageRegulatorVdd,
     moveVoltageRegulatorVddAction,
     resistorLow,
@@ -83,7 +65,6 @@ const SidePanel = ({
     updateLowResistorAction,
     updateResistors,
     resetResistors,
-    externalTriggerToggled,
     spikeFilteringToggle,
     switchUpHigh,
     switchUpLow,
@@ -129,86 +110,6 @@ const SidePanel = ({
                 </Button>
             </div>
 
-            <Accordion defaultActiveKey="1">
-                <Card>
-                    <Card.Header>
-                        <Accordion.Toggle as={Button} variant="link" eventKey="1">
-                            Trigger
-                        </Accordion.Toggle>
-                    </Card.Header>
-                    <Accordion.Collapse eventKey="1">
-                        <Card.Body>
-                            Window {triggerWindowLength} ms
-                            <Slider
-                                disabled={!rttRunning}
-                                min={(450 * ADC_SAMPLING_TIME_US) / 1e3}
-                                max={(4000 * ADC_SAMPLING_TIME_US) / 1e3}
-                                value={triggerWindowLength}
-                                labels={{ 1: '5.85', 100: '52' }}
-                                format={n => `${n}ms`}
-                                onChange={moveTriggerWindowLengthAction}
-                                tooltip={false}
-                                onChangeComplete={
-                                    () => ppkTriggerUpdateWindow(triggerWindowLength)
-                                }
-                            />
-                            <div className="d-flex flex-column">
-                                <ButtonGroup style={{ marginTop: 10 }}>
-                                    <Button
-                                        disabled={!rttRunning || externalTrigger}
-                                        size="lg"
-                                        variant="light"
-                                        style={{ width: '50%' }}
-                                        onClick={triggerSingleWaiting
-                                            ? ppkTriggerStop : ppkTriggerSingleSet}
-                                    >
-                                        <span className="mdi mdi-clock-outline" />
-                                        {triggerSingleWaiting ? 'Waiting...' : 'Single'}
-                                    </Button>
-                                    <Button
-                                        disabled={!rttRunning || externalTrigger}
-                                        size="lg"
-                                        variant="light"
-                                        style={{ width: '50%' }}
-                                        onClick={triggerRunning
-                                            ? ppkTriggerStop : ppkTriggerStart}
-                                    >
-                                        <span className={`mdi mdi-${triggerRunning ? 'flash' : 'record-circle-outline'}`} />
-                                        {triggerRunning ? 'Stop' : 'Start'}
-                                    </Button>
-                                </ButtonGroup>
-                            </div>
-                            <InputGroup style={{ marginTop: 10 }}>
-                                <InputGroup.Prepend>
-                                    <InputGroup.Text>Trigger level</InputGroup.Text>
-                                </InputGroup.Prepend>
-                                <Form.Control
-                                    disabled={!rttRunning || externalTrigger}
-                                    placeholder="1"
-                                    type="text"
-                                    onKeyPress={e => { if (e.key === 'Enter') { ppkTriggerSet(e.target.value, triggerUnit); } }}
-                                />
-                                <UnitSelector
-                                    disabled={!rttRunning || externalTrigger}
-                                    units={['\u00B5A', 'mA']}
-                                    id="input-dropdown-addon"
-                                    onChange={i => { triggerUnitChangeAction(['uA', 'mA'][i]); }}
-                                    as={InputGroup.Append}
-                                    variant="light"
-                                />
-                            </InputGroup>
-                            <Form.Group controlId="extTrigCheck">
-                                <Form.Check
-                                    type="checkbox"
-                                    onChange={e => externalTriggerToggled(e.target.checked)}
-                                    checked={externalTrigger}
-                                    label="External trigger"
-                                />
-                            </Form.Group>
-                        </Card.Body>
-                    </Accordion.Collapse>
-                </Card>
-            </Accordion>
             <Accordion defaultActiveKey="2">
                 <Card>
                     <Card.Header>
@@ -355,24 +256,11 @@ SidePanel.propTypes = {
     averageStart: PropTypes.func.isRequired,
     averageStop: PropTypes.func.isRequired,
     averageRunning: PropTypes.bool.isRequired,
-    externalTrigger: PropTypes.bool.isRequired,
     spikeFiltering: PropTypes.bool.isRequired,
 
     deviceRunning: PropTypes.bool.isRequired,
     rttRunning: PropTypes.bool.isRequired,
     ppkToggleDUT: PropTypes.func.isRequired,
-
-    triggerSingleWaiting: PropTypes.bool.isRequired,
-    triggerRunning: PropTypes.bool.isRequired,
-    ppkTriggerUpdateWindow: PropTypes.func.isRequired,
-    ppkTriggerStart: PropTypes.func.isRequired,
-    ppkTriggerStop: PropTypes.func.isRequired,
-    triggerUnitChangeAction: PropTypes.func.isRequired,
-    ppkTriggerSet: PropTypes.func.isRequired,
-    ppkTriggerSingleSet: PropTypes.func.isRequired,
-    triggerUnit: PropTypes.string.isRequired,
-    triggerWindowLength: PropTypes.number.isRequired,
-    moveTriggerWindowLengthAction: PropTypes.func.isRequired,
 
     voltageRegulatorVdd: PropTypes.number.isRequired,
     moveVoltageRegulatorVddAction: PropTypes.func.isRequired,
@@ -387,7 +275,6 @@ SidePanel.propTypes = {
     updateResistors: PropTypes.func.isRequired,
     resetResistors: PropTypes.func.isRequired,
 
-    externalTriggerToggled: PropTypes.func.isRequired,
     spikeFilteringToggle: PropTypes.func.isRequired,
 
     switchUpHigh: PropTypes.number.isRequired,

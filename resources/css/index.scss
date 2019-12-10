@@ -35,7 +35,7 @@
 }
 
 .chart-outer {
-    height: 50%;
+    height: 100%;
     width: 100%;
     position: relative;
     display: flex;
@@ -43,14 +43,14 @@
     justify-content: space-between;
     .chart-top {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         margin: 0px 24px;
         > * {
             margin: 10px 0;
             display: inherit;
         }
         .progress {
-            display: inline;
+            display: inline-block;
             width: 200px;
             background-color: #a94442;
             .progress-bar {

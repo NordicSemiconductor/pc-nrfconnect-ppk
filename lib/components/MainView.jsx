@@ -38,14 +38,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import AverageChart from '../containers/AverageChart';
-import TriggerChart from '../containers/TriggerChart';
 
-import { triggerOptions, averageOptions } from '../actions/PPKActions';
+import { averageOptions } from '../actions/PPKActions';
 
 const MainView = ({ toggleFullView, fullView }) => (
     <div className="core-main-view">
         <AverageChart options={averageOptions} />
-        <TriggerChart options={triggerOptions} />
         <span
             onClick={toggleFullView}
             className={`btnFullViewToggle mdi mdi-${fullView ? 'fullscreen-exit' : 'fullscreen'}`}

@@ -76,7 +76,7 @@ export default {
         props => (
             <div className="nav-menu-wrap">
                 <NavMenu {...props} />
-                Power Profiler
+                PPK mkII
             </div>
         )
     ),
