@@ -1,6 +1,6 @@
 # nRF Connect Power Profiler
 
-Power Profiler app for [nRF Connect](https://github.com/NordicSemiconductor/pc-nrfconnect-core).
+Power Profiler app for [nRF Connect](https://github.com/NordicSemiconductor/pc-nrfconnect-launcher).
 
 ## Introduction
 
