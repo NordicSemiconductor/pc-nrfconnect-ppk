@@ -36,6 +36,7 @@
 
 // For electron runtime optimization we need to avoid operator-assiment:
 /* eslint operator-assignment: off */
+/* eslint no-bitwise: off */
 
 import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
@@ -49,8 +50,16 @@ import '../utils/chart.dragSelect'; // eslint-disable-line
 import '../utils/chart.zoomPan'; // eslint-disable-line
 
 defaults.global.tooltips.enabled = false;
-defaults.global.legend.display = false;
+defaults.global.legend.display = true;
 defaults.global.animation.duration = 0;
+
+function useMergeState(initialState) {
+    const [state, setState] = useState(initialState);
+    const setMergedState = newState => setState(
+        prevState => Object.assign({}, prevState, newState),
+    );
+    return [state, setMergedState];
+}
 
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
@@ -101,7 +110,13 @@ const Chart = ({
 
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
 
-    const [lineData, setLineData] = useState([]);
+    const [{
+        lineData,
+        bits,
+    }, setChartState] = useMergeState({
+        lineData: [],
+        bits: [[], [], [], [], []],
+    });
     const len = lineData.length / 2;
 
     const onChartSizeUpdate = instance => {
@@ -110,7 +125,16 @@ const Chart = ({
         if (len === width) {
             return;
         }
-        setLineData(new Array(width + width));
+        setChartState({
+            lineData: new Array(2 * width),
+            bits: [
+                new Array(2 * width),
+                new Array(2 * width),
+                new Array(2 * width),
+                new Array(2 * width),
+                new Array(2 * width),
+            ],
+        });
     };
 
     const timestampToIndex = ts => (
@@ -197,20 +221,35 @@ const Chart = ({
         }
     } else {
         let mappedIndex = 0;
+        let bi = 0;
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
         for (let n = originalIndexBeginFloored;
             n < originalIndexEndCeiled;
-            mappedIndex = mappedIndex + 1, n = n + 1) {
+            mappedIndex = mappedIndex + 1, n = n + 1, bi = bi + 2) {
             const k = (n + options.data.length) % options.data.length;
             const v = options.data[k];
             const timestamp = begin
                 + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
             lineData[mappedIndex] = { x: timestamp, y: v };
+
+            bits[0][bi] = { x: timestamp, y: bits[0][bi - 1] };
+            bits[0][bi + 1] = { x: timestamp, y: options.bits[k] & 1 };
+            bits[1][bi] = { x: timestamp, y: bits[1][bi - 1] };
+            bits[1][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 1) & 1) + 2 };
+            bits[2][bi] = { x: timestamp, y: bits[2][bi - 1] };
+            bits[2][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 2) & 1) + 4 };
+            bits[3][bi] = { x: timestamp, y: bits[3][bi - 1] };
+            bits[3][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 3) & 1) + 6 };
+            bits[4][bi] = { x: timestamp, y: bits[4][bi - 1] };
+            bits[4][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 4) & 1) + 8 };
         }
-        for (; mappedIndex < lineData.length; mappedIndex = mappedIndex + 1) {
-            lineData[mappedIndex] = undefined;
-        }
+        lineData.fill(undefined, mappedIndex);
+        bits[0].fill(undefined, bi);
+        bits[1].fill(undefined, bi);
+        bits[2].fill(undefined, bi);
+        bits[3].fill(undefined, bi);
+        bits[4].fill(undefined, bi);
     }
 
     const renderValue = (label, value, unitArg) => {
@@ -248,6 +287,44 @@ const Chart = ({
     };
 
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
+
+    const bitColors = ['#005588', '#008855', '#005555', '#008888', '#000088'];
+    const bitLabels = ['led', 'bell', 'switch', 'magnet', 'torch'];
+
+    const bitsDataSets = (step > 1) ? [] : bits.map((b, i) => ({
+        borderColor: bitColors[i],
+        borderWidth: 0.5,
+        fill: false,
+        data: b,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        pointHitRadius: 0,
+        pointBorderWidth: 0,
+        lineTension: 0,
+        label: bitLabels[i],
+        yAxisID: 'bits-axis',
+    }));
+
+    const bitsAxis = (step > 1) ? [] : [{
+        id: 'bits-axis',
+        type: 'linear',
+        min: 0,
+        max: 9,
+        position: 'right',
+        ticks: {
+            autoSkip: false,
+            min: -1,
+            max: 10,
+            labelOffset: 0,
+            minRotation: 90,
+            maxRotation: 90,
+            callback: (n => bitLabels[n / 2]),
+        },
+        gridLines: {
+            display: false,
+        },
+    }];
+
     const chartData = {
         datasets: [{
             borderColor: options.color,
@@ -260,8 +337,9 @@ const Chart = ({
             pointBackgroundColor: options.color,
             pointBorderWidth: 0,
             lineTension: step > 0.2 ? 0 : 0.2,
-            label: 'data0',
-        }],
+            label: 'current',
+            yAxisID: 'current-axis',
+        }, ...bitsDataSets],
     };
 
     const chartOptions = {
@@ -289,24 +367,28 @@ const Chart = ({
                     cursorEnd,
                 },
             }],
-            yAxes: [{
-                type: 'linear',
-                min: options.valueRange.min,
-                max: options.valueRange.max,
-                fullWidth: 60,
-                ticks: {
-                    suggestedMin: options.valueRange.min,
-                    suggestedMax: options.valueRange.max,
-                    min: yMin === null ? options.valueRange.min : yMin,
-                    max: yMax === null ? undefined : yMax,
-                    maxTicksLimit: 7,
-                    callback: (uA => (
-                        unit(uA, 'uA')
-                            .format({ notation: 'fixed', precision: 3 })
-                            .replace('u', '\u00B5')
-                    )),
+            yAxes: [
+                {
+                    id: 'current-axis',
+                    type: 'linear',
+                    min: options.valueRange.min,
+                    max: options.valueRange.max,
+                    fullWidth: 60,
+                    ticks: {
+                        suggestedMin: options.valueRange.min,
+                        suggestedMax: options.valueRange.max,
+                        min: yMin === null ? options.valueRange.min : yMin,
+                        max: yMax === null ? undefined : yMax,
+                        maxTicksLimit: 7,
+                        callback: (uA => (
+                            unit(uA, 'uA')
+                                .format({ notation: 'fixed', precision: 3 })
+                                .replace('u', '\u00B5')
+                        )),
+                    },
                 },
-            }],
+                ...bitsAxis,
+            ],
         },
         redraw: true,
         maintainAspectRatio: false,
@@ -392,6 +474,7 @@ Chart.propTypes = {
     canReset: PropTypes.bool,
     options: PropTypes.shape({
         data: PropTypes.instanceOf(Float32Array),
+        bits: PropTypes.instanceOf(Uint8Array),
         index: PropTypes.number,
         timestamp: PropTypes.number,
         samplesPerSecond: PropTypes.number,
