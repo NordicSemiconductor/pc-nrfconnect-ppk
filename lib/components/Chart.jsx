@@ -52,15 +52,6 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = false;
 defaults.global.animation.duration = 0;
 
-function useMergeState(initialState) {
-    const [state, setState] = useState(initialState);
-    const setMergedState = newState => setState(
-        prevState => Object.assign({}, prevState, newState),
-    );
-    return [state, setMergedState];
-}
-
-
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
     const sign = usecs < 0 ? '-' : '';
@@ -110,10 +101,8 @@ const Chart = ({
 
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
 
-    const [{ lineData, len }, setChartState] = useMergeState({
-        lineData: [],
-        len: 0,
-    });
+    const [lineData, setLineData] = useState([]);
+    const len = lineData.length / 2;
 
     const onChartSizeUpdate = instance => {
         const { left, right } = instance.chart.chartArea;
@@ -121,10 +110,7 @@ const Chart = ({
         if (len === width) {
             return;
         }
-        setChartState({
-            lineData: new Array(width + width),
-            len: width,
-        });
+        setLineData(new Array(width + width));
     };
 
     const timestampToIndex = ts => (
@@ -222,7 +208,7 @@ const Chart = ({
                 + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
             lineData[mappedIndex] = { x: timestamp, y: v };
         }
-        for (; mappedIndex < len + len; mappedIndex = mappedIndex + 1) {
+        for (; mappedIndex < lineData.length; mappedIndex = mappedIndex + 1) {
             lineData[mappedIndex] = undefined;
         }
     }
