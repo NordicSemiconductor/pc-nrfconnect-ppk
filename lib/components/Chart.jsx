@@ -221,35 +221,33 @@ const Chart = ({
         }
     } else {
         let mappedIndex = 0;
-        let bi = 0;
+        const bi = new Array(bits.length).fill(0);
+        for (let i = 0; i < bits.length; i += 1) {
+            bits[i][0] = undefined;
+        }
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
         for (let n = originalIndexBeginFloored;
-            n < originalIndexEndCeiled;
-            mappedIndex = mappedIndex + 1, n = n + 1, bi = bi + 2) {
+            n <= originalIndexEndCeiled;
+            mappedIndex += 1, n += 1) {
             const k = (n + options.data.length) % options.data.length;
             const v = options.data[k];
             const timestamp = begin
                 + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
             lineData[mappedIndex] = { x: timestamp, y: v };
 
-            bits[0][bi] = { x: timestamp, y: bits[0][bi - 1] };
-            bits[0][bi + 1] = { x: timestamp, y: options.bits[k] & 1 };
-            bits[1][bi] = { x: timestamp, y: bits[1][bi - 1] };
-            bits[1][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 1) & 1) + 2 };
-            bits[2][bi] = { x: timestamp, y: bits[2][bi - 1] };
-            bits[2][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 2) & 1) + 4 };
-            bits[3][bi] = { x: timestamp, y: bits[3][bi - 1] };
-            bits[3][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 3) & 1) + 6 };
-            bits[4][bi] = { x: timestamp, y: bits[4][bi - 1] };
-            bits[4][bi + 1] = { x: timestamp, y: ((options.bits[k] >> 4) & 1) + 8 };
+            for (let i = 0; i < bits.length; i += 1) {
+                const y = ((options.bits[k] >> i) & 1) + (i * 2);
+                if ((bits[i][bi[i] - 1] || {}).y !== y || n === originalIndexEndCeiled) {
+                    bits[i][bi[i]] = { x: timestamp, y };
+                    bi[i] += 1;
+                }
+            }
         }
         lineData.fill(undefined, mappedIndex);
-        bits[0].fill(undefined, bi);
-        bits[1].fill(undefined, bi);
-        bits[2].fill(undefined, bi);
-        bits[3].fill(undefined, bi);
-        bits[4].fill(undefined, bi);
+        for (let i = 0; i < bits.length; i += 1) {
+            bits[i].fill(undefined, bi[i]);
+        }
     }
 
     const renderValue = (label, value, unitArg) => {
@@ -303,6 +301,7 @@ const Chart = ({
         lineTension: 0,
         label: bitLabels[i],
         yAxisID: 'bits-axis',
+        steppedLine: 'before',
     }));
 
     const bitsAxis = (step > 1) ? [] : [{
