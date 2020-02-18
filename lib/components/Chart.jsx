@@ -133,6 +133,9 @@ const Chart = ({
                 new Array(2 * width),
                 new Array(2 * width),
                 new Array(2 * width),
+                new Array(2 * width),
+                new Array(2 * width),
+                new Array(2 * width),
             ],
         });
     };
@@ -286,8 +289,8 @@ const Chart = ({
 
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
-    const bitColors = ['#005588', '#008855', '#005555', '#008888', '#000088'];
-    const bitLabels = ['led', 'bell', 'switch', 'magnet', 'torch'];
+    const bitColors = ['#005588', '#008855', '#005555', '#008888', '#660088', '#0055FF', '#00C288', '#0F2088'];
+    const bitLabels = ['LAP0', 'LAP1', 'LAP2', 'LAP3', 'LAP4', 'LAP5', 'LAP6', 'LAP7'];
 
     const bitsDataSets = (step > 1) ? [] : bits.map((b, i) => ({
         borderColor: bitColors[i],
@@ -308,12 +311,12 @@ const Chart = ({
         id: 'bits-axis',
         type: 'linear',
         min: 0,
-        max: 9,
+        max: 15,
         position: 'right',
         ticks: {
             autoSkip: false,
             min: -1,
-            max: 10,
+            max: 16,
             labelOffset: 0,
             minRotation: 90,
             maxRotation: 90,
