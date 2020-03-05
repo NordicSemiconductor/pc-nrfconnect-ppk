@@ -38,7 +38,7 @@
 /* eslint operator-assignment: off */
 /* eslint no-bitwise: off */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { defaults, Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
@@ -52,14 +52,6 @@ import '../utils/chart.zoomPan'; // eslint-disable-line
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
 defaults.global.animation.duration = 0;
-
-function useMergeState(initialState) {
-    const [state, setState] = useState(initialState);
-    const setMergedState = newState => setState(
-        prevState => Object.assign({}, prevState, newState),
-    );
-    return [state, setMergedState];
-}
 
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
@@ -87,6 +79,8 @@ const timestampToLabel = (usecs, index, array) => {
     return [time, subsecond];
 };
 
+const numberOfBits = 8;
+
 const Chart = ({
     options,
     index,
@@ -105,39 +99,23 @@ const Chart = ({
     yMin,
     yMax,
 }) => {
+    const chartRef = useRef(null);
+
     const end = windowEnd || options.timestamp;
     const begin = windowBegin || (end - windowDuration);
 
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
 
-    const [{
-        lineData,
-        bits,
-    }, setChartState] = useMergeState({
-        lineData: [],
-        bits: [[], [], [], [], []],
-    });
-    const len = lineData.length / 2;
+    const lineData = [];
+    const bits = [...Array(numberOfBits)].map(() => []);
+    const bitIndexes = new Array(numberOfBits);
+
+    const [len, setLen] = useState(0);
 
     const onChartSizeUpdate = instance => {
         const { left, right } = instance.chart.chartArea;
         const width = Math.trunc(right - left);
-        if (len === width) {
-            return;
-        }
-        setChartState({
-            lineData: new Array(2 * width),
-            bits: [
-                new Array(2 * width),
-                new Array(2 * width),
-                new Array(2 * width),
-                new Array(2 * width),
-                new Array(2 * width),
-                new Array(2 * width),
-                new Array(2 * width),
-                new Array(2 * width),
-            ],
-        });
+        setLen(Math.min(width, 2000));
     };
 
     const timestampToIndex = ts => (
@@ -181,10 +159,13 @@ const Chart = ({
         );
     };
 
-    const chartRef = useCallback(node => {
-        if (!node) return;
-        const { dragSelect, zoomPan } = node.chartInstance;
-        onChartSizeUpdate(node.chartInstance);
+    useEffect(() => {
+        if (!chartRef.current.chartInstance) {
+            return;
+        }
+
+        const { dragSelect, zoomPan } = chartRef.current.chartInstance;
+        onChartSizeUpdate(chartRef.current.chartInstance);
         dragSelect.callback = chartCursor;
         zoomPan.callback = zoomPanCallback;
     }, []);
@@ -199,22 +180,47 @@ const Chart = ({
     const originalIndexEnd = timestampToIndex(end);
     const step = (originalIndexEnd - originalIndexBegin) / len;
 
+    let mappedIndex = 0;
+    bitIndexes.fill(0);
+    for (let i = 0; i < numberOfBits; i += 1) {
+        bits[i][0] = undefined;
+    }
     if (step > 1) {
-        for (let mappedIndex = 0, originalIndex = originalIndexBegin;
+        for (let originalIndex = originalIndexBegin;
             mappedIndex < len;
-            mappedIndex = mappedIndex + 1, originalIndex = originalIndex + step) {
+            mappedIndex += 1, originalIndex += step) {
             const timestamp = begin + (windowDuration * (mappedIndex / len));
             const k = Math.floor(originalIndex);
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
             let max = -Number.MAX_VALUE;
-            for (let n = k; n < l; n = n + 1) {
+            for (let n = k; n < l; n += 1) {
                 const v = options.data[(n + options.data.length) % options.data.length];
                 if (v !== undefined) {
                     if (v > max) max = v;
                     if (v < min) min = v;
                 }
             }
+
+            for (let i = 0; i < numberOfBits; i += 1) {
+                let y1;
+                for (let n = k; n < l; n += 1) {
+                    const v = (options.bits[n] === undefined)
+                        ? undefined
+                        : (((options.bits[n] >> i) & 1) + (i * 2));
+                    if (v !== undefined && (y1 === undefined || v !== y1)) {
+                        if ((bits[i][bitIndexes[i] - 1] || {}).y !== v || mappedIndex === len - 1) {
+                            bits[i][bitIndexes[i]] = { x: timestamp, y: v };
+                            bitIndexes[i] += 1;
+                        }
+                        if (y1 !== undefined) {
+                            break;
+                        }
+                        y1 = v;
+                    }
+                }
+            }
+
             if (min > max) {
                 min = undefined;
                 max = undefined;
@@ -222,12 +228,10 @@ const Chart = ({
             lineData[mappedIndex * 2] = { x: timestamp, y: min };
             lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
         }
+        // chart dataset is a shallow copy of lineData array up to mappedIndex
+        // which in this case has 2 values (min and max) per pixel, therefore:
+        mappedIndex += mappedIndex;
     } else {
-        let mappedIndex = 0;
-        const bi = new Array(bits.length).fill(0);
-        for (let i = 0; i < bits.length; i += 1) {
-            bits[i][0] = undefined;
-        }
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
         for (let n = originalIndexBeginFloored;
@@ -239,17 +243,13 @@ const Chart = ({
                 + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
             lineData[mappedIndex] = { x: timestamp, y: v };
 
-            for (let i = 0; i < bits.length; i += 1) {
+            for (let i = 0; i < numberOfBits; i += 1) {
                 const y = ((options.bits[k] >> i) & 1) + (i * 2);
-                if ((bits[i][bi[i] - 1] || {}).y !== y || n === originalIndexEndCeiled) {
-                    bits[i][bi[i]] = { x: timestamp, y };
-                    bi[i] += 1;
+                if ((bits[i][bitIndexes[i] - 1] || {}).y !== y || n === originalIndexEndCeiled) {
+                    bits[i][bitIndexes[i]] = { x: timestamp, y };
+                    bitIndexes[i] += 1;
                 }
             }
-        }
-        lineData.fill(undefined, mappedIndex);
-        for (let i = 0; i < bits.length; i += 1) {
-            bits[i].fill(undefined, bi[i]);
         }
     }
 
@@ -292,11 +292,11 @@ const Chart = ({
     const bitColors = ['#005588', '#008855', '#005555', '#008888', '#660088', '#0055FF', '#00C288', '#0F2088'];
     const bitLabels = ['LAP0', 'LAP1', 'LAP2', 'LAP3', 'LAP4', 'LAP5', 'LAP6', 'LAP7'];
 
-    const bitsDataSets = (step > 1) ? [] : bits.map((b, i) => ({
+    const bitsDataSets = bits.map((b, i) => ({
         borderColor: bitColors[i],
         borderWidth: 0.5,
         fill: false,
-        data: b,
+        data: b.slice(0, bitIndexes[i]),
         pointRadius: 0,
         pointHoverRadius: 0,
         pointHitRadius: 0,
@@ -307,7 +307,7 @@ const Chart = ({
         steppedLine: 'before',
     }));
 
-    const bitsAxis = (step > 1) ? [] : [{
+    const bitsAxis = [{
         id: 'bits-axis',
         type: 'linear',
         min: 0,
@@ -332,26 +332,28 @@ const Chart = ({
             borderColor: options.color,
             borderWidth: 1,
             fill: false,
-            data: lineData,
+            data: lineData.slice(0, mappedIndex),
             pointRadius: step > 0.2 ? 0 : 1.5,
             pointHoverRadius: 0,
             pointHitRadius: 0,
             pointBackgroundColor: options.color,
             pointBorderWidth: 0,
             lineTension: step > 0.2 ? 0 : 0.2,
-            label: 'current',
-            yAxisID: 'current-axis',
+            label: 'Current',
+            yAxisID: 'yScale',
+            showLines: false,
         }, ...bitsDataSets],
     };
 
     const chartOptions = {
         scales: {
             xAxes: [{
-                id: 'x-axis-0',
+                id: 'xScale',
                 type: 'linear',
                 min: begin,
                 max: end,
                 ticks: {
+                    minRotation: 0,
                     maxRotation: 0,
                     autoSkipPadding: 25,
                     min: begin,
@@ -371,12 +373,14 @@ const Chart = ({
             }],
             yAxes: [
                 {
-                    id: 'current-axis',
+                    id: 'yScale',
                     type: 'linear',
                     min: options.valueRange.min,
                     max: options.valueRange.max,
                     fullWidth: 60,
                     ticks: {
+                        minRotation: 0,
+                        maxRotation: 0,
                         suggestedMin: options.valueRange.min,
                         suggestedMax: options.valueRange.max,
                         min: yMin === null ? options.valueRange.min : yMin,
@@ -395,6 +399,13 @@ const Chart = ({
         redraw: true,
         maintainAspectRatio: false,
         onResize: onChartSizeUpdate,
+        animation: {
+            duration: 0,
+        },
+        hover: {
+            animationDuration: 0,
+        },
+        responsiveAnimationDuration: 0,
     };
 
     return (

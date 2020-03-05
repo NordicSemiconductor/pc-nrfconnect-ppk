@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,47 +34,35 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { fork } from 'child_process';
-import { getAppDir } from 'nrfconnect/core';
-import path from 'path';
+const { resolve } = require('path');
 
-// read hardware states here
-const metadataString = [
-    'VERSION 0.0.0 CAL: 1 ',
-    'R1: 512 R2: 28 R3: 1.8 Board ID ABCDEF ',
-    'Refs VDD: 3000 HI: 5 LO: 6',
-].join('');
+const { execPath } = process;
 
-class SerialDevice {
-    constructor(device, parseMeasurementData) {
-        this.comName = device.serialport.comName;
-        this.child = fork(path.resolve(getAppDir(), 'worker', 'serialDevice.js'));
+const nodeModules = /node_modules/.test(execPath)
+    ? resolve(execPath.split('node_modules').shift(), 'node_modules')
+    : resolve(execPath, '..', 'resources', 'app.asar', 'node_modules');
 
-        this.child.on('message', m => {
-            if (m.data) {
-                parseMeasurementData(Buffer.from(m.data));
-                return;
+const SerialPort = require(resolve(nodeModules, 'serialport'));
+
+let port = null;
+process.on('message', msg => {
+    if (msg.start) {
+        process.send({ starting: msg.start });
+        port = new SerialPort(msg.start, { autoOpen: false });
+        port.open(err => {
+            if (err) {
+                process.send({ error: err.toString() });
             }
-            console.log(`message: ${JSON.stringify(m)}`);
-        });
-        this.child.on('close', code => {
-            console.log(`child process exited with code ${code}`);
+            process.send({ started: msg.start });
+            port.on('data', data => process.send(data));
         });
     }
-
-    start() {
-        this.child.send({ start: this.comName });
-        return Promise.resolve(metadataString);
+    if (msg.write) {
+        port.write(msg.write, err => {
+            if (err) {
+                process.send({ error: 'PPK command failed' });
+            }
+        });
     }
+});
 
-    stop() {
-        this.child.kill();
-    }
-
-    write(slipPackage) {
-        this.child.send({ write: slipPackage });
-        return Promise.resolve(slipPackage.length);
-    }
-}
-
-export default SerialDevice;
