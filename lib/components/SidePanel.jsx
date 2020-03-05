@@ -43,7 +43,11 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Card from 'react-bootstrap/Card';
 
-import Slider from 'react-rangeslider';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Slider from './Slider/Slider';
+import InlineInput from './Slider/InlineInput';
+
 import 'react-rangeslider/lib/index.css';
 
 const SidePanel = ({
@@ -119,15 +123,20 @@ const SidePanel = ({
                     </Card.Header>
                     <Accordion.Collapse eventKey="2">
                         <Card.Body>
-                            VDD {voltageRegulatorVdd} mV
+                            <Form.Label htmlFor="slider-vdd">
+                                VDD{' '}
+                                <InlineInput
+                                    value={voltageRegulatorVdd}
+                                    range={{ min: 1850, max: 3600 }}
+                                    onChange={moveVoltageRegulatorVddAction}
+                                />
+                                {' '}mV
+                            </Form.Label>
                             <Slider
-                                min={1850}
-                                max={3600}
-                                value={voltageRegulatorVdd}
-                                labels={{ 1850: '1850', 3600: '3600' }}
-                                format={n => `${n}mV`}
-                                onChange={moveVoltageRegulatorVddAction}
-                                tooltip={false}
+                                id="slider-vdd"
+                                values={[voltageRegulatorVdd]}
+                                range={{ min: 1850, max: 3600 }}
+                                onChange={[moveVoltageRegulatorVddAction]}
                                 onChangeComplete={ppkUpdateRegulator}
                             />
                         </Card.Body>
@@ -144,30 +153,32 @@ const SidePanel = ({
                             <Card.Body>
                                 Switch up
                                 <Slider
-                                    min={38}
-                                    max={175}
-                                    value={switchUpSliderPosition}
-                                    labels={{ 60: `${switchUpLow.toFixed(2)} uA`, 160: `${switchUpHigh.toFixed(2)} mA` }}
-                                    format={n => `${n}mA`}
-                                    tooltip={false}
-                                    onChange={switchingPointUpMoved}
+                                    values={[switchUpSliderPosition]}
+                                    range={{ min: 38, max: 175 }}
+                                    onChange={[switchingPointUpMoved]}
                                     onChangeComplete={ppkSwitchingPointsUpSet}
                                 />
+                                <Row className="mb-3">
+                                    <Col>{`${switchUpLow.toFixed(2)} uA`}</Col>
+                                    <Col className="text-right">{`${switchUpHigh.toFixed(2)} mA`}</Col>
+                                </Row>
+
                                 Switch down
                                 <Slider
-                                    min={100}
-                                    max={400}
-                                    reverse={false}
-                                    value={switchDownSliderPosition}
-                                    labels={{ 110: `${switchDownLow.toFixed(2)} uA`, 370: `${switchDownHigh.toFixed(2)} mA` }}
-                                    format={n => `${n}mA`}
-                                    tooltip={false}
-                                    onChange={switchingPointDownMovedAction}
+                                    values={[switchDownSliderPosition]}
+                                    range={{ min: 100, max: 400 }}
+                                    onChange={[switchingPointDownMovedAction]}
                                     onChangeComplete={ppkSwitchingPointsDownSet}
                                 />
+                                <Row className="mb-3">
+                                    <Col>{`${switchDownLow.toFixed(2)} uA`}</Col>
+                                    <Col className="text-right">{`${switchDownHigh.toFixed(2)} mA`}</Col>
+                                </Row>
+
                                 <Button
                                     onClick={ppkSwitchingPointsReset}
                                     variant="light"
+                                    className="mt-3"
                                 >
                                     Reset switch levels
                                 </Button>
