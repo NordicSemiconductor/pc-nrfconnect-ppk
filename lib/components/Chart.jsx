@@ -46,8 +46,8 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { unit } from 'mathjs';
 
-import '../utils/chart.dragSelect'; // eslint-disable-line
-import '../utils/chart.zoomPan'; // eslint-disable-line
+import dragSelectPlugin from '../utils/chart.dragSelect';
+import zoomPanPlugin from '../utils/chart.zoomPan';
 
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
@@ -79,7 +79,12 @@ const timestampToLabel = (usecs, index, array) => {
     return [time, subsecond];
 };
 
-const numberOfBits = 8;
+const allOfBits = 8;
+
+const emptyArray = () => [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
+const lineData = emptyArray();
+const bits = [...Array(allOfBits)].map(() => emptyArray());
+const bitIndexes = new Array(allOfBits);
 
 const Chart = ({
     options,
@@ -100,16 +105,12 @@ const Chart = ({
     yMax,
 }) => {
     const chartRef = useRef(null);
+    const numberOfBits = (windowDuration < 30000000) ? allOfBits : 0;
 
     const end = windowEnd || options.timestamp;
     const begin = windowBegin || (end - windowDuration);
 
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
-
-    const lineData = [];
-    const bits = [...Array(numberOfBits)].map(() => []);
-    const bitIndexes = new Array(numberOfBits);
-
     const [len, setLen] = useState(0);
 
     const onChartSizeUpdate = instance => {
@@ -183,13 +184,13 @@ const Chart = ({
     let mappedIndex = 0;
     bitIndexes.fill(0);
     for (let i = 0; i < numberOfBits; i += 1) {
-        bits[i][0] = undefined;
+        bits[i][0] = { x: undefined, y: undefined };
     }
     if (step > 1) {
         for (let originalIndex = originalIndexBegin;
-            mappedIndex < len;
+            mappedIndex < len + len;
             mappedIndex += 1, originalIndex += step) {
-            const timestamp = begin + (windowDuration * (mappedIndex / len));
+            const timestamp = begin + (windowDuration * (mappedIndex / (len + len)));
             const k = Math.floor(originalIndex);
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
@@ -202,6 +203,16 @@ const Chart = ({
                 }
             }
 
+            if (min > max) {
+                min = undefined;
+                max = undefined;
+            }
+            lineData[mappedIndex].x = timestamp;
+            lineData[mappedIndex].y = min;
+            mappedIndex += 1;
+            lineData[mappedIndex].x = timestamp;
+            lineData[mappedIndex].y = max;
+
             for (let i = 0; i < numberOfBits; i += 1) {
                 let y1;
                 for (let n = k; n < l; n += 1) {
@@ -209,8 +220,10 @@ const Chart = ({
                         ? undefined
                         : (((options.bits[n] >> i) & 1) + (i * 2));
                     if (v !== undefined && (y1 === undefined || v !== y1)) {
-                        if ((bits[i][bitIndexes[i] - 1] || {}).y !== v || mappedIndex === len - 1) {
-                            bits[i][bitIndexes[i]] = { x: timestamp, y: v };
+                        if ((bits[i][bitIndexes[i] - 1] || {}).y !== v
+                            || mappedIndex === len + len - 1) {
+                            bits[i][bitIndexes[i]].x = timestamp;
+                            bits[i][bitIndexes[i]].y = v;
                             bitIndexes[i] += 1;
                         }
                         if (y1 !== undefined) {
@@ -220,17 +233,7 @@ const Chart = ({
                     }
                 }
             }
-
-            if (min > max) {
-                min = undefined;
-                max = undefined;
-            }
-            lineData[mappedIndex * 2] = { x: timestamp, y: min };
-            lineData[(mappedIndex * 2) + 1] = { x: timestamp, y: max };
         }
-        // chart dataset is a shallow copy of lineData array up to mappedIndex
-        // which in this case has 2 values (min and max) per pixel, therefore:
-        mappedIndex += mappedIndex;
     } else {
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
@@ -241,12 +244,14 @@ const Chart = ({
             const v = options.data[k];
             const timestamp = begin
                 + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
-            lineData[mappedIndex] = { x: timestamp, y: v };
+            lineData[mappedIndex * 2].x = timestamp;
+            lineData[mappedIndex * 2].y = v;
 
             for (let i = 0; i < numberOfBits; i += 1) {
                 const y = ((options.bits[k] >> i) & 1) + (i * 2);
                 if ((bits[i][bitIndexes[i] - 1] || {}).y !== y || n === originalIndexEndCeiled) {
-                    bits[i][bitIndexes[i]] = { x: timestamp, y };
+                    bits[i][bitIndexes[i]].x = timestamp;
+                    bits[i][bitIndexes[i]].y = y;
                     bitIndexes[i] += 1;
                 }
             }
@@ -289,10 +294,17 @@ const Chart = ({
 
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
-    const bitColors = ['#005588', '#008855', '#005555', '#008888', '#660088', '#0055FF', '#00C288', '#0F2088'];
-    const bitLabels = ['LAP0', 'LAP1', 'LAP2', 'LAP3', 'LAP4', 'LAP5', 'LAP6', 'LAP7'];
+    const bitColors = [
+        '#005588', '#008855', '#005555',
+        '#008888', '#660088', '#0055FF',
+        '#00C288', '#0F2088',
+    ].slice(0, numberOfBits);
 
-    const bitsDataSets = bits.map((b, i) => ({
+    const bitLabels = [
+        'LAP0', 'LAP1', 'LAP2', 'LAP3', 'LAP4', 'LAP5', 'LAP6', 'LAP7',
+    ].slice(0, numberOfBits);
+
+    const bitsDataSets = bits.slice(0, numberOfBits).map((b, i) => ({
         borderColor: bitColors[i],
         borderWidth: 0.5,
         fill: false,
@@ -432,6 +444,7 @@ const Chart = ({
                     data={chartData}
                     options={chartOptions}
                     update={options.update}
+                    plugins={[dragSelectPlugin, zoomPanPlugin]}
                 />
             </div>
             <div className="chart-bottom">
