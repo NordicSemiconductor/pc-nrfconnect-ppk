@@ -36,11 +36,20 @@
 
 const { resolve } = require('path');
 
-const { execPath } = process;
+const { execPath, platform } = process;
 
-const nodeModules = /node_modules/.test(execPath)
-    ? resolve(execPath.split('node_modules').shift(), 'node_modules')
-    : resolve(execPath, '..', 'resources', 'app.asar', 'node_modules');
+const nodeModules = (() => {
+    switch (true) {
+        case (/node_modules/.test(execPath)):
+            return resolve(execPath.split('node_modules').shift(), 'node_modules');
+        case platform === "win32":
+            return resolve(execPath, '..', 'resources', 'app.asar', 'node_modules');
+        case platform === "darwin":
+            return resolve(execPath.split('/Frameworks/'), 'Resources', 'app.asar', 'node_modules');
+        case platform === "linux":
+            return undefined; // TODO: to be fixed
+    }
+})();
 
 const SerialPort = require(resolve(nodeModules, 'serialport'));
 
