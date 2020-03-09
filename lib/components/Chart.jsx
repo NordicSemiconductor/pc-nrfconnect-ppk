@@ -244,8 +244,8 @@ const Chart = ({
             const v = options.data[k];
             const timestamp = begin
                 + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
-            lineData[mappedIndex * 2].x = timestamp;
-            lineData[mappedIndex * 2].y = v;
+            lineData[mappedIndex].x = timestamp;
+            lineData[mappedIndex].y = v;
 
             for (let i = 0; i < numberOfBits; i += 1) {
                 const y = ((options.bits[k] >> i) & 1) + (i * 2);
