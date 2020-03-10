@@ -129,6 +129,7 @@ const SidePanel = ({
                                     value={voltageRegulatorVdd}
                                     range={{ min: 1850, max: 3600 }}
                                     onChange={moveVoltageRegulatorVddAction}
+                                    onChangeComplete={ppkUpdateRegulator}
                                 />
                                 {' '}mV
                             </Form.Label>

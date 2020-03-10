@@ -66,7 +66,9 @@ const useSynchronisationIfChangedFromOutside = (value, setInput) => {
     return ref.current;
 };
 
-const InlineInput = ({ value, range, onChange }) => {
+const InlineInput = ({
+    value, range, onChange, onChangeComplete,
+}) => {
     const [input, setInput] = useValidatedState(value, newValue => isInRange(newValue, range));
     useSynchronisationIfChangedFromOutside(value, setInput);
 
@@ -78,6 +80,18 @@ const InlineInput = ({ value, range, onChange }) => {
         }
     };
 
+    const onBlur = ({ target }) => {
+        if (onChangeComplete && isInRange(target.value, range)) {
+            onChangeComplete(Number(target.value));
+        }
+    };
+
+    const onKeyDown = ({ key, target }) => {
+        if (key === 'Enter') {
+            onBlur({ target });
+        }
+    };
+
     return (
         <input
             type="text"
@@ -85,6 +99,8 @@ const InlineInput = ({ value, range, onChange }) => {
             style={{ width: `${2 + Math.floor(Math.log10(range.max))}ex` }}
             value={input.value}
             onChange={onChangeIfValid}
+            onKeyDown={onKeyDown}
+            onBlur={onBlur}
         />
     );
 };
@@ -96,6 +112,11 @@ InlineInput.propTypes = {
         max: number.isRequired,
     }).isRequired,
     onChange: func.isRequired,
+    onChangeComplete: func,
+};
+
+InlineInput.defaultProps = {
+    onChangeComplete: null,
 };
 
 export default InlineInput;
