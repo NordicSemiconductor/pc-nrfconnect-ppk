@@ -55,15 +55,15 @@ const SerialPort = require(resolve(asarPath, 'node_modules', 'serialport'));
 
 let port = null;
 process.on('message', msg => {
-    if (msg.start) {
-        process.send({ starting: msg.start });
-        port = new SerialPort(msg.start, { autoOpen: false });
+    if (msg.open) {
+        process.send({ opening: msg.open });
+        port = new SerialPort(msg.open, { autoOpen: false });
+        port.on('data', data => process.send(data));
         port.open(err => {
             if (err) {
                 process.send({ error: err.toString() });
             }
-            process.send({ started: msg.start });
-            port.on('data', data => process.send(data));
+            process.send({ started: msg.open });
         });
     }
     if (msg.write) {
