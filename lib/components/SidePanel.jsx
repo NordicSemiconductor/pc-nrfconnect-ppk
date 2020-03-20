@@ -59,6 +59,8 @@ const SidePanel = ({
     deviceRunning,
     rttRunning,
     ppkToggleDUT,
+    ppkSetPowerMode,
+    isSmuMode,
     voltageRegulatorVdd,
     moveVoltageRegulatorVddAction,
     resistorLow,
@@ -111,6 +113,18 @@ const SidePanel = ({
                 >
                     <span className={`mdi mdi-${deviceRunning ? 'close-circle-outline' : 'record-circle-outline'}`} />
                     {deviceRunning ? 'Power OFF' : 'Power ON'}
+                </Button>
+            </div>
+            <div className="d-flex flex-column">
+                <Button
+                    style={{ backgroundColor: 0xFF11AA }}
+                    variant="light"
+                    size="lg"
+                    disabled={!rttRunning}
+                    onClick={() => ppkSetPowerMode(isSmuMode)}
+                >
+                    <span className={`mdi mdi-${isSmuMode ? 'flash' : 'flash-auto'}`} />
+                    {isSmuMode ? 'Source Meter' : 'Amperemeter'}
                 </Button>
             </div>
 
@@ -271,6 +285,8 @@ SidePanel.propTypes = {
     spikeFiltering: PropTypes.bool.isRequired,
 
     deviceRunning: PropTypes.bool.isRequired,
+    ppkSetPowerMode: PropTypes.func.isRequired,
+    isSmuMode: PropTypes.bool.isRequired,
     rttRunning: PropTypes.bool.isRequired,
     ppkToggleDUT: PropTypes.func.isRequired,
 
