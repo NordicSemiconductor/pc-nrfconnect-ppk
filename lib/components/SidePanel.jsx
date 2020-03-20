@@ -127,7 +127,7 @@ const SidePanel = ({
                                 VDD{' '}
                                 <InlineInput
                                     value={voltageRegulatorVdd}
-                                    range={{ min: 1850, max: 3600 }}
+                                    range={{ min: 1800, max: 5000 }}
                                     onChange={moveVoltageRegulatorVddAction}
                                     onChangeComplete={ppkUpdateRegulator}
                                 />
@@ -136,7 +136,7 @@ const SidePanel = ({
                             <Slider
                                 id="slider-vdd"
                                 values={[voltageRegulatorVdd]}
-                                range={{ min: 1850, max: 3600 }}
+                                range={{ min: 1800, max: 5000 }}
                                 onChange={[moveVoltageRegulatorVddAction]}
                                 onChangeComplete={ppkUpdateRegulator}
                             />
