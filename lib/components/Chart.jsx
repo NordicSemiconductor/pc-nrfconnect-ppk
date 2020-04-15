@@ -34,12 +34,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// For electron runtime optimization we need to avoid operator-assiment:
-/* eslint operator-assignment: off */
 /* eslint no-bitwise: off */
 
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
 import { defaults, Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -48,6 +47,8 @@ import { unit } from 'mathjs';
 
 import dragSelectPlugin from '../utils/chart.dragSelect';
 import zoomPanPlugin from '../utils/chart.zoomPan';
+
+import { averageChartWindow, averageChartCursorAction } from '../actions/uiActions';
 
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
@@ -86,26 +87,40 @@ const lineData = emptyArray();
 const bits = [...Array(allOfBits)].map(() => emptyArray());
 const bitIndexes = new Array(allOfBits);
 
-const Chart = ({
-    options,
-    index,
-    chartCursor,
-    chartWindow,
-    chartReset,
-    windowBegin,
-    windowEnd,
-    windowDuration,
-    bufferLength,
-    bufferRemaining,
-    averageRunning,
-    canReset,
-    cursorBegin,
-    cursorEnd,
-    yMin,
-    yMax,
-}) => {
+const Chart = ({ options }) => {
+    const dispatch = useDispatch();
+    const chartWindow = (windowBegin, windowEnd, yMin, yMax) => dispatch(
+        averageChartWindow(
+            windowBegin, windowEnd, windowEnd - windowBegin, yMin, yMax,
+        ),
+    );
+    const chartReset = windowDuration => dispatch(
+        averageChartWindow(null, null, windowDuration, undefined, undefined),
+    );
+    const chartCursor = (cursorBegin, cursorEnd) => dispatch(
+        averageChartCursorAction(cursorBegin, cursorEnd),
+    );
+
+    const index = useSelector(({ app }) => app.app.chartIndex);
+    const {
+        windowBegin,
+        windowEnd,
+        windowDuration,
+        bufferLength,
+        bufferRemaining,
+        averageRunning,
+        canReset,
+        cursorBegin,
+        cursorEnd,
+        yMin,
+        yMax,
+    } = useSelector(({ app }) => app.average);
+
     const chartRef = useRef(null);
-    const numberOfBits = (windowDuration < 30000000) ? allOfBits : 0;
+    let numberOfBits = (windowDuration < 30000000) ? allOfBits : 0;
+    if (!options.bits) {
+        numberOfBits = 0;
+    }
 
     const end = windowEnd || options.timestamp;
     const begin = windowBegin || (end - windowDuration);
@@ -443,7 +458,6 @@ const Chart = ({
                     ref={chartRef}
                     data={chartData}
                     options={chartOptions}
-                    update={options.update}
                     plugins={[dragSelectPlugin, zoomPanPlugin]}
                 />
             </div>
@@ -457,7 +471,7 @@ const Chart = ({
                 <ButtonGroup>
                     <Button
                         variant="primary"
-                        disabled={!chartCursorActive || !canReset}
+                        disabled={!chartCursorActive}
                         size="sm"
                         onClick={resetCursor}
                         title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
@@ -471,33 +485,7 @@ const Chart = ({
     );
 };
 
-Chart.defaultProps = {
-    bufferLength: null,
-    bufferRemaining: null,
-    averageRunning: null,
-    yMin: null,
-    yMax: null,
-    canReset: true,
-    cursorBegin: null,
-    cursorEnd: null,
-};
-
 Chart.propTypes = {
-    chartWindow: PropTypes.func.isRequired,
-    chartReset: PropTypes.func.isRequired,
-    chartCursor: PropTypes.func.isRequired,
-    cursorBegin: PropTypes.number,
-    cursorEnd: PropTypes.number,
-    windowBegin: PropTypes.number.isRequired,
-    windowEnd: PropTypes.number.isRequired,
-    windowDuration: PropTypes.number.isRequired,
-    yMin: PropTypes.number,
-    yMax: PropTypes.number,
-    index: PropTypes.number.isRequired,
-    bufferLength: PropTypes.number,
-    bufferRemaining: PropTypes.number,
-    averageRunning: PropTypes.bool,
-    canReset: PropTypes.bool,
     options: PropTypes.shape({
         data: PropTypes.instanceOf(Float32Array),
         bits: PropTypes.instanceOf(Uint8Array),
@@ -506,7 +494,6 @@ Chart.propTypes = {
         samplesPerSecond: PropTypes.number,
         color: PropTypes.string,
         valueRange: PropTypes.objectOf(PropTypes.number),
-        update: PropTypes.number,
     }).isRequired,
 };
 

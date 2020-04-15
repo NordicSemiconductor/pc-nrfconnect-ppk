@@ -35,14 +35,16 @@
  */
 
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import {
+    arrayOf, func, number, string,
+} from 'prop-types';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
 const UnitSelector = ({
-    units, onChange, ...rest
+    units, onChange, initial, ...rest
 }) => {
-    const [selected, setSelected] = useState(1);
+    const [selected, setSelected] = useState(initial);
     const menuItems = units.map((unit, k) => (
         <Dropdown.Item
             // eventKey is passed to container accordion
@@ -62,8 +64,9 @@ const UnitSelector = ({
 };
 
 UnitSelector.propTypes = {
-    units: PropTypes.arrayOf(PropTypes.string).isRequired,
-    onChange: PropTypes.func.isRequired,
+    units: arrayOf(string).isRequired,
+    onChange: func.isRequired,
+    initial: number.isRequired,
 };
 
 export default UnitSelector;

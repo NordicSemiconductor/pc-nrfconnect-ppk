@@ -49,8 +49,8 @@ export default ComposedComponent => (
             this.bindings.forEach(key => Mousetrap.unbind(key));
         }
 
-        bindHotkey(key, callback, action) {
-            Mousetrap.bind(key, callback, action);
+        bindHotkey(key, callback) {
+            Mousetrap.bind(key, callback);
             this.bindings.push(key);
         }
 

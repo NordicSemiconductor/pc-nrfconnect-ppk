@@ -40,10 +40,10 @@ import {
 } from 'nrfconnect/core';
 import path from 'path';
 import reducers from './lib/reducers';
-import MainView from './lib/containers/MainView';
-import SidePanel from './lib/containers/SidePanel';
+import MainView from './lib/components/MainView';
+import SidePanel from './lib/components/SidePanel';
 import ShoppingCartButton from './lib/components/ShoppingCartButton';
-import * as PPKActions from './lib/actions/PPKActions';
+import * as deviceActions from './lib/actions/deviceActions';
 import './resources/css/index.scss';
 
 let globalDispatch;
@@ -51,9 +51,6 @@ let globalDispatch;
 export default {
     onInit: dispatch => {
         globalDispatch = dispatch;
-    },
-    onReady: () => {
-        logger.info('App initialized');
     },
     decorateLogo: Logo => (
         props => (
@@ -76,7 +73,7 @@ export default {
         props => (
             <div className="nav-menu-wrap">
                 <NavMenu {...props} />
-                PPK mkII
+                Power Profiler
             </div>
         )
     ),
@@ -98,7 +95,7 @@ export default {
 
             case 'DEVICE_DESELECTED':
                 logger.info('Deselecting device');
-                dispatch(PPKActions.close()).then(() => {
+                dispatch(deviceActions.close()).then(() => {
                     dispatch(startWatchingDevices());
                 });
                 break;
@@ -107,7 +104,7 @@ export default {
                 dispatch(stopWatchingDevices());
                 const { device } = action;
                 logger.info(`Opening device with s/n ${device.serialNumber}`);
-                dispatch(PPKActions.open(device));
+                dispatch(deviceActions.open(device));
                 break;
             }
             default:
@@ -129,6 +126,6 @@ export default {
             },
             needSerialport: false,
         },
-        releaseCurrentDevice: () => globalDispatch(PPKActions.close()),
+        releaseCurrentDevice: () => globalDispatch(deviceActions.close()),
     },
 };

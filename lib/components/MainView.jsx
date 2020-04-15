@@ -35,28 +35,25 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
 
-import AverageChart from '../containers/AverageChart';
+import Chart from './Chart';
+import { options } from '../actions/deviceActions';
+import { toggleFullView } from '../actions/uiActions';
 
-import { averageOptions } from '../actions/PPKActions';
-
-const MainView = ({ toggleFullView, fullView }) => (
-    <div className="core-main-view">
-        <AverageChart options={averageOptions} />
-        <span
-            onClick={toggleFullView}
-            className={`btnFullViewToggle mdi mdi-${fullView ? 'fullscreen-exit' : 'fullscreen'}`}
-            onKeyPress={() => {}}
-            role="button"
-            tabIndex={0}
-        />
-    </div>
-);
-
-MainView.propTypes = {
-    fullView: PropTypes.bool.isRequired,
-    toggleFullView: PropTypes.func.isRequired,
+export default () => {
+    const dispatch = useDispatch();
+    const { fullView } = useSelector(({ app }) => app.app);
+    return (
+        <div className="core-main-view">
+            <Chart options={options} />
+            <span
+                onClick={() => dispatch(toggleFullView())}
+                className={`btnFullViewToggle mdi mdi-${fullView ? 'fullscreen-exit' : 'fullscreen'}`}
+                onKeyPress={() => {}}
+                role="button"
+                tabIndex={0}
+            />
+        </div>
+    );
 };
-
-export default MainView;

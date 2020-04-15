@@ -96,7 +96,7 @@ const InlineInput = ({
         <input
             type="text"
             className={`inline-input ${input.valid ? '' : 'invalid'}`}
-            style={{ width: `${2 + Math.floor(Math.log10(range.max))}ex` }}
+            style={{ width: `${3 + Math.floor(Math.log10(range.max))}ex` }}
             value={input.value}
             onChange={onChangeIfValid}
             onKeyDown={onKeyDown}

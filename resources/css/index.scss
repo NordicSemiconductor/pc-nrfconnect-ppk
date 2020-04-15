@@ -153,6 +153,8 @@
 .form-group {
     margin-bottom: 0;
 }
-.form-check {
-    padding-top: 1.25rem;
+.form-group:not(:first-child) {
+    .form-check {
+        padding-top: 1.25rem;
+    }
 }
