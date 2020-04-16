@@ -56,15 +56,17 @@ import {
     triggerSingleSet,
     externalTriggerToggled,
 } from '../actions/deviceActions';
+import { appState } from '../reducers/appReducer';
+import { triggerState } from '../reducers/triggerReducer';
 
 export default () => {
     const dispatch = useDispatch();
-    const rttRunning = useSelector(({ app }) => app.app.rttRunning);
+    const { rttRunning } = useSelector(appState);
     const {
         externalTrigger,
         triggerRunning,
         triggerSingleWaiting,
-    } = useSelector(({ app }) => app.trigger);
+    } = useSelector(triggerState);
 
     const range = {
         min: (450 * 13) / 1e3,

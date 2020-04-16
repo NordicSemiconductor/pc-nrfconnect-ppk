@@ -50,10 +50,13 @@ import { moveVoltageRegulatorVddAction } from '../actions/uiActions';
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 
+import { appState } from '../reducers/appReducer';
+import { voltageRegulatorState } from '../reducers/voltageRegulatorReducer';
+
 export default () => {
     const dispatch = useDispatch();
-    const { vdd } = useSelector(({ app }) => app.voltageRegulator);
-    const { advancedMode } = useSelector(({ app }) => app.app);
+    const { vdd } = useSelector(voltageRegulatorState);
+    const { advancedMode } = useSelector(appState);
 
     return (
         <Accordion defaultActiveKey="2">

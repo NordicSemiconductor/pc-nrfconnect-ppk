@@ -50,6 +50,9 @@ import zoomPanPlugin from '../utils/chart.zoomPan';
 
 import { averageChartWindow, averageChartCursorAction } from '../actions/uiActions';
 
+import { appState } from '../reducers/appReducer';
+import { averageState } from '../reducers/averageReducer';
+
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
 defaults.global.animation.duration = 0;
@@ -101,7 +104,7 @@ const Chart = ({ options }) => {
         averageChartCursorAction(cursorBegin, cursorEnd),
     );
 
-    const index = useSelector(({ app }) => app.app.chartIndex);
+    const { chartIndex: index } = useSelector(appState);
     const {
         windowBegin,
         windowEnd,
@@ -114,7 +117,7 @@ const Chart = ({ options }) => {
         cursorEnd,
         yMin,
         yMax,
-    } = useSelector(({ app }) => app.average);
+    } = useSelector(averageState);
 
     const chartRef = useRef(null);
     let numberOfBits = (windowDuration < 30000000) ? allOfBits : 0;

@@ -56,6 +56,8 @@ import {
     switchingPointUpMoved,
     switchingPointDownMovedAction,
 } from '../actions/uiActions';
+import { switchingPointsState } from '../reducers/switchingPointsReducer';
+import { appState } from '../reducers/appReducer';
 
 export default () => {
     const dispatch = useDispatch();
@@ -68,8 +70,8 @@ export default () => {
         switchDownLow,
         switchUpSliderPosition,
         switchDownSliderPosition,
-    } = useSelector(({ app }) => app.switchingPoints);
-    const { capabilities } = useSelector(({ app }) => app.app);
+    } = useSelector(switchingPointsState);
+    const { capabilities } = useSelector(appState);
 
     return (
         <Card>

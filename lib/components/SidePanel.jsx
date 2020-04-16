@@ -44,11 +44,13 @@ import VoltageRegulator from './VoltageRegulator';
 import { toggleAdvancedModeAction } from '../actions/uiActions';
 import withHotkey from '../utils/withHotKey';
 
+import { appState } from '../reducers/appReducer';
+
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
     bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
-    const { fullView, capabilities } = useSelector(({ app }) => app.app);
+    const { fullView, capabilities } = useSelector(appState);
     const hidden = fullView ? ' hidden' : '';
 
     return (

@@ -41,9 +41,11 @@ import Chart from './Chart';
 import { options } from '../actions/deviceActions';
 import { toggleFullView } from '../actions/uiActions';
 
+import { appState } from '../reducers/appReducer';
+
 export default () => {
     const dispatch = useDispatch();
-    const { fullView } = useSelector(({ app }) => app.app);
+    const { fullView } = useSelector(appState);
     return (
         <div className="core-main-view">
             <Chart options={options} />

@@ -44,6 +44,8 @@ import {
     toggleDUT,
     setPowerMode,
 } from '../actions/deviceActions';
+import { averageState } from '../reducers/averageReducer';
+import { appState } from '../reducers/appReducer';
 
 export default () => {
     const dispatch = useDispatch();
@@ -53,8 +55,8 @@ export default () => {
         rttRunning,
         capabilities,
         isSmuMode,
-    } = useSelector(({ app }) => app.app);
-    const { averageRunning } = useSelector(({ app }) => app.average);
+    } = useSelector(appState);
+    const { averageRunning } = useSelector(averageState);
 
     return (
         <>

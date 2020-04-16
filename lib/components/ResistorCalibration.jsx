@@ -54,13 +54,15 @@ import {
     updateLowResistorAction,
 } from '../actions/uiActions';
 
+import { resistorCalibrationState } from '../reducers/resistorCalibrationReducer';
+
 export default () => {
     const dispatch = useDispatch();
     const {
         resistorLow,
         resistorMid,
         resistorHigh,
-    } = useSelector(({ app }) => app.resistorCalibration);
+    } = useSelector(resistorCalibrationState);
 
     return (
         <Card>
