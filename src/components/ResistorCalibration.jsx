@@ -58,9 +58,9 @@ import {
 export default () => {
     const dispatch = useDispatch();
     const {
-        resistorLow,
-        resistorMid,
-        resistorHigh,
+        userResLo: resistorLow,
+        userResMid: resistorMid,
+        userResHi: resistorHigh,
     } = useSelector(resistorCalibrationState);
 
     return (
@@ -79,9 +79,7 @@ export default () => {
                         <Form.Control
                             type="text"
                             value={resistorHigh}
-                            onChange={e => dispatch(
-                                updateHighResistorAction(e.target.value),
-                            )}
+                            onChange={e => dispatch(updateHighResistorAction(e.target.value))}
                             onKeyPress={e => {
                                 if (e.key === 'Enter') {
                                     dispatch(updateResistors());
@@ -96,7 +94,7 @@ export default () => {
                         <Form.Control
                             type="text"
                             value={resistorMid}
-                            onChange={e => updateMidResistorAction(e.target.value)}
+                            onChange={e => dispatch(updateMidResistorAction(e.target.value))}
                             onKeyPress={e => {
                                 if (e.key === 'Enter') {
                                     dispatch(updateResistors());
@@ -111,9 +109,7 @@ export default () => {
                         <Form.Control
                             type="text"
                             value={resistorLow}
-                            onChange={e => dispatch(
-                                updateLowResistorAction(e.target.value),
-                            )}
+                            onChange={e => dispatch(updateLowResistorAction(e.target.value))}
                             onKeyPress={e => {
                                 if (e.key === 'Enter') {
                                     dispatch(updateResistors());

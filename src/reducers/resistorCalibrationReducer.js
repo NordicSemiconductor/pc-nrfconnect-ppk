@@ -104,7 +104,6 @@ export default (state = initialState, action) => {
                 userResLo = state.resLo;
             }
             return {
-                ...state,
                 userResHi,
                 userResMid,
                 userResLo,
