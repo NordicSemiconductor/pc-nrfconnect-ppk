@@ -34,9 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { PPK_METADATA, RESISTORS_RESET } from '../actions/deviceActions';
-import { USER_RESISTOR_UPDATED } from '../actions/uiActions';
-
 const initialState = {
     resLo: 509.0,
     resMid: 28.0,
@@ -46,7 +43,38 @@ const initialState = {
     userResHi: 1.8,
 };
 
-export default function resistorCalibration(state = initialState, action) {
+const RESISTORS_RESET = 'RESISTORS_RESET';
+const USER_RESISTOR_UPDATED = 'USER_RESISTOR_UPDATED';
+
+const updateResistorAction = ({ userResHi, userResMid, userResLo }) => ({
+    type: USER_RESISTOR_UPDATED,
+    userResHi,
+    userResMid,
+    userResLo,
+});
+
+export const resistorsResetAction = ({
+    resHi,
+    resMid,
+    resLo,
+    userResHi,
+    userResMid,
+    userResLo,
+} = {}) => ({
+    type: RESISTORS_RESET,
+    resHi,
+    resMid,
+    resLo,
+    userResHi,
+    userResMid,
+    userResLo,
+});
+
+export const updateHighResistorAction = userResHi => updateResistorAction({ userResHi });
+export const updateMidResistorAction = userResMid => updateResistorAction({ userResMid });
+export const updateLowResistorAction = userResLo => updateResistorAction({ userResLo });
+
+export default (state = initialState, action) => {
     switch (action.type) {
         case USER_RESISTOR_UPDATED: {
             const newUserResHi = parseFloat(action.userResHi);
@@ -59,17 +87,12 @@ export default function resistorCalibration(state = initialState, action) {
                 userResLo: Number.isNaN(newUserResLo) ? state.userResLo : newUserResLo,
             };
         }
-        case PPK_METADATA: {
+        case RESISTORS_RESET: {
             let {
                 userResHi,
                 userResMid,
                 userResLo,
-            } = action.metadata;
-            const {
-                resHi,
-                resMid,
-                resLo,
-            } = action.metadata;
+            } = action;
 
             if (userResHi === undefined) {
                 userResHi = state.resHi;
@@ -85,27 +108,14 @@ export default function resistorCalibration(state = initialState, action) {
                 userResHi,
                 userResMid,
                 userResLo,
-                resHi,
-                resMid,
-                resLo,
-            };
-        }
-        case RESISTORS_RESET: {
-            const {
-                resHi,
-                resMid,
-                resLo,
-            } = state;
-            return {
-                ...state,
-                userResHi: resHi,
-                userResMid: resMid,
-                userResLo: resLo,
+                resHi: action.resHi || state.resHi,
+                resMid: action.resMid || state.resMid,
+                resLo: action.resLo || state.resLo,
             };
         }
         default:
     }
     return state;
-}
+};
 
 export const resistorCalibrationState = ({ app }) => app.resistorCalibration;

@@ -39,12 +39,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 
 import {
-    averageStart,
-    averageStop,
+    samplingStart,
+    samplingStop,
     toggleDUT,
     setPowerMode,
 } from '../actions/deviceActions';
-import { averageState } from '../reducers/averageReducer';
 import { appState } from '../reducers/appReducer';
 
 export default () => {
@@ -55,8 +54,8 @@ export default () => {
         rttRunning,
         capabilities,
         isSmuMode,
+        samplingRunning,
     } = useSelector(appState);
-    const { averageRunning } = useSelector(averageState);
 
     return (
         <>
@@ -67,11 +66,11 @@ export default () => {
                         size="lg"
                         disabled={!rttRunning}
                         onClick={() => dispatch(
-                            averageRunning ? averageStop() : averageStart(),
+                            samplingRunning ? samplingStop() : samplingStart(),
                         )}
                     >
-                        <span className={`mdi mdi-${averageRunning ? 'stop' : 'play'}`} />
-                        {averageRunning ? 'Stop' : 'Start'}
+                        <span className={`mdi mdi-${samplingRunning ? 'stop' : 'play'}`} />
+                        {samplingRunning ? 'Stop' : 'Start'}
                     </Button>
                 </div>
             )}

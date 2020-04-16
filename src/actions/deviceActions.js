@@ -38,176 +38,35 @@
 
 import { logger } from 'nrfconnect/core';
 import Device from '../device';
-import { averageChartWindow } from './uiActions';
+
+import {
+    ppkOpenedAction,
+    ppkClosedAction,
+    rttStartAction,
+    ppkToggleDUTAction,
+    ppkSetPowerModeAction,
+    ppkAverageStartAction,
+    ppkAverageStoppedAction,
+} from '../reducers/appReducer';
+import {
+    ppkSwitchingPointsResetAction,
+    ppkSwitchingPointsDownSetAction,
+    ppkSpikeFilteringToggleAction,
+} from '../reducers/switchingPointsReducer';
+import {
+    ppkToggleTriggerAction,
+    ppkClearSingleTriggingAction,
+    ppkTriggerLevelSetAction,
+    ppkTriggerSingleSetAction,
+    ppkExternalTriggerToggledAction,
+} from '../reducers/triggerReducer';
+import { ppkUpdateRegulatorAction } from '../reducers/voltageRegulatorReducer';
+import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
+import { chartWindowAction, ppkAnimationAction } from '../reducers/chartReducer';
+import { options, bufferLengthInSeconds } from '../globals';
 
 let device = null;
 let updateRequestInterval;
-
-const bufferLengthInSeconds = 60 * 12;
-const samplingTime = 10;
-const samplesPerSecond = 1e6 / samplingTime;
-
-export const options = {
-    samplingTime,
-    samplesPerSecond,
-    data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
-    bits: null,
-    index: 0,
-    renderIndex: undefined,
-    timestamp: 0,
-    color: 'rgba(179, 40, 96, 1)',
-    valueRange: {
-        min: 0,
-        max: 15000,
-    },
-};
-
-export const PPK_OPENED = 'PPK_OPENED';
-export const PPK_CLOSED = 'PPK_CLOSED';
-export const PPK_METADATA = 'PPK_METADATA';
-export const PPK_ANIMATION = 'PPK_ANIMATION';
-export const DEVICE_UNDER_TEST_TOGGLE = 'DEVICE_UNDER_TEST_TOGGLE';
-export const SET_POWER_MODE = 'SET_POWER_MODE';
-export const TRIGGER_VALUE_SET = 'TRIGGER_VALUE_SET';
-export const TRIGGER_TOGGLE = 'TRIGGER_TOGGLE';
-export const TRIGGER_SINGLE_SET = 'TRIGGER_SINGLE_SET';
-export const AVERAGE_STARTED = 'AVERAGE_STARTED';
-export const AVERAGE_STOPPED = 'AVERAGE_STOPPED';
-export const TRIGGER_SINGLE_CLEAR = 'TRIGGER_SINGLE_CLEAR';
-export const RTT_CALLED_START = 'RTT_CALLED_START';
-export const RESISTORS_RESET = 'RESISTORS_RESET';
-export const EXTERNAL_TRIGGER_TOGGLE = 'EXTERNAL_TRIGGER_TOGGLE';
-export const VOLTAGE_REGULATOR_UPDATED = 'VOLTAGE_REGULATOR_UPDATED';
-export const SWITCHING_POINTS_UPDATED = 'SWITCHING_POINTS_UPDATED';
-export const SWITCHING_POINTS_RESET = 'SWITCHING_POINTS_RESET';
-export const SWITCHING_POINTS_DOWN_SET = 'SWITCHING_POINTS_DOWN_SET';
-export const SWITCHING_POINTS_UP_SET = 'SWITCHING_POINTS_UP_SET';
-export const SPIKE_FILTER_TOGGLE = 'SPIKE_FILTER_TOGGLE';
-
-function ppkOpenedAction(portName, capabilities) {
-    return {
-        type: PPK_OPENED,
-        portName,
-        capabilities,
-    };
-}
-
-function ppkClosedAction() {
-    return {
-        type: PPK_CLOSED,
-    };
-}
-
-function ppkMetadataAction(metadata) {
-    return {
-        type: PPK_METADATA,
-        metadata,
-    };
-}
-
-function ppkAnimationAction() {
-    return {
-        type: PPK_ANIMATION,
-        index: options.index,
-    };
-}
-
-function ppkToggleDUTAction() {
-    return {
-        type: DEVICE_UNDER_TEST_TOGGLE,
-    };
-}
-
-function ppkSetPowerModeAction() {
-    return {
-        type: SET_POWER_MODE,
-    };
-}
-
-function ppkTriggerLevelSetAction(triggerLevel) {
-    return {
-        type: TRIGGER_VALUE_SET,
-        triggerLevel,
-    };
-}
-
-function ppkToggleTriggerAction(triggerRunning) {
-    return {
-        type: TRIGGER_TOGGLE,
-        triggerRunning,
-    };
-}
-
-function ppkTriggerSingleSetAction() {
-    return {
-        type: TRIGGER_SINGLE_SET,
-    };
-}
-
-function ppkAverageStartAction() {
-    return {
-        type: AVERAGE_STARTED,
-    };
-}
-
-function ppkAverageStoppedAction() {
-    return {
-        type: AVERAGE_STOPPED,
-    };
-}
-
-function ppkClearSingleTriggingAction() {
-    return {
-        type: TRIGGER_SINGLE_CLEAR,
-    };
-}
-
-function rttStartAction() {
-    return {
-        type: RTT_CALLED_START,
-    };
-}
-
-function resistorsResetAction() {
-    return {
-        type: RESISTORS_RESET,
-    };
-}
-
-function ppkExternalTriggerToggledAction() {
-    return {
-        type: EXTERNAL_TRIGGER_TOGGLE,
-    };
-}
-
-function ppkSpikeFilteringToggleAction() {
-    return {
-        type: SPIKE_FILTER_TOGGLE,
-    };
-}
-
-function ppkUpdateRegulatorAction(currentVDD) {
-    return {
-        type: VOLTAGE_REGULATOR_UPDATED,
-        currentVDD,
-    };
-}
-function ppkSwitchingPointsUpSetAction() {
-    return {
-        type: SWITCHING_POINTS_UP_SET,
-    };
-}
-function ppkSwitchingPointsDownSetAction(sliderVal) {
-    return {
-        type: SWITCHING_POINTS_DOWN_SET,
-        sliderVal,
-    };
-}
-function ppkSwitchingPointsResetAction() {
-    return {
-        type: SWITCHING_POINTS_RESET,
-    };
-}
 
 function setupOptions() {
     console.log(device.capabilities);
@@ -228,18 +87,18 @@ function setupOptions() {
 
 
 /* Start reading current measurements */
-export function averageStart() {
+export function samplingStart() {
     return async (dispatch, getState) => {
         options.data.fill(undefined);
         options.index = 0;
-        dispatch(averageChartWindow(null, null, getState().app.average.windowDuration), null, null);
+        dispatch(chartWindowAction(null, null, getState().app.chart.windowDuration), null, null);
         dispatch(ppkAverageStartAction());
         await device.ppkAverageStart();
         logger.info('Average started');
     };
 }
 
-export function averageStop() {
+export function samplingStop() {
     return async dispatch => {
         dispatch(ppkAverageStoppedAction());
         await device.ppkAverageStop();
@@ -262,8 +121,8 @@ export function close() {
         if (!device) {
             return;
         }
-        if (getState().app.average.averageRunning) {
-            await dispatch(averageStop());
+        if (getState().app.app.samplingRunning) {
+            await dispatch(samplingStop());
         }
         if (getState().app.trigger.triggerRunning) {
             await dispatch(triggerStop());
@@ -285,8 +144,9 @@ export function open(deviceInfo) {
         const onSample = ({
             value, bits, timestamp, trigger,
         }) => {
-            const { averageRunning, windowBegin, windowEnd } = getState().app.average;
-            if (!averageRunning && !trigger) {
+            const { samplingRunning } = getState().app.app;
+            const { windowBegin, windowEnd } = getState().app.chart;
+            if (!samplingRunning && !trigger) {
                 // skip incoming data after stopped
                 return;
             }
@@ -314,7 +174,7 @@ export function open(deviceInfo) {
             if ((windowBegin !== 0 || windowEnd !== 0)
                 && options.timestamp >= windowBegin + (bufferLengthInSeconds * 1e6)) {
                 // stop average when reaches end of buffer (i.e. would overwrite chart data)
-                dispatch(averageStop());
+                dispatch(samplingStop());
                 return;
             }
 
@@ -328,7 +188,10 @@ export function open(deviceInfo) {
             setupOptions(device);
             const metadata = device.parseMeta(await device.start());
 
-            dispatch(ppkMetadataAction(metadata));
+            console.log(metadata);
+            dispatch(resistorsResetAction(metadata));
+            dispatch(ppkSwitchingPointsResetAction(metadata));
+            dispatch(ppkUpdateRegulatorAction(metadata));
             dispatch(rttStartAction());
             logger.info('PPK started');
         } catch (err) {
@@ -362,7 +225,7 @@ export function updateRegulator() {
     return async (dispatch, getState) => {
         const { vdd } = getState().app.voltageRegulator;
         await device.ppkUpdateRegulator(vdd);
-        dispatch(ppkUpdateRegulatorAction(vdd));
+        dispatch(ppkUpdateRegulatorAction({ currentVdd: vdd }));
     };
 }
 
@@ -477,7 +340,6 @@ export function switchingPointsUpSet() {
         const { switchUpSliderPosition } = getState().app.switchingPoints;
         const pot = 13500.0 * ((((10.98194 * switchUpSliderPosition) / 1000) / 0.41) - 1);
         await device.ppkSwitchPointUp(parseInt((pot), 10));
-        dispatch(ppkSwitchingPointsUpSetAction());
     };
 }
 

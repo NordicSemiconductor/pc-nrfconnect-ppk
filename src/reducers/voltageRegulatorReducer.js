@@ -34,41 +34,32 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { VOLTAGE_REGULATOR_UPDATED, PPK_METADATA } from '../actions/deviceActions';
-import { VOLTAGE_REGULATOR_VDD_MOVE } from '../actions/uiActions';
-
 const initialState = {
     vdd: 3000, // [1800 .. 3600] mV
     currentVDD: 3000,
 };
 
-export default function voltageRegulator(state = initialState, action) {
+const VOLTAGE_REGULATOR_UPDATED = 'VOLTAGE_REGULATOR_UPDATED';
+
+export const ppkUpdateRegulatorAction = ({ vdd, currentVDD }) => ({
+    type: VOLTAGE_REGULATOR_UPDATED,
+    vdd,
+    currentVDD,
+});
+
+export const moveVoltageRegulatorVddAction = vdd => ppkUpdateRegulatorAction({ vdd });
+
+export default (state = initialState, action) => {
     switch (action.type) {
-        case VOLTAGE_REGULATOR_VDD_MOVE: {
-            const { vdd } = action;
-            return {
-                ...state,
-                vdd,
-            };
-        }
         case VOLTAGE_REGULATOR_UPDATED: {
-            const { currentVDD } = action;
             return {
-                ...state,
-                currentVDD,
-            };
-        }
-        case PPK_METADATA: {
-            const { vdd } = action.metadata;
-            return {
-                ...state,
-                currentVDD: vdd,
-                vdd,
+                vdd: action.vdd || state.vdd,
+                currentVDD: action.currentVDD || state.currentVDD,
             };
         }
         default:
     }
     return state;
-}
+};
 
 export const voltageRegulatorState = ({ app }) => app.voltageRegulator;

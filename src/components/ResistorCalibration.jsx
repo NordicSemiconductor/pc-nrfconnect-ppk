@@ -52,9 +52,8 @@ import {
     updateHighResistorAction,
     updateMidResistorAction,
     updateLowResistorAction,
-} from '../actions/uiActions';
-
-import { resistorCalibrationState } from '../reducers/resistorCalibrationReducer';
+    resistorCalibrationState,
+} from '../reducers/resistorCalibrationReducer';
 
 export default () => {
     const dispatch = useDispatch();

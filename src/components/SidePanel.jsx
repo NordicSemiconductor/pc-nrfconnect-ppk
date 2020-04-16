@@ -41,10 +41,9 @@ import PropTypes from 'prop-types';
 import StartStop from './StartStop';
 import Trigger from './Trigger';
 import VoltageRegulator from './VoltageRegulator';
-import { toggleAdvancedModeAction } from '../actions/uiActions';
 import withHotkey from '../utils/withHotKey';
 
-import { appState } from '../reducers/appReducer';
+import { toggleAdvancedModeAction, appState } from '../reducers/appReducer';
 
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();

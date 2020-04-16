@@ -37,7 +37,6 @@
 /* eslint no-bitwise: off */
 
 import React, { useState, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { defaults, Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
@@ -48,10 +47,13 @@ import { unit } from 'mathjs';
 import dragSelectPlugin from '../utils/chart.dragSelect';
 import zoomPanPlugin from '../utils/chart.zoomPan';
 
-import { averageChartWindow, averageChartCursorAction } from '../actions/uiActions';
+import {
+    chartWindowAction,
+    chartCursorAction,
+    chartState,
+} from '../reducers/chartReducer';
 
-import { appState } from '../reducers/appReducer';
-import { averageState } from '../reducers/averageReducer';
+import { options } from '../globals';
 
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
@@ -90,34 +92,33 @@ const lineData = emptyArray();
 const bits = [...Array(allOfBits)].map(() => emptyArray());
 const bitIndexes = new Array(allOfBits);
 
-const Chart = ({ options }) => {
+const Chart = () => {
     const dispatch = useDispatch();
     const chartWindow = (windowBegin, windowEnd, yMin, yMax) => dispatch(
-        averageChartWindow(
+        chartWindowAction(
             windowBegin, windowEnd, windowEnd - windowBegin, yMin, yMax,
         ),
     );
     const chartReset = windowDuration => dispatch(
-        averageChartWindow(null, null, windowDuration, undefined, undefined),
+        chartWindowAction(null, null, windowDuration, undefined, undefined),
     );
     const chartCursor = (cursorBegin, cursorEnd) => dispatch(
-        averageChartCursorAction(cursorBegin, cursorEnd),
+        chartCursorAction(cursorBegin, cursorEnd),
     );
-
-    const { chartIndex: index } = useSelector(appState);
     const {
         windowBegin,
         windowEnd,
         windowDuration,
         bufferLength,
         bufferRemaining,
-        averageRunning,
+        samplingRunning,
         canReset,
         cursorBegin,
         cursorEnd,
         yMin,
         yMax,
-    } = useSelector(averageState);
+        index,
+    } = useSelector(chartState);
 
     const chartRef = useRef(null);
     let numberOfBits = (windowDuration < 30000000) ? allOfBits : 0;
@@ -283,13 +284,13 @@ const Chart = ({ options }) => {
     };
 
     const renderResetButton = () => {
-        if (averageRunning !== null) {
+        if (samplingRunning !== null) {
             const live = (windowBegin === 0) && (windowEnd === 0);
             return (
                 <Button
                     variant="primary"
                     size="sm"
-                    disabled={!averageRunning && live}
+                    disabled={!samplingRunning && live}
                     onClick={live ? chartPause : chartResetToLive}
                     title={live ? 'Pause' : 'Live'}
                 >
@@ -448,7 +449,7 @@ const Chart = ({ options }) => {
                             max={bufferLength}
                             now={bufferRemaining}
                             label={`${Number((bufferRemaining / 1e6)).toFixed(1)} s`}
-                            animated={averageRunning}
+                            animated={samplingRunning}
                             key={2}
                         />
                     ) : (
@@ -486,18 +487,6 @@ const Chart = ({ options }) => {
             </div>
         </div>
     );
-};
-
-Chart.propTypes = {
-    options: PropTypes.shape({
-        data: PropTypes.instanceOf(Float32Array),
-        bits: PropTypes.instanceOf(Uint8Array),
-        index: PropTypes.number,
-        timestamp: PropTypes.number,
-        samplesPerSecond: PropTypes.number,
-        color: PropTypes.string,
-        valueRange: PropTypes.objectOf(PropTypes.number),
-    }).isRequired,
 };
 
 export default Chart;

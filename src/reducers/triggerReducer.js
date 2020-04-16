@@ -34,14 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import {
-    TRIGGER_SINGLE_SET,
-    TRIGGER_SINGLE_CLEAR,
-    TRIGGER_TOGGLE,
-    EXTERNAL_TRIGGER_TOGGLE,
-    TRIGGER_VALUE_SET,
-} from '../actions/deviceActions';
-
 const initialState = {
     triggerLevel: 1, // [microAmp]
     triggerSingleWaiting: false,
@@ -49,7 +41,35 @@ const initialState = {
     externalTrigger: false,
 };
 
-export default function trigger(state = initialState, action) {
+const TRIGGER_VALUE_SET = 'TRIGGER_VALUE_SET';
+const TRIGGER_TOGGLE = 'TRIGGER_TOGGLE';
+const TRIGGER_SINGLE_SET = 'TRIGGER_SINGLE_SET';
+const TRIGGER_SINGLE_CLEAR = 'TRIGGER_SINGLE_CLEAR';
+const EXTERNAL_TRIGGER_TOGGLE = 'EXTERNAL_TRIGGER_TOGGLE';
+
+export const ppkTriggerLevelSetAction = triggerLevel => ({
+    type: TRIGGER_VALUE_SET,
+    triggerLevel,
+});
+
+export const ppkToggleTriggerAction = triggerRunning => ({
+    type: TRIGGER_TOGGLE,
+    triggerRunning,
+});
+
+export const ppkTriggerSingleSetAction = () => ({
+    type: TRIGGER_SINGLE_SET,
+});
+
+export const ppkClearSingleTriggingAction = () => ({
+    type: TRIGGER_SINGLE_CLEAR,
+});
+
+export const ppkExternalTriggerToggledAction = () => ({
+    type: EXTERNAL_TRIGGER_TOGGLE,
+});
+
+export default (state = initialState, action) => {
     switch (action.type) {
         case TRIGGER_SINGLE_SET: {
             return {
@@ -103,6 +123,6 @@ export default function trigger(state = initialState, action) {
         default:
     }
     return state;
-}
+};
 
 export const triggerState = ({ app }) => app.trigger;

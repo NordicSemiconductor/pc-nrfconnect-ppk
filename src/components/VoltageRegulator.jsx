@@ -45,13 +45,15 @@ import Slider from './Slider/Slider';
 import InlineInput from './Slider/InlineInput';
 
 import { updateRegulator } from '../actions/deviceActions';
-import { moveVoltageRegulatorVddAction } from '../actions/uiActions';
 
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 
 import { appState } from '../reducers/appReducer';
-import { voltageRegulatorState } from '../reducers/voltageRegulatorReducer';
+import {
+    voltageRegulatorState,
+    moveVoltageRegulatorVddAction,
+} from '../reducers/voltageRegulatorReducer';
 
 export default () => {
     const dispatch = useDispatch();

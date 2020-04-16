@@ -51,12 +51,11 @@ import {
     switchingPointsDownSet,
     switchingPointsUpSet,
 } from '../actions/deviceActions';
-
 import {
     switchingPointUpMoved,
     switchingPointDownMovedAction,
-} from '../actions/uiActions';
-import { switchingPointsState } from '../reducers/switchingPointsReducer';
+    switchingPointsState,
+} from '../reducers/switchingPointsReducer';
 import { appState } from '../reducers/appReducer';
 
 export default () => {

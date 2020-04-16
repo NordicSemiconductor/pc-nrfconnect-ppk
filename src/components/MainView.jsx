@@ -38,17 +38,15 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Chart from './Chart';
-import { options } from '../actions/deviceActions';
-import { toggleFullView } from '../actions/uiActions';
 
-import { appState } from '../reducers/appReducer';
+import { toggleFullView, appState } from '../reducers/appReducer';
 
 export default () => {
     const dispatch = useDispatch();
     const { fullView } = useSelector(appState);
     return (
         <div className="core-main-view">
-            <Chart options={options} />
+            <Chart />
             <span
                 onClick={() => dispatch(toggleFullView())}
                 className={`btnFullViewToggle mdi mdi-${fullView ? 'fullscreen-exit' : 'fullscreen'}`}

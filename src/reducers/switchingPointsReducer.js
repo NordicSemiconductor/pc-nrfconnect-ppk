@@ -34,18 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import {
-    PPK_METADATA,
-    SWITCHING_POINTS_RESET,
-    SWITCHING_POINTS_DOWN_SET,
-    SPIKE_FILTER_TOGGLE,
-} from '../actions/deviceActions';
-
-import {
-    SWITCHING_POINTS_DOWN_MOVE,
-    SWITCHING_POINTS_UP_MOVE,
-} from '../actions/uiActions';
-
 const initialState = {
     switchUpHigh: 1.82,
     switchUpLow: 100,
@@ -58,6 +46,45 @@ const initialState = {
     switchDownSliderPosition: 300,
     spikeFiltering: true,
 };
+
+const SWITCHING_POINTS_RESET = 'SWITCHING_POINTS_RESET';
+const SWITCHING_POINTS_DOWN_SET = 'SWITCHING_POINTS_DOWN_SET';
+const SPIKE_FILTER_TOGGLE = 'SPIKE_FILTER_TOGGLE';
+const SWITCHING_POINTS_UP_MOVE = 'SWITCHING_POINTS_UP_MOVE';
+const SWITCHING_POINTS_DOWN_MOVE = 'SWITCHING_POINTS_DOWN_MOVE';
+
+export const ppkSwitchingPointsResetAction = ({ vrefHigh, vrefLow } = {}) => ({
+    type: SWITCHING_POINTS_RESET,
+    vrefHigh,
+    vrefLow,
+});
+
+export const ppkSwitchingPointsDownSetAction = sliderVal => ({
+    type: SWITCHING_POINTS_DOWN_SET,
+    sliderVal,
+});
+
+export const ppkSpikeFilteringToggleAction = () => ({
+    type: SPIKE_FILTER_TOGGLE,
+});
+
+const switchingPointUpMovedAction = sliderVal => ({
+    type: SWITCHING_POINTS_UP_MOVE,
+    sliderVal,
+});
+
+export const switchingPointDownMovedAction = sliderVal => ({
+    type: SWITCHING_POINTS_DOWN_MOVE,
+    sliderVal,
+});
+
+export const switchingPointUpMoved = sliderVal => (dispatch, getState) => {
+    dispatch(switchingPointUpMovedAction(sliderVal));
+    dispatch(switchingPointDownMovedAction(
+        getState().app.switchingPoints.switchDownSliderPosition,
+    ));
+};
+
 
 function calculateSwitchingPointsUp(sliderVal) {
     return {
@@ -79,40 +106,8 @@ function calculateSwitchingPointsDown(sliderVal, switchUpHigh, switchUpSliderPos
     };
 }
 
-export default function switchingPoints(state = initialState, action) {
+export default (state = initialState, action) => {
     switch (action.type) {
-        case PPK_METADATA: {
-            const {
-                vrefHigh,
-                vrefLow,
-            } = action.metadata;
-            const switchUpSliderPosition = (((vrefHigh * 2) / 27000) + 1)
-                * (0.41 / 10.98194) * 1000;
-            const switchDownSliderPosition = 500
-                - (parseInt(((((((vrefLow * 2) + 30000) / 2000.0) + 1) / 16.3) * 100), 10));
-            const {
-                switchUpLow,
-                switchUpHigh,
-            } = calculateSwitchingPointsUp(switchUpSliderPosition);
-            const {
-                switchDownHigh,
-                switchDownLow,
-            } = calculateSwitchingPointsDown(switchDownSliderPosition,
-                switchUpHigh,
-                switchUpSliderPosition);
-
-            return {
-                ...state,
-                vrefHigh,
-                vrefLow,
-                switchUpSliderPosition,
-                switchDownSliderPosition,
-                switchUpLow,
-                switchUpHigh,
-                switchDownHigh,
-                switchDownLow,
-            };
-        }
         case SWITCHING_POINTS_UP_MOVE: {
             const { switchUpLow, switchUpHigh } = calculateSwitchingPointsUp(action.sliderVal);
             return {
@@ -154,14 +149,14 @@ export default function switchingPoints(state = initialState, action) {
             };
         }
         case SWITCHING_POINTS_RESET: {
-            const {
-                vrefHigh,
-                vrefLow,
-            } = state;
-            const switchUpSliderPosition = (((vrefHigh * 2) / 27000) + 1) * (0.41 / 10.98194)
-                * 1000;
-            const switchDownSliderPosition = 500
-                - (parseInt(((((((vrefLow * 2) + 30000) / 2000.0) + 1) / 16.3) * 100), 10));
+            const vrefHigh = action.vrefHigh || state.vrefHigh;
+            const vrefLow = action.vrefHigh || state.vrefHigh;
+            const switchUpSliderPosition = (
+                (((vrefHigh * 2) / 27000) + 1) * (0.41 / 10.98194) * 1000
+            );
+            const switchDownSliderPosition = (
+                500 - (parseInt(((((((vrefLow * 2) + 30000) / 2000.0) + 1) / 16.3) * 100), 10))
+            );
             const {
                 switchUpLow,
                 switchUpHigh,
@@ -185,7 +180,6 @@ export default function switchingPoints(state = initialState, action) {
                 switchUpHigh,
                 switchDownHigh,
                 switchDownLow,
-
             };
         }
         case SPIKE_FILTER_TOGGLE: {
@@ -197,6 +191,6 @@ export default function switchingPoints(state = initialState, action) {
         default:
     }
     return state;
-}
+};
 
 export const switchingPointsState = ({ app }) => app.switchingPoints;

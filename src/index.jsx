@@ -43,7 +43,7 @@ import reducers from './reducers';
 import MainView from './components/MainView';
 import SidePanel from './components/SidePanel';
 import ShoppingCartButton from './components/ShoppingCartButton';
-import * as deviceActions from './actions/deviceActions';
+import { open, close } from './actions/deviceActions';
 import './index.scss';
 
 let globalDispatch;
@@ -95,7 +95,7 @@ export default {
 
             case 'DEVICE_DESELECTED':
                 logger.info('Deselecting device');
-                dispatch(deviceActions.close()).then(() => {
+                dispatch(close()).then(() => {
                     dispatch(startWatchingDevices());
                 });
                 break;
@@ -104,7 +104,7 @@ export default {
                 dispatch(stopWatchingDevices());
                 const { device } = action;
                 logger.info(`Opening device with s/n ${device.serialNumber}`);
-                dispatch(deviceActions.open(device));
+                dispatch(open(device));
                 break;
             }
             default:
@@ -126,6 +126,6 @@ export default {
             },
             needSerialport: false,
         },
-        releaseCurrentDevice: () => globalDispatch(deviceActions.close()),
+        releaseCurrentDevice: () => globalDispatch(close()),
     },
 };

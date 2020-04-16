@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,20 +34,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { combineReducers } from 'redux';
+export const bufferLengthInSeconds = 60 * 12;
 
-import app from './appReducer';
-import chart from './chartReducer';
-import trigger from './triggerReducer';
-import switchingPoints from './switchingPointsReducer';
-import voltageRegulator from './voltageRegulatorReducer';
-import resistorCalibration from './resistorCalibrationReducer';
+const samplingTime = 10;
+const samplesPerSecond = 1e6 / samplingTime;
 
-export default combineReducers({
-    app,
-    chart,
-    trigger,
-    switchingPoints,
-    voltageRegulator,
-    resistorCalibration,
-});
+export const options = {
+    samplingTime,
+    samplesPerSecond,
+    data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
+    bits: null,
+    index: 0,
+    renderIndex: undefined,
+    timestamp: 0,
+    color: 'rgba(179, 40, 96, 1)',
+    valueRange: {
+        min: 0,
+        max: 15000,
+    },
+};

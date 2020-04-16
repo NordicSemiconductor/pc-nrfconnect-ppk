@@ -34,24 +34,70 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import * as deviceActions from '../actions/deviceActions';
-import * as uiActions from '../actions/uiActions';
-
 const initialState = {
     portName: null,
     metadata: [],
-    chartIndex: 0,
     isSmuMode: false,
     deviceRunning: true,
     rttRunning: false,
     fullView: false,
     advancedMode: false,
     capabilities: {},
+    samplingRunning: false,
 };
 
-export default function reduceApp(state = initialState, action) {
+const TOGGLE_FULL_VIEW = 'TOGGLE_FULL_VIEW';
+const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
+export const AVERAGE_STARTED = 'AVERAGE_STARTED';
+export const AVERAGE_STOPPED = 'AVERAGE_STOPPED';
+
+const PPK_OPENED = 'PPK_OPENED';
+const PPK_CLOSED = 'PPK_CLOSED';
+const DEVICE_UNDER_TEST_TOGGLE = 'DEVICE_UNDER_TEST_TOGGLE';
+const SET_POWER_MODE = 'SET_POWER_MODE';
+const RTT_CALLED_START = 'RTT_CALLED_START';
+
+export const toggleFullView = () => ({
+    type: TOGGLE_FULL_VIEW,
+});
+
+export const toggleAdvancedModeAction = () => ({
+    type: TOGGLE_ADVANCED_MODE,
+});
+
+export const ppkAverageStartAction = () => ({
+    type: AVERAGE_STARTED,
+});
+
+export const ppkAverageStoppedAction = () => ({
+    type: AVERAGE_STOPPED,
+});
+
+export const ppkOpenedAction = (portName, capabilities) => ({
+    type: PPK_OPENED,
+    portName,
+    capabilities,
+});
+
+export const ppkClosedAction = () => ({
+    type: PPK_CLOSED,
+});
+
+export const ppkToggleDUTAction = () => ({
+    type: DEVICE_UNDER_TEST_TOGGLE,
+});
+
+export const ppkSetPowerModeAction = () => ({
+    type: SET_POWER_MODE,
+});
+
+export const rttStartAction = () => ({
+    type: RTT_CALLED_START,
+});
+
+export default (state = initialState, action) => {
     switch (action.type) {
-        case deviceActions.PPK_OPENED: {
+        case PPK_OPENED: {
             const { portName, capabilities } = action;
             return {
                 ...state,
@@ -59,31 +105,17 @@ export default function reduceApp(state = initialState, action) {
                 capabilities: { ...capabilities },
             };
         }
-        case deviceActions.PPK_CLOSED: {
+        case PPK_CLOSED: {
             return initialState;
         }
-        case deviceActions.PPK_METADATA: {
-            const { metadata } = action;
-            return {
-                ...state,
-                metadata,
-            };
-        }
-        case deviceActions.PPK_ANIMATION: {
-            const { index } = action;
-            return {
-                ...state,
-                chartIndex: index,
-            };
-        }
-        case deviceActions.DEVICE_UNDER_TEST_TOGGLE: {
+        case DEVICE_UNDER_TEST_TOGGLE: {
             const { deviceRunning } = state;
             return {
                 ...state,
                 deviceRunning: !deviceRunning,
             };
         }
-        case deviceActions.SET_POWER_MODE: {
+        case SET_POWER_MODE: {
             const { isSmuMode } = state;
             return {
                 ...state,
@@ -91,36 +123,41 @@ export default function reduceApp(state = initialState, action) {
             };
         }
 
-        case deviceActions.RTT_CALLED_START: {
+        case RTT_CALLED_START: {
             return {
                 ...state,
                 rttRunning: true,
             };
         }
 
-        case deviceActions.RTT_CALLED_STOP: {
-            return {
-                ...state,
-                rttRunning: false,
-            };
-        }
-
-        case uiActions.TOGGLE_FULL_VIEW: {
+        case TOGGLE_FULL_VIEW: {
             return {
                 ...state,
                 fullView: !state.fullView,
             };
         }
-        case uiActions.TOGGLE_ADVANCED_MODE: {
+        case TOGGLE_ADVANCED_MODE: {
             return {
                 ...state,
                 advancedMode: !state.advancedMode,
+            };
+        }
+        case AVERAGE_STARTED: {
+            return {
+                ...state,
+                samplingRunning: true,
+            };
+        }
+        case AVERAGE_STOPPED: {
+            return {
+                ...state,
+                samplingRunning: false,
             };
         }
 
         default:
     }
     return state;
-}
+};
 
 export const appState = ({ app }) => app.app;

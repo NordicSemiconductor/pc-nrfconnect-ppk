@@ -34,14 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import {
-    AVERAGE_STARTED,
-    AVERAGE_STOPPED,
-    PPK_ANIMATION,
-    options,
-} from '../actions/deviceActions';
-
-import { CHART_AVERAGE_WINDOW, CHART_AVERAGE_CURSOR } from '../actions/uiActions';
+import { options } from '../globals';
 
 const initialWindowDuration = 7 * 1e6;
 const initialBufferLength = ((options.data.length / options.samplesPerSecond) * 1e6)
@@ -54,10 +47,54 @@ const initialState = {
     windowDuration: initialWindowDuration, // [microseconds]
     yMin: null,
     yMax: null,
-    averageRunning: false,
+    samplingRunning: false,
     bufferLength: initialBufferLength,
     bufferRemaining: initialBufferLength,
+    index: 0,
 };
+
+const PPK_ANIMATION = 'PPK_ANIMATION';
+const CHART_CURSOR = 'CHART_CURSOR';
+const CHART_WINDOW = 'CHART_WINDOW';
+
+const MIN_AVERAGE_WINDOW_DURATION = 1000;
+
+export const ppkAnimationAction = () => ({
+    type: PPK_ANIMATION,
+});
+
+export const chartCursorAction = (cursorBegin, cursorEnd) => ({
+    type: CHART_CURSOR,
+    cursorBegin,
+    cursorEnd,
+});
+
+export const chartWindowAction = (
+    windowBegin, windowEnd, windowDuration, yMin, yMax,
+) => {
+    const duration = Math.max(MIN_AVERAGE_WINDOW_DURATION, windowDuration);
+    if (windowBegin === null && windowEnd === null) {
+        return {
+            type: CHART_WINDOW,
+            windowBegin: 0,
+            windowEnd: 0,
+            windowDuration: windowDuration === null ? null : duration,
+            yMin,
+            yMax,
+        };
+    }
+    const half = duration / 2;
+    const center = (windowBegin + windowEnd) / 2;
+    return {
+        type: CHART_WINDOW,
+        windowBegin: center - half,
+        windowEnd: center + half,
+        windowDuration: duration,
+        yMin,
+        yMax,
+    };
+};
+
 
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
@@ -72,9 +109,9 @@ function calcBuffer(windowDuration, windowEnd) {
     };
 }
 
-export default function average(state = initialState, action) {
+export default (state = initialState, action) => {
     switch (action.type) {
-        case CHART_AVERAGE_CURSOR: {
+        case CHART_CURSOR: {
             const { cursorBegin, cursorEnd } = action;
             return {
                 ...state,
@@ -82,7 +119,7 @@ export default function average(state = initialState, action) {
                 cursorEnd,
             };
         }
-        case CHART_AVERAGE_WINDOW: {
+        case CHART_WINDOW: {
             const {
                 windowBegin, windowEnd, windowDuration, yMin, yMax,
             } = action;
@@ -101,24 +138,13 @@ export default function average(state = initialState, action) {
             return {
                 ...state,
                 ...calcBuffer(windowDuration, windowEnd),
-            };
-        }
-        case AVERAGE_STARTED: {
-            return {
-                ...state,
-                averageRunning: true,
-            };
-        }
-        case AVERAGE_STOPPED: {
-            return {
-                ...state,
-                averageRunning: false,
+                index: options.index,
             };
         }
 
         default:
     }
     return state;
-}
+};
 
-export const averageState = ({ app }) => app.average;
+export const chartState = ({ app }) => app.chart;
