@@ -53,14 +53,14 @@ const initialState = {
     index: 0,
 };
 
-const PPK_ANIMATION = 'PPK_ANIMATION';
+const ANIMATION = 'ANIMATION';
 const CHART_CURSOR = 'CHART_CURSOR';
 const CHART_WINDOW = 'CHART_WINDOW';
 
-const MIN_AVERAGE_WINDOW_DURATION = 1000;
+const MIN_WINDOW_DURATION = 1000;
 
-export const ppkAnimationAction = () => ({
-    type: PPK_ANIMATION,
+export const animationAction = () => ({
+    type: ANIMATION,
 });
 
 export const chartCursorAction = (cursorBegin, cursorEnd) => ({
@@ -72,7 +72,7 @@ export const chartCursorAction = (cursorBegin, cursorEnd) => ({
 export const chartWindowAction = (
     windowBegin, windowEnd, windowDuration, yMin, yMax,
 ) => {
-    const duration = Math.max(MIN_AVERAGE_WINDOW_DURATION, windowDuration);
+    const duration = Math.max(MIN_WINDOW_DURATION, windowDuration);
     if (windowBegin === null && windowEnd === null) {
         return {
             type: CHART_WINDOW,
@@ -133,7 +133,7 @@ export default (state = initialState, action) => {
                 yMax: yMax === null ? state.yMax : yMax,
             };
         }
-        case PPK_ANIMATION: {
+        case ANIMATION: {
             const { windowDuration, windowEnd } = state;
             return {
                 ...state,

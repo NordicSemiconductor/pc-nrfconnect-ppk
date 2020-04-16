@@ -53,18 +53,18 @@ const SPIKE_FILTER_TOGGLE = 'SPIKE_FILTER_TOGGLE';
 const SWITCHING_POINTS_UP_MOVE = 'SWITCHING_POINTS_UP_MOVE';
 const SWITCHING_POINTS_DOWN_MOVE = 'SWITCHING_POINTS_DOWN_MOVE';
 
-export const ppkSwitchingPointsResetAction = ({ vrefHigh, vrefLow } = {}) => ({
+export const switchingPointsResetAction = ({ vrefHigh, vrefLow } = {}) => ({
     type: SWITCHING_POINTS_RESET,
     vrefHigh,
     vrefLow,
 });
 
-export const ppkSwitchingPointsDownSetAction = sliderVal => ({
+export const switchingPointsDownSetAction = sliderVal => ({
     type: SWITCHING_POINTS_DOWN_SET,
     sliderVal,
 });
 
-export const ppkSpikeFilteringToggleAction = () => ({
+export const spikeFilteringToggleAction = () => ({
     type: SPIKE_FILTER_TOGGLE,
 });
 

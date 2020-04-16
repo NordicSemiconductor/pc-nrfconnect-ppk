@@ -41,13 +41,13 @@ const initialState = {
 
 const VOLTAGE_REGULATOR_UPDATED = 'VOLTAGE_REGULATOR_UPDATED';
 
-export const ppkUpdateRegulatorAction = ({ vdd, currentVDD }) => ({
+export const updateRegulatorAction = ({ vdd, currentVDD }) => ({
     type: VOLTAGE_REGULATOR_UPDATED,
     vdd,
     currentVDD,
 });
 
-export const moveVoltageRegulatorVddAction = vdd => ppkUpdateRegulatorAction({ vdd });
+export const moveVoltageRegulatorVddAction = vdd => updateRegulatorAction({ vdd });
 
 export default (state = initialState, action) => {
     switch (action.type) {

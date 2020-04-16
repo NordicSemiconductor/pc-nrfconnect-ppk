@@ -48,16 +48,16 @@ const initialState = {
 
 const TOGGLE_FULL_VIEW = 'TOGGLE_FULL_VIEW';
 const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
-export const AVERAGE_STARTED = 'AVERAGE_STARTED';
-export const AVERAGE_STOPPED = 'AVERAGE_STOPPED';
+export const SAMPLING_STARTED = 'SAMPLING_STARTED';
+export const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
 
-const PPK_OPENED = 'PPK_OPENED';
-const PPK_CLOSED = 'PPK_CLOSED';
+const DEVICE_OPENED = 'DEVICE_OPENED';
+const DEVICE_CLOSED = 'DEVICE_CLOSED';
 const DEVICE_UNDER_TEST_TOGGLE = 'DEVICE_UNDER_TEST_TOGGLE';
 const SET_POWER_MODE = 'SET_POWER_MODE';
 const RTT_CALLED_START = 'RTT_CALLED_START';
 
-export const toggleFullView = () => ({
+export const toggleFullViewAction = () => ({
     type: TOGGLE_FULL_VIEW,
 });
 
@@ -65,29 +65,29 @@ export const toggleAdvancedModeAction = () => ({
     type: TOGGLE_ADVANCED_MODE,
 });
 
-export const ppkAverageStartAction = () => ({
-    type: AVERAGE_STARTED,
+export const samplingStartAction = () => ({
+    type: SAMPLING_STARTED,
 });
 
-export const ppkAverageStoppedAction = () => ({
-    type: AVERAGE_STOPPED,
+export const samplingStoppedAction = () => ({
+    type: SAMPLING_STOPPED,
 });
 
-export const ppkOpenedAction = (portName, capabilities) => ({
-    type: PPK_OPENED,
+export const deviceOpenedAction = (portName, capabilities) => ({
+    type: DEVICE_OPENED,
     portName,
     capabilities,
 });
 
-export const ppkClosedAction = () => ({
-    type: PPK_CLOSED,
+export const deviceClosedAction = () => ({
+    type: DEVICE_CLOSED,
 });
 
-export const ppkToggleDUTAction = () => ({
+export const toggleDUTAction = () => ({
     type: DEVICE_UNDER_TEST_TOGGLE,
 });
 
-export const ppkSetPowerModeAction = () => ({
+export const setPowerModeAction = () => ({
     type: SET_POWER_MODE,
 });
 
@@ -97,7 +97,7 @@ export const rttStartAction = () => ({
 
 export default (state = initialState, action) => {
     switch (action.type) {
-        case PPK_OPENED: {
+        case DEVICE_OPENED: {
             const { portName, capabilities } = action;
             return {
                 ...state,
@@ -105,7 +105,7 @@ export default (state = initialState, action) => {
                 capabilities: { ...capabilities },
             };
         }
-        case PPK_CLOSED: {
+        case DEVICE_CLOSED: {
             return initialState;
         }
         case DEVICE_UNDER_TEST_TOGGLE: {
@@ -142,13 +142,13 @@ export default (state = initialState, action) => {
                 advancedMode: !state.advancedMode,
             };
         }
-        case AVERAGE_STARTED: {
+        case SAMPLING_STARTED: {
             return {
                 ...state,
                 samplingRunning: true,
             };
         }
-        case AVERAGE_STOPPED: {
+        case SAMPLING_STOPPED: {
             return {
                 ...state,
                 samplingRunning: false,

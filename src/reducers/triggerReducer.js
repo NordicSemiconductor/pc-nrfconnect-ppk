@@ -47,25 +47,25 @@ const TRIGGER_SINGLE_SET = 'TRIGGER_SINGLE_SET';
 const TRIGGER_SINGLE_CLEAR = 'TRIGGER_SINGLE_CLEAR';
 const EXTERNAL_TRIGGER_TOGGLE = 'EXTERNAL_TRIGGER_TOGGLE';
 
-export const ppkTriggerLevelSetAction = triggerLevel => ({
+export const triggerLevelSetAction = triggerLevel => ({
     type: TRIGGER_VALUE_SET,
     triggerLevel,
 });
 
-export const ppkToggleTriggerAction = triggerRunning => ({
+export const toggleTriggerAction = triggerRunning => ({
     type: TRIGGER_TOGGLE,
     triggerRunning,
 });
 
-export const ppkTriggerSingleSetAction = () => ({
+export const triggerSingleSetAction = () => ({
     type: TRIGGER_SINGLE_SET,
 });
 
-export const ppkClearSingleTriggingAction = () => ({
+export const clearSingleTriggingAction = () => ({
     type: TRIGGER_SINGLE_CLEAR,
 });
 
-export const ppkExternalTriggerToggledAction = () => ({
+export const externalTriggerToggledAction = () => ({
     type: EXTERNAL_TRIGGER_TOGGLE,
 });
 
