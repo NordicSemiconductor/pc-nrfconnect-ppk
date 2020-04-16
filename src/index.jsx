@@ -44,7 +44,7 @@ import MainView from './components/MainView';
 import SidePanel from './components/SidePanel';
 import ShoppingCartButton from './components/ShoppingCartButton';
 import * as deviceActions from './actions/deviceActions';
-import '../resources/css/index.scss';
+import './index.scss';
 
 let globalDispatch;
 
