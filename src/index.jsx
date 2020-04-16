@@ -39,12 +39,12 @@ import {
     logger, getAppDir, startWatchingDevices, stopWatchingDevices,
 } from 'nrfconnect/core';
 import path from 'path';
-import reducers from './lib/reducers';
-import MainView from './lib/components/MainView';
-import SidePanel from './lib/components/SidePanel';
-import ShoppingCartButton from './lib/components/ShoppingCartButton';
-import * as deviceActions from './lib/actions/deviceActions';
-import './resources/css/index.scss';
+import reducers from './reducers';
+import MainView from './components/MainView';
+import SidePanel from './components/SidePanel';
+import ShoppingCartButton from './components/ShoppingCartButton';
+import * as deviceActions from './actions/deviceActions';
+import '../resources/css/index.scss';
 
 let globalDispatch;
 
