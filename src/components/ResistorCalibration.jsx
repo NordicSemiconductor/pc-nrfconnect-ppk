@@ -57,11 +57,11 @@ import {
 
 export default () => {
     const dispatch = useDispatch();
-    const {
-        userResLo: resistorLow,
-        userResMid: resistorMid,
-        userResHi: resistorHigh,
-    } = useSelector(resistorCalibrationState);
+    const { userResLo, userResMid, userResHi } = useSelector(resistorCalibrationState);
+
+    const isHiValid = !Number.isNaN(parseFloat(userResHi));
+    const isMidValid = !Number.isNaN(parseFloat(userResMid));
+    const isLoValid = !Number.isNaN(parseFloat(userResLo));
 
     return (
         <Card>
@@ -78,13 +78,12 @@ export default () => {
                         </InputGroup.Prepend>
                         <Form.Control
                             type="text"
-                            value={resistorHigh}
+                            value={userResHi}
+                            isValid={isHiValid}
                             onChange={e => dispatch(updateHighResistorAction(e.target.value))}
-                            onKeyPress={e => {
-                                if (e.key === 'Enter') {
-                                    dispatch(updateResistors());
-                                }
-                            }}
+                            onKeyPress={e => (
+                                (e.key === 'Enter' && isHiValid) && dispatch(updateResistors())
+                            )}
                         />
                     </InputGroup>
                     <InputGroup>
@@ -93,13 +92,12 @@ export default () => {
                         </InputGroup.Prepend>
                         <Form.Control
                             type="text"
-                            value={resistorMid}
+                            value={userResMid}
+                            isValid={isMidValid}
                             onChange={e => dispatch(updateMidResistorAction(e.target.value))}
-                            onKeyPress={e => {
-                                if (e.key === 'Enter') {
-                                    dispatch(updateResistors());
-                                }
-                            }}
+                            onKeyPress={e => (
+                                (e.key === 'Enter' && isMidValid) && dispatch(updateResistors())
+                            )}
                         />
                     </InputGroup>
                     <InputGroup>
@@ -108,18 +106,18 @@ export default () => {
                         </InputGroup.Prepend>
                         <Form.Control
                             type="text"
-                            value={resistorLow}
+                            value={userResLo}
+                            isValid={isLoValid}
                             onChange={e => dispatch(updateLowResistorAction(e.target.value))}
-                            onKeyPress={e => {
-                                if (e.key === 'Enter') {
-                                    dispatch(updateResistors());
-                                }
-                            }}
+                            onKeyPress={e => (
+                                (e.key === 'Enter' && isLoValid) && dispatch(updateResistors())
+                            )}
                         />
                     </InputGroup>
                     <div className="d-flex flex-column">
                         <ButtonGroup style={{ marginTop: 10 }}>
                             <Button
+                                disabled={!(isLoValid && isHiValid && isMidValid)}
                                 onClick={() => dispatch(updateResistors())}
                                 variant="light"
                             >

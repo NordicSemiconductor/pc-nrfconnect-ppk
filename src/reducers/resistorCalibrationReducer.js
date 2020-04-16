@@ -74,47 +74,30 @@ export const updateHighResistorAction = userResHi => updateResistorAction({ user
 export const updateMidResistorAction = userResMid => updateResistorAction({ userResMid });
 export const updateLowResistorAction = userResLo => updateResistorAction({ userResLo });
 
+const defined = (a, b) => (a !== undefined ? a : b);
+
 export default (state = initialState, action) => {
     switch (action.type) {
         case USER_RESISTOR_UPDATED: {
-            const newUserResHi = parseFloat(action.userResHi);
-            const newUserResMid = parseFloat(action.userResMid);
-            const newUserResLo = parseFloat(action.userResLo);
             return {
                 ...state,
-                userResHi: Number.isNaN(newUserResHi) ? state.userResHi : newUserResHi,
-                userResMid: Number.isNaN(newUserResMid) ? state.userResMid : newUserResMid,
-                userResLo: Number.isNaN(newUserResLo) ? state.userResLo : newUserResLo,
+                userResHi: defined(action.userResHi, state.userResHi),
+                userResMid: defined(action.userResMid, state.userResMid),
+                userResLo: defined(action.userResLo, state.userResLo),
             };
         }
-        case RESISTORS_RESET: {
-            let {
-                userResHi,
-                userResMid,
-                userResLo,
-            } = action;
-
-            if (userResHi === undefined) {
-                userResHi = state.resHi;
-            }
-            if (userResMid === undefined) {
-                userResMid = state.resMid;
-            }
-            if (userResLo === undefined) {
-                userResLo = state.resLo;
-            }
+        case RESISTORS_RESET:
             return {
-                userResHi,
-                userResMid,
-                userResLo,
-                resHi: action.resHi || state.resHi,
-                resMid: action.resMid || state.resMid,
-                resLo: action.resLo || state.resLo,
+                userResHi: defined(action.userResHi, state.resHi),
+                userResMid: defined(action.userResMid, state.resMid),
+                userResLo: defined(action.userResLo, state.resLo),
+                resHi: defined(action.resHi, state.resHi),
+                resMid: defined(action.resMid, state.resMid),
+                resLo: defined(action.resLo, state.resLo),
             };
-        }
         default:
+            return state;
     }
-    return state;
 };
 
 export const resistorCalibrationState = ({ app }) => app.resistorCalibration;
