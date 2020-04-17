@@ -219,7 +219,7 @@ const Chart = () => {
             let max = -Number.MAX_VALUE;
             for (let n = k; n < l; n += 1) {
                 const v = options.data[(n + options.data.length) % options.data.length];
-                if (v !== undefined) {
+                if (!Number.isNaN(v)) {
                     if (v > max) max = v;
                     if (v < min) min = v;
                 }
@@ -238,7 +238,7 @@ const Chart = () => {
             for (let i = 0; i < numberOfBits; i += 1) {
                 let y1;
                 for (let n = k; n < l; n += 1) {
-                    const v = (options.bits[n] === undefined)
+                    const v = Number.isNaN(options.data[n])
                         ? undefined
                         : (((options.bits[n] >> i) & 1) + (i * 2));
                     if (v !== undefined && (y1 === undefined || v !== y1)) {
@@ -267,10 +267,12 @@ const Chart = () => {
             const timestamp = begin
                 + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
             lineData[mappedIndex].x = timestamp;
-            lineData[mappedIndex].y = v;
+            lineData[mappedIndex].y = Number.isNaN(v) ? undefined : v;
 
             for (let i = 0; i < numberOfBits; i += 1) {
-                const y = ((options.bits[k] >> i) & 1) + (i * 2);
+                const y = Number.isNaN(options.data[k])
+                    ? undefined
+                    : ((options.bits[k] >> i) & 1) + (i * 2);
                 if ((bits[i][bitIndexes[i] - 1] || {}).y !== y || n === originalIndexEndCeiled) {
                     bits[i][bitIndexes[i]].x = timestamp;
                     bits[i][bitIndexes[i]].y = y;

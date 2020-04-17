@@ -88,7 +88,7 @@ function setupOptions() {
 /* Start reading current measurements */
 export function samplingStart() {
     return async (dispatch, getState) => {
-        options.data.fill(undefined);
+        options.data.fill(NaN);
         options.index = 0;
         dispatch(chartWindowAction(null, null, getState().app.chart.windowDuration), null, null);
         dispatch(samplingStartAction());
@@ -154,7 +154,7 @@ export function open(deviceInfo) {
                 let avgts = options.timestamp;
                 while (avgts < timestamp - options.samplingTime) {
                     avgts += options.samplingTime;
-                    options.data[options.index] = undefined;
+                    options.data[options.index] = NaN;
                     options.index += 1;
                     if (options.index === options.data.length) {
                         options.index = 0;
