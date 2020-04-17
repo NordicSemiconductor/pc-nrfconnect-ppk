@@ -83,7 +83,7 @@ export const load = () => async dispatch => {
         return;
     }
 
-    const fd = fs.openSync('/tmp/ppk.dat', 'r');
+    const fd = fs.openSync(filename, 'r');
 
     const buf = Buffer.alloc(4);
     fs.readSync(fd, buf, 0, 4);
