@@ -36,6 +36,7 @@
     "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
   },
   "devDependencies": {
+    "bson": "^4.0.4",
     "chart.js": "2.9.3",
     "mathjs": "6.6.1",
     "mousetrap": "1.6.5",
