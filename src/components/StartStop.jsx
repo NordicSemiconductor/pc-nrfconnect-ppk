@@ -44,6 +44,7 @@ import {
     toggleDUT,
     setPowerMode,
 } from '../actions/deviceActions';
+import { save } from '../actions/fileActions';
 import { appState } from '../reducers/appReducer';
 
 export default () => {
@@ -58,50 +59,58 @@ export default () => {
     } = useSelector(appState);
 
     return (
-        <>
+        <div className="d-flex flex-column">
             {capabilities.ppkAverageStart && (
-                <div className="d-flex flex-column">
-                    <Button
-                        variant="primary"
-                        size="lg"
-                        disabled={!rttRunning}
-                        onClick={() => dispatch(
-                            samplingRunning ? samplingStop() : samplingStart(),
-                        )}
-                    >
-                        <span className={`mdi mdi-${samplingRunning ? 'stop' : 'play'}`} />
-                        {samplingRunning ? 'Stop' : 'Start'}
-                    </Button>
-                </div>
+                <Button
+                    className="mb-3"
+                    variant="primary"
+                    size="lg"
+                    disabled={!rttRunning}
+                    onClick={() => dispatch(
+                        samplingRunning ? samplingStop() : samplingStart(),
+                    )}
+                >
+                    <span className={`mdi mdi-${samplingRunning ? 'stop' : 'play'}`} />
+                    {samplingRunning ? 'Stop' : 'Start'}
+                </Button>
+            )}
+            {(
+                <Button
+                    className="mb-3"
+                    variant="info"
+                    size="lg"
+                    disabled={samplingRunning}
+                    onClick={() => dispatch(save())}
+                >
+                    Save
+                </Button>
             )}
             {capabilities.ppkToggleDUT && (
-                <div className="d-flex flex-column">
-                    <Button
-                        style={{ backgroundColor: 0xFF11AA }}
-                        variant="light"
-                        size="lg"
-                        disabled={!rttRunning}
-                        onClick={() => dispatch(toggleDUT(deviceRunning))}
-                    >
-                        <span className={`mdi mdi-${deviceRunning ? 'close-circle-outline' : 'record-circle-outline'}`} />
-                        {deviceRunning ? 'Power OFF' : 'Power ON'}
-                    </Button>
-                </div>
+                <Button
+                    style={{ backgroundColor: 0xFF11AA }}
+                    className="mb-3"
+                    variant="light"
+                    size="lg"
+                    disabled={!rttRunning}
+                    onClick={() => dispatch(toggleDUT(deviceRunning))}
+                >
+                    <span className={`mdi mdi-${deviceRunning ? 'close-circle-outline' : 'record-circle-outline'}`} />
+                    {deviceRunning ? 'Power OFF' : 'Power ON'}
+                </Button>
             )}
             {capabilities.ppkSetPowerMode && (
-                <div className="d-flex flex-column">
-                    <Button
-                        style={{ backgroundColor: 0xFF11AA }}
-                        variant="light"
-                        size="lg"
-                        disabled={!rttRunning}
-                        onClick={() => dispatch(setPowerMode(isSmuMode))}
-                    >
-                        <span className={`mdi mdi-${isSmuMode ? 'flash' : 'flash-auto'}`} />
-                        {isSmuMode ? 'Source Meter' : 'Amperemeter'}
-                    </Button>
-                </div>
+                <Button
+                    style={{ backgroundColor: 0xFF11AA }}
+                    className="mb-3"
+                    variant="light"
+                    size="lg"
+                    disabled={!rttRunning}
+                    onClick={() => dispatch(setPowerMode(isSmuMode))}
+                >
+                    <span className={`mdi mdi-${isSmuMode ? 'flash' : 'flash-auto'}`} />
+                    {isSmuMode ? 'Source Meter' : 'Amperemeter'}
+                </Button>
             )}
-        </>
+        </div>
     );
 };

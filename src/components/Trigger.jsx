@@ -81,7 +81,7 @@ export default () => {
     };
 
     return (
-        <Accordion defaultActiveKey="1">
+        <Accordion defaultActiveKey="1" className="mb-3">
             <Card>
                 <Card.Header>
                     <Accordion.Toggle as={Button} variant="link" eventKey="1">

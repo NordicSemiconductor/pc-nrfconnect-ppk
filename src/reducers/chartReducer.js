@@ -56,6 +56,7 @@ const initialState = {
 const ANIMATION = 'ANIMATION';
 const CHART_CURSOR = 'CHART_CURSOR';
 const CHART_WINDOW = 'CHART_WINDOW';
+const LOAD_CHART_STATE = 'LOAD_CHART_STATE';
 
 const MIN_WINDOW_DURATION = 1000;
 
@@ -94,6 +95,11 @@ export const chartWindowAction = (
         yMax,
     };
 };
+
+export const setChartState = state => ({
+    type: LOAD_CHART_STATE,
+    state,
+});
 
 
 function calcBuffer(windowDuration, windowEnd) {
@@ -141,10 +147,9 @@ export default (state = initialState, action) => {
                 index: options.index,
             };
         }
-
-        default:
+        case LOAD_CHART_STATE: return { ...state, ...action.state };
+        default: return state;
     }
-    return state;
 };
 
 export const chartState = ({ app }) => app.chart;

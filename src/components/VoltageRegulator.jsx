@@ -61,7 +61,7 @@ export default () => {
     const { advancedMode } = useSelector(appState);
 
     return (
-        <Accordion defaultActiveKey="2">
+        <Accordion defaultActiveKey="2" className="mb-3">
             <Card>
                 <Card.Header>
                     <Accordion.Toggle as={Button} variant="link" eventKey="2">

@@ -37,6 +37,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
+import Button from 'react-bootstrap/Button';
 
 import StartStop from './StartStop';
 import Trigger from './Trigger';
@@ -44,6 +45,7 @@ import VoltageRegulator from './VoltageRegulator';
 import withHotkey from '../utils/withHotKey';
 
 import { toggleAdvancedModeAction, appState } from '../reducers/appReducer';
+import { load } from '../actions/fileActions';
 
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
@@ -56,7 +58,17 @@ const SidePanel = ({ bindHotkey }) => {
         <div className={`core-side-panel${hidden}`}>
             {Object.keys(capabilities).length === 0
                 ? (
-                    <p>Please open your device first.</p>
+                    <div className="d-flex flex-column">
+                        <p>Please open your device first, or</p>
+                        <Button
+                            className="mb-3"
+                            variant="info"
+                            size="lg"
+                            onClick={() => dispatch(load())}
+                        >
+                            Load
+                        </Button>
+                    </div>
                 )
                 : (
                     <>

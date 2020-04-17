@@ -34,8 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// For electron runtime optimization we need to avoid operator-assiment:
-
 import { logger } from 'nrfconnect/core';
 import Device from '../device';
 
@@ -82,6 +80,7 @@ function setupOptions() {
     }
     if (options.data.length !== bufferLength) {
         options.data = new Float32Array(bufferLength);
+        options.data.fill(NaN);
     }
 }
 
@@ -336,7 +335,7 @@ export function spikeFilteringToggle() {
 }
 
 export function switchingPointsUpSet() {
-    return async (dispatch, getState) => {
+    return async (_, getState) => {
         const { switchUpSliderPosition } = getState().app.switchingPoints;
         const pot = 13500.0 * ((((10.98194 * switchUpSliderPosition) / 1000) / 0.41) - 1);
         await device.ppkSwitchPointUp(parseInt((pot), 10));
