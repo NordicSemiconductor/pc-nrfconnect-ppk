@@ -36,11 +36,19 @@
 
 import fs from 'fs';
 import bson from 'bson';
+import { remote } from 'electron';
 import { options } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 
+const { dialog } = remote;
+
 export const save = () => async (_, getState) => {
-    const fd = fs.openSync('/tmp/ppk.dat', 'w');
+    const filename = await dialog.showSaveDialog();
+    if (!filename) {
+        return;
+    }
+
+    const fd = fs.openSync(filename, 'w');
 
     const buf = Buffer.alloc(4);
     const { data, bits, ...opts } = options;
@@ -70,6 +78,11 @@ export const save = () => async (_, getState) => {
 };
 
 export const load = () => async dispatch => {
+    const [filename] = (await dialog.showOpenDialog()) || [];
+    if (!filename) {
+        return;
+    }
+
     const fd = fs.openSync('/tmp/ppk.dat', 'r');
 
     const buf = Buffer.alloc(4);
