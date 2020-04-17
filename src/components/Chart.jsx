@@ -59,6 +59,9 @@ defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
 defaults.global.animation.duration = 0;
 
+const dataColor = '#B32860';
+const valueRange = { min: 0, max: 15000 };
+
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
     const sign = usecs < 0 ? '-' : '';
@@ -360,14 +363,14 @@ const Chart = () => {
 
     const chartData = {
         datasets: [{
-            borderColor: options.color,
+            borderColor: dataColor,
             borderWidth: 1,
             fill: false,
             data: lineData.slice(0, mappedIndex),
             pointRadius: step > 0.2 ? 0 : 1.5,
             pointHoverRadius: 0,
             pointHitRadius: 0,
-            pointBackgroundColor: options.color,
+            pointBackgroundColor: dataColor,
             pointBorderWidth: 0,
             lineTension: step > 0.2 ? 0 : 0.2,
             label: 'Current',
@@ -406,15 +409,15 @@ const Chart = () => {
                 {
                     id: 'yScale',
                     type: 'linear',
-                    min: options.valueRange.min,
-                    max: options.valueRange.max,
+                    min: valueRange.min,
+                    max: valueRange.max,
                     fullWidth: 60,
                     ticks: {
                         minRotation: 0,
                         maxRotation: 0,
-                        suggestedMin: options.valueRange.min,
-                        suggestedMax: options.valueRange.max,
-                        min: yMin === null ? options.valueRange.min : yMin,
+                        suggestedMin: valueRange.min,
+                        suggestedMax: valueRange.max,
+                        min: yMin === null ? valueRange.min : yMin,
                         max: yMax === null ? undefined : yMax,
                         maxTicksLimit: 7,
                         callback: (uA => (

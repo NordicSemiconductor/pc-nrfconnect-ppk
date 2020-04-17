@@ -47,9 +47,4 @@ export const options = {
     index: 0,
     renderIndex: undefined,
     timestamp: 0,
-    color: 'rgba(179, 40, 96, 1)',
-    valueRange: {
-        min: 0,
-        max: 15000,
-    },
 };
