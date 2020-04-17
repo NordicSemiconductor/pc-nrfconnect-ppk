@@ -12,9 +12,6 @@
 .core-side-panel {
     height: 100%;
     flex: 0 0 300px;
-    > * {
-        margin-bottom: 20px;
-    }
 }
 
 .nav-menu-wrap {
@@ -55,7 +52,10 @@
             display: inline-block;
             width: 200px;
             background-color: #a94442;
+            border-radius: 0;
+            height: 1.2rem;
             .progress-bar {
+                height: 1.2rem;
                 float: right;
                 transition: none;
                 background-color: #28a328;
@@ -125,6 +125,9 @@
         top: 2px;
     }
 }
+.btn-lg, .btn-sm {
+    border-radius: 0;
+}
 
 .input-group-addon {
     min-width: 60px;
@@ -132,9 +135,12 @@
 
 .btnFullViewToggle {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 13px;
+    right: 12px;
     font-size: 24px;
+}
+.btnFullViewToggle:focus {
+    outline: none;
 }
 
 .accordion {
