@@ -37,13 +37,18 @@
 import fs from 'fs';
 import bson from 'bson';
 import { remote } from 'electron';
+import { join } from 'path';
+import { getAppDataDir } from 'nrfconnect/core';
 import { options } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 
 const { dialog } = remote;
 
 export const save = () => async (_, getState) => {
-    const filename = await dialog.showSaveDialog();
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+    const filename = await dialog.showSaveDialog({
+        defaultPath: join(getAppDataDir(), `ppk-${timestamp}.dat`),
+    });
     if (!filename) {
         return;
     }
