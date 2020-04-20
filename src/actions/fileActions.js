@@ -83,7 +83,9 @@ export const save = () => async (_, getState) => {
 };
 
 export const load = () => async dispatch => {
-    const [filename] = (await dialog.showOpenDialog()) || [];
+    const [filename] = (await dialog.showOpenDialog({
+        defaultPath: getAppDataDir(),
+    })) || [];
     if (!filename) {
         return;
     }
