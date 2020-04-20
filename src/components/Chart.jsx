@@ -446,14 +446,22 @@ const Chart = () => {
         responsiveAnimationDuration: 0,
         annotation: options.triggerMarkers ? {
             drawTime: 'beforeDatasetsDraw',
-            annotations: options.triggerMarkers.map(marker => ({
-                type: 'line',
-                mode: 'vertical',
-                scaleID: 'xScale',
-                value: marker - options.samplingTime,
-                borderColor: 'rgba(100%, 80%, 0%, 50%)',
-                borderWidth: 1,
-            })),
+            annotations: options.triggerMarkers
+                .reduce((pairs, _, i, array) => {
+                    if (!(i % 2)) {
+                        pairs.push(array.slice(i, i + 2));
+                    }
+                    return pairs;
+                }, [])
+                .map(([m1, m2]) => ({
+                    type: 'box',
+                    xScaleID: 'xScale',
+                    xMin: m1 - options.samplingTime,
+                    xMax: m2 - options.samplingTime,
+                    backgroundColor: 'rgba(255, 255, 255, 50%)',
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    borderWidth: 0,
+                })),
         } : undefined,
     };
 
