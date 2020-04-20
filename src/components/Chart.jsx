@@ -238,9 +238,10 @@ const Chart = () => {
             for (let i = 0; i < numberOfBits; i += 1) {
                 let y1;
                 for (let n = k; n < l; n += 1) {
-                    const v = Number.isNaN(options.data[n])
+                    const ni = (n + options.data.length) % options.data.length;
+                    const v = Number.isNaN(options.data[ni])
                         ? undefined
-                        : (((options.bits[n] >> i) & 1) + (i * 2));
+                        : (((options.bits[ni] >> i) & 1) + (i * 2));
                     if (v !== undefined && (y1 === undefined || v !== y1)) {
                         if ((bits[i][bitIndexes[i] - 1] || {}).y !== v
                             || mappedIndex === len + len - 1) {
