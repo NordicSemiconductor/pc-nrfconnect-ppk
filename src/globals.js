@@ -47,4 +47,5 @@ export const options = {
     index: 0,
     renderIndex: undefined,
     timestamp: 0,
+    triggerMarkers: null,
 };

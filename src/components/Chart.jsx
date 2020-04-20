@@ -44,6 +44,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { unit } from 'mathjs';
 
+import annotationPlugin from 'chartjs-plugin-annotation';
 import dragSelectPlugin from '../utils/chart.dragSelect';
 import zoomPanPlugin from '../utils/chart.zoomPan';
 
@@ -443,6 +444,17 @@ const Chart = () => {
             animationDuration: 0,
         },
         responsiveAnimationDuration: 0,
+        annotation: options.triggerMarkers ? {
+            drawTime: 'beforeDatasetsDraw',
+            annotations: options.triggerMarkers.map(marker => ({
+                type: 'line',
+                mode: 'vertical',
+                scaleID: 'xScale',
+                value: marker - options.samplingTime,
+                borderColor: 'rgba(100%, 80%, 0%, 50%)',
+                borderWidth: 1,
+            })),
+        } : undefined,
     };
 
     return (
@@ -468,7 +480,7 @@ const Chart = () => {
                     ref={chartRef}
                     data={chartData}
                     options={chartOptions}
-                    plugins={[dragSelectPlugin, zoomPanPlugin]}
+                    plugins={[dragSelectPlugin, zoomPanPlugin, annotationPlugin]}
                 />
             </div>
             <div className="chart-bottom">

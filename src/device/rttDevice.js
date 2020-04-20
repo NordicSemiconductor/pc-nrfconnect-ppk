@@ -116,7 +116,6 @@ class RTTDevice extends Device {
         this.isRttOpen = false;
 
         this.timestamp = 0;
-        this.timestampAverage = undefined;
         this.dataPayload = [];
 
         this.byteHandlerFn = this.byteHandlerReceiveMode;
@@ -135,17 +134,15 @@ class RTTDevice extends Device {
             case ETX: {
                 if (this.dataPayload.length === 4) {
                     this.handleAverageDataSet();
-                    this.timestampAverage += this.adcSamplingTimeUs * SAMPLES_PER_AVERAGE;
+                    this.timestamp += this.adcSamplingTimeUs * SAMPLES_PER_AVERAGE;
                 } else if (this.dataPayload.length === 5) {
                     this.timestamp = this.convertSysTick2MicroSeconds(
                         this.dataPayload.slice(0, 4),
                     );
-                    if (!this.timestampAverage) this.timestampAverage = this.timestamp;
                 } else {
                     try {
-                        this.handleTriggerDataSet(this.timestamp);
-                        this.timestampAverage = this.timestamp
-                            + (this.adcSamplingTimeUs * this.dataPayload.length / 2);
+                        this.handleTriggerDataSet();
+                        this.timestamp += (this.adcSamplingTimeUs * this.dataPayload.length / 2);
                     } catch (error) {
                         this.emit(
                             'error',
@@ -338,7 +335,7 @@ class RTTDevice extends Device {
         }
         try {
             const value = this.viewFloat[0];
-            let timestamp = this.timestampAverage;
+            let { timestamp } = this;
             for (let i = 0; i < SAMPLES_PER_AVERAGE; i += 1) {
                 this.onSampleCallback({ value, timestamp });
                 timestamp += this.adcSamplingTimeUs;

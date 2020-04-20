@@ -75,8 +75,10 @@ function setupOptions() {
         if (!options.bits || options.bits.length !== bufferLength) {
             options.bits = new Uint8Array(bufferLength);
         }
+        options.triggerMarkers = null;
     } else {
         options.bits = null;
+        options.triggerMarkers = [];
     }
     if (options.data.length !== bufferLength) {
         options.data = new Float32Array(bufferLength);
@@ -140,8 +142,10 @@ export function open(deviceInfo) {
             await dispatch(close());
         }
 
+        let isPreviousTrigger = false;
+
         const onSample = ({
-            value, bits, timestamp, trigger,
+            value, bits, timestamp, trigger = false,
         }) => {
             const { samplingRunning } = getState().app.app;
             const { windowBegin, windowEnd } = getState().app.chart;
@@ -151,9 +155,14 @@ export function open(deviceInfo) {
             }
 
             if (timestamp) {
-                let avgts = options.timestamp;
-                while (avgts < timestamp - options.samplingTime) {
-                    avgts += options.samplingTime;
+                if (isPreviousTrigger !== trigger) {
+                    isPreviousTrigger = trigger;
+                    options.triggerMarkers.push(timestamp);
+                }
+
+                let ts = options.timestamp;
+                while (ts < timestamp - options.samplingTime) {
+                    ts += options.samplingTime;
                     options.data[options.index] = NaN;
                     options.index += 1;
                     if (options.index === options.data.length) {

@@ -38,6 +38,7 @@
   "devDependencies": {
     "bson": "^4.0.4",
     "chart.js": "2.9.3",
+    "chartjs-plugin-annotation": "^0.5.7",
     "mathjs": "6.6.1",
     "mousetrap": "1.6.5",
     "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#semver:4.4.0",
