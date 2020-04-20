@@ -98,11 +98,7 @@ export const load = () => async dispatch => {
     fs.readSync(fd, objbuf, 0, objbuf.byteLength);
     const opts = bson.deserialize(objbuf);
 
-    options.samplingTime = opts.samplingTime;
-    options.samplesPerSecond = opts.samplesPerSecond;
-    options.index = opts.index;
-    options.renderIndex = opts.renderIndex;
-    options.timestamp = opts.timestamp;
+    Object.assign(options, opts);
 
     fs.readSync(fd, buf, 0, 4);
     objbuf = Buffer.alloc(buf.readUInt32LE());
