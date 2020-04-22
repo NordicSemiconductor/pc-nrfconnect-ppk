@@ -58,17 +58,10 @@ export const save = () => async (_, getState) => {
     const buf = Buffer.alloc(4);
     const { data, bits, ...opts } = options;
 
-    let objbuf = bson.serialize(opts);
-    buf.writeUInt32LE(objbuf.byteLength);
-    fs.writeSync(fd, buf);
-    fs.writeSync(fd, objbuf);
+    fs.writeSync(fd, bson.serialize(opts));
+    fs.writeSync(fd, bson.serialize(getState().app.chart));
 
-    objbuf = bson.serialize(getState().app.chart);
-    buf.writeUInt32LE(objbuf.byteLength);
-    fs.writeSync(fd, buf);
-    fs.writeSync(fd, objbuf);
-
-    objbuf = Buffer.from(options.data.buffer);
+    let objbuf = Buffer.from(options.data.buffer);
     buf.writeUInt32LE(objbuf.byteLength);
     fs.writeSync(fd, buf);
     fs.writeSync(fd, objbuf);
@@ -91,30 +84,32 @@ export const load = () => async dispatch => {
     }
 
     const fd = fs.openSync(filename, 'r');
-
+    let pos = 0;
     const buf = Buffer.alloc(4);
-    fs.readSync(fd, buf, 0, 4);
-    let objbuf = Buffer.alloc(buf.readUInt32LE());
-    fs.readSync(fd, objbuf, 0, objbuf.byteLength);
-    const opts = bson.deserialize(objbuf);
 
-    Object.assign(options, opts);
+    fs.readSync(fd, buf, 0, 4, pos);
+    const optsBuf = Buffer.alloc(buf.readUInt32LE());
+    pos += fs.readSync(fd, optsBuf, 0, optsBuf.byteLength, pos);
 
-    fs.readSync(fd, buf, 0, 4);
-    objbuf = Buffer.alloc(buf.readUInt32LE());
-    fs.readSync(fd, objbuf, 0, objbuf.byteLength);
-    const chartState = bson.deserialize(objbuf);
+    Object.assign(options, bson.deserialize(optsBuf));
 
-    fs.readSync(fd, buf, 0, 4);
+    fs.readSync(fd, buf, 0, 4, pos);
+    const chartStateBuf = Buffer.alloc(buf.readUInt32LE());
+    pos += fs.readSync(fd, chartStateBuf, 0, chartStateBuf.byteLength, pos);
+
+    const chartState = bson.deserialize(chartStateBuf);
+
+    pos += fs.readSync(fd, buf, 0, 4, pos);
     const dataLength = buf.readUInt32LE();
     if (options.data.length !== dataLength / Float32Array.BYTES_PER_ELEMENT) {
         options.data = new Float32Array(dataLength / Float32Array.BYTES_PER_ELEMENT);
         options.data.fill(NaN);
     }
-    objbuf = Buffer.from(options.data.buffer);
-    fs.readSync(fd, objbuf, 0, objbuf.byteLength);
+    let objbuf = Buffer.from(options.data.buffer);
+    pos += fs.readSync(fd, objbuf, 0, objbuf.byteLength, pos);
 
-    if (fs.readSync(fd, buf, 0, 4) === 4) {
+    if (fs.readSync(fd, buf, 0, 4, pos) === 4) {
+        pos += 4;
         const bitsLength = buf.readUInt32LE();
         if (bitsLength) {
             if ((options.bits || []).length !== bitsLength) {
@@ -128,7 +123,7 @@ export const load = () => async dispatch => {
     }
     if (options.bits) {
         objbuf = Buffer.from(options.bits.buffer);
-        fs.readSync(fd, objbuf, 0, objbuf.byteLength);
+        fs.readSync(fd, objbuf, 0, objbuf.byteLength, pos);
     }
 
     fs.closeSync(fd);
