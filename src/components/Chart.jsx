@@ -458,7 +458,7 @@ const Chart = () => {
                     xScaleID: 'xScale',
                     xMin: m1 - options.samplingTime,
                     xMax: m2 - options.samplingTime,
-                    backgroundColor: 'rgba(255, 255, 255, 50%)',
+                    backgroundColor: 'rgba(0, 100, 255, 10%)',
                     borderColor: 'rgba(0, 0, 0, 0)',
                     borderWidth: 0,
                 })),
