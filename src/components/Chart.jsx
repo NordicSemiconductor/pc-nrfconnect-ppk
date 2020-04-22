@@ -284,12 +284,6 @@ const Chart = () => {
         }
     }
 
-    const renderValue = (label, value, unitArg) => {
-        const v = unit(value, unitArg).format({ notation: 'fixed', precision: 3 });
-        const [valStr, unitStr] = v.split(' ');
-        return <span>{label}: <b>{valStr}</b> {unitStr.replace('u', '\u00B5')}</span>;
-    };
-
     const renderResetButton = () => {
         if (samplingRunning !== null) {
             const live = (windowBegin === 0) && (windowEnd === 0);
@@ -465,6 +459,17 @@ const Chart = () => {
         } : undefined,
     };
 
+    const renderValue = (label, u) => {
+        const v = u.format({ notation: 'fixed', precision: 3 });
+        const [valStr, unitStr] = v.split(' ');
+        return <span>{label}: <b>{valStr}</b> {unitStr.replace('u', '\u00B5')}</span>;
+    };
+
+    let marked = unit(calcDelta, 'us');
+    if (calcDelta > 60 * 1e6) {
+        marked = marked.to('min');
+    }
+
     return (
         <div className="chart-outer">
             <div className="chart-top">
@@ -493,10 +498,10 @@ const Chart = () => {
             </div>
             <div className="chart-bottom">
                 <div className="chart-stats">
-                    {renderValue(`${cursorBegin !== null ? 'marker' : 'window'} \u0394`, calcDelta, 'us')}
-                    {renderValue('avg', calcAvg, 'uA')}
-                    {renderValue('max', calcMax, 'uA')}
-                    {renderValue('charge', calcAvg * ((calcDelta || 1) / 1e6), 'uC')}
+                    {renderValue(`${cursorBegin !== null ? 'marker' : 'window'} \u0394`, marked)}
+                    {renderValue('avg', unit(calcAvg, 'uA'))}
+                    {renderValue('max', unit(calcMax, 'uA'))}
+                    {renderValue('charge', unit(calcAvg * ((calcDelta || 1) / 1e6), 'uC'))}
                 </div>
                 <ButtonGroup>
                     <Button
