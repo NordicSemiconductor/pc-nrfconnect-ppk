@@ -424,6 +424,12 @@ const Chart = () => {
                                 .replace('u', '\u00B5')
                         )),
                     },
+                    gridLines: {
+                        display: true,
+                        drawBorder: true,
+                        drawOnChartArea: true,
+                        borderDash: [3, 6],
+                    },
                 },
                 ...bitsAxis,
             ],
