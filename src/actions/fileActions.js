@@ -34,11 +34,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import fs from 'fs';
-import bson from 'bson';
+import { createReadStream, createWriteStream } from 'fs';
+import { serialize, deserialize } from 'bson';
+import { createInflateRaw, createDeflateRaw } from 'zlib';
+import { Writable } from 'stream';
 import { remote } from 'electron';
 import { join } from 'path';
-import { getAppDataDir } from 'nrfconnect/core';
+import { logger, getAppDataDir } from 'nrfconnect/core';
 import { options } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 
@@ -53,27 +55,35 @@ export const save = () => async (_, getState) => {
         return;
     }
 
-    const fd = fs.openSync(filename, 'w');
+    const file = createWriteStream(filename);
+    file.on('error', err => console.log(err.stack));
+
+    const deflateRaw = createDeflateRaw();
+    deflateRaw.pipe(file);
+
+    const write = bf => new Promise(resolve => deflateRaw.write(bf, 'binary', resolve));
+
+    const { data, bits, ...opts } = options;
+    await write(serialize(opts));
+    await write(serialize(getState().app.chart));
 
     const buf = Buffer.alloc(4);
-    const { data, bits, ...opts } = options;
-
-    fs.writeSync(fd, bson.serialize(opts));
-    fs.writeSync(fd, bson.serialize(getState().app.chart));
-
     let objbuf = Buffer.from(options.data.buffer);
     buf.writeUInt32LE(objbuf.byteLength);
-    fs.writeSync(fd, buf);
-    fs.writeSync(fd, objbuf);
+    await write(buf);
+    await write(objbuf);
 
     if (options.bits) {
         objbuf = Buffer.from(options.bits.buffer);
         buf.writeUInt32LE(objbuf.byteLength);
-        fs.writeSync(fd, buf);
-        fs.writeSync(fd, objbuf);
+        await write(buf);
+        await write(objbuf);
     }
-    fs.closeSync(fd);
+    deflateRaw.end();
+
+    logger.info(`State saved to: ${filename}`);
 };
+
 
 export const load = () => async dispatch => {
     const [filename] = (await dialog.showOpenDialog({
@@ -83,50 +93,44 @@ export const load = () => async dispatch => {
         return;
     }
 
-    const fd = fs.openSync(filename, 'r');
+    let buffer = Buffer.alloc(370 * 1e6);
+    let size = 0;
+    const content = new Writable({
+        write(chunk, _encoding, callback) {
+            chunk.copy(buffer, size, 0);
+            size += chunk.length;
+            callback();
+        },
+    });
+
+    await new Promise(resolve => createReadStream(filename)
+        .pipe(createInflateRaw())
+        .pipe(content)
+        .on('finish', resolve));
+    buffer = buffer.slice(0, size);
+
     let pos = 0;
-    const buf = Buffer.alloc(4);
+    let len = buffer.slice(pos, pos + 4).readUInt32LE();
+    Object.assign(options, deserialize(buffer.slice(pos, pos + len)));
+    pos += len;
 
-    fs.readSync(fd, buf, 0, 4, pos);
-    const optsBuf = Buffer.alloc(buf.readUInt32LE());
-    pos += fs.readSync(fd, optsBuf, 0, optsBuf.byteLength, pos);
+    len = buffer.slice(pos, pos + 4).readUInt32LE();
+    const chartState = deserialize(buffer.slice(pos, pos + len));
+    pos += len;
 
-    Object.assign(options, bson.deserialize(optsBuf));
+    len = buffer.slice(pos, pos + 4).readUInt32LE();
+    pos += 4;
+    options.data = new Float32Array(new Uint8Array(buffer.slice(pos, pos + len)).buffer);
+    pos += len;
 
-    fs.readSync(fd, buf, 0, 4, pos);
-    const chartStateBuf = Buffer.alloc(buf.readUInt32LE());
-    pos += fs.readSync(fd, chartStateBuf, 0, chartStateBuf.byteLength, pos);
-
-    const chartState = bson.deserialize(chartStateBuf);
-
-    pos += fs.readSync(fd, buf, 0, 4, pos);
-    const dataLength = buf.readUInt32LE();
-    if (options.data.length !== dataLength / Float32Array.BYTES_PER_ELEMENT) {
-        options.data = new Float32Array(dataLength / Float32Array.BYTES_PER_ELEMENT);
-        options.data.fill(NaN);
-    }
-    let objbuf = Buffer.from(options.data.buffer);
-    pos += fs.readSync(fd, objbuf, 0, objbuf.byteLength, pos);
-
-    if (fs.readSync(fd, buf, 0, 4, pos) === 4) {
+    if (pos < buffer.length) {
+        len = buffer.slice(pos, pos + 4).readUInt32LE();
         pos += 4;
-        const bitsLength = buf.readUInt32LE();
-        if (bitsLength) {
-            if ((options.bits || []).length !== bitsLength) {
-                options.bits = new Uint8Array(bitsLength);
-            }
-        } else {
-            options.bits = null;
-        }
+        options.bits = new Uint8Array(buffer.slice(pos, pos + len));
     } else {
         options.bits = null;
     }
-    if (options.bits) {
-        objbuf = Buffer.from(options.bits.buffer);
-        fs.readSync(fd, objbuf, 0, objbuf.byteLength, pos);
-    }
-
-    fs.closeSync(fd);
 
     dispatch(setChartState(chartState));
+    logger.info(`State restored from: ${filename}`);
 };
