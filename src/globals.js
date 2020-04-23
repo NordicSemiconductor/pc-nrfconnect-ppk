@@ -49,3 +49,11 @@ export const options = {
     timestamp: 0,
     triggerMarkers: null,
 };
+
+export const timestampToIndex = (ts, index = options.index) => (
+    index - (((options.timestamp - ts) * options.samplesPerSecond) / 1e6)
+);
+
+export const indexToTimestamp = (i, index = options.index) => (
+    options.timestamp - (((index - i) * 1e6) / options.samplesPerSecond)
+);

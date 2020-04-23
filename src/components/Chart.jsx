@@ -54,7 +54,9 @@ import {
     chartState,
 } from '../reducers/chartReducer';
 
-import { options } from '../globals';
+import { exportChart } from '../actions/fileActions';
+
+import { options, timestampToIndex } from '../globals';
 
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
@@ -142,12 +144,8 @@ const Chart = () => {
         setLen(Math.min(width, 2000));
     };
 
-    const timestampToIndex = ts => (
-        index - (((options.timestamp - ts) * options.samplesPerSecond) / 1e6)
-    );
-
-    const calcIndexBegin = Math.ceil(timestampToIndex(from));
-    const calcIndexEnd = Math.floor(timestampToIndex(to));
+    const calcIndexBegin = Math.ceil(timestampToIndex(from, index));
+    const calcIndexEnd = Math.floor(timestampToIndex(to, index));
 
     let calcSum = 0;
     let calcLen = 0;
@@ -200,8 +198,8 @@ const Chart = () => {
         options.timestamp - windowDuration, options.timestamp,
     );
 
-    const originalIndexBegin = timestampToIndex(begin);
-    const originalIndexEnd = timestampToIndex(end);
+    const originalIndexBegin = timestampToIndex(begin, index);
+    const originalIndexEnd = timestampToIndex(end, index);
     const step = (originalIndexEnd - originalIndexBegin) / len;
 
     let mappedIndex = 0;
@@ -510,6 +508,14 @@ const Chart = () => {
                     {renderValue('charge', unit(calcAvg * ((calcDelta || 1) / 1e6), 'uC'))}
                 </div>
                 <ButtonGroup>
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => dispatch(exportChart())}
+                        title={chartCursorActive ? 'Export marked' : 'Export window'}
+                    >
+                        <span className="mdi mdi-export" />
+                    </Button>
                     <Button
                         variant="primary"
                         disabled={!chartCursorActive}
