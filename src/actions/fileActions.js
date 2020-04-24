@@ -162,7 +162,7 @@ export const exportChart = () => async (dispatch, getState) => {
     const indexBegin = Math.ceil(timestampToIndex(from, index));
     const indexEnd = Math.floor(timestampToIndex(to, index));
 
-    fs.writeSync(fd, `Timestamp(ms),Current(uA)${options.bits ? ',Bits' : ''}\n`);
+    fs.writeSync(fd, `Timestamp(ms),Current(uA)${options.bits ? ',LAP0-LAP7' : ''}\n`);
     for (let n = indexBegin; n <= indexEnd; n += 1) {
         const k = (n + options.data.length) % options.data.length;
         const v = options.data[k];

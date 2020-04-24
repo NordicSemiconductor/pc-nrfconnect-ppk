@@ -225,7 +225,7 @@ export function open(deviceInfo) {
                 requestAnimationFrame(() => dispatch(animationAction()));
                 options.renderIndex = options.index;
             }
-        }, 10);
+        }, 30);
     };
 }
 

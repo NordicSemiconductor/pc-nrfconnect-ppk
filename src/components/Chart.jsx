@@ -35,6 +35,8 @@
  */
 
 /* eslint no-bitwise: off */
+/* eslint no-plusplus: off */
+/* eslint operator-assignment: off */
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -64,6 +66,11 @@ defaults.global.animation.duration = 0;
 
 const dataColor = '#B32860';
 const valueRange = { min: 0, max: 15000 };
+const bitColors = [
+    '#005588', '#008855', '#005555', '#008888',
+    '#660088', '#0055FF', '#00C288', '#0F2088',
+];
+const bitLabels = ['LAP0', 'LAP1', 'LAP2', 'LAP3', 'LAP4', 'LAP5', 'LAP6', 'LAP7'];
 
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
@@ -95,7 +102,7 @@ const allOfBits = 8;
 
 const emptyArray = () => [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 const lineData = emptyArray();
-const bits = [...Array(allOfBits)].map(() => emptyArray());
+const bitsData = [...Array(allOfBits)].map(() => emptyArray());
 const bitIndexes = new Array(allOfBits);
 
 const Chart = () => {
@@ -127,8 +134,11 @@ const Chart = () => {
     } = useSelector(chartState);
 
     const chartRef = useRef(null);
+
+    const { data, bits } = options;
+
     let numberOfBits = (windowDuration < 30000000) ? allOfBits : 0;
-    if (!options.bits) {
+    if (!bits) {
         numberOfBits = 0;
     }
 
@@ -151,15 +161,15 @@ const Chart = () => {
     let calcLen = 0;
     let calcMax = 0;
 
-    for (let n = calcIndexBegin; n <= calcIndexEnd; n += 1) {
-        const k = (n + options.data.length) % options.data.length;
-        const v = options.data[k];
+    for (let n = calcIndexBegin; n <= calcIndexEnd; ++n) {
+        const k = (n + data.length) % data.length;
+        const v = data[k];
         if (!Number.isNaN(v)) {
             if (v > calcMax) {
                 calcMax = v;
             }
-            calcSum += v;
-            calcLen += 1;
+            calcSum = calcSum + v;
+            ++calcLen;
         }
     }
 
@@ -173,7 +183,7 @@ const Chart = () => {
         }
 
         const earliestDataTime = options.timestamp
-            - ((options.data.length / options.samplesPerSecond) * 1e6);
+            - ((data.length / options.samplesPerSecond) * 1e6);
 
         chartWindow(
             Math.max(earliestDataTime, beginX),
@@ -204,20 +214,20 @@ const Chart = () => {
 
     let mappedIndex = 0;
     bitIndexes.fill(0);
-    for (let i = 0; i < numberOfBits; i += 1) {
-        bits[i][0] = { x: undefined, y: undefined };
+    for (let i = 0; i < numberOfBits; ++i) {
+        bitsData[i][0] = { x: undefined, y: undefined };
     }
     if (step > 1) {
         for (let originalIndex = originalIndexBegin;
             mappedIndex < len + len;
-            mappedIndex += 1, originalIndex += step) {
+            ++mappedIndex, originalIndex = originalIndex + step) {
             const timestamp = begin + (windowDuration * (mappedIndex / (len + len)));
             const k = Math.floor(originalIndex);
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
             let max = -Number.MAX_VALUE;
-            for (let n = k; n < l; n += 1) {
-                const v = options.data[(n + options.data.length) % options.data.length];
+            for (let n = k; n < l; ++n) {
+                const v = data[(n + data.length) % data.length];
                 if (!Number.isNaN(v)) {
                     if (v > max) max = v;
                     if (v < min) min = v;
@@ -230,28 +240,28 @@ const Chart = () => {
             }
             lineData[mappedIndex].x = timestamp;
             lineData[mappedIndex].y = min;
-            mappedIndex += 1;
+            ++mappedIndex;
             lineData[mappedIndex].x = timestamp;
             lineData[mappedIndex].y = max;
 
-            for (let i = 0; i < numberOfBits; i += 1) {
+            for (let i = 0; i < numberOfBits; ++i) {
                 let y1;
-                for (let n = k; n < l; n += 1) {
-                    const ni = (n + options.data.length) % options.data.length;
-                    const v = Number.isNaN(options.data[ni])
-                        ? undefined
-                        : (((options.bits[ni] >> i) & 1) + (i * 2));
-                    if (v !== undefined && (y1 === undefined || v !== y1)) {
-                        if ((bits[i][bitIndexes[i] - 1] || {}).y !== v
-                            || mappedIndex === len + len - 1) {
-                            bits[i][bitIndexes[i]].x = timestamp;
-                            bits[i][bitIndexes[i]].y = v;
-                            bitIndexes[i] += 1;
+                for (let n = k; n < l; ++n) {
+                    const ni = (n + data.length) % data.length;
+                    if (!Number.isNaN(data[ni])) {
+                        const v = (((bits[ni] >> i) & 1) + i + i);
+                        if (y1 === undefined || v !== y1) {
+                            if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== v
+                                || mappedIndex === len + len - 1) {
+                                bitsData[i][bitIndexes[i]].x = timestamp;
+                                bitsData[i][bitIndexes[i]].y = v;
+                                ++bitIndexes[i];
+                            }
+                            if (y1 !== undefined) {
+                                break;
+                            }
+                            y1 = v;
                         }
-                        if (y1 !== undefined) {
-                            break;
-                        }
-                        y1 = v;
                     }
                 }
             }
@@ -259,70 +269,29 @@ const Chart = () => {
     } else {
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
-        for (let n = originalIndexBeginFloored;
-            n <= originalIndexEndCeiled;
-            mappedIndex += 1, n += 1) {
-            const k = (n + options.data.length) % options.data.length;
-            const v = options.data[k];
-            const timestamp = begin
-                + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
+        for (let n = originalIndexBeginFloored; n <= originalIndexEndCeiled; ++mappedIndex, ++n) {
+            const k = (n + data.length) % data.length;
+            const v = data[k];
+            const timestamp = begin + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
             lineData[mappedIndex].x = timestamp;
             lineData[mappedIndex].y = Number.isNaN(v) ? undefined : v;
 
-            for (let i = 0; i < numberOfBits; i += 1) {
-                const y = Number.isNaN(options.data[k])
-                    ? undefined
-                    : ((options.bits[k] >> i) & 1) + (i * 2);
-                if ((bits[i][bitIndexes[i] - 1] || {}).y !== y || n === originalIndexEndCeiled) {
-                    bits[i][bitIndexes[i]].x = timestamp;
-                    bits[i][bitIndexes[i]].y = y;
-                    bitIndexes[i] += 1;
+            for (let i = 0; i < numberOfBits; ++i) {
+                const y = Number.isNaN(v) ? undefined : ((bits[k] >> i) & 1) + i + i;
+                if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== y
+                    || n === originalIndexEndCeiled) {
+                    bitsData[i][bitIndexes[i]].x = timestamp;
+                    bitsData[i][bitIndexes[i]].y = y;
+                    ++bitIndexes[i];
                 }
             }
         }
     }
 
-    const renderResetButton = () => {
-        if (samplingRunning !== null) {
-            const live = (windowBegin === 0) && (windowEnd === 0);
-            return (
-                <Button
-                    variant="primary"
-                    size="sm"
-                    disabled={!samplingRunning && live}
-                    onClick={live ? chartPause : chartResetToLive}
-                    title={live ? 'Pause' : 'Live'}
-                >
-                    <span className={`mdi mdi-${live ? 'pause' : 'step-forward'}`} />
-                </Button>
-            );
-        }
-        return (
-            <Button
-                variant="primary"
-                size="sm"
-                disabled={!canReset}
-                onClick={chartResetToLive}
-                title="Reset & Live"
-            >
-                <span className="mdi mdi-repeat" />
-            </Button>
-        );
-    };
-
+    const live = (windowBegin === 0) && (windowEnd === 0);
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
-    const bitColors = [
-        '#005588', '#008855', '#005555',
-        '#008888', '#660088', '#0055FF',
-        '#00C288', '#0F2088',
-    ].slice(0, numberOfBits);
-
-    const bitLabels = [
-        'LAP0', 'LAP1', 'LAP2', 'LAP3', 'LAP4', 'LAP5', 'LAP6', 'LAP7',
-    ].slice(0, numberOfBits);
-
-    const bitsDataSets = bits.slice(0, numberOfBits).map((b, i) => ({
+    const bitsDataSets = bitsData.slice(0, numberOfBits).map((b, i) => ({
         borderColor: bitColors[i],
         borderWidth: 0.5,
         fill: false,
@@ -338,6 +307,7 @@ const Chart = () => {
     }));
 
     const bitsAxis = [{
+        display: !!bits,
         id: 'bits-axis',
         type: 'linear',
         min: 0,
@@ -371,7 +341,6 @@ const Chart = () => {
             lineTension: step > 0.2 ? 0 : 0.2,
             label: 'Current',
             yAxisID: 'yScale',
-            showLines: false,
         }, ...bitsDataSets],
     };
 
@@ -525,7 +494,28 @@ const Chart = () => {
                     >
                         <span className="mdi mdi-eraser" />
                     </Button>
-                    {renderResetButton()}
+                    {samplingRunning !== null && (
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            disabled={!samplingRunning && live}
+                            onClick={live ? chartPause : chartResetToLive}
+                            title={live ? 'Pause' : 'Live'}
+                        >
+                            <span className={`mdi mdi-${live ? 'pause' : 'step-forward'}`} />
+                        </Button>
+                    )}
+                    {samplingRunning === null && (
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            disabled={!canReset}
+                            onClick={chartResetToLive}
+                            title="Reset & Live"
+                        >
+                            <span className="mdi mdi-repeat" />
+                        </Button>
+                    )}
                 </ButtonGroup>
             </div>
         </div>
