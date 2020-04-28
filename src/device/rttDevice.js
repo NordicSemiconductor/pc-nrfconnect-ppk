@@ -142,7 +142,6 @@ class RTTDevice extends Device {
                 } else {
                     try {
                         this.handleTriggerDataSet();
-                        this.timestamp += (this.adcSamplingTimeUs * this.dataPayload.length / 2);
                     } catch (error) {
                         this.emit(
                             'error',
@@ -368,7 +367,12 @@ class RTTDevice extends Device {
             const adcResult = (adcValue & MEAS_ADC_MSK);
             const value = this.getAdcResult[currentMeasurementRange](adcResult) * 1e6;
 
-            this.onSampleCallback({ value, timestamp, trigger: true });
+            this.onSampleCallback({
+                value,
+                timestamp,
+                trigger: true,
+                triggerMarker: (i === 0 || i === this.dataPayload.length - 2),
+            });
             timestamp += this.adcSamplingTimeUs;
         }
     }

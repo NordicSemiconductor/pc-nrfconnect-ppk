@@ -142,10 +142,10 @@ export function open(deviceInfo) {
             await dispatch(close());
         }
 
-        let isPreviousTrigger = false;
-
         const onSample = ({
-            value, bits, timestamp, trigger = false,
+            value, bits, timestamp,
+            trigger = false,
+            triggerMarker = false,
         }) => {
             const { samplingRunning } = getState().app.app;
             const { windowBegin, windowEnd } = getState().app.chart;
@@ -155,8 +155,7 @@ export function open(deviceInfo) {
             }
 
             if (timestamp) {
-                if (isPreviousTrigger !== trigger) {
-                    isPreviousTrigger = trigger;
+                if (triggerMarker) {
                     options.triggerMarkers.push(timestamp);
                 }
 
