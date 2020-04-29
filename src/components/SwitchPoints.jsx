@@ -88,7 +88,7 @@ export default () => {
                                 values={[switchUpSliderPosition]}
                                 range={{ min: 38, max: 175 }}
                                 onChange={[val => dispatch(switchingPointUpMoved(val))]}
-                                onChangeComplete={val => dispatch(switchingPointsUpSet(val))}
+                                onChangeComplete={() => dispatch(switchingPointsUpSet())}
                             />
                             <Row className="mb-3">
                                 <Col>{`${switchUpLow.toFixed(2)} uA`}</Col>
@@ -99,7 +99,7 @@ export default () => {
                                 values={[switchDownSliderPosition]}
                                 range={{ min: 100, max: 400 }}
                                 onChange={[val => dispatch(switchingPointDownMovedAction(val))]}
-                                onChangeComplete={val => dispatch(switchingPointsDownSet(val))}
+                                onChangeComplete={() => dispatch(switchingPointsDownSet())}
                             />
                             <Row className="mb-3">
                                 <Col>{`${switchDownLow.toFixed(2)} uA`}</Col>

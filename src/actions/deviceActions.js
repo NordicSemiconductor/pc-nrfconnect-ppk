@@ -60,7 +60,7 @@ import {
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
-import { chartWindowAction, animationAction } from '../reducers/chartReducer';
+import { chartWindowAction, animationAction, chartCursorAction } from '../reducers/chartReducer';
 import { options, bufferLengthInSeconds } from '../globals';
 
 let device = null;
@@ -96,6 +96,7 @@ export function samplingStart() {
             options.triggerMarkers = [];
         }
         dispatch(chartWindowAction(null, null, getState().app.chart.windowDuration), null, null);
+        dispatch(chartCursorAction(null, null));
         dispatch(samplingStartAction());
         await device.ppkAverageStart();
         logger.info('Average started');
