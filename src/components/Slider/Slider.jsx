@@ -64,7 +64,7 @@ const Slider = ({
                     value={value}
                     range={range}
                     onChange={onChange[index]}
-                    onChangeComplete={onChangeComplete}
+                    onChangeComplete={() => onChangeComplete(value)}
                     sliderWidth={sliderWidth}
                 />
             ))}
