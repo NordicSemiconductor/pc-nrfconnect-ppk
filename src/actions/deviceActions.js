@@ -160,6 +160,15 @@ export function open(deviceInfo) {
                 }
 
                 let ts = options.timestamp;
+                while (ts > timestamp - options.samplingTime) {
+                    ts -= options.samplingTime;
+                    options.data[options.index] = NaN;
+                    options.index -= 1;
+                    if (options.index === -1) {
+                        options.index = options.data.length - 1;
+                    }
+                }
+                ts = options.timestamp;
                 while (ts < timestamp - options.samplingTime) {
                     ts += options.samplingTime;
                     options.data[options.index] = NaN;
@@ -178,15 +187,14 @@ export function open(deviceInfo) {
                 options.timestamp += options.samplingTime;
             }
 
+            if (options.index === options.data.length) {
+                options.index = 0;
+            }
+
             if ((windowBegin !== 0 || windowEnd !== 0)
                 && options.timestamp >= windowBegin + (bufferLengthInSeconds * 1e6)) {
                 // stop average when reaches end of buffer (i.e. would overwrite chart data)
                 dispatch(samplingStop());
-                return;
-            }
-
-            if (options.index === options.data.length) {
-                options.index = 0;
             }
         };
 
