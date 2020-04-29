@@ -92,6 +92,9 @@ export function samplingStart() {
     return async (dispatch, getState) => {
         options.data.fill(NaN);
         options.index = 0;
+        if (options.triggerMarkers) {
+            options.triggerMarkers = [];
+        }
         dispatch(chartWindowAction(null, null, getState().app.chart.windowDuration), null, null);
         dispatch(samplingStartAction());
         await device.ppkAverageStart();
