@@ -57,7 +57,7 @@ import {
 
 export default () => {
     const dispatch = useDispatch();
-    const { vdd } = useSelector(voltageRegulatorState);
+    const { vdd, min, max } = useSelector(voltageRegulatorState);
     const { advancedMode } = useSelector(appState);
 
     return (
@@ -74,7 +74,7 @@ export default () => {
                             VDD{' '}
                             <InlineInput
                                 value={vdd}
-                                range={{ min: 1800, max: 5000 }}
+                                range={{ min, max }}
                                 onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
                                 onChangeComplete={value => dispatch(updateRegulator(value))}
                             />
@@ -83,7 +83,7 @@ export default () => {
                         <Slider
                             id="slider-vdd"
                             values={[vdd]}
-                            range={{ min: 1800, max: 5000 }}
+                            range={{ min, max }}
                             onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
                             onChangeComplete={value => dispatch(updateRegulator(value))}
                         />

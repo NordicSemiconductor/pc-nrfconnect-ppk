@@ -204,13 +204,14 @@ export function open(deviceInfo) {
 
         try {
             device = new Device(deviceInfo, onSample);
-            setupOptions(device);
+            setupOptions();
             const metadata = device.parseMeta(await device.start());
 
             console.log(metadata);
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
             dispatch(updateRegulatorAction(metadata));
+            dispatch(updateRegulatorAction(device.vddRange));
             dispatch(rttStartAction());
             logger.info('PPK started');
         } catch (err) {

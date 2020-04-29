@@ -109,6 +109,8 @@ class RTTDevice extends Device {
 
     resistors = { hi: 1.8, mid: 28.0, lo: 510.0 };
 
+    vddRange = { min: 1850, max: 3600 };
+
     constructor(device) {
         super();
 
