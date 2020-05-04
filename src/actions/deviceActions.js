@@ -158,6 +158,10 @@ export function open(deviceInfo) {
                 return;
             }
 
+            if (trigger && getState().app.trigger.triggerSingleWaiting) {
+                dispatch(clearSingleTriggingAction());
+            }
+
             if (timestamp) {
                 if (triggerMarker) {
                     options.triggerMarkers.push(timestamp);
