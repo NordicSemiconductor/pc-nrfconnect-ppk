@@ -57,6 +57,8 @@ class SerialDevice extends Device {
         r: [1031.64, 101.65, 10.15, 0.94, 0.043],
         g: [1, 1, 1, 1, 1],
         o: [0, 0, 0, 0, 0],
+        s: [0, 0, 0, 0, 0],
+        i: [0, 0, 0, 0, 0],
     };
 
     adcSamplingTimeUs = 10;
@@ -90,7 +92,8 @@ class SerialDevice extends Device {
 
     getAdcResult(range, adcVal) {
         return this.modifiers.g[range]
-            * ((adcVal - this.modifiers.o[range]) * (this.adcMult / this.modifiers.r[range]));
+            * ((adcVal - this.modifiers.o[range]) * (this.adcMult / this.modifiers.r[range]))
+            + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]);
     }
 
     start() {
@@ -100,10 +103,11 @@ class SerialDevice extends Device {
 
     parseMeta(m) {
         // if (m.calibrated) ?
-        this.modifiers.r = [m.r0, m.r1, m.r2, m.r3, m.r4];
-        this.modifiers.g = [m.g0, m.g1, m.g2, m.g3, m.g4];
-        this.modifiers.o = [m.o0, m.o1, m.o2, m.o3, m.o4];
-
+        Object.keys(this.modifiers).forEach(k => {
+            for (let i = 0; i < 5; i += 1) {
+                this.modifiers[k][i] = m[`${k}${i}`];
+            }
+        });
         return m;
     }
 
@@ -159,7 +163,7 @@ class SerialDevice extends Device {
         return new Promise(async resolve => {
             this.parser = data => {
                 metadata = `${metadata}${data}`;
-                if (metadata.includes('HW')) {
+                if (metadata.includes('END')) {
                     // hopefully we have the complete string, HW is the last line
                     this.parser = this.parseMeasurementData.bind(this);
                     resolve(metadata);
@@ -168,7 +172,8 @@ class SerialDevice extends Device {
             await this.sendCommand([PPKCmd.GetMetadata]);
         })
             // convert output string json:
-            .then(m => m.trim()
+            .then(m => m.replace('END', '')
+                .trim()
                 .toLowerCase()
                 .replace(/-nan/g, 'null')
                 .replace(/\n/g, ',\n"')

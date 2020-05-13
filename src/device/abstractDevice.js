@@ -53,6 +53,8 @@ function convertFloatToByteBuffer(floatnum) {
 }
 
 export default class Device extends EventEmitter {
+    currentVdd = 0;
+
     constructor() {
         super();
         this.capabilities = {};
@@ -124,6 +126,7 @@ export default class Device extends EventEmitter {
     }
 
     ppkUpdateRegulator(vdd) {
+        this.currentVdd = vdd;
         // eslint-disable-next-line no-bitwise
         return this.sendCommand([PPKCmd.RegulatorSet, vdd >> 8, vdd & 0xFF]);
     }
