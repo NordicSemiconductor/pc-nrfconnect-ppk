@@ -65,7 +65,7 @@ class SerialDevice extends Device {
 
     resistors = { hi: 1.8, mid: 28, lo: 500 };
 
-    vddRange = { min: 1800, max: 5000 };
+    vddRange = { min: 800, max: 5000 };
 
     constructor(deviceInfo) {
         super();
