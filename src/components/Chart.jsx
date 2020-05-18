@@ -70,7 +70,7 @@ const bitColors = [
     '#005588', '#008855', '#005555', '#008888',
     '#660088', '#0055FF', '#00C288', '#0F2088',
 ];
-const bitLabels = ['LAP0', 'LAP1', 'LAP2', 'LAP3', 'LAP4', 'LAP5', 'LAP6', 'LAP7'];
+const bitLabels = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'];
 
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
@@ -137,7 +137,7 @@ const Chart = () => {
 
     const { data, bits } = options;
 
-    let numberOfBits = (windowDuration < 30000000) ? allOfBits : 0;
+    let numberOfBits = (windowDuration <= 4500000) ? allOfBits : 0;
     if (!bits) {
         numberOfBits = 0;
     }
