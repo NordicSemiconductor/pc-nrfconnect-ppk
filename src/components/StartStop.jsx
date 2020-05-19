@@ -105,7 +105,7 @@ export default () => {
                     variant="light"
                     size="lg"
                     disabled={!rttRunning}
-                    onClick={() => dispatch(setPowerMode(isSmuMode))}
+                    onClick={() => dispatch(setPowerMode(!isSmuMode))}
                 >
                     <span className={`mdi mdi-${isSmuMode ? 'flash' : 'flash-auto'}`} />
                     {isSmuMode ? 'Source Meter' : 'Amperemeter'}

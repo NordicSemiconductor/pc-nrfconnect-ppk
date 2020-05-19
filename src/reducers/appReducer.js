@@ -86,8 +86,9 @@ export const toggleDUTAction = () => ({
     type: DEVICE_UNDER_TEST_TOGGLE,
 });
 
-export const setPowerModeAction = () => ({
+export const setPowerModeAction = isSmuMode => ({
     type: SET_POWER_MODE,
+    isSmuMode,
 });
 
 export const rttStartAction = () => ({
@@ -115,10 +116,9 @@ export default (state = initialState, action) => {
             };
         }
         case SET_POWER_MODE: {
-            const { isSmuMode } = state;
             return {
                 ...state,
-                isSmuMode: !isSmuMode,
+                isSmuMode: action.isSmuMode,
             };
         }
 

@@ -214,8 +214,16 @@ export function open(deviceInfo) {
             console.log(metadata);
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
-            dispatch(updateRegulatorAction(metadata));
-            dispatch(updateRegulatorAction(device.vddRange));
+            dispatch(updateRegulatorAction({
+                vdd: metadata.vdd,
+                currentVDD: metadata.vdd,
+                ...device.vddRange,
+            }));
+            if (device.capabilities.ppkSetPowerMode) {
+                // 1 = Ampere
+                // 2 = SMU
+                dispatch(setPowerModeAction(metadata.mode === 2));
+            }
             dispatch(rttStartAction());
             logger.info('PPK started');
         } catch (err) {
@@ -317,9 +325,9 @@ export function toggleDUT(isOn) {
 
 export function setPowerMode(isSmuMode) {
     return async dispatch => {
-        await device.ppkSetPowerMode(isSmuMode ? 0 : 1);
-        logger.info(`Mode: ${isSmuMode ? 'Amperemeter' : 'SMU'}`);
-        dispatch(setPowerModeAction());
+        await device.ppkSetPowerMode(isSmuMode ? 2 : 1);
+        logger.info(`Mode: ${isSmuMode ? 'SMU' : 'Amperemeter'}`);
+        dispatch(setPowerModeAction(isSmuMode));
     };
 }
 
