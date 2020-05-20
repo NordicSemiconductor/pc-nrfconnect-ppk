@@ -111,6 +111,14 @@ class RTTDevice extends Device {
 
     vddRange = { min: 1850, max: 3600 };
 
+    readloopRunning = false;
+
+    averageRunning = false;
+
+    triggerRunning = false;
+
+    triggerWaiting = false;
+
     constructor(device) {
         super();
 
@@ -220,7 +228,11 @@ class RTTDevice extends Device {
             if (rawbytes && rawbytes.length) {
                 process.nextTick(this.parseMeasurementData.bind(this, rawbytes));
             }
-            process.nextTick(this.readloop.bind(this));
+            if (this.averageRunning || this.triggerRunning || this.triggerWaiting) {
+                process.nextTick(this.readloop.bind(this));
+            } else {
+                this.readloopRunning = false;
+            }
         } catch (err) {
             this.isRttOpen = false;
             throw new Error('PPK connection failure');
@@ -266,9 +278,15 @@ class RTTDevice extends Device {
                 if (!string) {
                     throw new Error('Couldn`t read hardware states.');
                 }
-                process.nextTick(this.readloop.bind(this));
                 return string;
             });
+    }
+
+    startReadLoop() {
+        if (!this.readloopRunning) {
+            this.readloopRunning = true;
+            process.nextTick(this.readloop.bind(this));
+        }
     }
 
     stop() {
@@ -347,6 +365,7 @@ class RTTDevice extends Device {
     }
 
     handleTriggerDataSet() {
+        this.triggerWaiting = false;
         if (this.triggerBuf.length !== this.dataPayload.length) {
             this.triggerBuf = new ArrayBuffer(this.dataPayload.length);
             this.viewUint8 = new Uint8Array(this.triggerBuf);
@@ -410,15 +429,31 @@ class RTTDevice extends Device {
 
     // Capability methods
 
+    ppkAverageStart() {
+        this.averageRunning = true;
+        this.startReadLoop();
+        return super.ppkAverageStart();
+    }
+
+    ppkAverageStop() {
+        this.averageRunning = false;
+        return super.ppkAverageStop();
+    }
+
     ppkTriggerStop() {
+        this.triggerRunning = false;
         return this.sendCommand([PPKCmd.TriggerStop]);
     }
 
     ppkTriggerSet(...args) {
+        this.triggerRunning = true;
+        this.startReadLoop();
         return this.sendCommand([PPKCmd.TriggerSet, ...args]);
     }
 
     ppkTriggerSingleSet(...args) {
+        this.triggerWaiting = true;
+        this.startReadLoop();
         return this.sendCommand([PPKCmd.TriggerSingleSet, ...args]);
     }
 
