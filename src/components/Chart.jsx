@@ -43,7 +43,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { defaults, Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import ProgressBar from 'react-bootstrap/ProgressBar';
 import { unit } from 'mathjs';
 
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -59,6 +58,7 @@ import {
 import { exportChart } from '../actions/fileActions';
 
 import { options, timestampToIndex } from '../globals';
+import BufferView from './BufferView';
 
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
@@ -122,8 +122,6 @@ const Chart = () => {
         windowBegin,
         windowEnd,
         windowDuration,
-        bufferLength,
-        bufferRemaining,
         samplingRunning,
         canReset,
         cursorBegin,
@@ -374,8 +372,7 @@ const Chart = () => {
                 {
                     id: 'yScale',
                     type: 'linear',
-                    min: valueRange.min,
-                    max: valueRange.max,
+                    ...valueRange,
                     fullWidth: 60,
                     ticks: {
                         minRotation: 0,
@@ -446,20 +443,7 @@ const Chart = () => {
     return (
         <div className="chart-outer">
             <div className="chart-top">
-                <span>
-                    Buffer:&nbsp;
-                    {bufferRemaining > 0 ? (
-                        <ProgressBar
-                            max={bufferLength}
-                            now={bufferRemaining}
-                            label={`${Number((bufferRemaining / 1e6)).toFixed(1)} s`}
-                            animated={samplingRunning}
-                            key={2}
-                        />
-                    ) : (
-                        <ProgressBar className="full" label="FULL" max={1} now={1} />
-                    )}
-                </span>
+                <BufferView />
             </div>
             <div className="chart-container">
                 <Line

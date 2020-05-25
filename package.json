@@ -1,8 +1,8 @@
 {
-  "name": "pc-nrfconnect-ppkmkii",
-  "version": "2.3.1",
-  "description": "Power Profiler",
-  "displayName": "_PPK mkII",
+  "name": "pc-nrfconnect-ppk",
+  "version": "3.0.0-alpha.0",
+  "description": "Power Profiler mkII",
+  "displayName": "Power Profiler mkII",
   "repository": {
     "type": "git",
     "url": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk.git"

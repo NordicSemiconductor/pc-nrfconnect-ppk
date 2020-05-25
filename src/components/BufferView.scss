@@ -1,0 +1,36 @@
+.buffer-view {
+    position: relative;
+    height: 1rem;
+    width: 100%;
+    background-color: lightgray;
+
+    div {
+        display: block;
+        height: 1rem;
+        position: absolute;
+    }
+
+    .buffer {
+        background-color: #28a328;
+    }
+    .buffer-used {
+        background-color: #a94442;
+    }
+    .window {
+        height: 2rem;
+        top: -0.5rem;
+        border: 1px dashed gray;
+    }
+
+    span {
+        position: absolute;
+        top: 1px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 12px;
+        color: white;
+        text-shadow: 0px 0px 2px black;
+    }
+}

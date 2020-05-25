@@ -59,6 +59,7 @@ const CHART_WINDOW = 'CHART_WINDOW';
 const LOAD_CHART_STATE = 'LOAD_CHART_STATE';
 
 const MIN_WINDOW_DURATION = 1000;
+const MAX_WINDOW_DURATION = 120000000;
 
 export const animationAction = () => ({
     type: ANIMATION,
@@ -73,7 +74,7 @@ export const chartCursorAction = (cursorBegin, cursorEnd) => ({
 export const chartWindowAction = (
     windowBegin, windowEnd, windowDuration, yMin, yMax,
 ) => {
-    const duration = Math.max(MIN_WINDOW_DURATION, windowDuration);
+    const duration = Math.min(MAX_WINDOW_DURATION, Math.max(MIN_WINDOW_DURATION, windowDuration));
     if (windowBegin === null && windowEnd === null) {
         return {
             type: CHART_WINDOW,
