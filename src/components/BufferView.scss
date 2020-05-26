@@ -2,7 +2,7 @@
     position: relative;
     height: 1rem;
     width: 100%;
-    background-color: lightgray;
+    background-color: #a94442;
 
     div {
         display: block;
@@ -10,27 +10,22 @@
         position: absolute;
     }
 
-    .buffer {
+    .buffer-remaining {
         background-color: #28a328;
-    }
-    .buffer-used {
-        background-color: #a94442;
     }
     .window {
         height: 2rem;
         top: -0.5rem;
         border: 1px dashed gray;
+        background-color: #ffffffcc;
     }
 
     span {
         position: absolute;
-        top: 1px;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        text-align: center;
+        left: 4px;
         font-size: 12px;
         color: white;
         text-shadow: 0px 0px 2px black;
+        pointer-events: none;
     }
 }

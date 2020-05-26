@@ -34,40 +34,71 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { chartState } from '../reducers/chartReducer';
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { chartState, chartWindowAction } from '../reducers/chartReducer';
+
+import { options } from '../globals';
 
 import './BufferView.scss';
 
 export default () => {
     const {
+        windowBegin,
+        windowEnd,
         windowDuration,
         bufferLength,
         bufferRemaining,
     } = useSelector(chartState);
 
+    const totalInUs = bufferLength + windowDuration;
+
+    const dispatch = useDispatch();
+    const chartMove = diff => {
+        const { timestamp } = options;
+        let d = Math.min(diff, timestamp - windowEnd);
+        d = Math.max(d, timestamp - totalInUs - windowBegin);
+        dispatch(chartWindowAction(windowBegin + d, windowEnd + d, windowDuration, null, null));
+    };
+
+    const [x, setX] = useState(null);
+
     const width = 100;
-    const f = width / (bufferLength + windowDuration);
+    const f = width / totalInUs;
 
     return (
-        <div className="buffer-view">
+        <div className="buffer-view progress-bar-striped">
+            <div className="buffer-remaining" style={{ width: `${bufferRemaining * f}%` }} />
             <div
                 className="window"
-                style={{ marginLeft: `${bufferRemaining * f}%`, width: `${windowDuration * f}%` }}
+                style={{ left: `${bufferRemaining * f}%`, width: `${windowDuration * f}%` }}
+                onPointerDown={e => {
+                    if (e.button === 0) {
+                        e.target.setPointerCapture(e.pointerId);
+                        setX({ pageX: e.pageX, offsetLeft: e.target.offsetLeft });
+                    }
+                }}
+                onPointerMove={e => {
+                    if (x !== null) {
+                        let left = Math.max(0, x.offsetLeft + e.pageX - x.pageX);
+                        left = Math.min(left,
+                            e.target.parentNode.clientWidth - e.target.clientWidth);
+                        e.target.style.left = `${left}px`;
+                    }
+                }}
+                onPointerUp={e => {
+                    delete e.target.style.left;
+                    e.target.releasePointerCapture(e.pointerId);
+                    setX(null);
+                    chartMove(totalInUs * (e.pageX - x.pageX) / e.target.parentNode.clientWidth);
+                }}
             />
-            <div className="buffer" style={{ width: `${bufferLength * f}%` }}>
-                <div
-                    className="buffer-used progress-bar-striped"
-                    style={{ width: `${100 - (bufferRemaining / bufferLength) * 100}%` }}
-                />
-                <span>
-                    Buffer:&nbsp;
-                    {bufferRemaining > 0
-                        ? `${Number((bufferRemaining / 1e6)).toFixed(1)} s`
-                        : 'FULL'}
-                </span>
-            </div>
+
+            <span>
+                {bufferRemaining > 0
+                    ? `${Number((bufferRemaining / 1e6)).toFixed(1)} s`
+                    : 'FULL'}
+            </span>
         </div>
     );
 };
