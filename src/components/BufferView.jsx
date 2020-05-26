@@ -71,26 +71,25 @@ export default () => {
             <div className="buffer-remaining" style={{ width: `${bufferRemaining * f}%` }} />
             <div
                 className="window"
-                style={{ left: `${bufferRemaining * f}%`, width: `${windowDuration * f}%` }}
+                style={{
+                    width: `${windowDuration * f}%`,
+                    left: `${bufferRemaining * f}%`,
+                }}
                 onPointerDown={e => {
                     if (e.button === 0) {
                         e.target.setPointerCapture(e.pointerId);
-                        setX({ pageX: e.pageX, offsetLeft: e.target.offsetLeft });
+                        setX(e.clientX);
                     }
                 }}
                 onPointerMove={e => {
                     if (x !== null) {
-                        let left = Math.max(0, x.offsetLeft + e.pageX - x.pageX);
-                        left = Math.min(left,
-                            e.target.parentNode.clientWidth - e.target.clientWidth);
-                        e.target.style.left = `${left}px`;
+                        chartMove(totalInUs * (e.clientX - x) / e.target.parentNode.clientWidth);
+                        setX(e.clientX);
                     }
                 }}
                 onPointerUp={e => {
-                    delete e.target.style.left;
                     e.target.releasePointerCapture(e.pointerId);
                     setX(null);
-                    chartMove(totalInUs * (e.pageX - x.pageX) / e.target.parentNode.clientWidth);
                 }}
             />
 
