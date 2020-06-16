@@ -55,7 +55,8 @@ class SerialDevice extends Device {
 
     modifiers = {
         r: [1031.64, 101.65, 10.15, 0.94, 0.043],
-        g: [1, 1, 1, 1, 1],
+        gs: [1, 1, 1, 1, 1],
+        gi: [1, 1, 1, 1, 1],
         o: [0, 0, 0, 0, 0],
         s: [0, 0, 0, 0, 0],
         i: [0, 0, 0, 0, 0],
@@ -91,9 +92,11 @@ class SerialDevice extends Device {
     }
 
     getAdcResult(range, adcVal) {
-        return this.modifiers.g[range]
-            * ((adcVal - this.modifiers.o[range]) * (this.adcMult / this.modifiers.r[range]))
-            + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]);
+        let resultWithoutGain = ((adcVal - this.modifiers.o[range])
+                                * (this.adcMult / this.modifiers.r[range]));
+        return (resultWithoutGain
+            * (this.modifiers.gs[range] * resultWithoutGain + this.modifiers.gi[range])
+            + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]));
     }
 
     start() {
