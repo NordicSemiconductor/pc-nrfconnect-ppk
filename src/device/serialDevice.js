@@ -50,6 +50,8 @@ const MEAS_LOGIC = generateMask(8, 24);
 
 const getMaskedValue = (value, { mask, pos }) => ((value & mask) >> pos);
 
+const average = (...array) => array.reduce((a, b) => a + b) / array.length;
+
 class SerialDevice extends Device {
     adcMult = (1.2 / 163840);
 
@@ -89,14 +91,38 @@ class SerialDevice extends Device {
         this.child.on('close', code => {
             console.log(`child process exited with code ${code}`);
         });
+        this.prevAdc = [];
+        this.afterSpike = 0;
     }
 
     getAdcResult(range, adcVal) {
-        let resultWithoutGain = ((adcVal - this.modifiers.o[range])
+        const resultWithoutGain = ((adcVal - this.modifiers.o[range])
                                 * (this.adcMult / this.modifiers.r[range]));
-        return (resultWithoutGain
+        let adc = (resultWithoutGain
             * (this.modifiers.gs[range] * resultWithoutGain + this.modifiers.gi[range])
             + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]));
+
+        if (this.prevRange === undefined) {
+            this.prevRange = range;
+        }
+
+        if (this.prevRange !== range || this.afterSpike > 0) {
+            if (this.prevRange !== range) {
+                // number of measurements after the spike which still to be averaged
+                this.afterSpike = 3;
+            }
+            console.log(this.afterSpike);
+            adc = average(...this.prevAdc, adc);
+            this.afterSpike -= 1;
+        }
+        this.prevAdc.push(adc);
+        // number of values kept for averaging
+        if (this.prevAdc.length > 4) {
+            this.prevAdc.shift();
+        }
+        this.prevRange = range;
+
+        return adc;
     }
 
     start() {
@@ -108,7 +134,7 @@ class SerialDevice extends Device {
         // if (m.calibrated) ?
         Object.keys(this.modifiers).forEach(k => {
             for (let i = 0; i < 5; i += 1) {
-                this.modifiers[k][i] = m[`${k}${i}`];
+                this.modifiers[k][i] = m[`${k}${i}`] || this.modifiers[k][i];
             }
         });
         return m;
