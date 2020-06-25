@@ -50,7 +50,7 @@ const MEAS_LOGIC = generateMask(8, 24);
 
 const getMaskedValue = (value, { mask, pos }) => ((value & mask) >> pos);
 
-const average = (...array) => array.reduce((a, b) => a + b) / array.length;
+const alpha = 0.5;
 
 class SerialDevice extends Device {
     adcMult = (1.2 / 163840);
@@ -91,8 +91,6 @@ class SerialDevice extends Device {
         this.child.on('close', code => {
             console.log(`child process exited with code ${code}`);
         });
-        this.prevAdc = [];
-        this.afterSpike = 0;
     }
 
     getAdcResult(range, adcVal) {
@@ -102,6 +100,10 @@ class SerialDevice extends Device {
             * (this.modifiers.gs[range] * resultWithoutGain + this.modifiers.gi[range])
             + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]));
 
+        this.rollingAvg = (this.rollingAvg === undefined)
+            ? adc
+            : (alpha * adc) + (1.0 - alpha) * this.rollingAvg;
+
         if (this.prevRange === undefined) {
             this.prevRange = range;
         }
@@ -109,16 +111,10 @@ class SerialDevice extends Device {
         if (this.prevRange !== range || this.afterSpike > 0) {
             if (this.prevRange !== range) {
                 // number of measurements after the spike which still to be averaged
-                this.afterSpike = 3;
+                this.afterSpike = 6;
             }
-            console.log(this.afterSpike);
-            adc = average(...this.prevAdc, adc);
+            adc = this.rollingAvg;
             this.afterSpike -= 1;
-        }
-        this.prevAdc.push(adc);
-        // number of values kept for averaging
-        if (this.prevAdc.length > 4) {
-            this.prevAdc.shift();
         }
         this.prevRange = range;
 
@@ -148,6 +144,11 @@ class SerialDevice extends Device {
         if (cmd.constructor !== Array) {
             this.emit('error', 'Unable to issue command', 'Command is not an array');
             return undefined;
+        }
+        if (cmd[0] === PPKCmd.AverageStart) {
+            this.rollingAvg = undefined;
+            this.prevRange = undefined;
+            this.afterSpike = 0;
         }
         this.child.send({ write: cmd });
         return Promise.resolve(cmd.length);
