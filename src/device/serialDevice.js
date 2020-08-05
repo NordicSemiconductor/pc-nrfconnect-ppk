@@ -50,7 +50,7 @@ const MEAS_LOGIC = generateMask(8, 24);
 
 const getMaskedValue = (value, { mask, pos }) => ((value & mask) >> pos);
 
-const alpha = 0.5;
+const alpha = 0.04;
 
 class SerialDevice extends Device {
     adcMult = (1.2 / 163840);
@@ -112,7 +112,7 @@ class SerialDevice extends Device {
         if (this.prevRange !== range || this.afterSpike > 0) {
             if (this.prevRange !== range) {
                 // number of measurements after the spike which still to be averaged
-                this.afterSpike = 6;
+                this.afterSpike = 3;
             }
             adc = this.rollingAvg;
             this.afterSpike -= 1;
