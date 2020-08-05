@@ -62,6 +62,7 @@ class SerialDevice extends Device {
         o: [0, 0, 0, 0, 0],
         s: [0, 0, 0, 0, 0],
         i: [0, 0, 0, 0, 0],
+        ug: [1, 1, 1, 1, 1],
     };
 
     adcSamplingTimeUs = 10;
