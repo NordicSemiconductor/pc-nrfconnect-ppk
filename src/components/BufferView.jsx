@@ -83,7 +83,7 @@ export default () => {
                 }}
                 onPointerMove={e => {
                     if (x !== null) {
-                        chartMove(totalInUs * (e.clientX - x) / e.target.parentNode.clientWidth);
+                        chartMove((totalInUs * (e.clientX - x)) / e.target.parentNode.clientWidth);
                         setX(e.clientX);
                     }
                 }}

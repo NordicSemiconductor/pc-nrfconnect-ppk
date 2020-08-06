@@ -35,97 +35,18 @@
  */
 
 import React from 'react';
-import {
-    logger, getAppDir, startWatchingDevices, stopWatchingDevices,
-} from 'nrfconnect/core';
-import path from 'path';
-import reducers from './reducers';
+import { App } from 'pc-nrfconnect-shared';
 import MainView from './components/MainView';
 import SidePanel from './components/SidePanel';
-import ShoppingCartButton from './components/ShoppingCartButton';
-import { open, close } from './actions/deviceActions';
+import DeviceSelector from './components/DeviceSelector';
+import reducers from './reducers';
 import './index.scss';
 
-let globalDispatch;
-
-export default {
-    onInit: dispatch => {
-        globalDispatch = dispatch;
-    },
-    decorateLogo: Logo => (
-        props => (
-            <div className="logo-wrap">
-                <ShoppingCartButton
-                    url="http://www.nordicsemi.com/eng/Buy-Online?search_token=nRF6707"
-                    tooltip="Open web page for buying Power Profiler Kit hardware"
-                />
-                <Logo {...props} />
-            </div>
-        )
-    ),
-    decorateMainView: () => () => <MainView />,
-    decorateSidePanel: () => () => <SidePanel />,
-    mapLogViewerState: (state, props) => ({
-        ...props,
-        cssClass: `core-log-viewer${state.app.app.fullView ? ' hidden' : ''}`,
-    }),
-    decorateNavMenu: NavMenu => (
-        props => (
-            <div className="nav-menu-wrap">
-                <NavMenu {...props} />
-                Power Profiler
-            </div>
-        )
-    ),
-    mapDeviceSelectorState: (state, props) => ({
-        portIndicatorStatus: (state.app.app.portName !== null) ? 'on' : 'off',
-        ...props,
-    }),
-    reduceApp: reducers,
-    middleware: store => next => action => { // eslint-disable-line
-        if (!action) {
-            return;
-        }
-        const { dispatch } = store;
-
-        switch (action.type) {
-            case 'DEVICE_SELECTED':
-                logger.info(`Validating firmware for device with s/n ${action.device.serialNumber}`);
-                break;
-
-            case 'DEVICE_DESELECTED':
-                logger.info('Deselecting device');
-                dispatch(close()).then(() => {
-                    dispatch(startWatchingDevices());
-                });
-                break;
-
-            case 'DEVICE_SETUP_COMPLETE': {
-                dispatch(stopWatchingDevices());
-                const { device } = action;
-                logger.info(`Opening device with s/n ${device.serialNumber}`);
-                dispatch(open(device));
-                break;
-            }
-            default:
-        }
-        next(action);
-    },
-    config: {
-        selectorTraits: {
-            jlink: true,
-            serialport: true,
-        },
-        deviceSetup: {
-            jprog: {
-                nrf52: {
-                    fw: path.resolve(getAppDir(), 'firmware/ppk_nrfconnect.hex'),
-                    fwVersion: 'ppk-fw-2.1.0',
-                    fwIdAddress: 0x10000,
-                },
-            },
-            needSerialport: false,
-        },
-        releaseCurrentDevice: () => globalDispatch(close()),
-    },
-};
+export default () => (
+    <App
+        appReducer={reducers}
+        deviceSelect={<DeviceSelector />}
+        sidePanel={<SidePanel />}
+        panes={[['Power Profiler', MainView]]}
+    />
+);

@@ -102,7 +102,6 @@ export const setChartState = state => ({
     state,
 });
 
-
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
     const totalInUs = (data.length / samplesPerSecond) * 1e6;

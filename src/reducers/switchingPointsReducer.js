@@ -85,7 +85,6 @@ export const switchingPointUpMoved = sliderVal => (dispatch, getState) => {
     ));
 };
 
-
 function calculateSwitchingPointsUp(sliderVal) {
     return {
         switchUpLow: (sliderVal / 510.0) * 1000, // RES_LOW

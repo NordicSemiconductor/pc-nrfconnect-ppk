@@ -40,7 +40,6 @@ const initialState = {
     isSmuMode: false,
     deviceRunning: true,
     rttRunning: false,
-    fullView: false,
     advancedMode: false,
     capabilities: {},
     samplingRunning: false,
@@ -54,11 +53,6 @@ const SAMPLING_STARTED = 'SAMPLING_STARTED';
 const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
 const SET_POWER_MODE = 'SET_POWER_MODE';
 const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
-const TOGGLE_FULL_VIEW = 'TOGGLE_FULL_VIEW';
-
-export const toggleFullViewAction = () => ({
-    type: TOGGLE_FULL_VIEW,
-});
 
 export const toggleAdvancedModeAction = () => ({
     type: TOGGLE_ADVANCED_MODE,
@@ -129,12 +123,6 @@ export default (state = initialState, action) => {
             };
         }
 
-        case TOGGLE_FULL_VIEW: {
-            return {
-                ...state,
-                fullView: !state.fullView,
-            };
-        }
         case TOGGLE_ADVANCED_MODE: {
             return {
                 ...state,

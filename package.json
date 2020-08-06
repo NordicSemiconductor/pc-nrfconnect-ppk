@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfconnect-ppk",
-  "version": "3.0.0-alpha.0",
+  "version": "3.0.0-alpha.1",
   "description": "Power Profiler mkII",
   "displayName": "Power Profiler mkII",
   "repository": {
@@ -10,7 +10,7 @@
   "author": "Nordic Semiconductor ASA",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
-    "nrfconnect": "^3.3.0"
+    "nrfconnect": "^3.4.0"
   },
   "main": "dist/bundle.js",
   "files": [
@@ -27,8 +27,8 @@
     "build": "nrfconnect-scripts build-prod",
     "nordic-publish": "nrfconnect-scripts nordic-publish",
     "lint-init": "nrfconnect-scripts lint-init",
-    "lint": "nrfconnect-scripts lint lib index.jsx",
-    "lintfix": "nrfconnect-scripts lint --fix lib index.jsx",
+    "lint": "nrfconnect-scripts lint src",
+    "lintfix": "nrfconnect-scripts lint --fix src",
     "test": "nrfconnect-scripts test",
     "test-watch": "nrfconnect-scripts test --watch",
     "clean": "npm run clean-dist && npm run clean-modules",
@@ -41,9 +41,11 @@
     "chartjs-plugin-annotation": "^0.5.7",
     "mathjs": "6.6.1",
     "mousetrap": "1.6.5",
-    "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#semver:4.4.0",
+    "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v4.8.4",
+    "react": "16.13.1",
     "react-chartjs-2": "2.9.0",
-    "react-rangeslider": "2.2.0"
+    "react-rangeslider": "2.2.0",
+    "react-redux": "7.2.0"
   },
   "dependencies": {}
 }

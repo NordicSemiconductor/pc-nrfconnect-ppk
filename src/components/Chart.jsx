@@ -38,7 +38,9 @@
 /* eslint no-plusplus: off */
 /* eslint operator-assignment: off */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, {
+    useState, useRef, useEffect, useCallback,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { defaults, Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
@@ -107,17 +109,17 @@ const bitIndexes = new Array(allOfBits);
 
 const Chart = () => {
     const dispatch = useDispatch();
-    const chartWindow = (windowBegin, windowEnd, yMin, yMax) => dispatch(
+    const chartWindow = useCallback((windowBegin, windowEnd, yMin, yMax) => dispatch(
         chartWindowAction(
             windowBegin, windowEnd, windowEnd - windowBegin, yMin, yMax,
         ),
-    );
-    const chartReset = windowDuration => dispatch(
+    ), [dispatch]);
+    const chartReset = useCallback(windowDuration => dispatch(
         chartWindowAction(null, null, windowDuration, undefined, undefined),
-    );
-    const chartCursor = (cursorBegin, cursorEnd) => dispatch(
+    ), [dispatch]);
+    const chartCursor = useCallback((cursorBegin, cursorEnd) => dispatch(
         chartCursorAction(cursorBegin, cursorEnd),
-    );
+    ), [dispatch]);
     const {
         windowBegin,
         windowEnd,
@@ -174,7 +176,7 @@ const Chart = () => {
     const calcDelta = to - from;
     const calcAvg = calcSum / (calcLen || 1);
 
-    const zoomPanCallback = (beginX, endX, beginY, endY) => {
+    const zoomPanCallback = useCallback((beginX, endX, beginY, endY) => {
         if (typeof beginX === 'undefined') {
             chartReset(windowDuration);
             return;
@@ -187,7 +189,7 @@ const Chart = () => {
             Math.max(earliestDataTime, beginX),
             Math.min(options.timestamp, endX), beginY, endY,
         );
-    };
+    }, [chartReset, chartWindow, data.length, windowDuration]);
 
     useEffect(() => {
         if (!chartRef.current.chartInstance) {
@@ -198,7 +200,7 @@ const Chart = () => {
         onChartSizeUpdate(chartRef.current.chartInstance);
         dragSelect.callback = chartCursor;
         zoomPan.callback = zoomPanCallback;
-    }, []);
+    }, [chartCursor, zoomPanCallback]);
 
     const chartResetToLive = () => zoomPanCallback(undefined, undefined);
     const resetCursor = () => chartCursor(null, null);

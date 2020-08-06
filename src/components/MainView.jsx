@@ -35,25 +35,10 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
 import Chart from './Chart';
 
-import { toggleFullViewAction, appState } from '../reducers/appReducer';
-
-export default () => {
-    const dispatch = useDispatch();
-    const { fullView } = useSelector(appState);
-    return (
-        <div className="core-main-view">
-            <Chart />
-            <span
-                onClick={() => dispatch(toggleFullViewAction())}
-                className={`btnFullViewToggle mdi mdi-${fullView ? 'fullscreen-exit' : 'fullscreen'}`}
-                onKeyPress={() => {}}
-                role="button"
-                tabIndex={0}
-            />
-        </div>
-    );
-};
+export default () => (
+    <div className="core-main-view">
+        <Chart />
+    </div>
+);

@@ -86,7 +86,6 @@ function setupOptions() {
     }
 }
 
-
 /* Start reading current measurements */
 export function samplingStart() {
     return async (dispatch, getState) => {
@@ -260,7 +259,6 @@ export function updateRegulator() {
         dispatch(updateRegulatorAction({ currentVdd: vdd }));
     };
 }
-
 
 /**
  * Takes the window value in milliseconds, adjusts for microsecs

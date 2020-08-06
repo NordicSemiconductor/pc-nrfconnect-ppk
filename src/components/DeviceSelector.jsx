@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,11 +34,58 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export const constrainedToPercentage = percentage => {
-    if (percentage < 0) return 0;
-    if (percentage > 100) return 100;
-    return percentage;
+import { connect } from 'react-redux';
+import {
+    startWatchingDevices, stopWatchingDevices,
+} from 'nrfconnect/core';
+import {
+    getAppFile, logger,
+    DeviceSelector,
+} from 'pc-nrfconnect-shared';
+
+import { open, close } from '../actions/deviceActions';
+
+const deviceListing = {
+    serialport: true,
+    jlink: true,
 };
 
-export const toPercentage = (v, { min, max }) => (v - min) * 100 / (max - min);
-export const fromPercentage = (v, { min, max }) => Math.round(v * (max - min) / 100 + min);
+const deviceSetup = {
+    dfu: {},
+    jprog: {
+        nrf52: {
+            fw: getAppFile('firmware/ppk_nrfconnect.hex'),
+            fwVersion: 'ppk-fw-2.1.0',
+            fwIdAddress: 0x10000,
+        },
+    },
+    needSerialport: true,
+};
+
+const mapState = () => ({
+    deviceListing,
+    deviceSetup,
+});
+
+const mapDispatch = dispatch => ({
+    onDeviceSelected: device => {
+        logger.info(`Validating firmware for device with s/n ${device.serialNumber}`);
+    },
+    onDeviceDeselected: () => {
+        logger.info('Deselecting device');
+        dispatch(close()).then(() => {
+            // dispatch(startWatchingDevices());
+        });
+    },
+    releaseCurrentDevice: () => {
+        logger.info('Will set up selected device');
+        dispatch(close());
+    },
+    onDeviceIsReady: device => {
+        // dispatch(stopWatchingDevices());
+        logger.info(`Opening device with s/n ${device.serialNumber}`);
+        dispatch(open(device));
+    },
+});
+
+export default connect(mapState, mapDispatch)(DeviceSelector);

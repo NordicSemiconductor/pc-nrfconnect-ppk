@@ -41,8 +41,8 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card';
 
-import Slider from './Slider/Slider';
-import InlineInput from './Slider/InlineInput';
+import Slider from 'pc-nrfconnect-shared/src/Slider/Slider';
+import InlineInput from 'pc-nrfconnect-shared/src/InlineInput/InlineInput';
 
 import { updateRegulator } from '../actions/deviceActions';
 

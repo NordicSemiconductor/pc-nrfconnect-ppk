@@ -67,6 +67,8 @@
     }
     .chart-container {
         height: 100%;
+        contain: size;
+        position: relative;
     }
     .chart-bottom {
         display: flex;

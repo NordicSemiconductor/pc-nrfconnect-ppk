@@ -43,8 +43,8 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Card from 'react-bootstrap/Card';
 
-import Slider from './Slider/Slider';
-import InlineInput from './Slider/InlineInput';
+import Slider from 'pc-nrfconnect-shared/src/Slider/Slider';
+import InlineInput from 'pc-nrfconnect-shared/src/InlineInput/InlineInput';
 
 import UnitSelector from './UnitSelector';
 

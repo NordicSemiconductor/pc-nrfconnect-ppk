@@ -84,7 +84,6 @@ export const save = () => async (_, getState) => {
     logger.info(`State saved to: ${filename}`);
 };
 
-
 export const load = () => async dispatch => {
     const [filename] = (await dialog.showOpenDialog({
         defaultPath: getAppDataDir(),

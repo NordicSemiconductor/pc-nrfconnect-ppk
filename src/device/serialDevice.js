@@ -191,7 +191,7 @@ class SerialDevice extends Device {
 
     getMetadata() {
         let metadata = '';
-        return new Promise(async resolve => {
+        return new Promise(resolve => {
             this.parser = data => {
                 metadata = `${metadata}${data}`;
                 if (metadata.includes('END')) {
@@ -200,7 +200,7 @@ class SerialDevice extends Device {
                     resolve(metadata);
                 }
             };
-            await this.sendCommand([PPKCmd.GetMetadata]);
+            this.sendCommand([PPKCmd.GetMetadata]);
         })
             // convert output string json:
             .then(m => m.replace('END', '')
