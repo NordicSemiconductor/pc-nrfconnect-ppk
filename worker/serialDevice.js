@@ -42,15 +42,18 @@ const asarPath = (() => {
     switch (true) {
         case (/node_modules/.test(execPath)):
             return resolve(execPath.split('node_modules')[0]);
-        case platform === "win32":
+        case platform === 'win32':
             return resolve(execPath, '..', 'resources', 'app.asar');
-        case platform === "darwin":
+        case platform === 'darwin':
             return resolve(execPath.split('/Frameworks/')[0], 'Resources', 'app.asar');
-        case platform === "linux":
+        case platform === 'linux':
             return resolve(execPath.split('/').slice(0, -1).join('/'), 'resources', 'app.asar');
+        default:
+            return null;
     }
 })();
 
+// eslint-disable-next-line import/no-dynamic-require
 const SerialPort = require(resolve(asarPath, 'node_modules', 'serialport'));
 
 let port = null;
@@ -75,3 +78,11 @@ process.on('message', msg => {
     }
 });
 
+process.on('disconnect', () => {
+    console.log('parent process disconnected, cleaning up');
+    if (port) {
+        port.close(process.exit);
+    } else {
+        process.exit();
+    }
+});
