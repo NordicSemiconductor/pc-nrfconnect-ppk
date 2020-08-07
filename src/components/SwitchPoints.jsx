@@ -43,7 +43,7 @@ import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import Slider from 'pc-nrfconnect-shared/src/Slider/Slider';
+import { Slider } from 'pc-nrfconnect-shared';
 
 import {
     spikeFilteringToggle,

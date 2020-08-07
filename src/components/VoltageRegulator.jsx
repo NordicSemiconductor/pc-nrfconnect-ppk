@@ -41,8 +41,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card';
 
-import Slider from 'pc-nrfconnect-shared/src/Slider/Slider';
-import InlineInput from 'pc-nrfconnect-shared/src/InlineInput/InlineInput';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import { updateRegulator } from '../actions/deviceActions';
 
@@ -72,11 +71,10 @@ export default () => {
                     <Card.Body>
                         <Form.Label htmlFor="slider-vdd">
                             VDD{' '}
-                            <InlineInput
+                            <NumberInlineInput
                                 value={vdd}
                                 range={{ min, max }}
                                 onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
-                                onChangeComplete={value => dispatch(updateRegulator(value))}
                             />
                             {' '}mV
                         </Form.Label>

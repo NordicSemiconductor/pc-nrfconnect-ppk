@@ -43,8 +43,7 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Card from 'react-bootstrap/Card';
 
-import Slider from 'pc-nrfconnect-shared/src/Slider/Slider';
-import InlineInput from 'pc-nrfconnect-shared/src/InlineInput/InlineInput';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import UnitSelector from './UnitSelector';
 
@@ -92,11 +91,10 @@ export default () => {
                     <Card.Body>
                         <Form.Label htmlFor="slider-trigger-window">
                             Window{' '}
-                            <InlineInput
+                            <NumberInlineInput
                                 value={triggerWindowLength}
                                 range={range}
-                                onChange={value => dispatch(setTriggerWindowLength(value))}
-                                onChangeComplete={value => dispatch(triggerUpdateWindow(value))}
+                                onChange={value => setTriggerWindowLength(value)}
                             />
                             {' '}ms
                         </Form.Label>
@@ -104,7 +102,7 @@ export default () => {
                             id="slider-trigger-window"
                             values={[triggerWindowLength]}
                             range={range}
-                            onChange={[value => dispatch(setTriggerWindowLength(value))]}
+                            onChange={[value => setTriggerWindowLength(value)]}
                             onChangeComplete={value => dispatch(triggerUpdateWindow(value))}
                         />
                         <div className="d-flex flex-column">
