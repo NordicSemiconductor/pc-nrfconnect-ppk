@@ -42,7 +42,7 @@ import React, {
     useState, useRef, useEffect, useCallback,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { defaults, Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { unit } from 'mathjs';
@@ -63,10 +63,6 @@ import { options, timestampToIndex } from '../globals';
 import BufferView from './BufferView';
 
 import colors from './colors.scss';
-
-defaults.global.tooltips.enabled = false;
-defaults.global.legend.display = true;
-defaults.global.animation.duration = 0;
 
 const dataColor = colors.accent;
 const valueRange = { min: 0, max: 15000 };
@@ -343,10 +339,12 @@ const Chart = () => {
             fill: false,
             data: lineData.slice(0, mappedIndex),
             pointRadius: step > 0.2 ? 0 : 1.5,
-            pointHoverRadius: 0,
-            pointHitRadius: 0,
+            pointHoverRadius: step > 0.2 ? 0 : 3,
+            pointHitRadius: step > 0.2 ? 0 : 3,
             pointBackgroundColor: dataColor,
+            pointHoverBackgroundColor: dataColor,
             pointBorderWidth: 0,
+            pointHoverBorderWidth: 0,
             lineTension: step > 0.2 ? 0 : 0.2,
             label: 'Current',
             yAxisID: 'yScale',
@@ -438,6 +436,14 @@ const Chart = () => {
                     borderWidth: 0,
                 })),
         } : undefined,
+        tooltips: {
+            enabled: true,
+            mode: 'point',
+            intersect: false,
+        },
+        legend: {
+            display: true,
+        },
     };
 
     const renderValue = (label, u) => {
