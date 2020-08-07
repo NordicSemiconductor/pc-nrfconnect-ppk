@@ -35,9 +35,7 @@
  */
 
 import { connect } from 'react-redux';
-import {
-    startWatchingDevices, stopWatchingDevices,
-} from 'nrfconnect/core';
+// import { startWatchingDevices, stopWatchingDevices } from 'nrfconnect/core';
 import {
     getAppFile, logger,
     DeviceSelector,
