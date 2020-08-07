@@ -1,8 +1,10 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
 .buffer-view {
     position: relative;
     height: 1rem;
     width: 100%;
-    background-color: #a94442;
+    background-color: $red;
 
     div {
         display: block;
@@ -11,12 +13,12 @@
     }
 
     .buffer-remaining {
-        background-color: #28a328;
+        background-color: $green;
     }
     .window {
         height: 2rem;
         top: -0.5rem;
-        border: 1px dashed gray;
+        border: 1px dashed $gray-300;
         background-color: #ffffffcc;
         cursor: grab;
     }
@@ -25,8 +27,8 @@
         position: absolute;
         left: 4px;
         font-size: 12px;
-        color: white;
-        text-shadow: 0px 0px 2px black;
+        color: $white;
+        text-shadow: 0px 0px 2px $black;
         pointer-events: none;
     }
 }

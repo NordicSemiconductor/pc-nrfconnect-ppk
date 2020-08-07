@@ -62,15 +62,24 @@ import { exportChart } from '../actions/fileActions';
 import { options, timestampToIndex } from '../globals';
 import BufferView from './BufferView';
 
+import colors from './colors.scss';
+
 defaults.global.tooltips.enabled = false;
 defaults.global.legend.display = true;
 defaults.global.animation.duration = 0;
 
-const dataColor = '#B32860';
+const dataColor = colors.accent;
 const valueRange = { min: 0, max: 15000 };
 const bitColors = [
-    '#005588', '#008855', '#005555', '#008888',
-    '#660088', '#0055FF', '#00C288', '#0F2088',
+    colors.red,
+    colors.indigo,
+    colors.amber,
+    colors.purple,
+    colors.green,
+    colors.deepPurple,
+    colors.orange,
+    colors.lime,
+    colors.pink,
 ];
 const bitLabels = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'];
 
