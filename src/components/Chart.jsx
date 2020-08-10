@@ -105,6 +105,10 @@ const timestampToLabel = (usecs, index, array) => {
     return [time, subsecond];
 };
 
+const formatCurrent = uA => unit(uA, 'uA')
+    .format({ notation: 'fixed', precision: 3 })
+    .replace('u', '\u00B5');
+
 const allOfBits = 8;
 
 const emptyArray = () => [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
@@ -348,6 +352,7 @@ const Chart = () => {
             lineTension: step > 0.2 ? 0 : 0.2,
             label: 'Current',
             yAxisID: 'yScale',
+            labelCallback: ({ y }) => formatCurrent(y),
         }, ...bitsDataSets],
     };
 
@@ -391,11 +396,7 @@ const Chart = () => {
                         min: yMin === null ? valueRange.min : yMin,
                         max: yMax === null ? undefined : yMax,
                         maxTicksLimit: 7,
-                        callback: (uA => (
-                            unit(uA, 'uA')
-                                .format({ notation: 'fixed', precision: 3 })
-                                .replace('u', '\u00B5')
-                        )),
+                        callback: formatCurrent,
                     },
                     gridLines: {
                         display: true,
@@ -440,6 +441,17 @@ const Chart = () => {
             enabled: true,
             mode: 'point',
             intersect: false,
+            callbacks: {
+                title: items => timestampToLabel(items[0].xLabel),
+                label: (item, d) => {
+                    const dataset = d.datasets[item.datasetIndex];
+                    const element = dataset.data[item.index];
+                    if (dataset.labelCallback) {
+                        return dataset.labelCallback(element);
+                    }
+                    return `${dataset.label}: ${element.y}`;
+                },
+            },
         },
         legend: {
             display: true,
