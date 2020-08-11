@@ -1,42 +1,5 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-.core-main-layout > div:nth-child(1) {
-    min-width: 0;
-    position: relative;
-}
-
-.core-main-view {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: $white;
-    padding: 1rem;
-}
-
-.core-side-panel {
-    height: 100%;
-    flex: 0 0 300px;
-}
-
-.nav-menu-wrap {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    color: $white;
-    font-size: large;
-}
-
-.logo-wrap {
-    margin-left: auto;
-    button {
-        display: inline-block;
-        margin-right: 5px;
-    }
-    div {
-        display: inline-block;
-    }
-}
-
 .chart-outer {
     flex: 1;
     width: 100%;
@@ -44,6 +7,11 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
+    height: 100%;
+    background: $white;
+    padding: 1rem;
+
     .chart-top {
         display: flex;
         justify-content: flex-end;
@@ -95,15 +63,6 @@
     .rangeslider__labels .rangeslider__label-item {
         transform: translate(-50%, 0);
     }
-}
-
-.core-side-panel {
-    .mdi {
-        margin-right: 5px;
-    }
-}
-.core-side-panel.disabled {
-    pointer-events: none;
 }
 
 .hidden {

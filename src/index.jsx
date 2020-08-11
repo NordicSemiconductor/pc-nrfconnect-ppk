@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { App } from 'pc-nrfconnect-shared';
-import MainView from './components/MainView';
+import Chart from './components/Chart';
 import SidePanel from './components/SidePanel';
 import DeviceSelector from './components/DeviceSelector';
 import reducers from './reducers';
@@ -47,6 +47,6 @@ export default () => (
         appReducer={reducers}
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
-        panes={[['Power Profiler', MainView]]}
+        panes={[['Power Profiler', Chart]]}
     />
 );

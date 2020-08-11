@@ -51,35 +51,29 @@ const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
     bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
-    const { fullView, capabilities } = useSelector(appState);
-    const hidden = fullView ? ' hidden' : '';
+    const { capabilities } = useSelector(appState);
 
+    if (Object.keys(capabilities).length === 0) {
+        return (
+            <>
+                <p>Please open your device first, or</p>
+                <Button
+                    className="mb-3 w-100"
+                    variant="info"
+                    size="lg"
+                    onClick={() => dispatch(load())}
+                >
+                    Load
+                </Button>
+            </>
+        );
+    }
     return (
-        <div className={`core-side-panel${hidden}`}>
-            {Object.keys(capabilities).length === 0
-                ? (
-                    <div className="d-flex flex-column">
-                        <p>Please open your device first, or</p>
-                        <Button
-                            className="mb-3"
-                            variant="info"
-                            size="lg"
-                            onClick={() => dispatch(load())}
-                        >
-                            Load
-                        </Button>
-                    </div>
-                )
-                : (
-                    <>
-                        <StartStop />
-                        {capabilities.ppkTriggerSet && (
-                            <Trigger />
-                        )}
-                        <VoltageRegulator />
-                    </>
-                )}
-        </div>
+        <>
+            <StartStop />
+            {capabilities.ppkTriggerSet && <Trigger />}
+            <VoltageRegulator />
+        </>
     );
 };
 
