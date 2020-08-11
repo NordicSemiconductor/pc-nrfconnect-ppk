@@ -50,6 +50,7 @@ import { unit } from 'mathjs';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import dragSelectPlugin from '../utils/chart.dragSelect';
 import zoomPanPlugin from '../utils/chart.zoomPan';
+import crossHairPlugin from '../utils/chart.crossHair';
 
 import {
     chartWindowAction,
@@ -108,6 +109,9 @@ const timestampToLabel = (usecs, index, array) => {
 const formatCurrent = uA => unit(uA, 'uA')
     .format({ notation: 'fixed', precision: 3 })
     .replace('u', '\u00B5');
+
+crossHairPlugin.formatY = formatCurrent;
+crossHairPlugin.formatX = timestampToLabel;
 
 const allOfBits = 8;
 
@@ -258,7 +262,7 @@ const Chart = () => {
                 for (let n = k; n < l; ++n) {
                     const ni = (n + data.length) % data.length;
                     if (!Number.isNaN(data[ni])) {
-                        const v = (((bits[ni] >> i) & 1) + i + i);
+                        const v = (((bits[ni] >> i) & 1) - 0.5) * 0.8;
                         if (y1 === undefined || v !== y1) {
                             if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== v
                                 || mappedIndex === len + len - 1) {
@@ -286,7 +290,7 @@ const Chart = () => {
             lineData[mappedIndex].y = Number.isNaN(v) ? undefined : v;
 
             for (let i = 0; i < numberOfBits; ++i) {
-                const y = Number.isNaN(v) ? undefined : ((bits[k] >> i) & 1) + i + i;
+                const y = Number.isNaN(v) ? undefined : (((bits[k] >> i) & 1) - 0.5) * 0.8;
                 if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== y
                     || n === originalIndexEndCeiled) {
                     bitsData[i][bitIndexes[i]].x = timestamp;
@@ -302,8 +306,9 @@ const Chart = () => {
 
     const bitsDataSets = bitsData.slice(0, numberOfBits).map((b, i) => ({
         borderColor: bitColors[i],
+        backgroundColor: `${bitColors[i]}0f`,
         borderWidth: 0.5,
-        fill: false,
+        fill: 'origin',
         data: b.slice(0, bitIndexes[i]),
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -311,30 +316,31 @@ const Chart = () => {
         pointBorderWidth: 0,
         lineTension: 0,
         label: bitLabels[i],
-        yAxisID: 'bits-axis',
+        yAxisID: `bits-axis-${i}`,
         steppedLine: 'before',
     }));
 
-    const bitsAxis = [{
-        display: !!bits,
-        id: 'bits-axis',
+    const bitsAxis = bitsData.slice(0, numberOfBits).map((_, i) => ({
+        id: `bits-axis-${i}`,
         type: 'linear',
-        min: 0,
-        max: 15,
         position: 'right',
         ticks: {
+            fontColor: bitColors[i],
             autoSkip: false,
-            min: -1,
-            max: 16,
-            labelOffset: 0,
+            min: -i - 0.5,
+            max: 7.5 - i,
+            labelOffset: -10,
             minRotation: 90,
             maxRotation: 90,
-            callback: (n => bitLabels[n / 2]),
+            callback: (n => ((n === 0) ? bitLabels[i] : '')),
+            mirror: true,
+            padding: 10,
         },
         gridLines: {
             display: false,
+            drawTicks: false,
         },
-    }];
+    }));
 
     const chartData = {
         datasets: [{
@@ -382,31 +388,29 @@ const Chart = () => {
                     cursorEnd,
                 },
             }],
-            yAxes: [
-                {
-                    id: 'yScale',
-                    type: 'linear',
-                    ...valueRange,
-                    fullWidth: 60,
-                    ticks: {
-                        minRotation: 0,
-                        maxRotation: 0,
-                        suggestedMin: valueRange.min,
-                        suggestedMax: valueRange.max,
-                        min: yMin === null ? valueRange.min : yMin,
-                        max: yMax === null ? undefined : yMax,
-                        maxTicksLimit: 7,
-                        callback: formatCurrent,
-                    },
-                    gridLines: {
-                        display: true,
-                        drawBorder: true,
-                        drawOnChartArea: true,
-                        borderDash: [3, 6],
-                    },
+            yAxes: [{
+                id: 'yScale',
+                type: 'linear',
+                ...valueRange,
+                ticks: {
+                    minRotation: 0,
+                    maxRotation: 0,
+                    suggestedMin: valueRange.min,
+                    suggestedMax: valueRange.max,
+                    min: yMin === null ? valueRange.min : yMin,
+                    max: yMax === null ? undefined : yMax,
+                    maxTicksLimit: 7,
+                    padding: 0,
+                    callback: formatCurrent,
                 },
-                ...bitsAxis,
-            ],
+                gridLines: {
+                    display: true,
+                    drawBorder: true,
+                    drawOnChartArea: true,
+                    borderDash: [3, 6],
+                },
+                afterFit: scale => { scale.width = 80; }, // eslint-disable-line
+            }, ...bitsAxis],
         },
         redraw: true,
         maintainAspectRatio: false,
@@ -479,7 +483,7 @@ const Chart = () => {
                     ref={chartRef}
                     data={chartData}
                     options={chartOptions}
-                    plugins={[dragSelectPlugin, zoomPanPlugin, annotationPlugin]}
+                    plugins={[dragSelectPlugin, zoomPanPlugin, annotationPlugin, crossHairPlugin]}
                 />
             </div>
             <div className="chart-bottom">
