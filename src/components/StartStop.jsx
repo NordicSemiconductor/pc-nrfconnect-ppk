@@ -37,6 +37,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
 import {
     samplingStart,
@@ -57,6 +58,8 @@ export default () => {
         isSmuMode,
         samplingRunning,
     } = useSelector(appState);
+
+    const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
     return (
         <div className="d-flex flex-column">
@@ -95,17 +98,14 @@ export default () => {
                 </Button>
             )}
             {capabilities.ppkSetPowerMode && (
-                <Button
-                    style={{ backgroundColor: 0xFF11AA }}
-                    className="mb-3"
-                    variant="light"
-                    size="lg"
-                    disabled={!rttRunning}
-                    onClick={() => dispatch(setPowerMode(!isSmuMode))}
-                >
-                    <span className={`mdi mdi-${isSmuMode ? 'flash' : 'flash-auto'}`} />
-                    {isSmuMode ? 'Source Meter' : 'Amperemeter'}
-                </Button>
+                <ButtonGroup className="mb-3">
+                    <Button variant={isSmuMode ? 'secondary' : 'light'} onClick={togglePowerMode}>
+                        Sourcemeter
+                    </Button>
+                    <Button variant={isSmuMode ? 'light' : 'secondary'} onClick={togglePowerMode}>
+                        Amperemeter
+                    </Button>
+                </ButtonGroup>
             )}
         </div>
     );
