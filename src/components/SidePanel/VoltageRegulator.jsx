@@ -36,49 +36,47 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import PropTypes from 'prop-types';
-import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 
-import StartStop from './StartStop';
-import Trigger from './Trigger';
-import VoltageRegulator from './VoltageRegulator';
-import withHotkey from '../utils/withHotKey';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
-import { toggleAdvancedModeAction, appState } from '../reducers/appReducer';
-import { load } from '../actions/fileActions';
+import { updateRegulator } from '../../actions/deviceActions';
 
-const SidePanel = ({ bindHotkey }) => {
+import SwitchPoints from './SwitchPoints';
+import ResistorCalibration from './ResistorCalibration';
+
+import { appState } from '../../reducers/appReducer';
+import {
+    voltageRegulatorState,
+    moveVoltageRegulatorVddAction,
+} from '../../reducers/voltageRegulatorReducer';
+
+export default () => {
     const dispatch = useDispatch();
-    bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+    const { vdd, min, max } = useSelector(voltageRegulatorState);
+    const { advancedMode } = useSelector(appState);
 
-    const { capabilities } = useSelector(appState);
-
-    if (Object.keys(capabilities).length === 0) {
-        return (
-            <>
-                <p>Please open your device first, or</p>
-                <Button
-                    className="mb-3 w-100"
-                    variant="info"
-                    size="lg"
-                    onClick={() => dispatch(load())}
-                >
-                    Load
-                </Button>
-            </>
-        );
-    }
     return (
         <>
-            <StartStop />
-            {capabilities.ppkTriggerSet && <Trigger />}
-            <VoltageRegulator />
+            <h2>Voltage Regulator</h2>
+            <Form.Label htmlFor="slider-vdd">
+                VDD{' '}
+                <NumberInlineInput
+                    value={vdd}
+                    range={{ min, max }}
+                    onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
+                />
+                {' '}mV
+            </Form.Label>
+            <Slider
+                id="slider-vdd"
+                values={[vdd]}
+                range={{ min, max }}
+                onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
+                onChangeComplete={value => dispatch(updateRegulator(value))}
+            />
+            {advancedMode && <SwitchPoints />}
+            {advancedMode && <ResistorCalibration />}
         </>
     );
 };
-
-SidePanel.propTypes = {
-    bindHotkey: PropTypes.func.isRequired,
-};
-
-export default withHotkey(SidePanel);

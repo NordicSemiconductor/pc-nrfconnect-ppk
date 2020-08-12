@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,18 +35,33 @@
  */
 
 import React from 'react';
-import { App } from 'pc-nrfconnect-shared';
-import Chart from './components/Chart';
-import SidePanel from './components/SidePanel/SidePanel';
-import DeviceSelector from './components/DeviceSelector';
-import reducers from './reducers';
-import './index.scss';
+import { useDispatch, useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
-export default () => (
-    <App
-        appReducer={reducers}
-        deviceSelect={<DeviceSelector />}
-        sidePanel={<SidePanel />}
-        panes={[['Power Profiler', Chart]]}
-    />
-);
+import { setPowerMode } from '../../actions/deviceActions';
+import { appState } from '../../reducers/appReducer';
+
+export default () => {
+    const dispatch = useDispatch();
+    const { capabilities, isSmuMode } = useSelector(appState);
+    const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
+
+    if (!capabilities.ppkSetPowerMode) {
+        return null;
+    }
+
+    return (
+        <>
+            <h2>Mode</h2>
+            <ButtonGroup className="mb-3">
+                <Button variant={isSmuMode ? 'secondary' : 'light'} onClick={togglePowerMode}>
+                    Sourcemeter
+                </Button>
+                <Button variant={isSmuMode ? 'light' : 'secondary'} onClick={togglePowerMode}>
+                    Amperemeter
+                </Button>
+            </ButtonGroup>
+        </>
+    );
+};

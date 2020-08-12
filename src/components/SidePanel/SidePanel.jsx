@@ -35,23 +35,52 @@
  */
 
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import Button from 'react-bootstrap/Button';
-import { shell } from 'electron';
 
-const ShoppingCartButton = ({ url, tooltip }) => (
-    <Button
-        className="btn btn-primary core-btn"
-        title={tooltip}
-        onClick={() => shell.openItem(url)}
-    >
-        <span className="mdi mdi-cart" />
-    </Button>
-);
+import StartStop from './StartStop';
+import Trigger from './Trigger';
+import VoltageRegulator from './VoltageRegulator';
+import withHotkey from '../../utils/withHotKey';
 
-ShoppingCartButton.propTypes = {
-    url: PropTypes.string.isRequired,
-    tooltip: PropTypes.string.isRequired,
+import { toggleAdvancedModeAction, appState } from '../../reducers/appReducer';
+import { load } from '../../actions/fileActions';
+
+import './sidepanel.scss';
+
+const SidePanel = ({ bindHotkey }) => {
+    const dispatch = useDispatch();
+    bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+
+    const { capabilities } = useSelector(appState);
+
+    if (Object.keys(capabilities).length === 0) {
+        return (
+            <div className="sidepanel">
+                <p>Please open your device first, or</p>
+                <Button
+                    className="mb-3 w-100"
+                    variant="info"
+                    size="lg"
+                    onClick={() => dispatch(load())}
+                >
+                    Load
+                </Button>
+            </div>
+        );
+    }
+    return (
+        <div className="sidepanel">
+            <StartStop />
+            {capabilities.ppkTriggerSet && <Trigger />}
+            <VoltageRegulator />
+        </div>
+    );
 };
 
-export default ShoppingCartButton;
+SidePanel.propTypes = {
+    bindHotkey: PropTypes.func.isRequired,
+};
+
+export default withHotkey(SidePanel);

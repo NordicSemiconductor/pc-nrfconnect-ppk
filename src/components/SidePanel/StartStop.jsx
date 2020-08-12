@@ -37,16 +37,16 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+
+import PowerMode from './PowerMode';
 
 import {
     samplingStart,
     samplingStop,
     toggleDUT,
-    setPowerMode,
-} from '../actions/deviceActions';
-import { save } from '../actions/fileActions';
-import { appState } from '../reducers/appReducer';
+} from '../../actions/deviceActions';
+import { save } from '../../actions/fileActions';
+import { appState } from '../../reducers/appReducer';
 
 export default () => {
     const dispatch = useDispatch();
@@ -55,11 +55,8 @@ export default () => {
         deviceRunning,
         rttRunning,
         capabilities,
-        isSmuMode,
         samplingRunning,
     } = useSelector(appState);
-
-    const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
     return (
         <div className="d-flex flex-column">
@@ -97,16 +94,7 @@ export default () => {
                     {deviceRunning ? 'Power OFF' : 'Power ON'}
                 </Button>
             )}
-            {capabilities.ppkSetPowerMode && (
-                <ButtonGroup className="mb-3">
-                    <Button variant={isSmuMode ? 'secondary' : 'light'} onClick={togglePowerMode}>
-                        Sourcemeter
-                    </Button>
-                    <Button variant={isSmuMode ? 'light' : 'secondary'} onClick={togglePowerMode}>
-                        Amperemeter
-                    </Button>
-                </ButtonGroup>
-            )}
+            <PowerMode />
         </div>
     );
 };
