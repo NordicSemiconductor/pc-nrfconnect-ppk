@@ -90,7 +90,11 @@ class SerialDevice extends Device {
             console.log(`message: ${JSON.stringify(m)}`);
         });
         this.child.on('close', code => {
-            console.log(`child process exited with code ${code}`);
+            if (code) {
+                console.log(`Child process exited with code ${code}`);
+            } else {
+                console.log('Child process cleanly exited');
+            }
         });
     }
 

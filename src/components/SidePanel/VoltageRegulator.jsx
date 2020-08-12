@@ -54,10 +54,10 @@ import {
 export default () => {
     const dispatch = useDispatch();
     const { vdd, min, max } = useSelector(voltageRegulatorState);
-    const { advancedMode } = useSelector(appState);
+    const { advancedMode, isSmuMode } = useSelector(appState);
 
     return (
-        <>
+        <div className={isSmuMode ? '' : 'disabled'}>
             <h2>Voltage Regulator</h2>
             <Form.Label htmlFor="slider-vdd">
                 VDD{' '}
@@ -73,10 +73,10 @@ export default () => {
                 values={[vdd]}
                 range={{ min, max }}
                 onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
-                onChangeComplete={value => dispatch(updateRegulator(value))}
+                onChangeComplete={() => dispatch(updateRegulator(vdd))}
             />
             {advancedMode && <SwitchPoints />}
             {advancedMode && <ResistorCalibration />}
-        </>
+        </div>
     );
 };

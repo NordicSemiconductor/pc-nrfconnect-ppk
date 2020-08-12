@@ -98,7 +98,7 @@ export function samplingStart() {
         dispatch(chartCursorAction(null, null));
         dispatch(samplingStartAction());
         await device.ppkAverageStart();
-        logger.info('Average started');
+        logger.info('Sampling started');
     };
 }
 
@@ -106,7 +106,7 @@ export function samplingStop() {
     return async dispatch => {
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
-        logger.info('Average stopped');
+        logger.info('Sampling stopped');
     };
 }
 
@@ -226,7 +226,7 @@ export function open(deviceInfo) {
             dispatch(rttStartAction());
             logger.info('PPK started');
         } catch (err) {
-            logger.error('Failed to start the PPK.');
+            logger.error('Failed to start PPK');
             logger.debug(err);
             dispatch({ type: 'DEVICE_DESELECTED' });
         }
@@ -256,6 +256,7 @@ export function updateRegulator() {
     return async (dispatch, getState) => {
         const { vdd } = getState().app.voltageRegulator;
         await device.ppkUpdateRegulator(vdd);
+        logger.info(`Voltage regulater updated to ${vdd} mV`);
         dispatch(updateRegulatorAction({ currentVdd: vdd }));
     };
 }
@@ -269,17 +270,17 @@ export function updateRegulator() {
 export function triggerUpdateWindow(value) {
     return async () => {
         const triggerWindowMicroSec = value * 1000;
-        const triggerWindow = triggerWindowMicroSec / options.samplingTime;
+        const triggerWindow = Math.floor(triggerWindowMicroSec / options.samplingTime);
         // If division returns a decimal, round downward to nearest integer
-        await device.ppkTriggerWindowSet(Math.floor(triggerWindow));
-        logger.info('Trigger window updated');
+        await device.ppkTriggerWindowSet(triggerWindow);
+        logger.info(`Trigger window updated to ${triggerWindow} ms`);
     };
 }
 
 export function triggerSet(triggerLevel) {
     /* eslint-disable no-bitwise */
     return async dispatch => {
-        logger.info('Trigger level set: ', triggerLevel, 'uA');
+        logger.info(`Trigger level set ${triggerLevel} uA`);
         const high = (triggerLevel >> 16) & 0xFF;
         const mid = (triggerLevel >> 8) & 0xFF;
         const low = triggerLevel & 0xFF;
@@ -324,7 +325,7 @@ export function toggleDUT(isOn) {
 export function setPowerMode(isSmuMode) {
     return async dispatch => {
         await device.ppkSetPowerMode(isSmuMode ? 2 : 1);
-        logger.info(`Mode: ${isSmuMode ? 'SMU' : 'Amperemeter'}`);
+        logger.info(`Mode: ${isSmuMode ? 'Sourcemeter' : 'Amperemeter'}`);
         dispatch(setPowerModeAction(isSmuMode));
     };
 }
@@ -332,6 +333,7 @@ export function setPowerMode(isSmuMode) {
 export function updateResistors() {
     return async (_, getState) => {
         const { userResLo, userResMid, userResHi } = getState().app.resistorCalibration;
+        logger.info(`Resistors set to ${userResLo}/${userResMid}/${userResHi}`);
         await device.ppkUpdateResistors(userResLo, userResMid, userResHi);
     };
 }
@@ -339,6 +341,7 @@ export function updateResistors() {
 export function resetResistors() {
     return async (dispatch, getState) => {
         const { resLo, resMid, resHi } = getState().app.resistorCalibration;
+        logger.info(`Resistors reset to ${resLo}/${resMid}/${resHi}`);
         await device.ppkUpdateResistors(resLo, resMid, resHi);
         dispatch(resistorsResetAction());
     };

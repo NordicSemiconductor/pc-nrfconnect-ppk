@@ -94,7 +94,7 @@ export default () => {
                 values={[triggerWindowLength]}
                 range={range}
                 onChange={[value => setTriggerWindowLength(value)]}
-                onChangeComplete={value => dispatch(triggerUpdateWindow(value))}
+                onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
             />
             <div className="d-flex flex-column">
                 <ButtonGroup style={{ marginTop: 10 }}>
@@ -157,7 +157,7 @@ export default () => {
             </InputGroup>
             <Form.Group controlId="extTrigCheck">
                 <Form.Check
-                    type="checkbox"
+                    type="switch"
                     onChange={e => dispatch(externalTriggerToggled(e.target.checked))}
                     checked={externalTrigger}
                     label="External trigger"

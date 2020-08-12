@@ -59,9 +59,19 @@ const SerialPort = require(resolve(asarPath, 'node_modules', 'serialport'));
 let port = null;
 process.on('message', msg => {
     if (msg.open) {
+        console.log('\x1b[2J');
         process.send({ opening: msg.open });
         port = new SerialPort(msg.open, { autoOpen: false });
-        port.on('data', data => process.send(data));
+
+        let data = Buffer.alloc(0);
+        port.on('data', buf => {
+            data = Buffer.concat([data, buf]);
+        });
+        setInterval(() => {
+            if (data.length === 0) return;
+            process.send(data);
+            data = Buffer.alloc(0);
+        }, 30);
         port.open(err => {
             if (err) {
                 process.send({ error: err.toString() });

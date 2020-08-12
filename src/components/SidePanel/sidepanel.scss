@@ -25,4 +25,9 @@
 
         &:focus { background-color: $white; }
     }
+
+    .disabled {
+        pointer-events: none;
+        opacity: 0.3;
+    }
 }

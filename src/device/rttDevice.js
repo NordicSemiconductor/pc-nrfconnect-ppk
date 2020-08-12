@@ -193,7 +193,7 @@ class RTTDevice extends Device {
     logProbeInfo() {
         return new Promise(resolve => {
             nRFjprogjs.getProbeInfo(this.serialNumber, (err, info) => {
-                logger.info('SEGGER serial: ', info.serialNumber);
+                logger.info('SEGGER serial number: ', info.serialNumber);
                 logger.info('SEGGER speed: ', info.clockSpeedkHz, ' kHz');
                 logger.info('SEGGER version: ', info.firmwareString);
                 resolve();

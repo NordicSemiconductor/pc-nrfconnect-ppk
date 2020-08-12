@@ -76,10 +76,7 @@ const mapDispatch = dispatch => ({
             // dispatch(startWatchingDevices());
         });
     },
-    releaseCurrentDevice: () => {
-        logger.info('Will set up selected device');
-        dispatch(close());
-    },
+    releaseCurrentDevice: () => dispatch(close()),
     onDeviceIsReady: device => {
         // dispatch(stopWatchingDevices());
         logger.info(`Opening device with s/n ${device.serialNumber}`);
