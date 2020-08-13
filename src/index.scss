@@ -50,21 +50,6 @@
     }
 }
 
-.rangeslider {
-    margin-bottom: 40px;
-    .rangeslider__handle {
-        width: 10px;
-        border-radius: 5px;
-        transform: translate(-50%, -50%);
-        &:after {
-            display: none;
-        }
-    }
-    .rangeslider__labels .rangeslider__label-item {
-        transform: translate(-50%, 0);
-    }
-}
-
 .hidden {
     display: none;
 }
@@ -90,15 +75,6 @@
 }
 .btnFullViewToggle:focus {
     outline: none;
-}
-
-.accordion {
-    > .card:last-of-type {
-        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-    }
-    > .card {
-        overflow: visible;
-    }
 }
 
 .card-header {
