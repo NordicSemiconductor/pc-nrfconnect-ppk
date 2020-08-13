@@ -54,10 +54,10 @@ import {
 export default () => {
     const dispatch = useDispatch();
     const { vdd, min, max } = useSelector(voltageRegulatorState);
-    const { advancedMode, isSmuMode } = useSelector(appState);
+    const { advancedMode, isSmuMode, capabilities: { ppkSetPowerMode } } = useSelector(appState);
 
     return (
-        <div className={isSmuMode ? '' : 'disabled'}>
+        <div className={(ppkSetPowerMode && !isSmuMode) ? 'disabled' : ''}>
             <h2>Voltage Regulator</h2>
             <Form.Label htmlFor="slider-vdd">
                 VDD{' '}
