@@ -48,22 +48,22 @@ export default {
 
         const { canvas } = chartInstance.chart.ctx;
 
-        dragSelect.mouseDownHandler = event => {
+        dragSelect.pointerDownHandler = event => {
             if (event.button === 0 && event.shiftKey) {
                 dragSelect.dragStart = event;
             }
         };
-        canvas.addEventListener('mousedown', dragSelect.mouseDownHandler);
+        canvas.addEventListener('pointerdown', dragSelect.pointerDownHandler);
 
-        dragSelect.mouseMoveHandler = event => {
+        dragSelect.pointerMoveHandler = event => {
             if (chartInstance.dragSelect.dragStart) {
                 chartInstance.dragSelect.dragEnd = event;
                 chartInstance.update({ lazy: true });
             }
         };
-        canvas.addEventListener('mousemove', dragSelect.mouseMoveHandler);
+        canvas.addEventListener('pointermove', dragSelect.pointerMoveHandler);
 
-        dragSelect.mouseUpHandler = event => {
+        dragSelect.pointerUpHandler = event => {
             if (dragSelect.dragStart) {
                 const { dragStart } = dragSelect;
                 const offsetX = dragStart.target.getBoundingClientRect().left;
@@ -84,7 +84,7 @@ export default {
                 dragSelect.dragEnd = null;
             }
         };
-        canvas.addEventListener('mouseup', dragSelect.mouseUpHandler);
+        canvas.addEventListener('pointerup', dragSelect.pointerUpHandler);
     },
 
     beforeDraw(chartInstance) {
@@ -127,9 +127,9 @@ export default {
         if (dragSelect) {
             const { canvas } = chartInstance.chart.ctx;
 
-            canvas.removeEventListener('mousedown', dragSelect.mouseDownHandler);
-            canvas.removeEventListener('mousemove', dragSelect.mouseMoveHandler);
-            canvas.removeEventListener('mouseup', dragSelect.mouseUpHandler);
+            canvas.removeEventListener('pointerdown', dragSelect.pointerDownHandler);
+            canvas.removeEventListener('pointermove', dragSelect.pointerMoveHandler);
+            canvas.removeEventListener('pointerup', dragSelect.pointerUpHandler);
 
             delete chartInstance.dragSelect;
         }

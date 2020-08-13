@@ -45,28 +45,40 @@ export default {
 
         const { canvas } = chartInstance.chart.ctx;
 
-        crossHair.mouseMoveHandler = event => {
+        crossHair.pointerMoveHandler = event => {
             chartInstance.crossHair.moveEvent = event;
             chartInstance.update({ lazy: true });
         };
-        canvas.addEventListener('mousemove', crossHair.mouseMoveHandler);
+        canvas.addEventListener('pointermove', crossHair.pointerMoveHandler);
+        canvas.addEventListener('pointerup', crossHair.pointerMoveHandler);
+        canvas.addEventListener('pointerleave', crossHair.pointerMoveHandler);
     },
 
     afterDraw(chartInstance) {
-        const { chartArea, chart } = chartInstance;
-        const { moveEvent } = chartInstance.crossHair;
-        if (!moveEvent) return;
-
+        const {
+            chartArea, chart, crossHair, scales,
+        } = chartInstance;
+        const { moveEvent } = crossHair;
         const { ctx } = chart;
+        const { canvas } = ctx;
+
+        if (!moveEvent) {
+            canvas.style.cursor = 'default';
+            return;
+        }
+
         const {
             left, right, top, bottom,
         } = chartArea;
         const { layerX, layerY } = moveEvent;
 
         if (!(top < layerY && bottom > layerY && left < layerX && right > layerX)) {
+            canvas.style.cursor = 'default';
             return;
         }
-        const { xScale, yScale } = chartInstance.scales;
+        canvas.style.cursor = 'pointer';
+
+        const { xScale, yScale } = scales;
         const uA = this.formatY(yScale.getValueForPixel(layerY));
         const { width: uAwidth } = ctx.measureText(uA);
         const [time, subsecond] = this.formatX(xScale.getValueForPixel(layerX), 0, []);
@@ -102,7 +114,9 @@ export default {
         const { crossHair } = chartInstance;
         if (crossHair) {
             const { canvas } = chartInstance.chart.ctx;
-            canvas.removeEventListener('mousemove', crossHair.mouseMoveHandler);
+            canvas.removeEventListener('pointermove', crossHair.pointerMoveHandler);
+            canvas.removeEventListener('pointerup', crossHair.pointerMoveHandler);
+            canvas.removeEventListener('pointerleave', crossHair.pointerMoveHandler);
             delete chartInstance.crossHair;
         }
     },
