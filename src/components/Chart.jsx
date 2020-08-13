@@ -119,6 +119,7 @@ const emptyArray = () => [...Array(4000)].map(() => ({ x: undefined, y: undefine
 const lineData = emptyArray();
 const bitsData = [...Array(allOfBits)].map(() => emptyArray());
 const bitIndexes = new Array(allOfBits);
+const lastBits = new Array(allOfBits);
 
 const Chart = () => {
     const dispatch = useDispatch();
@@ -155,7 +156,7 @@ const Chart = () => {
         numberOfBits = 0;
     }
 
-    const end = windowEnd || options.timestamp;
+    const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || (end - windowDuration);
 
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
@@ -172,13 +173,13 @@ const Chart = () => {
 
     let calcSum = 0;
     let calcLen = 0;
-    let calcMax = 0;
+    let calcMax;
 
     for (let n = calcIndexBegin; n <= calcIndexEnd; ++n) {
         const k = (n + data.length) % data.length;
         const v = data[k];
         if (!Number.isNaN(v)) {
-            if (v > calcMax) {
+            if (calcMax === undefined || v > calcMax) {
                 calcMax = v;
             }
             calcSum = calcSum + v;
@@ -227,6 +228,7 @@ const Chart = () => {
 
     let mappedIndex = 0;
     bitIndexes.fill(0);
+
     for (let i = 0; i < numberOfBits; ++i) {
         bitsData[i][0] = { x: undefined, y: undefined };
     }
@@ -280,6 +282,8 @@ const Chart = () => {
             }
         }
     } else {
+        lastBits.fill(undefined);
+        let last;
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
         for (let n = originalIndexBeginFloored; n <= originalIndexEndCeiled; ++mappedIndex, ++n) {
@@ -287,14 +291,20 @@ const Chart = () => {
             const v = data[k];
             const timestamp = begin + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
             lineData[mappedIndex].x = timestamp;
-            lineData[mappedIndex].y = Number.isNaN(v) ? undefined : v;
+            if (n < originalIndexEndCeiled) {
+                last = Number.isNaN(v) ? undefined : v;
+            }
+            lineData[mappedIndex].y = last;
 
             for (let i = 0; i < numberOfBits; ++i) {
                 const y = Number.isNaN(v) ? undefined : (((bits[k] >> i) & 1) - 0.5) * 0.8;
-                if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== y
-                    || n === originalIndexEndCeiled) {
-                    bitsData[i][bitIndexes[i]].x = timestamp;
+                bitsData[i][bitIndexes[i]].x = timestamp;
+                if (n === originalIndexEndCeiled) {
+                    bitsData[i][bitIndexes[i]].y = lastBits[i];
+                    ++bitIndexes[i];
+                } else if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== y) {
                     bitsData[i][bitIndexes[i]].y = y;
+                    lastBits[i] = y;
                     ++bitIndexes[i];
                 }
             }
@@ -490,7 +500,7 @@ const Chart = () => {
                 <div className="chart-stats">
                     {renderValue(`${cursorBegin !== null ? 'marker' : 'window'} \u0394`, marked)}
                     {renderValue('avg', unit(calcAvg, 'uA'))}
-                    {renderValue('max', unit(calcMax, 'uA'))}
+                    {renderValue('max', unit(calcMax || 0, 'uA'))}
                     {renderValue('charge', unit(calcAvg * ((calcDelta || 1) / 1e6), 'uC'))}
                 </div>
                 <ButtonGroup>
