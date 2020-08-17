@@ -50,7 +50,12 @@ const deviceListing = {
 };
 
 const deviceSetup = {
-    dfu: {},
+    dfu: {
+        ppk2: {
+            application: getAppFile('firmware/ppk2.hex'),
+            semver: 'power_profiler_kit_2 0.7.0+Aug-10-2020-11-24-36',
+        },
+    },
     jprog: {
         nrf52: {
             fw: getAppFile('firmware/ppk_nrfconnect.hex'),
