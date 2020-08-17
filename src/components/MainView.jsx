@@ -36,9 +36,11 @@
 
 import React from 'react';
 import Chart from './Chart';
+import ExportCSVDialog from './ExportCSVDialog';
 
 export default () => (
-    <div className="core-main-view">
+    <>
         <Chart />
-    </div>
+        <ExportCSVDialog />
+    </>
 );

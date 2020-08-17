@@ -113,13 +113,13 @@ export default () => {
                         onClick={() => dispatch(updateResistors())}
                         variant="light"
                     >
-                        <span className="mdi mdi-refresh" />Update
+                        Update
                     </Button>
                     <Button
                         onClick={() => dispatch(resetResistors())}
                         variant="light"
                     >
-                        <span className="mdi mdi-cancel" />Reset
+                        Reset
                     </Button>
                 </ButtonGroup>
             </div>

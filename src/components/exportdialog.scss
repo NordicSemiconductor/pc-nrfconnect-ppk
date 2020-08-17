@@ -1,0 +1,33 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.export-dialog {
+    color: $gray-600;
+
+    h2 {
+        margin-bottom: 1rem;
+        margin-top: 2rem;
+
+        text-transform: uppercase;
+        font-size: smaller;
+        font-weight: normal;
+        letter-spacing: 0.5ex;
+
+        color: $gray-400;
+    }
+
+    .row h2 {
+        margin-top: 0;
+    }
+
+    .col p {
+        margin-bottom: 0;
+    }
+
+    .filename {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        direction: rtl;
+        text-align: left;
+    }
+}

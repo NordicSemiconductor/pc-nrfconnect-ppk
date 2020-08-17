@@ -43,6 +43,7 @@ const initialState = {
     advancedMode: false,
     capabilities: {},
     samplingRunning: false,
+    isExportCSVDialogVisible: false,
 };
 
 const DEVICE_CLOSED = 'DEVICE_CLOSED';
@@ -53,6 +54,7 @@ const SAMPLING_STARTED = 'SAMPLING_STARTED';
 const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
 const SET_POWER_MODE = 'SET_POWER_MODE';
 const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
+const TOGGLE_EXPORT_DIALOG = 'TOGGLE_EXPORT_DIALOG';
 
 export const toggleAdvancedModeAction = () => ({
     type: TOGGLE_ADVANCED_MODE,
@@ -89,8 +91,12 @@ export const rttStartAction = () => ({
     type: RTT_CALLED_START,
 });
 
-export default (state = initialState, action) => {
-    switch (action.type) {
+export const toggleExportCSVDialogVisible = () => ({
+    type: TOGGLE_EXPORT_DIALOG,
+});
+
+export default (state = initialState, { type, ...action }) => {
+    switch (type) {
         case DEVICE_OPENED: {
             const { portName, capabilities } = action;
             return {
@@ -101,6 +107,17 @@ export default (state = initialState, action) => {
         }
         case DEVICE_CLOSED: {
             return initialState;
+        }
+        case 'DEVICES_DETECTED': {
+            // hack to filter out usb devices which are not PPK2
+            // TODO: maybe check if PPK2 in bootloader mode needs to be included
+            action.devices.splice(0, action.devices.length,
+                ...action.devices.filter(d => (
+                    d.jlink
+                    || (d.usb || {}).product === 'PPK2'
+                    || (d.serialport.vendorId === '1915' && d.serialport.productId === '521f')
+                )));
+            return state;
         }
         case DEVICE_UNDER_TEST_TOGGLE: {
             const { deviceRunning } = state;
@@ -127,6 +144,12 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 advancedMode: !state.advancedMode,
+            };
+        }
+        case TOGGLE_EXPORT_DIALOG: {
+            return {
+                ...state,
+                isExportCSVDialogVisible: !state.isExportCSVDialogVisible,
             };
         }
         case SAMPLING_STARTED: {

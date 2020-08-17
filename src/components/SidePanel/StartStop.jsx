@@ -69,12 +69,11 @@ export default () => {
                     samplingRunning ? samplingStop() : samplingStart(),
                 )}
             >
-                <span className={`mdi mdi-${samplingRunning ? 'stop' : 'play'}`} />
                 {samplingRunning ? 'Stop' : 'Start'}
             </Button>
             <Button
                 className="mb-3"
-                variant="info"
+                variant="secondary"
                 size="lg"
                 disabled={samplingRunning}
                 onClick={() => dispatch(save())}
@@ -90,8 +89,7 @@ export default () => {
                     disabled={!rttRunning}
                     onClick={() => dispatch(toggleDUT(deviceRunning))}
                 >
-                    <span className={`mdi mdi-${deviceRunning ? 'close-circle-outline' : 'record-circle-outline'}`} />
-                    {deviceRunning ? 'Power OFF' : 'Power ON'}
+                    {deviceRunning ? 'Turn DUT OFF' : 'Turn DUT ON'}
                 </Button>
             )}
             <PowerMode />

@@ -58,7 +58,7 @@ import {
     chartState,
 } from '../reducers/chartReducer';
 
-import { exportChart } from '../actions/fileActions';
+import { toggleExportCSVDialogVisible } from '../reducers/appReducer';
 
 import { options, timestampToIndex } from '../globals';
 import BufferView from './BufferView';
@@ -507,7 +507,7 @@ const Chart = () => {
                     <Button
                         variant="primary"
                         size="sm"
-                        onClick={() => dispatch(exportChart())}
+                        onClick={() => dispatch(toggleExportCSVDialogVisible())}
                         title={chartCursorActive ? 'Export marked' : 'Export window'}
                     >
                         <span className="mdi mdi-export" />

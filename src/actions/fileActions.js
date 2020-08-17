@@ -41,7 +41,7 @@ import { Writable } from 'stream';
 import { remote } from 'electron';
 import { join } from 'path';
 import { logger, getAppDataDir } from 'nrfconnect/core';
-import { options, timestampToIndex, indexToTimestamp } from '../globals';
+import { options } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 
 const { dialog } = remote;
@@ -132,46 +132,4 @@ export const load = () => async dispatch => {
 
     dispatch(setChartState(chartState));
     logger.info(`State restored from: ${filename}`);
-};
-
-export const exportChart = () => async (dispatch, getState) => {
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
-    const filename = await dialog.showSaveDialog({
-        defaultPath: join(getAppDataDir(), `ppk-${timestamp}.csv`),
-    });
-    if (!filename) {
-        return;
-    }
-    const fd = fs.openSync(filename, 'w');
-
-    const {
-        windowBegin,
-        windowEnd,
-        cursorBegin,
-        cursorEnd,
-        windowDuration,
-        index,
-    } = getState().app.chart;
-
-    const end = windowEnd || options.timestamp;
-    const begin = windowBegin || (end - windowDuration);
-
-    const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
-
-    const indexBegin = Math.ceil(timestampToIndex(from, index));
-    const indexEnd = Math.floor(timestampToIndex(to, index));
-
-    fs.writeSync(fd, `Timestamp(ms),Current(uA)${options.bits ? ',LAP0-LAP7' : ''}\n`);
-    for (let n = indexBegin; n <= indexEnd; n += 1) {
-        const k = (n + options.data.length) % options.data.length;
-        const v = options.data[k];
-        if (!Number.isNaN(v)) {
-            const bits = options.bits
-                ? `,${options.bits[k].toString(2).padStart(8, '0')}`
-                : '';
-            fs.writeSync(fd, `${indexToTimestamp(n, index) / 1000},${v.toFixed(3)}${bits}\n`);
-        }
-    }
-
-    fs.closeSync(fd);
 };
