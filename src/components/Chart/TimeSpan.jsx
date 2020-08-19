@@ -50,7 +50,7 @@ const TimeSpan = ({ duration, width }) => {
     return (
         <div className="timespan" style={{ width }}>
             <div className="value">
-                {valStr}
+                {'\u0394'}{valStr}
                 <span className="unit">{unitStr.replace('u', '\u00B5')}</span>
             </div>
         </div>
