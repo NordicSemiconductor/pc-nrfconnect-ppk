@@ -8,6 +8,7 @@
     flex-direction: column;
     justify-content: space-between;
     color: $gray-600;
+    overflow: hidden;
 
     height: 100%;
 
@@ -36,7 +37,7 @@
         flex-direction: row;
         align-items: center;
         span {
-            width: $yAxisWidth;
+            width: $yAxisWidthPx;
             text-align: center;
         }
     }
@@ -48,11 +49,12 @@
             margin-right: 0.5rem;
         }
         margin-right: -0.5rem;
+        padding: 0.5rem 0;
 
         // temporary
         .btn-group {
-            max-width: $yAxisWidth;
-            min-width: $yAxisWidth;
+            max-width: $yAxisWidthPx;
+            min-width: $yAxisWidthPx;
             margin-right: 0;
             height: 2rem;
         }

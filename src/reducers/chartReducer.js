@@ -51,6 +51,9 @@ const initialState = {
     bufferRemaining: initialBufferLength,
     index: 0,
     digitalChannels: [],
+    digitalChannelsVisible: true,
+    timestampsVisible: true,
+    triggerHandleVisible: true,
 };
 
 const ANIMATION = 'ANIMATION';
@@ -58,6 +61,9 @@ const CHART_CURSOR = 'CHART_CURSOR';
 const CHART_WINDOW = 'CHART_WINDOW';
 const LOAD_CHART_STATE = 'LOAD_CHART_STATE';
 const DIGITAL_CHANNELS = 'DIGITAL_CHANNELS';
+const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
+const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
+const TOGGLE_TRIGGER_HANDLE = 'TOGGLE_TRIGGER_HANDLE';
 
 const MIN_WINDOW_DURATION = 1000;
 const MAX_WINDOW_DURATION = 120000000;
@@ -108,6 +114,10 @@ export const setDigitalChannels = digitalChannels => ({
     digitalChannels,
 });
 
+export const toggleDigitalChannels = () => ({ type: TOGGLE_DIGITAL_CHANNELS });
+export const toggleTimestamps = () => ({ type: TOGGLE_TIMESTAMPS });
+export const toggleTriggerHandle = () => ({ type: TOGGLE_TRIGGER_HANDLE });
+
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
     const totalInUs = (data.length / samplesPerSecond) * 1e6;
@@ -157,6 +167,18 @@ export default (state = initialState, { type, ...action }) => {
         case DIGITAL_CHANNELS: return {
             ...state,
             ...action,
+        };
+        case TOGGLE_DIGITAL_CHANNELS: return {
+            ...state,
+            digitalChannelsVisible: !state.digitalChannelsVisible,
+        };
+        case TOGGLE_TIMESTAMPS: return {
+            ...state,
+            timestampsVisible: !state.timestampsVisible,
+        };
+        case TOGGLE_TRIGGER_HANDLE: return {
+            ...state,
+            triggerHandleVisible: !state.triggerHandleVisible,
         };
         default: return state;
     }

@@ -66,9 +66,10 @@ import BufferView from './BufferView';
 
 import './chart.scss';
 import colors from './colors.scss';
-import { yAxisWidth } from './bufferview.scss';
+import { yAxisWidthPx, rightMarginPx } from './bufferview.scss';
 
-const yAxisScaleWidth = parseInt(yAxisWidth, 10);
+const yAxisWidth = parseInt(yAxisWidthPx, 10);
+const rightMargin = parseInt(rightMarginPx, 10);
 
 const dataColor = colors.nordicBlue;
 const valueRange = { min: 0, max: 15000 };
@@ -137,6 +138,8 @@ const Chart = () => {
         yMax,
         index,
         digitalChannels,
+        digitalChannelsVisible,
+        timestampsVisible,
     } = useSelector(chartState);
 
     const chartRef = useRef(null);
@@ -154,7 +157,6 @@ const Chart = () => {
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
     const [len, setLen] = useState(0);
     const [bufferViewWidth, setBufferViewWidth] = useState(0);
-    const [rightMargin, setRightMargin] = useState(0);
 
     const calcIndexBegin = Math.ceil(timestampToIndex(from, index));
     const calcIndexEnd = Math.floor(timestampToIndex(to, index));
@@ -345,6 +347,7 @@ const Chart = () => {
                 type: 'linear',
                 min: begin,
                 max: end,
+                display: timestampsVisible,
                 ticks: {
                     minRotation: 0,
                     maxRotation: 0,
@@ -385,7 +388,7 @@ const Chart = () => {
                     drawOnChartArea: true,
                     borderDash: [3, 6],
                 },
-                afterFit: scale => { scale.width = yAxisScaleWidth; }, // eslint-disable-line
+                afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
             }],
         },
         redraw: true,
@@ -476,11 +479,12 @@ const Chart = () => {
                             {
                                 id: 'notifier',
                                 afterLayout(chart) {
+                                    const { chartArea, width } = chart;
+                                    chartArea.right = width - rightMargin;
                                     const { left, right } = chart.chartArea;
-                                    const width = Math.trunc(right - left);
-                                    setLen(Math.min(width, 2000));
-                                    setBufferViewWidth(width);
-                                    setRightMargin(chart.width - right);
+                                    const w = Math.trunc(right - left);
+                                    setLen(Math.min(w, 2000));
+                                    setBufferViewWidth(w);
                                 },
                             },
                         ]}
@@ -524,7 +528,7 @@ const Chart = () => {
                     <StatBox average={calcAvg} max={calcMax} delta={calcDelta} label="SELECTION" />
                 </div>
             </div>
-            {bitsChartData.map((_, i) => (
+            {digitalChannelsVisible && bitsChartData.map((_, i) => (
                 <div key={`${i + 1}`} className="chart-bits">
                     <span>{bitsChartData[i].datasets[0].label}</span>
                     <div

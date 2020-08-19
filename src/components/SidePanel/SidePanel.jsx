@@ -40,9 +40,10 @@ import PropTypes from 'prop-types';
 import Button from 'react-bootstrap/Button';
 
 import Buffer from './Buffer';
+import DigitalChannels from './DigitalChannels';
+import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
 import Trigger from './Trigger';
-import DigitalChannels from './DigitalChannels';
 import VoltageRegulator from './VoltageRegulator';
 import withHotkey from '../../utils/withHotKey';
 
@@ -76,6 +77,7 @@ const SidePanel = ({ bindHotkey }) => {
                     LOAD
                 </Button>
                 <DigitalChannels />
+                <DisplayOptions />
             </div>
         );
     }
@@ -86,6 +88,7 @@ const SidePanel = ({ bindHotkey }) => {
             <Buffer />
             <DigitalChannels />
             <VoltageRegulator />
+            <DisplayOptions />
             <Button
                 className="my-3 w-100"
                 variant="secondary"

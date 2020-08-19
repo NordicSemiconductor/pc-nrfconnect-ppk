@@ -1,13 +1,14 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-$yAxisWidth: 80px;  // must be in pixels, imported in JS
+$yAxisWidthPx: 80px;  // must be in pixels, imported in JS
+$rightMarginPx: 30px;
 
 .buffer-view {
     height: 2rem;
     position: relative;
     display: flex;
     align-items: center;
-    margin-left: $yAxisWidth;
+    margin-left: $yAxisWidthPx;
 
     div {
         background-color: $gray-600;
@@ -31,5 +32,6 @@ $yAxisWidth: 80px;  // must be in pixels, imported in JS
 }
 
 :export {
-    yAxisWidth: $yAxisWidth;
+    yAxisWidthPx: $yAxisWidthPx;
+    rightMarginPx: $rightMarginPx;
 }
