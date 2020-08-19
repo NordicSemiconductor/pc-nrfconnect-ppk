@@ -1,4 +1,7 @@
-@import "./bufferview.scss";
+@import "~pc-nrfconnect-shared/src/variables";
+
+$yAxisWidthPx: 80px;  // must be in pixels, imported in JS
+$rightMarginPx: 30px;
 
 .chart-outer {
     flex: 1;
@@ -44,7 +47,7 @@
     .chart-bottom {
         display: flex;
         // use when btn-group is gone
-        // margin-left: $yAxisWidth;
+        // margin-left: $yAxisWidthPx;
         > * {
             margin-right: 0.5rem;
         }
@@ -59,4 +62,9 @@
             height: 2rem;
         }
     }
+}
+
+:export {
+    yAxisWidthPx: $yAxisWidthPx;
+    rightMarginPx: $rightMarginPx;
 }

@@ -48,25 +48,25 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { unit } from 'mathjs';
 
 import annotationPlugin from 'chartjs-plugin-annotation';
-import dragSelectPlugin from '../utils/chart.dragSelect';
-import zoomPanPlugin from '../utils/chart.zoomPan';
-import crossHairPlugin from '../utils/chart.crossHair';
+import dragSelectPlugin from './plugins/chart.dragSelect';
+import zoomPanPlugin from './plugins/chart.zoomPan';
+import crossHairPlugin from './plugins/chart.crossHair';
 
+import BufferView from './BufferView';
 import StatBox from './StatBox';
+import TimeSpan from './TimeSpan';
 
-import { appState } from '../reducers/appReducer';
+import { appState } from '../../reducers/appReducer';
 import {
     chartWindowAction,
     chartCursorAction,
     chartState,
-} from '../reducers/chartReducer';
+} from '../../reducers/chartReducer';
 
-import { options, timestampToIndex, nbDigitalChannels } from '../globals';
-import BufferView from './BufferView';
+import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
-import './chart.scss';
-import colors from './colors.scss';
-import { yAxisWidthPx, rightMarginPx } from './bufferview.scss';
+import { yAxisWidthPx, rightMarginPx } from './chart.scss';
+import colors from '../colors.scss';
 
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
@@ -113,6 +113,33 @@ const bitsData = [...Array(nbDigitalChannels)].map(() => emptyArray());
 const bitIndexes = new Array(nbDigitalChannels);
 const lastBits = new Array(nbDigitalChannels);
 
+const bitsChartOptions = {
+    scales: {
+        xAxes: [{
+            display: false,
+            type: 'linear',
+            ticks: {},
+            tickMarkLength: 0,
+            drawTicks: false,
+            cursor: {},
+        }],
+        yAxes: [{
+            type: 'linear',
+            display: false,
+            ticks: {
+                min: -0.5,
+                max: 0.5,
+            },
+        }],
+    },
+    redraw: true,
+    maintainAspectRatio: false,
+    animation: { duration: 0 },
+    hover: { animationDuration: 0 },
+    responsiveAnimationDuration: 0,
+    legend: { display: false },
+};
+
 const Chart = () => {
     const dispatch = useDispatch();
     const chartWindow = useCallback((windowBegin, windowEnd, yMin, yMax) => dispatch(
@@ -156,7 +183,7 @@ const Chart = () => {
 
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
     const [len, setLen] = useState(0);
-    const [bufferViewWidth, setBufferViewWidth] = useState(0);
+    const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
     const calcIndexBegin = Math.ceil(timestampToIndex(from, index));
     const calcIndexEnd = Math.floor(timestampToIndex(to, index));
@@ -434,40 +461,17 @@ const Chart = () => {
         legend: { display: false },
     };
 
-    const bitsChartOptions = {
-        scales: {
-            xAxes: [{
-                display: false,
-                type: 'linear',
-                ticks: {
-                    min: begin,
-                    max: end,
-                },
-                tickMarkLength: 0,
-                drawTicks: false,
-                cursor: { cursorBegin, cursorEnd },
-            }],
-            yAxes: [{
-                type: 'linear',
-                display: false,
-                ticks: {
-                    min: -0.5,
-                    max: 0.5,
-                },
-            }],
-        },
-        redraw: true,
-        maintainAspectRatio: false,
-        animation: { duration: 0 },
-        hover: { animationDuration: 0 },
-        responsiveAnimationDuration: 0,
-        legend: { display: false },
-    };
+    const bitXaxis = bitsChartOptions.scales.xAxes[0];
+    bitXaxis.ticks.min = begin;
+    bitXaxis.ticks.max = end;
+    bitXaxis.cursor.cursorBegin = cursorBegin;
+    bitXaxis.cursor.cursorEnd = cursorEnd;
 
     return (
         <div className="chart-outer">
             <div className="chart-current">
-                <BufferView width={bufferViewWidth} />
+                <BufferView width={chartAreaWidth} />
+                <TimeSpan duration={windowDuration} width={chartAreaWidth} />
                 <div className="chart-container">
                     <Line
                         ref={chartRef}
@@ -484,7 +488,7 @@ const Chart = () => {
                                     const { left, right } = chart.chartArea;
                                     const w = Math.trunc(right - left);
                                     setLen(Math.min(w, 2000));
-                                    setBufferViewWidth(w);
+                                    setChartAreaWidth(w);
                                 },
                             },
                         ]}

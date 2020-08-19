@@ -37,9 +37,9 @@
 import React, { useState } from 'react';
 import { number } from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
-import { chartState, chartWindowAction } from '../reducers/chartReducer';
+import { chartState, chartWindowAction } from '../../reducers/chartReducer';
 
-import { options } from '../globals';
+import { options } from '../../globals';
 
 import './bufferview.scss';
 

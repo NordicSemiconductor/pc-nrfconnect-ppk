@@ -1,7 +1,5 @@
 @import "~pc-nrfconnect-shared/src/variables";
-
-$yAxisWidthPx: 80px;  // must be in pixels, imported in JS
-$rightMarginPx: 30px;
+@import "./chart.scss";
 
 .buffer-view {
     height: 2rem;
@@ -31,7 +29,3 @@ $rightMarginPx: 30px;
     }
 }
 
-:export {
-    yAxisWidthPx: $yAxisWidthPx;
-    rightMarginPx: $rightMarginPx;
-}

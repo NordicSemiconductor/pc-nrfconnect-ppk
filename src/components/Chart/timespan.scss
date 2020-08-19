@@ -1,0 +1,30 @@
+@import "~pc-nrfconnect-shared/src/variables";
+@import "./chart.scss";
+
+.timespan {
+    text-align: center;
+    font-size: 8pt;
+    margin-left: $yAxisWidthPx;
+    border-style: solid;
+    border-color: $gray-100;
+    border-width: 0 1px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    position: relative;
+
+    .value {
+        padding: 0 0.5rem;
+        background-color: $white;
+        z-index: 1;
+    }
+}
+
+.timespan::before {
+    content: '';
+    top: 43%;
+    border-top: 1px solid $gray-100;
+    display: block;
+    position: absolute;
+    width: 100%;
+}

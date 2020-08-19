@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,12 +35,31 @@
  */
 
 import React from 'react';
-import Chart from './Chart/Chart';
-import ExportCSVDialog from './ExportCSVDialog';
+import { number } from 'prop-types';
+import { unit } from 'mathjs';
 
-export default () => (
-    <>
-        <Chart />
-        <ExportCSVDialog />
-    </>
-);
+import './timespan.scss';
+
+const TimeSpan = ({ duration, width }) => {
+    let time = unit(duration, 'us');
+    if (duration > 60 * 1e6) {
+        time = time.to('min');
+    }
+    const v = time.format({ notation: 'fixed', precision: 2 });
+    const [valStr, unitStr] = v.split(' ');
+    return (
+        <div className="timespan" style={{ width }}>
+            <div className="value">
+                {valStr}
+                <span className="unit">{unitStr.replace('u', '\u00B5')}</span>
+            </div>
+        </div>
+    );
+};
+
+TimeSpan.propTypes = {
+    duration: number.isRequired,
+    width: number.isRequired,
+};
+
+export default TimeSpan;
