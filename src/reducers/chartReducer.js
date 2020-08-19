@@ -47,16 +47,17 @@ const initialState = {
     windowDuration: initialWindowDuration, // [microseconds]
     yMin: null,
     yMax: null,
-    samplingRunning: false,
     bufferLength: initialBufferLength,
     bufferRemaining: initialBufferLength,
     index: 0,
+    digitalChannels: [],
 };
 
 const ANIMATION = 'ANIMATION';
 const CHART_CURSOR = 'CHART_CURSOR';
 const CHART_WINDOW = 'CHART_WINDOW';
 const LOAD_CHART_STATE = 'LOAD_CHART_STATE';
+const DIGITAL_CHANNELS = 'DIGITAL_CHANNELS';
 
 const MIN_WINDOW_DURATION = 1000;
 const MAX_WINDOW_DURATION = 120000000;
@@ -99,7 +100,12 @@ export const chartWindowAction = (
 
 export const setChartState = state => ({
     type: LOAD_CHART_STATE,
-    state,
+    ...state,
+});
+
+export const setDigitalChannels = digitalChannels => ({
+    type: DIGITAL_CHANNELS,
+    digitalChannels,
 });
 
 function calcBuffer(windowDuration, windowEnd) {
@@ -115,8 +121,8 @@ function calcBuffer(windowDuration, windowEnd) {
     };
 }
 
-export default (state = initialState, action) => {
-    switch (action.type) {
+export default (state = initialState, { type, ...action }) => {
+    switch (type) {
         case CHART_CURSOR: {
             const { cursorBegin, cursorEnd } = action;
             return {
@@ -147,7 +153,11 @@ export default (state = initialState, action) => {
                 index: options.index,
             };
         }
-        case LOAD_CHART_STATE: return { ...state, ...action.state };
+        case LOAD_CHART_STATE:
+        case DIGITAL_CHANNELS: return {
+            ...state,
+            ...action,
+        };
         default: return state;
     }
 };

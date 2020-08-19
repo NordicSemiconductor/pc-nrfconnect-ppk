@@ -50,6 +50,8 @@ export const options = {
     triggerMarkers: null,
 };
 
+export const nbDigitalChannels = 8;
+
 export const timestampToIndex = (ts, index = options.index) => (
     index - (((options.timestamp - ts) * options.samplesPerSecond) / 1e6)
 );

@@ -52,33 +52,26 @@ import dragSelectPlugin from '../utils/chart.dragSelect';
 import zoomPanPlugin from '../utils/chart.zoomPan';
 import crossHairPlugin from '../utils/chart.crossHair';
 
+import StatBox from './StatBox';
+
+import { appState } from '../reducers/appReducer';
 import {
     chartWindowAction,
     chartCursorAction,
     chartState,
 } from '../reducers/chartReducer';
 
-import { toggleExportCSVDialogVisible } from '../reducers/appReducer';
-
-import { options, timestampToIndex } from '../globals';
+import { options, timestampToIndex, nbDigitalChannels } from '../globals';
 import BufferView from './BufferView';
 
+import './chart.scss';
 import colors from './colors.scss';
+import { yAxisWidth } from './bufferview.scss';
 
-const dataColor = colors.accent;
+const yAxisScaleWidth = parseInt(yAxisWidth, 10);
+
+const dataColor = colors.nordicBlue;
 const valueRange = { min: 0, max: 15000 };
-const bitColors = [
-    colors.red,
-    colors.indigo,
-    colors.amber,
-    colors.purple,
-    colors.green,
-    colors.deepPurple,
-    colors.orange,
-    colors.lime,
-    colors.pink,
-];
-const bitLabels = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'];
 
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
@@ -107,19 +100,17 @@ const timestampToLabel = (usecs, index, array) => {
 };
 
 const formatCurrent = uA => unit(uA, 'uA')
-    .format({ notation: 'fixed', precision: 3 })
+    .format({ notation: 'fixed', precision: 2 })
     .replace('u', '\u00B5');
 
 crossHairPlugin.formatY = formatCurrent;
 crossHairPlugin.formatX = timestampToLabel;
 
-const allOfBits = 8;
-
 const emptyArray = () => [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 const lineData = emptyArray();
-const bitsData = [...Array(allOfBits)].map(() => emptyArray());
-const bitIndexes = new Array(allOfBits);
-const lastBits = new Array(allOfBits);
+const bitsData = [...Array(nbDigitalChannels)].map(() => emptyArray());
+const bitIndexes = new Array(nbDigitalChannels);
+const lastBits = new Array(nbDigitalChannels);
 
 const Chart = () => {
     const dispatch = useDispatch();
@@ -134,24 +125,25 @@ const Chart = () => {
     const chartCursor = useCallback((cursorBegin, cursorEnd) => dispatch(
         chartCursorAction(cursorBegin, cursorEnd),
     ), [dispatch]);
+    const { samplingRunning } = useSelector(appState);
     const {
         windowBegin,
         windowEnd,
         windowDuration,
-        samplingRunning,
         canReset,
         cursorBegin,
         cursorEnd,
         yMin,
         yMax,
         index,
+        digitalChannels,
     } = useSelector(chartState);
 
     const chartRef = useRef(null);
 
     const { data, bits } = options;
 
-    let numberOfBits = (windowDuration <= 4500000) ? allOfBits : 0;
+    let numberOfBits = (windowDuration <= 4500000) ? nbDigitalChannels : 0;
     if (!bits) {
         numberOfBits = 0;
     }
@@ -161,12 +153,8 @@ const Chart = () => {
 
     const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
     const [len, setLen] = useState(0);
-
-    const onChartSizeUpdate = instance => {
-        const { left, right } = instance.chart.chartArea;
-        const width = Math.trunc(right - left);
-        setLen(Math.min(width, 2000));
-    };
+    const [bufferViewWidth, setBufferViewWidth] = useState(0);
+    const [rightMargin, setRightMargin] = useState(0);
 
     const calcIndexBegin = Math.ceil(timestampToIndex(from, index));
     const calcIndexEnd = Math.floor(timestampToIndex(to, index));
@@ -209,9 +197,7 @@ const Chart = () => {
         if (!chartRef.current.chartInstance) {
             return;
         }
-
         const { dragSelect, zoomPan } = chartRef.current.chartInstance;
-        onChartSizeUpdate(chartRef.current.chartInstance);
         dragSelect.callback = chartCursor;
         zoomPan.callback = zoomPanCallback;
     }, [chartCursor, zoomPanCallback]);
@@ -314,48 +300,28 @@ const Chart = () => {
     const live = (windowBegin === 0) && (windowEnd === 0);
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
-    const bitsDataSets = bitsData.slice(0, numberOfBits).map((b, i) => ({
-        borderColor: bitColors[i],
-        backgroundColor: `${bitColors[i]}0f`,
-        borderWidth: 0.5,
-        fill: 'origin',
-        data: b.slice(0, bitIndexes[i]),
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        pointHitRadius: 0,
-        pointBorderWidth: 0,
-        lineTension: 0,
-        label: bitLabels[i],
-        yAxisID: `bits-axis-${i}`,
-        steppedLine: 'before',
-    }));
-
-    const bitsAxis = bitsData.slice(0, numberOfBits).map((_, i) => ({
-        id: `bits-axis-${i}`,
-        type: 'linear',
-        position: 'right',
-        ticks: {
-            fontColor: bitColors[i],
-            autoSkip: false,
-            min: -i - 0.5,
-            max: 7.5 - i,
-            labelOffset: -10,
-            minRotation: 90,
-            maxRotation: 90,
-            callback: (n => ((n === 0) ? bitLabels[i] : '')),
-            mirror: true,
-            padding: 10,
-        },
-        gridLines: {
-            display: false,
-            drawTicks: false,
-        },
-    }));
+    const bitsChartData = bitsData
+        .map((b, i) => ({
+            datasets: [{
+                borderColor: dataColor,
+                borderWidth: 1.5,
+                fill: false,
+                data: b.slice(0, bitIndexes[i]),
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                pointHitRadius: 0,
+                pointBorderWidth: 0,
+                lineTension: 0,
+                label: `${i}`,
+                steppedLine: 'before',
+            }],
+        }))
+        .filter((_, i) => digitalChannels[i]);
 
     const chartData = {
         datasets: [{
             borderColor: dataColor,
-            borderWidth: 1,
+            borderWidth: 1.5,
             fill: false,
             data: lineData.slice(0, mappedIndex),
             pointRadius: step > 0.2 ? 0 : 1.5,
@@ -369,7 +335,7 @@ const Chart = () => {
             label: 'Current',
             yAxisID: 'yScale',
             labelCallback: ({ y }) => formatCurrent(y),
-        }, ...bitsDataSets],
+        }],
     };
 
     const chartOptions = {
@@ -419,18 +385,13 @@ const Chart = () => {
                     drawOnChartArea: true,
                     borderDash: [3, 6],
                 },
-                afterFit: scale => { scale.width = 80; }, // eslint-disable-line
-            }, ...bitsAxis],
+                afterFit: scale => { scale.width = yAxisScaleWidth; }, // eslint-disable-line
+            }],
         },
         redraw: true,
         maintainAspectRatio: false,
-        onResize: onChartSizeUpdate,
-        animation: {
-            duration: 0,
-        },
-        hover: {
-            animationDuration: 0,
-        },
+        animation: { duration: 0 },
+        hover: { animationDuration: 0 },
         responsiveAnimationDuration: 0,
         annotation: options.triggerMarkers ? {
             drawTime: 'beforeDatasetsDraw',
@@ -467,84 +428,116 @@ const Chart = () => {
                 },
             },
         },
-        legend: {
-            display: true,
+        legend: { display: false },
+    };
+
+    const bitsChartOptions = {
+        scales: {
+            xAxes: [{
+                display: false,
+                type: 'linear',
+                ticks: {
+                    min: begin,
+                    max: end,
+                },
+                tickMarkLength: 0,
+                drawTicks: false,
+                cursor: { cursorBegin, cursorEnd },
+            }],
+            yAxes: [{
+                type: 'linear',
+                display: false,
+                ticks: {
+                    min: -0.5,
+                    max: 0.5,
+                },
+            }],
         },
+        redraw: true,
+        maintainAspectRatio: false,
+        animation: { duration: 0 },
+        hover: { animationDuration: 0 },
+        responsiveAnimationDuration: 0,
+        legend: { display: false },
     };
-
-    const renderValue = (label, u) => {
-        const v = u.format({ notation: 'fixed', precision: 3 });
-        const [valStr, unitStr] = v.split(' ');
-        return <span>{label}: <b>{valStr}</b> {unitStr.replace('u', '\u00B5')}</span>;
-    };
-
-    let marked = unit(calcDelta, 'us');
-    if (calcDelta > 60 * 1e6) {
-        marked = marked.to('min');
-    }
 
     return (
         <div className="chart-outer">
-            <div className="chart-top">
-                <BufferView />
-            </div>
-            <div className="chart-container">
-                <Line
-                    ref={chartRef}
-                    data={chartData}
-                    options={chartOptions}
-                    plugins={[dragSelectPlugin, zoomPanPlugin, annotationPlugin, crossHairPlugin]}
-                />
-            </div>
-            <div className="chart-bottom">
-                <div className="chart-stats">
-                    {renderValue(`${cursorBegin !== null ? 'marker' : 'window'} \u0394`, marked)}
-                    {renderValue('avg', unit(calcAvg, 'uA'))}
-                    {renderValue('max', unit(calcMax || 0, 'uA'))}
-                    {renderValue('charge', unit(calcAvg * ((calcDelta || 1) / 1e6), 'uC'))}
+            <div className="chart-current">
+                <BufferView width={bufferViewWidth} />
+                <div className="chart-container">
+                    <Line
+                        ref={chartRef}
+                        data={chartData}
+                        options={chartOptions}
+                        plugins={[
+                            dragSelectPlugin, zoomPanPlugin,
+                            annotationPlugin, crossHairPlugin,
+                            {
+                                id: 'notifier',
+                                afterLayout(chart) {
+                                    const { left, right } = chart.chartArea;
+                                    const width = Math.trunc(right - left);
+                                    setLen(Math.min(width, 2000));
+                                    setBufferViewWidth(width);
+                                    setRightMargin(chart.width - right);
+                                },
+                            },
+                        ]}
+                    />
                 </div>
-                <ButtonGroup>
-                    <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => dispatch(toggleExportCSVDialogVisible())}
-                        title={chartCursorActive ? 'Export marked' : 'Export window'}
-                    >
-                        <span className="mdi mdi-export" />
-                    </Button>
-                    <Button
-                        variant="primary"
-                        disabled={!chartCursorActive}
-                        size="sm"
-                        onClick={resetCursor}
-                        title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
-                    >
-                        <span className="mdi mdi-eraser" />
-                    </Button>
-                    {samplingRunning !== null && (
+                <div className="chart-bottom" style={{ paddingRight: `${rightMargin}px` }}>
+                    <ButtonGroup>
                         <Button
                             variant="primary"
+                            disabled={!chartCursorActive}
                             size="sm"
-                            disabled={!samplingRunning && live}
-                            onClick={live ? chartPause : chartResetToLive}
-                            title={live ? 'Pause' : 'Live'}
+                            onClick={resetCursor}
+                            title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
                         >
-                            <span className={`mdi mdi-${live ? 'pause' : 'step-forward'}`} />
+                            <span className="mdi mdi-eraser" />
                         </Button>
-                    )}
-                    {samplingRunning === null && (
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            disabled={!canReset}
-                            onClick={chartResetToLive}
-                            title="Reset & Live"
-                        >
-                            <span className="mdi mdi-repeat" />
-                        </Button>
-                    )}
-                </ButtonGroup>
+                        {samplingRunning !== null && (
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                disabled={!samplingRunning && live}
+                                onClick={live ? chartPause : chartResetToLive}
+                                title={live ? 'Pause' : 'Live'}
+                            >
+                                <span className={`mdi mdi-${live ? 'pause' : 'step-forward'}`} />
+                            </Button>
+                        )}
+                        {samplingRunning === null && (
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                disabled={!canReset}
+                                onClick={chartResetToLive}
+                                title="Reset & Live"
+                            >
+                                <span className="mdi mdi-repeat" />
+                            </Button>
+                        )}
+                    </ButtonGroup>
+                    <StatBox average={calcAvg} max={calcMax} delta={calcDelta} label="WINDOW" />
+                    <StatBox average={calcAvg} max={calcMax} delta={calcDelta} label="SELECTION" />
+                </div>
             </div>
+            {bitsChartData.map((_, i) => (
+                <div key={`${i + 1}`} className="chart-bits">
+                    <span>{bitsChartData[i].datasets[0].label}</span>
+                    <div
+                        className="chart-container"
+                        style={{ paddingRight: `${rightMargin}px` }}
+                    >
+                        <Line
+                            data={bitsChartData[i]}
+                            options={bitsChartOptions}
+                        />
+                    </div>
+                </div>
+            ))}
         </div>
     );
 };

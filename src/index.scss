@@ -1,53 +1,7 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-.chart-outer {
-    flex: 1;
-    width: 100%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    height: 100%;
-    background: $white;
-    padding: 1rem;
-
-    .chart-top {
-        display: flex;
-        justify-content: flex-end;
-        margin: 0 0.5rem;
-        > * {
-            margin: 10px 0;
-            display: inherit;
-        }
-    }
-    .chart-container {
-        height: 100%;
-        contain: size;
-        position: relative;
-    }
-    .chart-bottom {
-        display: flex;
-        > * {
-            margin-right: 10px;
-        }
-        .chart-stats {
-            margin-left: 1rem;
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            background: $gray-50;
-            span {
-                margin: auto 10px;
-                white-space: pre;
-            }
-        }
-        .btn-group {
-            align-self: flex-end;
-            white-space: pre;
-            min-width: 70px;
-        }
-    }
+.core19-app-content .core19-main-and-log .core19-main-container {
+    margin: 0.5rem;
 }
 
 .hidden {
@@ -65,16 +19,6 @@
 
 .input-group-addon {
     min-width: 60px;
-}
-
-.btnFullViewToggle {
-    position: absolute;
-    top: 13px;
-    right: 12px;
-    font-size: 24px;
-}
-.btnFullViewToggle:focus {
-    outline: none;
 }
 
 .card-header {

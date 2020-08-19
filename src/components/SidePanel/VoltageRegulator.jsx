@@ -58,7 +58,7 @@ export default () => {
 
     return (
         <div className={(ppkSetPowerMode && !isSmuMode) ? 'disabled' : ''}>
-            <h2>Voltage Regulator</h2>
+            <h2>VOLTAGE REGULATOR</h2>
             <Form.Label htmlFor="slider-vdd">
                 VDD{' '}
                 <NumberInlineInput

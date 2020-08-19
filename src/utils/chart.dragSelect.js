@@ -125,12 +125,12 @@ export default {
     destroy(chartInstance) {
         const { dragSelect } = chartInstance;
         if (dragSelect) {
-            const { canvas } = chartInstance.chart.ctx;
-
-            canvas.removeEventListener('pointerdown', dragSelect.pointerDownHandler);
-            canvas.removeEventListener('pointermove', dragSelect.pointerMoveHandler);
-            canvas.removeEventListener('pointerup', dragSelect.pointerUpHandler);
-
+            const { canvas } = chartInstance.chart.ctx || {};
+            if (canvas) {
+                canvas.removeEventListener('pointerdown', dragSelect.pointerDownHandler);
+                canvas.removeEventListener('pointermove', dragSelect.pointerMoveHandler);
+                canvas.removeEventListener('pointerup', dragSelect.pointerUpHandler);
+            }
             delete chartInstance.dragSelect;
         }
     },

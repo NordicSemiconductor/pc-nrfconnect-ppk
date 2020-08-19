@@ -40,6 +40,7 @@ import path from 'path';
 
 import Device from './abstractDevice';
 import PPKCmd from '../constants';
+import { nbDigitalChannels } from '../globals';
 
 /* eslint-disable no-bitwise */
 
@@ -73,6 +74,8 @@ class SerialDevice extends Device {
 
     constructor(deviceInfo) {
         super();
+
+        this.capabilities.digitalChannels = nbDigitalChannels;
 
         this.comName = deviceInfo.serialport.comName;
         this.child = fork(path.resolve(getAppDir(), 'worker', 'serialDevice.js'));

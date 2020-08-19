@@ -1,0 +1,60 @@
+@import "./bufferview.scss";
+
+.chart-outer {
+    flex: 1;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: $gray-600;
+
+    height: 100%;
+
+    .chart-current {
+        display: flex;
+        flex-direction: column;
+        height: inherit;
+    }
+    .chart-current, .chart-bits {
+        background: $white;
+        margin: 0.2rem;
+    }
+
+    .chart-top {
+        position: relative;
+    }
+    .chart-container {
+        height: 100%;
+        contain: size;
+        position: relative;
+        flex: 1;
+    }
+    .chart-bits {
+        height: 4rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        span {
+            width: $yAxisWidth;
+            text-align: center;
+        }
+    }
+    .chart-bottom {
+        display: flex;
+        // use when btn-group is gone
+        // margin-left: $yAxisWidth;
+        > * {
+            margin-right: 0.5rem;
+        }
+        margin-right: -0.5rem;
+
+        // temporary
+        .btn-group {
+            max-width: $yAxisWidth;
+            min-width: $yAxisWidth;
+            margin-right: 0;
+            height: 2rem;
+        }
+    }
+}

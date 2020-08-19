@@ -72,7 +72,7 @@ export default () => {
 
     return (
         <>
-            <h2>Switch levels</h2>
+            <h2>SWITCH LEVELS</h2>
             {capabilities.ppkSwitchPointUp && (
                 <>
                     Switch up

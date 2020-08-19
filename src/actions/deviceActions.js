@@ -60,7 +60,9 @@ import {
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
-import { chartWindowAction, animationAction, chartCursorAction } from '../reducers/chartReducer';
+import {
+    chartWindowAction, animationAction, chartCursorAction, setDigitalChannels,
+} from '../reducers/chartReducer';
 import { options, bufferLengthInSeconds } from '../globals';
 
 let device = null;
@@ -232,6 +234,9 @@ export function open(deviceInfo) {
         }
 
         dispatch(deviceOpenedAction(deviceInfo.serialNumber, device.capabilities));
+        dispatch(setDigitalChannels(
+            [...Array(device.capabilities.digitalChannels)].map(() => true),
+        ));
         logger.info('PPK opened');
 
         device.on('error', (message, error) => {

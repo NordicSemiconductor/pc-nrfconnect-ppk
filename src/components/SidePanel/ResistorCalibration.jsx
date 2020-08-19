@@ -63,7 +63,7 @@ export default () => {
 
     return (
         <>
-            <h2>Resistor Calibration</h2>
+            <h2>RESISTOR CALIBRATION</h2>
             <InputGroup>
                 <InputGroup.Prepend>
                     <InputGroup.Text>High</InputGroup.Text>

@@ -34,69 +34,53 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
-import { number } from 'prop-types';
-import { useSelector, useDispatch } from 'react-redux';
-import { chartState, chartWindowAction } from '../reducers/chartReducer';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import ToggleButton from 'react-bootstrap/ToggleButton';
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 
-import { options } from '../globals';
+import { chartState, setDigitalChannels } from '../../reducers/chartReducer';
 
-import './bufferview.scss';
-
-const BufferView = ({ width }) => {
-    const {
-        windowBegin,
-        windowEnd,
-        windowDuration,
-        bufferLength,
-        bufferRemaining,
-    } = useSelector(chartState);
-
-    const totalInUs = bufferLength + windowDuration;
-
+export default () => {
     const dispatch = useDispatch();
-    const chartMove = diff => {
-        const { timestamp } = options;
-        let d = Math.min(diff, timestamp - windowEnd);
-        d = Math.max(d, timestamp - totalInUs - windowBegin);
-        dispatch(chartWindowAction(windowBegin + d, windowEnd + d, windowDuration, null, null));
+    const { digitalChannels } = useSelector(chartState);
+
+    if (!digitalChannels.length) {
+        return null;
+    }
+
+    const value = digitalChannels.reduce((a, v, i) => {
+        if (v) a.push(i);
+        return a;
+    }, []);
+
+    const toggle = i => {
+        const channels = [...digitalChannels];
+        channels[i] = !channels[i];
+        dispatch(setDigitalChannels(channels));
     };
 
-    const [x, setX] = useState(null);
-    const f = 100 / totalInUs;
-
     return (
-        <div className="buffer-view" style={{ width }}>
-            <div className="mid-line" />
-            <div
-                className="window"
-                style={{
-                    width: `${windowDuration * f}%`,
-                    left: `${bufferRemaining * f}%`,
-                }}
-                onPointerDown={e => {
-                    if (e.button === 0) {
-                        e.target.setPointerCapture(e.pointerId);
-                        setX(e.clientX);
-                    }
-                }}
-                onPointerMove={e => {
-                    if (x !== null) {
-                        chartMove((totalInUs * (e.clientX - x)) / e.target.parentNode.clientWidth);
-                        setX(e.clientX);
-                    }
-                }}
-                onPointerUp={e => {
-                    e.target.releasePointerCapture(e.pointerId);
-                    setX(null);
-                }}
-            />
-        </div>
+        <>
+            <h2>DIGITAL CHANNELS</h2>
+            <ToggleButtonGroup
+                className="digital-channels w-100"
+                type="checkbox"
+                value={value}
+            >
+                {digitalChannels.map((channel, i) => (
+                    <ToggleButton
+                        key={`d${i + 1}`}
+                        checked={channel}
+                        variant={channel ? 'light' : 'secondary'}
+                        className="text-smaller px-0 py-1"
+                        value={i}
+                        onChange={() => toggle(i)}
+                    >
+                        {i}
+                    </ToggleButton>
+                ))}
+            </ToggleButtonGroup>
+        </>
     );
 };
-
-BufferView.propTypes = {
-    width: number.isRequired,
-};
-
-export default BufferView;

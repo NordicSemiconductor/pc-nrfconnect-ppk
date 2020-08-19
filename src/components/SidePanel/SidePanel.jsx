@@ -39,13 +39,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import Button from 'react-bootstrap/Button';
 
+import Buffer from './Buffer';
 import StartStop from './StartStop';
 import Trigger from './Trigger';
+import DigitalChannels from './DigitalChannels';
 import VoltageRegulator from './VoltageRegulator';
 import withHotkey from '../../utils/withHotKey';
 
-import { toggleAdvancedModeAction, appState } from '../../reducers/appReducer';
-import { load } from '../../actions/fileActions';
+import {
+    appState,
+    toggleAdvancedModeAction,
+    toggleExportCSVDialogVisible,
+} from '../../reducers/appReducer';
+import { load, save } from '../../actions/fileActions';
+import { chartState } from '../../reducers/chartReducer';
 
 import './sidepanel.scss';
 
@@ -53,7 +60,9 @@ const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
     bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
-    const { capabilities } = useSelector(appState);
+    const { capabilities, samplingRunning } = useSelector(appState);
+    const { cursorBegin, cursorEnd } = useSelector(chartState);
+    const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
     if (Object.keys(capabilities).length === 0) {
         return (
@@ -62,11 +71,11 @@ const SidePanel = ({ bindHotkey }) => {
                 <Button
                     className="mb-3 w-100"
                     variant="info"
-                    size="lg"
                     onClick={() => dispatch(load())}
                 >
-                    Load
+                    LOAD
                 </Button>
+                <DigitalChannels />
             </div>
         );
     }
@@ -74,7 +83,25 @@ const SidePanel = ({ bindHotkey }) => {
         <div className="sidepanel">
             <StartStop />
             {capabilities.ppkTriggerSet && <Trigger />}
+            <Buffer />
+            <DigitalChannels />
             <VoltageRegulator />
+            <Button
+                className="my-3 w-100"
+                variant="secondary"
+                disabled={samplingRunning}
+                onClick={() => dispatch(save())}
+            >
+                SAVE
+            </Button>
+            <Button
+                className="mb-3 w-100"
+                variant="secondary"
+                disabled={samplingRunning}
+                onClick={() => dispatch(toggleExportCSVDialogVisible())}
+            >
+                EXPORT {chartCursorActive ? 'MARKED' : 'WINDOW'}
+            </Button>
         </div>
     );
 };

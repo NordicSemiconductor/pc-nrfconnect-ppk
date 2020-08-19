@@ -35,33 +35,53 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { string, instanceOf, number } from 'prop-types';
+import { unit, Unit } from 'mathjs';
 
-import { setPowerMode } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import './statbox.scss';
 
-export default () => {
-    const dispatch = useDispatch();
-    const { capabilities, isSmuMode } = useSelector(appState);
-    const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
-
-    if (!capabilities.ppkSetPowerMode) {
-        return null;
-    }
-
+const Value = ({ label, u }) => {
+    const v = u.format({ notation: 'fixed', precision: 2 });
+    const [valStr, unitStr] = v.split(' ');
     return (
-        <>
-            <h2 className="mt-0">MODE</h2>
-            <ButtonGroup className="mb-3">
-                <Button variant={isSmuMode ? 'secondary' : 'light'} onClick={togglePowerMode}>
-                    Sourcemeter
-                </Button>
-                <Button variant={isSmuMode ? 'light' : 'secondary'} onClick={togglePowerMode}>
-                    Amperemeter
-                </Button>
-            </ButtonGroup>
-        </>
+        <div className="value-box">
+            <div className="value">
+                {valStr}
+                <span className="unit">{unitStr.replace('u', '\u00B5')}</span>
+            </div>
+            {label}
+        </div>
     );
 };
+Value.propTypes = {
+    label: string.isRequired,
+    u: instanceOf(Unit).isRequired,
+};
+
+const StatBox = ({
+    average, max = 0, delta, label,
+}) => {
+    let time = unit(delta, 'us');
+    if (delta > 60 * 1e6) {
+        time = time.to('min');
+    }
+    return (
+        <div className="statbox d-flex flex-column">
+            <div className="d-flex flex-row">
+                <Value label="average" u={unit(average, 'uA')} />
+                <Value label="max" u={unit(max || 0, 'uA')} />
+                <Value label="time" u={time} />
+                <Value label="charge" u={unit(average * ((delta || 1) / 1e6), 'uC')} />
+            </div>
+            {label}
+        </div>
+    );
+};
+StatBox.propTypes = {
+    average: number.isRequired,
+    max: number,
+    delta: number.isRequired,
+    label: string.isRequired,
+};
+
+export default StatBox;

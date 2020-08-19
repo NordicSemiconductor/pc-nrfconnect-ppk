@@ -34,69 +34,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
-import { number } from 'prop-types';
-import { useSelector, useDispatch } from 'react-redux';
-import { chartState, chartWindowAction } from '../reducers/chartReducer';
+import React from 'react';
+import { useSelector } from 'react-redux';
+import { chartState } from '../../reducers/chartReducer';
 
-import { options } from '../globals';
-
-import './bufferview.scss';
-
-const BufferView = ({ width }) => {
+export default () => {
     const {
-        windowBegin,
-        windowEnd,
         windowDuration,
         bufferLength,
         bufferRemaining,
     } = useSelector(chartState);
 
     const totalInUs = bufferLength + windowDuration;
-
-    const dispatch = useDispatch();
-    const chartMove = diff => {
-        const { timestamp } = options;
-        let d = Math.min(diff, timestamp - windowEnd);
-        d = Math.max(d, timestamp - totalInUs - windowBegin);
-        dispatch(chartWindowAction(windowBegin + d, windowEnd + d, windowDuration, null, null));
-    };
-
-    const [x, setX] = useState(null);
-    const f = 100 / totalInUs;
+    const percentage = (100 * bufferRemaining) / totalInUs;
 
     return (
-        <div className="buffer-view" style={{ width }}>
-            <div className="mid-line" />
-            <div
-                className="window"
-                style={{
-                    width: `${windowDuration * f}%`,
-                    left: `${bufferRemaining * f}%`,
-                }}
-                onPointerDown={e => {
-                    if (e.button === 0) {
-                        e.target.setPointerCapture(e.pointerId);
-                        setX(e.clientX);
-                    }
-                }}
-                onPointerMove={e => {
-                    if (x !== null) {
-                        chartMove((totalInUs * (e.clientX - x)) / e.target.parentNode.clientWidth);
-                        setX(e.clientX);
-                    }
-                }}
-                onPointerUp={e => {
-                    e.target.releasePointerCapture(e.pointerId);
-                    setX(null);
-                }}
-            />
-        </div>
+        <>
+            <h2>CAPTURE STATUS</h2>
+            <div className="buffer-total">
+                <div className="buffer-used p-3" style={{ width: `${percentage}%` }} />
+            </div>
+            <h2 className="mt-2">
+                BUFFER {bufferRemaining > 0 ? `${percentage.toFixed()}%` : 'FULL'}
+            </h2>
+        </>
     );
 };
-
-BufferView.propTypes = {
-    width: number.isRequired,
-};
-
-export default BufferView;

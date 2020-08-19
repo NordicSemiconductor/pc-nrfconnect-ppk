@@ -79,7 +79,7 @@ export default () => {
 
     return (
         <>
-            <h2>Trigger</h2>
+            <h2>TRIGGER</h2>
             <Form.Label htmlFor="slider-trigger-window">
                 Window{' '}
                 <NumberInlineInput

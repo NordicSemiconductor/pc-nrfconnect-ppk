@@ -1,34 +1,35 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
+$yAxisWidth: 80px;  // must be in pixels, imported in JS
+
 .buffer-view {
+    height: 2rem;
     position: relative;
-    height: 1rem;
-    width: 100%;
-    background-color: $red;
+    display: flex;
+    align-items: center;
+    margin-left: $yAxisWidth;
 
     div {
+        background-color: $gray-600;
         display: block;
-        height: 1rem;
         position: absolute;
+        border-radius: 2px;
     }
 
-    .buffer-remaining {
-        background-color: $green;
+    .mid-line {
+        height: 2px;
+        width: 100%;
     }
+
     .window {
-        height: 2rem;
-        top: -0.5rem;
-        border: 1px dashed $gray-300;
-        background-color: #ffffffcc;
+        top: 0.5rem;
+        bottom: 0.5rem;
+        background-color: $gray-600;
+        border: 2px solid $gray-600;
         cursor: grab;
     }
+}
 
-    span {
-        position: absolute;
-        left: 4px;
-        font-size: 12px;
-        color: $white;
-        text-shadow: 0px 0px 2px $black;
-        pointer-events: none;
-    }
+:export {
+    yAxisWidth: $yAxisWidth;
 }

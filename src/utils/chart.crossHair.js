@@ -113,10 +113,12 @@ export default {
     destroy(chartInstance) {
         const { crossHair } = chartInstance;
         if (crossHair) {
-            const { canvas } = chartInstance.chart.ctx;
-            canvas.removeEventListener('pointermove', crossHair.pointerMoveHandler);
-            canvas.removeEventListener('pointerup', crossHair.pointerMoveHandler);
-            canvas.removeEventListener('pointerleave', crossHair.pointerMoveHandler);
+            const { canvas } = chartInstance.chart.ctx || {};
+            if (canvas) {
+                canvas.removeEventListener('pointermove', crossHair.pointerMoveHandler);
+                canvas.removeEventListener('pointerup', crossHair.pointerMoveHandler);
+                canvas.removeEventListener('pointerleave', crossHair.pointerMoveHandler);
+            }
             delete chartInstance.crossHair;
         }
     },

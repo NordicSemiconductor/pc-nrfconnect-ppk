@@ -71,8 +71,13 @@ export default {
             const p = xScale.getValueForPixel(event.clientX - offsetX);
 
             let z = 0;
-            if (event.deltaY < 0) z = wheelZoomFactor;
-            if (event.deltaY > 0) z = 1 / wheelZoomFactor;
+            if (event.deltaY < 0) {
+                z = wheelZoomFactor;
+            } else if (event.deltaY > 0) {
+                z = 1 / wheelZoomFactor;
+            } else {
+                return;
+            }
 
             const { min, max } = xScale;
             zoomPan.zoomAtOriginBy(p, z, min, max);
@@ -161,13 +166,13 @@ export default {
     destroy(chartInstance) {
         const { zoomPan } = chartInstance;
         if (zoomPan) {
-            const { canvas } = chartInstance.chart.ctx;
-
-            canvas.removeEventListener('pointerdown', zoomPan.mouseDownHandler);
-            canvas.removeEventListener('pointermove', zoomPan.mouseMoveHandler);
-            canvas.removeEventListener('pointerup', zoomPan.mouseUpHandler);
-            canvas.removeEventListener('wheel', zoomPan.wheelHandler);
-
+            const { canvas } = chartInstance.chart.ctx || {};
+            if (canvas) {
+                canvas.removeEventListener('pointerdown', zoomPan.mouseDownHandler);
+                canvas.removeEventListener('pointermove', zoomPan.mouseMoveHandler);
+                canvas.removeEventListener('pointerup', zoomPan.mouseUpHandler);
+                canvas.removeEventListener('wheel', zoomPan.wheelHandler);
+            }
             delete chartInstance.zoomPan;
         }
     },

@@ -37,6 +37,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 
 import PowerMode from './PowerMode';
 
@@ -45,7 +46,6 @@ import {
     samplingStop,
     toggleDUT,
 } from '../../actions/deviceActions';
-import { save } from '../../actions/fileActions';
 import { appState } from '../../reducers/appReducer';
 
 export default () => {
@@ -60,39 +60,27 @@ export default () => {
 
     return (
         <div className="d-flex flex-column">
+            <PowerMode />
+            {capabilities.ppkToggleDUT && (
+                <Form.Group controlId="check-dut">
+                    <Form.Check
+                        type="switch"
+                        onChange={() => dispatch(toggleDUT(deviceRunning))}
+                        checked={deviceRunning}
+                        label="SUPPLY POWER TO TEST DEVICE"
+                    />
+                </Form.Group>
+            )}
             <Button
-                className="mb-3"
-                variant="primary"
-                size="lg"
+                className="mt-3"
+                variant="secondary"
                 disabled={!rttRunning}
                 onClick={() => dispatch(
                     samplingRunning ? samplingStop() : samplingStart(),
                 )}
             >
-                {samplingRunning ? 'Stop' : 'Start'}
+                {samplingRunning ? 'STOP SAMPLING' : 'START SAMPLING'}
             </Button>
-            <Button
-                className="mb-3"
-                variant="secondary"
-                size="lg"
-                disabled={samplingRunning}
-                onClick={() => dispatch(save())}
-            >
-                Save
-            </Button>
-            {capabilities.ppkToggleDUT && (
-                <Button
-                    style={{ backgroundColor: 0xFF11AA }}
-                    className="mb-3"
-                    variant="light"
-                    size="lg"
-                    disabled={!rttRunning}
-                    onClick={() => dispatch(toggleDUT(deviceRunning))}
-                >
-                    {deviceRunning ? 'Turn DUT OFF' : 'Turn DUT ON'}
-                </Button>
-            )}
-            <PowerMode />
         </div>
     );
 };
