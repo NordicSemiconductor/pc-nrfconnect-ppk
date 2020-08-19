@@ -108,17 +108,6 @@ export default (state = initialState, { type, ...action }) => {
         case DEVICE_CLOSED: {
             return initialState;
         }
-        case 'DEVICES_DETECTED': {
-            // hack to filter out usb devices which are not PPK2
-            // TODO: maybe check if PPK2 in bootloader mode needs to be included
-            action.devices.splice(0, action.devices.length,
-                ...action.devices.filter(d => (
-                    d.jlink
-                    || (d.usb || {}).product === 'PPK2'
-                    || (d.serialport.vendorId === '1915' && d.serialport.productId === '521f')
-                )));
-            return state;
-        }
         case DEVICE_UNDER_TEST_TOGGLE: {
             const { deviceRunning } = state;
             return {
