@@ -65,29 +65,33 @@ const SidePanel = ({ bindHotkey }) => {
     const { cursorBegin, cursorEnd } = useSelector(chartState);
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
-    if (Object.keys(capabilities).length === 0) {
-        return (
-            <div className="sidepanel">
-                <p>Please open your device first, or</p>
-                <Button
-                    className="mb-3 w-100"
-                    variant="info"
-                    onClick={() => dispatch(load())}
-                >
-                    LOAD
-                </Button>
-                <DigitalChannels />
-                <DisplayOptions />
-            </div>
-        );
-    }
+    const deviceOpen = (Object.keys(capabilities).length > 0);
+
     return (
-        <div className="sidepanel">
-            <StartStop />
-            {capabilities.ppkTriggerSet && <Trigger />}
-            <Buffer />
-            <DigitalChannels />
-            <VoltageRegulator />
+        <div className="sidepanel d-flex flex-column h-100">
+            {deviceOpen && (
+                <>
+                    <StartStop />
+                    {capabilities.ppkTriggerSet && <Trigger />}
+                    <Buffer />
+                    <DigitalChannels />
+                    <VoltageRegulator />
+                </>
+            )}
+            {deviceOpen || (
+                <>
+                    <p>Please open your device first, or</p>
+                    <Button
+                        className="mb-3 w-100"
+                        variant="info"
+                        onClick={() => dispatch(load())}
+                    >
+                        LOAD
+                    </Button>
+                    <DigitalChannels />
+                </>
+            )}
+            <div className="flex-fill" />
             <DisplayOptions />
             <Button
                 className="my-3 w-100"
