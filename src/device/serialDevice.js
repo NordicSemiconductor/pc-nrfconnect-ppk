@@ -77,7 +77,7 @@ class SerialDevice extends Device {
 
         this.capabilities.digitalChannels = nbDigitalChannels;
 
-        this.comName = deviceInfo.serialport.comName;
+        this.path = deviceInfo.serialport.path;
         this.child = fork(path.resolve(getAppDir(), 'worker', 'serialDevice.js'));
         this.parser = null;
 
@@ -130,7 +130,7 @@ class SerialDevice extends Device {
     }
 
     start() {
-        this.child.send({ open: this.comName });
+        this.child.send({ open: this.path });
         return this.getMetadata();
     }
 

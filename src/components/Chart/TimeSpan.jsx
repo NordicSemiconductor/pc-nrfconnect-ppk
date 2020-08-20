@@ -34,19 +34,31 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { number } from 'prop-types';
-import { useSelector } from 'react-redux';
+import React, { useState, useCallback } from 'react';
+import { number, string } from 'prop-types';
+import { useSelector, useDispatch } from 'react-redux';
 import { unit } from 'mathjs';
-import { chartState } from '../../reducers/chartReducer';
+import { chartState, chartCursorAction } from '../../reducers/chartReducer';
+
+import { options } from '../../globals';
 
 import './timespan.scss';
 
-const TimeSpan = ({ cursorBegin = null, cursorEnd = null, width }) => {
+const TimeSpan = ({
+    cursorBegin = null,
+    cursorEnd = null,
+    width,
+    className = '',
+}) => {
+    const dispatch = useDispatch();
+    const chartCursor = useCallback((...args) => dispatch(chartCursorAction(...args)), [dispatch]);
+
+    const [drag, setDrag] = useState(null);
     const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
-    const [w0, w1] = (windowBegin === 0 && windowEnd === 0)
-        ? [-windowDuration, 0]
-        : [windowBegin, windowEnd];
+
+    const w1 = windowEnd || options.timestamp - options.samplingTime;
+    const w0 = windowBegin || (w1 - windowDuration);
+
     const duration = (cursorBegin === null) ? windowDuration : (cursorEnd - cursorBegin);
 
     let time = unit(duration, 'us');
@@ -61,12 +73,32 @@ const TimeSpan = ({ cursorBegin = null, cursorEnd = null, width }) => {
     const [begin, end] = cursorBegin === null
         ? [w0, w1]
         : [cursorBegin, cursorEnd];
+
+    const onPointerDown = ({ clientX, pointerId, target }) => {
+        target.setPointerCapture(pointerId);
+        setDrag({ clientX, cursorBegin, cursorEnd });
+    };
+    const onPointerUp = ({ target, pointerId }) => {
+        target.releasePointerCapture(pointerId);
+        setDrag(null);
+    };
+
     return (
-        <div className="timespan" style={{ width }}>
+        <div className={`timespan ${className}`} style={{ width }}>
             {showHandles && (
                 <div
                     className="cursor begin"
                     style={{ left: `${(100 * (cursorBegin - w0)) / windowDuration}%` }}
+                    onPointerDown={onPointerDown}
+                    onPointerMove={({ clientX, target }) => {
+                        if (drag) {
+                            chartCursor(drag.cursorBegin
+                                + (windowDuration
+                                    * ((clientX - drag.clientX)
+                                    / target.parentElement.offsetWidth)), cursorEnd);
+                        }
+                    }}
+                    onPointerUp={onPointerUp}
                 />
             )}
             <div
@@ -84,6 +116,16 @@ const TimeSpan = ({ cursorBegin = null, cursorEnd = null, width }) => {
                 <div
                     className="cursor end"
                     style={{ left: `${(100 * (cursorEnd - w0)) / windowDuration}%` }}
+                    onPointerDown={onPointerDown}
+                    onPointerMove={({ clientX, target }) => {
+                        if (drag) {
+                            chartCursor(cursorBegin, drag.cursorEnd
+                                + (windowDuration
+                                    * ((clientX - drag.clientX)
+                                        / target.parentElement.offsetWidth)));
+                        }
+                    }}
+                    onPointerUp={onPointerUp}
                 />
             )}
         </div>
@@ -94,6 +136,7 @@ TimeSpan.propTypes = {
     cursorBegin: number,
     cursorEnd: number,
     width: number.isRequired,
+    className: string,
 };
 
 export default TimeSpan;

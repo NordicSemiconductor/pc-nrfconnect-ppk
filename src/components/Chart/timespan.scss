@@ -3,11 +3,12 @@
 
 .timespan {
     margin-left: $yAxisWidthPx;
-    height: 1rem;
+    height: 1.5rem;
     position: relative;
     overflow: hidden;
 
     .span {
+        line-height: 1.5rem;
         text-align: center;
         font-size: 8pt;
         position: absolute;
@@ -25,7 +26,7 @@
     }
     .span::after {
         content: '';
-        top: 43%;
+        top: 50%;
         border-top: 1px solid $gray-100;
         display: block;
         position: absolute;
@@ -39,9 +40,16 @@
         background-color: $gray-600;
         border: 2px solid $gray-600;
         border-radius: 2px;
-        margin-left: -2px;
+        margin-left: -4px;
         cursor: grab;
         z-index: 2;
         position: absolute;
+    }
+}
+
+.timespan.window {
+    height: 1rem;
+    .span {
+        line-height: 1rem;
     }
 }

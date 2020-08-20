@@ -381,27 +381,20 @@ const Chart = () => {
             xAxes: [{
                 id: 'xScale',
                 type: 'linear',
-                min: begin,
-                max: end,
-                display: timestampsVisible,
+                display: true,
                 ticks: {
+                    display: timestampsVisible,
                     minRotation: 0,
                     maxRotation: 0,
                     autoSkipPadding: 25,
                     min: begin,
                     max: end,
-                    callback: timestampsVisible ? timestampToLabel : () => '',
+                    callback: timestampToLabel,
                     maxTicksLimit: 7,
                 },
-                gridLines: {
-                    display: true,
-                    drawBorder: true,
-                    drawOnChartArea: false,
-                },
-                cursor: {
-                    cursorBegin,
-                    cursorEnd,
-                },
+                gridLines: { display: true, drawBorder: true, drawOnChartArea: true },
+                cursor: { cursorBegin, cursorEnd },
+                afterFit: scale => { scale.paddingRight = rightMargin; }, // eslint-disable-line
             }],
             yAxes: [{
                 id: 'yScale',
@@ -418,16 +411,8 @@ const Chart = () => {
                     padding: 0,
                     callback: formatCurrent,
                 },
-                gridLines: {
-                    display: true,
-                    drawBorder: true,
-                    drawOnChartArea: true,
-                    borderDash: [3, 6],
-                },
-                afterFit: scale => {
-                    console.log(scale.width, yAxisWidth);
-                    scale.width = yAxisWidth; // eslint-disable-line
-                },
+                gridLines: { display: true, drawBorder: true, drawOnChartArea: true },
+                afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
             }],
         },
         redraw: true,
@@ -483,7 +468,7 @@ const Chart = () => {
         <div className="chart-outer">
             <div className="chart-current">
                 <BufferView width={chartAreaWidth} />
-                <TimeSpan width={chartAreaWidth} />
+                <TimeSpan width={chartAreaWidth} className="window" />
                 <div className="chart-container">
                     <Line
                         ref={chartRef}
