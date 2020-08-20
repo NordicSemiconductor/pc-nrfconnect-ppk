@@ -140,6 +140,35 @@ const bitsChartOptions = {
     legend: { display: false },
 };
 
+const calcStats = (data, begin, end, index) => {
+    if (begin === null || end === null) {
+        return null;
+    }
+    const indexBegin = Math.ceil(timestampToIndex(begin, index));
+    const indexEnd = Math.floor(timestampToIndex(end, index));
+
+    let sum = 0;
+    let len = 0;
+    let max;
+
+    for (let n = indexBegin; n <= indexEnd; ++n) {
+        const k = (n + data.length) % data.length;
+        const v = data[k];
+        if (!Number.isNaN(v)) {
+            if (max === undefined || v > max) {
+                max = v;
+            }
+            sum = sum + v;
+            ++len;
+        }
+    }
+    return {
+        average: sum / (len || 1),
+        max,
+        delta: end - begin,
+    };
+};
+
 const Chart = () => {
     const dispatch = useDispatch();
     const chartWindow = useCallback((windowBegin, windowEnd, yMin, yMax) => dispatch(
@@ -163,11 +192,11 @@ const Chart = () => {
         cursorEnd,
         yMin,
         yMax,
-        index,
         digitalChannels,
         digitalChannelsVisible,
         timestampsVisible,
     } = useSelector(chartState);
+    const { index } = options;
 
     const chartRef = useRef(null);
 
@@ -181,31 +210,11 @@ const Chart = () => {
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || (end - windowDuration);
 
-    const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
     const [len, setLen] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
-    const calcIndexBegin = Math.ceil(timestampToIndex(from, index));
-    const calcIndexEnd = Math.floor(timestampToIndex(to, index));
-
-    let calcSum = 0;
-    let calcLen = 0;
-    let calcMax;
-
-    for (let n = calcIndexBegin; n <= calcIndexEnd; ++n) {
-        const k = (n + data.length) % data.length;
-        const v = data[k];
-        if (!Number.isNaN(v)) {
-            if (calcMax === undefined || v > calcMax) {
-                calcMax = v;
-            }
-            calcSum = calcSum + v;
-            ++calcLen;
-        }
-    }
-
-    const calcDelta = to - from;
-    const calcAvg = calcSum / (calcLen || 1);
+    const windowStats = calcStats(data, begin, end, index);
+    const selectionStats = calcStats(data, cursorBegin, cursorEnd, index);
 
     const zoomPanCallback = useCallback((beginX, endX, beginY, endY) => {
         if (typeof beginX === 'undefined') {
@@ -381,7 +390,7 @@ const Chart = () => {
                     autoSkipPadding: 25,
                     min: begin,
                     max: end,
-                    callback: timestampToLabel,
+                    callback: timestampsVisible ? timestampToLabel : () => '',
                     maxTicksLimit: 7,
                 },
                 gridLines: {
@@ -415,7 +424,10 @@ const Chart = () => {
                     drawOnChartArea: true,
                     borderDash: [3, 6],
                 },
-                afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
+                afterFit: scale => {
+                    console.log(scale.width, yAxisWidth);
+                    scale.width = yAxisWidth; // eslint-disable-line
+                },
             }],
         },
         redraw: true,
@@ -471,7 +483,7 @@ const Chart = () => {
         <div className="chart-outer">
             <div className="chart-current">
                 <BufferView width={chartAreaWidth} />
-                <TimeSpan duration={windowDuration} width={chartAreaWidth} />
+                <TimeSpan width={chartAreaWidth} />
                 <div className="chart-container">
                     <Line
                         ref={chartRef}
@@ -494,6 +506,11 @@ const Chart = () => {
                         ]}
                     />
                 </div>
+                <TimeSpan
+                    cursorBegin={cursorBegin}
+                    cursorEnd={cursorEnd}
+                    width={chartAreaWidth}
+                />
                 <div className="chart-bottom" style={{ paddingRight: `${rightMargin}px` }}>
                     <ButtonGroup>
                         <Button
@@ -528,8 +545,8 @@ const Chart = () => {
                             </Button>
                         )}
                     </ButtonGroup>
-                    <StatBox average={calcAvg} max={calcMax} delta={calcDelta} label="WINDOW" />
-                    <StatBox average={calcAvg} max={calcMax} delta={calcDelta} label="SELECTION" />
+                    <StatBox {...windowStats} label="WINDOW" />
+                    <StatBox {...selectionStats} label="SELECTION" />
                 </div>
             </div>
             {digitalChannelsVisible && bitsChartData.map((_, i) => (

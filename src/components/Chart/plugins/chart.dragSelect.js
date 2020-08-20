@@ -36,8 +36,10 @@
 
 /* eslint no-param-reassign: off */
 
-const CHART_SELECTION_COLOR = 'hsla(60, 50%, 70%, 1.0)';
-const CHART_DRAG_COLOR = 'hsla(210, 50%, 70%, 0.8)';
+import colors from '../../colors.scss';
+
+const CHART_SELECTION_COLOR = colors.gray50;
+const CHART_DRAG_COLOR = colors.gray100;
 
 export default {
     id: 'dragSelect',

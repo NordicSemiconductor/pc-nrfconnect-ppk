@@ -248,10 +248,11 @@ export function open(deviceInfo) {
         });
 
         clearInterval(updateRequestInterval);
+        let renderIndex;
         updateRequestInterval = setInterval(() => {
-            if (options.renderIndex !== options.index) {
+            if (renderIndex !== options.index) {
                 requestAnimationFrame(() => dispatch(animationAction()));
-                options.renderIndex = options.index;
+                renderIndex = options.index;
             }
         }, 30);
     };

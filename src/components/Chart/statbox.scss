@@ -4,6 +4,7 @@
     flex: 1;
     text-align: center;
     font-size: 8pt;
+    align-self: stretch;
 
     .value-box {
         border: 1px solid $gray-100;
@@ -11,8 +12,8 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        align-items: center;
         padding: 0.25rem;
+        justify-content: center;
 
         .value {
             font-size: 12pt;

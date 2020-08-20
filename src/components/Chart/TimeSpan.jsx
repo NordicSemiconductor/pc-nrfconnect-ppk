@@ -36,29 +36,63 @@
 
 import React from 'react';
 import { number } from 'prop-types';
+import { useSelector } from 'react-redux';
 import { unit } from 'mathjs';
+import { chartState } from '../../reducers/chartReducer';
 
 import './timespan.scss';
 
-const TimeSpan = ({ duration, width }) => {
+const TimeSpan = ({ cursorBegin = null, cursorEnd = null, width }) => {
+    const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
+    const [w0, w1] = (windowBegin === 0 && windowEnd === 0)
+        ? [-windowDuration, 0]
+        : [windowBegin, windowEnd];
+    const duration = (cursorBegin === null) ? windowDuration : (cursorEnd - cursorBegin);
+
     let time = unit(duration, 'us');
     if (duration > 60 * 1e6) {
         time = time.to('min');
     }
     const v = time.format({ notation: 'fixed', precision: 2 });
     const [valStr, unitStr] = v.split(' ');
+
+    const showHandles = cursorBegin !== null && w0 !== 0;
+
+    const [begin, end] = cursorBegin === null
+        ? [w0, w1]
+        : [cursorBegin, cursorEnd];
     return (
         <div className="timespan" style={{ width }}>
-            <div className="value">
-                {'\u0394'}{valStr}
-                <span className="unit">{unitStr.replace('u', '\u00B5')}</span>
+            {showHandles && (
+                <div
+                    className="cursor begin"
+                    style={{ left: `${(100 * (cursorBegin - w0)) / windowDuration}%` }}
+                />
+            )}
+            <div
+                className="span"
+                style={{
+                    left: `${(100 * (begin - w0)) / windowDuration}%`,
+                    width: `${(100 * (end - begin)) / windowDuration}%`,
+                }}
+            >
+                <div className="value">
+                    {`\u0394${valStr}${unitStr.replace('u', '\u00B5')}`}
+                </div>
             </div>
+            {showHandles && (
+                <div
+                    className="cursor end"
+                    style={{ left: `${(100 * (cursorEnd - w0)) / windowDuration}%` }}
+                />
+            )}
         </div>
     );
 };
 
 TimeSpan.propTypes = {
-    duration: number.isRequired,
+    cursorBegin: number,
+    cursorEnd: number,
     width: number.isRequired,
 };
 

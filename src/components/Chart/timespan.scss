@@ -2,29 +2,46 @@
 @import "./chart.scss";
 
 .timespan {
-    text-align: center;
-    font-size: 8pt;
     margin-left: $yAxisWidthPx;
-    border-style: solid;
-    border-color: $gray-100;
-    border-width: 0 1px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+    height: 1rem;
     position: relative;
+    overflow: hidden;
 
-    .value {
-        padding: 0 0.5rem;
-        background-color: $white;
-        z-index: 1;
+    .span {
+        text-align: center;
+        font-size: 8pt;
+        position: absolute;
+        border-style: solid;
+        border-color: $gray-100;
+        border-width: 0 1px;
+        .value {
+            padding: 0 0.5rem;
+            background-color: $white;
+            z-index: 1;
+            width: fit-content;
+            margin: auto;
+            position: relative;
+        }
     }
-}
+    .span::after {
+        content: '';
+        top: 43%;
+        border-top: 1px solid $gray-100;
+        display: block;
+        position: absolute;
+        width: 100%;
+    }
 
-.timespan::before {
-    content: '';
-    top: 43%;
-    border-top: 1px solid $gray-100;
-    display: block;
-    position: absolute;
-    width: 100%;
+    .cursor {
+        top: 0;
+        bottom: 0;
+        width: 0.5rem;
+        background-color: $gray-600;
+        border: 2px solid $gray-600;
+        border-radius: 2px;
+        margin-left: -2px;
+        cursor: grab;
+        z-index: 2;
+        position: absolute;
+    }
 }

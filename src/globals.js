@@ -45,7 +45,6 @@ export const options = {
     data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
     bits: null,
     index: 0,
-    renderIndex: undefined,
     timestamp: 0,
     triggerMarkers: null,
 };

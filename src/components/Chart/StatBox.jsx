@@ -58,29 +58,41 @@ Value.propTypes = {
     u: instanceOf(Unit).isRequired,
 };
 
-const StatBox = ({
-    average, max = 0, delta, label,
-}) => {
-    let time = unit(delta, 'us');
+const time = delta => {
+    let ret = unit(delta, 'us');
     if (delta > 60 * 1e6) {
-        time = time.to('min');
+        ret = ret.to('min');
     }
-    return (
-        <div className="statbox d-flex flex-column">
-            <div className="d-flex flex-row">
-                <Value label="average" u={unit(average, 'uA')} />
-                <Value label="max" u={unit(max || 0, 'uA')} />
-                <Value label="time" u={time} />
-                <Value label="charge" u={unit(average * ((delta || 1) / 1e6), 'uC')} />
-            </div>
-            {label}
-        </div>
-    );
+    return ret;
 };
+
+const StatBox = ({
+    average = null, max = null, delta = null, label,
+}) => (
+    <div className="statbox d-flex flex-column">
+        <div className="d-flex flex-row flex-fill mb-1">
+            {delta === null && (
+                <div className="value-box">
+                    SELECT RANGE IN CHART
+                </div>
+            )}
+            {delta !== null && (
+                <>
+                    <Value label="average" u={unit(average, 'uA')} />
+                    <Value label="max" u={unit(max || 0, 'uA')} />
+                    <Value label="time" u={time(delta)} />
+                    <Value label="charge" u={unit(average * ((delta || 1) / 1e6), 'uC')} />
+                </>
+            )}
+        </div>
+        {label}
+    </div>
+);
+
 StatBox.propTypes = {
-    average: number.isRequired,
+    average: number,
     max: number,
-    delta: number.isRequired,
+    delta: number,
     label: string.isRequired,
 };
 
