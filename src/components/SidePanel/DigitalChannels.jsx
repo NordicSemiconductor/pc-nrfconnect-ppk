@@ -43,9 +43,9 @@ import { chartState, setDigitalChannels } from '../../reducers/chartReducer';
 
 export default () => {
     const dispatch = useDispatch();
-    const { digitalChannels } = useSelector(chartState);
+    const { digitalChannels, hasDigitalChannels } = useSelector(chartState);
 
-    if (!digitalChannels.length) {
+    if (!hasDigitalChannels) {
         return null;
     }
 

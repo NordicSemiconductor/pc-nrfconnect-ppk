@@ -54,6 +54,7 @@ const initialState = {
     bufferLength: initialBufferLength,
     bufferRemaining: initialBufferLength,
     index: 0,
+    hasDigitalChannels: false,
     digitalChannels: persistentStore.get('digitalChannels', []),
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
@@ -68,6 +69,7 @@ const DIGITAL_CHANNELS = 'DIGITAL_CHANNELS';
 const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
 const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
 const TOGGLE_TRIGGER_HANDLE = 'TOGGLE_TRIGGER_HANDLE';
+const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 
 const MIN_WINDOW_DURATION = 1000;
 const MAX_WINDOW_DURATION = 120000000;
@@ -111,6 +113,14 @@ export const chartWindowAction = (
 export const setChartState = state => ({
     type: LOAD_CHART_STATE,
     ...state,
+    yMin: null,
+    yMax: null,
+    hasDigitalChannels: options.bits !== null,
+});
+
+export const updateHasDigitalChannels = () => ({
+    type: UPDATE_HAS_DIGITAL_CHANNELS,
+    hasDigitalChannels: options.bits !== null,
 });
 
 export const setDigitalChannels = digitalChannels => ({
@@ -167,7 +177,7 @@ export default (state = initialState, { type, ...action }) => {
                 index: options.index,
             };
         }
-        case LOAD_CHART_STATE:
+        case LOAD_CHART_STATE: return { ...state, ...action };
         case DIGITAL_CHANNELS: {
             persistentStore.set('digitalChannels', action.digitalChannels);
             return { ...state, ...action };
@@ -193,6 +203,7 @@ export default (state = initialState, { type, ...action }) => {
                 triggerHandleVisible: !state.triggerHandleVisible,
             };
         }
+        case UPDATE_HAS_DIGITAL_CHANNELS: return { ...state, ...action };
         default: return state;
     }
 };

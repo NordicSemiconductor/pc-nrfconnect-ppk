@@ -194,6 +194,7 @@ const Chart = () => {
         digitalChannels,
         digitalChannelsVisible,
         timestampsVisible,
+        hasDigitalChannels,
     } = useSelector(chartState);
     const { index } = options;
 
@@ -532,7 +533,7 @@ const Chart = () => {
                     />
                 </div>
             </div>
-            {digitalChannelsVisible && (
+            {hasDigitalChannels && digitalChannelsVisible && (
                 <div className="chart-bits-container">
                     {bitsChartData.map((_, i) => (
                         <div key={`${i + 1}`} className="chart-bits">

@@ -46,10 +46,10 @@ import {
 export default () => {
     const dispatch = useDispatch();
     const {
-        digitalChannels,
         digitalChannelsVisible,
         timestampsVisible,
         triggerHandleVisible,
+        hasDigitalChannels,
     } = useSelector(chartState);
     const { capabilities } = useSelector(appState);
 
@@ -74,7 +74,7 @@ export default () => {
                     label="TIMESTAMPS"
                 />
             </Form.Group>
-            {digitalChannels.length > 0 && (
+            {hasDigitalChannels && (
                 <Form.Group controlId="toggleDigital">
                     <Form.Check
                         type="switch"

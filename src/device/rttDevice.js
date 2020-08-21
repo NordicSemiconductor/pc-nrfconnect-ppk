@@ -129,8 +129,6 @@ class RTTDevice extends Device {
         this.dataPayload = [];
 
         this.byteHandlerFn = this.byteHandlerReceiveMode;
-
-        this.capabilities.digitalChannels = 0;
     }
 
     byteHandlerReceiveMode(byte) {

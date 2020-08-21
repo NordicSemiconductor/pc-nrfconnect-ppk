@@ -61,14 +61,14 @@ import {
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
 import {
-    chartWindowAction, animationAction, chartCursorAction, setDigitalChannels,
+    chartWindowAction, animationAction, chartCursorAction, updateHasDigitalChannels,
 } from '../reducers/chartReducer';
 import { options, bufferLengthInSeconds } from '../globals';
 
 let device = null;
 let updateRequestInterval;
 
-function setupOptions() {
+const setupOptions = () => dispatch => {
     console.log(device.capabilities);
     options.samplingTime = device.adcSamplingTimeUs;
     options.samplesPerSecond = 1e6 / options.samplingTime;
@@ -86,7 +86,8 @@ function setupOptions() {
         options.data = new Float32Array(bufferLength);
         options.data.fill(NaN);
     }
-}
+    dispatch(updateHasDigitalChannels());
+};
 
 /* Start reading current measurements */
 export function samplingStart() {
@@ -209,7 +210,7 @@ export function open(deviceInfo) {
 
         try {
             device = new Device(deviceInfo, onSample);
-            setupOptions();
+            dispatch(setupOptions());
             const metadata = device.parseMeta(await device.start());
 
             console.log(metadata);
@@ -234,9 +235,7 @@ export function open(deviceInfo) {
         }
 
         dispatch(deviceOpenedAction(deviceInfo.serialNumber, device.capabilities));
-        dispatch(setDigitalChannels(
-            [...Array(device.capabilities.digitalChannels)].map(() => true),
-        ));
+
         logger.info('PPK opened');
 
         device.on('error', (message, error) => {
