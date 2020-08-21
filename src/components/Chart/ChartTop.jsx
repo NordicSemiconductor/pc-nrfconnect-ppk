@@ -36,28 +36,23 @@
 
 import React from 'react';
 import { bool, func } from 'prop-types';
-// import { useSelector, useDispatch } from 'react-redux';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
 
-// import { chartState, chartWindowAction } from '../../reducers/chartReducer';
-
-// import { options } from '../../globals';
-
 import './charttop.scss';
 
 const ChartTop = ({
-    live, samplingRunning, chartPause, chartResetToLive,
+    live, samplingRunning, chartPause, chartResetToLive, zoomToWindow,
 }) => (
     <div className="chart-top d-flex flex-row justify-content-between align-items-center mt-2">
         <ButtonGroup>
-            <Button variant="secondary" size="sm">1ms</Button>
-            <Button variant="secondary" size="sm">10ms</Button>
-            <Button variant="secondary" size="sm">100ms</Button>
-            <Button variant="secondary" size="sm">1s</Button>
-            <Button variant="secondary" size="sm">1min</Button>
+            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000)}>1ms</Button>
+            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(10000)}>10ms</Button>
+            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(100000)}>100ms</Button>
+            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000000)}>1s</Button>
+            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(60000000)}>1min</Button>
         </ButtonGroup>
         <Form.Group controlId="chart-toggle-live">
             <Form.Check
@@ -76,6 +71,7 @@ ChartTop.propTypes = {
     samplingRunning: bool.isRequired,
     chartPause: func.isRequired,
     chartResetToLive: func.isRequired,
+    zoomToWindow: func.isRequired,
 };
 
 export default ChartTop;

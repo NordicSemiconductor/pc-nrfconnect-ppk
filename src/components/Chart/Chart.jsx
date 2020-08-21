@@ -230,6 +230,21 @@ const Chart = () => {
         );
     }, [chartReset, chartWindow, data.length, windowDuration]);
 
+    const zoomToWindow = useCallback(usec => {
+        if (windowEnd) {
+            const mid = (windowBegin + windowEnd) / 2;
+            let a = mid - (usec / 2);
+            let b = mid + (usec / 2);
+            if (b > windowEnd) {
+                a = a - (b - windowEnd);
+                b = windowEnd;
+            }
+            chartWindow(a, b);
+            return;
+        }
+        chartReset(usec);
+    }, [chartWindow, chartReset, windowBegin, windowEnd]);
+
     useEffect(() => {
         if (!chartRef.current.chartInstance) {
             return;
@@ -468,6 +483,7 @@ const Chart = () => {
                     samplingRunning={samplingRunning}
                     chartPause={chartPause}
                     chartResetToLive={chartResetToLive}
+                    zoomToWindow={zoomToWindow}
                 />
                 <BufferView width={chartAreaWidth} />
                 <TimeSpan width={chartAreaWidth} className="window" />
