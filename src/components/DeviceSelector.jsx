@@ -53,7 +53,7 @@ const deviceSetup = {
     dfu: {
         ppk2: {
             application: getAppFile('firmware/ppk2.hex'),
-            semver: 'power_profiler_kit_2 0.7.0+Aug-10-2020-11-24-36',
+            semver: 'power_profiler_kit_2 0.7.0+Aug-13-2020-15-25-47',
         },
     },
     jprog: {
