@@ -73,7 +73,7 @@ export default () => {
             )}
             <Button
                 className="mt-3"
-                variant="secondary"
+                variant="set"
                 disabled={!rttRunning}
                 onClick={() => dispatch(
                     samplingRunning ? samplingStop() : samplingStart(),

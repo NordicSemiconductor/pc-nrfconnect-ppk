@@ -83,7 +83,7 @@ const SidePanel = ({ bindHotkey }) => {
                     <p>Please open your device first, or</p>
                     <Button
                         className="mb-3 w-100"
-                        variant="info"
+                        variant="set"
                         onClick={() => dispatch(load())}
                     >
                         LOAD
@@ -95,7 +95,7 @@ const SidePanel = ({ bindHotkey }) => {
             <DisplayOptions />
             <Button
                 className="my-3 w-100"
-                variant="secondary"
+                variant="set"
                 disabled={samplingRunning}
                 onClick={() => dispatch(save())}
             >
@@ -103,7 +103,7 @@ const SidePanel = ({ bindHotkey }) => {
             </Button>
             <Button
                 className="mb-3 w-100"
-                variant="secondary"
+                variant="set"
                 disabled={samplingRunning}
                 onClick={() => dispatch(toggleExportCSVDialogVisible())}
             >

@@ -56,14 +56,14 @@ export default () => {
             <h2 className="mt-0">MODE</h2>
             <ButtonGroup className="mb-3">
                 <Button
-                    variant={isSmuMode ? 'secondary' : 'light'}
+                    variant={isSmuMode ? 'set' : 'unset'}
                     style={{ pointerEvents: isSmuMode ? 'none' : 'inherit' }}
                     onClick={togglePowerMode}
                 >
                     Sourcemeter
                 </Button>
                 <Button
-                    variant={isSmuMode ? 'light' : 'secondary'}
+                    variant={isSmuMode ? 'unset' : 'set'}
                     style={{ pointerEvents: !isSmuMode ? 'none' : 'inherit' }}
                     onClick={togglePowerMode}
                 >

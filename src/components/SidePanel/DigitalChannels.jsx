@@ -72,10 +72,11 @@ export default () => {
                     <ToggleButton
                         key={`d${i + 1}`}
                         checked={channel}
-                        variant={channel ? 'light' : 'secondary'}
+                        variant={channel ? 'set' : 'unset'}
                         className="text-smaller px-0 py-1"
                         value={i}
                         onChange={() => toggle(i)}
+                        active
                     >
                         {i}
                     </ToggleButton>

@@ -37,12 +37,23 @@
     .buffer-total {
         background-color: $gray-100;
         .buffer-used {
-            background-color: $gray-400;
+            background-color: $gray-600;
         }
     }
     .digital-channels .btn {
         height: 1.6rem;
         margin: 1px;
         line-height: 1rem;
+    }
+
+    .btn-set {
+        color: $gray-600;
+        background-color: $white;
+        border-color: $gray-600;
+    }
+    .btn-unset {
+        color: $gray-200;
+        background-color: $gray-600;
+        border-color: $gray-600;
     }
 }
