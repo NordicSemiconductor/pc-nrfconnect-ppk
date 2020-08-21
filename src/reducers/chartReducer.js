@@ -36,6 +36,10 @@
 
 import { options } from '../globals';
 
+import persistentStore from '../utils/persistentStore';
+
+console.log(persistentStore);
+
 const initialWindowDuration = 7 * 1e6;
 const initialBufferLength = ((options.data.length / options.samplesPerSecond) * 1e6)
               - initialWindowDuration;
@@ -50,10 +54,10 @@ const initialState = {
     bufferLength: initialBufferLength,
     bufferRemaining: initialBufferLength,
     index: 0,
-    digitalChannels: [],
-    digitalChannelsVisible: true,
-    timestampsVisible: false,
-    triggerHandleVisible: true,
+    digitalChannels: persistentStore.get('digitalChannels', []),
+    digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
+    timestampsVisible: persistentStore.get('timestampsVisible', false),
+    triggerHandleVisible: persistentStore.get('triggerHandleVisible', true),
 };
 
 const ANIMATION = 'ANIMATION';
@@ -164,22 +168,31 @@ export default (state = initialState, { type, ...action }) => {
             };
         }
         case LOAD_CHART_STATE:
-        case DIGITAL_CHANNELS: return {
-            ...state,
-            ...action,
-        };
-        case TOGGLE_DIGITAL_CHANNELS: return {
-            ...state,
-            digitalChannelsVisible: !state.digitalChannelsVisible,
-        };
-        case TOGGLE_TIMESTAMPS: return {
-            ...state,
-            timestampsVisible: !state.timestampsVisible,
-        };
-        case TOGGLE_TRIGGER_HANDLE: return {
-            ...state,
-            triggerHandleVisible: !state.triggerHandleVisible,
-        };
+        case DIGITAL_CHANNELS: {
+            persistentStore.set('digitalChannels', action.digitalChannels);
+            return { ...state, ...action };
+        }
+        case TOGGLE_DIGITAL_CHANNELS: {
+            persistentStore.set('digitalChannelsVisible', !state.digitalChannelsVisible);
+            return {
+                ...state,
+                digitalChannelsVisible: !state.digitalChannelsVisible,
+            };
+        }
+        case TOGGLE_TIMESTAMPS: {
+            persistentStore.set('timestampsVisible', !state.timestampsVisible);
+            return {
+                ...state,
+                timestampsVisible: !state.timestampsVisible,
+            };
+        }
+        case TOGGLE_TRIGGER_HANDLE: {
+            persistentStore.set('triggerHandleVisible', !state.triggerHandleVisible);
+            return {
+                ...state,
+                triggerHandleVisible: !state.triggerHandleVisible,
+            };
+        }
         default: return state;
     }
 };

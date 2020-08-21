@@ -39,6 +39,7 @@
     "bson": "^4.0.4",
     "chart.js": "2.9.3",
     "chartjs-plugin-annotation": "^0.5.7",
+    "electron-store": "^6.0.0",
     "mathjs": "6.6.1",
     "mousetrap": "1.6.5",
     "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v4.8.4",
