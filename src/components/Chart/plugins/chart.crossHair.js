@@ -96,16 +96,16 @@ export default {
         ctx.stroke();
 
         ctx.fillStyle = 'black';
-        ctx.fillRect(left - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
-        ctx.fillRect(layerX - 5 - (tsWidth / 2), bottom, tsWidth + 10, 33);
+        ctx.fillRect(right - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
+        ctx.fillRect(layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
 
         ctx.textAlign = 'right';
         ctx.fillStyle = 'white';
-        ctx.fillText(uA, left - 5, layerY);
+        ctx.fillText(uA, right - 5, layerY + 3);
 
         ctx.textAlign = 'center';
-        ctx.fillText(time, layerX, bottom + 10);
-        ctx.fillText(subsecond, layerX, bottom + 25);
+        ctx.fillText(time, layerX, top + 13);
+        ctx.fillText(subsecond, layerX, top + 28);
 
         ctx.restore();
     },

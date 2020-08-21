@@ -35,7 +35,9 @@
  */
 
 import React from 'react';
-import { string, instanceOf, number } from 'prop-types';
+import {
+    string, instanceOf, number, node,
+} from 'prop-types';
 import { unit, Unit } from 'mathjs';
 
 import './statbox.scss';
@@ -67,13 +69,15 @@ const time = delta => {
 };
 
 const StatBox = ({
-    average = null, max = null, delta = null, label,
+    average = null, max = null, delta = null,
+    label, action = null,
 }) => (
-    <div className="statbox d-flex flex-column">
-        <div className="d-flex flex-row flex-fill mb-1">
+    <div className="statbox d-flex flex-column mb-1">
+        <div className="statbox-header"><span>{label}</span>{action}</div>
+        <div className="d-flex flex-row flex-fill">
             {delta === null && (
                 <div className="value-box">
-                    SELECT RANGE IN CHART
+                    Hold SHIFT+LEFT CLICK and DRAG to make a selection
                 </div>
             )}
             {delta !== null && (
@@ -85,7 +89,6 @@ const StatBox = ({
                 </>
             )}
         </div>
-        {label}
     </div>
 );
 
@@ -94,6 +97,7 @@ StatBox.propTypes = {
     max: number,
     delta: number,
     label: string.isRequired,
+    action: node,
 };
 
 export default StatBox;

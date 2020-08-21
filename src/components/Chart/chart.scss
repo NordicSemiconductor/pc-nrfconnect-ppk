@@ -1,6 +1,6 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-$yAxisWidthPx: 80px;  // must be in pixels, imported in JS
+$yAxisWidthPx: 70px;  // must be in pixels, imported in JS
 $rightMarginPx: 30px;
 
 .chart-outer {
@@ -22,7 +22,6 @@ $rightMarginPx: 30px;
     }
     .chart-current, .chart-bits {
         background: $white;
-        margin: 0.2rem;
     }
 
     .chart-top {
@@ -34,33 +33,37 @@ $rightMarginPx: 30px;
         position: relative;
         flex: 1;
     }
-    .chart-bits {
-        height: 4rem;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        span {
-            width: $yAxisWidthPx;
-            text-align: center;
+    .chart-bits-container {
+        margin-top: 0.5rem;
+        margin-bottom: -1px;
+        .chart-bits {
+            height: 2rem;
+            flex: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-bottom: 1px;
+            padding: 0.3rem 0;
+            span {
+                width: $yAxisWidthPx;
+                text-align: center;
+            }
         }
     }
+
     .chart-bottom {
         display: flex;
-        // use when btn-group is gone
-        // margin-left: $yAxisWidthPx;
+        margin-left: $yAxisWidthPx;
         > * {
             margin-right: 0.5rem;
         }
         margin-right: -0.5rem;
         padding: 0.5rem 0;
-
-        // temporary
-        .btn-group {
-            max-width: $yAxisWidthPx;
-            min-width: $yAxisWidthPx;
-            margin-right: 0;
-            height: 2rem;
-        }
+        flex-wrap: wrap;
+    }
+    .chart-top {
+        margin-left: $yAxisWidthPx;
+        margin-right: $rightMarginPx;
     }
 }
 

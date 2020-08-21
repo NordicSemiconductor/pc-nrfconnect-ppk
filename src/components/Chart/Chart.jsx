@@ -44,7 +44,6 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { unit } from 'mathjs';
 
 import annotationPlugin from 'chartjs-plugin-annotation';
@@ -52,6 +51,7 @@ import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 import crossHairPlugin from './plugins/chart.crossHair';
 
+import ChartTop from './ChartTop';
 import BufferView from './BufferView';
 import StatBox from './StatBox';
 import TimeSpan from './TimeSpan';
@@ -72,7 +72,7 @@ const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
 
 const dataColor = colors.nordicBlue;
-const valueRange = { min: 0, max: 15000 };
+const valueRange = { min: -20, max: 100 };
 
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
@@ -101,7 +101,7 @@ const timestampToLabel = (usecs, index, array) => {
 };
 
 const formatCurrent = uA => unit(uA, 'uA')
-    .format({ notation: 'fixed', precision: 2 })
+    .format({ notation: 'auto', precision: 4 })
     .replace('u', '\u00B5');
 
 crossHairPlugin.formatY = formatCurrent;
@@ -187,7 +187,6 @@ const Chart = () => {
         windowBegin,
         windowEnd,
         windowDuration,
-        canReset,
         cursorBegin,
         cursorEnd,
         yMin,
@@ -399,17 +398,14 @@ const Chart = () => {
             yAxes: [{
                 id: 'yScale',
                 type: 'linear',
-                ...valueRange,
                 ticks: {
                     minRotation: 0,
                     maxRotation: 0,
-                    suggestedMin: valueRange.min,
-                    suggestedMax: valueRange.max,
                     min: yMin === null ? valueRange.min : yMin,
-                    max: yMax === null ? undefined : yMax,
+                    max: yMax === null ? valueRange.max : yMax,
                     maxTicksLimit: 7,
                     padding: 0,
-                    callback: formatCurrent,
+                    callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
                 },
                 gridLines: { display: true, drawBorder: true, drawOnChartArea: true },
                 afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
@@ -467,6 +463,12 @@ const Chart = () => {
     return (
         <div className="chart-outer">
             <div className="chart-current">
+                <ChartTop
+                    live={live}
+                    samplingRunning={samplingRunning}
+                    chartPause={chartPause}
+                    chartResetToLive={chartResetToLive}
+                />
                 <BufferView width={chartAreaWidth} />
                 <TimeSpan width={chartAreaWidth} className="window" />
                 <div className="chart-container">
@@ -476,7 +478,7 @@ const Chart = () => {
                         options={chartOptions}
                         plugins={[
                             dragSelectPlugin, zoomPanPlugin,
-                            annotationPlugin, crossHairPlugin,
+                            crossHairPlugin, annotationPlugin,
                             {
                                 id: 'notifier',
                                 afterLayout(chart) {
@@ -497,57 +499,41 @@ const Chart = () => {
                     width={chartAreaWidth}
                 />
                 <div className="chart-bottom" style={{ paddingRight: `${rightMargin}px` }}>
-                    <ButtonGroup>
-                        <Button
-                            variant="primary"
-                            disabled={!chartCursorActive}
-                            size="sm"
-                            onClick={resetCursor}
-                            title={chartCursorActive ? 'Clear Marker' : 'Hold shift + click and drag to select an area'}
-                        >
-                            <span className="mdi mdi-eraser" />
-                        </Button>
-                        {samplingRunning !== null && (
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                disabled={!samplingRunning && live}
-                                onClick={live ? chartPause : chartResetToLive}
-                                title={live ? 'Pause' : 'Live'}
-                            >
-                                <span className={`mdi mdi-${live ? 'pause' : 'step-forward'}`} />
-                            </Button>
-                        )}
-                        {samplingRunning === null && (
-                            <Button
-                                variant="primary"
-                                size="sm"
-                                disabled={!canReset}
-                                onClick={chartResetToLive}
-                                title="Reset & Live"
-                            >
-                                <span className="mdi mdi-repeat" />
-                            </Button>
-                        )}
-                    </ButtonGroup>
                     <StatBox {...windowStats} label="WINDOW" />
-                    <StatBox {...selectionStats} label="SELECTION" />
+                    <StatBox
+                        {...selectionStats}
+                        label="SELECTION"
+                        action={(
+                            <Button
+                                variant="secondary"
+                                disabled={!chartCursorActive}
+                                size="sm"
+                                onClick={resetCursor}
+                            >
+                                CLEAR
+                            </Button>
+                        )}
+                    />
                 </div>
             </div>
-            {digitalChannelsVisible && bitsChartData.map((_, i) => (
-                <div key={`${i + 1}`} className="chart-bits">
-                    <span>{bitsChartData[i].datasets[0].label}</span>
-                    <div
-                        className="chart-container"
-                        style={{ paddingRight: `${rightMargin}px` }}
-                    >
-                        <Line
-                            data={bitsChartData[i]}
-                            options={bitsChartOptions}
-                        />
-                    </div>
+            {digitalChannelsVisible && (
+                <div className="chart-bits-container">
+                    {bitsChartData.map((_, i) => (
+                        <div key={`${i + 1}`} className="chart-bits">
+                            <span>{bitsChartData[i].datasets[0].label}</span>
+                            <div
+                                className="chart-container"
+                                style={{ paddingRight: `${rightMargin}px` }}
+                            >
+                                <Line
+                                    data={bitsChartData[i]}
+                                    options={bitsChartOptions}
+                                />
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            )}
         </div>
     );
 };

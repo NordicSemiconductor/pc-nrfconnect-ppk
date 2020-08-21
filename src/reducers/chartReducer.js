@@ -52,7 +52,7 @@ const initialState = {
     index: 0,
     digitalChannels: [],
     digitalChannelsVisible: true,
-    timestampsVisible: true,
+    timestampsVisible: false,
     triggerHandleVisible: true,
 };
 

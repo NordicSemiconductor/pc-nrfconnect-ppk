@@ -209,7 +209,7 @@ export default () => {
                         <p>Number of records: {records}</p>
                         <p>Filesize: {filesize}</p>
                         <p>Duration: {unit(duration, 'us')
-                            .format({ notation: 'fixed', precision: 3 }).replace('u', '\u00B5')}
+                            .format({ notation: 'auto', precision: 4 }).replace('u', '\u00B5')}
                         </p>
                     </Col>
                 </Row>

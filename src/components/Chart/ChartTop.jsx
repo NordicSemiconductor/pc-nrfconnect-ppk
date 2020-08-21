@@ -35,28 +35,47 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { chartState } from '../../reducers/chartReducer';
+import { bool, func } from 'prop-types';
+// import { useSelector, useDispatch } from 'react-redux';
 
-export default () => {
-    const {
-        windowDuration,
-        bufferLength,
-        bufferRemaining,
-    } = useSelector(chartState);
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Form from 'react-bootstrap/Form';
 
-    const totalInUs = bufferLength + windowDuration;
-    const percentage = 100 - ((100 * bufferRemaining) / totalInUs);
+// import { chartState, chartWindowAction } from '../../reducers/chartReducer';
 
-    return (
-        <>
-            <h2>CAPTURE STATUS</h2>
-            <div className="buffer-total">
-                <div className="buffer-used py-3" style={{ width: `${percentage}%` }} />
-            </div>
-            <h2 className="mt-2">
-                BUFFER {bufferRemaining > 0 ? `${percentage.toFixed()}%` : 'FULL'}
-            </h2>
-        </>
-    );
+// import { options } from '../../globals';
+
+import './charttop.scss';
+
+const ChartTop = ({
+    live, samplingRunning, chartPause, chartResetToLive,
+}) => (
+    <div className="chart-top d-flex flex-row justify-content-between align-items-center mt-2">
+        <ButtonGroup>
+            <Button variant="secondary" size="sm">1ms</Button>
+            <Button variant="secondary" size="sm">10ms</Button>
+            <Button variant="secondary" size="sm">100ms</Button>
+            <Button variant="secondary" size="sm">1s</Button>
+            <Button variant="secondary" size="sm">1min</Button>
+        </ButtonGroup>
+        <Form.Group controlId="chart-toggle-live">
+            <Form.Check
+                type="switch"
+                onChange={evt => (evt.target.checked ? chartResetToLive() : chartPause())}
+                checked={live}
+                label="LIVE"
+                disabled={!samplingRunning && live}
+            />
+        </Form.Group>
+    </div>
+);
+
+ChartTop.propTypes = {
+    live: bool.isRequired,
+    samplingRunning: bool.isRequired,
+    chartPause: func.isRequired,
+    chartResetToLive: func.isRequired,
 };
+
+export default ChartTop;

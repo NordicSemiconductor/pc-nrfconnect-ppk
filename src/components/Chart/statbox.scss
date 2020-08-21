@@ -5,6 +5,20 @@
     text-align: center;
     font-size: 8pt;
     align-self: stretch;
+    border: 1px solid $gray-100;
+
+    .statbox-header {
+        position: relative;
+        margin-bottom: -1px;
+        .btn {
+            position: absolute;
+            padding: 0 0.5rem;
+            font-size: inherit;
+            right: 0;
+            background-color: $gray-100;
+            border: 0;
+        }
+    }
 
     .value-box {
         border: 1px solid $gray-100;
@@ -14,6 +28,8 @@
         flex-direction: column;
         padding: 0.25rem;
         justify-content: center;
+        margin-bottom: -1px;
+        border-left-width: 0;
 
         .value {
             font-size: 12pt;
