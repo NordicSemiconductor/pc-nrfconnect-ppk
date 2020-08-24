@@ -42,6 +42,7 @@ import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
 
+import Collapse from './Collapse';
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 
@@ -57,26 +58,33 @@ export default () => {
     const { advancedMode, isSmuMode, capabilities: { ppkSetPowerMode } } = useSelector(appState);
 
     return (
-        <div className={(ppkSetPowerMode && !isSmuMode) ? 'disabled' : ''}>
-            <h2>VOLTAGE REGULATOR</h2>
-            <Form.Label htmlFor="slider-vdd">
-                VDD{' '}
-                <NumberInlineInput
-                    value={vdd}
+        <>
+            <Collapse
+                defaultActiveKey="0"
+                title="VOLTAGE ADJUSTMENT"
+                eventKey="1"
+            >
+                <Form.Label htmlFor="slider-vdd">
+                    VDD{' '}
+                    <NumberInlineInput
+                        value={vdd}
+                        range={{ min, max }}
+                        onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
+                    />
+                    {' '}mV
+                </Form.Label>
+                <Slider
+                    id="slider-vdd"
+                    values={[vdd]}
                     range={{ min, max }}
-                    onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
+                    onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
+                    onChangeComplete={() => dispatch(updateRegulator(vdd))}
                 />
-                {' '}mV
-            </Form.Label>
-            <Slider
-                id="slider-vdd"
-                values={[vdd]}
-                range={{ min, max }}
-                onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
-                onChangeComplete={() => dispatch(updateRegulator(vdd))}
-            />
-            {advancedMode && <SwitchPoints />}
-            {advancedMode && <ResistorCalibration />}
-        </div>
+            </Collapse>
+            <div className={(ppkSetPowerMode && !isSmuMode) ? 'disabled' : ''}>
+                {advancedMode && <SwitchPoints />}
+                {advancedMode && <ResistorCalibration />}
+            </div>
+        </>
     );
 };
