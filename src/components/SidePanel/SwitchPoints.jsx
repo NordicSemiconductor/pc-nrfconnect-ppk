@@ -42,6 +42,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 import { Slider } from 'pc-nrfconnect-shared';
+import Collapse from './Collapse';
 
 import {
     spikeFilteringToggle,
@@ -71,8 +72,7 @@ export default () => {
     const { capabilities } = useSelector(appState);
 
     return (
-        <>
-            <h2>SWITCH LEVELS</h2>
+        <Collapse title="SWITCH LEVELS" eventKey="2">
             {capabilities.ppkSwitchPointUp && (
                 <>
                     Switch up
@@ -115,6 +115,6 @@ export default () => {
                     />
                 </Form.Group>
             )}
-        </>
+        </Collapse>
     );
 };

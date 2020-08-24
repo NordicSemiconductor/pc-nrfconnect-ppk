@@ -40,6 +40,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Collapse from './Collapse';
 
 import {
     updateResistors,
@@ -62,8 +63,7 @@ export default () => {
     const isLoValid = !Number.isNaN(parseFloat(userResLo));
 
     return (
-        <>
-            <h2>RESISTOR CALIBRATION</h2>
+        <Collapse title="RESISTOR CALIBRATION" eventKey="3">
             <InputGroup>
                 <InputGroup.Prepend>
                     <InputGroup.Text>High</InputGroup.Text>
@@ -123,6 +123,6 @@ export default () => {
                     </Button>
                 </ButtonGroup>
             </div>
-        </>
+        </Collapse>
     );
 };

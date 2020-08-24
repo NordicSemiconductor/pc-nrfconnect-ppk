@@ -36,6 +36,7 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
@@ -43,6 +44,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
+import Collapse from './Collapse';
 import UnitSelector from './UnitSelector';
 
 import {
@@ -78,91 +80,92 @@ export default () => {
     };
 
     return (
-        <>
-            <h2>TRIGGER</h2>
-            <Form.Label htmlFor="slider-trigger-window">
-                Window{' '}
-                <NumberInlineInput
-                    value={triggerWindowLength}
+        <Accordion defaultActiveKey="0">
+            <Collapse title="TRIGGER" eventKey="0">
+                <Form.Label htmlFor="slider-trigger-window">
+                    Window{' '}
+                    <NumberInlineInput
+                        value={triggerWindowLength}
+                        range={range}
+                        onChange={value => setTriggerWindowLength(value)}
+                    />
+                    {' '}ms
+                </Form.Label>
+                <Slider
+                    id="slider-trigger-window"
+                    values={[triggerWindowLength]}
                     range={range}
-                    onChange={value => setTriggerWindowLength(value)}
+                    onChange={[value => setTriggerWindowLength(value)]}
+                    onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
                 />
-                {' '}ms
-            </Form.Label>
-            <Slider
-                id="slider-trigger-window"
-                values={[triggerWindowLength]}
-                range={range}
-                onChange={[value => setTriggerWindowLength(value)]}
-                onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
-            />
-            <div className="d-flex flex-column">
-                <ButtonGroup style={{ marginTop: 10 }}>
-                    <Button
+                <div className="d-flex flex-column">
+                    <ButtonGroup style={{ marginTop: 10 }}>
+                        <Button
+                            disabled={!rttRunning || externalTrigger}
+                            size="lg"
+                            variant="light"
+                            style={{ width: '50%' }}
+                            onClick={() => dispatch(
+                                triggerSingleWaiting
+                                    ? triggerStop()
+                                    : triggerSingleSet(),
+                            )}
+                        >
+                            <span className="mdi mdi-clock-outline" />
+                            {triggerSingleWaiting ? 'Waiting...' : 'Single'}
+                        </Button>
+                        <Button
+                            disabled={!rttRunning || externalTrigger}
+                            size="lg"
+                            variant="light"
+                            style={{ width: '50%' }}
+                            onClick={() => dispatch(
+                                triggerRunning
+                                    ? triggerStop()
+                                    : triggerStart(),
+                            )}
+                        >
+                            <span className={`mdi mdi-${triggerRunning ? 'flash' : 'record-circle-outline'}`} />
+                            {triggerRunning ? 'Stop' : 'Start'}
+                        </Button>
+                    </ButtonGroup>
+                </div>
+                <InputGroup style={{ marginTop: 10 }}>
+                    <InputGroup.Prepend>
+                        <InputGroup.Text>Trigger level</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <Form.Control
                         disabled={!rttRunning || externalTrigger}
-                        size="lg"
-                        variant="light"
-                        style={{ width: '50%' }}
-                        onClick={() => dispatch(
-                            triggerSingleWaiting
-                                ? triggerStop()
-                                : triggerSingleSet(),
-                        )}
-                    >
-                        <span className="mdi mdi-clock-outline" />
-                        {triggerSingleWaiting ? 'Waiting...' : 'Single'}
-                    </Button>
-                    <Button
+                        value={level.value}
+                        type="number"
+                        onChange={e => setLevel({
+                            ...level, value: parseInt(e.target.value, 10),
+                        })}
+                        onKeyPress={e => {
+                            if (e.key === 'Enter') {
+                                sendTriggerLevel();
+                            }
+                        }}
+                    />
+                    <UnitSelector
                         disabled={!rttRunning || externalTrigger}
-                        size="lg"
+                        units={['\u00B5A', 'mA']}
+                        initial={1}
+                        id="input-dropdown-addon"
+                        onChange={i => setLevel({ ...level, unit: 1000 ** i })}
+                        as={InputGroup.Append}
                         variant="light"
-                        style={{ width: '50%' }}
-                        onClick={() => dispatch(
-                            triggerRunning
-                                ? triggerStop()
-                                : triggerStart(),
-                        )}
-                    >
-                        <span className={`mdi mdi-${triggerRunning ? 'flash' : 'record-circle-outline'}`} />
-                        {triggerRunning ? 'Stop' : 'Start'}
-                    </Button>
-                </ButtonGroup>
-            </div>
-            <InputGroup style={{ marginTop: 10 }}>
-                <InputGroup.Prepend>
-                    <InputGroup.Text>Trigger level</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control
-                    disabled={!rttRunning || externalTrigger}
-                    value={level.value}
-                    type="number"
-                    onChange={e => setLevel({
-                        ...level, value: parseInt(e.target.value, 10),
-                    })}
-                    onKeyPress={e => {
-                        if (e.key === 'Enter') {
-                            sendTriggerLevel();
-                        }
-                    }}
-                />
-                <UnitSelector
-                    disabled={!rttRunning || externalTrigger}
-                    units={['\u00B5A', 'mA']}
-                    initial={1}
-                    id="input-dropdown-addon"
-                    onChange={i => setLevel({ ...level, unit: 1000 ** i })}
-                    as={InputGroup.Append}
-                    variant="light"
-                />
-            </InputGroup>
-            <Form.Group controlId="extTrigCheck">
-                <Form.Check
-                    type="switch"
-                    onChange={e => dispatch(externalTriggerToggled(e.target.checked))}
-                    checked={externalTrigger}
-                    label="External trigger"
-                />
-            </Form.Group>
-        </>
+                    />
+                </InputGroup>
+                <Form.Group controlId="extTrigCheck">
+                    <Form.Check
+                        type="switch"
+                        onChange={e => dispatch(externalTriggerToggled(e.target.checked))}
+                        checked={externalTrigger}
+                        label="External trigger"
+                    />
+                </Form.Group>
+            </Collapse>
+        </Accordion>
     );
 };

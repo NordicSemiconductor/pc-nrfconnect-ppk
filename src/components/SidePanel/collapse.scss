@@ -1,0 +1,23 @@
+.accordion {
+    .collapse-toggle {
+        -webkit-appearance: none;
+        border: none;
+        background: none;
+        outline: none;
+        padding: 0;
+        h2 {
+            line-height: 13px;
+            &::after {
+                content: "\f140";
+                font-family: "Material Design Icons";
+                font-size: 15px;
+                display: inline-block;
+                vertical-align: middle;
+                transition: transform 0.2s ease-in-out;
+            }
+        }
+    }
+    .collapse-toggle.show h2::after {
+        transform: rotate(-180deg);
+    }
+}

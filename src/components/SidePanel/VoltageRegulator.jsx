@@ -36,6 +36,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import Accordion from 'react-bootstrap/Accordion';
 import Form from 'react-bootstrap/Form';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
@@ -58,12 +59,8 @@ export default () => {
     const { advancedMode, isSmuMode, capabilities: { ppkSetPowerMode } } = useSelector(appState);
 
     return (
-        <>
-            <Collapse
-                defaultActiveKey="0"
-                title="VOLTAGE ADJUSTMENT"
-                eventKey="1"
-            >
+        <Accordion defaultActiveKey="1">
+            <Collapse title="VOLTAGE ADJUSTMENT" eventKey="1">
                 <Form.Label htmlFor="slider-vdd">
                     VDD{' '}
                     <NumberInlineInput
@@ -85,6 +82,6 @@ export default () => {
                 {advancedMode && <SwitchPoints />}
                 {advancedMode && <ResistorCalibration />}
             </div>
-        </>
+        </Accordion>
     );
 };
