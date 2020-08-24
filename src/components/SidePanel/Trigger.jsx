@@ -42,7 +42,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { NumberInlineInput, Slider, Toggle } from 'pc-nrfconnect-shared';
 
 import Collapse from './Collapse';
 import UnitSelector from './UnitSelector';
@@ -157,14 +157,11 @@ export default () => {
                         variant="light"
                     />
                 </InputGroup>
-                <Form.Group controlId="extTrigCheck">
-                    <Form.Check
-                        type="switch"
-                        onChange={e => dispatch(externalTriggerToggled(e.target.checked))}
-                        checked={externalTrigger}
-                        label="External trigger"
-                    />
-                </Form.Group>
+                <Toggle
+                    onToggle={e => dispatch(externalTriggerToggled(e.target.checked))}
+                    isToggled={externalTrigger}
+                    label="External trigger"
+                />
             </Collapse>
         </Accordion>
     );

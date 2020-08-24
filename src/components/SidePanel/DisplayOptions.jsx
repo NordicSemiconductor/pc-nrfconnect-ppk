@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Form from 'react-bootstrap/Form';
+import { Toggle } from 'pc-nrfconnect-shared';
 
 import { appState } from '../../reducers/appReducer';
 import {
@@ -57,32 +57,23 @@ export default () => {
         <>
             <h2>DISPLAY OPTIONS</h2>
             {capabilities.ppkTriggerSet && (
-                <Form.Group controlId="toggleTriggerHandle">
-                    <Form.Check
-                        type="switch"
-                        onChange={() => dispatch(toggleTriggerHandle())}
-                        checked={triggerHandleVisible}
-                        label="TRIGGER HANDLE"
-                    />
-                </Form.Group>
-            )}
-            <Form.Group controlId="toggleTimeStamps">
-                <Form.Check
-                    type="switch"
-                    onChange={() => dispatch(toggleTimestamps())}
-                    checked={timestampsVisible}
-                    label="TIMESTAMPS"
+                <Toggle
+                    onToggle={() => dispatch(toggleTriggerHandle())}
+                    isToggled={triggerHandleVisible}
+                    label="TRIGGER HANDLE"
                 />
-            </Form.Group>
+            )}
+            <Toggle
+                onToggle={() => dispatch(toggleTimestamps())}
+                isToggled={timestampsVisible}
+                label="TIMESTAMPS"
+            />
             {hasDigitalChannels && (
-                <Form.Group controlId="toggleDigital">
-                    <Form.Check
-                        type="switch"
-                        onChange={() => dispatch(toggleDigitalChannels())}
-                        checked={digitalChannelsVisible}
-                        label="DIGITAL CHANNELS"
-                    />
-                </Form.Group>
+                <Toggle
+                    onToggle={() => dispatch(toggleDigitalChannels())}
+                    isToggled={digitalChannelsVisible}
+                    label="DIGITAL CHANNELS"
+                />
             )}
         </>
     );

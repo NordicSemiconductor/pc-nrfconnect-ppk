@@ -35,10 +35,9 @@
  */
 
 import React, { useState } from 'react';
-import { func, bool, string } from 'prop-types';
 import fs from 'fs';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConfirmationDialog } from 'pc-nrfconnect-shared';
+import { ConfirmationDialog, Toggle } from 'pc-nrfconnect-shared';
 import { logger, getAppDataDir } from 'nrfconnect/core';
 import { remote } from 'electron';
 import { join } from 'path';
@@ -46,7 +45,6 @@ import * as mathjs from 'mathjs';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
 import { appState, toggleExportCSVDialogVisible } from '../reducers/appReducer';
@@ -56,26 +54,6 @@ import { options, timestampToIndex, indexToTimestamp } from '../globals';
 import './exportdialog.scss';
 
 const { unit } = mathjs;
-
-const Switch = ({
-    onChange,
-    checked,
-    label,
-}) => (
-    <Form.Group controlId={`check-${label}`}>
-        <Form.Check
-            type="switch"
-            onChange={onChange}
-            checked={checked}
-            label={label}
-        />
-    </Form.Group>
-);
-Switch.propTypes = {
-    onChange: func.isRequired,
-    checked: bool.isRequired,
-    label: string.isRequired,
-};
 
 // create and array of [index, length] to split longer range
 const indexer = (i, j, d) => {
@@ -181,26 +159,26 @@ export default () => {
                 <Row className="export-settings">
                     <Col>
                         <h2>Export fields</h2>
-                        <Switch
-                            onChange={() => updateSettings({ timestamp: !settings.timestamp })}
-                            checked={settings.timestamp}
+                        <Toggle
+                            onToggle={() => updateSettings({ timestamp: !settings.timestamp })}
+                            isToggled={settings.timestamp}
                             label="Timestamp"
                         />
-                        <Switch
-                            onChange={() => updateSettings({ current: !settings.current })}
-                            checked={settings.current}
+                        <Toggle
+                            onToggle={() => updateSettings({ current: !settings.current })}
+                            isToggled={settings.current}
                             label="Current"
                         />
-                        <Switch
-                            onChange={() => updateSettings({ bits: !settings.bits })}
-                            checked={settings.bits}
+                        <Toggle
+                            onToggle={() => updateSettings({ bits: !settings.bits })}
+                            isToggled={settings.bits}
                             label="Digital logic pins (single string field)"
                         />
-                        <Switch
-                            onChange={() => updateSettings({
+                        <Toggle
+                            onToggle={() => updateSettings({
                                 bitsSeparated: !settings.bitsSeparated,
                             })}
-                            checked={settings.bitsSeparated}
+                            isToggled={settings.bitsSeparated}
                             label="Digital logic pins (separate fields)"
                         />
                     </Col>

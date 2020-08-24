@@ -39,7 +39,7 @@ import { bool, func } from 'prop-types';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Form from 'react-bootstrap/Form';
+import { Toggle } from 'pc-nrfconnect-shared';
 
 import './charttop.scss';
 
@@ -54,15 +54,12 @@ const ChartTop = ({
             <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000000)}>1s</Button>
             <Button variant="secondary" size="sm" onClick={() => zoomToWindow(60000000)}>1min</Button>
         </ButtonGroup>
-        <Form.Group controlId="chart-toggle-live">
-            <Form.Check
-                type="switch"
-                onChange={evt => (evt.target.checked ? chartResetToLive() : chartPause())}
-                checked={live}
-                label="LIVE"
-                disabled={!samplingRunning && live}
-            />
-        </Form.Group>
+        <Toggle
+            label="LIVE VIEW"
+            onToggle={() => (live ? chartPause() : chartResetToLive())}
+            isToggled={live}
+            disabled={!samplingRunning && live}
+        />
     </div>
 );
 

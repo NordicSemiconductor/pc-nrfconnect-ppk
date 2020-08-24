@@ -37,11 +37,10 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import { Slider } from 'pc-nrfconnect-shared';
+import { Slider, Toggle } from 'pc-nrfconnect-shared';
 import Collapse from './Collapse';
 
 import {
@@ -106,14 +105,11 @@ export default () => {
                 </>
             )}
             {capabilities.ppkSpikeFilteringOn && (
-                <Form.Group controlId="spikeCheck">
-                    <Form.Check
-                        type="switch"
-                        onChange={() => dispatch(spikeFilteringToggle())}
-                        checked={spikeFiltering}
-                        label="Spike filtering"
-                    />
-                </Form.Group>
+                <Toggle
+                    onToggle={() => dispatch(spikeFilteringToggle())}
+                    isToggled={spikeFiltering}
+                    label="Spike filtering"
+                />
             )}
         </Collapse>
     );

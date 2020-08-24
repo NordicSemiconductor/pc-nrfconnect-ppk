@@ -37,7 +37,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
+import { Toggle } from 'pc-nrfconnect-shared';
 
 import PowerMode from './PowerMode';
 
@@ -62,14 +62,11 @@ export default () => {
         <div className="d-flex flex-column">
             <PowerMode />
             {capabilities.ppkToggleDUT && (
-                <Form.Group controlId="check-dut">
-                    <Form.Check
-                        type="switch"
-                        onChange={() => dispatch(toggleDUT(deviceRunning))}
-                        checked={deviceRunning}
-                        label="SUPPLY POWER TO TEST DEVICE"
-                    />
-                </Form.Group>
+                <Toggle
+                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
+                    isToggled={deviceRunning}
+                    label="SUPPLY POWER TO TEST DEVICE"
+                />
             )}
             <Button
                 className="mt-3"
