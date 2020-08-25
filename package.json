@@ -42,7 +42,7 @@
     "electron-store": "5.1.1",
     "mathjs": "6.6.1",
     "mousetrap": "1.6.5",
-    "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v4.8.10",
+    "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v4.8.11",
     "react": "16.13.1",
     "react-chartjs-2": "2.9.0",
     "react-rangeslider": "2.2.0",
