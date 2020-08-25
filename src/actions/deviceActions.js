@@ -250,7 +250,11 @@ export function open(deviceInfo) {
         let renderIndex;
         updateRequestInterval = setInterval(() => {
             if (renderIndex !== options.index) {
-                requestAnimationFrame(() => dispatch(animationAction()));
+                requestAnimationFrame(() => {
+                    if (getState().app.chart.windowEnd === 0) {
+                        dispatch(animationAction());
+                    }
+                });
                 renderIndex = options.index;
             }
         }, 30);
