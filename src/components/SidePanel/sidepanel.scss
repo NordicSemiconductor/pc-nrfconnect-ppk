@@ -56,4 +56,10 @@
         background-color: $gray-600;
         border-color: $gray-600;
     }
+
+    .start-stop span.danger {
+        font-size: 22px;
+        margin-right: 0.5rem;
+        color: #f44336;
+    }
 }

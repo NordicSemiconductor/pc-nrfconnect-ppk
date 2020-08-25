@@ -163,16 +163,19 @@ export default () => {
                             onToggle={() => updateSettings({ timestamp: !settings.timestamp })}
                             isToggled={settings.timestamp}
                             label="Timestamp"
+                            variant="secondary"
                         />
                         <Toggle
                             onToggle={() => updateSettings({ current: !settings.current })}
                             isToggled={settings.current}
                             label="Current"
+                            variant="secondary"
                         />
                         <Toggle
                             onToggle={() => updateSettings({ bits: !settings.bits })}
                             isToggled={settings.bits}
                             label="Digital logic pins (single string field)"
+                            variant="secondary"
                         />
                         <Toggle
                             onToggle={() => updateSettings({
@@ -180,6 +183,7 @@ export default () => {
                             })}
                             isToggled={settings.bitsSeparated}
                             label="Digital logic pins (separate fields)"
+                            variant="secondary"
                         />
                     </Col>
                     <Col>

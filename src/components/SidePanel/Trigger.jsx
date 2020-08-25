@@ -161,6 +161,7 @@ export default () => {
                     onToggle={e => dispatch(externalTriggerToggled(e.target.checked))}
                     isToggled={externalTrigger}
                     label="External trigger"
+                    variant="secondary"
                 />
             </Collapse>
         </Accordion>

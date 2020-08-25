@@ -59,14 +59,17 @@ export default () => {
     } = useSelector(appState);
 
     return (
-        <div className="d-flex flex-column">
+        <div className="d-flex flex-column start-stop">
             <PowerMode />
             {capabilities.ppkToggleDUT && (
-                <Toggle
-                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
-                    isToggled={deviceRunning}
-                    label="SUPPLY POWER TO TEST DEVICE"
-                />
+                <div className="d-flex flex-row">
+                    <span className="danger mdi mdi-alert-decagram-outline" />
+                    <Toggle
+                        onToggle={() => dispatch(toggleDUT(deviceRunning))}
+                        isToggled={deviceRunning}
+                        label="SUPPLY POWER TO TEST DEVICE"
+                    />
+                </div>
             )}
             <Button
                 className="mt-3"

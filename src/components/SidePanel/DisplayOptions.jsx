@@ -60,19 +60,22 @@ export default () => {
                 <Toggle
                     onToggle={() => dispatch(toggleTriggerHandle())}
                     isToggled={triggerHandleVisible}
-                    label="TRIGGER HANDLE"
+                    label="Trigger handle"
+                    variant="secondary"
                 />
             )}
             <Toggle
                 onToggle={() => dispatch(toggleTimestamps())}
                 isToggled={timestampsVisible}
-                label="TIMESTAMPS"
+                label="Timestamps"
+                variant="secondary"
             />
             {hasDigitalChannels && (
                 <Toggle
                     onToggle={() => dispatch(toggleDigitalChannels())}
                     isToggled={digitalChannelsVisible}
-                    label="DIGITAL CHANNELS"
+                    label="Digital channels"
+                    variant="secondary"
                 />
             )}
         </>

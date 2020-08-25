@@ -109,6 +109,7 @@ export default () => {
                     onToggle={() => dispatch(spikeFilteringToggle())}
                     isToggled={spikeFiltering}
                     label="Spike filtering"
+                    variant="secondary"
                 />
             )}
         </Collapse>
