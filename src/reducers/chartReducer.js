@@ -34,11 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { options } from '../globals';
+import { options, nbDigitalChannels } from '../globals';
 
 import persistentStore from '../utils/persistentStore';
-
-console.log(persistentStore);
 
 const initialWindowDuration = 7 * 1e6;
 const initialBufferLength = ((options.data.length / options.samplesPerSecond) * 1e6)
@@ -55,7 +53,7 @@ const initialState = {
     bufferRemaining: initialBufferLength,
     index: 0,
     hasDigitalChannels: false,
-    digitalChannels: persistentStore.get('digitalChannels', []),
+    digitalChannels: persistentStore.get('digitalChannels', Array(nbDigitalChannels).fill(false)),
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     triggerHandleVisible: persistentStore.get('triggerHandleVisible', true),
