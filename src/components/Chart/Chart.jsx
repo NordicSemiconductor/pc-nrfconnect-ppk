@@ -116,6 +116,7 @@ const lastBits = new Array(nbDigitalChannels);
 const bitsChartOptions = {
     scales: {
         xAxes: [{
+            id: 'xScale',
             display: false,
             type: 'linear',
             ticks: {},
@@ -545,6 +546,7 @@ const Chart = () => {
                                 <Line
                                     data={bitsChartData[i]}
                                     options={bitsChartOptions}
+                                    plugins={[crossHairPlugin]}
                                 />
                             </div>
                         </div>

@@ -36,90 +36,101 @@
 
 /* eslint no-param-reassign: off */
 
-export default {
+const plugin = {
     id: 'crossHair',
+    instances: [],
+    moveEvent: {},
+
+    pointerMoveHandler(evt, chartInstance) {
+        const { layerX, layerY } = evt || {};
+        const { chartArea } = chartInstance;
+        const { left } = chartArea;
+        plugin.moveEvent = { layerX: layerX - left, layerY, id: chartInstance.id };
+        plugin.instances.forEach(instance => instance.update({ lazy: true }));
+    },
+
+    pointerLeaveHandler() {
+        plugin.moveEvent = {};
+        plugin.instances.forEach(instance => instance.update({ lazy: true }));
+    },
 
     beforeInit(chartInstance) {
-        const crossHair = {};
-        chartInstance.crossHair = crossHair;
-
+        plugin.instances.push(chartInstance);
         const { canvas } = chartInstance.chart.ctx;
-
-        crossHair.pointerMoveHandler = event => {
-            chartInstance.crossHair.moveEvent = event;
-            chartInstance.update({ lazy: true });
-        };
-        canvas.addEventListener('pointermove', crossHair.pointerMoveHandler);
-        canvas.addEventListener('pointerup', crossHair.pointerMoveHandler);
-        canvas.addEventListener('pointerleave', crossHair.pointerMoveHandler);
+        canvas.addEventListener('pointermove', evt => plugin.pointerMoveHandler(evt, chartInstance));
+        canvas.addEventListener('pointerup', evt => plugin.pointerMoveHandler(evt, chartInstance));
+        canvas.addEventListener('pointerleave', plugin.pointerLeaveHandler);
     },
 
     afterDraw(chartInstance) {
         const {
-            chartArea, chart, crossHair, scales,
+            chartArea, chart, scales,
         } = chartInstance;
-        const { moveEvent } = crossHair;
         const { ctx } = chart;
         const { canvas } = ctx;
-
-        if (!moveEvent) {
-            canvas.style.cursor = 'default';
-            return;
-        }
-
         const {
             left, right, top, bottom,
         } = chartArea;
-        const { layerX, layerY } = moveEvent;
 
-        if (!(top < layerY && bottom > layerY && left < layerX && right > layerX)) {
+        if (!plugin.moveEvent) {
             canvas.style.cursor = 'default';
-            return;
         }
-        canvas.style.cursor = 'pointer';
+
+        const { layerX, layerY } = plugin.moveEvent;
 
         const { xScale, yScale } = scales;
-        const uA = this.formatY(yScale.getValueForPixel(layerY));
-        const { width: uAwidth } = ctx.measureText(uA);
-        const [time, subsecond] = this.formatX(xScale.getValueForPixel(layerX), 0, []);
+        const [time, subsecond] = this.formatX(xScale.getValueForPixel(left + layerX), 0, []);
         const { width: tsWidth } = ctx.measureText(time);
 
         ctx.save();
         ctx.lineWidth = 0.5;
         ctx.strokeStyle = 'black';
         ctx.beginPath();
-        ctx.moveTo(left, layerY - 0.5);
-        ctx.lineTo(right, layerY - 0.5);
-        ctx.moveTo(layerX - 0.5, top);
-        ctx.lineTo(layerX - 0.5, bottom);
+        ctx.moveTo(left + layerX - 0.5, top);
+        ctx.lineTo(left + layerX - 0.5, bottom);
         ctx.closePath();
         ctx.stroke();
 
-        ctx.fillStyle = 'black';
-        ctx.fillRect(right - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
-        ctx.fillRect(layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
-
-        ctx.textAlign = 'right';
-        ctx.fillStyle = 'white';
-        ctx.fillText(uA, right - 5, layerY + 3);
-
-        ctx.textAlign = 'center';
-        ctx.fillText(time, layerX, top + 13);
-        ctx.fillText(subsecond, layerX, top + 28);
+        if (chartInstance.id === 0) {
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'right';
+            ctx.fillRect(left + layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText(time, left + layerX, top + 13);
+            ctx.fillText(subsecond, left + layerX, top + 28);
+        }
 
         ctx.restore();
-    },
 
-    destroy(chartInstance) {
-        const { crossHair } = chartInstance;
-        if (crossHair) {
-            const { canvas } = chartInstance.chart.ctx || {};
-            if (canvas) {
-                canvas.removeEventListener('pointermove', crossHair.pointerMoveHandler);
-                canvas.removeEventListener('pointerup', crossHair.pointerMoveHandler);
-                canvas.removeEventListener('pointerleave', crossHair.pointerMoveHandler);
-            }
-            delete chartInstance.crossHair;
+        if (!(top < layerY && bottom > layerY && layerX > 0 && right > layerX)) {
+            canvas.style.cursor = 'default';
+            return;
+        }
+
+        canvas.style.cursor = 'pointer';
+
+        if (yScale && plugin.moveEvent.id === 0) {
+            ctx.save();
+            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = 'black';
+            ctx.beginPath();
+            ctx.moveTo(left, layerY - 0.5);
+            ctx.lineTo(right, layerY - 0.5);
+            ctx.closePath();
+            ctx.stroke();
+
+            const uA = yScale ? this.formatY(yScale.getValueForPixel(layerY)) : null;
+            const { width: uAwidth } = ctx.measureText(uA);
+
+            ctx.fillStyle = 'black';
+            ctx.textAlign = 'right';
+            ctx.fillRect(right - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
+            ctx.fillStyle = 'white';
+            ctx.fillText(uA, right - 5, layerY + 3);
+            ctx.restore();
         }
     },
 };
+
+export default plugin;
