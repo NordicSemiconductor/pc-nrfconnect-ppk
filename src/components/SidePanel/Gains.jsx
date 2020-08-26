@@ -60,7 +60,7 @@ const Gains = ({ eventKey }) => {
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>
                     <Form.Label className="pt-2 d-flex flex-row justify-content-between">
-                        <span>Gain multiplier #{index + 1}</span>
+                        <span>Range {index + 1}</span>
                         <span>{(gain / 100).toFixed(2)}</span>
                     </Form.Label>
                     <Slider
