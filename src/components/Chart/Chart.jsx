@@ -375,7 +375,7 @@ const Chart = () => {
     const chartData = {
         datasets: [{
             borderColor: dataColor,
-            borderWidth: 1.5,
+            borderWidth: step > 2 ? 1 : 1.5,
             fill: false,
             data: lineData.slice(0, mappedIndex),
             pointRadius: step > 0.2 ? 0 : 1.5,

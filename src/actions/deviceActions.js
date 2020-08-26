@@ -69,7 +69,6 @@ let device = null;
 let updateRequestInterval;
 
 const setupOptions = () => dispatch => {
-    console.log(device.capabilities);
     options.samplingTime = device.adcSamplingTimeUs;
     options.samplesPerSecond = 1e6 / options.samplingTime;
     const bufferLength = Math.trunc(options.samplesPerSecond * bufferLengthInSeconds);
@@ -77,6 +76,7 @@ const setupOptions = () => dispatch => {
         if (!options.bits || options.bits.length !== bufferLength) {
             options.bits = new Uint8Array(bufferLength);
         }
+        options.bits.fill(0);
         options.triggerMarkers = null;
     } else {
         options.bits = null;
@@ -84,8 +84,10 @@ const setupOptions = () => dispatch => {
     }
     if (options.data.length !== bufferLength) {
         options.data = new Float32Array(bufferLength);
-        options.data.fill(NaN);
     }
+    options.data.fill(NaN);
+    options.index = 0;
+    options.timestamp = 0;
     dispatch(updateHasDigitalChannels());
 };
 
@@ -93,7 +95,11 @@ const setupOptions = () => dispatch => {
 export function samplingStart() {
     return async (dispatch, getState) => {
         options.data.fill(NaN);
+        if (options.bits) {
+            options.bits.fill(0);
+        }
         options.index = 0;
+        options.timestamp = undefined;
         if (options.triggerMarkers) {
             options.triggerMarkers = [];
         }
@@ -153,6 +159,9 @@ export function open(deviceInfo) {
             trigger = false,
             triggerMarker = false,
         }) => {
+            if (options.timestamp === undefined) {
+                options.timestamp = 0;
+            }
             const { samplingRunning } = getState().app.app;
             const { windowBegin, windowEnd } = getState().app.chart;
             if (!samplingRunning && !trigger) {
