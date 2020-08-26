@@ -72,7 +72,7 @@ const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
 
 const dataColor = colors.nordicBlue;
-const valueRange = { min: -20, max: 100 };
+const valueRange = { min: -20, max: undefined };
 
 const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
