@@ -41,7 +41,7 @@ const GAINS_UPDATE = 'GAINS_UPDATE';
 
 export const updateGainsAction = (value, range) => ({
     type: GAINS_UPDATE,
-    value: value === null ? 100 : value,
+    value: value || 100,
     range,
 });
 

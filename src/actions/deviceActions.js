@@ -232,11 +232,11 @@ export function open(deviceInfo) {
                 ...device.vddRange,
             }));
             if (device.capabilities.ppkSetUserGains) {
-                dispatch(updateGainsAction(metadata.ug0, 0));
-                dispatch(updateGainsAction(metadata.ug1, 1));
-                dispatch(updateGainsAction(metadata.ug2, 2));
-                dispatch(updateGainsAction(metadata.ug3, 3));
-                dispatch(updateGainsAction(metadata.ug4, 4));
+                dispatch(updateGainsAction(metadata.ug0 * 100, 0));
+                dispatch(updateGainsAction(metadata.ug1 * 100, 1));
+                dispatch(updateGainsAction(metadata.ug2 * 100, 2));
+                dispatch(updateGainsAction(metadata.ug3 * 100, 3));
+                dispatch(updateGainsAction(metadata.ug4 * 100, 4));
             }
             if (device.capabilities.ppkSetPowerMode) {
                 // 1 = Ampere
