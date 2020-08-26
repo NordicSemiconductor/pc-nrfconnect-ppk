@@ -131,6 +131,13 @@ const plugin = {
             ctx.restore();
         }
     },
+
+    destroy(chartInstance) {
+        const i = plugin.instances.findIndex(({ id }) => id === chartInstance.id);
+        if (i > -1) {
+            plugin.instances.splice(i, 1);
+        }
+    },
 };
 
 export default plugin;
