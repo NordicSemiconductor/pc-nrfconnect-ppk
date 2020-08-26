@@ -35,6 +35,7 @@
  */
 
 import React from 'react';
+import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
@@ -56,7 +57,7 @@ import {
 } from '../../reducers/switchingPointsReducer';
 import { appState } from '../../reducers/appReducer';
 
-export default () => {
+const SwitchPoints = ({ eventKey }) => {
     const dispatch = useDispatch();
 
     const {
@@ -68,10 +69,14 @@ export default () => {
         switchUpSliderPosition,
         switchDownSliderPosition,
     } = useSelector(switchingPointsState);
-    const { capabilities } = useSelector(appState);
+    const { advancedMode, capabilities } = useSelector(appState);
+
+    if (!advancedMode || !capabilities.ppkSwitchPointUp) {
+        return null;
+    }
 
     return (
-        <Collapse title="SWITCH LEVELS" eventKey="2">
+        <Collapse title="SWITCH LEVELS" eventKey={eventKey}>
             {capabilities.ppkSwitchPointUp && (
                 <>
                     Switch up
@@ -115,3 +120,9 @@ export default () => {
         </Collapse>
     );
 };
+
+SwitchPoints.propTypes = {
+    eventKey: string.isRequired,
+};
+
+export default SwitchPoints;

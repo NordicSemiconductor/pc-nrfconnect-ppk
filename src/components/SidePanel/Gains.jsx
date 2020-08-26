@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -39,50 +39,45 @@ import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { Slider } from 'pc-nrfconnect-shared';
 
-import { updateRegulator } from '../../actions/deviceActions';
+import { updateGains } from '../../actions/deviceActions';
 import Collapse from './Collapse';
 
 import { appState } from '../../reducers/appReducer';
-import {
-    voltageRegulatorState,
-    moveVoltageRegulatorVddAction,
-} from '../../reducers/voltageRegulatorReducer';
+import { updateGainsAction, gainsState } from '../../reducers/gainsReducer';
 
-const VoltageRegulator = ({ eventKey }) => {
+const Gains = ({ eventKey }) => {
     const dispatch = useDispatch();
-    const { vdd, min, max } = useSelector(voltageRegulatorState);
-    const { isSmuMode, capabilities: { ppkSetPowerMode } } = useSelector(appState);
-
+    const gains = useSelector(gainsState);
+    const { capabilities } = useSelector(appState);
+    if (!capabilities.ppkSetUserGains) {
+        return null;
+    }
+    const range = { min: 90, max: 110 };
     return (
-        <Collapse
-            title="VOLTAGE ADJUSTMENT"
-            eventKey={eventKey}
-            className={ppkSetPowerMode && !isSmuMode ? 'disabled' : ''}
-        >
-            <Form.Label htmlFor="slider-vdd">
-                VDD{' '}
-                <NumberInlineInput
-                    value={vdd}
-                    range={{ min, max }}
-                    onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
-                />
-                {' '}mV
-            </Form.Label>
-            <Slider
-                id="slider-vdd"
-                values={[vdd]}
-                range={{ min, max }}
-                onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
-                onChangeComplete={() => dispatch(updateRegulator(vdd))}
-            />
+        <Collapse title="GAINS" eventKey={eventKey}>
+            {gains.map((gain, index) => (
+                <React.Fragment key={`${index + 1}`}>
+                    <Form.Label className="pt-2 d-flex flex-row justify-content-between">
+                        <span>Gain multiplier #{index + 1}</span>
+                        <span>{(gain / 100).toFixed(2)}</span>
+                    </Form.Label>
+                    <Slider
+                        id={`slider-gains-${index}`}
+                        values={[gain]}
+                        range={range}
+                        onChange={[value => dispatch(updateGainsAction(value, index))]}
+                        onChangeComplete={() => dispatch(updateGains())}
+                    />
+                </React.Fragment>
+            ))}
         </Collapse>
     );
 };
 
-VoltageRegulator.propTypes = {
+Gains.propTypes = {
     eventKey: string.isRequired,
 };
 
-export default VoltageRegulator;
+export default Gains;

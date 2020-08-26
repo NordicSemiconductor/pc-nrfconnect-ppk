@@ -35,6 +35,7 @@
  */
 
 import React from 'react';
+import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -47,6 +48,7 @@ import {
     resetResistors,
 } from '../../actions/deviceActions';
 
+import { appState } from '../../reducers/appReducer';
 import {
     updateHighResistorAction,
     updateMidResistorAction,
@@ -54,16 +56,21 @@ import {
     resistorCalibrationState,
 } from '../../reducers/resistorCalibrationReducer';
 
-export default () => {
+const ResistorCalibration = ({ eventKey }) => {
     const dispatch = useDispatch();
     const { userResLo, userResMid, userResHi } = useSelector(resistorCalibrationState);
+    const { advancedMode, capabilities } = useSelector(appState);
+
+    if (!advancedMode || !capabilities.ppkUpdateResistors) {
+        return null;
+    }
 
     const isHiValid = !Number.isNaN(parseFloat(userResHi));
     const isMidValid = !Number.isNaN(parseFloat(userResMid));
     const isLoValid = !Number.isNaN(parseFloat(userResLo));
 
     return (
-        <Collapse title="RESISTOR CALIBRATION" eventKey="3">
+        <Collapse title="RESISTOR CALIBRATION" eventKey={eventKey}>
             <InputGroup>
                 <InputGroup.Prepend>
                     <InputGroup.Text>High</InputGroup.Text>
@@ -126,3 +133,9 @@ export default () => {
         </Collapse>
     );
 };
+
+ResistorCalibration.propTypes = {
+    eventKey: string.isRequired,
+};
+
+export default ResistorCalibration;

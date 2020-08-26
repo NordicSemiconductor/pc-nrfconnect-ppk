@@ -225,6 +225,10 @@ class SerialDevice extends Device {
     ppkSetPowerMode(...args) {
         return this.sendCommand([PPKCmd.SetPowerMode, ...args]);
     }
+
+    ppkSetUserGains(range, gain) {
+        return this.sendCommand([PPKCmd.SetUserGains, range, gain]);
+    }
 }
 
 export default SerialDevice;

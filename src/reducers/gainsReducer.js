@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,55 +34,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { string } from 'prop-types';
-import { useDispatch, useSelector } from 'react-redux';
+const initialState = [100, 100, 100, 100, 100];
 
-import Form from 'react-bootstrap/Form';
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+const GAINS_RESET = 'GAINS_RESET';
+const GAINS_UPDATE = 'GAINS_UPDATE';
 
-import { updateRegulator } from '../../actions/deviceActions';
-import Collapse from './Collapse';
+export const updateGainsAction = (value, range) => ({
+    type: GAINS_UPDATE,
+    value: value === null ? 100 : value,
+    range,
+});
 
-import { appState } from '../../reducers/appReducer';
-import {
-    voltageRegulatorState,
-    moveVoltageRegulatorVddAction,
-} from '../../reducers/voltageRegulatorReducer';
+export const gainsResetAction = () => ({ type: GAINS_RESET });
 
-const VoltageRegulator = ({ eventKey }) => {
-    const dispatch = useDispatch();
-    const { vdd, min, max } = useSelector(voltageRegulatorState);
-    const { isSmuMode, capabilities: { ppkSetPowerMode } } = useSelector(appState);
-
-    return (
-        <Collapse
-            title="VOLTAGE ADJUSTMENT"
-            eventKey={eventKey}
-            className={ppkSetPowerMode && !isSmuMode ? 'disabled' : ''}
-        >
-            <Form.Label htmlFor="slider-vdd">
-                VDD{' '}
-                <NumberInlineInput
-                    value={vdd}
-                    range={{ min, max }}
-                    onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
-                />
-                {' '}mV
-            </Form.Label>
-            <Slider
-                id="slider-vdd"
-                values={[vdd]}
-                range={{ min, max }}
-                onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
-                onChangeComplete={() => dispatch(updateRegulator(vdd))}
-            />
-        </Collapse>
-    );
+export default (state = initialState, { type, ...action }) => {
+    switch (type) {
+        case GAINS_UPDATE: {
+            state.splice(action.range, 1, action.value);
+            return [...state];
+        }
+        case GAINS_RESET:
+            return initialState;
+        default:
+            return state;
+    }
 };
 
-VoltageRegulator.propTypes = {
-    eventKey: string.isRequired,
-};
-
-export default VoltageRegulator;
+export const gainsState = ({ app }) => app.gains;

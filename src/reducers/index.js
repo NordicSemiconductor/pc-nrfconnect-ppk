@@ -42,6 +42,7 @@ import trigger from './triggerReducer';
 import switchingPoints from './switchingPointsReducer';
 import voltageRegulator from './voltageRegulatorReducer';
 import resistorCalibration from './resistorCalibrationReducer';
+import gains from './gainsReducer';
 
 export default combineReducers({
     app,
@@ -50,4 +51,5 @@ export default combineReducers({
     switchingPoints,
     voltageRegulator,
     resistorCalibration,
+    gains,
 });

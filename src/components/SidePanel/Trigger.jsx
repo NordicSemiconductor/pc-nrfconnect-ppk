@@ -60,12 +60,16 @@ import { triggerState } from '../../reducers/triggerReducer';
 
 export default () => {
     const dispatch = useDispatch();
-    const { rttRunning } = useSelector(appState);
+    const { rttRunning, capabilities } = useSelector(appState);
     const {
         externalTrigger,
         triggerRunning,
         triggerSingleWaiting,
     } = useSelector(triggerState);
+
+    if (!capabilities.ppkTriggerSet) {
+        return null;
+    }
 
     const range = {
         min: (450 * 13) / 1e3,

@@ -64,6 +64,7 @@ import {
     chartWindowAction, animationAction, chartCursorAction, updateHasDigitalChannels,
 } from '../reducers/chartReducer';
 import { options, bufferLengthInSeconds } from '../globals';
+import { updateGainsAction } from '../reducers/gainsReducer';
 
 let device = null;
 let updateRequestInterval;
@@ -230,6 +231,13 @@ export function open(deviceInfo) {
                 currentVDD: metadata.vdd,
                 ...device.vddRange,
             }));
+            if (device.capabilities.ppkSetUserGains) {
+                dispatch(updateGainsAction(metadata.ug0, 0));
+                dispatch(updateGainsAction(metadata.ug1, 1));
+                dispatch(updateGainsAction(metadata.ug2, 2));
+                dispatch(updateGainsAction(metadata.ug3, 3));
+                dispatch(updateGainsAction(metadata.ug4, 4));
+            }
             if (device.capabilities.ppkSetPowerMode) {
                 // 1 = Ampere
                 // 2 = SMU
@@ -278,6 +286,19 @@ export function updateRegulator() {
         dispatch(updateRegulatorAction({ currentVdd: vdd }));
     };
 }
+
+export const updateGains = () => async (_, getState) => {
+    if (!device.ppkSetUserGains) {
+        return;
+    }
+    const { gains } = getState().app;
+    await device.ppkSetUserGains(0, gains[0] / 100);
+    await device.ppkSetUserGains(1, gains[1] / 100);
+    await device.ppkSetUserGains(2, gains[2] / 100);
+    await device.ppkSetUserGains(3, gains[3] / 100);
+    await device.ppkSetUserGains(4, gains[4] / 100);
+    logger.info(`Gain multipliers updated [${gains.join(',')}]`);
+};
 
 /**
  * Takes the window value in milliseconds, adjusts for microsecs

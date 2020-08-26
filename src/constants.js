@@ -56,4 +56,5 @@ export default {
     SpikeFilteringOff: 0x16,
     GetMetadata: 0x19,
     Reset: 0x20,
+    SetUserGains: 0x25,
 };

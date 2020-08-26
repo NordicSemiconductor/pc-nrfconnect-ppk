@@ -45,13 +45,6 @@ const getAllPropertyNames = obj => {
     return [...new Set(Object.getOwnPropertyNames(obj).concat(inherited))];
 };
 
-function convertFloatToByteBuffer(floatnum) {
-    const float = new Float32Array(1);
-    float[0] = floatnum;
-    const bytes = new Uint8Array(float.buffer);
-    return bytes;
-}
-
 export default class Device extends EventEmitter {
     currentVdd = 0;
 
@@ -99,30 +92,6 @@ export default class Device extends EventEmitter {
 
     ppkToggleDUT(...args) {
         return this.sendCommand([PPKCmd.DutToggle, ...args]);
-    }
-
-    ppkUpdateResistors(low, mid, high) {
-        const lowbytes = convertFloatToByteBuffer(low);
-        const midbytes = convertFloatToByteBuffer(mid);
-        const highbytes = convertFloatToByteBuffer(high);
-        this.resistors.hi = high;
-        this.resistors.mid = mid;
-        this.resistors.lo = low;
-
-        return this.sendCommand([
-            PPKCmd.ResUserSet,
-            lowbytes[0], lowbytes[1], lowbytes[2], lowbytes[3],
-            midbytes[0], midbytes[1], midbytes[2], midbytes[3],
-            highbytes[0], highbytes[1], highbytes[2], highbytes[3],
-        ]);
-    }
-
-    ppkSpikeFilteringOn() {
-        return this.sendCommand([PPKCmd.SpikeFilteringOn]);
-    }
-
-    ppkSpikeFilteringOff() {
-        return this.sendCommand([PPKCmd.SpikeFilteringOff]);
     }
 
     ppkUpdateRegulator(vdd) {
