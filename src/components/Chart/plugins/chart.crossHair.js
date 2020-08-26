@@ -82,28 +82,30 @@ const plugin = {
         const [time, subsecond] = this.formatX(xScale.getValueForPixel(left + layerX), 0, []);
         const { width: tsWidth } = ctx.measureText(time);
 
-        ctx.save();
-        ctx.lineWidth = 0.5;
-        ctx.strokeStyle = 'black';
-        ctx.beginPath();
-        ctx.moveTo(left + layerX - 0.5, top);
-        ctx.lineTo(left + layerX - 0.5, bottom);
-        ctx.closePath();
-        ctx.stroke();
+        if (layerX >= 0 && layerX <= (right - left)) {
+            ctx.save();
+            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = 'black';
+            ctx.beginPath();
+            ctx.moveTo(left + layerX - 0.5, top);
+            ctx.lineTo(left + layerX - 0.5, bottom);
+            ctx.closePath();
+            ctx.stroke();
 
-        if (chartInstance.id === 0) {
-            ctx.fillStyle = 'black';
-            ctx.textAlign = 'right';
-            ctx.fillRect(left + layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText(time, left + layerX, top + 13);
-            ctx.fillText(subsecond, left + layerX, top + 28);
+            if (chartInstance.id === 0) {
+                ctx.fillStyle = 'black';
+                ctx.textAlign = 'right';
+                ctx.fillRect(left + layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText(time, left + layerX, top + 13);
+                ctx.fillText(subsecond, left + layerX, top + 28);
+            }
+
+            ctx.restore();
         }
 
-        ctx.restore();
-
-        if (!(top < layerY && bottom > layerY && layerX > 0 && right > layerX)) {
+        if (layerY < top || layerY > bottom) {
             canvas.style.cursor = 'default';
             return;
         }
