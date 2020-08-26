@@ -103,7 +103,7 @@ class SerialDevice extends Device {
     getAdcResult(range, adcVal) {
         const resultWithoutGain = ((adcVal - this.modifiers.o[range])
                                 * (this.adcMult / this.modifiers.r[range]));
-        let adc = (resultWithoutGain
+        let adc = this.modifiers.ug[range] * (resultWithoutGain
             * (this.modifiers.gs[range] * resultWithoutGain + this.modifiers.gi[range])
             + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]));
 
@@ -227,6 +227,7 @@ class SerialDevice extends Device {
     }
 
     ppkSetUserGains(range, gain) {
+        this.modifiers.ug[range] = gain;
         return this.sendCommand([PPKCmd.SetUserGains, range, ...convertFloatToByteBuffer(gain)]);
     }
 }
