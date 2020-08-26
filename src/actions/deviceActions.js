@@ -282,7 +282,7 @@ export function updateRegulator() {
     return async (dispatch, getState) => {
         const { vdd } = getState().app.voltageRegulator;
         await device.ppkUpdateRegulator(vdd);
-        logger.info(`Voltage regulater updated to ${vdd} mV`);
+        logger.info(`Voltage regulator updated to ${vdd} mV`);
         dispatch(updateRegulatorAction({ currentVdd: vdd }));
     };
 }
