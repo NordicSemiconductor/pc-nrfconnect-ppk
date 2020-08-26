@@ -287,18 +287,14 @@ export function updateRegulator() {
     };
 }
 
-export const updateGains = () => async (_, getState) => {
+export const updateGains = index => async (_, getState) => {
     if (!device.ppkSetUserGains) {
         return;
     }
     const { gains } = getState().app;
-    const scaled = gains.map(g => g / 100);
-    await device.ppkSetUserGains(0, scaled[0]);
-    await device.ppkSetUserGains(1, scaled[1]);
-    await device.ppkSetUserGains(2, scaled[2]);
-    await device.ppkSetUserGains(3, scaled[3]);
-    await device.ppkSetUserGains(4, scaled[4]);
-    logger.info(`Gain multipliers updated [${scaled.join(',')}]`);
+    const gain = gains[index] / 100;
+    await device.ppkSetUserGains(index, gain);
+    logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
 };
 
 /**

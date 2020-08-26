@@ -68,7 +68,7 @@ const Gains = ({ eventKey }) => {
                         values={[gain]}
                         range={range}
                         onChange={[value => dispatch(updateGainsAction(value, index))]}
-                        onChangeComplete={() => dispatch(updateGains())}
+                        onChangeComplete={() => dispatch(updateGains(index))}
                     />
                 </React.Fragment>
             ))}
