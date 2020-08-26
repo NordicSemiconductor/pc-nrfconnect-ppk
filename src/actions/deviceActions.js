@@ -292,12 +292,13 @@ export const updateGains = () => async (_, getState) => {
         return;
     }
     const { gains } = getState().app;
-    await device.ppkSetUserGains(0, gains[0] / 100);
-    await device.ppkSetUserGains(1, gains[1] / 100);
-    await device.ppkSetUserGains(2, gains[2] / 100);
-    await device.ppkSetUserGains(3, gains[3] / 100);
-    await device.ppkSetUserGains(4, gains[4] / 100);
-    logger.info(`Gain multipliers updated [${gains.join(',')}]`);
+    const scaled = gains.map(g => g / 100);
+    await device.ppkSetUserGains(0, scaled[0]);
+    await device.ppkSetUserGains(1, scaled[1]);
+    await device.ppkSetUserGains(2, scaled[2]);
+    await device.ppkSetUserGains(3, scaled[3]);
+    await device.ppkSetUserGains(4, scaled[4]);
+    logger.info(`Gain multipliers updated [${scaled.join(',')}]`);
 };
 
 /**

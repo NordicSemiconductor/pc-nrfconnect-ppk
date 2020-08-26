@@ -45,6 +45,13 @@ const getAllPropertyNames = obj => {
     return [...new Set(Object.getOwnPropertyNames(obj).concat(inherited))];
 };
 
+export function convertFloatToByteBuffer(floatnum) {
+    const float = new Float32Array(1);
+    float[0] = floatnum;
+    const bytes = new Uint8Array(float.buffer);
+    return bytes;
+}
+
 export default class Device extends EventEmitter {
     currentVdd = 0;
 

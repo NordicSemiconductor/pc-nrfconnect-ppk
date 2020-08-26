@@ -38,7 +38,7 @@ import { fork } from 'child_process';
 import { getAppDir } from 'nrfconnect/core';
 import path from 'path';
 
-import Device from './abstractDevice';
+import Device, { convertFloatToByteBuffer } from './abstractDevice';
 import PPKCmd from '../constants';
 
 /* eslint-disable no-bitwise */
@@ -227,7 +227,7 @@ class SerialDevice extends Device {
     }
 
     ppkSetUserGains(range, gain) {
-        return this.sendCommand([PPKCmd.SetUserGains, range, gain]);
+        return this.sendCommand([PPKCmd.SetUserGains, range, ...convertFloatToByteBuffer(gain)]);
     }
 }
 
