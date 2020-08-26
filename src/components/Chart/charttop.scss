@@ -1,7 +1,10 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
 .chart-top {
     .btn-group > .btn {
         width: 4rem;
         margin-right: 0.5rem;
         padding: 0;
+        color: $gray-600;
     }
 }
