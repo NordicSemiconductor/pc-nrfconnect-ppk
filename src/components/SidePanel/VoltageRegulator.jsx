@@ -60,7 +60,11 @@ export default () => {
 
     return (
         <Accordion defaultActiveKey="1">
-            <Collapse title="VOLTAGE ADJUSTMENT" eventKey="1">
+            <Collapse
+                title="VOLTAGE ADJUSTMENT"
+                eventKey="1"
+                className={ppkSetPowerMode && !isSmuMode ? 'disabled' : ''}
+            >
                 <Form.Label htmlFor="slider-vdd">
                     VDD{' '}
                     <NumberInlineInput
@@ -78,10 +82,12 @@ export default () => {
                     onChangeComplete={() => dispatch(updateRegulator(vdd))}
                 />
             </Collapse>
-            <div className={(ppkSetPowerMode && !isSmuMode) ? 'disabled' : ''}>
-                {advancedMode && <SwitchPoints />}
-                {advancedMode && <ResistorCalibration />}
-            </div>
+            {ppkSetPowerMode || (
+                <>
+                    {advancedMode && <SwitchPoints />}
+                    {advancedMode && <ResistorCalibration />}
+                </>
+            )}
         </Accordion>
     );
 };

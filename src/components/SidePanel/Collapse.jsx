@@ -63,18 +63,21 @@ ContextAwareToggle.propTypes = {
     title: string.isRequired,
 };
 
-const Collapse = ({ title, eventKey, children = null }) => (
-    <>
+const Collapse = ({
+    title, eventKey, className = '', children = null,
+}) => (
+    <div className={className}>
         <ContextAwareToggle eventKey={eventKey} title={title} />
         <Accordion.Collapse eventKey={eventKey}>
             <>{children}</>
         </Accordion.Collapse>
-    </>
+    </div>
 );
 
 Collapse.propTypes = {
     title: string.isRequired,
     eventKey: string.isRequired,
+    className: string,
     children: node,
 };
 
