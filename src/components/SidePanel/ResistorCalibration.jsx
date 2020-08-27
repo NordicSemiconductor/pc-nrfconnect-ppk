@@ -40,7 +40,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+
 import Collapse from './Collapse';
 
 import {
@@ -59,77 +60,79 @@ import {
 const ResistorCalibration = ({ eventKey }) => {
     const dispatch = useDispatch();
     const { userResLo, userResMid, userResHi } = useSelector(resistorCalibrationState);
-    const { advancedMode, capabilities } = useSelector(appState);
+    const { capabilities } = useSelector(appState);
 
-    if (!advancedMode || !capabilities.ppkUpdateResistors) {
+    if (!capabilities.ppkUpdateResistors) {
         return null;
     }
 
-    const isHiValid = !Number.isNaN(parseFloat(userResHi));
-    const isMidValid = !Number.isNaN(parseFloat(userResMid));
-    const isLoValid = !Number.isNaN(parseFloat(userResLo));
-
     return (
         <Collapse title="RESISTOR CALIBRATION" eventKey={eventKey}>
-            <InputGroup>
-                <InputGroup.Prepend>
-                    <InputGroup.Text>High</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control
-                    type="text"
+            <Form.Label htmlFor="slider-res-hi">
+                High{' '}
+                <NumberInlineInput
                     value={userResHi}
-                    isValid={isHiValid}
-                    onChange={e => dispatch(updateHighResistorAction(e.target.value))}
-                    onKeyPress={e => (
-                        (e.key === 'Enter' && isHiValid) && dispatch(updateResistors())
-                    )}
+                    range={{ min: 1, max: 3 }}
+                    onChange={value => dispatch(updateHighResistorAction(value))}
+                    chars={5}
                 />
-            </InputGroup>
-            <InputGroup>
-                <InputGroup.Prepend>
-                    <InputGroup.Text>Mid</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control
-                    type="text"
+                { '\u2126'}
+            </Form.Label>
+            <Slider
+                id="slider-res-hi"
+                values={[userResHi]}
+                range={{ min: 1, max: 3, decimals: 2 }}
+                onChange={[value => dispatch(updateHighResistorAction(value))]}
+                onChangeComplete={() => dispatch(updateResistors())}
+            />
+            <Form.Label htmlFor="slider-res-mid">
+                Mid{' '}
+                <NumberInlineInput
                     value={userResMid}
-                    isValid={isMidValid}
-                    onChange={e => dispatch(updateMidResistorAction(e.target.value))}
-                    onKeyPress={e => (
-                        (e.key === 'Enter' && isMidValid) && dispatch(updateResistors())
-                    )}
+                    range={{ min: 25, max: 35 }}
+                    onChange={value => dispatch(updateMidResistorAction(value))}
+                    chars={5}
                 />
-            </InputGroup>
-            <InputGroup>
-                <InputGroup.Prepend>
-                    <InputGroup.Text>Low</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control
-                    type="text"
+                { '\u2126'}
+            </Form.Label>
+            <Slider
+                id="slider-res-mid"
+                values={[userResMid]}
+                range={{ min: 25, max: 35, decimals: 1 }}
+                onChange={[value => dispatch(updateMidResistorAction(value))]}
+                onChangeComplete={() => dispatch(updateResistors())}
+            />
+            <Form.Label htmlFor="slider-res-low">
+                Low{' '}
+                <NumberInlineInput
                     value={userResLo}
-                    isValid={isLoValid}
-                    onChange={e => dispatch(updateLowResistorAction(e.target.value))}
-                    onKeyPress={e => (
-                        (e.key === 'Enter' && isLoValid) && dispatch(updateResistors())
-                    )}
+                    range={{ min: 450, max: 550 }}
+                    onChange={value => dispatch(updateLowResistorAction(value))}
+                    chars={4}
                 />
-            </InputGroup>
-            <div className="d-flex flex-column">
-                <ButtonGroup style={{ marginTop: 10 }}>
-                    <Button
-                        disabled={!(isLoValid && isHiValid && isMidValid)}
-                        onClick={() => dispatch(updateResistors())}
-                        variant="light"
-                    >
-                        Update
-                    </Button>
-                    <Button
-                        onClick={() => dispatch(resetResistors())}
-                        variant="light"
-                    >
-                        Reset
-                    </Button>
-                </ButtonGroup>
-            </div>
+                { '\u2126'}
+            </Form.Label>
+            <Slider
+                id="slider-res-low"
+                values={[userResLo]}
+                range={{ min: 450, max: 550 }}
+                onChange={[value => dispatch(updateLowResistorAction(value))]}
+                onChangeComplete={() => dispatch(updateResistors())}
+            />
+            <ButtonGroup style={{ marginTop: 10 }}>
+                <Button
+                    onClick={() => dispatch(updateResistors())}
+                    variant="light"
+                >
+                    Update
+                </Button>
+                <Button
+                    onClick={() => dispatch(resetResistors())}
+                    variant="light"
+                >
+                    Reset
+                </Button>
+            </ButtonGroup>
         </Collapse>
     );
 };

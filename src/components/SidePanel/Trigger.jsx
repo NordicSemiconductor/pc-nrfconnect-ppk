@@ -74,6 +74,7 @@ export default () => {
     const range = {
         min: (450 * 13) / 1e3,
         max: (4000 * 13) / 1e3,
+        decimals: 2,
     };
 
     const [level, setLevel] = useState({ value: 1, unit: 1000 });
@@ -92,6 +93,7 @@ export default () => {
                         value={triggerWindowLength}
                         range={range}
                         onChange={value => setTriggerWindowLength(value)}
+                        chars={6}
                     />
                     {' '}ms
                 </Form.Label>

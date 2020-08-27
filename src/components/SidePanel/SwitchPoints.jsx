@@ -69,9 +69,9 @@ const SwitchPoints = ({ eventKey }) => {
         switchUpSliderPosition,
         switchDownSliderPosition,
     } = useSelector(switchingPointsState);
-    const { advancedMode, capabilities } = useSelector(appState);
+    const { capabilities } = useSelector(appState);
 
-    if (!advancedMode || !capabilities.ppkSwitchPointUp) {
+    if (!capabilities.ppkSwitchPointUp) {
         return null;
     }
 

@@ -309,7 +309,7 @@ export function triggerUpdateWindow(value) {
         const triggerWindow = Math.floor(triggerWindowMicroSec / options.samplingTime);
         // If division returns a decimal, round downward to nearest integer
         await device.ppkTriggerWindowSet(triggerWindow);
-        logger.info(`Trigger window updated to ${triggerWindow} ms`);
+        logger.info(`Trigger window updated to ${value} ms`);
     };
 }
 
