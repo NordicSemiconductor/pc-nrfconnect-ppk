@@ -7,6 +7,8 @@
         padding: 0;
         h2 {
             line-height: 13px;
+            margin-bottom: 0;
+            transition: margin-bottom 0.2s ease-in-out;
             &::after {
                 content: "\f140";
                 font-family: "Material Design Icons";
@@ -17,7 +19,12 @@
             }
         }
     }
-    .collapse-toggle.show h2::after {
-        transform: rotate(-180deg);
+    .collapse-toggle.show {
+        h2 {
+            margin-bottom: 16px;
+        }
+        h2::after {
+            transform: rotate(-180deg);
+        }
     }
 }

@@ -1,11 +1,18 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-.core19-app-content .core19-main-and-log .core19-main-container {
-    margin: 0.5rem;
-}
+.core19-app-content {
+    color: $gray-700;
 
-.core19-app-content .core19-side-panel {
-    overflow: overlay;
+    .core19-main-and-log {
+        background-color: $gray-100;
+        .core19-main-container {
+            margin: 0.5rem;
+        }
+    }
+
+    .core19-side-panel {
+        overflow: overlay;
+    }
 }
 
 .btn-lg {
@@ -41,4 +48,10 @@
 // missing from shared
 .toggle {
     min-height: fit-content;
+    .toggle-handle-secondary-toggled {
+        background: white; // overridden
+    }
+    .toggle-label {
+        font-size: 12px; // overridden
+    }
 }

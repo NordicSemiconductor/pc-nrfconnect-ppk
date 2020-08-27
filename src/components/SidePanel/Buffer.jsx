@@ -49,14 +49,15 @@ export default () => {
     const percentage = 100 - ((100 * bufferRemaining) / totalInUs);
 
     return (
-        <>
+        <div className="buffer">
             <h2>CAPTURE STATUS</h2>
             <div className="buffer-total">
-                <div className="buffer-used py-3" style={{ width: `${percentage}%` }} />
+                <div
+                    className="buffer-used progress-bar-striped"
+                    style={{ width: `${percentage}%` }}
+                />
             </div>
-            <h2 className="mt-2">
-                BUFFER {bufferRemaining > 0 ? `${percentage.toFixed()}%` : 'FULL'}
-            </h2>
-        </>
+            <div className="label mt-2">Buffer {`${percentage.toFixed()}%`} full</div>
+        </div>
     );
 };

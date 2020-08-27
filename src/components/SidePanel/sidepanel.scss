@@ -1,18 +1,20 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
+.core19-app-content .core19-side-panel {
+    background-color: $gray-50;
+}
+
 .sidepanel {
     font-size: 12px;
-    color: $gray-600;
+    padding: 12px 0;
 
     h2 {
-        margin-top: 2rem;
-        margin-bottom: 1rem;
+        margin-top: 36px;
+        margin-bottom: 16px;
 
         font-size: 10px;
         font-weight: normal;
         letter-spacing: 0.5ex;
-
-        color: $gray-400;
     }
 
     .form-label, .form-group {
@@ -34,32 +36,53 @@
         border-radius: 0;
     }
 
-    .buffer-total {
-        background-color: $gray-100;
-        .buffer-used {
-            background-color: $gray-600;
+    .buffer {
+        .buffer-total {
+            background-color: $gray-100;
+            padding: 1px;
+            border: 1px solid $gray-700;
+            .buffer-used {
+                background-color: $gray-700;
+                height: 24px;
+            }
+        }
+        .label {
+            font-size: 10px;
         }
     }
+
     .digital-channels .btn {
         height: 1.6rem;
         margin: 1px;
         line-height: 1rem;
     }
 
-    .btn-set {
-        color: $gray-600;
-        background-color: $white;
-        border-color: $gray-600;
-    }
-    .btn-unset {
-        color: $gray-200;
-        background-color: $gray-600;
-        border-color: $gray-600;
+    .btn {
+        font-size: 12px;
     }
 
-    .start-stop span.danger {
-        font-size: 22px;
-        margin-right: 0.5rem;
-        color: #f44336;
+    .btn-set {
+        color: $gray-700;
+        background-color: $white;
+        border-color: $gray-700;
+    }
+    .btn-unset {
+        color: $white;
+        background-color: $gray-700;
+        border-color: $gray-700;
+    }
+
+    .start-stop .start-btn {
+        margin-top: 28px;
+    }
+
+    .power-mode {
+        padding: 4px;
+        background-color: $gray-700;
+        border-radius: 4px;
+        button {
+            padding: 4px;
+            border-radius: 4px !important;
+        }
     }
 }

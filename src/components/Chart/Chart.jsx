@@ -256,8 +256,11 @@ const Chart = () => {
         zoomPan.callback = zoomPanCallback;
     }, [chartCursor, zoomPanCallback]);
 
-    const chartResetToLive = () => zoomPanCallback(undefined, undefined);
     const resetCursor = () => chartCursor(null, null);
+    const chartResetToLive = () => {
+        zoomPanCallback(undefined, undefined);
+        resetCursor();
+    };
     const chartPause = () => chartWindow(
         options.timestamp - windowDuration, options.timestamp,
     );

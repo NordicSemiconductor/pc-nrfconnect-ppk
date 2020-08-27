@@ -62,17 +62,15 @@ export default () => {
         <div className="d-flex flex-column start-stop">
             <PowerMode />
             {capabilities.ppkToggleDUT && (
-                <div className="d-flex flex-row">
-                    <span className="danger mdi mdi-alert-decagram-outline" />
-                    <Toggle
-                        onToggle={() => dispatch(toggleDUT(deviceRunning))}
-                        isToggled={deviceRunning}
-                        label="SUPPLY POWER TO TEST DEVICE"
-                    />
-                </div>
+                <Toggle
+                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
+                    isToggled={deviceRunning}
+                    label="Supply power to test device"
+                    variant="secondary"
+                />
             )}
             <Button
-                className="mt-3"
+                className="start-btn"
                 variant="set"
                 disabled={!rttRunning}
                 onClick={() => dispatch(

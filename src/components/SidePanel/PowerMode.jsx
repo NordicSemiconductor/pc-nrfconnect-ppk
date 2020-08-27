@@ -54,7 +54,7 @@ export default () => {
     return (
         <>
             <h2 className="mt-0">MODE</h2>
-            <ButtonGroup className="mb-3">
+            <ButtonGroup className="power-mode mb-2">
                 <Button
                     variant={isSmuMode ? 'set' : 'unset'}
                     style={{ pointerEvents: isSmuMode ? 'none' : 'inherit' }}

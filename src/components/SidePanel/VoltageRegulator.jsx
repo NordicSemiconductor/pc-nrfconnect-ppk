@@ -62,7 +62,7 @@ const VoltageRegulator = ({ eventKey }) => {
             className={ppkSetPowerMode && !isSmuMode ? 'disabled' : ''}
         >
             <Form.Label htmlFor="slider-vdd">
-                VDD{' '}
+                Supply{' '}
                 <NumberInlineInput
                     value={vdd}
                     range={{ min, max }}
