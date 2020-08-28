@@ -185,7 +185,7 @@ export default () => {
                     onChangeComplete={() => sendTriggerLevel()}
                 />
                 <Toggle
-                    onToggle={e => dispatch(externalTriggerToggled(e.target.checked))}
+                    onToggle={value => dispatch(externalTriggerToggled(value))}
                     isToggled={externalTrigger}
                     label="External trigger"
                     variant="secondary"
