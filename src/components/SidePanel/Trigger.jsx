@@ -40,12 +40,12 @@ import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
+// import InputGroup from 'react-bootstrap/InputGroup';
 
 import { NumberInlineInput, Slider, Toggle } from 'pc-nrfconnect-shared';
 
 import Collapse from './Collapse';
-import UnitSelector from './UnitSelector';
+// import UnitSelector from './UnitSelector';
 
 import {
     triggerUpdateWindow,
@@ -77,11 +77,13 @@ export default () => {
         decimals: 2,
     };
 
-    const [level, setLevel] = useState({ value: 1, unit: 1000 });
+    const [level, setLevel] = useState(1);
+    // use true for mA, false for uA
+    const [levelUnit, setLevelUnit] = useState(true);
     const [triggerWindowLength, setTriggerWindowLength] = useState(range.min);
 
     const sendTriggerLevel = () => {
-        dispatch(triggerSet(level.value * level.unit));
+        dispatch(triggerSet(level * (1000 ** levelUnit)));
     };
 
     return (
@@ -104,39 +106,31 @@ export default () => {
                     onChange={[value => setTriggerWindowLength(value)]}
                     onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
                 />
-                <div className="d-flex flex-column">
-                    <ButtonGroup style={{ marginTop: 10 }}>
-                        <Button
-                            disabled={!rttRunning || externalTrigger}
-                            size="lg"
-                            variant="light"
-                            style={{ width: '50%' }}
-                            onClick={() => dispatch(
-                                triggerSingleWaiting
-                                    ? triggerStop()
-                                    : triggerSingleSet(),
-                            )}
-                        >
-                            <span className="mdi mdi-clock-outline" />
-                            {triggerSingleWaiting ? 'Waiting...' : 'Single'}
-                        </Button>
-                        <Button
-                            disabled={!rttRunning || externalTrigger}
-                            size="lg"
-                            variant="light"
-                            style={{ width: '50%' }}
-                            onClick={() => dispatch(
-                                triggerRunning
-                                    ? triggerStop()
-                                    : triggerStart(),
-                            )}
-                        >
-                            <span className={`mdi mdi-${triggerRunning ? 'flash' : 'record-circle-outline'}`} />
-                            {triggerRunning ? 'Stop' : 'Start'}
-                        </Button>
-                    </ButtonGroup>
-                </div>
-                <InputGroup style={{ marginTop: 10 }}>
+                <ButtonGroup className="my-2 d-flex flex-row">
+                    <Button
+                        disabled={!rttRunning || externalTrigger}
+                        variant="set"
+                        onClick={() => dispatch(
+                            triggerSingleWaiting
+                                ? triggerStop()
+                                : triggerSingleSet(),
+                        )}
+                    >
+                        {triggerSingleWaiting ? 'Waiting...' : 'Single'}
+                    </Button>
+                    <Button
+                        disabled={!rttRunning || externalTrigger}
+                        variant="set"
+                        onClick={() => dispatch(
+                            triggerRunning
+                                ? triggerStop()
+                                : triggerStart(),
+                        )}
+                    >
+                        {triggerRunning ? 'Stop' : 'Start'}
+                    </Button>
+                </ButtonGroup>
+                {/* <InputGroup className="my-2">
                     <InputGroup.Prepend>
                         <InputGroup.Text>Trigger level</InputGroup.Text>
                     </InputGroup.Prepend>
@@ -162,7 +156,34 @@ export default () => {
                         as={InputGroup.Append}
                         variant="light"
                     />
-                </InputGroup>
+                </InputGroup> */}
+
+                <Form.Label
+                    htmlFor="slider-trigger-level"
+                    className="d-flex flex-row align-items-baseline"
+                >
+                    Trigger level{' '}
+                    <NumberInlineInput
+                        value={level}
+                        range={{ min: 1, max: 1000 }}
+                        onChange={value => setLevel(parseInt(value, 10))}
+                    />
+                    {' '}
+                    <Toggle
+                        onToggle={() => setLevelUnit(!levelUnit)}
+                        isToggled={levelUnit}
+                        label={'\u00B5A'}
+                        variant="secondary"
+                    />
+                    <span className="ml-2">mA</span>
+                </Form.Label>
+                <Slider
+                    id="slider-trigger-level"
+                    values={[level]}
+                    range={{ min: 1, max: 1000 }}
+                    onChange={[value => setLevel(parseInt(value, 10))]}
+                    onChangeComplete={() => sendTriggerLevel()}
+                />
                 <Toggle
                     onToggle={e => dispatch(externalTriggerToggled(e.target.checked))}
                     isToggled={externalTrigger}

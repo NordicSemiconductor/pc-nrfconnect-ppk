@@ -13,13 +13,11 @@
     .core19-side-panel {
         overflow: overlay;
     }
-}
-
-.btn-lg {
-    .mdi {
-        top: 2px;
+    .core19-side-panel::-webkit-scrollbar-thumb {
+        border-color: $gray-50;
     }
 }
+
 .btn-lg, .btn-sm {
     border-radius: 0;
 }

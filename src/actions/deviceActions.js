@@ -316,7 +316,7 @@ export function triggerUpdateWindow(value) {
 export function triggerSet(triggerLevel) {
     /* eslint-disable no-bitwise */
     return async dispatch => {
-        logger.info(`Trigger level set ${triggerLevel} uA`);
+        logger.info(`Trigger level set ${triggerLevel} \u00B5A`);
         const high = (triggerLevel >> 16) & 0xFF;
         const mid = (triggerLevel >> 8) & 0xFF;
         const low = triggerLevel & 0xFF;

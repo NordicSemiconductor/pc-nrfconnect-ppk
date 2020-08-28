@@ -72,7 +72,7 @@ const SidePanel = ({ bindHotkey }) => {
     const deviceOpen = (Object.keys(capabilities).length > 0);
 
     return (
-        <div className="sidepanel d-flex flex-column h-100">
+        <div className="sidepanel d-flex flex-column">
             {deviceOpen && (
                 <>
                     <StartStop />

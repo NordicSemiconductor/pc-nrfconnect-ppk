@@ -29,7 +29,6 @@
 
     .disabled {
         pointer-events: none;
-        opacity: 0.3;
     }
 
     .input-group.text {
@@ -84,5 +83,12 @@
             padding: 4px;
             border-radius: 4px !important;
         }
+        .btn:disabled {
+            opacity: initial;
+        }
+    }
+
+    #slider-trigger-level {
+        margin-bottom: 0.5rem;
     }
 }

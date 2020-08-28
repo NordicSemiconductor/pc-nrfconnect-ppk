@@ -57,14 +57,14 @@ export default () => {
             <ButtonGroup className="power-mode mb-2">
                 <Button
                     variant={isSmuMode ? 'set' : 'unset'}
-                    style={{ pointerEvents: isSmuMode ? 'none' : 'inherit' }}
+                    disabled={isSmuMode}
                     onClick={togglePowerMode}
                 >
                     Sourcemeter
                 </Button>
                 <Button
                     variant={isSmuMode ? 'unset' : 'set'}
-                    style={{ pointerEvents: !isSmuMode ? 'none' : 'inherit' }}
+                    disabled={!isSmuMode}
                     onClick={togglePowerMode}
                 >
                     Amperemeter
