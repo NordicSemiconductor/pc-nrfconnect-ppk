@@ -50,6 +50,7 @@ import annotationPlugin from 'chartjs-plugin-annotation';
 import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 import crossHairPlugin from './plugins/chart.crossHair';
+import triggerLevelPlugin from './plugins/chart.triggerLevel';
 
 import ChartTop from './ChartTop';
 import BufferView from './BufferView';
@@ -104,9 +105,6 @@ const timestampToLabel = (usecs, index, array) => {
 const formatCurrent = uA => unit(uA, 'uA')
     .format({ notation: 'auto', precision: 4 })
     .replace('u', '\u00B5');
-
-crossHairPlugin.formatY = formatCurrent;
-crossHairPlugin.formatX = timestampToLabel;
 
 const emptyArray = () => [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 const lineData = emptyArray();
@@ -198,7 +196,7 @@ const Chart = () => {
         timestampsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
-    const { triggerLevel } = useSelector(triggerState);
+    const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
     const { index } = options;
 
     const chartRef = useRef(null);
@@ -474,6 +472,10 @@ const Chart = () => {
             },
         },
         legend: { display: false },
+        formatX: timestampToLabel,
+        formatY: formatCurrent,
+        triggerLevel,
+        triggerActive: triggerRunning || triggerSingleWaiting,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];
@@ -499,9 +501,9 @@ const Chart = () => {
                         ref={chartRef}
                         data={chartData}
                         options={chartOptions}
-                        triggerLevel={triggerLevel}
                         plugins={[
                             dragSelectPlugin, zoomPanPlugin,
+                            triggerLevelPlugin,
                             crossHairPlugin, annotationPlugin,
                             {
                                 id: 'notifier',

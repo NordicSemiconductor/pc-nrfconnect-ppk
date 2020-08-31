@@ -126,6 +126,9 @@ export function samplingStop() {
 
 export function triggerStop() {
     return async dispatch => {
+        if (!device.capabilities.ppkTriggerStop) {
+            return;
+        }
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
         dispatch(toggleTriggerAction(false));
@@ -162,6 +165,7 @@ export function close() {
         device.removeAllListeners();
         device = null;
         dispatch(deviceClosedAction());
+        dispatch(triggerLevelSetAction(null));
         logger.info('PPK closed');
     };
 }
@@ -245,6 +249,11 @@ export function open(deviceInfo) {
             console.log(metadata);
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
+            if (device.capabilities.ppkTriggerSet) {
+                dispatch(triggerLevelSetAction(1000));
+            } else {
+                dispatch(triggerLevelSetAction(null));
+            }
             dispatch(updateRegulatorAction({
                 vdd: metadata.vdd,
                 currentVDD: metadata.vdd,

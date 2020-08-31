@@ -64,7 +64,7 @@ const plugin = {
 
     afterDraw(chartInstance) {
         const {
-            chartArea, chart, scales,
+            chartArea, chart, scales, options: { formatX, formatY },
         } = chartInstance;
         const { ctx } = chart;
         const { canvas } = ctx;
@@ -77,10 +77,7 @@ const plugin = {
         }
 
         const { layerX, layerY } = plugin.moveEvent;
-
         const { xScale, yScale } = scales;
-        const [time, subsecond] = this.formatX(xScale.getValueForPixel(left + layerX), 0, []);
-        const { width: tsWidth } = ctx.measureText(time);
 
         if (layerX >= 0 && layerX <= (right - left)) {
             ctx.save();
@@ -93,6 +90,8 @@ const plugin = {
             ctx.stroke();
 
             if (chartInstance.id === 0) {
+                const [time, subsecond] = formatX(xScale.getValueForPixel(left + layerX), 0, []);
+                const { width: tsWidth } = ctx.measureText(time);
                 ctx.fillStyle = 'black';
                 ctx.textAlign = 'right';
                 ctx.fillRect(left + layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
@@ -122,7 +121,7 @@ const plugin = {
             ctx.closePath();
             ctx.stroke();
 
-            const uA = yScale ? this.formatY(yScale.getValueForPixel(layerY)) : null;
+            const uA = yScale ? formatY(yScale.getValueForPixel(layerY)) : null;
             const { width: uAwidth } = ctx.measureText(uA);
 
             ctx.fillStyle = 'black';

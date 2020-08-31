@@ -35,7 +35,7 @@
  */
 
 const initialState = {
-    triggerLevel: 1, // [microAmp]
+    triggerLevel: null, // [microAmp]
     triggerSingleWaiting: false,
     triggerRunning: false,
     externalTrigger: false,
