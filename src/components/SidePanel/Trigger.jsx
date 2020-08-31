@@ -39,13 +39,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
-// import InputGroup from 'react-bootstrap/InputGroup';
 
 import { NumberInlineInput, Slider, Toggle } from 'pc-nrfconnect-shared';
 
 import Collapse from './Collapse';
-// import UnitSelector from './UnitSelector';
 
 import {
     triggerUpdateWindow,
@@ -82,15 +81,16 @@ export default () => {
     const [levelUnit, setLevelUnit] = useState(true);
     const [triggerWindowLength, setTriggerWindowLength] = useState(range.min);
 
-    const sendTriggerLevel = () => {
-        dispatch(triggerSet(level * (1000 ** levelUnit)));
+    const sendTriggerLevel = unit => {
+        dispatch(triggerSet(level * (1000 ** unit)));
+        setLevelUnit(unit);
     };
 
     return (
         <Accordion defaultActiveKey="0">
             <Collapse title="TRIGGER" eventKey="0">
                 <Form.Label htmlFor="slider-trigger-window">
-                    Window{' '}
+                    <span className="flex-fill">Window</span>
                     <NumberInlineInput
                         value={triggerWindowLength}
                         range={range}
@@ -130,59 +130,42 @@ export default () => {
                         {triggerRunning ? 'Stop' : 'Start'}
                     </Button>
                 </ButtonGroup>
-                {/* <InputGroup className="my-2">
-                    <InputGroup.Prepend>
-                        <InputGroup.Text>Trigger level</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <Form.Control
-                        disabled={!rttRunning || externalTrigger}
-                        value={level.value}
-                        type="number"
-                        onChange={e => setLevel({
-                            ...level, value: parseInt(e.target.value, 10),
-                        })}
-                        onKeyPress={e => {
-                            if (e.key === 'Enter') {
-                                sendTriggerLevel();
-                            }
-                        }}
-                    />
-                    <UnitSelector
-                        disabled={!rttRunning || externalTrigger}
-                        units={['\u00B5A', 'mA']}
-                        initial={1}
-                        id="input-dropdown-addon"
-                        onChange={i => setLevel({ ...level, unit: 1000 ** i })}
-                        as={InputGroup.Append}
-                        variant="light"
-                    />
-                </InputGroup> */}
-
                 <Form.Label
                     htmlFor="slider-trigger-level"
                     className="d-flex flex-row align-items-baseline"
                 >
-                    Trigger level{' '}
+                    <span className="flex-fill">Trigger level</span>
                     <NumberInlineInput
                         value={level}
                         range={{ min: 1, max: 1000 }}
                         onChange={value => setLevel(parseInt(value, 10))}
                     />
-                    {' '}
-                    <Toggle
-                        onToggle={() => setLevelUnit(!levelUnit)}
-                        isToggled={levelUnit}
-                        label={'\u00B5A'}
-                        variant="secondary"
-                    />
-                    <span className="ml-2">mA</span>
+                    <Dropdown>
+                        <Dropdown.Toggle id="dropdown-current-unit" variant="plain">
+                            {levelUnit ? 'mA' : '\u00B5A'}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item
+                                eventKey="0"
+                                onSelect={() => sendTriggerLevel(false)}
+                            >
+                                {'\u00B5A'}
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                                eventKey="0"
+                                onSelect={() => sendTriggerLevel(true)}
+                            >
+                                mA
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </Form.Label>
                 <Slider
                     id="slider-trigger-level"
                     values={[level]}
                     range={{ min: 1, max: 1000 }}
                     onChange={[value => setLevel(parseInt(value, 10))]}
-                    onChangeComplete={() => sendTriggerLevel()}
+                    onChangeComplete={() => sendTriggerLevel(levelUnit)}
                 />
                 <Toggle
                     onToggle={value => dispatch(externalTriggerToggled(value))}

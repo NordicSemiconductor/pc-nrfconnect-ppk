@@ -69,7 +69,7 @@ const ResistorCalibration = ({ eventKey }) => {
     return (
         <Collapse title="RESISTOR CALIBRATION" eventKey={eventKey}>
             <Form.Label htmlFor="slider-res-hi">
-                High{' '}
+                <span className="flex-fill">High</span>
                 <NumberInlineInput
                     value={userResHi}
                     range={{ min: 1, max: 3 }}
@@ -86,7 +86,7 @@ const ResistorCalibration = ({ eventKey }) => {
                 onChangeComplete={() => dispatch(updateResistors())}
             />
             <Form.Label htmlFor="slider-res-mid">
-                Mid{' '}
+                <span className="flex-fill">Mid</span>
                 <NumberInlineInput
                     value={userResMid}
                     range={{ min: 25, max: 35 }}
@@ -103,7 +103,7 @@ const ResistorCalibration = ({ eventKey }) => {
                 onChangeComplete={() => dispatch(updateResistors())}
             />
             <Form.Label htmlFor="slider-res-low">
-                Low{' '}
+                <span className="flex-fill">Low</span>
                 <NumberInlineInput
                     value={userResLo}
                     range={{ min: 450, max: 550 }}
