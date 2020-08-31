@@ -113,7 +113,7 @@ const SidePanel = ({ bindHotkey }) => {
                 SAVE
             </Button>
             <Button
-                className="mb-3 w-100"
+                className="w-100"
                 variant="set"
                 disabled={samplingRunning}
                 onClick={() => dispatch(toggleExportCSVDialogVisible())}
