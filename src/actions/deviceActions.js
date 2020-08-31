@@ -298,6 +298,15 @@ export const updateGains = index => async (_, getState) => {
     logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
 };
 
+export const updateSpikeFilter = () => async (_, getState) => {
+    if (!device.ppkSetSpikeFilter) {
+        return;
+    }
+    const { spikeFilter: { jumps, samples, alpha } } = getState().app;
+    await device.ppkSetSpikeFilter(jumps, samples, alpha);
+    logger.info(`Spike filter: at ${jumps} range jumps use rolling average for ${samples} samples with ${alpha} coefficient`);
+};
+
 /**
  * Takes the window value in milliseconds, adjusts for microsecs
  * and resolves the number of bytes we need for this size of window.

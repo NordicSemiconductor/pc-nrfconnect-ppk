@@ -60,6 +60,7 @@ import { load, save } from '../../actions/fileActions';
 import { chartState } from '../../reducers/chartReducer';
 
 import './sidepanel.scss';
+import SpikeFilter from './SpikeFilter';
 
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
@@ -84,6 +85,7 @@ const SidePanel = ({ bindHotkey }) => {
                         <SwitchPoints eventKey="2" />
                         <ResistorCalibration eventKey="3" />
                         <Gains eventKey="4" />
+                        <SpikeFilter eventKey="5" />
                     </Accordion>
                 </>
             )}

@@ -50,7 +50,7 @@ const MEAS_LOGIC = generateMask(8, 24);
 
 const getMaskedValue = (value, { mask, pos }) => ((value & mask) >> pos);
 
-const alpha = 0.04;
+// const alpha = 0.04;
 
 class SerialDevice extends Device {
     adcMult = (1.2 / 163840);
@@ -75,6 +75,7 @@ class SerialDevice extends Device {
         super();
 
         this.capabilities.digitalChannels = true;
+        this.spikeFilter = { alpha: 0.04, samples: 3, jumps: 1 };
 
         this.path = deviceInfo.serialport.path;
         this.child = fork(path.resolve(getAppDir(), 'worker', 'serialDevice.js'));
@@ -109,16 +110,16 @@ class SerialDevice extends Device {
 
         this.rollingAvg = (this.rollingAvg === undefined)
             ? adc
-            : (alpha * adc) + (1.0 - alpha) * this.rollingAvg;
+            : (this.spikeFilter.alpha * adc) + (1.0 - this.spikeFilter.alpha) * this.rollingAvg;
 
         if (this.prevRange === undefined) {
             this.prevRange = range;
         }
 
         if (this.prevRange !== range || this.afterSpike > 0) {
-            if (this.prevRange !== range) {
+            if (range - this.prevRange >= this.spikeFilter.jumps) {
                 // number of measurements after the spike which still to be averaged
-                this.afterSpike = 3;
+                this.afterSpike = this.spikeFilter.samples;
             }
             adc = this.rollingAvg;
             this.afterSpike -= 1;
@@ -229,6 +230,12 @@ class SerialDevice extends Device {
     ppkSetUserGains(range, gain) {
         this.modifiers.ug[range] = gain;
         return this.sendCommand([PPKCmd.SetUserGains, range, ...convertFloatToByteBuffer(gain)]);
+    }
+
+    ppkSetSpikeFilter(jumps, samples, alpha) {
+        this.spikeFilter = {
+            jumps, samples, alpha,
+        };
     }
 }
 

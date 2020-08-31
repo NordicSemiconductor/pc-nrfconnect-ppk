@@ -36,7 +36,6 @@
 
 const initialState = [100, 100, 100, 100, 100];
 
-const GAINS_RESET = 'GAINS_RESET';
 const GAINS_UPDATE = 'GAINS_UPDATE';
 
 export const updateGainsAction = (value, range) => ({
@@ -45,16 +44,12 @@ export const updateGainsAction = (value, range) => ({
     range,
 });
 
-export const gainsResetAction = () => ({ type: GAINS_RESET });
-
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case GAINS_UPDATE: {
             state.splice(action.range, 1, action.value);
             return [...state];
         }
-        case GAINS_RESET:
-            return initialState;
         default:
             return state;
     }

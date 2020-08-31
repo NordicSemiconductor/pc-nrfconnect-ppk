@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,24 +34,37 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { combineReducers } from 'redux';
+import persistentStore from '../utils/persistentStore';
 
-import app from './appReducer';
-import chart from './chartReducer';
-import trigger from './triggerReducer';
-import switchingPoints from './switchingPointsReducer';
-import voltageRegulator from './voltageRegulatorReducer';
-import resistorCalibration from './resistorCalibrationReducer';
-import gains from './gainsReducer';
-import spikeFilter from './spikeFilterReducer';
+const initialState = {
+    alpha: persistentStore.get('spikeFilter.alpha', 0.04),
+    samples: persistentStore.get('spikeFilter.samples', 3),
+    jumps: persistentStore.get('spikeFilter.jumps', 1),
+};
 
-export default combineReducers({
-    app,
-    chart,
-    trigger,
-    switchingPoints,
-    voltageRegulator,
-    resistorCalibration,
-    gains,
-    spikeFilter,
+const SPIKE_FILTER_UPDATE = 'SPIKE_FILTER_UPDATE';
+
+export const updateSpikeFilterAction = (jumps, samples, alpha) => ({
+    type: SPIKE_FILTER_UPDATE,
+    jumps,
+    samples,
+    alpha,
 });
+
+export default (state = initialState, { type, ...action }) => {
+    switch (type) {
+        case SPIKE_FILTER_UPDATE: {
+            persistentStore.set('spikeFilter.jumps', action.jumps);
+            persistentStore.set('spikeFilter.samples', action.samples);
+            persistentStore.set('spikeFilter.alpha', action.alpha);
+            return {
+                ...state,
+                ...action,
+            };
+        }
+        default:
+            return state;
+    }
+};
+
+export const spikeFilterState = ({ app }) => app.spikeFilter;
