@@ -62,6 +62,7 @@ import {
     chartCursorAction,
     chartState,
 } from '../../reducers/chartReducer';
+import { triggerState } from '../../reducers/triggerReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
@@ -197,6 +198,7 @@ const Chart = () => {
         timestampsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
+    const { triggerLevel } = useSelector(triggerState);
     const { index } = options;
 
     const chartRef = useRef(null);
@@ -497,6 +499,7 @@ const Chart = () => {
                         ref={chartRef}
                         data={chartData}
                         options={chartOptions}
+                        triggerLevel={triggerLevel}
                         plugins={[
                             dragSelectPlugin, zoomPanPlugin,
                             crossHairPlugin, annotationPlugin,

@@ -50,8 +50,6 @@ const MEAS_LOGIC = generateMask(8, 24);
 
 const getMaskedValue = (value, { mask, pos }) => ((value & mask) >> pos);
 
-// const alpha = 0.04;
-
 class SerialDevice extends Device {
     adcMult = (1.2 / 163840);
 
@@ -75,7 +73,9 @@ class SerialDevice extends Device {
         super();
 
         this.capabilities.digitalChannels = true;
-        this.spikeFilter = { alpha: 0.04, samples: 3, jumps: 1 };
+        this.spikeFilter = {
+            alpha: 0.04, samples: 3, jumps: 1, alpha4: 0.04,
+        };
 
         this.path = deviceInfo.serialport.path;
         this.child = fork(path.resolve(getAppDir(), 'worker', 'serialDevice.js'));
@@ -111,6 +111,9 @@ class SerialDevice extends Device {
         this.rollingAvg = (this.rollingAvg === undefined)
             ? adc
             : (this.spikeFilter.alpha * adc) + (1.0 - this.spikeFilter.alpha) * this.rollingAvg;
+        this.rollingAvg4 = (this.rollingAvg4 === undefined)
+            ? adc
+            : (this.spikeFilter.alpha4 * adc) + (1.0 - this.spikeFilter.alpha4) * this.rollingAvg4;
 
         if (this.prevRange === undefined) {
             this.prevRange = range;
@@ -121,7 +124,7 @@ class SerialDevice extends Device {
                 // number of measurements after the spike which still to be averaged
                 this.afterSpike = this.spikeFilter.samples;
             }
-            adc = this.rollingAvg;
+            adc = range === 4 ? this.rollingAvg4 : this.rollingAvg;
             this.afterSpike -= 1;
         }
         this.prevRange = range;
@@ -155,6 +158,7 @@ class SerialDevice extends Device {
         }
         if (cmd[0] === PPKCmd.AverageStart) {
             this.rollingAvg = undefined;
+            this.rollingAvg4 = undefined;
             this.prevRange = undefined;
             this.afterSpike = 0;
         }
@@ -232,9 +236,10 @@ class SerialDevice extends Device {
         return this.sendCommand([PPKCmd.SetUserGains, range, ...convertFloatToByteBuffer(gain)]);
     }
 
-    ppkSetSpikeFilter(jumps, samples, alpha) {
+    ppkSetSpikeFilter(spikeFilter) {
         this.spikeFilter = {
-            jumps, samples, alpha,
+            ...this.spikeFilter,
+            ...spikeFilter,
         };
     }
 }

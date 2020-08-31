@@ -53,6 +53,7 @@ const SpikeFilter = ({ eventKey }) => {
         jumps,
         samples,
         alpha,
+        alpha4,
     } = useSelector(spikeFilterState);
     const { capabilities } = useSelector(appState);
     if (!capabilities.ppkSetUserGains) {
@@ -68,7 +69,7 @@ const SpikeFilter = ({ eventKey }) => {
                 id="slider-spike-jumps"
                 values={[jumps]}
                 range={{ min: 1, max: 4 }}
-                onChange={[value => dispatch(updateSpikeFilterAction(value, samples, alpha))]}
+                onChange={[value => dispatch(updateSpikeFilterAction({ jumps: value }))]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
             <Form.Label className="pt-2 d-flex flex-row justify-content-between">
@@ -79,18 +80,29 @@ const SpikeFilter = ({ eventKey }) => {
                 id="slider-spike-samples"
                 values={[samples]}
                 range={{ min: 1, max: 10 }}
-                onChange={[value => dispatch(updateSpikeFilterAction(jumps, value, alpha))]}
+                onChange={[value => dispatch(updateSpikeFilterAction({ samples: value }))]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
             <Form.Label className="pt-2 d-flex flex-row justify-content-between">
-                <span>Smoothing coefficient</span>
+                <span>Coefficient</span>
                 <span>{alpha}</span>
             </Form.Label>
             <Slider
                 id="slider-spike-alpha"
                 values={[alpha]}
                 range={{ min: 0, max: 0.5, decimals: 2 }}
-                onChange={[value => dispatch(updateSpikeFilterAction(jumps, samples, value))]}
+                onChange={[value => dispatch(updateSpikeFilterAction({ alpha: value }))]}
+                onChangeComplete={() => dispatch(updateSpikeFilter())}
+            />
+            <Form.Label className="pt-2 d-flex flex-row justify-content-between">
+                <span>Coefficient for range 4</span>
+                <span>{alpha4}</span>
+            </Form.Label>
+            <Slider
+                id="slider-spike-alpha4"
+                values={[alpha4]}
+                range={{ min: 0, max: 0.5, decimals: 2 }}
+                onChange={[value => dispatch(updateSpikeFilterAction({ alpha4: value }))]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
         </Collapse>

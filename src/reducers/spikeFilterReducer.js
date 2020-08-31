@@ -40,23 +40,19 @@ const initialState = {
     alpha: persistentStore.get('spikeFilter.alpha', 0.04),
     samples: persistentStore.get('spikeFilter.samples', 3),
     jumps: persistentStore.get('spikeFilter.jumps', 1),
+    alpha4: persistentStore.get('spikeFilter.alpha4', 0.04),
 };
 
 const SPIKE_FILTER_UPDATE = 'SPIKE_FILTER_UPDATE';
 
-export const updateSpikeFilterAction = (jumps, samples, alpha) => ({
+export const updateSpikeFilterAction = spikeFilter => ({
     type: SPIKE_FILTER_UPDATE,
-    jumps,
-    samples,
-    alpha,
+    ...spikeFilter,
 });
 
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case SPIKE_FILTER_UPDATE: {
-            persistentStore.set('spikeFilter.jumps', action.jumps);
-            persistentStore.set('spikeFilter.samples', action.samples);
-            persistentStore.set('spikeFilter.alpha', action.alpha);
             return {
                 ...state,
                 ...action,

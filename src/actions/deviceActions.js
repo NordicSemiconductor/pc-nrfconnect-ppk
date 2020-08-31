@@ -37,6 +37,7 @@
 import { logger } from 'nrfconnect/core';
 import isDev from 'electron-is-dev';
 import Device from '../device';
+import persistentStore from '../utils/persistentStore';
 
 import {
     deviceOpenedAction,
@@ -131,6 +132,22 @@ export function triggerStop() {
         dispatch(clearSingleTriggingAction());
     };
 }
+
+export const updateSpikeFilter = () => async (_, getState) => {
+    if (!device.ppkSetSpikeFilter) {
+        return;
+    }
+    const { spikeFilter } = getState().app;
+    const {
+        jumps, samples, alpha, alpha4,
+    } = spikeFilter;
+    persistentStore.set('spikeFilter.jumps', jumps);
+    persistentStore.set('spikeFilter.samples', samples);
+    persistentStore.set('spikeFilter.alpha', alpha);
+    persistentStore.set('spikeFilter.alpha4', alpha4);
+    await device.ppkSetSpikeFilter(spikeFilter);
+    logger.info(`Spike filter: at ${jumps} range jumps use rolling average for ${samples} samples with ${alpha} coefficient`);
+};
 
 export function close() {
     return async (dispatch, getState) => {
@@ -243,6 +260,9 @@ export function open(deviceInfo) {
                 dispatch(updateGainsAction(metadata.ug3 * 100, 3));
                 dispatch(updateGainsAction(metadata.ug4 * 100, 4));
             }
+            if (device.capabilities.ppkSetSpikeFilter) {
+                dispatch(updateSpikeFilter());
+            }
             if (device.capabilities.ppkSetPowerMode) {
                 // 1 = Ampere
                 // 2 = SMU
@@ -296,15 +316,6 @@ export const updateGains = index => async (_, getState) => {
     const gain = gains[index] / 100;
     await device.ppkSetUserGains(index, gain);
     logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
-};
-
-export const updateSpikeFilter = () => async (_, getState) => {
-    if (!device.ppkSetSpikeFilter) {
-        return;
-    }
-    const { spikeFilter: { jumps, samples, alpha } } = getState().app;
-    await device.ppkSetSpikeFilter(jumps, samples, alpha);
-    logger.info(`Spike filter: at ${jumps} range jumps use rolling average for ${samples} samples with ${alpha} coefficient`);
 };
 
 /**
