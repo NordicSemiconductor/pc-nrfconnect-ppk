@@ -39,7 +39,6 @@ import persistentStore from '../utils/persistentStore';
 const initialState = {
     alpha: persistentStore.get('spikeFilter.alpha', 0.04),
     samples: persistentStore.get('spikeFilter.samples', 3),
-    jumps: persistentStore.get('spikeFilter.jumps', 1),
     alpha4: persistentStore.get('spikeFilter.alpha4', 0.04),
 };
 

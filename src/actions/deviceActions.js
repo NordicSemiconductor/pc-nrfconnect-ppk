@@ -138,15 +138,12 @@ export const updateSpikeFilter = () => async (_, getState) => {
         return;
     }
     const { spikeFilter } = getState().app;
-    const {
-        jumps, samples, alpha, alpha4,
-    } = spikeFilter;
-    persistentStore.set('spikeFilter.jumps', jumps);
+    const { samples, alpha, alpha4 } = spikeFilter;
     persistentStore.set('spikeFilter.samples', samples);
     persistentStore.set('spikeFilter.alpha', alpha);
     persistentStore.set('spikeFilter.alpha4', alpha4);
     await device.ppkSetSpikeFilter(spikeFilter);
-    logger.info(`Spike filter: at ${jumps} range jumps use rolling average for ${samples} samples with ${alpha} coefficient`);
+    logger.info(`Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha4} in range 4)`);
 };
 
 export function close() {

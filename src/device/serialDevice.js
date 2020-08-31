@@ -74,7 +74,7 @@ class SerialDevice extends Device {
 
         this.capabilities.digitalChannels = true;
         this.spikeFilter = {
-            alpha: 0.04, samples: 3, jumps: 1, alpha4: 0.04,
+            alpha: 0.04, alpha4: 0.04, samples: 3,
         };
 
         this.path = deviceInfo.serialport.path;
@@ -120,7 +120,7 @@ class SerialDevice extends Device {
         }
 
         if (this.prevRange !== range || this.afterSpike > 0) {
-            if (range - this.prevRange >= this.spikeFilter.jumps) {
+            if (this.prevRange !== range) {
                 // number of measurements after the spike which still to be averaged
                 this.afterSpike = this.spikeFilter.samples;
             }

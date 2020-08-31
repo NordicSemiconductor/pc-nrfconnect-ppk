@@ -49,29 +49,13 @@ import { updateSpikeFilterAction, spikeFilterState } from '../../reducers/spikeF
 
 const SpikeFilter = ({ eventKey }) => {
     const dispatch = useDispatch();
-    const {
-        jumps,
-        samples,
-        alpha,
-        alpha4,
-    } = useSelector(spikeFilterState);
+    const { samples, alpha, alpha4 } = useSelector(spikeFilterState);
     const { capabilities } = useSelector(appState);
     if (!capabilities.ppkSetUserGains) {
         return null;
     }
     return (
         <Collapse title="SPIKE FILTER" eventKey={eventKey}>
-            <Form.Label className="pt-2 d-flex flex-row justify-content-between">
-                <span>Range jumps</span>
-                <span>{jumps}</span>
-            </Form.Label>
-            <Slider
-                id="slider-spike-jumps"
-                values={[jumps]}
-                range={{ min: 1, max: 4 }}
-                onChange={[value => dispatch(updateSpikeFilterAction({ jumps: value }))]}
-                onChangeComplete={() => dispatch(updateSpikeFilter())}
-            />
             <Form.Label className="pt-2 d-flex flex-row justify-content-between">
                 <span>Samples to smooth</span>
                 <span>{samples}</span>
