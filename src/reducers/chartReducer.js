@@ -72,9 +72,7 @@ const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const MIN_WINDOW_DURATION = 1000;
 const MAX_WINDOW_DURATION = 120000000;
 
-export const animationAction = () => ({
-    type: ANIMATION,
-});
+export const animationAction = () => ({ type: ANIMATION });
 
 export const chartCursorAction = (cursorBegin, cursorEnd) => ({
     type: CHART_CURSOR,
@@ -169,10 +167,17 @@ export default (state = initialState, { type, ...action }) => {
         }
         case ANIMATION: {
             const { windowDuration, windowEnd } = state;
+            const calc = calcBuffer(windowDuration, windowEnd);
+            if (windowEnd === 0) {
+                return {
+                    ...state,
+                    ...calc,
+                    index: options.index,
+                };
+            }
             return {
                 ...state,
-                ...calcBuffer(windowDuration, windowEnd),
-                index: options.index,
+                bufferRemaining: calc.bufferRemaining,
             };
         }
         case LOAD_CHART_STATE: return { ...state, ...action };

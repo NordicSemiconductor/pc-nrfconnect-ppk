@@ -37,15 +37,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { chartState } from '../../reducers/chartReducer';
+import { bufferLengthInSeconds } from '../../globals';
+
+const totalInUs = bufferLengthInSeconds * 1000000;
 
 export default () => {
-    const {
-        windowDuration,
-        bufferLength,
-        bufferRemaining,
-    } = useSelector(chartState);
-
-    const totalInUs = bufferLength + windowDuration;
+    const { bufferRemaining } = useSelector(chartState);
     const percentage = 100 - ((100 * bufferRemaining) / totalInUs);
 
     return (
