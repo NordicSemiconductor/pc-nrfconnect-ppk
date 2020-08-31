@@ -35,6 +35,7 @@
  */
 
 import { logger } from 'nrfconnect/core';
+import isDev from 'electron-is-dev';
 import Device from '../device';
 
 import {
@@ -68,6 +69,8 @@ import { updateGainsAction } from '../reducers/gainsReducer';
 
 let device = null;
 let updateRequestInterval;
+
+const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
 const setupOptions = () => dispatch => {
     options.samplingTime = device.adcSamplingTimeUs;
@@ -174,6 +177,8 @@ export function open(deviceInfo) {
                 dispatch(clearSingleTriggingAction());
             }
 
+            const zeroCappedValue = zeroCap(value);
+
             if (timestamp) {
                 if (triggerMarker) {
                     options.triggerMarkers.push(timestamp);
@@ -197,11 +202,11 @@ export function open(deviceInfo) {
                         options.index = 0;
                     }
                 }
-                options.data[options.index] = value;
+                options.data[options.index] = zeroCappedValue;
                 options.index += 1;
                 options.timestamp = timestamp;
             } else {
-                options.data[options.index] = value;
+                options.data[options.index] = zeroCappedValue;
                 options.bits[options.index] = bits;
                 options.index += 1;
                 options.timestamp += options.samplingTime;
