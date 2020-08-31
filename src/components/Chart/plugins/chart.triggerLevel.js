@@ -67,9 +67,9 @@ const plugin = {
 
             ctx.fillStyle = triggerActive ? 'red' : 'green';
             ctx.textAlign = 'right';
-            ctx.fillRect(right - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
+            ctx.fillRect(left - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
             ctx.fillStyle = 'white';
-            ctx.fillText(uA, right - 5, layerY + 3);
+            ctx.fillText(uA, left - 5, layerY + 3);
             ctx.restore();
         }
     },
