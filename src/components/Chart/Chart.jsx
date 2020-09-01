@@ -217,9 +217,12 @@ const Chart = () => {
     const windowStats = calcStats(data, begin, end, index);
     const selectionStats = calcStats(data, cursorBegin, cursorEnd, index);
 
+    const resetCursor = useCallback(() => chartCursor(null, null), [chartCursor]);
+
     const zoomPanCallback = useCallback((beginX, endX, beginY, endY) => {
         if (typeof beginX === 'undefined') {
             chartReset(windowDuration);
+            resetCursor();
             return;
         }
 
@@ -230,7 +233,7 @@ const Chart = () => {
             Math.max(earliestDataTime, beginX),
             Math.min(options.timestamp, endX), beginY, endY,
         );
-    }, [chartReset, chartWindow, data.length, windowDuration]);
+    }, [chartReset, chartWindow, data.length, windowDuration, resetCursor]);
 
     const zoomToWindow = useCallback(usec => {
         if (windowEnd) {
@@ -256,11 +259,7 @@ const Chart = () => {
         zoomPan.callback = zoomPanCallback;
     }, [chartCursor, zoomPanCallback]);
 
-    const resetCursor = () => chartCursor(null, null);
-    const chartResetToLive = () => {
-        zoomPanCallback(undefined, undefined);
-        resetCursor();
-    };
+    const chartResetToLive = () => zoomPanCallback(undefined, undefined);
     const chartPause = () => chartWindow(
         options.timestamp - windowDuration, options.timestamp,
     );

@@ -4,7 +4,7 @@
 .buffer-view {
     height: 2rem;
     position: relative;
-    display: flex;
+    display: none; // from flex, decide if we keep this
     align-items: center;
     margin-left: $yAxisWidthPx;
 

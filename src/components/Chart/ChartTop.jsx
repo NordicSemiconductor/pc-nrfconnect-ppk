@@ -46,7 +46,7 @@ import './charttop.scss';
 const ChartTop = ({
     live, samplingRunning, chartPause, chartResetToLive, zoomToWindow,
 }) => (
-    <div className="chart-top d-flex flex-row justify-content-between align-items-center mt-2">
+    <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
         <ButtonGroup>
             <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000)}>1ms</Button>
             <Button variant="secondary" size="sm" onClick={() => zoomToWindow(10000)}>10ms</Button>
