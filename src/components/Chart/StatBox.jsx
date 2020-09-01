@@ -73,7 +73,7 @@ const StatBox = ({
     label, action = null,
 }) => (
     <div className="statbox d-flex flex-column mb-1">
-        <div className="statbox-header"><span>{label}</span>{action}</div>
+        <div className="statbox-header"><h2 className="d-inline my-0">{label}</h2>{action}</div>
         <div className="d-flex flex-row flex-fill">
             {delta === null && (
                 <div className="value-box">

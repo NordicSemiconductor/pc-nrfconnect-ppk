@@ -59,6 +59,7 @@ const ChartTop = ({
             onToggle={() => (live ? chartPause() : chartResetToLive())}
             isToggled={live}
             disabled={!samplingRunning && live}
+            variant="secondary"
         />
     </div>
 );

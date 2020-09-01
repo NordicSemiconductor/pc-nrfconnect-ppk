@@ -5,11 +5,12 @@
     text-align: center;
     font-size: 8pt;
     align-self: stretch;
-    border: 1px solid $gray-100;
 
     .statbox-header {
         position: relative;
-        margin-bottom: -1px;
+        margin: -1px;
+        padding-left: 4px;
+        text-align: start;
         .btn {
             position: absolute;
             padding: 0 0.5rem;
@@ -29,7 +30,6 @@
         padding: 0.25rem;
         justify-content: center;
         margin-bottom: -1px;
-        border-left-width: 0;
 
         .value {
             font-size: 12pt;
@@ -37,5 +37,10 @@
                 font-size: 9pt;
             }
         }
+    }
+}
+.statbox:nth-child(2) {
+    .value-box {
+        background-color: $gray-50;
     }
 }

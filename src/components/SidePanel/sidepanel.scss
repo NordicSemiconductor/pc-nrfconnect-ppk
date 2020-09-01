@@ -9,15 +9,6 @@
     padding: 8px 0;
     min-height: 100%;
 
-    h2 {
-        margin-top: 32px;
-        margin-bottom: 16px;
-
-        font-size: 10px;
-        font-weight: normal;
-        letter-spacing: 0.5ex;
-    }
-
     .form-label, .form-group {
         margin-bottom: 0ex;
     }
@@ -44,8 +35,7 @@
     .buffer {
         .buffer-total {
             background-color: $gray-100;
-            padding: 1px;
-            border: 1px solid $gray-700;
+            padding: 2px;
             .buffer-used {
                 background-color: $gray-700;
                 height: 24px;

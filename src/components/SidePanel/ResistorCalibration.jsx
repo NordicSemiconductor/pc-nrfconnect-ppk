@@ -74,7 +74,7 @@ const ResistorCalibration = ({ eventKey }) => {
                     value={userResHi}
                     range={{ min: 1, max: 3 }}
                     onChange={value => dispatch(updateHighResistorAction(value))}
-                    chars={5}
+                    chars={6}
                 />
                 { '\u2126'}
             </Form.Label>
@@ -91,7 +91,7 @@ const ResistorCalibration = ({ eventKey }) => {
                     value={userResMid}
                     range={{ min: 25, max: 35 }}
                     onChange={value => dispatch(updateMidResistorAction(value))}
-                    chars={5}
+                    chars={6}
                 />
                 { '\u2126'}
             </Form.Label>
@@ -108,7 +108,7 @@ const ResistorCalibration = ({ eventKey }) => {
                     value={userResLo}
                     range={{ min: 450, max: 550 }}
                     onChange={value => dispatch(updateLowResistorAction(value))}
-                    chars={4}
+                    chars={5}
                 />
                 { '\u2126'}
             </Form.Label>

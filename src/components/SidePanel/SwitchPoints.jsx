@@ -87,7 +87,7 @@ const SwitchPoints = ({ eventKey }) => {
                         onChangeComplete={() => dispatch(switchingPointsUpSet())}
                     />
                     <Row className="mb-3">
-                        <Col>{`${switchUpLow.toFixed(2)} uA`}</Col>
+                        <Col>{`${switchUpLow.toFixed(2)} \u00B5A`}</Col>
                         <Col className="text-right">{`${switchUpHigh.toFixed(2)} mA`}</Col>
                     </Row>
                     Switch down
@@ -98,7 +98,7 @@ const SwitchPoints = ({ eventKey }) => {
                         onChangeComplete={() => dispatch(switchingPointsDownSet())}
                     />
                     <Row className="mb-3">
-                        <Col>{`${switchDownLow.toFixed(2)} uA`}</Col>
+                        <Col>{`${switchDownLow.toFixed(2)} \u00B5A`}</Col>
                         <Col className="text-right">{`${switchDownHigh.toFixed(2)} mA`}</Col>
                     </Row>
                     <Button

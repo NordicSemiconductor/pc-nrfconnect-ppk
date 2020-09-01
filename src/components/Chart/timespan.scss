@@ -36,14 +36,22 @@
     .cursor {
         top: 0;
         bottom: 0;
-        width: 0.5rem;
+        width: 12px;
         background-color: $gray-600;
         border: 2px solid $gray-600;
         border-radius: 2px;
-        margin-left: -4px;
+        margin-left: -6px;
         cursor: grab;
         z-index: 2;
         position: absolute;
+
+        &::after {
+            content: '\2261';
+            color: $gray-50;
+            font-size: 16px;
+            position: absolute;
+            top: -2px;
+        }
     }
 }
 
