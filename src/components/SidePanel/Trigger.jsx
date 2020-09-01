@@ -95,6 +95,7 @@ export default () => {
                         value={triggerWindowLength}
                         range={range}
                         onChange={value => setTriggerWindowLength(value)}
+                        onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
                         chars={6}
                     />
                     {' '}ms
@@ -139,6 +140,7 @@ export default () => {
                         value={level}
                         range={{ min: 1, max: 1000 }}
                         onChange={value => setLevel(parseInt(value, 10))}
+                        onChangeComplete={() => sendTriggerLevel(levelUnit)}
                     />
                     <Dropdown>
                         <Dropdown.Toggle id="dropdown-current-unit" variant="plain">

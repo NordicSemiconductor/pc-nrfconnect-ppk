@@ -67,6 +67,7 @@ const VoltageRegulator = ({ eventKey }) => {
                     value={vdd}
                     range={{ min, max }}
                     onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
+                    onChangeComplete={() => dispatch(updateRegulator(vdd))}
                 />
                 {' '}mV
             </Form.Label>
