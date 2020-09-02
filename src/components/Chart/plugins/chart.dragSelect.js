@@ -46,7 +46,7 @@ export default {
 
     beforeInit(chartInstance) {
         const dragSelect = {};
-        chartInstance.dragSelect = {};
+        chartInstance.dragSelect = dragSelect;
 
         const { canvas } = chartInstance.chart.ctx;
 
@@ -91,15 +91,15 @@ export default {
     },
 
     beforeDraw(chartInstance) {
-        const { chartArea, chart } = chartInstance;
-        const { ctx } = chart;
         const {
-            left, right, top, bottom,
-        } = chartArea;
-
-        const scale = chartInstance.scales.xScale;
+            chartArea: {
+                left, right, top, bottom,
+            },
+            chart: { ctx },
+            scales: { xScale: scale },
+            dragSelect: { dragStart, dragEnd },
+        } = chartInstance;
         const { cursor } = scale.options;
-        const { dragStart, dragEnd } = chartInstance.dragSelect;
 
         if (typeof cursor.cursorBegin !== 'number' && !(dragStart && dragEnd)) {
             return;
