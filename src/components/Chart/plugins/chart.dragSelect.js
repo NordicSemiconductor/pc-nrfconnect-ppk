@@ -46,7 +46,7 @@ export default {
 
     beforeInit(chartInstance) {
         const dragSelect = {};
-        chartInstance.dragSelect = dragSelect;
+        chartInstance.dragSelect = {};
 
         const { canvas } = chartInstance.chart.ctx;
 
@@ -87,6 +87,7 @@ export default {
             }
         };
         canvas.addEventListener('pointerup', dragSelect.pointerUpHandler);
+        canvas.addEventListener('pointerleave', dragSelect.pointerUpHandler);
     },
 
     beforeDraw(chartInstance) {
@@ -122,18 +123,5 @@ export default {
             ctx.fillRect(startX, top, endX - startX, bottom - top);
         }
         ctx.restore();
-    },
-
-    destroy(chartInstance) {
-        const { dragSelect } = chartInstance;
-        if (dragSelect) {
-            const { canvas } = chartInstance.chart.ctx || {};
-            if (canvas) {
-                canvas.removeEventListener('pointerdown', dragSelect.pointerDownHandler);
-                canvas.removeEventListener('pointermove', dragSelect.pointerMoveHandler);
-                canvas.removeEventListener('pointerup', dragSelect.pointerUpHandler);
-            }
-            delete chartInstance.dragSelect;
-        }
     },
 };

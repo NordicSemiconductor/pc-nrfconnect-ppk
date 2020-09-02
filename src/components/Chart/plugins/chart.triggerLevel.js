@@ -36,42 +36,101 @@
 
 /* eslint no-param-reassign: off */
 
+import colors from '../../colors.scss';
+
+const { amber: colorActive, green: colorInactive, white } = colors;
+
 const plugin = {
     id: 'triggerLevel',
+
+    getCoords(chartInstance) {
+        const {
+            chartArea: { left, top, bottom }, scales: { yScale }, options: { triggerLevel },
+        } = chartInstance;
+        if (triggerLevel === null) {
+            return null;
+        }
+        const y = chartInstance.triggerLine.y !== null
+            ? chartInstance.triggerLine.y
+            : yScale.getPixelForValue(triggerLevel);
+        if (y < top || y > bottom) {
+            return null;
+        }
+        return {
+            y,
+            label: {
+                x: left - 70,
+                y: y - 10,
+                w: 70,
+                h: 20,
+            },
+        };
+    },
+
+    pointerDownHandler(evt, chartInstance) {
+        const { label } = this.getCoords(chartInstance) || {};
+        if (!label) return;
+        const { layerX, layerY } = evt || {};
+        if (layerX >= label.x && layerX <= label.x + label.w
+            && layerY >= label.y && layerY <= label.y + label.h) {
+            chartInstance.triggerLine.y = layerY;
+        }
+    },
+
+    pointerMoveHandler(evt, chartInstance) {
+        if (chartInstance.triggerLine.y === null) return;
+        const { label } = this.getCoords(chartInstance) || {};
+        if (!label) return;
+        chartInstance.triggerLine.y = evt.layerY;
+    },
+
+    pointerLeaveHandler(chartInstance) {
+        if (!chartInstance.triggerLine) return;
+        if (chartInstance.triggerLine.y !== null) {
+            const { scales: { yScale }, options: { sendTriggerLevel } } = chartInstance;
+            sendTriggerLevel(yScale.getValueForPixel(chartInstance.triggerLine.y));
+        }
+        chartInstance.triggerLine.y = null;
+    },
+
+    beforeInit(chartInstance) {
+        chartInstance.triggerLine = { y: null };
+        const { canvas } = chartInstance.chart.ctx;
+        canvas.addEventListener('pointerdown', evt => plugin.pointerDownHandler(evt, chartInstance));
+        canvas.addEventListener('pointermove', evt => plugin.pointerMoveHandler(evt, chartInstance));
+        canvas.addEventListener('pointerup', () => plugin.pointerLeaveHandler(chartInstance));
+        canvas.addEventListener('pointerleave', () => plugin.pointerLeaveHandler(chartInstance));
+    },
 
     afterDraw(chartInstance) {
         const {
             chartArea: { left, right },
             chart: { ctx },
-            scales: { yScale },
             options: { formatY, triggerLevel, triggerActive },
         } = chartInstance;
 
-        if (triggerLevel === null) {
-            return;
-        }
-        const layerY = yScale.getPixelForValue(triggerLevel);
+        const coords = this.getCoords(chartInstance);
 
-        if (yScale) {
-            ctx.save();
-            ctx.lineWidth = 0.5;
-            ctx.strokeStyle = triggerActive ? 'red' : 'green';
-            ctx.beginPath();
-            ctx.moveTo(left, layerY - 0.5);
-            ctx.lineTo(right, layerY - 0.5);
-            ctx.closePath();
-            ctx.stroke();
+        if (!coords) return;
+        const { y, label } = coords;
 
-            const uA = yScale ? formatY(triggerLevel) : null;
-            const { width: uAwidth } = ctx.measureText(uA);
+        const color = triggerActive ? colorActive : colorInactive;
 
-            ctx.fillStyle = triggerActive ? 'red' : 'green';
-            ctx.textAlign = 'right';
-            ctx.fillRect(left - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
-            ctx.fillStyle = 'white';
-            ctx.fillText(uA, left - 5, layerY + 3);
-            ctx.restore();
-        }
+        ctx.save();
+        ctx.lineWidth = 0.5;
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(left, y - 0.5);
+        ctx.lineTo(right, y - 0.5);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        ctx.textAlign = 'right';
+        ctx.fillRect(label.x, label.y, label.w, label.h);
+        ctx.fillStyle = white;
+        ctx.fillText(formatY(triggerLevel), label.x + label.w - 5, label.y + 13);
+        ctx.restore();
     },
 };
 

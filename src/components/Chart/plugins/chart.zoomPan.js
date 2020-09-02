@@ -161,19 +161,6 @@ export default {
             zoomPan.dragStart = null;
         };
         canvas.addEventListener('pointerup', zoomPan.mouseUpHandler, false);
-    },
-
-    destroy(chartInstance) {
-        const { zoomPan } = chartInstance;
-        if (zoomPan) {
-            const { canvas } = chartInstance.chart.ctx || {};
-            if (canvas) {
-                canvas.removeEventListener('pointerdown', zoomPan.mouseDownHandler);
-                canvas.removeEventListener('pointermove', zoomPan.mouseMoveHandler);
-                canvas.removeEventListener('pointerup', zoomPan.mouseUpHandler);
-                canvas.removeEventListener('wheel', zoomPan.wheelHandler);
-            }
-            delete chartInstance.zoomPan;
-        }
+        canvas.addEventListener('pointerleave', zoomPan.mouseUpHandler, false);
     },
 };

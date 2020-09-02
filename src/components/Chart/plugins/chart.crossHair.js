@@ -36,16 +36,18 @@
 
 /* eslint no-param-reassign: off */
 
+import colors from '../../colors.scss';
+
+const { gray900: color, white } = colors;
+
 const plugin = {
     id: 'crossHair',
     instances: [],
     moveEvent: {},
 
-    pointerMoveHandler(evt, chartInstance) {
+    pointerMoveHandler(evt, { chartArea: { left }, id }) {
         const { layerX, layerY } = evt || {};
-        const { chartArea } = chartInstance;
-        const { left } = chartArea;
-        plugin.moveEvent = { layerX: layerX - left, layerY, id: chartInstance.id };
+        plugin.moveEvent = { layerX: layerX - left, layerY, id };
         plugin.instances.forEach(instance => instance.update({ lazy: true }));
     },
 
@@ -64,25 +66,25 @@ const plugin = {
 
     afterDraw(chartInstance) {
         const {
-            chartArea, chart, scales, options: { formatX, formatY },
+            chartArea: {
+                left, right, top, bottom,
+            },
+            chart: { ctx },
+            scales: { xScale, yScale },
+            options: { formatX, formatY },
         } = chartInstance;
-        const { ctx } = chart;
         const { canvas } = ctx;
-        const {
-            left, right, top, bottom,
-        } = chartArea;
 
         if (!plugin.moveEvent) {
             canvas.style.cursor = 'default';
         }
 
         const { layerX, layerY } = plugin.moveEvent;
-        const { xScale, yScale } = scales;
 
         if (layerX >= 0 && layerX <= (right - left)) {
             ctx.save();
             ctx.lineWidth = 0.5;
-            ctx.strokeStyle = 'black';
+            ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.moveTo(left + layerX - 0.5, top);
             ctx.lineTo(left + layerX - 0.5, bottom);
@@ -92,10 +94,10 @@ const plugin = {
             if (chartInstance.id === 0) {
                 const [time, subsecond] = formatX(xScale.getValueForPixel(left + layerX), 0, []);
                 const { width: tsWidth } = ctx.measureText(time);
-                ctx.fillStyle = 'black';
+                ctx.fillStyle = color;
                 ctx.textAlign = 'right';
                 ctx.fillRect(left + layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
-                ctx.fillStyle = 'white';
+                ctx.fillStyle = white;
                 ctx.textAlign = 'center';
                 ctx.fillText(time, left + layerX, top + 13);
                 ctx.fillText(subsecond, left + layerX, top + 28);
@@ -114,7 +116,7 @@ const plugin = {
         if (yScale && plugin.moveEvent.id === 0) {
             ctx.save();
             ctx.lineWidth = 0.5;
-            ctx.strokeStyle = 'black';
+            ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.moveTo(left, layerY - 0.5);
             ctx.lineTo(right, layerY - 0.5);
@@ -124,10 +126,10 @@ const plugin = {
             const uA = yScale ? formatY(yScale.getValueForPixel(layerY)) : null;
             const { width: uAwidth } = ctx.measureText(uA);
 
-            ctx.fillStyle = 'black';
+            ctx.fillStyle = color;
             ctx.textAlign = 'right';
             ctx.fillRect(right - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = white;
             ctx.fillText(uA, right - 5, layerY + 3);
             ctx.restore();
         }

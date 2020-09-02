@@ -64,6 +64,7 @@ import {
     chartState,
 } from '../../reducers/chartReducer';
 import { triggerState } from '../../reducers/triggerReducer';
+import { triggerSet } from '../../actions/deviceActions';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
@@ -198,6 +199,8 @@ const Chart = () => {
     } = useSelector(chartState);
     const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
     const { index } = options;
+
+    const sendTriggerLevel = level => dispatch(triggerSet(Math.round(level)));
 
     const chartRef = useRef(null);
 
@@ -475,6 +478,7 @@ const Chart = () => {
         formatY: formatCurrent,
         triggerLevel,
         triggerActive: triggerRunning || triggerSingleWaiting,
+        sendTriggerLevel,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];
