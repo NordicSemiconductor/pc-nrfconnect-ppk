@@ -108,6 +108,9 @@ class SerialDevice extends Device {
             * (this.modifiers.gs[range] * resultWithoutGain + this.modifiers.gi[range])
             + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]));
 
+        const prevRollingAvg4 = this.rollingAvg4;
+        const prevRollingAvg = this.rollingAvg;
+
         this.rollingAvg = (this.rollingAvg === undefined)
             ? adc
             : (this.spikeFilter.alpha * adc) + (1.0 - this.spikeFilter.alpha) * this.rollingAvg;
@@ -122,9 +125,22 @@ class SerialDevice extends Device {
         if (this.prevRange !== range || this.afterSpike > 0) {
             if (this.prevRange !== range) {
                 // number of measurements after the spike which still to be averaged
+                this.consecutiveRangeSample = 0;
                 this.afterSpike = this.spikeFilter.samples;
+            } else {
+                this.consecutiveRangeSample += 1;
             }
-            adc = range === 4 ? this.rollingAvg4 : this.rollingAvg;
+            // Use previous rolling average if within first two samples of range 4
+            if (range === 4) {
+                if (this.consecutiveRangeSample < 2) {
+                    this.rollingAvg4 = prevRollingAvg4;
+                    this.rollingAvg = prevRollingAvg;
+                }
+                adc = this.rollingAvg4;
+            } else {
+                adc = this.rollingAvg;
+            }
+            // adc = range === 4 ? this.rollingAvg4 : this.rollingAvg;
             this.afterSpike -= 1;
         }
         this.prevRange = range;
@@ -138,7 +154,6 @@ class SerialDevice extends Device {
     }
 
     parseMeta(m) {
-        // if (m.calibrated) ?
         Object.keys(this.modifiers).forEach(k => {
             for (let i = 0; i < 5; i += 1) {
                 this.modifiers[k][i] = m[`${k}${i}`] || this.modifiers[k][i];
@@ -160,6 +175,7 @@ class SerialDevice extends Device {
             this.rollingAvg = undefined;
             this.rollingAvg4 = undefined;
             this.prevRange = undefined;
+            this.consecutiveRangeSample = 0;
             this.afterSpike = 0;
         }
         this.child.send({ write: cmd });
