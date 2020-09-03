@@ -170,6 +170,28 @@ export function close() {
     };
 }
 
+const initGains = () => async dispatch => {
+    if (!device.capabilities.ppkSetUserGains) {
+        return;
+    }
+    const { ug } = device.modifiers;
+    // if any value is ug is outside of [0.9..1.1] range:
+    if (ug.reduce((p, c) => Math.abs(c - 1) > 0.1 || p, false)) {
+        logger.info('Found out of range user gain, setting all gains back to 1.0');
+        ug.splice(0, 5, 1, 1, 1, 1, 1);
+        await device.ppkSetUserGains(0, ug[0]);
+        await device.ppkSetUserGains(1, ug[1]);
+        await device.ppkSetUserGains(2, ug[2]);
+        await device.ppkSetUserGains(3, ug[3]);
+        await device.ppkSetUserGains(4, ug[4]);
+    }
+    dispatch(updateGainsAction(ug[0] * 100, 0));
+    dispatch(updateGainsAction(ug[1] * 100, 1));
+    dispatch(updateGainsAction(ug[2] * 100, 2));
+    dispatch(updateGainsAction(ug[3] * 100, 3));
+    dispatch(updateGainsAction(ug[4] * 100, 4));
+};
+
 export function open(deviceInfo) {
     return async (dispatch, getState) => {
         if (getState().app.portName) {
@@ -259,13 +281,7 @@ export function open(deviceInfo) {
                 currentVDD: metadata.vdd,
                 ...device.vddRange,
             }));
-            if (device.capabilities.ppkSetUserGains) {
-                dispatch(updateGainsAction(metadata.ug0 * 100, 0));
-                dispatch(updateGainsAction(metadata.ug1 * 100, 1));
-                dispatch(updateGainsAction(metadata.ug2 * 100, 2));
-                dispatch(updateGainsAction(metadata.ug3 * 100, 3));
-                dispatch(updateGainsAction(metadata.ug4 * 100, 4));
-            }
+            await dispatch(initGains());
             if (device.capabilities.ppkSetSpikeFilter) {
                 dispatch(updateSpikeFilter());
             }
