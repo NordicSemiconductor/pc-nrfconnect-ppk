@@ -54,10 +54,9 @@ import withHotkey from '../../utils/withHotKey';
 import {
     appState,
     toggleAdvancedModeAction,
-    toggleExportCSVDialogVisible,
+    toggleSaveChoiceDialog,
 } from '../../reducers/appReducer';
-import { load, save } from '../../actions/fileActions';
-import { chartState } from '../../reducers/chartReducer';
+import { load } from '../../actions/fileActions';
 
 import './sidepanel.scss';
 import SpikeFilter from './SpikeFilter';
@@ -67,8 +66,6 @@ const SidePanel = ({ bindHotkey }) => {
     bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
     const { capabilities, samplingRunning } = useSelector(appState);
-    const { cursorBegin, cursorEnd } = useSelector(chartState);
-    const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
     const deviceOpen = (Object.keys(capabilities).length > 0);
 
@@ -105,20 +102,12 @@ const SidePanel = ({ bindHotkey }) => {
             <div className="flex-fill" />
             <DisplayOptions />
             <Button
-                className="my-3 w-100"
+                className="w-100 mt-4"
                 variant="set"
                 disabled={samplingRunning}
-                onClick={() => dispatch(save())}
+                onClick={() => dispatch(toggleSaveChoiceDialog())}
             >
-                SAVE
-            </Button>
-            <Button
-                className="w-100"
-                variant="set"
-                disabled={samplingRunning}
-                onClick={() => dispatch(toggleExportCSVDialogVisible())}
-            >
-                EXPORT {chartCursorActive ? 'MARKED' : 'WINDOW'}
+                SAVE / EXPORT
             </Button>
         </div>
     );

@@ -36,11 +36,13 @@
 
 import React from 'react';
 import Chart from './Chart/Chart';
-import ExportCSVDialog from './ExportCSVDialog';
+import SaveChoiceDialog from './SaveExport/SaveChoiceDialog';
+import ExportDialog from './SaveExport/ExportDialog';
 
 export default () => (
     <>
         <Chart />
-        <ExportCSVDialog />
+        <SaveChoiceDialog />
+        <ExportDialog />
     </>
 );

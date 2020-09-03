@@ -49,7 +49,7 @@ const { dialog } = remote;
 export const save = () => async (_, getState) => {
     const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
     const filename = await dialog.showSaveDialog({
-        defaultPath: join(getAppDataDir(), `ppk-${timestamp}.dat`),
+        defaultPath: join(getAppDataDir(), `ppk-${timestamp}.ppk`),
     });
     if (!filename) {
         return;

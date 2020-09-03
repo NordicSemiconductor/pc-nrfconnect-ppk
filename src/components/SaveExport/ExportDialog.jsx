@@ -37,21 +37,23 @@
 import React, { useState } from 'react';
 import fs from 'fs';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConfirmationDialog, Toggle } from 'pc-nrfconnect-shared';
+import { Toggle } from 'pc-nrfconnect-shared';
 import { logger, getAppDataDir } from 'nrfconnect/core';
 import { remote } from 'electron';
 import { join } from 'path';
 import * as mathjs from 'mathjs';
 
+import Modal from 'react-bootstrap/Modal';
+import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 
-import { appState, toggleExportCSVDialogVisible } from '../reducers/appReducer';
-import { chartState } from '../reducers/chartReducer';
-import { options, timestampToIndex, indexToTimestamp } from '../globals';
+import { appState, toggleExportDialog } from '../../reducers/appReducer';
+import { chartState } from '../../reducers/chartReducer';
+import { options, timestampToIndex, indexToTimestamp } from '../../globals';
 
-import './exportdialog.scss';
+import './saveexport.scss';
 
 const { unit } = mathjs;
 
@@ -101,7 +103,7 @@ const exportChart = (
         .reduce((prev, task) => prev.then(task), Promise.resolve())
         .then(() => {
             fs.closeSync(fd);
-            dispatch(toggleExportCSVDialogVisible());
+            dispatch(toggleExportDialog());
             logger.info(`Exported CSV to: ${filename}`);
         });
 };
@@ -116,7 +118,7 @@ export default () => {
         windowDuration,
         index,
     } = useSelector(chartState);
-    const { isExportCSVDialogVisible } = useSelector(appState);
+    const { isExportDialogVisible } = useSelector(appState);
 
     const [settings, setSettings] = useState({
         timestamp: true,
@@ -146,53 +148,72 @@ export default () => {
     const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
     const [filename, setFilename] = useState(join(getAppDataDir(), `ppk-${timestamp}.csv`));
 
+    const close = () => dispatch(toggleExportDialog());
+
     return (
-        <ConfirmationDialog
-            title="Export selection to CSV"
-            isVisible={isExportCSVDialogVisible}
-            onOk={() => setImmediate(() => {
-                dispatch(exportChart(filename, indexBegin, indexEnd, index, settings));
-            })}
-            onCancel={() => dispatch(toggleExportCSVDialogVisible())}
+        <Modal
+            show={isExportDialogVisible}
+            className="export-dialog"
+            onHide={close}
         >
-            <div className="export-dialog">
+            <Modal.Header closeButton>
+                <Modal.Title>Export selection to CSV</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
                 <Row className="export-settings">
-                    <Col>
-                        <h2>Export fields</h2>
-                        <Toggle
-                            onToggle={() => updateSettings({ timestamp: !settings.timestamp })}
-                            isToggled={settings.timestamp}
-                            label="Timestamp"
-                            variant="secondary"
-                        />
-                        <Toggle
-                            onToggle={() => updateSettings({ current: !settings.current })}
-                            isToggled={settings.current}
-                            label="Current"
-                            variant="secondary"
-                        />
-                        <Toggle
-                            onToggle={() => updateSettings({ bits: !settings.bits })}
-                            isToggled={settings.bits}
-                            label="Digital logic pins (single string field)"
-                            variant="secondary"
-                        />
-                        <Toggle
-                            onToggle={() => updateSettings({
-                                bitsSeparated: !settings.bitsSeparated,
-                            })}
-                            isToggled={settings.bitsSeparated}
-                            label="Digital logic pins (separate fields)"
-                            variant="secondary"
-                        />
+                    <Col sm={8}>
+                        <Card className="h-100">
+                            <Card.Body>
+                                <h2>EXPORT FIELDS</h2>
+                                <div className="w-fit-content">
+                                    <Toggle
+                                        onToggle={() => updateSettings({
+                                            timestamp: !settings.timestamp,
+                                        })}
+                                        isToggled={settings.timestamp}
+                                        label="Timestamp"
+                                        variant="secondary"
+                                    />
+                                    <Toggle
+                                        onToggle={() => updateSettings({
+                                            current: !settings.current,
+                                        })}
+                                        isToggled={settings.current}
+                                        label="Current"
+                                        variant="secondary"
+                                    />
+                                    <Toggle
+                                        onToggle={() => updateSettings({
+                                            bits: !settings.bits,
+                                        })}
+                                        isToggled={settings.bits}
+                                        label="Digital logic pins (single string field)"
+                                        variant="secondary"
+                                    />
+                                    <Toggle
+                                        onToggle={() => updateSettings({
+                                            bitsSeparated: !settings.bitsSeparated,
+                                        })}
+                                        isToggled={settings.bitsSeparated}
+                                        label="Digital logic pins (separate fields)"
+                                        variant="secondary"
+                                    />
+                                </div>
+                            </Card.Body>
+                        </Card>
                     </Col>
-                    <Col>
-                        <h2>Estimated size</h2>
-                        <p>Number of records: {records}</p>
-                        <p>Filesize: {filesize}</p>
-                        <p>Duration: {unit(duration, 'us')
-                            .format({ notation: 'auto', precision: 4 }).replace('u', '\u00B5')}
-                        </p>
+                    <Col sm={4}>
+                        <Card className="h-100">
+                            <Card.Body>
+                                <h2>ESTIMATION</h2>
+                                <p>{records} records</p>
+                                <p>{filesize}</p>
+                                <p>{unit(duration, 'us')
+                                    .format({ notation: 'auto', precision: 4 })
+                                    .replace('u', '\u00B5')}
+                                </p>
+                            </Card.Body>
+                        </Card>
                     </Col>
                 </Row>
                 <h2>Output filename</h2>
@@ -206,7 +227,18 @@ export default () => {
                 >
                     Change
                 </Button>
-            </div>
-        </ConfirmationDialog>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button
+                    variant="primary"
+                    onClick={() => setImmediate(() => {
+                        dispatch(exportChart(filename, indexBegin, indexEnd, index, settings));
+                    })}
+                >
+                    Save
+                </Button>
+                <Button variant="secondary" onClick={close}>Close</Button>
+            </Modal.Footer>
+        </Modal>
     );
 };

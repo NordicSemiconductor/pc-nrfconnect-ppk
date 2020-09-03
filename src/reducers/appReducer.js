@@ -43,7 +43,8 @@ const initialState = {
     advancedMode: false,
     capabilities: {},
     samplingRunning: false,
-    isExportCSVDialogVisible: false,
+    isSaveChoiceDialogVisible: false,
+    isExportDialogVisible: false,
 };
 
 const DEVICE_CLOSED = 'DEVICE_CLOSED';
@@ -54,19 +55,12 @@ const SAMPLING_STARTED = 'SAMPLING_STARTED';
 const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
 const SET_POWER_MODE = 'SET_POWER_MODE';
 const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
+const TOGGLE_SAVE_CHOICE_DIALOG = 'TOGGLE_SAVE_CHOICE_DIALOG';
 const TOGGLE_EXPORT_DIALOG = 'TOGGLE_EXPORT_DIALOG';
 
-export const toggleAdvancedModeAction = () => ({
-    type: TOGGLE_ADVANCED_MODE,
-});
-
-export const samplingStartAction = () => ({
-    type: SAMPLING_STARTED,
-});
-
-export const samplingStoppedAction = () => ({
-    type: SAMPLING_STOPPED,
-});
+export const toggleAdvancedModeAction = () => ({ type: TOGGLE_ADVANCED_MODE });
+export const samplingStartAction = () => ({ type: SAMPLING_STARTED });
+export const samplingStoppedAction = () => ({ type: SAMPLING_STOPPED });
 
 export const deviceOpenedAction = (portName, capabilities) => ({
     type: DEVICE_OPENED,
@@ -74,26 +68,17 @@ export const deviceOpenedAction = (portName, capabilities) => ({
     capabilities,
 });
 
-export const deviceClosedAction = () => ({
-    type: DEVICE_CLOSED,
-});
-
-export const toggleDUTAction = () => ({
-    type: DEVICE_UNDER_TEST_TOGGLE,
-});
+export const deviceClosedAction = () => ({ type: DEVICE_CLOSED });
+export const toggleDUTAction = () => ({ type: DEVICE_UNDER_TEST_TOGGLE });
 
 export const setPowerModeAction = isSmuMode => ({
     type: SET_POWER_MODE,
     isSmuMode,
 });
 
-export const rttStartAction = () => ({
-    type: RTT_CALLED_START,
-});
-
-export const toggleExportCSVDialogVisible = () => ({
-    type: TOGGLE_EXPORT_DIALOG,
-});
+export const rttStartAction = () => ({ type: RTT_CALLED_START });
+export const toggleSaveChoiceDialog = () => ({ type: TOGGLE_SAVE_CHOICE_DIALOG });
+export const toggleExportDialog = () => ({ type: TOGGLE_EXPORT_DIALOG });
 
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
@@ -105,54 +90,39 @@ export default (state = initialState, { type, ...action }) => {
                 capabilities: { ...capabilities },
             };
         }
-        case DEVICE_CLOSED: {
-            return initialState;
-        }
-        case DEVICE_UNDER_TEST_TOGGLE: {
-            const { deviceRunning } = state;
-            return {
-                ...state,
-                deviceRunning: !deviceRunning,
-            };
-        }
-        case SET_POWER_MODE: {
-            return {
-                ...state,
-                isSmuMode: action.isSmuMode,
-            };
-        }
-
-        case RTT_CALLED_START: {
-            return {
-                ...state,
-                rttRunning: true,
-            };
-        }
-
-        case TOGGLE_ADVANCED_MODE: {
-            return {
-                ...state,
-                advancedMode: !state.advancedMode,
-            };
-        }
-        case TOGGLE_EXPORT_DIALOG: {
-            return {
-                ...state,
-                isExportCSVDialogVisible: !state.isExportCSVDialogVisible,
-            };
-        }
-        case SAMPLING_STARTED: {
-            return {
-                ...state,
-                samplingRunning: true,
-            };
-        }
-        case SAMPLING_STOPPED: {
-            return {
-                ...state,
-                samplingRunning: false,
-            };
-        }
+        case DEVICE_CLOSED: return initialState;
+        case DEVICE_UNDER_TEST_TOGGLE: return {
+            ...state,
+            deviceRunning: !state.deviceRunning,
+        };
+        case SET_POWER_MODE: return {
+            ...state,
+            isSmuMode: action.isSmuMode,
+        };
+        case RTT_CALLED_START: return {
+            ...state,
+            rttRunning: true,
+        };
+        case TOGGLE_ADVANCED_MODE: return {
+            ...state,
+            advancedMode: !state.advancedMode,
+        };
+        case TOGGLE_SAVE_CHOICE_DIALOG: return {
+            ...state,
+            isSaveChoiceDialogVisible: !state.isSaveChoiceDialogVisible,
+        };
+        case TOGGLE_EXPORT_DIALOG: return {
+            ...state,
+            isExportDialogVisible: !state.isExportDialogVisible,
+        };
+        case SAMPLING_STARTED: return {
+            ...state,
+            samplingRunning: true,
+        };
+        case SAMPLING_STOPPED: return {
+            ...state,
+            samplingRunning: false,
+        };
 
         default:
     }

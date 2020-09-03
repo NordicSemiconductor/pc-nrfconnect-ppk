@@ -1,6 +1,10 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-.export-dialog {
+.modal-body {
+    padding: 2rem;
+}
+
+.export-dialog, .choice-dialog {
     color: $gray-600;
 
     h2 {
@@ -19,15 +23,12 @@
         margin-top: 0;
     }
 
-    .col p {
-        margin-bottom: 0;
+    .w-fit-content {
+        width: fit-content;
     }
+}
 
-    .filename {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        direction: rtl;
-        text-align: left;
-    }
+.card-header {
+    background-color: unset;
+    border-bottom: none;
 }

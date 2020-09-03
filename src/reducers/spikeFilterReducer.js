@@ -37,9 +37,9 @@
 import persistentStore from '../utils/persistentStore';
 
 const initialState = {
-    alpha: persistentStore.get('spikeFilter.alpha', 0.04),
-    samples: persistentStore.get('spikeFilter.samples', 3),
-    alpha4: persistentStore.get('spikeFilter.alpha4', 0.04),
+    samples: persistentStore.get('spikeFilter.samples', 5),
+    alpha: persistentStore.get('spikeFilter.alpha', 0.12),
+    alpha4: persistentStore.get('spikeFilter.alpha4', 0.06),
 };
 
 const SPIKE_FILTER_UPDATE = 'SPIKE_FILTER_UPDATE';
