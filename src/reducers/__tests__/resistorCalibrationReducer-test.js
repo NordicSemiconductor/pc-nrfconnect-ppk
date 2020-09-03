@@ -42,14 +42,13 @@ jest.mock('../../actions/deviceActions', () => ({
 }));
 
 import reducer from '../resistorCalibrationReducer';
-import * as UiActions from '../../actions/uiActions';
 
 const initialState = reducer(undefined, {});
 
 describe('resistorCalibrationReducer', () => {
     it('should not update user resistor values if they are undefined', () => {
         const state = reducer(initialState, {
-            type: UiActions.USER_RESISTOR_UPDATED,
+            type: 'USER_RESISTOR_UPDATED',
             userResHi: undefined,
             userResMid: undefined,
             userResLo: undefined,
@@ -61,7 +60,7 @@ describe('resistorCalibrationReducer', () => {
 
     it('should not update user resistor values if they cannot be parsed as floats', () => {
         const state = reducer(initialState, {
-            type: UiActions.USER_RESISTOR_UPDATED,
+            type: 'USER_RESISTOR_UPDATED',
             userResHi: 'foo',
             userResMid: '*',
             userResLo: '!',
@@ -73,7 +72,7 @@ describe('resistorCalibrationReducer', () => {
 
     it('should update user resistor values if they can be parsed as floats', () => {
         const state = reducer(initialState, {
-            type: UiActions.USER_RESISTOR_UPDATED,
+            type: 'USER_RESISTOR_UPDATED',
             userResHi: '42',
             userResMid: '1.234',
             userResLo: '13.37',
