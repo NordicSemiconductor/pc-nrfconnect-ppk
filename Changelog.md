@@ -1,3 +1,11 @@
+## Version 3.0.0-alpha.2
+### Updates
+- Save last directory used
+
+## Version 3.0.0-alpha.1
+### Updates
+- First automated test release
+
 ## Version 2.3.1
 ### Bugfixes
 - Fix updating voltage regulator #105

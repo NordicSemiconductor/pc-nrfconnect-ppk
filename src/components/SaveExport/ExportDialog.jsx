@@ -38,9 +38,9 @@ import React, { useState } from 'react';
 import fs from 'fs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Toggle } from 'pc-nrfconnect-shared';
-import { logger, getAppDataDir } from 'nrfconnect/core';
+import { logger } from 'nrfconnect/core';
 import { remote } from 'electron';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import * as mathjs from 'mathjs';
 
 import Modal from 'react-bootstrap/Modal';
@@ -52,6 +52,8 @@ import Button from 'react-bootstrap/Button';
 import { appState, toggleExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { options, timestampToIndex, indexToTimestamp } from '../../globals';
+
+import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 
 import './saveexport.scss';
 
@@ -146,7 +148,7 @@ export default () => {
         .format({ notation: 'fixed', precision: 0 });
 
     const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
-    const [filename, setFilename] = useState(join(getAppDataDir(), `ppk-${timestamp}.csv`));
+    const filename = join(lastSaveDir(), `ppk-${timestamp}.csv`);
 
     const close = () => dispatch(toggleExportDialog());
 
@@ -216,24 +218,18 @@ export default () => {
                         </Card>
                     </Col>
                 </Row>
-                <h2>Output filename</h2>
-                <p className="filename">{filename}</p>
-                <Button
-                    variant="secondary"
-                    onClick={() => {
-                        const fn = remote.dialog.showSaveDialog({ defaultPath: filename });
-                        if (fn) { setFilename(fn); }
-                    }}
-                >
-                    Change
-                </Button>
             </Modal.Body>
             <Modal.Footer>
                 <Button
                     variant="primary"
-                    onClick={() => setImmediate(() => {
-                        dispatch(exportChart(filename, indexBegin, indexEnd, index, settings));
-                    })}
+                    onClick={() => {
+                        const fn = remote.dialog.showSaveDialog({ defaultPath: filename });
+                        if (!fn) return;
+                        setLastSaveDir(dirname(fn));
+                        setImmediate(() => {
+                            dispatch(exportChart(fn, indexBegin, indexEnd, index, settings));
+                        });
+                    }}
                 >
                     Save
                 </Button>
