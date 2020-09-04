@@ -39,21 +39,25 @@ import { serialize, deserialize } from 'bson';
 import { createInflateRaw, createDeflateRaw } from 'zlib';
 import { Writable } from 'stream';
 import { remote } from 'electron';
-import { join } from 'path';
-import { logger, getAppDataDir } from 'nrfconnect/core';
+import { join, dirname } from 'path';
+import { logger } from 'nrfconnect/core';
 import { options } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
+
+import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 
 const { dialog } = remote;
 
 export const save = () => async (_, getState) => {
     const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
     const filename = await dialog.showSaveDialog({
-        defaultPath: join(getAppDataDir(), `ppk-${timestamp}.ppk`),
+        defaultPath: join(lastSaveDir(), `ppk-${timestamp}.ppk`),
     });
     if (!filename) {
         return;
     }
+
+    setLastSaveDir(dirname(filename));
 
     const file = fs.createWriteStream(filename);
     file.on('error', err => console.log(err.stack));
@@ -86,7 +90,7 @@ export const save = () => async (_, getState) => {
 
 export const load = () => async dispatch => {
     const [filename] = (await dialog.showOpenDialog({
-        defaultPath: getAppDataDir(),
+        defaultPath: lastSaveDir(),
     })) || [];
     if (!filename) {
         return;

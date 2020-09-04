@@ -35,5 +35,11 @@
  */
 
 import Store from 'electron-store';
+import { getAppDataDir } from 'nrfconnect/core';
 
-export default new Store({ name: 'pc-nrfconnect-ppk' });
+const persistentStore = new Store({ name: 'pc-nrfconnect-ppk' });
+
+export default persistentStore;
+
+export const lastSaveDir = () => persistentStore.get('lastSaveDir', getAppDataDir());
+export const setLastSaveDir = dir => persistentStore.set('lastSaveDir', dir);
