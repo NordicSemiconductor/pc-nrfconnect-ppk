@@ -353,7 +353,6 @@ const Chart = () => {
         }
     }
 
-    const live = (windowBegin === 0) && (windowEnd === 0);
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
     const bitsChartData = bitsData
@@ -488,7 +487,6 @@ const Chart = () => {
         <div className="chart-outer">
             <div className="chart-current">
                 <ChartTop
-                    live={live}
                     chartPause={chartPause}
                     chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}

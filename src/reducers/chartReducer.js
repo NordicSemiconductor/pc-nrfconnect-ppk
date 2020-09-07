@@ -57,6 +57,7 @@ const initialState = {
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     triggerHandleVisible: persistentStore.get('triggerHandleVisible', true),
+    yAxisLock: false,
 };
 
 const ANIMATION = 'ANIMATION';
@@ -68,6 +69,7 @@ const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
 const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
 const TOGGLE_TRIGGER_HANDLE = 'TOGGLE_TRIGGER_HANDLE';
 const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
+const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
 
 const MIN_WINDOW_DURATION = 1000;
 const MAX_WINDOW_DURATION = 120000000;
@@ -134,6 +136,7 @@ export const setDigitalChannels = digitalChannels => ({
 export const toggleDigitalChannels = () => ({ type: TOGGLE_DIGITAL_CHANNELS });
 export const toggleTimestamps = () => ({ type: TOGGLE_TIMESTAMPS });
 export const toggleTriggerHandle = () => ({ type: TOGGLE_TRIGGER_HANDLE });
+export const toggleYAxisLock = () => ({ type: TOGGLE_Y_AXIS_LOCK });
 
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
@@ -162,14 +165,15 @@ export default (state = initialState, { type, ...action }) => {
             const {
                 windowBegin, windowEnd, windowDuration, yMin, yMax,
             } = action;
+            const { yAxisLock } = state;
             return {
                 ...state,
                 windowBegin,
                 windowEnd,
                 windowDuration,
                 ...calcBuffer(windowDuration, windowEnd),
-                yMin: yMin === null ? state.yMin : yMin,
-                yMax: yMax === null ? state.yMax : yMax,
+                yMin: (yMin === null || yAxisLock) ? state.yMin : yMin,
+                yMax: (yMax === null || yAxisLock) ? state.yMax : yMax,
             };
         }
         case ANIMATION: {
@@ -213,6 +217,7 @@ export default (state = initialState, { type, ...action }) => {
                 triggerHandleVisible: !state.triggerHandleVisible,
             };
         }
+        case TOGGLE_Y_AXIS_LOCK: return { ...state, yAxisLock: !state.yAxisLock };
         case UPDATE_HAS_DIGITAL_CHANNELS: return { ...state, ...action };
         default: return state;
     }

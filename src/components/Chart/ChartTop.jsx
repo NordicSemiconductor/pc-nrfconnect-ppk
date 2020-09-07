@@ -35,23 +35,31 @@
  */
 
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import { bool, func } from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { func } from 'prop-types';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Toggle } from 'pc-nrfconnect-shared';
 
-import { goLive } from '../../reducers/chartReducer';
+import { goLive, toggleYAxisLock, chartState } from '../../reducers/chartReducer';
 
 import './charttop.scss';
 
-const ChartTop = ({
-    live, chartPause, zoomToWindow,
-}) => {
+const ChartTop = ({ chartPause, zoomToWindow }) => {
     const dispatch = useDispatch();
+    const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
+    const live = (windowBegin === 0) && (windowEnd === 0);
+
     return (
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
+            <Toggle
+                label="LOCK Y-AXIS"
+                onToggle={() => dispatch(toggleYAxisLock())}
+                isToggled={yAxisLock}
+                variant="secondary"
+                labelRight
+            />
             <ButtonGroup>
                 <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000)}>1ms</Button>
                 <Button variant="secondary" size="sm" onClick={() => zoomToWindow(10000)}>10ms</Button>
@@ -70,7 +78,6 @@ const ChartTop = ({
 };
 
 ChartTop.propTypes = {
-    live: bool.isRequired,
     chartPause: func.isRequired,
     zoomToWindow: func.isRequired,
 };
