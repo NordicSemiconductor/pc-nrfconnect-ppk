@@ -34,6 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* eslint-disable no-bitwise */
+
 import { logger } from 'nrfconnect/core';
 import isDev from 'electron-is-dev';
 import Device from '../device';
@@ -352,35 +354,27 @@ export function triggerLengthUpdate(value) {
     };
 }
 
-export function triggerSet(triggerLevel) {
-    /* eslint-disable no-bitwise */
-    return async dispatch => {
-        logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
+export function triggerStart() {
+    return async (dispatch, getState) => {
+        // Start trigger
+        dispatch(toggleTriggerAction(true));
+        dispatch(clearSingleTriggingAction());
+
+        const { triggerLevel } = getState().app.trigger;
+        logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
         const high = (triggerLevel >> 16) & 0xFF;
         const mid = (triggerLevel >> 8) & 0xFF;
         const low = triggerLevel & 0xFF;
-        dispatch(triggerLevelSetAction(triggerLevel));
 
         await device.ppkTriggerSet(high, mid, low);
         dispatch(toggleTriggerAction(true));
     };
 }
 
-export function triggerStart() {
-    return async (dispatch, getState) => {
-        // Start trigger
-        const { triggerLevel } = getState().app.trigger;
-
-        logger.info('Starting trigger');
-        dispatch(toggleTriggerAction(true));
-        dispatch(clearSingleTriggingAction());
-        dispatch(triggerSet(triggerLevel));
-    };
-}
-
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
         const { triggerLevel } = getState().app.trigger;
+        logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
         const high = (triggerLevel >> 16) & 0xFF;
         const mid = (triggerLevel >> 8) & 0xFF;
         const low = triggerLevel & 0xFF;

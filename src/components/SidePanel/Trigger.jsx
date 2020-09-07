@@ -50,12 +50,11 @@ import {
     triggerLengthUpdate,
     triggerStart,
     triggerStop,
-    triggerSet,
     triggerSingleSet,
     externalTriggerToggled,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
-import { triggerState } from '../../reducers/triggerReducer';
+import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
 
 export default () => {
     const dispatch = useDispatch();
@@ -88,7 +87,7 @@ export default () => {
     }, [triggerLevel]);
 
     const sendTriggerLevel = unit => {
-        dispatch(triggerSet(level * (1000 ** unit)));
+        dispatch(triggerLevelSetAction(level * (1000 ** unit)));
         setLevelUnit(unit);
     };
 

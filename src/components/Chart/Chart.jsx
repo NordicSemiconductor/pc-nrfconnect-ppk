@@ -62,8 +62,7 @@ import {
     chartCursorAction,
     chartState,
 } from '../../reducers/chartReducer';
-import { triggerState } from '../../reducers/triggerReducer';
-import { triggerSet } from '../../actions/deviceActions';
+import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
@@ -198,7 +197,7 @@ const Chart = () => {
     const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
     const { index } = options;
 
-    const sendTriggerLevel = level => dispatch(triggerSet(Math.round(level)));
+    const sendTriggerLevel = level => dispatch(triggerLevelSetAction(level));
 
     const chartRef = useRef(null);
 

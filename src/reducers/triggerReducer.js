@@ -49,7 +49,7 @@ const TRIGGER_VALUE_SET = 'TRIGGER_VALUE_SET';
 
 export const triggerLevelSetAction = triggerLevel => ({
     type: TRIGGER_VALUE_SET,
-    triggerLevel,
+    triggerLevel: triggerLevel ? Math.max(1, Math.round(triggerLevel)) : null,
 });
 
 export const toggleTriggerAction = triggerRunning => ({
