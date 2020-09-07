@@ -1,7 +1,15 @@
+## Version 3.0.0-alpha.4
+### Updates
+- Moved save/export to top, fixed collapse defaults
+- Toggle live mode when trigger starts
+- Removed digital options for v1 export
+- Added selection handle lines, limited area
+- Updated crosshair color
+
 ## Version 3.0.0-alpha.3
 ### Updates
 - Chart live view toggle always enabled
-- moved digital channel toggles to display options
+- Moved digital channel toggles to display options
 - Rearraged trigger controls
 - Renamed trigger window to trigger length
 - Fixed updating trigger controls

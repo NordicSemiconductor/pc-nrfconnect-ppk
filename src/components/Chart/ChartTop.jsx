@@ -35,38 +35,43 @@
  */
 
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { bool, func } from 'prop-types';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Toggle } from 'pc-nrfconnect-shared';
 
+import { goLive } from '../../reducers/chartReducer';
+
 import './charttop.scss';
 
 const ChartTop = ({
-    live, chartPause, chartResetToLive, zoomToWindow,
-}) => (
-    <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
-        <ButtonGroup>
-            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000)}>1ms</Button>
-            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(10000)}>10ms</Button>
-            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(100000)}>100ms</Button>
-            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000000)}>1s</Button>
-            <Button variant="secondary" size="sm" onClick={() => zoomToWindow(60000000)}>1min</Button>
-        </ButtonGroup>
-        <Toggle
-            label="LIVE VIEW"
-            onToggle={() => (live ? chartPause() : chartResetToLive())}
-            isToggled={live}
-            variant="secondary"
-        />
-    </div>
-);
+    live, chartPause, zoomToWindow,
+}) => {
+    const dispatch = useDispatch();
+    return (
+        <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
+            <ButtonGroup>
+                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000)}>1ms</Button>
+                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(10000)}>10ms</Button>
+                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(100000)}>100ms</Button>
+                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000000)}>1s</Button>
+                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(60000000)}>1min</Button>
+            </ButtonGroup>
+            <Toggle
+                label="LIVE VIEW"
+                onToggle={() => (live ? chartPause() : dispatch(goLive()))}
+                isToggled={live}
+                variant="secondary"
+            />
+        </div>
+    );
+};
 
 ChartTop.propTypes = {
     live: bool.isRequired,
     chartPause: func.isRequired,
-    chartResetToLive: func.isRequired,
     zoomToWindow: func.isRequired,
 };
 

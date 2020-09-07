@@ -35,7 +35,7 @@
  */
 
 import React, { useContext } from 'react';
-import { string, node } from 'prop-types';
+import { string, node, bool } from 'prop-types';
 
 import Accordion from 'react-bootstrap/Accordion';
 import AccordionContext from 'react-bootstrap/AccordionContext';
@@ -64,9 +64,13 @@ ContextAwareToggle.propTypes = {
 };
 
 const Collapse = ({
-    title, eventKey, className = '', children = null,
+    title,
+    eventKey,
+    className = '',
+    children = null,
+    defaultCollapsed = true,
 }) => (
-    <Accordion defaultActiveKey={eventKey}>
+    <Accordion defaultActiveKey={defaultCollapsed ? '' : eventKey}>
         <div className={`collapse-container ${className}`}>
             <ContextAwareToggle eventKey={eventKey} title={title} />
             <Accordion.Collapse eventKey={eventKey}>
@@ -81,6 +85,7 @@ Collapse.propTypes = {
     eventKey: string.isRequired,
     className: string,
     children: node,
+    defaultCollapsed: bool,
 };
 
 export default Collapse;

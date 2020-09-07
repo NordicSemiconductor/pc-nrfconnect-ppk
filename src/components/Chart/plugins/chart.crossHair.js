@@ -38,7 +38,7 @@
 
 import colors from '../../colors.scss';
 
-const { gray900: color, white } = colors;
+const { gray700: color, white } = colors;
 
 const plugin = {
     id: 'crossHair',

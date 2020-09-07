@@ -109,10 +109,27 @@ export default {
 
         if (typeof cursor.cursorBegin === 'number') {
             const { cursorBegin, cursorEnd } = cursor;
-            const startX = Math.max(scale.getPixelForValue(cursorBegin).valueOf(), left);
-            const endX = Math.min(scale.getPixelForValue(cursorEnd).valueOf(), right);
-            ctx.fillStyle = CHART_SELECTION_COLOR;
-            ctx.fillRect(startX, top, endX - startX, bottom - top);
+            const sX = scale.getPixelForValue(cursorBegin);
+            const eX = scale.getPixelForValue(cursorEnd);
+            const startX = Math.max(sX, left);
+            const endX = Math.min(eX, right);
+            if (startX < right && endX > left) {
+                ctx.fillStyle = CHART_SELECTION_COLOR;
+                ctx.fillRect(startX, top, endX - startX, bottom - top);
+            }
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = colors.gray700;
+            ctx.beginPath();
+            if (sX >= left && sX <= right) {
+                ctx.moveTo(sX, top);
+                ctx.lineTo(sX, bottom + 10);
+            }
+            if (eX >= left && eX <= right) {
+                ctx.moveTo(eX, top);
+                ctx.lineTo(eX, bottom + 10);
+            }
+            ctx.closePath();
+            ctx.stroke();
         }
 
         if (dragStart && dragEnd) {

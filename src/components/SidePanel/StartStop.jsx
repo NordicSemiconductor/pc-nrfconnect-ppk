@@ -59,7 +59,7 @@ export default () => {
     } = useSelector(appState);
 
     return (
-        <div className="d-flex flex-column start-stop">
+        <div className="d-flex flex-column start-stop mt-3">
             <PowerMode />
             {capabilities.ppkToggleDUT && (
                 <Toggle
