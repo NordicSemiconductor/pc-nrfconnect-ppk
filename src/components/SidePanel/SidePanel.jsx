@@ -37,7 +37,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 
 import Buffer from './Buffer';
@@ -73,15 +72,13 @@ const SidePanel = ({ bindHotkey }) => {
             {deviceOpen && (
                 <>
                     <StartStop />
-                    <Trigger />
+                    <Trigger eventKey="0" />
                     <Buffer />
-                    <Accordion defaultActiveKey="1">
-                        <VoltageRegulator eventKey="1" />
-                        <SwitchPoints eventKey="2" />
-                        <ResistorCalibration eventKey="3" />
-                        <Gains eventKey="4" />
-                        <SpikeFilter eventKey="5" />
-                    </Accordion>
+                    <VoltageRegulator eventKey="1" />
+                    <SwitchPoints eventKey="2" />
+                    <ResistorCalibration eventKey="3" />
+                    <Gains eventKey="4" />
+                    <SpikeFilter eventKey="5" />
                 </>
             )}
             {deviceOpen || (
