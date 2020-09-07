@@ -119,13 +119,14 @@ export default () => {
         cursorEnd,
         windowDuration,
         index,
+        hasDigitalChannels,
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
 
     const [settings, setSettings] = useState({
         timestamp: true,
         current: true,
-        bits: true,
+        bits: hasDigitalChannels,
         bitsSeparated: false,
     });
     const updateSettings = change => setSettings({ ...settings, ...change });
@@ -184,22 +185,26 @@ export default () => {
                                         label="Current"
                                         variant="secondary"
                                     />
-                                    <Toggle
-                                        onToggle={() => updateSettings({
-                                            bits: !settings.bits,
-                                        })}
-                                        isToggled={settings.bits}
-                                        label="Digital logic pins (single string field)"
-                                        variant="secondary"
-                                    />
-                                    <Toggle
-                                        onToggle={() => updateSettings({
-                                            bitsSeparated: !settings.bitsSeparated,
-                                        })}
-                                        isToggled={settings.bitsSeparated}
-                                        label="Digital logic pins (separate fields)"
-                                        variant="secondary"
-                                    />
+                                    {hasDigitalChannels && (
+                                        <>
+                                            <Toggle
+                                                onToggle={() => updateSettings({
+                                                    bits: !settings.bits,
+                                                })}
+                                                isToggled={settings.bits}
+                                                label="Digital logic pins (single string field)"
+                                                variant="secondary"
+                                            />
+                                            <Toggle
+                                                onToggle={() => updateSettings({
+                                                    bitsSeparated: !settings.bitsSeparated,
+                                                })}
+                                                isToggled={settings.bitsSeparated}
+                                                label="Digital logic pins (separate fields)"
+                                                variant="secondary"
+                                            />
+                                        </>
+                                    )}
                                 </div>
                             </Card.Body>
                         </Card>
