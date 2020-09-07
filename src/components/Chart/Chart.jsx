@@ -46,11 +46,11 @@ import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
 import { unit } from 'mathjs';
 
-import annotationPlugin from 'chartjs-plugin-annotation';
 import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 import crossHairPlugin from './plugins/chart.crossHair';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
+import triggerRangePlugin from './plugins/chart.triggerRange';
 
 import ChartTop from './ChartTop';
 import BufferView from './BufferView';
@@ -353,7 +353,6 @@ const Chart = () => {
         }
     }
 
-    const live = (windowBegin === 0) && (windowEnd === 0);
     const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
 
     const bitsChartData = bitsData
@@ -374,20 +373,22 @@ const Chart = () => {
         }))
         .filter((_, i) => digitalChannels[i]);
 
+    const snapping = (step <= 0.2) && ((windowBegin !== 0) || (windowEnd !== 0));
+
     const chartData = {
         datasets: [{
             borderColor: dataColor,
             borderWidth: step > 2 ? 1 : 1.5,
             fill: false,
             data: lineData.slice(0, mappedIndex),
-            pointRadius: step > 0.2 ? 0 : 1.5,
-            pointHoverRadius: step > 0.2 ? 0 : 3,
-            pointHitRadius: step > 0.2 ? 0 : 3,
+            pointRadius: snapping ? 1.5 : 0,
+            pointHoverRadius: snapping ? 3 : 0,
+            pointHitRadius: snapping ? 3 : 0,
             pointBackgroundColor: dataColor,
             pointHoverBackgroundColor: dataColor,
             pointBorderWidth: 0,
             pointHoverBorderWidth: 0,
-            lineTension: step > 0.2 ? 0 : 0.2,
+            lineTension: snapping ? 0.2 : 0,
             label: 'Current',
             yAxisID: 'yScale',
             labelCallback: ({ y }) => formatCurrent(y),
@@ -435,47 +436,14 @@ const Chart = () => {
         animation: { duration: 0 },
         hover: { animationDuration: 0 },
         responsiveAnimationDuration: 0,
-        annotation: options.triggerMarkers ? {
-            drawTime: 'beforeDatasetsDraw',
-            annotations: options.triggerMarkers
-                .reduce((pairs, _, i, array) => {
-                    if (!(i % 2)) {
-                        pairs.push(array.slice(i, i + 2));
-                    }
-                    return pairs;
-                }, [])
-                .map(([m1, m2]) => ({
-                    type: 'box',
-                    xScaleID: 'xScale',
-                    xMin: m1 - options.samplingTime,
-                    xMax: m2 - options.samplingTime,
-                    backgroundColor: 'rgba(0, 100, 255, 10%)',
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    borderWidth: 0,
-                })),
-        } : undefined,
-        tooltips: {
-            enabled: true,
-            mode: 'point',
-            intersect: false,
-            callbacks: {
-                title: items => timestampToLabel(items[0].xLabel),
-                label: (item, d) => {
-                    const dataset = d.datasets[item.datasetIndex];
-                    const element = dataset.data[item.index];
-                    if (dataset.labelCallback) {
-                        return dataset.labelCallback(element);
-                    }
-                    return `${dataset.label}: ${element.y}`;
-                },
-            },
-        },
+        tooltips: { enabled: false },
         legend: { display: false },
         formatX: timestampToLabel,
         formatY: formatCurrent,
         triggerLevel,
         triggerActive: triggerRunning || triggerSingleWaiting,
         sendTriggerLevel,
+        snapping,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];
@@ -488,7 +456,6 @@ const Chart = () => {
         <div className="chart-outer">
             <div className="chart-current">
                 <ChartTop
-                    live={live}
                     chartPause={chartPause}
                     chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}
@@ -501,9 +468,11 @@ const Chart = () => {
                         data={chartData}
                         options={chartOptions}
                         plugins={[
-                            dragSelectPlugin, zoomPanPlugin,
+                            dragSelectPlugin,
+                            zoomPanPlugin,
                             triggerLevelPlugin,
-                            crossHairPlugin, annotationPlugin,
+                            crossHairPlugin,
+                            triggerRangePlugin,
                             {
                                 id: 'notifier',
                                 afterLayout(chart) {

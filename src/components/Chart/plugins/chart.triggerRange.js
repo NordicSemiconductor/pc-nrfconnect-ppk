@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,33 +34,60 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import Mousetrap from 'mousetrap';
+/* eslint no-param-reassign: off */
 
-export default ComposedComponent => (
-    class WithHotkey extends React.Component {
-        constructor(props) {
-            super(props);
-            this.bindings = [];
-            this.bindHotkey = this.bindHotkey.bind(this);
-        }
+import { options } from '../../../globals';
+import colors from '../../colors.scss';
 
-        componentWillUnmount() {
-            this.bindings.forEach(key => Mousetrap.unbind(key));
-        }
+const { indigo: color } = colors;
 
-        bindHotkey(key, callback) {
-            Mousetrap.bind(key, callback);
-            this.bindings.push(key);
-        }
+const plugin = {
+    id: 'triggerRange',
 
-        render() {
-            return (
-                <ComposedComponent
-                    bindHotkey={this.bindHotkey}
-                    {...this.props}
-                />
-            );
-        }
-    }
-);
+    beforeDatasetsDraw(chartInstance) {
+        const {
+            chartArea: { top, left, right },
+            chart: { ctx },
+            scales: { xScale: scale },
+        } = chartInstance;
+
+        if (!options.triggerMarkers) return;
+
+        const min = scale.getValueForPixel(left);
+        const max = scale.getValueForPixel(right);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(left, top, right - left, 16);
+        ctx.clip();
+        ctx.fillStyle = color;
+
+        options.triggerMarkers
+            .reduce((pairs, _, i, array) => {
+                if (!(i % 2)) {
+                    const [a, b] = array.slice(i, i + 2);
+                    if (b > min && a < max) {
+                        pairs.push([a, b]);
+                    }
+                }
+                return pairs;
+            }, [])
+            .forEach(([a, b]) => {
+                const x1 = scale.getPixelForValue(a);
+                const x2 = scale.getPixelForValue(b);
+                const d = x2 - x1;
+                const s = d / Math.max(1, Math.floor(d / 6));
+                for (let x = x1; x < x2 + 1; x += s) {
+                    ctx.beginPath();
+                    ctx.moveTo(x - 3, top);
+                    ctx.lineTo(x + 3, top);
+                    ctx.lineTo(x, top + 4);
+                    ctx.fill();
+                }
+            });
+
+        ctx.restore();
+    },
+};
+
+export default plugin;

@@ -1,3 +1,10 @@
+## Version 3.0.0-alpha.5
+### Updates
+- Added lock y-axis toggle
+- Removed hidden advanced mode
+- Introduced custom trigger range visual
+- Added snapping to crosshair, removed tooltips
+
 ## Version 3.0.0-alpha.4
 ### Updates
 - Moved save/export to top, fixed collapse defaults
