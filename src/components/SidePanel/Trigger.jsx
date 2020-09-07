@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
@@ -77,11 +77,15 @@ export default () => {
         decimals: 2,
     };
 
-    /// TODO: don't use separate level state
     const [level, setLevel] = useState(triggerLevel);
     // use true for mA, false for uA
     const [levelUnit, setLevelUnit] = useState(false);
     const [triggerLength, setTriggerLength] = useState(range.min);
+
+    useEffect(() => {
+        setLevelUnit(triggerLevel > 1000);
+        setLevel(triggerLevel > 1000 ? Math.round(triggerLevel / 1000) : triggerLevel);
+    }, [triggerLevel]);
 
     const sendTriggerLevel = unit => {
         dispatch(triggerSet(level * (1000 ** unit)));
