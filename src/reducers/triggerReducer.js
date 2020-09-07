@@ -57,20 +57,12 @@ export const toggleTriggerAction = triggerRunning => ({
     triggerRunning,
 });
 
-export const triggerSingleSetAction = () => ({
-    type: TRIGGER_SINGLE_SET,
-});
+export const triggerSingleSetAction = () => ({ type: TRIGGER_SINGLE_SET });
+export const clearSingleTriggingAction = () => ({ type: TRIGGER_SINGLE_CLEAR });
+export const externalTriggerToggledAction = () => ({ type: EXTERNAL_TRIGGER_TOGGLE });
 
-export const clearSingleTriggingAction = () => ({
-    type: TRIGGER_SINGLE_CLEAR,
-});
-
-export const externalTriggerToggledAction = () => ({
-    type: EXTERNAL_TRIGGER_TOGGLE,
-});
-
-export default (state = initialState, action) => {
-    switch (action.type) {
+export default (state = initialState, { type, ...action }) => {
+    switch (type) {
         case TRIGGER_SINGLE_SET: {
             return {
                 ...state,
@@ -114,11 +106,7 @@ export default (state = initialState, action) => {
 
         case TRIGGER_VALUE_SET: {
             const { triggerLevel } = action;
-            return {
-                ...state,
-                triggerLevel,
-                triggerRunning: true,
-            };
+            return { ...state, triggerLevel };
         }
         default:
     }

@@ -342,26 +342,27 @@ export const updateGains = index => async (_, getState) => {
  * @param {number} value  Value received in milliseconds
  * @returns {null} Nothing
  */
-export function triggerUpdateWindow(value) {
+export function triggerLengthUpdate(value) {
     return async () => {
-        const triggerWindowMicroSec = value * 1000;
-        const triggerWindow = Math.floor(triggerWindowMicroSec / options.samplingTime);
+        const triggerLengthMicroSec = value * 1000;
+        const triggerLength = Math.floor(triggerLengthMicroSec / options.samplingTime);
         // If division returns a decimal, round downward to nearest integer
-        await device.ppkTriggerWindowSet(triggerWindow);
-        logger.info(`Trigger window updated to ${value} ms`);
+        await device.ppkTriggerWindowSet(triggerLength);
+        logger.info(`Trigger length updated to ${value} ms`);
     };
 }
 
 export function triggerSet(triggerLevel) {
     /* eslint-disable no-bitwise */
     return async dispatch => {
-        logger.info(`Trigger level set ${triggerLevel} \u00B5A`);
+        logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
         const high = (triggerLevel >> 16) & 0xFF;
         const mid = (triggerLevel >> 8) & 0xFF;
         const low = triggerLevel & 0xFF;
-        await device.ppkTriggerSet(high, mid, low);
-
         dispatch(triggerLevelSetAction(triggerLevel));
+
+        await device.ppkTriggerSet(high, mid, low);
+        dispatch(toggleTriggerAction(true));
     };
 }
 

@@ -47,7 +47,7 @@ import { NumberInlineInput, Slider, Toggle } from 'pc-nrfconnect-shared';
 import Collapse from './Collapse';
 
 import {
-    triggerUpdateWindow,
+    triggerLengthUpdate,
     triggerStart,
     triggerStop,
     triggerSet,
@@ -64,6 +64,7 @@ export default () => {
         externalTrigger,
         triggerRunning,
         triggerSingleWaiting,
+        triggerLevel,
     } = useSelector(triggerState);
 
     if (!capabilities.ppkTriggerSet) {
@@ -76,10 +77,11 @@ export default () => {
         decimals: 2,
     };
 
-    const [level, setLevel] = useState(1);
+    /// TODO: don't use separate level state
+    const [level, setLevel] = useState(triggerLevel);
     // use true for mA, false for uA
-    const [levelUnit, setLevelUnit] = useState(true);
-    const [triggerWindowLength, setTriggerWindowLength] = useState(range.min);
+    const [levelUnit, setLevelUnit] = useState(false);
+    const [triggerLength, setTriggerLength] = useState(range.min);
 
     const sendTriggerLevel = unit => {
         dispatch(triggerSet(level * (1000 ** unit)));
@@ -88,26 +90,8 @@ export default () => {
 
     return (
         <Accordion defaultActiveKey="0">
-            <Collapse title="TRIGGER" eventKey="0">
-                <Form.Label htmlFor="slider-trigger-window">
-                    <span className="flex-fill">Window</span>
-                    <NumberInlineInput
-                        value={triggerWindowLength}
-                        range={range}
-                        onChange={value => setTriggerWindowLength(value)}
-                        onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
-                        chars={6}
-                    />
-                    {' '}ms
-                </Form.Label>
-                <Slider
-                    id="slider-trigger-window"
-                    values={[triggerWindowLength]}
-                    range={range}
-                    onChange={[value => setTriggerWindowLength(value)]}
-                    onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
-                />
-                <ButtonGroup className="my-2 d-flex flex-row">
+            <Collapse title="TRIGGER" eventKey="0" className="trigger-collapse">
+                <ButtonGroup className="mb-2 d-flex flex-row">
                     <Button
                         disabled={!rttRunning || externalTrigger}
                         variant="set"
@@ -131,6 +115,24 @@ export default () => {
                         {triggerRunning ? 'Stop' : 'Start'}
                     </Button>
                 </ButtonGroup>
+                <Form.Label htmlFor="slider-trigger-window">
+                    <span className="flex-fill">Length</span>
+                    <NumberInlineInput
+                        value={triggerLength}
+                        range={range}
+                        onChange={value => setTriggerLength(value)}
+                        onChangeComplete={() => dispatch(triggerLengthUpdate(triggerLength))}
+                        chars={6}
+                    />
+                    {' '}ms
+                </Form.Label>
+                <Slider
+                    id="slider-trigger-window"
+                    values={[triggerLength]}
+                    range={range}
+                    onChange={[value => setTriggerLength(value)]}
+                    onChangeComplete={() => dispatch(triggerLengthUpdate(triggerLength))}
+                />
                 <Form.Label
                     htmlFor="slider-trigger-level"
                     className="d-flex flex-row align-items-baseline"
