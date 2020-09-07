@@ -373,20 +373,22 @@ const Chart = () => {
         }))
         .filter((_, i) => digitalChannels[i]);
 
+    const snapping = (step <= 0.2) && ((windowBegin !== 0) || (windowEnd !== 0));
+
     const chartData = {
         datasets: [{
             borderColor: dataColor,
             borderWidth: step > 2 ? 1 : 1.5,
             fill: false,
             data: lineData.slice(0, mappedIndex),
-            pointRadius: step > 0.2 ? 0 : 1.5,
-            pointHoverRadius: step > 0.2 ? 0 : 3,
-            pointHitRadius: step > 0.2 ? 0 : 3,
+            pointRadius: snapping ? 1.5 : 0,
+            pointHoverRadius: snapping ? 3 : 0,
+            pointHitRadius: snapping ? 3 : 0,
             pointBackgroundColor: dataColor,
             pointHoverBackgroundColor: dataColor,
             pointBorderWidth: 0,
             pointHoverBorderWidth: 0,
-            lineTension: step > 0.2 ? 0 : 0.2,
+            lineTension: snapping ? 0.2 : 0,
             label: 'Current',
             yAxisID: 'yScale',
             labelCallback: ({ y }) => formatCurrent(y),
@@ -434,28 +436,14 @@ const Chart = () => {
         animation: { duration: 0 },
         hover: { animationDuration: 0 },
         responsiveAnimationDuration: 0,
-        tooltips: {
-            enabled: true,
-            mode: 'point',
-            intersect: false,
-            callbacks: {
-                title: items => timestampToLabel(items[0].xLabel),
-                label: (item, d) => {
-                    const dataset = d.datasets[item.datasetIndex];
-                    const element = dataset.data[item.index];
-                    if (dataset.labelCallback) {
-                        return dataset.labelCallback(element);
-                    }
-                    return `${dataset.label}: ${element.y}`;
-                },
-            },
-        },
+        tooltips: { enabled: false },
         legend: { display: false },
         formatX: timestampToLabel,
         formatY: formatCurrent,
         triggerLevel,
         triggerActive: triggerRunning || triggerSingleWaiting,
         sendTriggerLevel,
+        snapping,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];

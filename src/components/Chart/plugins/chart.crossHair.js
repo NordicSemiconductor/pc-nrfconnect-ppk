@@ -45,8 +45,20 @@ const plugin = {
     instances: [],
     moveEvent: {},
 
-    pointerMoveHandler(evt, { chartArea: { left }, id }) {
-        const { layerX, layerY } = evt || {};
+    pointerMoveHandler(evt, {
+        chartArea: { left }, id, chart, options: { snapping },
+    }) {
+        let { layerX, layerY } = evt || {};
+
+        if (snapping) {
+            const hit = chart.getElementAtEvent(evt)[0];
+            if (hit) {
+                // eslint-disable-next-line no-underscore-dangle
+                const { x, y } = hit._model;
+                layerX = x;
+                layerY = y;
+            }
+        }
         plugin.moveEvent = { layerX: layerX - left, layerY, id };
         plugin.instances.forEach(instance => instance.update({ lazy: true }));
     },
