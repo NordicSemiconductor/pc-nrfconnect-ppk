@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfconnect-ppk",
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.5",
   "description": "Power Profiler",
   "displayName": "Power Profiler",
   "repository": {
@@ -38,15 +38,12 @@
   "devDependencies": {
     "bson": "4.0.4",
     "chart.js": "2.9.3",
-    "chartjs-plugin-annotation": "0.5.7",
     "electron-is-dev": "1.2.0",
     "electron-store": "5.1.1",
     "mathjs": "6.6.1",
-    "mousetrap": "1.6.5",
     "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v4.8.15",
     "react": "16.13.1",
     "react-chartjs-2": "2.9.0",
-    "react-rangeslider": "2.2.0",
     "react-redux": "7.2.0"
   },
   "dependencies": {}
