@@ -38,6 +38,11 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Toggle } from 'pc-nrfconnect-shared';
 
+import Accordion from 'react-bootstrap/Accordion';
+
+import DigitalChannels from './DigitalChannels';
+import Collapse from './Collapse';
+
 import { appState } from '../../reducers/appReducer';
 import {
     chartState, toggleDigitalChannels, toggleTimestamps, toggleTriggerHandle,
@@ -54,30 +59,34 @@ export default () => {
     const { capabilities } = useSelector(appState);
 
     return (
-        <>
-            <h2>DISPLAY OPTIONS</h2>
-            {capabilities.ppkTriggerSet && (
+        <Accordion defaultActiveKey="10">
+            <Collapse title="DISPLAY OPTIONS" eventKey="10">
+                {capabilities.ppkTriggerSet && (
+                    <Toggle
+                        onToggle={() => dispatch(toggleTriggerHandle())}
+                        isToggled={triggerHandleVisible}
+                        label="Trigger handle"
+                        variant="secondary"
+                    />
+                )}
                 <Toggle
-                    onToggle={() => dispatch(toggleTriggerHandle())}
-                    isToggled={triggerHandleVisible}
-                    label="Trigger handle"
+                    onToggle={() => dispatch(toggleTimestamps())}
+                    isToggled={timestampsVisible}
+                    label="Timestamps"
                     variant="secondary"
                 />
-            )}
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="secondary"
-            />
-            {hasDigitalChannels && (
-                <Toggle
-                    onToggle={() => dispatch(toggleDigitalChannels())}
-                    isToggled={digitalChannelsVisible}
-                    label="Digital channels"
-                    variant="secondary"
-                />
-            )}
-        </>
+                {hasDigitalChannels && (
+                    <>
+                        <Toggle
+                            onToggle={() => dispatch(toggleDigitalChannels())}
+                            isToggled={digitalChannelsVisible}
+                            label="Digital channels"
+                            variant="secondary"
+                        />
+                        <DigitalChannels />
+                    </>
+                )}
+            </Collapse>
+        </Accordion>
     );
 };

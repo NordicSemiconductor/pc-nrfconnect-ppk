@@ -41,7 +41,6 @@ import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 
 import Buffer from './Buffer';
-import DigitalChannels from './DigitalChannels';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
 import Trigger from './Trigger';
@@ -76,7 +75,6 @@ const SidePanel = ({ bindHotkey }) => {
                     <StartStop />
                     <Trigger />
                     <Buffer />
-                    <DigitalChannels />
                     <Accordion defaultActiveKey="1">
                         <VoltageRegulator eventKey="1" />
                         <SwitchPoints eventKey="2" />
@@ -96,10 +94,8 @@ const SidePanel = ({ bindHotkey }) => {
                     >
                         LOAD
                     </Button>
-                    <DigitalChannels />
                 </>
             )}
-            <div className="flex-fill" />
             <DisplayOptions />
             <Button
                 className="w-100 mt-4"
