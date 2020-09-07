@@ -36,7 +36,6 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import PropTypes from 'prop-types';
 import Button from 'react-bootstrap/Button';
 
 import Buffer from './Buffer';
@@ -47,11 +46,9 @@ import VoltageRegulator from './VoltageRegulator';
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 import Gains from './Gains';
-import withHotkey from '../../utils/withHotKey';
 
 import {
     appState,
-    toggleAdvancedModeAction,
     toggleSaveChoiceDialog,
 } from '../../reducers/appReducer';
 import { load } from '../../actions/fileActions';
@@ -59,9 +56,8 @@ import { load } from '../../actions/fileActions';
 import './sidepanel.scss';
 import SpikeFilter from './SpikeFilter';
 
-const SidePanel = ({ bindHotkey }) => {
+export default () => {
     const dispatch = useDispatch();
-    bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
     const { capabilities, samplingRunning } = useSelector(appState);
 
@@ -105,9 +101,3 @@ const SidePanel = ({ bindHotkey }) => {
         </div>
     );
 };
-
-SidePanel.propTypes = {
-    bindHotkey: PropTypes.func.isRequired,
-};
-
-export default withHotkey(SidePanel);
