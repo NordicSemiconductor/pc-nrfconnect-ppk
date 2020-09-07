@@ -57,7 +57,6 @@ import BufferView from './BufferView';
 import StatBox from './StatBox';
 import TimeSpan from './TimeSpan';
 
-import { appState } from '../../reducers/appReducer';
 import {
     chartWindowAction,
     chartCursorAction,
@@ -183,7 +182,6 @@ const Chart = () => {
     const chartCursor = useCallback((cursorBegin, cursorEnd) => dispatch(
         chartCursorAction(cursorBegin, cursorEnd),
     ), [dispatch]);
-    const { samplingRunning } = useSelector(appState);
     const {
         windowBegin,
         windowEnd,
@@ -492,7 +490,6 @@ const Chart = () => {
             <div className="chart-current">
                 <ChartTop
                     live={live}
-                    samplingRunning={samplingRunning}
                     chartPause={chartPause}
                     chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}

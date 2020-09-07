@@ -44,7 +44,7 @@ import { Toggle } from 'pc-nrfconnect-shared';
 import './charttop.scss';
 
 const ChartTop = ({
-    live, samplingRunning, chartPause, chartResetToLive, zoomToWindow,
+    live, chartPause, chartResetToLive, zoomToWindow,
 }) => (
     <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
         <ButtonGroup>
@@ -58,7 +58,6 @@ const ChartTop = ({
             label="LIVE VIEW"
             onToggle={() => (live ? chartPause() : chartResetToLive())}
             isToggled={live}
-            disabled={!samplingRunning && live}
             variant="secondary"
         />
     </div>
@@ -66,7 +65,6 @@ const ChartTop = ({
 
 ChartTop.propTypes = {
     live: bool.isRequired,
-    samplingRunning: bool.isRequired,
     chartPause: func.isRequired,
     chartResetToLive: func.isRequired,
     zoomToWindow: func.isRequired,
