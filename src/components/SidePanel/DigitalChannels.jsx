@@ -61,27 +61,24 @@ export default () => {
     };
 
     return (
-        <>
-            <h2>DIGITAL CHANNELS</h2>
-            <ToggleButtonGroup
-                className="digital-channels w-100"
-                type="checkbox"
-                value={value}
-            >
-                {digitalChannels.map((channel, i) => (
-                    <ToggleButton
-                        key={`d${i + 1}`}
-                        checked={channel}
-                        variant={channel ? 'set' : 'unset'}
-                        className="text-smaller px-0 py-1"
-                        value={i}
-                        onChange={() => toggle(i)}
-                        active
-                    >
-                        {i}
-                    </ToggleButton>
-                ))}
-            </ToggleButtonGroup>
-        </>
+        <ToggleButtonGroup
+            className="digital-channels w-100"
+            type="checkbox"
+            value={value}
+        >
+            {digitalChannels.map((channel, i) => (
+                <ToggleButton
+                    key={`d${i + 1}`}
+                    checked={channel}
+                    variant={channel ? 'set' : 'unset'}
+                    className="text-smaller px-0 py-1"
+                    value={i}
+                    onChange={() => toggle(i)}
+                    active
+                >
+                    {i}
+                </ToggleButton>
+            ))}
+        </ToggleButtonGroup>
     );
 };

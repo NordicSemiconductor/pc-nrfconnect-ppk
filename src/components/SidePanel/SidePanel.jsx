@@ -37,11 +37,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 
 import Buffer from './Buffer';
-import DigitalChannels from './DigitalChannels';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
 import Trigger from './Trigger';
@@ -74,16 +72,13 @@ const SidePanel = ({ bindHotkey }) => {
             {deviceOpen && (
                 <>
                     <StartStop />
-                    <Trigger />
+                    <Trigger eventKey="0" />
                     <Buffer />
-                    <DigitalChannels />
-                    <Accordion defaultActiveKey="1">
-                        <VoltageRegulator eventKey="1" />
-                        <SwitchPoints eventKey="2" />
-                        <ResistorCalibration eventKey="3" />
-                        <Gains eventKey="4" />
-                        <SpikeFilter eventKey="5" />
-                    </Accordion>
+                    <VoltageRegulator eventKey="1" />
+                    <SwitchPoints eventKey="2" />
+                    <ResistorCalibration eventKey="3" />
+                    <Gains eventKey="4" />
+                    <SpikeFilter eventKey="5" />
                 </>
             )}
             {deviceOpen || (
@@ -96,10 +91,8 @@ const SidePanel = ({ bindHotkey }) => {
                     >
                         LOAD
                     </Button>
-                    <DigitalChannels />
                 </>
             )}
-            <div className="flex-fill" />
             <DisplayOptions />
             <Button
                 className="w-100 mt-4"

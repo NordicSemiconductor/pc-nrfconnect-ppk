@@ -34,9 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import Accordion from 'react-bootstrap/Accordion';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -47,28 +47,24 @@ import { NumberInlineInput, Slider, Toggle } from 'pc-nrfconnect-shared';
 import Collapse from './Collapse';
 
 import {
-    triggerUpdateWindow,
+    triggerLengthUpdate,
     triggerStart,
     triggerStop,
-    triggerSet,
     triggerSingleSet,
     externalTriggerToggled,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
-import { triggerState } from '../../reducers/triggerReducer';
+import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
 
-export default () => {
+const Trigger = ({ eventKey }) => {
     const dispatch = useDispatch();
     const { rttRunning, capabilities } = useSelector(appState);
     const {
         externalTrigger,
         triggerRunning,
         triggerSingleWaiting,
+        triggerLevel,
     } = useSelector(triggerState);
-
-    if (!capabilities.ppkTriggerSet) {
-        return null;
-    }
 
     const range = {
         min: (450 * 13) / 1e3,
@@ -76,106 +72,119 @@ export default () => {
         decimals: 2,
     };
 
-    const [level, setLevel] = useState(1);
+    const [level, setLevel] = useState(triggerLevel);
     // use true for mA, false for uA
-    const [levelUnit, setLevelUnit] = useState(true);
-    const [triggerWindowLength, setTriggerWindowLength] = useState(range.min);
+    const [levelUnit, setLevelUnit] = useState(false);
+    const [triggerLength, setTriggerLength] = useState(range.min);
+
+    useEffect(() => {
+        setLevelUnit(triggerLevel > 1000);
+        setLevel(triggerLevel > 1000 ? Math.round(triggerLevel / 1000) : triggerLevel);
+    }, [triggerLevel]);
 
     const sendTriggerLevel = unit => {
-        dispatch(triggerSet(level * (1000 ** unit)));
+        dispatch(triggerLevelSetAction(level * (1000 ** unit)));
         setLevelUnit(unit);
     };
 
+    if (!capabilities.ppkTriggerSet) {
+        return null;
+    }
+
     return (
-        <Accordion defaultActiveKey="0">
-            <Collapse title="TRIGGER" eventKey="0">
-                <Form.Label htmlFor="slider-trigger-window">
-                    <span className="flex-fill">Window</span>
-                    <NumberInlineInput
-                        value={triggerWindowLength}
-                        range={range}
-                        onChange={value => setTriggerWindowLength(value)}
-                        onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
-                        chars={6}
-                    />
-                    {' '}ms
-                </Form.Label>
-                <Slider
-                    id="slider-trigger-window"
-                    values={[triggerWindowLength]}
-                    range={range}
-                    onChange={[value => setTriggerWindowLength(value)]}
-                    onChangeComplete={() => dispatch(triggerUpdateWindow(triggerWindowLength))}
-                />
-                <ButtonGroup className="my-2 d-flex flex-row">
-                    <Button
-                        disabled={!rttRunning || externalTrigger}
-                        variant="set"
-                        onClick={() => dispatch(
-                            triggerSingleWaiting
-                                ? triggerStop()
-                                : triggerSingleSet(),
-                        )}
-                    >
-                        {triggerSingleWaiting ? 'Waiting...' : 'Single'}
-                    </Button>
-                    <Button
-                        disabled={!rttRunning || externalTrigger}
-                        variant="set"
-                        onClick={() => dispatch(
-                            triggerRunning
-                                ? triggerStop()
-                                : triggerStart(),
-                        )}
-                    >
-                        {triggerRunning ? 'Stop' : 'Start'}
-                    </Button>
-                </ButtonGroup>
-                <Form.Label
-                    htmlFor="slider-trigger-level"
-                    className="d-flex flex-row align-items-baseline"
+        <Collapse title="TRIGGER" eventKey={eventKey} className="trigger-collapse">
+            <ButtonGroup className="mb-2 d-flex flex-row">
+                <Button
+                    disabled={!rttRunning || externalTrigger}
+                    variant="set"
+                    onClick={() => dispatch(
+                        triggerSingleWaiting
+                            ? triggerStop()
+                            : triggerSingleSet(),
+                    )}
                 >
-                    <span className="flex-fill">Trigger level</span>
-                    <NumberInlineInput
-                        value={level}
-                        range={{ min: 1, max: 1000 }}
-                        onChange={value => setLevel(parseInt(value, 10))}
-                        onChangeComplete={() => sendTriggerLevel(levelUnit)}
-                    />
-                    <Dropdown>
-                        <Dropdown.Toggle id="dropdown-current-unit" variant="plain">
-                            {levelUnit ? 'mA' : '\u00B5A'}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item
-                                eventKey="0"
-                                onSelect={() => sendTriggerLevel(false)}
-                            >
-                                {'\u00B5A'}
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                eventKey="0"
-                                onSelect={() => sendTriggerLevel(true)}
-                            >
-                                mA
-                            </Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </Form.Label>
-                <Slider
-                    id="slider-trigger-level"
-                    values={[level]}
+                    {triggerSingleWaiting ? 'Waiting...' : 'Single'}
+                </Button>
+                <Button
+                    disabled={!rttRunning || externalTrigger}
+                    variant="set"
+                    onClick={() => dispatch(
+                        triggerRunning
+                            ? triggerStop()
+                            : triggerStart(),
+                    )}
+                >
+                    {triggerRunning ? 'Stop' : 'Start'}
+                </Button>
+            </ButtonGroup>
+            <Form.Label htmlFor="slider-trigger-window">
+                <span className="flex-fill">Length</span>
+                <NumberInlineInput
+                    value={triggerLength}
+                    range={range}
+                    onChange={value => setTriggerLength(value)}
+                    onChangeComplete={() => dispatch(triggerLengthUpdate(triggerLength))}
+                    chars={6}
+                />
+                {' '}ms
+            </Form.Label>
+            <Slider
+                id="slider-trigger-window"
+                values={[triggerLength]}
+                range={range}
+                onChange={[value => setTriggerLength(value)]}
+                onChangeComplete={() => dispatch(triggerLengthUpdate(triggerLength))}
+            />
+            <Form.Label
+                htmlFor="slider-trigger-level"
+                className="d-flex flex-row align-items-baseline"
+            >
+                <span className="flex-fill">Trigger level</span>
+                <NumberInlineInput
+                    value={level}
                     range={{ min: 1, max: 1000 }}
-                    onChange={[value => setLevel(parseInt(value, 10))]}
+                    onChange={value => setLevel(parseInt(value, 10))}
                     onChangeComplete={() => sendTriggerLevel(levelUnit)}
                 />
-                <Toggle
-                    onToggle={value => dispatch(externalTriggerToggled(value))}
-                    isToggled={externalTrigger}
-                    label="External trigger"
-                    variant="secondary"
-                />
-            </Collapse>
-        </Accordion>
+                <Dropdown>
+                    <Dropdown.Toggle id="dropdown-current-unit" variant="plain">
+                        {levelUnit ? 'mA' : '\u00B5A'}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        <Dropdown.Item
+                            eventKey="0"
+                            onSelect={() => sendTriggerLevel(false)}
+                        >
+                            {'\u00B5A'}
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                            eventKey="0"
+                            onSelect={() => sendTriggerLevel(true)}
+                        >
+                            mA
+                        </Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
+            </Form.Label>
+            <Slider
+                id="slider-trigger-level"
+                values={[level]}
+                range={{ min: 1, max: 1000 }}
+                onChange={[value => setLevel(parseInt(value, 10))]}
+                onChangeComplete={() => sendTriggerLevel(levelUnit)}
+            />
+            <Toggle
+                onToggle={value => dispatch(externalTriggerToggled(value))}
+                isToggled={externalTrigger}
+                label="External trigger"
+                variant="secondary"
+            />
+        </Collapse>
     );
 };
+
+Trigger.propTypes = {
+    eventKey: string.isRequired,
+};
+
+export default Trigger;

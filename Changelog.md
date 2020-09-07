@@ -1,3 +1,13 @@
+## Version 3.0.0-alpha.3
+### Updates
+- Chart live view toggle always enabled
+- moved digital channel toggles to display options
+- Rearraged trigger controls
+- Renamed trigger window to trigger length
+- Fixed updating trigger controls
+- Only send trigger level before trigging started
+- Independent collapsibles in the side panel
+
 ## Version 3.0.0-alpha.2
 ### Updates
 - Save last directory used

@@ -66,12 +66,14 @@ ContextAwareToggle.propTypes = {
 const Collapse = ({
     title, eventKey, className = '', children = null,
 }) => (
-    <div className={`collapse-container ${className}`}>
-        <ContextAwareToggle eventKey={eventKey} title={title} />
-        <Accordion.Collapse eventKey={eventKey}>
-            <>{children}</>
-        </Accordion.Collapse>
-    </div>
+    <Accordion defaultActiveKey={eventKey}>
+        <div className={`collapse-container ${className}`}>
+            <ContextAwareToggle eventKey={eventKey} title={title} />
+            <Accordion.Collapse eventKey={eventKey}>
+                <>{children}</>
+            </Accordion.Collapse>
+        </div>
+    </Accordion>
 );
 
 Collapse.propTypes = {

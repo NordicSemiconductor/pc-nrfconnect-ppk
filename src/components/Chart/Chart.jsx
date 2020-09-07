@@ -57,14 +57,12 @@ import BufferView from './BufferView';
 import StatBox from './StatBox';
 import TimeSpan from './TimeSpan';
 
-import { appState } from '../../reducers/appReducer';
 import {
     chartWindowAction,
     chartCursorAction,
     chartState,
 } from '../../reducers/chartReducer';
-import { triggerState } from '../../reducers/triggerReducer';
-import { triggerSet } from '../../actions/deviceActions';
+import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
@@ -183,7 +181,6 @@ const Chart = () => {
     const chartCursor = useCallback((cursorBegin, cursorEnd) => dispatch(
         chartCursorAction(cursorBegin, cursorEnd),
     ), [dispatch]);
-    const { samplingRunning } = useSelector(appState);
     const {
         windowBegin,
         windowEnd,
@@ -200,7 +197,7 @@ const Chart = () => {
     const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
     const { index } = options;
 
-    const sendTriggerLevel = level => dispatch(triggerSet(Math.round(level)));
+    const sendTriggerLevel = level => dispatch(triggerLevelSetAction(level));
 
     const chartRef = useRef(null);
 
@@ -492,7 +489,6 @@ const Chart = () => {
             <div className="chart-current">
                 <ChartTop
                     live={live}
-                    samplingRunning={samplingRunning}
                     chartPause={chartPause}
                     chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}

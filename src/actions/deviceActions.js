@@ -34,6 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* eslint-disable no-bitwise */
+
 import { logger } from 'nrfconnect/core';
 import isDev from 'electron-is-dev';
 import Device from '../device';
@@ -342,44 +344,37 @@ export const updateGains = index => async (_, getState) => {
  * @param {number} value  Value received in milliseconds
  * @returns {null} Nothing
  */
-export function triggerUpdateWindow(value) {
+export function triggerLengthUpdate(value) {
     return async () => {
-        const triggerWindowMicroSec = value * 1000;
-        const triggerWindow = Math.floor(triggerWindowMicroSec / options.samplingTime);
+        const triggerLengthMicroSec = value * 1000;
+        const triggerLength = Math.floor(triggerLengthMicroSec / options.samplingTime);
         // If division returns a decimal, round downward to nearest integer
-        await device.ppkTriggerWindowSet(triggerWindow);
-        logger.info(`Trigger window updated to ${value} ms`);
-    };
-}
-
-export function triggerSet(triggerLevel) {
-    /* eslint-disable no-bitwise */
-    return async dispatch => {
-        logger.info(`Trigger level set ${triggerLevel} \u00B5A`);
-        const high = (triggerLevel >> 16) & 0xFF;
-        const mid = (triggerLevel >> 8) & 0xFF;
-        const low = triggerLevel & 0xFF;
-        await device.ppkTriggerSet(high, mid, low);
-
-        dispatch(triggerLevelSetAction(triggerLevel));
+        await device.ppkTriggerWindowSet(triggerLength);
+        logger.info(`Trigger length updated to ${value} ms`);
     };
 }
 
 export function triggerStart() {
     return async (dispatch, getState) => {
         // Start trigger
-        const { triggerLevel } = getState().app.trigger;
-
-        logger.info('Starting trigger');
         dispatch(toggleTriggerAction(true));
         dispatch(clearSingleTriggingAction());
-        dispatch(triggerSet(triggerLevel));
+
+        const { triggerLevel } = getState().app.trigger;
+        logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
+        const high = (triggerLevel >> 16) & 0xFF;
+        const mid = (triggerLevel >> 8) & 0xFF;
+        const low = triggerLevel & 0xFF;
+
+        await device.ppkTriggerSet(high, mid, low);
+        dispatch(toggleTriggerAction(true));
     };
 }
 
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
         const { triggerLevel } = getState().app.trigger;
+        logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
         const high = (triggerLevel >> 16) & 0xFF;
         const mid = (triggerLevel >> 8) & 0xFF;
         const low = triggerLevel & 0xFF;
