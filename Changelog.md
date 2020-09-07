@@ -6,6 +6,7 @@
 - Renamed trigger window to trigger length
 - Fixed updating trigger controls
 - Only send trigger level before trigging started
+- Independent collapsibles in the side panel
 
 ## Version 3.0.0-alpha.2
 ### Updates
