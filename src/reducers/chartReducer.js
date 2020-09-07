@@ -106,6 +106,13 @@ export const chartWindowAction = (
     };
 };
 
+export const chartReset = windowDuration => chartWindowAction(null, null, windowDuration);
+export const resetCursor = () => chartCursorAction(null, null);
+export const goLive = () => (dispatch, getState) => {
+    dispatch(chartReset(getState().app.chart.windowDuration));
+    dispatch(resetCursor());
+};
+
 export const setChartState = state => ({
     type: LOAD_CHART_STATE,
     ...state,

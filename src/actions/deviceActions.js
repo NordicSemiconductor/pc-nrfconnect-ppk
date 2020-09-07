@@ -65,7 +65,7 @@ import {
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
 import {
-    chartWindowAction, animationAction, chartCursorAction, updateHasDigitalChannels,
+    chartWindowAction, animationAction, chartCursorAction, updateHasDigitalChannels, goLive,
 } from '../reducers/chartReducer';
 import { options, bufferLengthInSeconds } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
@@ -356,7 +356,7 @@ export function triggerLengthUpdate(value) {
 
 export function triggerStart() {
     return async (dispatch, getState) => {
-        // Start trigger
+        dispatch(goLive());
         dispatch(toggleTriggerAction(true));
         dispatch(clearSingleTriggingAction());
 
@@ -373,6 +373,7 @@ export function triggerStart() {
 
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
+        dispatch(goLive());
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
         const high = (triggerLevel >> 16) & 0xFF;
