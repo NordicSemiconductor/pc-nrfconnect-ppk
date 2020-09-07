@@ -69,18 +69,6 @@ const SidePanel = ({ bindHotkey }) => {
 
     return (
         <div className="sidepanel d-flex flex-column">
-            {deviceOpen && (
-                <>
-                    <StartStop />
-                    <Trigger eventKey="0" />
-                    <Buffer />
-                    <VoltageRegulator eventKey="1" />
-                    <SwitchPoints eventKey="2" />
-                    <ResistorCalibration eventKey="3" />
-                    <Gains eventKey="4" />
-                    <SpikeFilter eventKey="5" />
-                </>
-            )}
             {deviceOpen || (
                 <>
                     <p>Please open your device first, or</p>
@@ -93,15 +81,27 @@ const SidePanel = ({ bindHotkey }) => {
                     </Button>
                 </>
             )}
-            <DisplayOptions />
             <Button
-                className="w-100 mt-4"
+                className="w-100 mb-3"
                 variant="set"
                 disabled={samplingRunning}
                 onClick={() => dispatch(toggleSaveChoiceDialog())}
             >
                 SAVE / EXPORT
             </Button>
+            {deviceOpen && (
+                <>
+                    <StartStop />
+                    <Trigger eventKey="0" />
+                    <Buffer />
+                    <VoltageRegulator eventKey="1" />
+                    <SwitchPoints eventKey="2" />
+                    <ResistorCalibration eventKey="3" />
+                    <Gains eventKey="4" />
+                    <SpikeFilter eventKey="5" />
+                </>
+            )}
+            <DisplayOptions />
         </div>
     );
 };

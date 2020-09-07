@@ -92,7 +92,12 @@ const Trigger = ({ eventKey }) => {
     }
 
     return (
-        <Collapse title="TRIGGER" eventKey={eventKey} className="trigger-collapse">
+        <Collapse
+            title="TRIGGER"
+            eventKey={eventKey}
+            className="trigger-collapse"
+            defaultCollapsed={false}
+        >
             <ButtonGroup className="mb-2 d-flex flex-row">
                 <Button
                     disabled={!rttRunning || externalTrigger}
