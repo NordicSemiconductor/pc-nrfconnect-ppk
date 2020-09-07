@@ -46,11 +46,11 @@ import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
 import { unit } from 'mathjs';
 
-import annotationPlugin from 'chartjs-plugin-annotation';
 import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 import crossHairPlugin from './plugins/chart.crossHair';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
+import triggerRangePlugin from './plugins/chart.triggerRange';
 
 import ChartTop from './ChartTop';
 import BufferView from './BufferView';
@@ -434,25 +434,6 @@ const Chart = () => {
         animation: { duration: 0 },
         hover: { animationDuration: 0 },
         responsiveAnimationDuration: 0,
-        annotation: options.triggerMarkers ? {
-            drawTime: 'beforeDatasetsDraw',
-            annotations: options.triggerMarkers
-                .reduce((pairs, _, i, array) => {
-                    if (!(i % 2)) {
-                        pairs.push(array.slice(i, i + 2));
-                    }
-                    return pairs;
-                }, [])
-                .map(([m1, m2]) => ({
-                    type: 'box',
-                    xScaleID: 'xScale',
-                    xMin: m1 - options.samplingTime,
-                    xMax: m2 - options.samplingTime,
-                    backgroundColor: 'rgba(0, 100, 255, 10%)',
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    borderWidth: 0,
-                })),
-        } : undefined,
         tooltips: {
             enabled: true,
             mode: 'point',
@@ -499,9 +480,11 @@ const Chart = () => {
                         data={chartData}
                         options={chartOptions}
                         plugins={[
-                            dragSelectPlugin, zoomPanPlugin,
+                            dragSelectPlugin,
+                            zoomPanPlugin,
                             triggerLevelPlugin,
-                            crossHairPlugin, annotationPlugin,
+                            crossHairPlugin,
+                            triggerRangePlugin,
                             {
                                 id: 'notifier',
                                 afterLayout(chart) {

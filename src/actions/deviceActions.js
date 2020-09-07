@@ -219,7 +219,7 @@ export function open(deviceInfo) {
 
             if (timestamp) {
                 if (triggerMarker) {
-                    options.triggerMarkers.push(timestamp);
+                    options.triggerMarkers.push(timestamp - options.samplingTime);
                 }
 
                 let ts = options.timestamp;
