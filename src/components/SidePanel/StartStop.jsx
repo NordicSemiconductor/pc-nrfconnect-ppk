@@ -59,18 +59,10 @@ export default () => {
     } = useSelector(appState);
 
     return (
-        <div className="d-flex flex-column start-stop mt-3">
+        <div className="d-flex flex-column start-stop">
             <PowerMode />
-            {capabilities.ppkToggleDUT && (
-                <Toggle
-                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
-                    isToggled={deviceRunning}
-                    label="Supply power to test device"
-                    variant="secondary"
-                />
-            )}
             <Button
-                className="start-btn"
+                className="start-btn mb-3"
                 variant="set"
                 disabled={!rttRunning}
                 onClick={() => dispatch(
@@ -79,6 +71,14 @@ export default () => {
             >
                 {samplingRunning ? 'STOP SAMPLING' : 'START SAMPLING'}
             </Button>
+            {capabilities.ppkToggleDUT && (
+                <Toggle
+                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
+                    isToggled={deviceRunning}
+                    label="Supply power to test device"
+                    variant="secondary"
+                />
+            )}
         </div>
     );
 };

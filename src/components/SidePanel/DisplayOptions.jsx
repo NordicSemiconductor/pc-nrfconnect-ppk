@@ -54,7 +54,12 @@ export default () => {
     } = useSelector(chartState);
 
     return (
-        <Collapse title="DISPLAY OPTIONS" eventKey="10" defaultCollapsed={false}>
+        <Collapse
+            title="DISPLAY OPTIONS"
+            eventKey="10"
+            defaultCollapsed={false}
+            className="mb-2"
+        >
             <Toggle
                 onToggle={() => dispatch(toggleTimestamps())}
                 isToggled={timestampsVisible}
