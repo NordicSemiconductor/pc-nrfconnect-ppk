@@ -42,7 +42,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 
-import { NumberInlineInput, Slider, Toggle } from 'pc-nrfconnect-shared';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import Collapse from './Collapse';
 
@@ -55,6 +55,11 @@ import {
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
+import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
+
+const SINGLE = 'SINGLE';
+const CONTINUOUS = 'CONTINUOUS';
+const EXTERNAL = 'EXTERNAL';
 
 const Trigger = ({ eventKey }) => {
     const dispatch = useDispatch();
@@ -62,9 +67,10 @@ const Trigger = ({ eventKey }) => {
     const {
         externalTrigger,
         triggerRunning,
-        triggerSingleWaiting,
         triggerLevel,
     } = useSelector(triggerState);
+
+    const { triggerHandleVisible } = useSelector(chartState);
 
     const range = {
         min: (450 * 13) / 1e3,
@@ -87,41 +93,89 @@ const Trigger = ({ eventKey }) => {
         setLevelUnit(unit);
     };
 
+    const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
+
     if (!capabilities.ppkTriggerSet) {
         return null;
     }
+
+    let startLabel = 'External';
+    let onStartClicked = null;
+    if (!externalTrigger) {
+        if (!triggerRunning) {
+            startLabel = 'Start';
+            if (triggerMode === SINGLE) {
+                onStartClicked = () => dispatch(triggerSingleSet());
+            } else {
+                onStartClicked = () => dispatch(triggerStart());
+            }
+        } else {
+            onStartClicked = () => dispatch(triggerStop());
+            if (triggerMode === SINGLE) {
+                startLabel = 'Wait';
+            } else {
+                startLabel = 'Stop';
+            }
+        }
+    }
+
+    const onTriggerToggled = enable => {
+        if (triggerHandleVisible !== enable) {
+            dispatch(toggleTriggerHandle());
+        }
+    };
 
     return (
         <Collapse
             title="TRIGGER"
             eventKey={eventKey}
             className="trigger-collapse"
-            defaultCollapsed={false}
+            onToggled={onTriggerToggled}
         >
-            <ButtonGroup className="mb-2 d-flex flex-row">
+            <ButtonGroup className="mb-2 trigger-mode d-flex flex-row">
                 <Button
-                    disabled={!rttRunning || externalTrigger}
-                    variant="set"
-                    onClick={() => dispatch(
-                        triggerSingleWaiting
-                            ? triggerStop()
-                            : triggerSingleSet(),
-                    )}
+                    disabled={!rttRunning || triggerMode === SINGLE}
+                    variant={triggerMode === SINGLE ? 'set' : 'unset'}
+                    onClick={() => {
+                        setTriggerMode(SINGLE);
+                        if (externalTrigger) {
+                            dispatch(externalTriggerToggled(false));
+                        }
+                    }}
                 >
-                    {triggerSingleWaiting ? 'Waiting...' : 'Single'}
+                    Single
                 </Button>
                 <Button
-                    disabled={!rttRunning || externalTrigger}
-                    variant="set"
-                    onClick={() => dispatch(
-                        triggerRunning
-                            ? triggerStop()
-                            : triggerStart(),
-                    )}
+                    disabled={!rttRunning || triggerMode === CONTINUOUS}
+                    variant={triggerMode === CONTINUOUS ? 'set' : 'unset'}
+                    onClick={() => {
+                        setTriggerMode(CONTINUOUS);
+                        if (externalTrigger) {
+                            dispatch(externalTriggerToggled(false));
+                        }
+                    }}
                 >
-                    {triggerRunning ? 'Stop' : 'Start'}
+                    Continuous
+                </Button>
+                <Button
+                    disabled={!rttRunning || triggerMode === EXTERNAL}
+                    variant={triggerMode === EXTERNAL ? 'set' : 'unset'}
+                    onClick={() => {
+                        setTriggerMode(EXTERNAL);
+                        dispatch(externalTriggerToggled(true));
+                    }}
+                >
+                    External
                 </Button>
             </ButtonGroup>
+            <Button
+                className="w-100 mb-2"
+                disabled={!rttRunning || externalTrigger}
+                variant="set"
+                onClick={onStartClicked}
+            >
+                {startLabel}
+            </Button>
             <Form.Label htmlFor="slider-trigger-window">
                 <span className="flex-fill">Length</span>
                 <NumberInlineInput
@@ -177,12 +231,6 @@ const Trigger = ({ eventKey }) => {
                 range={{ min: 1, max: 1000 }}
                 onChange={[value => setLevel(parseInt(value, 10))]}
                 onChangeComplete={() => sendTriggerLevel(levelUnit)}
-            />
-            <Toggle
-                onToggle={value => dispatch(externalTriggerToggled(value))}
-                isToggled={externalTrigger}
-                label="External trigger"
-                variant="secondary"
             />
         </Collapse>
     );

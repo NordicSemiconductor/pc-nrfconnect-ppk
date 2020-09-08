@@ -63,6 +63,7 @@ import {
     chartState,
 } from '../../reducers/chartReducer';
 import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
+import { appState } from '../../reducers/appReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
@@ -193,8 +194,10 @@ const Chart = () => {
         digitalChannelsVisible,
         timestampsVisible,
         hasDigitalChannels,
+        triggerHandleVisible,
     } = useSelector(chartState);
     const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
+    const { samplingRunning } = useSelector(appState);
     const { index } = options;
 
     const sendTriggerLevel = level => dispatch(triggerLevelSetAction(level));
@@ -373,7 +376,9 @@ const Chart = () => {
         }))
         .filter((_, i) => digitalChannels[i]);
 
-    const snapping = (step <= 0.2) && ((windowBegin !== 0) || (windowEnd !== 0));
+    const live = ((windowBegin === 0) && (windowEnd === 0))
+        && (samplingRunning || triggerRunning || triggerSingleWaiting);
+    const snapping = (step <= 0.2) && !live;
 
     const chartData = {
         datasets: [{
@@ -444,6 +449,8 @@ const Chart = () => {
         triggerActive: triggerRunning || triggerSingleWaiting,
         sendTriggerLevel,
         snapping,
+        live,
+        triggerHandleVisible,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];

@@ -45,9 +45,10 @@ const plugin = {
 
     getCoords(chartInstance) {
         const {
-            chartArea: { left, top, bottom }, scales: { yScale }, options: { triggerLevel },
+            chartArea: { left, top, bottom }, scales: { yScale },
+            options: { triggerLevel, triggerHandleVisible },
         } = chartInstance;
-        if (triggerLevel === null) {
+        if (triggerLevel === null || !triggerHandleVisible) {
             return null;
         }
         const y = chartInstance.triggerLine.y !== null

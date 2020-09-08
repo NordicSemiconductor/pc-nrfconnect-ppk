@@ -34,8 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useContext } from 'react';
-import { string, node, bool } from 'prop-types';
+import React, { useContext, useEffect } from 'react';
+import {
+    string, node, bool, func,
+} from 'prop-types';
 
 import Accordion from 'react-bootstrap/Accordion';
 import AccordionContext from 'react-bootstrap/AccordionContext';
@@ -43,10 +45,11 @@ import { useAccordionToggle } from 'react-bootstrap/AccordionToggle';
 
 import './collapse.scss';
 
-const ContextAwareToggle = ({ title, eventKey }) => {
+const ContextAwareToggle = ({ title, eventKey, onToggled }) => {
     const currentEventKey = useContext(AccordionContext);
     const decoratedOnClick = useAccordionToggle(eventKey);
     const isCurrentEventKey = currentEventKey === eventKey;
+    useEffect(() => onToggled(isCurrentEventKey), [isCurrentEventKey, onToggled]);
 
     return (
         <button
@@ -61,6 +64,7 @@ const ContextAwareToggle = ({ title, eventKey }) => {
 ContextAwareToggle.propTypes = {
     eventKey: string.isRequired,
     title: string.isRequired,
+    onToggled: func.isRequired,
 };
 
 const Collapse = ({
@@ -69,10 +73,11 @@ const Collapse = ({
     className = '',
     children = null,
     defaultCollapsed = true,
+    onToggled = () => {},
 }) => (
     <Accordion defaultActiveKey={defaultCollapsed ? '' : eventKey}>
         <div className={`collapse-container ${className}`}>
-            <ContextAwareToggle eventKey={eventKey} title={title} />
+            <ContextAwareToggle eventKey={eventKey} title={title} onToggled={onToggled} />
             <Accordion.Collapse eventKey={eventKey}>
                 <>{children}</>
             </Accordion.Collapse>
@@ -86,6 +91,7 @@ Collapse.propTypes = {
     className: string,
     children: node,
     defaultCollapsed: bool,
+    onToggled: func,
 };
 
 export default Collapse;

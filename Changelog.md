@@ -1,3 +1,10 @@
+## Version 3.0.0-alpha.6
+### Updates
+- Fixed trigger level rounding
+- Enabled crosshair only when chart is paused
+- Added support for panning with touchpad
+- Refactored trigger control
+
 ## Version 3.0.0-alpha.5
 ### Updates
 - Added lock y-axis toggle
