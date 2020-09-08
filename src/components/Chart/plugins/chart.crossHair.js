@@ -43,11 +43,15 @@ const { gray700: color, white } = colors;
 const plugin = {
     id: 'crossHair',
     instances: [],
-    moveEvent: {},
+    moveEvent: null,
 
     pointerMoveHandler(evt, {
-        chartArea: { left }, id, chart, options: { snapping },
+        chartArea: { left }, id, chart, options: { snapping, live },
     }) {
+        if (live) {
+            plugin.moveEvent = null;
+            return;
+        }
         let { layerX, layerY } = evt || {};
 
         if (snapping) {
@@ -64,7 +68,7 @@ const plugin = {
     },
 
     pointerLeaveHandler() {
-        plugin.moveEvent = {};
+        plugin.moveEvent = null;
         plugin.instances.forEach(instance => instance.update({ lazy: true }));
     },
 
@@ -89,6 +93,7 @@ const plugin = {
 
         if (!plugin.moveEvent) {
             canvas.style.cursor = 'default';
+            return;
         }
 
         const { layerX, layerY } = plugin.moveEvent;
