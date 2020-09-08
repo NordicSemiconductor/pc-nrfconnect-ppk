@@ -194,6 +194,7 @@ const Chart = () => {
         digitalChannelsVisible,
         timestampsVisible,
         hasDigitalChannels,
+        triggerHandleVisible,
     } = useSelector(chartState);
     const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
     const { samplingRunning } = useSelector(appState);
@@ -449,6 +450,7 @@ const Chart = () => {
         sendTriggerLevel,
         snapping,
         live,
+        triggerHandleVisible,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];

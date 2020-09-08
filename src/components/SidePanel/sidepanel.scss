@@ -71,10 +71,9 @@
         margin-top: 24px;
     }
 
-    .power-mode {
+    .power-mode, .trigger-mode {
         padding: 4px;
         background-color: $gray-700;
-        border-radius: 4px;
         button {
             padding: 4px;
             border-radius: 4px !important;

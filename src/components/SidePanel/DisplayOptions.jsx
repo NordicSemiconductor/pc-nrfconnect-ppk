@@ -41,9 +41,8 @@ import { Toggle } from 'pc-nrfconnect-shared';
 import DigitalChannels from './DigitalChannels';
 import Collapse from './Collapse';
 
-import { appState } from '../../reducers/appReducer';
 import {
-    chartState, toggleDigitalChannels, toggleTimestamps, toggleTriggerHandle,
+    chartState, toggleDigitalChannels, toggleTimestamps,
 } from '../../reducers/chartReducer';
 
 export default () => {
@@ -51,21 +50,11 @@ export default () => {
     const {
         digitalChannelsVisible,
         timestampsVisible,
-        triggerHandleVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
-    const { capabilities } = useSelector(appState);
 
     return (
         <Collapse title="DISPLAY OPTIONS" eventKey="10" defaultCollapsed={false}>
-            {capabilities.ppkTriggerSet && (
-                <Toggle
-                    onToggle={() => dispatch(toggleTriggerHandle())}
-                    isToggled={triggerHandleVisible}
-                    label="Trigger handle"
-                    variant="secondary"
-                />
-            )}
             <Toggle
                 onToggle={() => dispatch(toggleTimestamps())}
                 isToggled={timestampsVisible}

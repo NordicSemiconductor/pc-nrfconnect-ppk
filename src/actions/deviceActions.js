@@ -422,6 +422,9 @@ export function externalTriggerToggled(chbState) {
     return async dispatch => {
         if (chbState) {
             await device.ppkTriggerStop();
+            logger.info('Starting external trigger');
+        } else {
+            logger.info('Stopping external trigger');
         }
         await device.ppkTriggerExtToggle();
         dispatch(externalTriggerToggledAction());
