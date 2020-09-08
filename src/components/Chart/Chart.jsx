@@ -468,6 +468,7 @@ const Chart = () => {
                     chartPause={chartPause}
                     chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}
+                    chartRef={chartRef}
                 />
                 <BufferView width={chartAreaWidth} />
                 <TimeSpan width={chartAreaWidth} className="window" />
