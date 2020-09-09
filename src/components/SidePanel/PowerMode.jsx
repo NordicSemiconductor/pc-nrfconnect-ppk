@@ -60,14 +60,16 @@ export default () => {
                     disabled={isSmuMode}
                     onClick={togglePowerMode}
                 >
-                    Sourcemeter
+                    Source meter
+                    <div className="dot sourcemeter" />
                 </Button>
                 <Button
                     variant={isSmuMode ? 'unset' : 'set'}
                     disabled={!isSmuMode}
                     onClick={togglePowerMode}
                 >
-                    Amperemeter
+                    Ampere meter
+                    <div className="dot amperemeter" />
                 </Button>
             </ButtonGroup>
         </>

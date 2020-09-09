@@ -77,6 +77,20 @@
         .btn:disabled {
             opacity: initial;
         }
+        .dot {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            width: 6px;
+            height: 6px;
+            border-radius: 3px;
+        }
+        .btn-set .sourcemeter {
+            background: $red;
+        }
+        .btn-set .amperemeter {
+            background: $nordic-blue;
+        }
     }
 
     .trigger-collapse .slider {
