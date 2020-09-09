@@ -36,10 +36,12 @@
 
 import persistentStore from '../utils/persistentStore';
 
+const defaults = { samples: 5, alpha: 0.12, alpha4: 0.06 };
+
 const initialState = {
-    samples: persistentStore.get('spikeFilter.samples', 5),
-    alpha: persistentStore.get('spikeFilter.alpha', 0.12),
-    alpha4: persistentStore.get('spikeFilter.alpha4', 0.06),
+    samples: persistentStore.get('spikeFilter.samples', defaults.samples),
+    alpha: persistentStore.get('spikeFilter.alpha', defaults.alpha),
+    alpha4: persistentStore.get('spikeFilter.alpha4', defaults.alpha4),
 };
 
 const SPIKE_FILTER_UPDATE = 'SPIKE_FILTER_UPDATE';
@@ -49,16 +51,15 @@ export const updateSpikeFilterAction = spikeFilter => ({
     ...spikeFilter,
 });
 
+export const resetSpikeFilterToDefaults = () => ({
+    type: SPIKE_FILTER_UPDATE,
+    ...defaults,
+});
+
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
-        case SPIKE_FILTER_UPDATE: {
-            return {
-                ...state,
-                ...action,
-            };
-        }
-        default:
-            return state;
+        case SPIKE_FILTER_UPDATE: return { ...state, ...action };
+        default: return state;
     }
 };
 
