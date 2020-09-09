@@ -1,3 +1,10 @@
+## Version 3.0.0-alpha.7
+### Updates
+- Updated point radius in main chart
+- Fixed y-axis lock when limits are unset
+- Rearranged sidepanel
+- Updated style of trigger level handle
+
 ## Version 3.0.0-alpha.6
 ### Updates
 - Fixed trigger level rounding

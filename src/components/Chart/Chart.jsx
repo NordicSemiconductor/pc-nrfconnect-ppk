@@ -378,7 +378,7 @@ const Chart = () => {
 
     const live = ((windowBegin === 0) && (windowEnd === 0))
         && (samplingRunning || triggerRunning || triggerSingleWaiting);
-    const snapping = (step <= 0.2) && !live;
+    const snapping = (step <= 0.1) && !live;
 
     const chartData = {
         datasets: [{
@@ -386,13 +386,15 @@ const Chart = () => {
             borderWidth: step > 2 ? 1 : 1.5,
             fill: false,
             data: lineData.slice(0, mappedIndex),
-            pointRadius: snapping ? 1.5 : 0,
-            pointHoverRadius: snapping ? 3 : 0,
-            pointHitRadius: snapping ? 3 : 0,
-            pointBackgroundColor: dataColor,
+            pointRadius: snapping ? 5 : 0,
+            pointHoverRadius: snapping ? 5 : 0,
+            pointHitRadius: snapping ? 5 : 0,
+            pointBackgroundColor: colors.white,
             pointHoverBackgroundColor: dataColor,
-            pointBorderWidth: 0,
-            pointHoverBorderWidth: 0,
+            pointBorderWidth: 1.5,
+            pointHoverBorderWidth: 1.5,
+            pointBorderColor: dataColor,
+            pointHoverBorderColor: dataColor,
             lineTension: snapping ? 0.2 : 0,
             label: 'Current',
             yAxisID: 'yScale',
@@ -466,6 +468,7 @@ const Chart = () => {
                     chartPause={chartPause}
                     chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}
+                    chartRef={chartRef}
                 />
                 <BufferView width={chartAreaWidth} />
                 <TimeSpan width={chartAreaWidth} className="window" />

@@ -69,7 +69,7 @@ export default () => {
                 <>
                     <p>Please open your device first, or</p>
                     <Button
-                        className="mb-3 w-100"
+                        className="w-100"
                         variant="set"
                         onClick={() => dispatch(load())}
                     >
@@ -77,8 +77,17 @@ export default () => {
                     </Button>
                 </>
             )}
+            {deviceOpen && (
+                <>
+                    <StartStop />
+                    <Buffer />
+                    <Trigger eventKey="0" />
+                    <VoltageRegulator eventKey="1" />
+                </>
+            )}
+            <DisplayOptions />
             <Button
-                className="w-100 mb-3"
+                className="w-100 mt-3"
                 variant="set"
                 disabled={samplingRunning}
                 onClick={() => dispatch(toggleSaveChoiceDialog())}
@@ -87,17 +96,12 @@ export default () => {
             </Button>
             {deviceOpen && (
                 <>
-                    <StartStop />
-                    <Trigger eventKey="0" />
-                    <Buffer />
-                    <VoltageRegulator eventKey="1" />
                     <SwitchPoints eventKey="2" />
                     <ResistorCalibration eventKey="3" />
                     <Gains eventKey="4" />
                     <SpikeFilter eventKey="5" />
                 </>
             )}
-            <DisplayOptions />
         </div>
     );
 };

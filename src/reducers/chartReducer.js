@@ -136,7 +136,7 @@ export const setDigitalChannels = digitalChannels => ({
 export const toggleDigitalChannels = () => ({ type: TOGGLE_DIGITAL_CHANNELS });
 export const toggleTimestamps = () => ({ type: TOGGLE_TIMESTAMPS });
 export const toggleTriggerHandle = () => ({ type: TOGGLE_TRIGGER_HANDLE });
-export const toggleYAxisLock = () => ({ type: TOGGLE_Y_AXIS_LOCK });
+export const toggleYAxisLock = (yMin, yMax) => ({ type: TOGGLE_Y_AXIS_LOCK, yMin, yMax });
 
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
@@ -217,7 +217,7 @@ export default (state = initialState, { type, ...action }) => {
                 triggerHandleVisible: !state.triggerHandleVisible,
             };
         }
-        case TOGGLE_Y_AXIS_LOCK: return { ...state, yAxisLock: !state.yAxisLock };
+        case TOGGLE_Y_AXIS_LOCK: return { ...state, ...action, yAxisLock: !state.yAxisLock };
         case UPDATE_HAS_DIGITAL_CHANNELS: return { ...state, ...action };
         default: return state;
     }

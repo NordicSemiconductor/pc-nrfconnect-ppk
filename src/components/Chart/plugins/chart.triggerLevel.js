@@ -38,7 +38,21 @@
 
 import colors from '../../colors.scss';
 
-const { amber: colorActive, green: colorInactive, white } = colors;
+const { amber: colorActive, gray600: colorInactive, white } = colors;
+
+// eslint-disable-next-line func-names
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    this.beginPath();
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r);
+    this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r);
+    this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+    return this;
+};
 
 const plugin = {
     id: 'triggerLevel',
@@ -60,7 +74,7 @@ const plugin = {
         return {
             y,
             label: {
-                x: left - 70,
+                x: left - 62,
                 y: y - 10,
                 w: 70,
                 h: 20,
@@ -118,7 +132,7 @@ const plugin = {
         const color = triggerActive ? colorActive : colorInactive;
 
         ctx.save();
-        ctx.lineWidth = 0.5;
+        ctx.lineWidth = 1.5;
         ctx.strokeStyle = color;
         ctx.beginPath();
         ctx.moveTo(left, y - 0.5);
@@ -128,9 +142,19 @@ const plugin = {
 
         ctx.fillStyle = color;
         ctx.textAlign = 'right';
-        ctx.fillRect(label.x, label.y, label.w, label.h);
+        ctx.roundRect(label.x, label.y, label.w, label.h, 2).fill();
         ctx.fillStyle = white;
-        ctx.fillText(formatY(triggerLevel), label.x + label.w - 5, label.y + 13);
+        ctx.fillText(formatY(triggerLevel), label.x + label.w - 18, label.y + 13);
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = white;
+        ctx.beginPath();
+        ctx.moveTo(left - 4, y - 2.5); ctx.lineTo(left + 4, y - 2.5);
+        ctx.moveTo(left - 4, y - 0.5); ctx.lineTo(left + 4, y - 0.5);
+        ctx.moveTo(left - 4, y + 1.5); ctx.lineTo(left + 4, y + 1.5);
+        ctx.closePath();
+        ctx.stroke();
+
         ctx.restore();
     },
 };

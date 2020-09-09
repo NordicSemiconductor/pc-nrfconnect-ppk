@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { func } from 'prop-types';
+import { func, node } from 'prop-types';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -46,7 +46,7 @@ import { goLive, toggleYAxisLock, chartState } from '../../reducers/chartReducer
 
 import './charttop.scss';
 
-const ChartTop = ({ chartPause, zoomToWindow }) => {
+const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
     const dispatch = useDispatch();
     const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
     const live = (windowBegin === 0) && (windowEnd === 0);
@@ -55,7 +55,10 @@ const ChartTop = ({ chartPause, zoomToWindow }) => {
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
             <Toggle
                 label="LOCK Y-AXIS"
-                onToggle={() => dispatch(toggleYAxisLock())}
+                onToggle={() => {
+                    const { min, max } = chartRef.current.chartInstance.scales.yScale;
+                    dispatch(toggleYAxisLock(min, max));
+                }}
                 isToggled={yAxisLock}
                 variant="secondary"
                 labelRight
@@ -80,6 +83,7 @@ const ChartTop = ({ chartPause, zoomToWindow }) => {
 ChartTop.propTypes = {
     chartPause: func.isRequired,
     zoomToWindow: func.isRequired,
+    chartRef: node.isRequired,
 };
 
 export default ChartTop;
