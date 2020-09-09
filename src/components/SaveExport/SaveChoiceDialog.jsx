@@ -43,7 +43,7 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 
-import { appState, toggleSaveChoiceDialog, toggleExportDialog } from '../../reducers/appReducer';
+import { appState, toggleSaveChoiceDialog, showExportDialog } from '../../reducers/appReducer';
 import { save } from '../../actions/fileActions';
 
 import './saveexport.scss';
@@ -106,7 +106,7 @@ export default () => {
                                     className="w-100"
                                     onClick={() => {
                                         close();
-                                        dispatch(toggleExportDialog());
+                                        dispatch(showExportDialog());
                                     }}
                                 >
                                     EXPORT

@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import fs from 'fs';
 import { useDispatch, useSelector } from 'react-redux';
 import { Toggle } from 'pc-nrfconnect-shared';
@@ -48,8 +48,9 @@ import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
-import { appState, toggleExportDialog } from '../../reducers/appReducer';
+import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { options, timestampToIndex, indexToTimestamp } from '../../globals';
 
@@ -79,6 +80,7 @@ const exportChart = (
     filename, indexBegin, indexEnd, index, {
         timestamp, current, bits, bitsSeparated,
     },
+    setProgress, cancel,
 ) => dispatch => {
     if (!filename) {
         return Promise.resolve();
@@ -88,7 +90,10 @@ const exportChart = (
     fs.writeSync(fd, selectivePrint(['Timestamp(ms)', 'Current(uA)', 'D0-D7', 'D0,D1,D2,D3,D4,D5,D6,D7'], selection));
 
     return indexer(indexBegin, indexEnd, 10000)
-        .map(([start, len]) => new Promise(resolve => {
+        .map(([start, len]) => () => new Promise((resolve, reject) => {
+            if (cancel.current) {
+                reject();
+            }
             let content = '';
             for (let n = start; n <= start + len; n += 1) {
                 const k = (n + options.data.length) % options.data.length;
@@ -100,12 +105,18 @@ const exportChart = (
                     content += selectivePrint([indexToTimestamp(n, index) / 1000, v.toFixed(3), b, b.split('').join(',')], selection);
                 }
             }
-            fs.write(fd, content, () => resolve());
+            fs.write(fd, content, () => {
+                setProgress(Math.round(
+                    ((start - indexBegin) / (indexEnd - indexBegin)) * 100,
+                ));
+                resolve();
+            });
         }))
         .reduce((prev, task) => prev.then(task), Promise.resolve())
+        .catch(() => logger.info('Exported cancelled'))
         .then(() => {
             fs.closeSync(fd);
-            dispatch(toggleExportDialog());
+            dispatch(hideExportDialog());
             logger.info(`Exported CSV to: ${filename}`);
         });
 };
@@ -131,6 +142,15 @@ export default () => {
     });
     const updateSettings = change => setSettings({ ...settings, ...change });
 
+    const cancel = useRef(false);
+    const [progress, setProgress] = useState(0);
+    useEffect(() => {
+        setProgress(0);
+        if (isExportDialogVisible) {
+            cancel.current = false;
+        }
+    }, [isExportDialogVisible]);
+
     const end = windowEnd || options.timestamp;
     const begin = windowBegin || (end - windowDuration);
 
@@ -151,7 +171,10 @@ export default () => {
     const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
     const filename = join(lastSaveDir(), `ppk-${timestamp}.csv`);
 
-    const close = () => dispatch(toggleExportDialog());
+    const close = () => {
+        cancel.current = true;
+        dispatch(hideExportDialog());
+    };
 
     return (
         <Modal
@@ -223,6 +246,7 @@ export default () => {
                         </Card>
                     </Col>
                 </Row>
+                <ProgressBar now={progress} animated className="mt-4" />
             </Modal.Body>
             <Modal.Footer>
                 <Button
@@ -231,9 +255,9 @@ export default () => {
                         const fn = remote.dialog.showSaveDialog({ defaultPath: filename });
                         if (!fn) return;
                         setLastSaveDir(dirname(fn));
-                        setImmediate(() => {
-                            dispatch(exportChart(fn, indexBegin, indexEnd, index, settings));
-                        });
+                        dispatch(exportChart(
+                            fn, indexBegin, indexEnd, index, settings, setProgress, cancel,
+                        ));
                     }}
                 >
                     Save
