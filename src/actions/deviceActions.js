@@ -396,7 +396,7 @@ export function toggleDUT(isOn) {
 export function setPowerMode(isSmuMode) {
     return async dispatch => {
         await device.ppkSetPowerMode(isSmuMode ? 2 : 1);
-        logger.info(`Mode: ${isSmuMode ? 'Sourcemeter' : 'Amperemeter'}`);
+        logger.info(`Mode: ${isSmuMode ? 'Source meter' : 'Ampere meter'}`);
         dispatch(setPowerModeAction(isSmuMode));
     };
 }
