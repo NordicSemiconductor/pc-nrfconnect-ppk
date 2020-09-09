@@ -134,11 +134,13 @@ const plugin = {
         ctx.save();
         ctx.lineWidth = 1.5;
         ctx.strokeStyle = color;
+        ctx.setLineDash([5, 4]);
         ctx.beginPath();
         ctx.moveTo(left, y - 0.5);
         ctx.lineTo(right, y - 0.5);
         ctx.closePath();
         ctx.stroke();
+        ctx.setLineDash([]);
 
         ctx.fillStyle = color;
         ctx.textAlign = 'right';

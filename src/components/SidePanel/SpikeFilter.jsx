@@ -38,6 +38,7 @@ import React from 'react';
 import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
+import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { Slider } from 'pc-nrfconnect-shared';
 
@@ -45,7 +46,9 @@ import { updateSpikeFilter } from '../../actions/deviceActions';
 import Collapse from './Collapse';
 
 import { appState } from '../../reducers/appReducer';
-import { updateSpikeFilterAction, spikeFilterState } from '../../reducers/spikeFilterReducer';
+import {
+    updateSpikeFilterAction, spikeFilterState, resetSpikeFilterToDefaults,
+} from '../../reducers/spikeFilterReducer';
 
 const SpikeFilter = ({ eventKey }) => {
     const dispatch = useDispatch();
@@ -89,6 +92,16 @@ const SpikeFilter = ({ eventKey }) => {
                 onChange={[value => dispatch(updateSpikeFilterAction({ alpha4: value }))]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
+            <Button
+                onClick={() => {
+                    dispatch(resetSpikeFilterToDefaults());
+                    dispatch(updateSpikeFilter());
+                }}
+                variant="set"
+                className="w-50 mb-2 mt-3"
+            >
+                Defaults
+            </Button>
         </Collapse>
     );
 };

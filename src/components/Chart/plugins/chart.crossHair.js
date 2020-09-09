@@ -100,7 +100,7 @@ const plugin = {
 
         if (layerX >= 0 && layerX <= (right - left)) {
             ctx.save();
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 1.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.moveTo(left + layerX - 0.5, top);
@@ -113,11 +113,11 @@ const plugin = {
                 const { width: tsWidth } = ctx.measureText(time);
                 ctx.fillStyle = color;
                 ctx.textAlign = 'right';
-                ctx.fillRect(left + layerX - 5 - (tsWidth / 2), top, tsWidth + 10, 33);
+                ctx.fillRect(left + layerX, top, tsWidth + 10, 33);
                 ctx.fillStyle = white;
                 ctx.textAlign = 'center';
-                ctx.fillText(time, left + layerX, top + 13);
-                ctx.fillText(subsecond, left + layerX, top + 28);
+                ctx.fillText(time, left + layerX + 5 + (tsWidth / 2), top + 13);
+                ctx.fillText(subsecond, left + layerX + 5 + (tsWidth / 2), top + 28);
             }
 
             ctx.restore();
@@ -132,7 +132,7 @@ const plugin = {
 
         if (yScale && plugin.moveEvent.id === 0) {
             ctx.save();
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 1.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.moveTo(left, layerY - 0.5);
@@ -145,9 +145,9 @@ const plugin = {
 
             ctx.fillStyle = color;
             ctx.textAlign = 'right';
-            ctx.fillRect(right - uAwidth - 10, layerY - 10, uAwidth + 10, 20);
+            ctx.fillRect(right - uAwidth - 10, layerY - 20, uAwidth + 10, 20);
             ctx.fillStyle = white;
-            ctx.fillText(uA, right - 5, layerY + 3);
+            ctx.fillText(uA, right - 5, layerY - 7);
             ctx.restore();
         }
     },

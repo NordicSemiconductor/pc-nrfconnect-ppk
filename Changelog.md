@@ -1,3 +1,12 @@
+## Version 3.0.0-alpha.9
+### Updates
+- Updated firmware
+- Added defaults button to spike filter
+- Moved collapsible icon to right
+- Update control styles in sidepanel
+- Add dot indicator to power mode selector
+- Enhanced chart elements styles
+
 ## Version 3.0.0-alpha.8
 ### Updates
 - Minor style updates

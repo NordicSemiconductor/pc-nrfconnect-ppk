@@ -119,17 +119,22 @@ export default {
             }
             ctx.lineWidth = 1.5;
             ctx.strokeStyle = colors.gray700;
-            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
             if (sX >= left && sX <= right) {
+                ctx.beginPath();
                 ctx.moveTo(sX, top);
                 ctx.lineTo(sX, bottom + 10);
+                ctx.closePath();
+                ctx.stroke();
             }
             if (eX >= left && eX <= right) {
+                ctx.beginPath();
                 ctx.moveTo(eX, top);
                 ctx.lineTo(eX, bottom + 10);
+                ctx.closePath();
+                ctx.stroke();
             }
-            ctx.closePath();
-            ctx.stroke();
+            ctx.setLineDash([]);
         }
 
         if (dragStart && dragEnd) {

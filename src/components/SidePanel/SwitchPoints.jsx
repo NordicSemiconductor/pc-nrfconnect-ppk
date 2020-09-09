@@ -97,15 +97,16 @@ const SwitchPoints = ({ eventKey }) => {
                         onChange={[val => dispatch(switchingPointDownMovedAction(val))]}
                         onChangeComplete={() => dispatch(switchingPointsDownSet())}
                     />
-                    <Row className="mb-3">
+                    <Row className="mb-2">
                         <Col>{`${switchDownLow.toFixed(2)} \u00B5A`}</Col>
                         <Col className="text-right">{`${switchDownHigh.toFixed(2)} mA`}</Col>
                     </Row>
                     <Button
                         onClick={() => dispatch(switchingPointsReset())}
-                        variant="light"
+                        variant="set"
+                        className="w-50 mb-2"
                     >
-                        Reset switch levels
+                        Reset
                     </Button>
                 </>
             )}
