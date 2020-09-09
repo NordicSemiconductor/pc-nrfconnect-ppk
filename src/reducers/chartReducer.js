@@ -217,7 +217,10 @@ export default (state = initialState, { type, ...action }) => {
                 triggerHandleVisible: !state.triggerHandleVisible,
             };
         }
-        case TOGGLE_Y_AXIS_LOCK: return { ...state, ...action, yAxisLock: !state.yAxisLock };
+        case TOGGLE_Y_AXIS_LOCK: {
+            const { yMin, yMax, ...s } = state;
+            return { ...s, ...action, yAxisLock: !state.yAxisLock };
+        }
         case UPDATE_HAS_DIGITAL_CHANNELS: return { ...state, ...action };
         default: return state;
     }

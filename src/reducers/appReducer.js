@@ -54,7 +54,8 @@ const SAMPLING_STARTED = 'SAMPLING_STARTED';
 const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
 const SET_POWER_MODE = 'SET_POWER_MODE';
 const TOGGLE_SAVE_CHOICE_DIALOG = 'TOGGLE_SAVE_CHOICE_DIALOG';
-const TOGGLE_EXPORT_DIALOG = 'TOGGLE_EXPORT_DIALOG';
+const SHOW_EXPORT_DIALOG = 'SHOW_EXPORT_DIALOG';
+const HIDE_EXPORT_DIALOG = 'HIDE_EXPORT_DIALOG';
 
 export const samplingStartAction = () => ({ type: SAMPLING_STARTED });
 export const samplingStoppedAction = () => ({ type: SAMPLING_STOPPED });
@@ -75,7 +76,8 @@ export const setPowerModeAction = isSmuMode => ({
 
 export const rttStartAction = () => ({ type: RTT_CALLED_START });
 export const toggleSaveChoiceDialog = () => ({ type: TOGGLE_SAVE_CHOICE_DIALOG });
-export const toggleExportDialog = () => ({ type: TOGGLE_EXPORT_DIALOG });
+export const showExportDialog = () => ({ type: SHOW_EXPORT_DIALOG });
+export const hideExportDialog = () => ({ type: HIDE_EXPORT_DIALOG });
 
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
@@ -88,34 +90,17 @@ export default (state = initialState, { type, ...action }) => {
             };
         }
         case DEVICE_CLOSED: return initialState;
-        case DEVICE_UNDER_TEST_TOGGLE: return {
-            ...state,
-            deviceRunning: !state.deviceRunning,
-        };
-        case SET_POWER_MODE: return {
-            ...state,
-            isSmuMode: action.isSmuMode,
-        };
-        case RTT_CALLED_START: return {
-            ...state,
-            rttRunning: true,
-        };
+        case DEVICE_UNDER_TEST_TOGGLE: return { ...state, deviceRunning: !state.deviceRunning };
+        case SET_POWER_MODE: return { ...state, ...action };
+        case RTT_CALLED_START: return { ...state, rttRunning: true };
         case TOGGLE_SAVE_CHOICE_DIALOG: return {
             ...state,
             isSaveChoiceDialogVisible: !state.isSaveChoiceDialogVisible,
         };
-        case TOGGLE_EXPORT_DIALOG: return {
-            ...state,
-            isExportDialogVisible: !state.isExportDialogVisible,
-        };
-        case SAMPLING_STARTED: return {
-            ...state,
-            samplingRunning: true,
-        };
-        case SAMPLING_STOPPED: return {
-            ...state,
-            samplingRunning: false,
-        };
+        case SHOW_EXPORT_DIALOG: return { ...state, isExportDialogVisible: true };
+        case HIDE_EXPORT_DIALOG: return { ...state, isExportDialogVisible: false };
+        case SAMPLING_STARTED: return { ...state, samplingRunning: true };
+        case SAMPLING_STOPPED: return { ...state, samplingRunning: false };
 
         default:
     }

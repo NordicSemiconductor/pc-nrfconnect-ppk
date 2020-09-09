@@ -39,7 +39,7 @@
 import { options } from '../../../globals';
 import colors from '../../colors.scss';
 
-const { indigo: color } = colors;
+const { gray700: color } = colors;
 
 const plugin = {
     id: 'triggerRange',

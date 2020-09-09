@@ -1,3 +1,9 @@
+## Version 3.0.0-alpha.8
+### Updates
+- Minor style updates
+- Added progress bar to export dialog, made export cancellable
+- Reset y-range when turning y-lock off
+
 ## Version 3.0.0-alpha.7
 ### Updates
 - Updated point radius in main chart
