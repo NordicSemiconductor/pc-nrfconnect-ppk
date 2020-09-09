@@ -12,10 +12,15 @@
         outline: none;
         padding: 0;
         color: $gray-700;
+
+        width: 100%;
+        text-align: left;
+
         h2 {
             line-height: 13px;
             margin-bottom: 0;
             transition: margin-bottom 0.2s ease-in-out;
+            position: relative;
             &::after {
                 content: "\f140";
                 font-family: "Material Design Icons";
@@ -23,6 +28,9 @@
                 display: inline-block;
                 vertical-align: middle;
                 transition: transform 0.2s ease-in-out;
+                position: absolute;
+                right: 0;
+                transform-origin: 8px 6px;
             }
         }
     }
