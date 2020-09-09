@@ -122,16 +122,16 @@ const ResistorCalibration = ({ eventKey }) => {
                 onChange={[value => dispatch(updateLowResistorAction(value))]}
                 onChangeComplete={() => dispatch(updateResistors())}
             />
-            <ButtonGroup className="mt-2">
+            <ButtonGroup className="mt-2 w-100">
                 <Button
                     onClick={() => dispatch(updateResistors())}
-                    variant="light"
+                    variant="set"
                 >
                     Update
                 </Button>
                 <Button
                     onClick={() => dispatch(resetResistors())}
-                    variant="light"
+                    variant="set"
                 >
                     Reset
                 </Button>
