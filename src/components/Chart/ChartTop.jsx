@@ -56,8 +56,12 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
             <Toggle
                 label="LOCK Y-AXIS"
                 onToggle={() => {
-                    const { min, max } = chartRef.current.chartInstance.scales.yScale;
-                    dispatch(toggleYAxisLock(min, max));
+                    if (yAxisLock) {
+                        dispatch(toggleYAxisLock());
+                    } else {
+                        const { min, max } = chartRef.current.chartInstance.scales.yScale;
+                        dispatch(toggleYAxisLock(min, max));
+                    }
                 }}
                 isToggled={yAxisLock}
                 variant="secondary"
