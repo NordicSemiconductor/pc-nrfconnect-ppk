@@ -1,3 +1,12 @@
+## Version 3.0.0-alpha.10
+### Updates
+- Disable trigger level for external trigger
+- Update stat-box heading style
+- Use only one color for trigger level
+- Update sidepanel initial layout
+- Responsive width of chart top buttons
+- Update trigger, crosshair and markers in chart
+
 ## Version 3.0.0-alpha.9
 ### Updates
 - Updated firmware
