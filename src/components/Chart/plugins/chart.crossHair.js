@@ -100,7 +100,7 @@ const plugin = {
 
         if (layerX >= 0 && layerX <= (right - left)) {
             ctx.save();
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.moveTo(left + layerX - 0.5, top);
@@ -132,7 +132,7 @@ const plugin = {
 
         if (yScale && plugin.moveEvent.id === 0) {
             ctx.save();
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
             ctx.moveTo(left, layerY - 0.5);

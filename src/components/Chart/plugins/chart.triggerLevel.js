@@ -130,7 +130,7 @@ const plugin = {
         const { y, label } = coords;
 
         ctx.save();
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 0.5;
         ctx.strokeStyle = color;
         ctx.setLineDash([5, 4]);
         ctx.beginPath();
