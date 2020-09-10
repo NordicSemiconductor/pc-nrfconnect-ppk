@@ -98,6 +98,7 @@ export default {
             chart: { ctx },
             scales: { xScale: scale },
             dragSelect: { dragStart, dragEnd },
+            canvas,
         } = chartInstance;
         const { cursor } = scale.options;
 
@@ -117,20 +118,20 @@ export default {
                 ctx.fillStyle = CHART_SELECTION_COLOR;
                 ctx.fillRect(startX, top, endX - startX, bottom - top);
             }
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 0.5;
             ctx.strokeStyle = colors.gray700;
             ctx.setLineDash([4, 4]);
             if (sX >= left && sX <= right) {
                 ctx.beginPath();
                 ctx.moveTo(sX, top);
-                ctx.lineTo(sX, bottom + 10);
+                ctx.lineTo(sX, canvas.height);
                 ctx.closePath();
                 ctx.stroke();
             }
             if (eX >= left && eX <= right) {
                 ctx.beginPath();
                 ctx.moveTo(eX, top);
-                ctx.lineTo(eX, bottom + 10);
+                ctx.lineTo(eX, canvas.height);
                 ctx.closePath();
                 ctx.stroke();
             }

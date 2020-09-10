@@ -11,3 +11,11 @@
         margin-bottom: 0 !important;
     }
 }
+
+@media screen and (max-width: 960px) {
+    .chart-top {
+        .btn-group > .btn {
+            width: 3rem;
+        }
+    }
+}

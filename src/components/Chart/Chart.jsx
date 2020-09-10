@@ -196,7 +196,9 @@ const Chart = () => {
         hasDigitalChannels,
         triggerHandleVisible,
     } = useSelector(chartState);
-    const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
+    const {
+        triggerLevel, triggerRunning, triggerSingleWaiting, externalTrigger,
+    } = useSelector(triggerState);
     const { samplingRunning } = useSelector(appState);
     const { index } = options;
 
@@ -378,7 +380,9 @@ const Chart = () => {
 
     const live = ((windowBegin === 0) && (windowEnd === 0))
         && (samplingRunning || triggerRunning || triggerSingleWaiting);
-    const snapping = (step <= 0.1) && !live;
+    const snapping = (step <= 0.16) && !live;
+
+    const pointRadius = (step <= 0.08) ? 4 : 2;
 
     const chartData = {
         datasets: [{
@@ -386,9 +390,9 @@ const Chart = () => {
             borderWidth: step > 2 ? 1 : 1.5,
             fill: false,
             data: lineData.slice(0, mappedIndex),
-            pointRadius: snapping ? 5 : 0,
-            pointHoverRadius: snapping ? 5 : 0,
-            pointHitRadius: snapping ? 5 : 0,
+            pointRadius: snapping ? pointRadius : 0,
+            pointHoverRadius: snapping ? pointRadius : 0,
+            pointHitRadius: snapping ? pointRadius : 0,
             pointBackgroundColor: colors.white,
             pointHoverBackgroundColor: dataColor,
             pointBorderWidth: 1.5,
@@ -452,7 +456,7 @@ const Chart = () => {
         sendTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible,
+        triggerHandleVisible: triggerHandleVisible && !externalTrigger,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];

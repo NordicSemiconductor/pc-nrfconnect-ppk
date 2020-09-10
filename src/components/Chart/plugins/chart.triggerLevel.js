@@ -38,7 +38,7 @@
 
 import colors from '../../colors.scss';
 
-const { amber: colorActive, gray600: colorInactive, white } = colors;
+const { gray600: color, white } = colors;
 
 // eslint-disable-next-line func-names
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
@@ -121,7 +121,7 @@ const plugin = {
         const {
             chartArea: { left, right },
             chart: { ctx },
-            options: { formatY, triggerLevel, triggerActive },
+            options: { formatY, triggerLevel },
         } = chartInstance;
 
         const coords = this.getCoords(chartInstance);
@@ -129,10 +129,8 @@ const plugin = {
         if (!coords) return;
         const { y, label } = coords;
 
-        const color = triggerActive ? colorActive : colorInactive;
-
         ctx.save();
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 0.5;
         ctx.strokeStyle = color;
         ctx.setLineDash([5, 4]);
         ctx.beginPath();
