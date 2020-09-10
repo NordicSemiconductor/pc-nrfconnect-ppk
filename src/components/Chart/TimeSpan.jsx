@@ -44,6 +44,15 @@ import { options } from '../../globals';
 
 import './timespan.scss';
 
+const handle = (
+    <g>
+        <path d="M 0 24 C 0 25 1 26 2 26 L 9 26 C 10 26 11 25 11 24 L 11 11 C 11 7 5.5 0 5.5 0 C 5.5 0 0 7 0 11 z" />
+        <line x1="3" y1="22" x2="8" y2="22" />
+        <line x1="3" y1="18" x2="8" y2="18" />
+        <line x1="3" y1="14" x2="8" y2="14" />
+    </g>
+);
+
 const TimeSpan = ({
     cursorBegin = null,
     cursorEnd = null,
@@ -99,7 +108,9 @@ const TimeSpan = ({
                         }
                     }}
                     onPointerUp={onPointerUp}
-                />
+                >
+                    <svg height={26} width={11}>{handle}</svg>
+                </div>
             )}
             <div
                 className="span"
@@ -126,7 +137,9 @@ const TimeSpan = ({
                         }
                     }}
                     onPointerUp={onPointerUp}
-                />
+                >
+                    <svg height={26} width={11}>{handle}</svg>
+                </div>
             )}
         </div>
     );

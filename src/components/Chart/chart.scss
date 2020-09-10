@@ -36,6 +36,7 @@ $rightMarginPx: 30px;
     .chart-bits-container {
         margin-top: 0.5rem;
         margin-bottom: -1px;
+        position: relative;
         .chart-bits {
             height: 2rem;
             flex: none;
@@ -47,6 +48,22 @@ $rightMarginPx: 30px;
             span {
                 width: $yAxisWidthPx;
                 text-align: center;
+            }
+        }
+        .info {
+            display: flex;
+            position: absolute;
+            top: 0;
+            left: 70px;
+            bottom: 0;
+            right: 0;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            p {
+                margin-bottom: 0;
+                padding: 1rem;
+                background-color: $white;
             }
         }
     }

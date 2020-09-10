@@ -3,12 +3,18 @@
 
 .timespan {
     margin-left: $yAxisWidthPx;
-    height: 1.5rem;
+    height: 1rem;
     position: relative;
     overflow: hidden;
 
+    &.selection {
+        height: 26px;
+        margin-top: -10px;
+        padding-top: 10px;
+    }
+
     .span {
-        line-height: 1.5rem;
+        line-height: 1rem;
         text-align: center;
         font-size: 8pt;
         position: absolute;
@@ -34,30 +40,23 @@
     }
 
     .cursor {
+        position: absolute;
         top: 0;
-        bottom: 0;
+        height: 26px;
         width: 11px;
-        background-color: $gray-600;
-        border-radius: 2px;
-        margin-left: -5px;
+        margin-left: -5.5px;
         cursor: grab;
         z-index: 2;
-        position: absolute;
-
-        &::after {
-            content: '\2261';
-            color: $gray-50;
-            font-size: 17px;
-            position: absolute;
-            top: -2px;
-            left: 0.5px;
-        }
     }
-}
-
-.timespan.window {
-    height: 1rem;
-    .span {
-        line-height: 1rem;
+    svg {
+        pointer-events: none;
+        stroke-width: 0;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: $gray-700;
+        line {
+            stroke-width: 1;
+            stroke: $gray-50;
+        }
     }
 }

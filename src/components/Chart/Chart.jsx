@@ -475,7 +475,7 @@ const Chart = () => {
                     chartRef={chartRef}
                 />
                 <BufferView width={chartAreaWidth} />
-                <TimeSpan width={chartAreaWidth} className="window" />
+                <TimeSpan width={chartAreaWidth + 1} className="window" />
                 <div className="chart-container">
                     <Line
                         ref={chartRef}
@@ -504,7 +504,8 @@ const Chart = () => {
                 <TimeSpan
                     cursorBegin={cursorBegin}
                     cursorEnd={cursorEnd}
-                    width={chartAreaWidth}
+                    width={chartAreaWidth + 1}
+                    className="selection"
                 />
                 <div className="chart-bottom" style={{ paddingRight: `${rightMargin}px` }}>
                     <StatBox {...windowStats} label="WINDOW" />
@@ -541,6 +542,11 @@ const Chart = () => {
                             </div>
                         </div>
                     ))}
+                    {numberOfBits === 0 && (
+                        <div className="info">
+                            <p>Zoom in on the main chart to see the digital channels</p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
