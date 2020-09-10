@@ -77,7 +77,7 @@ const ResistorCalibration = ({ eventKey }) => {
                     onChangeComplete={() => dispatch(updateResistors())}
                     chars={6}
                 />
-                { '\u2126'}
+                <span className="omega" />
             </Form.Label>
             <Slider
                 id="slider-res-hi"
@@ -95,7 +95,7 @@ const ResistorCalibration = ({ eventKey }) => {
                     onChangeComplete={() => dispatch(updateResistors())}
                     chars={6}
                 />
-                { '\u2126'}
+                <span className="omega" />
             </Form.Label>
             <Slider
                 id="slider-res-mid"
@@ -113,7 +113,7 @@ const ResistorCalibration = ({ eventKey }) => {
                     onChangeComplete={() => dispatch(updateResistors())}
                     chars={5}
                 />
-                { '\u2126'}
+                <span className="omega" />
             </Form.Label>
             <Slider
                 id="slider-res-low"

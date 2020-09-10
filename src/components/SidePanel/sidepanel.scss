@@ -131,4 +131,11 @@
             padding: 0.25rem;
         }
     }
+
+    .omega {
+        font-family: -webkit-pictograph;
+        &::after {
+            content: "\2126";
+        }
+    }
 }
