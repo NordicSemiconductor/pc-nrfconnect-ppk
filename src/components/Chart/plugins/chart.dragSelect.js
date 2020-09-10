@@ -38,7 +38,7 @@
 
 import colors from '../../colors.scss';
 
-const CHART_SELECTION_COLOR = colors.gray50;
+const CHART_SELECTION_COLOR = colors.gray100;
 const CHART_DRAG_COLOR = colors.gray100;
 
 export default {
@@ -53,6 +53,7 @@ export default {
         dragSelect.pointerDownHandler = event => {
             if (event.button === 0 && event.shiftKey) {
                 dragSelect.dragStart = event;
+                dragSelect.callback();
             }
         };
         canvas.addEventListener('pointerdown', dragSelect.pointerDownHandler);
@@ -77,9 +78,7 @@ export default {
                     const min = scale.getValueForPixel(startX).valueOf();
                     const max = scale.getValueForPixel(endX).valueOf();
 
-                    if (dragSelect.callback) {
-                        dragSelect.callback(min, max);
-                    }
+                    dragSelect.callback(min, max);
                     chartInstance.update({ lazy: true });
                 }
                 dragSelect.dragStart = null;
@@ -93,12 +92,14 @@ export default {
     beforeDraw(chartInstance) {
         const {
             chartArea: {
-                left, right, top, bottom,
+                left, right, top,
             },
             chart: { ctx },
             scales: { xScale: scale },
             dragSelect: { dragStart, dragEnd },
-            canvas,
+            canvas: {
+                height: bottom,
+            },
         } = chartInstance;
         const { cursor } = scale.options;
 
@@ -120,18 +121,19 @@ export default {
             }
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = colors.gray700;
+            ctx.fillStyle = colors.gray700;
             ctx.setLineDash([4, 4]);
             if (sX >= left && sX <= right) {
                 ctx.beginPath();
                 ctx.moveTo(sX, top);
-                ctx.lineTo(sX, canvas.height);
+                ctx.lineTo(sX, bottom);
                 ctx.closePath();
                 ctx.stroke();
             }
             if (eX >= left && eX <= right) {
                 ctx.beginPath();
                 ctx.moveTo(eX, top);
-                ctx.lineTo(eX, canvas.height);
+                ctx.lineTo(eX, bottom);
                 ctx.closePath();
                 ctx.stroke();
             }
