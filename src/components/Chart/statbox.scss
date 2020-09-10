@@ -11,13 +11,16 @@
         margin: -1px;
         padding-left: 4px;
         text-align: start;
+        height: 1rem;
         .btn {
-            position: absolute;
             padding: 0 0.5rem;
-            font-size: inherit;
-            right: 0;
-            background-color: $gray-100;
-            border: 0;
+            float: right;
+            margin-bottom: 3px;
+            font-size: 10px;
+            line-height: 11px;
+        }
+        h2 {
+            letter-spacing: initial;
         }
     }
 
