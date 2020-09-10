@@ -1,3 +1,12 @@
+## Version 3.0.0-alpha.11
+### Updates
+- Added shift+touchpad events for better zooming
+- Fix timespan height and alignment
+- Fix collapsible icon alignment
+- Changed omega sign symbol
+- Added info about digital channels to see
+- Use svg handles on selection
+
 ## Version 3.0.0-alpha.10
 ### Updates
 - Disable trigger level for external trigger
