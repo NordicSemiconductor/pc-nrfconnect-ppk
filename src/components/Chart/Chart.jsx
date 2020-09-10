@@ -196,7 +196,9 @@ const Chart = () => {
         hasDigitalChannels,
         triggerHandleVisible,
     } = useSelector(chartState);
-    const { triggerLevel, triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
+    const {
+        triggerLevel, triggerRunning, triggerSingleWaiting, externalTrigger,
+    } = useSelector(triggerState);
     const { samplingRunning } = useSelector(appState);
     const { index } = options;
 
@@ -452,7 +454,7 @@ const Chart = () => {
         sendTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible,
+        triggerHandleVisible: triggerHandleVisible && !externalTrigger,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];

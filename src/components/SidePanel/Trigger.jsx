@@ -194,44 +194,46 @@ const Trigger = ({ eventKey }) => {
                 onChange={[value => setTriggerLength(value)]}
                 onChangeComplete={() => dispatch(triggerLengthUpdate(triggerLength))}
             />
-            <Form.Label
-                htmlFor="slider-trigger-level"
-                className="d-flex flex-row align-items-baseline"
-            >
-                <span className="flex-fill">Trigger level</span>
-                <NumberInlineInput
-                    value={level}
+            <div className={externalTrigger ? 'disabled' : ''}>
+                <Form.Label
+                    htmlFor="slider-trigger-level"
+                    className="d-flex flex-row align-items-baseline"
+                >
+                    <span className="flex-fill">Level</span>
+                    <NumberInlineInput
+                        value={level}
+                        range={{ min: 1, max: 1000 }}
+                        onChange={value => setLevel(parseInt(value, 10))}
+                        onChangeComplete={() => sendTriggerLevel(levelUnit)}
+                    />
+                    <Dropdown>
+                        <Dropdown.Toggle id="dropdown-current-unit" variant="plain">
+                            {levelUnit ? 'mA' : '\u00B5A'}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item
+                                eventKey="0"
+                                onSelect={() => sendTriggerLevel(false)}
+                            >
+                                {'\u00B5A'}
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                                eventKey="0"
+                                onSelect={() => sendTriggerLevel(true)}
+                            >
+                                mA
+                            </Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Form.Label>
+                <Slider
+                    id="slider-trigger-level"
+                    values={[level]}
                     range={{ min: 1, max: 1000 }}
-                    onChange={value => setLevel(parseInt(value, 10))}
+                    onChange={[value => setLevel(parseInt(value, 10))]}
                     onChangeComplete={() => sendTriggerLevel(levelUnit)}
                 />
-                <Dropdown>
-                    <Dropdown.Toggle id="dropdown-current-unit" variant="plain">
-                        {levelUnit ? 'mA' : '\u00B5A'}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                        <Dropdown.Item
-                            eventKey="0"
-                            onSelect={() => sendTriggerLevel(false)}
-                        >
-                            {'\u00B5A'}
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                            eventKey="0"
-                            onSelect={() => sendTriggerLevel(true)}
-                        >
-                            mA
-                        </Dropdown.Item>
-                    </Dropdown.Menu>
-                </Dropdown>
-            </Form.Label>
-            <Slider
-                id="slider-trigger-level"
-                values={[level]}
-                range={{ min: 1, max: 1000 }}
-                onChange={[value => setLevel(parseInt(value, 10))]}
-                onChangeComplete={() => sendTriggerLevel(levelUnit)}
-            />
+            </div>
         </Collapse>
     );
 };
