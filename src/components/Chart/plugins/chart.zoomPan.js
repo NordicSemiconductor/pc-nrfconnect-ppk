@@ -73,10 +73,6 @@ export default {
             zoomPan.callback(newMinX, newMaxX, null, null);
         };
 
-        zoomPan.pan = (dx, xMin, xMax, dy, yMin, yMax) => {
-            zoomPan.callback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
-        };
-
         zoomPan.wheelHandler = event => {
             if (!zoomPan.callback) {
                 return;
@@ -89,26 +85,39 @@ export default {
             const {
                 min: yMin, max: yMax, start: y0, end: y1, height,
             } = yScale;
+            const { deltaX, deltaY } = event;
+            const { left: xOffset, top: yOffset } = event.target.getBoundingClientRect();
 
             if (isTrackPad(event)) {
-                const fx = (x0 - x1) / width;
-                const fy = (y1 - y0) / height;
-                zoomPan.pan(event.wheelDeltaX * fx, xMin, xMax,
-                    event.wheelDeltaY * fy, yMin, yMax);
+                if (event.shiftKey) {
+                    const pX = xMin + ((xMax - xMin) * (
+                        (event.clientX - xOffset - xScale.left) / width)
+                    );
+                    const pY = yMax + ((yMin - yMax) * (
+                        (event.clientY - yOffset - yScale.top) / height)
+                    );
+                    const fx = 1.01 ** deltaX;
+                    const fy = 1.01 ** deltaY;
+                    zoomPan.zoomAtOriginBy(pX, fx, xMin, xMax, pY, fy, yMin, yMax);
+                } else {
+                    const fx = (x1 - x0) / width;
+                    const fy = (y0 - y1) / height;
+                    const dx = fx * deltaX;
+                    const dy = fy * deltaY;
+                    zoomPan.callback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
+                }
                 return;
             }
 
             let z = 0;
-            if (event.deltaY < 0) {
+            if (deltaY < 0) {
                 z = wheelZoomFactor;
-            } else if (event.deltaY > 0) {
+            } else if (deltaY > 0) {
                 z = 1 / wheelZoomFactor;
             } else {
                 return;
             }
-            const offsetX = event.target.getBoundingClientRect().left;
-            const p = xScale.getValueForPixel(event.clientX - offsetX);
-
+            const p = xScale.getValueForPixel(event.clientX - xOffset);
             zoomPan.zoomAtOriginBy(p, z, xMin, xMax);
         };
         canvas.addEventListener('wheel', zoomPan.wheelHandler);
@@ -130,8 +139,7 @@ export default {
                 const { xScale, yScale } = chartInstance.scales;
                 const { min: xMin, max: xMax } = xScale;
                 const { max: yMin, min: yMax } = yScale;
-                const xOffset = event.target.getBoundingClientRect().left;
-                const yOffset = event.target.getBoundingClientRect().top;
+                const { left: xOffset, top: yOffset } = event.target.getBoundingClientRect();
                 const pX = xMin + ((xMax - xMin) * (
                     (event.clientX - xOffset - xScale.left) / xScale.width)
                 );
