@@ -475,7 +475,7 @@ const Chart = () => {
                     chartRef={chartRef}
                 />
                 <BufferView width={chartAreaWidth} />
-                <TimeSpan width={chartAreaWidth} className="window" />
+                <TimeSpan width={chartAreaWidth + 1} className="window" />
                 <div className="chart-container">
                     <Line
                         ref={chartRef}
@@ -504,7 +504,7 @@ const Chart = () => {
                 <TimeSpan
                     cursorBegin={cursorBegin}
                     cursorEnd={cursorEnd}
-                    width={chartAreaWidth}
+                    width={chartAreaWidth + 1}
                 />
                 <div className="chart-bottom" style={{ paddingRight: `${rightMargin}px` }}>
                     <StatBox {...windowStats} label="WINDOW" />
