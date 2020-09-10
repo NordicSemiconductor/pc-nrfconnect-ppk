@@ -38,6 +38,8 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 
+import { openUrl } from 'pc-nrfconnect-shared/src/open';
+
 import Buffer from './Buffer';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
@@ -46,6 +48,7 @@ import VoltageRegulator from './VoltageRegulator';
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 import Gains from './Gains';
+import SpikeFilter from './SpikeFilter';
 
 import {
     appState,
@@ -53,8 +56,12 @@ import {
 } from '../../reducers/appReducer';
 import { load } from '../../actions/fileActions';
 
+import { options } from '../../globals';
+
 import './sidepanel.scss';
-import SpikeFilter from './SpikeFilter';
+
+const ppk1ug = 'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+const ppk2ug = 'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 
 export default () => {
     const dispatch = useDispatch();
@@ -67,13 +74,32 @@ export default () => {
         <div className="sidepanel d-flex flex-column">
             {deviceOpen || (
                 <>
-                    <p>Please open your device first, or</p>
                     <Button
                         className="w-100"
                         variant="set"
                         onClick={() => dispatch(load())}
                     >
                         LOAD
+                    </Button>
+                    <h2>INSTRUCTIONS</h2>
+                    <p>
+                        The Power Profiler Kit (PPK) is an affordable, flexible
+                        tool that measures real-time power consumption of your
+                        designs.
+                    </p>
+                    <p>
+                        Select a device to sample real-time measurements or load
+                        an existing data set.
+                    </p>
+                    <p>
+                        <i>PPK</i> or <i>PPK2</i> hardware is required to
+                        sample real-time measurements.
+                    </p>
+                    <Button variant="link" onClick={() => openUrl(ppk1ug)}>
+                        PPK User Guide
+                    </Button>
+                    <Button variant="link" onClick={() => openUrl(ppk2ug)}>
+                        PPK2 User Guide
                     </Button>
                 </>
             )}
@@ -86,14 +112,16 @@ export default () => {
                 </>
             )}
             <DisplayOptions />
-            <Button
-                className="w-100 mt-3"
-                variant="set"
-                disabled={samplingRunning}
-                onClick={() => dispatch(toggleSaveChoiceDialog())}
-            >
-                SAVE / EXPORT
-            </Button>
+            {options.timestamp === null || (
+                <Button
+                    className="w-100 mt-3"
+                    variant="set"
+                    disabled={samplingRunning}
+                    onClick={() => dispatch(toggleSaveChoiceDialog())}
+                >
+                    SAVE / EXPORT
+                </Button>
+            )}
             {deviceOpen && (
                 <>
                     <SwitchPoints eventKey="2" />

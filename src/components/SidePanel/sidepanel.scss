@@ -56,6 +56,10 @@
     .btn {
         font-size: 12px;
     }
+    .btn-link {
+        width: fit-content;
+        padding-left: 0;
+    }
 
     .btn-set {
         color: $gray-700;
