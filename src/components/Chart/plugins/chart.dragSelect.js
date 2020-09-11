@@ -92,7 +92,7 @@ export default {
     beforeDraw(chartInstance) {
         const {
             chartArea: {
-                left, right, top,
+                left, right, top, bottom: areaBottom,
             },
             chart: { ctx },
             scales: { xScale: scale },
@@ -117,7 +117,7 @@ export default {
             const endX = Math.min(eX, right);
             if (startX < right && endX > left) {
                 ctx.fillStyle = CHART_SELECTION_COLOR;
-                ctx.fillRect(startX, top, endX - startX, bottom - top);
+                ctx.fillRect(startX, top, endX - startX, areaBottom - top);
             }
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = colors.gray700;
@@ -145,7 +145,7 @@ export default {
             const startX = Math.max(Math.min(dragStart.clientX, dragEnd.clientX) - offsetX, left);
             const endX = Math.min(Math.max(dragStart.clientX, dragEnd.clientX) - offsetX, right);
             ctx.fillStyle = CHART_DRAG_COLOR;
-            ctx.fillRect(startX, top, endX - startX, bottom - top);
+            ctx.fillRect(startX, top, endX - startX, areaBottom - top);
         }
         ctx.restore();
     },
