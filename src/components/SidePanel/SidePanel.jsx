@@ -79,7 +79,7 @@ export default () => {
                         variant="set"
                         onClick={() => dispatch(load())}
                     >
-                        LOAD
+                        Load
                     </Button>
                     <h2>INSTRUCTIONS</h2>
                     <p>
@@ -119,7 +119,7 @@ export default () => {
                     disabled={samplingRunning}
                     onClick={() => dispatch(toggleSaveChoiceDialog())}
                 >
-                    SAVE / EXPORT
+                    Save / Export
                 </Button>
             )}
             {deviceOpen && (
