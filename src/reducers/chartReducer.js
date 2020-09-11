@@ -88,8 +88,20 @@ export const chartWindowAction = (
     windowBegin, windowEnd, windowDuration, yMin, yMax,
 ) => {
     const duration = Math.min(MAX_WINDOW_DURATION, Math.max(MIN_WINDOW_DURATION, windowDuration));
-    const y0 = yMin ? Math.max(Y_MIN, yMin) : yMin;
-    const y1 = yMax ? Math.min(yMax, Y_MAX) : yMax;
+    let y0 = yMin;
+    let y1 = yMax;
+
+    if ((yMin !== null && yMin !== undefined) && (yMax !== null && yMax !== undefined)) {
+        const p0 = Math.max(0, Y_MIN - yMin);
+        const p1 = Math.max(0, yMax - Y_MAX);
+        if (p0 * p1 === 0) {
+            y0 = y0 - p1 + p0;
+            y1 = y1 - p1 + p0;
+        } else {
+            y0 = Y_MIN;
+            y1 = Y_MAX;
+        }
+    }
 
     if (windowBegin === null && windowEnd === null) {
         return {
