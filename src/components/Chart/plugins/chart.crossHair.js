@@ -103,8 +103,8 @@ const plugin = {
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
-            ctx.moveTo(left + layerX - 0.5, top);
-            ctx.lineTo(left + layerX - 0.5, bottom);
+            ctx.moveTo(left + layerX, top);
+            ctx.lineTo(left + layerX, bottom);
             ctx.closePath();
             ctx.stroke();
 
@@ -135,8 +135,8 @@ const plugin = {
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
-            ctx.moveTo(left, layerY - 0.5);
-            ctx.lineTo(right, layerY - 0.5);
+            ctx.moveTo(left, layerY);
+            ctx.lineTo(right, layerY);
             ctx.closePath();
             ctx.stroke();
 
