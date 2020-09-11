@@ -69,7 +69,7 @@ export default () => {
                     samplingRunning ? samplingStop() : samplingStart(),
                 )}
             >
-                {samplingRunning ? 'STOP SAMPLING' : 'START SAMPLING'}
+                {samplingRunning ? 'Stop sampling' : 'Start sampling'}
             </Button>
             {capabilities.ppkToggleDUT && (
                 <Toggle

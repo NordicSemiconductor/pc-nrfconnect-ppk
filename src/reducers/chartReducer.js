@@ -73,6 +73,8 @@ const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
 
 const MIN_WINDOW_DURATION = 500;
 const MAX_WINDOW_DURATION = 120000000;
+const Y_MIN = -100;
+const Y_MAX = 1200000;
 
 export const animationAction = () => ({ type: ANIMATION });
 
@@ -86,14 +88,17 @@ export const chartWindowAction = (
     windowBegin, windowEnd, windowDuration, yMin, yMax,
 ) => {
     const duration = Math.min(MAX_WINDOW_DURATION, Math.max(MIN_WINDOW_DURATION, windowDuration));
+    const y0 = yMin ? Math.max(Y_MIN, yMin) : yMin;
+    const y1 = yMax ? Math.min(yMax, Y_MAX) : yMax;
+
     if (windowBegin === null && windowEnd === null) {
         return {
             type: CHART_WINDOW,
             windowBegin: 0,
             windowEnd: 0,
             windowDuration: windowDuration === null ? null : duration,
-            yMin,
-            yMax,
+            yMin: y0,
+            yMax: y1,
         };
     }
     const half = duration / 2;
@@ -103,8 +108,8 @@ export const chartWindowAction = (
         windowBegin: center - half,
         windowEnd: center + half,
         windowDuration: duration,
-        yMin,
-        yMax,
+        yMin: y0,
+        yMax: y1,
     };
 };
 

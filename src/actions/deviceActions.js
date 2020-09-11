@@ -212,6 +212,7 @@ export function open(deviceInfo) {
             }
 
             if (trigger && getState().app.trigger.triggerSingleWaiting) {
+                logger.info('Trigger received, stopped waiting');
                 dispatch(clearSingleTriggingAction());
             }
 
