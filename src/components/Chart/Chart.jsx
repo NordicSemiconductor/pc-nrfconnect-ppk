@@ -234,10 +234,12 @@ const Chart = () => {
         const earliestDataTime = options.timestamp
             - ((data.length / options.samplesPerSecond) * 1e6);
 
-        chartWindow(
-            Math.max(earliestDataTime, beginX),
-            Math.min(options.timestamp, endX), beginY, endY,
-        );
+        const p0 = Math.max(0, earliestDataTime - beginX);
+        const p1 = Math.max(0, endX - options.timestamp);
+
+        if (p0 * p1 === 0) {
+            chartWindow(beginX - p1 + p0, endX - p1 + p0, beginY, endY);
+        }
     }, [chartReset, chartWindow, data.length, windowDuration, resetCursor]);
 
     const zoomToWindow = useCallback(usec => {
