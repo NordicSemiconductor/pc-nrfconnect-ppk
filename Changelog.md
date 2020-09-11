@@ -1,3 +1,10 @@
+## Version 3.0.0-alpha.13
+### Updates
+- Fixed selected area in the chart
+- Fixed crosshair alignment
+- Pan keeps the window length
+- Better y-range limit
+
 ## Version 3.0.0-alpha.12
 ### Updates
 - New trigger handle
