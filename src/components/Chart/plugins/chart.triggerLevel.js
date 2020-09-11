@@ -38,7 +38,7 @@
 
 import colors from '../../colors.scss';
 
-const { gray600: color, white } = colors;
+const { gray700: color, white } = colors;
 
 // eslint-disable-next-line func-names
 CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
@@ -75,9 +75,9 @@ const plugin = {
             y,
             label: {
                 x: left - 62,
-                y: y - 10,
-                w: 70,
-                h: 20,
+                y: y - 9,
+                w: 80,
+                h: 18,
             },
         };
     },
@@ -134,26 +134,38 @@ const plugin = {
         ctx.strokeStyle = color;
         ctx.setLineDash([5, 4]);
         ctx.beginPath();
-        ctx.moveTo(left, y - 0.5);
-        ctx.lineTo(right, y - 0.5);
+        ctx.moveTo(left, y);
+        ctx.lineTo(right, y);
         ctx.closePath();
         ctx.stroke();
         ctx.setLineDash([]);
 
         ctx.fillStyle = color;
-        ctx.textAlign = 'right';
-        ctx.roundRect(label.x, label.y, label.w, label.h, 2).fill();
-        ctx.fillStyle = white;
-        ctx.fillText(formatY(triggerLevel), label.x + label.w - 18, label.y + 13);
+
+        ctx.translate(label.x, label.y);
+        ctx.beginPath();
+        ctx.moveTo(0, 2);
+        ctx.bezierCurveTo(0, 1, 1, 0, 2, 0);
+        ctx.lineTo(label.w - 20, 0);
+        ctx.bezierCurveTo(label.w - 15, 0, label.w, label.h / 2, label.w, label.h / 2);
+        ctx.bezierCurveTo(label.w, label.h / 2, label.w - 15, label.h, label.w - 20, label.h);
+        ctx.lineTo(2, label.h);
+        ctx.bezierCurveTo(1, label.h, 0, label.h - 1, 0, label.h - 2);
+        ctx.closePath();
+        ctx.fill();
 
         ctx.lineWidth = 1;
-        ctx.strokeStyle = white;
+        ctx.strokeStyle = colors.gray50;
         ctx.beginPath();
-        ctx.moveTo(left - 4, y - 2.5); ctx.lineTo(left + 4, y - 2.5);
-        ctx.moveTo(left - 4, y - 0.5); ctx.lineTo(left + 4, y - 0.5);
-        ctx.moveTo(left - 4, y + 1.5); ctx.lineTo(left + 4, y + 1.5);
+        ctx.moveTo(4, 3); ctx.lineTo(4, label.h - 3);
+        ctx.moveTo(8, 3); ctx.lineTo(8, label.h - 3);
+        ctx.moveTo(12, 3); ctx.lineTo(12, label.h - 3);
         ctx.closePath();
         ctx.stroke();
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = white;
+        ctx.fillText(formatY(triggerLevel), label.w - 18, label.h / 2 + 4);
 
         ctx.restore();
     },
