@@ -67,7 +67,7 @@ export default {
                 const zY = Math.max(factorY, 0.1);
                 const newMinY = pY - ((pY - yMin) / zY);
                 const newMaxY = pY + ((yMax - pY) / zY);
-                zoomPan.callback(newMinX, newMaxX, newMaxY, newMinY);
+                zoomPan.callback(newMinX, newMaxX, newMinY, newMaxY);
                 return;
             }
             zoomPan.callback(newMinX, newMaxX, null, null);
