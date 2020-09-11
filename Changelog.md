@@ -1,3 +1,10 @@
+## Version 3.0.0-alpha.12
+### Updates
+- New trigger handle
+- Limit y-axis range
+- Changed button label capitalization
+- Add log when single trigger received
+
 ## Version 3.0.0-alpha.11
 ### Updates
 - Added shift+touchpad events for better zooming
