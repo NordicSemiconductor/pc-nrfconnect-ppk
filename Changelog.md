@@ -1,3 +1,9 @@
+## Version 3.0.0-beta.1
+### Updates
+- Sharp crosshair, trigger, marker lines
+- Updated start button label for PPK1
+- Updated padding, font-size of calculated values
+
 ## Version 3.0.0-alpha.13
 ### Updates
 - Fixed selected area in the chart
