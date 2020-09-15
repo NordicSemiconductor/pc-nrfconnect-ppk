@@ -58,6 +58,11 @@ export default () => {
         samplingRunning,
     } = useSelector(appState);
 
+    let btnLabel = samplingRunning ? 'Stop sampling' : 'Start sampling';
+    if (capabilities.ppkTriggerSet) {
+        btnLabel = samplingRunning ? 'Stop average sampling' : 'Start average sampling';
+    }
+
     return (
         <div className="d-flex flex-column start-stop">
             <PowerMode />
@@ -69,7 +74,7 @@ export default () => {
                     samplingRunning ? samplingStop() : samplingStart(),
                 )}
             >
-                {samplingRunning ? 'Stop sampling' : 'Start sampling'}
+                {btnLabel}
             </Button>
             {capabilities.ppkToggleDUT && (
                 <Toggle

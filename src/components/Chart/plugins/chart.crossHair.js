@@ -97,14 +97,16 @@ const plugin = {
         }
 
         const { layerX, layerY } = plugin.moveEvent;
+        const x = Math.ceil(layerX - 0.5) - 0.5;
+        const y = Math.ceil(layerY - 0.5) + 0.5;
 
         if (layerX >= 0 && layerX <= (right - left)) {
             ctx.save();
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
-            ctx.moveTo(left + layerX, top);
-            ctx.lineTo(left + layerX, bottom);
+            ctx.moveTo(left + x, top);
+            ctx.lineTo(left + x, bottom);
             ctx.closePath();
             ctx.stroke();
 
@@ -135,8 +137,8 @@ const plugin = {
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
             ctx.beginPath();
-            ctx.moveTo(left, layerY);
-            ctx.lineTo(right, layerY);
+            ctx.moveTo(left, y);
+            ctx.lineTo(right, y);
             ctx.closePath();
             ctx.stroke();
 

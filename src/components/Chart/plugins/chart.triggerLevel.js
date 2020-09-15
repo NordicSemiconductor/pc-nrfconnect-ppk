@@ -58,10 +58,10 @@ const plugin = {
             return null;
         }
         return {
-            y,
+            y: Math.ceil(y - 0.5) + 0.5,
             label: {
                 x: left - 62,
-                y: y - 9,
+                y: y - 9.5,
                 w: 80,
                 h: 18,
             },
@@ -118,7 +118,7 @@ const plugin = {
         ctx.save();
         ctx.lineWidth = 0.5;
         ctx.strokeStyle = color;
-        ctx.setLineDash([5, 4]);
+        ctx.setLineDash([4, 5]);
         ctx.beginPath();
         ctx.moveTo(left, y);
         ctx.lineTo(right, y);

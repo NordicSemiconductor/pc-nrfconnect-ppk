@@ -111,8 +111,8 @@ export default {
 
         if (typeof cursor.cursorBegin === 'number') {
             const { cursorBegin, cursorEnd } = cursor;
-            const sX = scale.getPixelForValue(cursorBegin);
-            const eX = scale.getPixelForValue(cursorEnd);
+            const sX = Math.ceil(scale.getPixelForValue(cursorBegin) - 0.5) - 0.5;
+            const eX = Math.ceil(scale.getPixelForValue(cursorEnd) - 0.5) - 0.5;
             const startX = Math.max(sX, left);
             const endX = Math.min(eX, right);
             if (startX < right && endX > left) {
