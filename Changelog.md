@@ -1,3 +1,8 @@
+## Version 3.0.0-beta.2
+### Updates
+- Updated for new rules of shared@4.9.3
+- Added supporting component for bootstrap tooltips
+
 ## Version 3.0.0-beta.1
 ### Updates
 - Sharp crosshair, trigger, marker lines
