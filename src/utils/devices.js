@@ -39,6 +39,4 @@ export const VendorId = {
     NORDIC_SEMICONDUCTOR: 0x1915,
 };
 
-export const USBProductIds = [
-    0x520F, 0x521F, 0xC00A,
-];
+export const USBProductIds = [0x520f, 0x521f, 0xc00a];

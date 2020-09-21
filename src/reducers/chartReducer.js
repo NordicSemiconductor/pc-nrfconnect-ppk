@@ -39,8 +39,9 @@ import { options, nbDigitalChannels } from '../globals';
 import persistentStore from '../utils/persistentStore';
 
 const initialWindowDuration = 7 * 1e6;
-const initialBufferLength = ((options.data.length / options.samplesPerSecond) * 1e6)
-              - initialWindowDuration;
+const initialBufferLength =
+    (options.data.length / options.samplesPerSecond) * 1e6 -
+    initialWindowDuration;
 const initialState = {
     cursorBegin: null, // [microseconds]
     cursorEnd: null, // [microseconds]
@@ -53,7 +54,10 @@ const initialState = {
     bufferRemaining: initialBufferLength,
     index: 0,
     hasDigitalChannels: false,
-    digitalChannels: persistentStore.get('digitalChannels', Array(nbDigitalChannels).fill(false)),
+    digitalChannels: persistentStore.get(
+        'digitalChannels',
+        Array(nbDigitalChannels).fill(false)
+    ),
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     triggerHandleVisible: persistentStore.get('triggerHandleVisible', true),
@@ -85,13 +89,25 @@ export const chartCursorAction = (cursorBegin, cursorEnd) => ({
 });
 
 export const chartWindowAction = (
-    windowBegin, windowEnd, windowDuration, yMin, yMax,
+    windowBegin,
+    windowEnd,
+    windowDuration,
+    yMin,
+    yMax
 ) => {
-    const duration = Math.min(MAX_WINDOW_DURATION, Math.max(MIN_WINDOW_DURATION, windowDuration));
+    const duration = Math.min(
+        MAX_WINDOW_DURATION,
+        Math.max(MIN_WINDOW_DURATION, windowDuration)
+    );
     let y0 = yMin;
     let y1 = yMax;
 
-    if ((yMin !== null && yMin !== undefined) && (yMax !== null && yMax !== undefined)) {
+    if (
+        yMin !== null &&
+        yMin !== undefined &&
+        yMax !== null &&
+        yMax !== undefined
+    ) {
         const p0 = Math.max(0, Y_MIN - yMin);
         const p1 = Math.max(0, yMax - Y_MAX);
         if (p0 * p1 === 0) {
@@ -125,7 +141,8 @@ export const chartWindowAction = (
     };
 };
 
-export const chartReset = windowDuration => chartWindowAction(null, null, windowDuration);
+export const chartReset = windowDuration =>
+    chartWindowAction(null, null, windowDuration);
 export const resetCursor = () => chartCursorAction(null, null);
 export const goLive = () => (dispatch, getState) => {
     dispatch(chartReset(getState().app.chart.windowDuration));
@@ -153,15 +170,18 @@ export const setDigitalChannels = digitalChannels => ({
 export const toggleDigitalChannels = () => ({ type: TOGGLE_DIGITAL_CHANNELS });
 export const toggleTimestamps = () => ({ type: TOGGLE_TIMESTAMPS });
 export const toggleTriggerHandle = () => ({ type: TOGGLE_TRIGGER_HANDLE });
-export const toggleYAxisLock = (yMin, yMax) => ({ type: TOGGLE_Y_AXIS_LOCK, yMin, yMax });
+export const toggleYAxisLock = (yMin, yMax) => ({
+    type: TOGGLE_Y_AXIS_LOCK,
+    yMin,
+    yMax,
+});
 
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
     const totalInUs = (data.length / samplesPerSecond) * 1e6;
     const bufferLength = totalInUs - windowDuration;
-    const bufferRemaining = (windowEnd !== 0)
-        ? (bufferLength - (timestamp - windowEnd))
-        : bufferLength;
+    const bufferRemaining =
+        windowEnd !== 0 ? bufferLength - (timestamp - windowEnd) : bufferLength;
     return {
         bufferLength,
         bufferRemaining,
@@ -180,7 +200,11 @@ export default (state = initialState, { type, ...action }) => {
         }
         case CHART_WINDOW: {
             const {
-                windowBegin, windowEnd, windowDuration, yMin, yMax,
+                windowBegin,
+                windowEnd,
+                windowDuration,
+                yMin,
+                yMax,
             } = action;
             const { yAxisLock } = state;
             return {
@@ -189,8 +213,8 @@ export default (state = initialState, { type, ...action }) => {
                 windowEnd,
                 windowDuration,
                 ...calcBuffer(windowDuration, windowEnd),
-                yMin: (yMin === null || yAxisLock) ? state.yMin : yMin,
-                yMax: (yMax === null || yAxisLock) ? state.yMax : yMax,
+                yMin: yMin === null || yAxisLock ? state.yMin : yMin,
+                yMax: yMax === null || yAxisLock ? state.yMax : yMax,
             };
         }
         case ANIMATION: {
@@ -208,13 +232,17 @@ export default (state = initialState, { type, ...action }) => {
                 bufferRemaining: calc.bufferRemaining,
             };
         }
-        case LOAD_CHART_STATE: return { ...state, ...action };
+        case LOAD_CHART_STATE:
+            return { ...state, ...action };
         case DIGITAL_CHANNELS: {
             persistentStore.set('digitalChannels', action.digitalChannels);
             return { ...state, ...action };
         }
         case TOGGLE_DIGITAL_CHANNELS: {
-            persistentStore.set('digitalChannelsVisible', !state.digitalChannelsVisible);
+            persistentStore.set(
+                'digitalChannelsVisible',
+                !state.digitalChannelsVisible
+            );
             return {
                 ...state,
                 digitalChannelsVisible: !state.digitalChannelsVisible,
@@ -228,18 +256,24 @@ export default (state = initialState, { type, ...action }) => {
             };
         }
         case TOGGLE_TRIGGER_HANDLE: {
-            persistentStore.set('triggerHandleVisible', !state.triggerHandleVisible);
+            persistentStore.set(
+                'triggerHandleVisible',
+                !state.triggerHandleVisible
+            );
             return {
                 ...state,
                 triggerHandleVisible: !state.triggerHandleVisible,
             };
         }
         case TOGGLE_Y_AXIS_LOCK: {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { yMin, yMax, ...s } = state;
             return { ...s, ...action, yAxisLock: !state.yAxisLock };
         }
-        case UPDATE_HAS_DIGITAL_CHANNELS: return { ...state, ...action };
-        default: return state;
+        case UPDATE_HAS_DIGITAL_CHANNELS:
+            return { ...state, ...action };
+        default:
+            return state;
     }
 };
 

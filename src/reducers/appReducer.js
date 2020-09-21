@@ -75,7 +75,9 @@ export const setPowerModeAction = isSmuMode => ({
 });
 
 export const rttStartAction = () => ({ type: RTT_CALLED_START });
-export const toggleSaveChoiceDialog = () => ({ type: TOGGLE_SAVE_CHOICE_DIALOG });
+export const toggleSaveChoiceDialog = () => ({
+    type: TOGGLE_SAVE_CHOICE_DIALOG,
+});
 export const showExportDialog = () => ({ type: SHOW_EXPORT_DIALOG });
 export const hideExportDialog = () => ({ type: HIDE_EXPORT_DIALOG });
 
@@ -89,18 +91,27 @@ export default (state = initialState, { type, ...action }) => {
                 capabilities: { ...capabilities },
             };
         }
-        case DEVICE_CLOSED: return initialState;
-        case DEVICE_UNDER_TEST_TOGGLE: return { ...state, deviceRunning: !state.deviceRunning };
-        case SET_POWER_MODE: return { ...state, ...action };
-        case RTT_CALLED_START: return { ...state, rttRunning: true };
-        case TOGGLE_SAVE_CHOICE_DIALOG: return {
-            ...state,
-            isSaveChoiceDialogVisible: !state.isSaveChoiceDialogVisible,
-        };
-        case SHOW_EXPORT_DIALOG: return { ...state, isExportDialogVisible: true };
-        case HIDE_EXPORT_DIALOG: return { ...state, isExportDialogVisible: false };
-        case SAMPLING_STARTED: return { ...state, samplingRunning: true };
-        case SAMPLING_STOPPED: return { ...state, samplingRunning: false };
+        case DEVICE_CLOSED:
+            return initialState;
+        case DEVICE_UNDER_TEST_TOGGLE:
+            return { ...state, deviceRunning: !state.deviceRunning };
+        case SET_POWER_MODE:
+            return { ...state, ...action };
+        case RTT_CALLED_START:
+            return { ...state, rttRunning: true };
+        case TOGGLE_SAVE_CHOICE_DIALOG:
+            return {
+                ...state,
+                isSaveChoiceDialogVisible: !state.isSaveChoiceDialogVisible,
+            };
+        case SHOW_EXPORT_DIALOG:
+            return { ...state, isExportDialogVisible: true };
+        case HIDE_EXPORT_DIALOG:
+            return { ...state, isExportDialogVisible: false };
+        case SAMPLING_STARTED:
+            return { ...state, samplingRunning: true };
+        case SAMPLING_STOPPED:
+            return { ...state, samplingRunning: false };
 
         default:
     }

@@ -43,7 +43,11 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 
-import { appState, toggleSaveChoiceDialog, showExportDialog } from '../../reducers/appReducer';
+import {
+    appState,
+    toggleSaveChoiceDialog,
+    showExportDialog,
+} from '../../reducers/appReducer';
 import { save } from '../../actions/fileActions';
 
 import './saveexport.scss';
@@ -71,8 +75,9 @@ export default () => {
                             <Card.Body className="pb-0">
                                 <h2>SAVE SESSION DATA</h2>
                                 <p>
-                                    Great if you want to view the data again in this application.
-                                    Not usable by other software.
+                                    Great if you want to view the data again in
+                                    this application. Not usable by other
+                                    software.
                                 </p>
                                 <p>.PPK</p>
                             </Card.Body>
@@ -95,8 +100,9 @@ export default () => {
                             <Card.Body className="pb-0">
                                 <h2>EXPORT SELECTED RANGE</h2>
                                 <p>
-                                    Great if you want to manipulate your data in other software.
-                                    Can not be opened by this application.
+                                    Great if you want to manipulate your data in
+                                    other software. Can not be opened by this
+                                    application.
                                 </p>
                                 <p>.CSV</p>
                             </Card.Body>
@@ -118,7 +124,9 @@ export default () => {
             </Modal.Body>
 
             <Modal.Footer>
-                <Button variant="secondary" onClick={close}>Close</Button>
+                <Button variant="secondary" onClick={close}>
+                    Close
+                </Button>
             </Modal.Footer>
         </Modal>
     );

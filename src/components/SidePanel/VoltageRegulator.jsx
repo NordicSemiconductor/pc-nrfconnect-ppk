@@ -53,7 +53,10 @@ import {
 const VoltageRegulator = ({ eventKey }) => {
     const dispatch = useDispatch();
     const { vdd, min, max } = useSelector(voltageRegulatorState);
-    const { isSmuMode, capabilities: { ppkSetPowerMode } } = useSelector(appState);
+    const {
+        isSmuMode,
+        capabilities: { ppkSetPowerMode },
+    } = useSelector(appState);
 
     return (
         <Collapse
@@ -66,16 +69,20 @@ const VoltageRegulator = ({ eventKey }) => {
                 <NumberInlineInput
                     value={vdd}
                     range={{ min, max }}
-                    onChange={value => dispatch(moveVoltageRegulatorVddAction(value))}
+                    onChange={value =>
+                        dispatch(moveVoltageRegulatorVddAction(value))
+                    }
                     onChangeComplete={() => dispatch(updateRegulator(vdd))}
-                />
-                {' '}mV
+                />{' '}
+                mV
             </Form.Label>
             <Slider
                 id="slider-vdd"
                 values={[vdd]}
                 range={{ min, max }}
-                onChange={[value => dispatch(moveVoltageRegulatorVddAction(value))]}
+                onChange={[
+                    value => dispatch(moveVoltageRegulatorVddAction(value)),
+                ]}
                 onChangeComplete={() => dispatch(updateRegulator(vdd))}
             />
         </Collapse>

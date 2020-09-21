@@ -51,9 +51,10 @@ export const triggerLevelSetAction = level => {
     if (level === null) return { type: TRIGGER_VALUE_SET, triggerLevel: null };
     return {
         type: TRIGGER_VALUE_SET,
-        triggerLevel: (level > 1000)
-            ? Math.round(level / 1000) * 1000
-            : Math.max(1, Math.round(level)),
+        triggerLevel:
+            level > 1000
+                ? Math.round(level / 1000) * 1000
+                : Math.max(1, Math.round(level)),
     };
 };
 
@@ -64,7 +65,9 @@ export const toggleTriggerAction = triggerRunning => ({
 
 export const triggerSingleSetAction = () => ({ type: TRIGGER_SINGLE_SET });
 export const clearSingleTriggingAction = () => ({ type: TRIGGER_SINGLE_CLEAR });
-export const externalTriggerToggledAction = () => ({ type: EXTERNAL_TRIGGER_TOGGLE });
+export const externalTriggerToggledAction = () => ({
+    type: EXTERNAL_TRIGGER_TOGGLE,
+});
 
 export default (state = initialState, { type, ...action }) => {
     switch (type) {

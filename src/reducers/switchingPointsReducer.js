@@ -80,9 +80,11 @@ export const switchingPointDownMovedAction = sliderVal => ({
 
 export const switchingPointUpMoved = sliderVal => (dispatch, getState) => {
     dispatch(switchingPointUpMovedAction(sliderVal));
-    dispatch(switchingPointDownMovedAction(
-        getState().app.switchingPoints.switchDownSliderPosition,
-    ));
+    dispatch(
+        switchingPointDownMovedAction(
+            getState().app.switchingPoints.switchDownSliderPosition
+        )
+    );
 };
 
 function calculateSwitchingPointsUp(sliderVal) {
@@ -92,7 +94,11 @@ function calculateSwitchingPointsUp(sliderVal) {
     };
 }
 
-function calculateSwitchingPointsDown(sliderVal, switchUpHigh, switchUpSliderPosition) {
+function calculateSwitchingPointsDown(
+    sliderVal,
+    switchUpHigh,
+    switchUpSliderPosition
+) {
     const hysteresis = (500 - sliderVal) / 100.0;
     const temp = switchUpSliderPosition;
     const switchDownHigh = switchUpHigh / 16.3 / hysteresis;
@@ -108,7 +114,9 @@ function calculateSwitchingPointsDown(sliderVal, switchUpHigh, switchUpSliderPos
 export default (state = initialState, action) => {
     switch (action.type) {
         case SWITCHING_POINTS_UP_MOVE: {
-            const { switchUpLow, switchUpHigh } = calculateSwitchingPointsUp(action.sliderVal);
+            const { switchUpLow, switchUpHigh } = calculateSwitchingPointsUp(
+                action.sliderVal
+            );
             return {
                 ...state,
                 switchUpLow,
@@ -123,7 +131,7 @@ export default (state = initialState, action) => {
             } = calculateSwitchingPointsDown(
                 action.sliderVal,
                 state.switchUpHigh,
-                state.switchUpSliderPosition,
+                state.switchUpSliderPosition
             );
             return {
                 ...state,
@@ -139,7 +147,7 @@ export default (state = initialState, action) => {
             } = calculateSwitchingPointsDown(
                 action.sliderVal,
                 state.switchUpHigh,
-                state.switchUpSliderPosition,
+                state.switchUpSliderPosition
             );
             return {
                 ...state,
@@ -150,23 +158,24 @@ export default (state = initialState, action) => {
         case SWITCHING_POINTS_RESET: {
             const vrefHigh = action.vrefHigh || state.vrefHigh;
             const vrefLow = action.vrefHigh || state.vrefHigh;
-            const switchUpSliderPosition = (
-                (((vrefHigh * 2) / 27000) + 1) * (0.41 / 10.98194) * 1000
+            const switchUpSliderPosition =
+                ((vrefHigh * 2) / 27000 + 1) * (0.41 / 10.98194) * 1000;
+            const switchDownSliderPosition =
+                500 -
+                parseInt(
+                    (((vrefLow * 2 + 30000) / 2000.0 + 1) / 16.3) * 100,
+                    10
+                );
+            const { switchUpLow, switchUpHigh } = calculateSwitchingPointsUp(
+                switchUpSliderPosition
             );
-            const switchDownSliderPosition = (
-                500 - (parseInt(((((((vrefLow * 2) + 30000) / 2000.0) + 1) / 16.3) * 100), 10))
-            );
-            const {
-                switchUpLow,
-                switchUpHigh,
-            } = calculateSwitchingPointsUp(switchUpSliderPosition);
             const {
                 switchDownHigh,
                 switchDownLow,
             } = calculateSwitchingPointsDown(
                 switchDownSliderPosition,
                 switchUpHigh,
-                state.switchUpSliderPosition,
+                state.switchUpSliderPosition
             );
 
             return {

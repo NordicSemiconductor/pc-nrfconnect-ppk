@@ -42,14 +42,18 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Toggle } from 'pc-nrfconnect-shared';
 
-import { goLive, toggleYAxisLock, chartState } from '../../reducers/chartReducer';
+import {
+    goLive,
+    toggleYAxisLock,
+    chartState,
+} from '../../reducers/chartReducer';
 
 import './charttop.scss';
 
 const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
     const dispatch = useDispatch();
     const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
-    const live = (windowBegin === 0) && (windowEnd === 0);
+    const live = windowBegin === 0 && windowEnd === 0;
 
     return (
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
@@ -59,7 +63,10 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     if (yAxisLock) {
                         dispatch(toggleYAxisLock());
                     } else {
-                        const { min, max } = chartRef.current.chartInstance.scales.yScale;
+                        const {
+                            min,
+                            max,
+                        } = chartRef.current.chartInstance.scales.yScale;
                         dispatch(toggleYAxisLock(min, max));
                     }
                 }}
@@ -68,11 +75,41 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                 labelRight
             />
             <ButtonGroup>
-                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000)}>1ms</Button>
-                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(10000)}>10ms</Button>
-                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(100000)}>100ms</Button>
-                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(1000000)}>1s</Button>
-                <Button variant="secondary" size="sm" onClick={() => zoomToWindow(60000000)}>1min</Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => zoomToWindow(1000)}
+                >
+                    1ms
+                </Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => zoomToWindow(10000)}
+                >
+                    10ms
+                </Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => zoomToWindow(100000)}
+                >
+                    100ms
+                </Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => zoomToWindow(1000000)}
+                >
+                    1s
+                </Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => zoomToWindow(60000000)}
+                >
+                    1min
+                </Button>
             </ButtonGroup>
             <Toggle
                 label="LIVE VIEW"

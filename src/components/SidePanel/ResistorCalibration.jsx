@@ -44,10 +44,7 @@ import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import Collapse from './Collapse';
 
-import {
-    updateResistors,
-    resetResistors,
-} from '../../actions/deviceActions';
+import { updateResistors, resetResistors } from '../../actions/deviceActions';
 
 import { appState } from '../../reducers/appReducer';
 import {
@@ -59,7 +56,9 @@ import {
 
 const ResistorCalibration = ({ eventKey }) => {
     const dispatch = useDispatch();
-    const { userResLo, userResMid, userResHi } = useSelector(resistorCalibrationState);
+    const { userResLo, userResMid, userResHi } = useSelector(
+        resistorCalibrationState
+    );
     const { capabilities } = useSelector(appState);
 
     if (!capabilities.ppkUpdateResistors) {
@@ -73,7 +72,9 @@ const ResistorCalibration = ({ eventKey }) => {
                 <NumberInlineInput
                     value={userResHi}
                     range={{ min: 1, max: 3 }}
-                    onChange={value => dispatch(updateHighResistorAction(value))}
+                    onChange={value =>
+                        dispatch(updateHighResistorAction(value))
+                    }
                     onChangeComplete={() => dispatch(updateResistors())}
                     chars={6}
                 />

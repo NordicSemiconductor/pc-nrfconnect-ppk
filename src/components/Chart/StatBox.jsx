@@ -35,9 +35,7 @@
  */
 
 import React from 'react';
-import {
-    string, instanceOf, number, node,
-} from 'prop-types';
+import { string, instanceOf, number, node } from 'prop-types';
 import { unit, Unit } from 'mathjs';
 
 import './statbox.scss';
@@ -69,11 +67,17 @@ const time = delta => {
 };
 
 const StatBox = ({
-    average = null, max = null, delta = null,
-    label, action = null,
+    average = null,
+    max = null,
+    delta = null,
+    label,
+    action = null,
 }) => (
     <div className="statbox d-flex flex-column mb-1">
-        <div className="statbox-header"><h2 className="d-inline my-0">{label}</h2>{action}</div>
+        <div className="statbox-header">
+            <h2 className="d-inline my-0">{label}</h2>
+            {action}
+        </div>
         <div className="d-flex flex-row flex-fill">
             {delta === null && (
                 <div className="value-box">
@@ -85,7 +89,10 @@ const StatBox = ({
                     <Value label="average" u={unit(average, 'uA')} />
                     <Value label="max" u={unit(max || 0, 'uA')} />
                     <Value label="time" u={time(delta)} />
-                    <Value label="charge" u={unit(average * ((delta || 1) / 1e6), 'uC')} />
+                    <Value
+                        label="charge"
+                        u={unit(average * ((delta || 1) / 1e6), 'uC')}
+                    />
                 </>
             )}
         </div>

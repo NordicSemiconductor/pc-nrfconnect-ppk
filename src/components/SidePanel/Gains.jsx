@@ -67,7 +67,9 @@ const Gains = ({ eventKey }) => {
                         id={`slider-gains-${index}`}
                         values={[gain]}
                         range={range}
-                        onChange={[value => dispatch(updateGainsAction(value, index))]}
+                        onChange={[
+                            value => dispatch(updateGainsAction(value, index)),
+                        ]}
                         onChangeComplete={() => dispatch(updateGains(index))}
                     />
                 </React.Fragment>

@@ -34,25 +34,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export const bufferLengthInSeconds = 60 * 12;
+import React from 'react';
+import { node, string } from 'prop-types';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
-const samplingTime = 10;
-const samplesPerSecond = 1e6 / samplingTime;
+const WithTip = ({ tip, placement = 'right', children }) => (
+    <OverlayTrigger
+        placement={placement}
+        delay={{ show: 250, hide: 400 }}
+        overlay={props => (
+            <Tooltip id="button-tooltip" {...props}>
+                {tip}
+            </Tooltip>
+        )}
+    >
+        {children}
+    </OverlayTrigger>
+);
 
-export const options = {
-    samplingTime,
-    samplesPerSecond,
-    data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
-    bits: null,
-    index: 0,
-    timestamp: null,
-    triggerMarkers: null,
+WithTip.propTypes = {
+    tip: string.isRequired,
+    placement: string,
+    children: node.isRequired,
 };
 
-export const nbDigitalChannels = 8;
-
-export const timestampToIndex = (ts, index = options.index) =>
-    index - ((options.timestamp - ts) * options.samplesPerSecond) / 1e6;
-
-export const indexToTimestamp = (i, index = options.index) =>
-    options.timestamp - ((index - i) * 1e6) / options.samplesPerSecond;
+export default WithTip;

@@ -38,9 +38,7 @@
 /* eslint no-plusplus: off */
 /* eslint operator-assignment: off */
 
-import React, {
-    useState, useRef, useEffect, useCallback,
-} from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
@@ -62,7 +60,10 @@ import {
     chartCursorAction,
     chartState,
 } from '../../reducers/chartReducer';
-import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
+import {
+    triggerState,
+    triggerLevelSetAction,
+} from '../../reducers/triggerReducer';
 import { appState } from '../../reducers/appReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
@@ -80,13 +81,13 @@ const timestampToLabel = (usecs, index, array) => {
     const microseconds = Math.abs(usecs);
     const sign = usecs < 0 ? '-' : '';
     if (!array) {
-        return `${sign}${Number((microseconds / 1e3)).toFixed(3)} ms`;
+        return `${sign}${Number(microseconds / 1e3).toFixed(3)} ms`;
     }
     if (index > 0 && index < array.length - 1) {
         const first = array[0];
         const last = array[array.length - 1];
         const range = last - first;
-        if ((usecs - first < range / 8) || (last - usecs < range / 8)) {
+        if (usecs - first < range / 8 || last - usecs < range / 8) {
             return undefined;
         }
     }
@@ -97,16 +98,20 @@ const timestampToLabel = (usecs, index, array) => {
     const s = d.getUTCSeconds().toString().padStart(2, '0');
 
     const time = `${sign}${h}:${m}:${s}`;
-    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(3)}`.padStart(7, '0');
+    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
+        3
+    )}`.padStart(7, '0');
 
     return [time, subsecond];
 };
 
-const formatCurrent = uA => unit(uA, 'uA')
-    .format({ notation: 'auto', precision: 4 })
-    .replace('u', '\u00B5');
+const formatCurrent = uA =>
+    unit(uA, 'uA')
+        .format({ notation: 'auto', precision: 4 })
+        .replace('u', '\u00B5');
 
-const emptyArray = () => [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
+const emptyArray = () =>
+    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 const lineData = emptyArray();
 const bitsData = [...Array(nbDigitalChannels)].map(() => emptyArray());
 const bitIndexes = new Array(nbDigitalChannels);
@@ -114,23 +119,27 @@ const lastBits = new Array(nbDigitalChannels);
 
 const bitsChartOptions = {
     scales: {
-        xAxes: [{
-            id: 'xScale',
-            display: false,
-            type: 'linear',
-            ticks: {},
-            tickMarkLength: 0,
-            drawTicks: false,
-            cursor: {},
-        }],
-        yAxes: [{
-            type: 'linear',
-            display: false,
-            ticks: {
-                min: -0.5,
-                max: 0.5,
+        xAxes: [
+            {
+                id: 'xScale',
+                display: false,
+                type: 'linear',
+                ticks: {},
+                tickMarkLength: 0,
+                drawTicks: false,
+                cursor: {},
             },
-        }],
+        ],
+        yAxes: [
+            {
+                type: 'linear',
+                display: false,
+                ticks: {
+                    min: -0.5,
+                    max: 0.5,
+                },
+            },
+        ],
     },
     redraw: true,
     maintainAspectRatio: false,
@@ -171,17 +180,37 @@ const calcStats = (data, begin, end, index) => {
 
 const Chart = () => {
     const dispatch = useDispatch();
-    const chartWindow = useCallback((windowBegin, windowEnd, yMin, yMax) => dispatch(
-        chartWindowAction(
-            windowBegin, windowEnd, windowEnd - windowBegin, yMin, yMax,
-        ),
-    ), [dispatch]);
-    const chartReset = useCallback(windowDuration => dispatch(
-        chartWindowAction(null, null, windowDuration, undefined, undefined),
-    ), [dispatch]);
-    const chartCursor = useCallback((cursorBegin, cursorEnd) => dispatch(
-        chartCursorAction(cursorBegin, cursorEnd),
-    ), [dispatch]);
+    const chartWindow = useCallback(
+        (windowBegin, windowEnd, yMin, yMax) =>
+            dispatch(
+                chartWindowAction(
+                    windowBegin,
+                    windowEnd,
+                    windowEnd - windowBegin,
+                    yMin,
+                    yMax
+                )
+            ),
+        [dispatch]
+    );
+    const chartReset = useCallback(
+        windowDuration =>
+            dispatch(
+                chartWindowAction(
+                    null,
+                    null,
+                    windowDuration,
+                    undefined,
+                    undefined
+                )
+            ),
+        [dispatch]
+    );
+    const chartCursor = useCallback(
+        (cursorBegin, cursorEnd) =>
+            dispatch(chartCursorAction(cursorBegin, cursorEnd)),
+        [dispatch]
+    );
     const {
         windowBegin,
         windowEnd,
@@ -197,7 +226,10 @@ const Chart = () => {
         triggerHandleVisible,
     } = useSelector(chartState);
     const {
-        triggerLevel, triggerRunning, triggerSingleWaiting, externalTrigger,
+        triggerLevel,
+        triggerRunning,
+        triggerSingleWaiting,
+        externalTrigger,
     } = useSelector(triggerState);
     const { samplingRunning } = useSelector(appState);
     const { index } = options;
@@ -208,13 +240,13 @@ const Chart = () => {
 
     const { data, bits } = options;
 
-    let numberOfBits = (windowDuration <= 4500000) ? nbDigitalChannels : 0;
+    let numberOfBits = windowDuration <= 4500000 ? nbDigitalChannels : 0;
     if (!bits) {
         numberOfBits = 0;
     }
 
     const end = windowEnd || options.timestamp - options.samplingTime;
-    const begin = windowBegin || (end - windowDuration);
+    const begin = windowBegin || end - windowDuration;
 
     const [len, setLen] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
@@ -222,40 +254,49 @@ const Chart = () => {
     const windowStats = calcStats(data, begin, end, index);
     const selectionStats = calcStats(data, cursorBegin, cursorEnd, index);
 
-    const resetCursor = useCallback(() => chartCursor(null, null), [chartCursor]);
+    const resetCursor = useCallback(() => chartCursor(null, null), [
+        chartCursor,
+    ]);
 
-    const zoomPanCallback = useCallback((beginX, endX, beginY, endY) => {
-        if (typeof beginX === 'undefined') {
-            chartReset(windowDuration);
-            resetCursor();
-            return;
-        }
-
-        const earliestDataTime = options.timestamp
-            - ((data.length / options.samplesPerSecond) * 1e6);
-
-        const p0 = Math.max(0, earliestDataTime - beginX);
-        const p1 = Math.max(0, endX - options.timestamp);
-
-        if (p0 * p1 === 0) {
-            chartWindow(beginX - p1 + p0, endX - p1 + p0, beginY, endY);
-        }
-    }, [chartReset, chartWindow, data.length, windowDuration, resetCursor]);
-
-    const zoomToWindow = useCallback(usec => {
-        if (windowEnd) {
-            const mid = (windowBegin + windowEnd) / 2;
-            let a = mid - (usec / 2);
-            let b = mid + (usec / 2);
-            if (b > windowEnd) {
-                a = a - (b - windowEnd);
-                b = windowEnd;
+    const zoomPanCallback = useCallback(
+        (beginX, endX, beginY, endY) => {
+            if (typeof beginX === 'undefined') {
+                chartReset(windowDuration);
+                resetCursor();
+                return;
             }
-            chartWindow(a, b);
-            return;
-        }
-        chartReset(usec);
-    }, [chartWindow, chartReset, windowBegin, windowEnd]);
+
+            const earliestDataTime =
+                options.timestamp -
+                (data.length / options.samplesPerSecond) * 1e6;
+
+            const p0 = Math.max(0, earliestDataTime - beginX);
+            const p1 = Math.max(0, endX - options.timestamp);
+
+            if (p0 * p1 === 0) {
+                chartWindow(beginX - p1 + p0, endX - p1 + p0, beginY, endY);
+            }
+        },
+        [chartReset, chartWindow, data.length, windowDuration, resetCursor]
+    );
+
+    const zoomToWindow = useCallback(
+        usec => {
+            if (windowEnd) {
+                const mid = (windowBegin + windowEnd) / 2;
+                let a = mid - usec / 2;
+                let b = mid + usec / 2;
+                if (b > windowEnd) {
+                    a = a - (b - windowEnd);
+                    b = windowEnd;
+                }
+                chartWindow(a, b);
+                return;
+            }
+            chartReset(usec);
+        },
+        [chartWindow, chartReset, windowBegin, windowEnd]
+    );
 
     useEffect(() => {
         if (!chartRef.current.chartInstance) {
@@ -267,9 +308,8 @@ const Chart = () => {
     }, [chartCursor, zoomPanCallback]);
 
     const chartResetToLive = () => zoomPanCallback(undefined, undefined);
-    const chartPause = () => chartWindow(
-        options.timestamp - windowDuration, options.timestamp,
-    );
+    const chartPause = () =>
+        chartWindow(options.timestamp - windowDuration, options.timestamp);
 
     const originalIndexBegin = timestampToIndex(begin, index);
     const originalIndexEnd = timestampToIndex(end, index);
@@ -282,10 +322,13 @@ const Chart = () => {
         bitsData[i][0] = { x: undefined, y: undefined };
     }
     if (step > 1) {
-        for (let originalIndex = originalIndexBegin;
+        for (
+            let originalIndex = originalIndexBegin;
             mappedIndex < len + len;
-            ++mappedIndex, originalIndex = originalIndex + step) {
-            const timestamp = begin + (windowDuration * (mappedIndex / (len + len)));
+            ++mappedIndex, originalIndex = originalIndex + step
+        ) {
+            const timestamp =
+                begin + windowDuration * (mappedIndex / (len + len));
             const k = Math.floor(originalIndex);
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
@@ -315,8 +358,11 @@ const Chart = () => {
                     if (!Number.isNaN(data[ni])) {
                         const v = (((bits[ni] >> i) & 1) - 0.5) * 0.8;
                         if (y1 === undefined || v !== y1) {
-                            if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== v
-                                || mappedIndex === len + len - 1) {
+                            if (
+                                (bitsData[i][bitIndexes[i] - 1] || {}).y !==
+                                    v ||
+                                mappedIndex === len + len - 1
+                            ) {
                                 bitsData[i][bitIndexes[i]].x = timestamp;
                                 bitsData[i][bitIndexes[i]].y = v;
                                 ++bitIndexes[i];
@@ -335,10 +381,16 @@ const Chart = () => {
         let last;
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
-        for (let n = originalIndexBeginFloored; n <= originalIndexEndCeiled; ++mappedIndex, ++n) {
+        for (
+            let n = originalIndexBeginFloored;
+            n <= originalIndexEndCeiled;
+            ++mappedIndex, ++n
+        ) {
             const k = (n + data.length) % data.length;
             const v = data[k];
-            const timestamp = begin + (((n - originalIndexBegin) * 1e6) / options.samplesPerSecond);
+            const timestamp =
+                begin +
+                ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
             lineData[mappedIndex].x = timestamp;
             if (n < originalIndexEndCeiled) {
                 last = Number.isNaN(v) ? undefined : v;
@@ -346,7 +398,9 @@ const Chart = () => {
             lineData[mappedIndex].y = last;
 
             for (let i = 0; i < numberOfBits; ++i) {
-                const y = Number.isNaN(v) ? undefined : (((bits[k] >> i) & 1) - 0.5) * 0.8;
+                const y = Number.isNaN(v)
+                    ? undefined
+                    : (((bits[k] >> i) & 1) - 0.5) * 0.8;
                 bitsData[i][bitIndexes[i]].x = timestamp;
                 if (n === originalIndexEndCeiled) {
                     bitsData[i][bitIndexes[i]].y = lastBits[i];
@@ -360,89 +414,107 @@ const Chart = () => {
         }
     }
 
-    const chartCursorActive = ((cursorBegin !== null) || (cursorEnd !== null));
+    const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
     const bitsChartData = bitsData
         .map((b, i) => ({
-            datasets: [{
-                borderColor: dataColor,
-                borderWidth: 1.5,
-                fill: false,
-                data: b.slice(0, bitIndexes[i]),
-                pointRadius: 0,
-                pointHoverRadius: 0,
-                pointHitRadius: 0,
-                pointBorderWidth: 0,
-                lineTension: 0,
-                label: `${i}`,
-                steppedLine: 'before',
-            }],
+            datasets: [
+                {
+                    borderColor: dataColor,
+                    borderWidth: 1.5,
+                    fill: false,
+                    data: b.slice(0, bitIndexes[i]),
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    pointHitRadius: 0,
+                    pointBorderWidth: 0,
+                    lineTension: 0,
+                    label: `${i}`,
+                    steppedLine: 'before',
+                },
+            ],
         }))
         .filter((_, i) => digitalChannels[i]);
 
-    const live = ((windowBegin === 0) && (windowEnd === 0))
-        && (samplingRunning || triggerRunning || triggerSingleWaiting);
-    const snapping = (step <= 0.16) && !live;
+    const live =
+        windowBegin === 0 &&
+        windowEnd === 0 &&
+        (samplingRunning || triggerRunning || triggerSingleWaiting);
+    const snapping = step <= 0.16 && !live;
 
-    const pointRadius = (step <= 0.08) ? 4 : 2;
+    const pointRadius = step <= 0.08 ? 4 : 2;
 
     const chartData = {
-        datasets: [{
-            borderColor: dataColor,
-            borderWidth: step > 2 ? 1 : 1.5,
-            fill: false,
-            data: lineData.slice(0, mappedIndex),
-            pointRadius: snapping ? pointRadius : 0,
-            pointHoverRadius: snapping ? pointRadius : 0,
-            pointHitRadius: snapping ? pointRadius : 0,
-            pointBackgroundColor: colors.white,
-            pointHoverBackgroundColor: dataColor,
-            pointBorderWidth: 1.5,
-            pointHoverBorderWidth: 1.5,
-            pointBorderColor: dataColor,
-            pointHoverBorderColor: dataColor,
-            lineTension: snapping ? 0.2 : 0,
-            label: 'Current',
-            yAxisID: 'yScale',
-            labelCallback: ({ y }) => formatCurrent(y),
-        }],
+        datasets: [
+            {
+                borderColor: dataColor,
+                borderWidth: step > 2 ? 1 : 1.5,
+                fill: false,
+                data: lineData.slice(0, mappedIndex),
+                pointRadius: snapping ? pointRadius : 0,
+                pointHoverRadius: snapping ? pointRadius : 0,
+                pointHitRadius: snapping ? pointRadius : 0,
+                pointBackgroundColor: colors.white,
+                pointHoverBackgroundColor: dataColor,
+                pointBorderWidth: 1.5,
+                pointHoverBorderWidth: 1.5,
+                pointBorderColor: dataColor,
+                pointHoverBorderColor: dataColor,
+                lineTension: snapping ? 0.2 : 0,
+                label: 'Current',
+                yAxisID: 'yScale',
+                labelCallback: ({ y }) => formatCurrent(y),
+            },
+        ],
     };
 
     const chartOptions = {
         scales: {
-            xAxes: [{
-                id: 'xScale',
-                type: 'linear',
-                display: true,
-                ticks: {
-                    display: timestampsVisible,
-                    minRotation: 0,
-                    maxRotation: 0,
-                    autoSkipPadding: 25,
-                    min: begin,
-                    max: end,
-                    callback: timestampToLabel,
-                    maxTicksLimit: 7,
-                },
-                gridLines: { display: true, drawBorder: true, drawOnChartArea: true },
-                cursor: { cursorBegin, cursorEnd },
+            xAxes: [
+                {
+                    id: 'xScale',
+                    type: 'linear',
+                    display: true,
+                    ticks: {
+                        display: timestampsVisible,
+                        minRotation: 0,
+                        maxRotation: 0,
+                        autoSkipPadding: 25,
+                        min: begin,
+                        max: end,
+                        callback: timestampToLabel,
+                        maxTicksLimit: 7,
+                    },
+                    gridLines: {
+                        display: true,
+                        drawBorder: true,
+                        drawOnChartArea: true,
+                    },
+                    cursor: { cursorBegin, cursorEnd },
                 afterFit: scale => { scale.paddingRight = rightMargin; }, // eslint-disable-line
-            }],
-            yAxes: [{
-                id: 'yScale',
-                type: 'linear',
-                ticks: {
-                    minRotation: 0,
-                    maxRotation: 0,
-                    min: yMin === null ? valueRange.min : yMin,
-                    max: yMax === null ? valueRange.max : yMax,
-                    maxTicksLimit: 7,
-                    padding: 0,
-                    callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
                 },
-                gridLines: { display: true, drawBorder: true, drawOnChartArea: true },
+            ],
+            yAxes: [
+                {
+                    id: 'yScale',
+                    type: 'linear',
+                    ticks: {
+                        minRotation: 0,
+                        maxRotation: 0,
+                        min: yMin === null ? valueRange.min : yMin,
+                        max: yMax === null ? valueRange.max : yMax,
+                        maxTicksLimit: 7,
+                        padding: 0,
+                        callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
+                    },
+                    gridLines: {
+                        display: true,
+                        drawBorder: true,
+                        drawOnChartArea: true,
+                    },
                 afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
-            }],
+                },
+            ],
         },
         redraw: true,
         maintainAspectRatio: false,
@@ -509,12 +581,15 @@ const Chart = () => {
                     width={chartAreaWidth + 1}
                     className="selection"
                 />
-                <div className="chart-bottom" style={{ paddingRight: `${rightMargin}px` }}>
+                <div
+                    className="chart-bottom"
+                    style={{ paddingRight: `${rightMargin}px` }}
+                >
                     <StatBox {...windowStats} label="WINDOW" />
                     <StatBox
                         {...selectionStats}
                         label="SELECTION"
-                        action={(
+                        action={
                             <Button
                                 variant="secondary"
                                 disabled={!chartCursorActive}
@@ -523,7 +598,7 @@ const Chart = () => {
                             >
                                 CLEAR
                             </Button>
-                        )}
+                        }
                     />
                 </div>
             </div>
@@ -546,7 +621,10 @@ const Chart = () => {
                     ))}
                     {numberOfBits === 0 && (
                         <div className="info">
-                            <p>Zoom in on the main chart to see the digital channels</p>
+                            <p>
+                                Zoom in on the main chart to see the digital
+                                channels
+                            </p>
                         </div>
                     )}
                 </div>

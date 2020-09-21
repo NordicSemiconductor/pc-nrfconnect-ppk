@@ -43,15 +43,15 @@ import PPKCmd from '../constants';
 
 /* eslint-disable no-bitwise */
 
-const generateMask = (bits, pos) => ({ pos, mask: ((2 ** bits) - 1) << pos });
+const generateMask = (bits, pos) => ({ pos, mask: (2 ** bits - 1) << pos });
 const MEAS_ADC = generateMask(14, 0);
 const MEAS_RANGE = generateMask(3, 14);
 const MEAS_LOGIC = generateMask(8, 24);
 
-const getMaskedValue = (value, { mask, pos }) => ((value & mask) >> pos);
+const getMaskedValue = (value, { mask, pos }) => (value & mask) >> pos;
 
 class SerialDevice extends Device {
-    adcMult = (1.2 / 163840);
+    adcMult = 1.2 / 163840;
 
     modifiers = {
         r: [1031.64, 101.65, 10.15, 0.94, 0.043],
@@ -74,11 +74,15 @@ class SerialDevice extends Device {
 
         this.capabilities.digitalChannels = true;
         this.spikeFilter = {
-            alpha: 0.04, alpha4: 0.04, samples: 3,
+            alpha: 0.04,
+            alpha4: 0.04,
+            samples: 3,
         };
 
         this.path = deviceInfo.serialport.path;
-        this.child = fork(path.resolve(getAppDir(), 'worker', 'serialDevice.js'));
+        this.child = fork(
+            path.resolve(getAppDir(), 'worker', 'serialDevice.js')
+        );
         this.parser = null;
 
         this.child.on('message', m => {
@@ -102,21 +106,30 @@ class SerialDevice extends Device {
     }
 
     getAdcResult(range, adcVal) {
-        const resultWithoutGain = ((adcVal - this.modifiers.o[range])
-                                * (this.adcMult / this.modifiers.r[range]));
-        let adc = this.modifiers.ug[range] * (resultWithoutGain
-            * (this.modifiers.gs[range] * resultWithoutGain + this.modifiers.gi[range])
-            + (this.modifiers.s[range] * (this.currentVdd / 1000) + this.modifiers.i[range]));
+        const resultWithoutGain =
+            (adcVal - this.modifiers.o[range]) *
+            (this.adcMult / this.modifiers.r[range]);
+        let adc =
+            this.modifiers.ug[range] *
+            (resultWithoutGain *
+                (this.modifiers.gs[range] * resultWithoutGain +
+                    this.modifiers.gi[range]) +
+                (this.modifiers.s[range] * (this.currentVdd / 1000) +
+                    this.modifiers.i[range]));
 
         const prevRollingAvg4 = this.rollingAvg4;
         const prevRollingAvg = this.rollingAvg;
 
-        this.rollingAvg = (this.rollingAvg === undefined)
-            ? adc
-            : (this.spikeFilter.alpha * adc) + (1.0 - this.spikeFilter.alpha) * this.rollingAvg;
-        this.rollingAvg4 = (this.rollingAvg4 === undefined)
-            ? adc
-            : (this.spikeFilter.alpha4 * adc) + (1.0 - this.spikeFilter.alpha4) * this.rollingAvg4;
+        this.rollingAvg =
+            this.rollingAvg === undefined
+                ? adc
+                : this.spikeFilter.alpha * adc +
+                  (1.0 - this.spikeFilter.alpha) * this.rollingAvg;
+        this.rollingAvg4 =
+            this.rollingAvg4 === undefined
+                ? adc
+                : this.spikeFilter.alpha4 * adc +
+                  (1.0 - this.spikeFilter.alpha4) * this.rollingAvg4;
 
         if (this.prevRange === undefined) {
             this.prevRange = range;
@@ -168,7 +181,11 @@ class SerialDevice extends Device {
 
     sendCommand(cmd) {
         if (cmd.constructor !== Array) {
-            this.emit('error', 'Unable to issue command', 'Command is not an array');
+            this.emit(
+                'error',
+                'Unable to issue command',
+                'Command is not an array'
+            );
             return undefined;
         }
         if (cmd[0] === PPKCmd.AverageStart) {
@@ -185,18 +202,24 @@ class SerialDevice extends Device {
     handleRawDataSet(adcValue) {
         try {
             const currentMeasurementRange = Math.min(
-                getMaskedValue(adcValue, MEAS_RANGE), this.modifiers.r.length,
+                getMaskedValue(adcValue, MEAS_RANGE),
+                this.modifiers.r.length
             );
             const adcResult = getMaskedValue(adcValue, MEAS_ADC) * 4;
             const bits = getMaskedValue(adcValue, MEAS_LOGIC);
-            const value = this.getAdcResult(currentMeasurementRange, adcResult) * 1e6;
+            const value =
+                this.getAdcResult(currentMeasurementRange, adcResult) * 1e6;
             // Only fire the event, if the buffer data is valid
             this.onSampleCallback({ value, bits });
         } catch (err) {
             console.log(err.message, 'original value', adcValue);
             // to keep timestamp consistent, undefined must be emitted
             this.onSampleCallback({});
-            this.emit('warning', 'Average data error2, restart application', err);
+            this.emit(
+                'warning',
+                'Average data error2, restart application',
+                err
+            );
         }
     }
 
@@ -206,7 +229,8 @@ class SerialDevice extends Device {
         const sampleSize = 4;
         let ofs = this.remainder.length;
         const first = Buffer.concat(
-            [this.remainder, buf.subarray(0, sampleSize - ofs)], sampleSize,
+            [this.remainder, buf.subarray(0, sampleSize - ofs)],
+            sampleSize
         );
         ofs = sampleSize - ofs;
         this.handleRawDataSet(first.readUIntLE(0, sampleSize));
@@ -218,27 +242,32 @@ class SerialDevice extends Device {
 
     getMetadata() {
         let metadata = '';
-        return new Promise(resolve => {
-            this.parser = data => {
-                metadata = `${metadata}${data}`;
-                if (metadata.includes('END')) {
-                    // hopefully we have the complete string, HW is the last line
-                    this.parser = this.parseMeasurementData.bind(this);
-                    resolve(metadata);
-                }
-            };
-            this.sendCommand([PPKCmd.GetMetadata]);
-        })
-            // convert output string json:
-            .then(m => m.replace('END', '')
-                .trim()
-                .toLowerCase()
-                .replace(/-nan/g, 'null')
-                .replace(/\n/g, ',\n"')
-                .replace(/: /g, '": '))
-            .then(m => `{"${m}}`)
-            // resolve with parsed object:
-            .then(JSON.parse);
+        return (
+            new Promise(resolve => {
+                this.parser = data => {
+                    metadata = `${metadata}${data}`;
+                    if (metadata.includes('END')) {
+                        // hopefully we have the complete string, HW is the last line
+                        this.parser = this.parseMeasurementData.bind(this);
+                        resolve(metadata);
+                    }
+                };
+                this.sendCommand([PPKCmd.GetMetadata]);
+            })
+                // convert output string json:
+                .then(m =>
+                    m
+                        .replace('END', '')
+                        .trim()
+                        .toLowerCase()
+                        .replace(/-nan/g, 'null')
+                        .replace(/\n/g, ',\n"')
+                        .replace(/: /g, '": ')
+                )
+                .then(m => `{"${m}}`)
+                // resolve with parsed object:
+                .then(JSON.parse)
+        );
     }
 
     // Capability methods
@@ -249,7 +278,11 @@ class SerialDevice extends Device {
 
     ppkSetUserGains(range, gain) {
         this.modifiers.ug[range] = gain;
-        return this.sendCommand([PPKCmd.SetUserGains, range, ...convertFloatToByteBuffer(gain)]);
+        return this.sendCommand([
+            PPKCmd.SetUserGains,
+            range,
+            ...convertFloatToByteBuffer(gain),
+        ]);
     }
 
     ppkSetSpikeFilter(spikeFilter) {

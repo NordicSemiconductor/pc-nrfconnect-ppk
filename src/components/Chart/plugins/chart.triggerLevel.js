@@ -45,15 +45,17 @@ const plugin = {
 
     getCoords(chartInstance) {
         const {
-            chartArea: { left, top, bottom }, scales: { yScale },
+            chartArea: { left, top, bottom },
+            scales: { yScale },
             options: { triggerLevel, triggerHandleVisible },
         } = chartInstance;
         if (triggerLevel === null || !triggerHandleVisible) {
             return null;
         }
-        const y = chartInstance.triggerLine.y !== null
-            ? chartInstance.triggerLine.y
-            : yScale.getPixelForValue(triggerLevel);
+        const y =
+            chartInstance.triggerLine.y !== null
+                ? chartInstance.triggerLine.y
+                : yScale.getPixelForValue(triggerLevel);
         if (y < top || y > bottom) {
             return null;
         }
@@ -72,8 +74,12 @@ const plugin = {
         const { label } = this.getCoords(chartInstance) || {};
         if (!label) return;
         const { layerX, layerY } = evt || {};
-        if (layerX >= label.x && layerX <= label.x + label.w
-            && layerY >= label.y && layerY <= label.y + label.h) {
+        if (
+            layerX >= label.x &&
+            layerX <= label.x + label.w &&
+            layerY >= label.y &&
+            layerY <= label.y + label.h
+        ) {
             chartInstance.triggerLine.y = layerY;
         }
     },
@@ -88,8 +94,13 @@ const plugin = {
     pointerLeaveHandler(chartInstance) {
         if (!chartInstance.triggerLine) return;
         if (chartInstance.triggerLine.y !== null) {
-            const { scales: { yScale }, options: { sendTriggerLevel } } = chartInstance;
-            sendTriggerLevel(yScale.getValueForPixel(chartInstance.triggerLine.y));
+            const {
+                scales: { yScale },
+                options: { sendTriggerLevel },
+            } = chartInstance;
+            sendTriggerLevel(
+                yScale.getValueForPixel(chartInstance.triggerLine.y)
+            );
         }
         chartInstance.triggerLine.y = null;
     },
@@ -97,10 +108,18 @@ const plugin = {
     beforeInit(chartInstance) {
         chartInstance.triggerLine = { y: null };
         const { canvas } = chartInstance.chart.ctx;
-        canvas.addEventListener('pointerdown', evt => plugin.pointerDownHandler(evt, chartInstance));
-        canvas.addEventListener('pointermove', evt => plugin.pointerMoveHandler(evt, chartInstance));
-        canvas.addEventListener('pointerup', () => plugin.pointerLeaveHandler(chartInstance));
-        canvas.addEventListener('pointerleave', () => plugin.pointerLeaveHandler(chartInstance));
+        canvas.addEventListener('pointerdown', evt =>
+            plugin.pointerDownHandler(evt, chartInstance)
+        );
+        canvas.addEventListener('pointermove', evt =>
+            plugin.pointerMoveHandler(evt, chartInstance)
+        );
+        canvas.addEventListener('pointerup', () =>
+            plugin.pointerLeaveHandler(chartInstance)
+        );
+        canvas.addEventListener('pointerleave', () =>
+            plugin.pointerLeaveHandler(chartInstance)
+        );
     },
 
     afterDraw(chartInstance) {
@@ -133,8 +152,22 @@ const plugin = {
         ctx.moveTo(0, 2);
         ctx.bezierCurveTo(0, 1, 1, 0, 2, 0);
         ctx.lineTo(label.w - 20, 0);
-        ctx.bezierCurveTo(label.w - 15, 0, label.w, label.h / 2, label.w, label.h / 2);
-        ctx.bezierCurveTo(label.w, label.h / 2, label.w - 15, label.h, label.w - 20, label.h);
+        ctx.bezierCurveTo(
+            label.w - 15,
+            0,
+            label.w,
+            label.h / 2,
+            label.w,
+            label.h / 2
+        );
+        ctx.bezierCurveTo(
+            label.w,
+            label.h / 2,
+            label.w - 15,
+            label.h,
+            label.w - 20,
+            label.h
+        );
         ctx.lineTo(2, label.h);
         ctx.bezierCurveTo(1, label.h, 0, label.h - 1, 0, label.h - 2);
         ctx.closePath();
@@ -143,9 +176,12 @@ const plugin = {
         ctx.lineWidth = 1;
         ctx.strokeStyle = colors.gray50;
         ctx.beginPath();
-        ctx.moveTo(4, 3); ctx.lineTo(4, label.h - 3);
-        ctx.moveTo(8, 3); ctx.lineTo(8, label.h - 3);
-        ctx.moveTo(12, 3); ctx.lineTo(12, label.h - 3);
+        ctx.moveTo(4, 3);
+        ctx.lineTo(4, label.h - 3);
+        ctx.moveTo(8, 3);
+        ctx.lineTo(8, label.h - 3);
+        ctx.moveTo(12, 3);
+        ctx.lineTo(12, label.h - 3);
         ctx.closePath();
         ctx.stroke();
 

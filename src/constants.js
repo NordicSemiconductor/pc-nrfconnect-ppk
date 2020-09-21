@@ -44,11 +44,11 @@ export default {
     AverageStop: 0x07,
     RangeSet: 0x08, // (no-firmware)
     LCDSet: 0x09, // (no-firmware)
-    TriggerStop: 0x0A,
-    DutToggle: 0x0C,
-    RegulatorSet: 0x0D,
-    SwitchPointDown: 0x0E,
-    SwitchPointUp: 0x0F,
+    TriggerStop: 0x0a,
+    DutToggle: 0x0c,
+    RegulatorSet: 0x0d,
+    SwitchPointDown: 0x0e,
+    SwitchPointUp: 0x0f,
     TriggerExtToggle: 0x11,
     SetPowerMode: 0x11,
     ResUserSet: 0x12,

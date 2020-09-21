@@ -36,10 +36,7 @@
 
 import { connect } from 'react-redux';
 // import { startWatchingDevices, stopWatchingDevices } from 'nrfconnect/core';
-import {
-    getAppFile, logger,
-    DeviceSelector,
-} from 'pc-nrfconnect-shared';
+import { getAppFile, logger, DeviceSelector } from 'pc-nrfconnect-shared';
 
 import { open, close } from '../actions/deviceActions';
 
@@ -53,7 +50,7 @@ const deviceSetup = {
     dfu: {
         ppk2: {
             application: getAppFile('firmware/ppk2.hex'),
-            semver: 'power_profiler_kit_2 0.7.0+Sep-08-2020-10-23-31',
+            semver: 'power_profiler_kit_2 0.7.0+Sep-14-2020-12-07-12',
         },
     },
     jprog: {
@@ -73,7 +70,9 @@ const mapState = () => ({
 
 const mapDispatch = dispatch => ({
     onDeviceSelected: device => {
-        logger.info(`Validating firmware for device with s/n ${device.serialNumber}`);
+        logger.info(
+            `Validating firmware for device with s/n ${device.serialNumber}`
+        );
     },
     onDeviceDeselected: () => {
         logger.info('Deselecting device');

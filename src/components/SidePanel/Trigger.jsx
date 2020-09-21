@@ -54,7 +54,10 @@ import {
     externalTriggerToggled,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
-import { triggerState, triggerLevelSetAction } from '../../reducers/triggerReducer';
+import {
+    triggerState,
+    triggerLevelSetAction,
+} from '../../reducers/triggerReducer';
 import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
 
 const SINGLE = 'SINGLE';
@@ -64,11 +67,9 @@ const EXTERNAL = 'EXTERNAL';
 const Trigger = ({ eventKey }) => {
     const dispatch = useDispatch();
     const { rttRunning, capabilities } = useSelector(appState);
-    const {
-        externalTrigger,
-        triggerRunning,
-        triggerLevel,
-    } = useSelector(triggerState);
+    const { externalTrigger, triggerRunning, triggerLevel } = useSelector(
+        triggerState
+    );
 
     const { triggerHandleVisible } = useSelector(chartState);
 
@@ -85,11 +86,13 @@ const Trigger = ({ eventKey }) => {
 
     useEffect(() => {
         setLevelUnit(triggerLevel > 1000);
-        setLevel(triggerLevel > 1000 ? Math.round(triggerLevel / 1000) : triggerLevel);
+        setLevel(
+            triggerLevel > 1000 ? Math.round(triggerLevel / 1000) : triggerLevel
+        );
     }, [triggerLevel]);
 
     const sendTriggerLevel = unit => {
-        dispatch(triggerLevelSetAction(level * (1000 ** unit)));
+        dispatch(triggerLevelSetAction(level * 1000 ** unit));
         setLevelUnit(unit);
     };
 
@@ -182,17 +185,21 @@ const Trigger = ({ eventKey }) => {
                     value={triggerLength}
                     range={range}
                     onChange={value => setTriggerLength(value)}
-                    onChangeComplete={() => dispatch(triggerLengthUpdate(triggerLength))}
+                    onChangeComplete={() =>
+                        dispatch(triggerLengthUpdate(triggerLength))
+                    }
                     chars={6}
-                />
-                {' '}ms
+                />{' '}
+                ms
             </Form.Label>
             <Slider
                 id="slider-trigger-window"
                 values={[triggerLength]}
                 range={range}
                 onChange={[value => setTriggerLength(value)]}
-                onChangeComplete={() => dispatch(triggerLengthUpdate(triggerLength))}
+                onChangeComplete={() =>
+                    dispatch(triggerLengthUpdate(triggerLength))
+                }
             />
             <div className={externalTrigger ? 'disabled' : ''}>
                 <Form.Label
@@ -207,7 +214,10 @@ const Trigger = ({ eventKey }) => {
                         onChangeComplete={() => sendTriggerLevel(levelUnit)}
                     />
                     <Dropdown>
-                        <Dropdown.Toggle id="dropdown-current-unit" variant="plain">
+                        <Dropdown.Toggle
+                            id="dropdown-current-unit"
+                            variant="plain"
+                        >
                             {levelUnit ? 'mA' : '\u00B5A'}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
