@@ -35,9 +35,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import {
-    string, node, bool, func,
-} from 'prop-types';
+import { string, node, bool, func } from 'prop-types';
 
 import Accordion from 'react-bootstrap/Accordion';
 import AccordionContext from 'react-bootstrap/AccordionContext';
@@ -49,7 +47,10 @@ const ContextAwareToggle = ({ title, eventKey, onToggled }) => {
     const currentEventKey = useContext(AccordionContext);
     const decoratedOnClick = useAccordionToggle(eventKey);
     const isCurrentEventKey = currentEventKey === eventKey;
-    useEffect(() => onToggled(isCurrentEventKey), [isCurrentEventKey, onToggled]);
+    useEffect(() => onToggled(isCurrentEventKey), [
+        isCurrentEventKey,
+        onToggled,
+    ]);
 
     return (
         <button
@@ -77,7 +78,11 @@ const Collapse = ({
 }) => (
     <Accordion defaultActiveKey={defaultCollapsed ? '' : eventKey}>
         <div className={`collapse-container ${className}`}>
-            <ContextAwareToggle eventKey={eventKey} title={title} onToggled={onToggled} />
+            <ContextAwareToggle
+                eventKey={eventKey}
+                title={title}
+                onToggled={onToggled}
+            />
             <Accordion.Collapse eventKey={eventKey}>
                 <>{children}</>
             </Accordion.Collapse>

@@ -47,7 +47,9 @@ import Collapse from './Collapse';
 
 import { appState } from '../../reducers/appReducer';
 import {
-    updateSpikeFilterAction, spikeFilterState, resetSpikeFilterToDefaults,
+    updateSpikeFilterAction,
+    spikeFilterState,
+    resetSpikeFilterToDefaults,
 } from '../../reducers/spikeFilterReducer';
 
 const SpikeFilter = ({ eventKey }) => {
@@ -67,7 +69,10 @@ const SpikeFilter = ({ eventKey }) => {
                 id="slider-spike-samples"
                 values={[samples]}
                 range={{ min: 1, max: 10 }}
-                onChange={[value => dispatch(updateSpikeFilterAction({ samples: value }))]}
+                onChange={[
+                    value =>
+                        dispatch(updateSpikeFilterAction({ samples: value })),
+                ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
             <Form.Label className="pt-2 d-flex flex-row justify-content-between">
@@ -78,7 +83,10 @@ const SpikeFilter = ({ eventKey }) => {
                 id="slider-spike-alpha"
                 values={[alpha]}
                 range={{ min: 0, max: 0.5, decimals: 2 }}
-                onChange={[value => dispatch(updateSpikeFilterAction({ alpha: value }))]}
+                onChange={[
+                    value =>
+                        dispatch(updateSpikeFilterAction({ alpha: value })),
+                ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
             <Form.Label className="pt-2 d-flex flex-row justify-content-between">
@@ -89,7 +97,10 @@ const SpikeFilter = ({ eventKey }) => {
                 id="slider-spike-alpha4"
                 values={[alpha4]}
                 range={{ min: 0, max: 0.5, decimals: 2 }}
-                onChange={[value => dispatch(updateSpikeFilterAction({ alpha4: value }))]}
+                onChange={[
+                    value =>
+                        dispatch(updateSpikeFilterAction({ alpha4: value })),
+                ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
             <Button

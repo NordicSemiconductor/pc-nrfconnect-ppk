@@ -45,9 +45,10 @@ const plugin = {
     instances: [],
     moveEvent: null,
 
-    pointerMoveHandler(evt, {
-        chartArea: { left }, id, chart, options: { snapping, live },
-    }) {
+    pointerMoveHandler(
+        evt,
+        { chartArea: { left }, id, chart, options: { snapping, live } }
+    ) {
         if (live) {
             plugin.moveEvent = null;
             return;
@@ -75,16 +76,18 @@ const plugin = {
     beforeInit(chartInstance) {
         plugin.instances.push(chartInstance);
         const { canvas } = chartInstance.chart.ctx;
-        canvas.addEventListener('pointermove', evt => plugin.pointerMoveHandler(evt, chartInstance));
-        canvas.addEventListener('pointerup', evt => plugin.pointerMoveHandler(evt, chartInstance));
+        canvas.addEventListener('pointermove', evt =>
+            plugin.pointerMoveHandler(evt, chartInstance)
+        );
+        canvas.addEventListener('pointerup', evt =>
+            plugin.pointerMoveHandler(evt, chartInstance)
+        );
         canvas.addEventListener('pointerleave', plugin.pointerLeaveHandler);
     },
 
     afterDraw(chartInstance) {
         const {
-            chartArea: {
-                left, right, top, bottom,
-            },
+            chartArea: { left, right, top, bottom },
             chart: { ctx },
             scales: { xScale, yScale },
             options: { formatX, formatY },
@@ -100,7 +103,7 @@ const plugin = {
         const x = Math.ceil(layerX - 0.5) - 0.5;
         const y = Math.ceil(layerY - 0.5) + 0.5;
 
-        if (layerX >= 0 && layerX <= (right - left)) {
+        if (layerX >= 0 && layerX <= right - left) {
             ctx.save();
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
@@ -111,15 +114,23 @@ const plugin = {
             ctx.stroke();
 
             if (chartInstance.id === 0) {
-                const [time, subsecond] = formatX(xScale.getValueForPixel(left + layerX), 0, []);
+                const [time, subsecond] = formatX(
+                    xScale.getValueForPixel(left + layerX),
+                    0,
+                    []
+                );
                 const { width: tsWidth } = ctx.measureText(time);
                 ctx.fillStyle = color;
                 ctx.textAlign = 'right';
                 ctx.fillRect(left + layerX, top, tsWidth + 10, 33);
                 ctx.fillStyle = white;
                 ctx.textAlign = 'center';
-                ctx.fillText(time, left + layerX + 5 + (tsWidth / 2), top + 13);
-                ctx.fillText(subsecond, left + layerX + 5 + (tsWidth / 2), top + 28);
+                ctx.fillText(time, left + layerX + 5 + tsWidth / 2, top + 13);
+                ctx.fillText(
+                    subsecond,
+                    left + layerX + 5 + tsWidth / 2,
+                    top + 28
+                );
             }
 
             ctx.restore();
@@ -155,7 +166,9 @@ const plugin = {
     },
 
     destroy(chartInstance) {
-        const i = plugin.instances.findIndex(({ id }) => id === chartInstance.id);
+        const i = plugin.instances.findIndex(
+            ({ id }) => id === chartInstance.id
+        );
         if (i > -1) {
             plugin.instances.splice(i, 1);
         }

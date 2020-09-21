@@ -51,10 +51,8 @@ export const options = {
 
 export const nbDigitalChannels = 8;
 
-export const timestampToIndex = (ts, index = options.index) => (
-    index - (((options.timestamp - ts) * options.samplesPerSecond) / 1e6)
-);
+export const timestampToIndex = (ts, index = options.index) =>
+    index - ((options.timestamp - ts) * options.samplesPerSecond) / 1e6;
 
-export const indexToTimestamp = (i, index = options.index) => (
-    options.timestamp - (((index - i) * 1e6) / options.samplesPerSecond)
-);
+export const indexToTimestamp = (i, index = options.index) =>
+    options.timestamp - ((index - i) * 1e6) / options.samplesPerSecond;

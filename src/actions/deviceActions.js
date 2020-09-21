@@ -65,7 +65,11 @@ import {
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
 import {
-    chartWindowAction, animationAction, chartCursorAction, updateHasDigitalChannels, goLive,
+    chartWindowAction,
+    animationAction,
+    chartCursorAction,
+    updateHasDigitalChannels,
+    goLive,
 } from '../reducers/chartReducer';
 import { options, bufferLengthInSeconds } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
@@ -78,7 +82,9 @@ const zeroCap = isDev ? n => n : n => Math.max(0, n);
 const setupOptions = () => dispatch => {
     options.samplingTime = device.adcSamplingTimeUs;
     options.samplesPerSecond = 1e6 / options.samplingTime;
-    const bufferLength = Math.trunc(options.samplesPerSecond * bufferLengthInSeconds);
+    const bufferLength = Math.trunc(
+        options.samplesPerSecond * bufferLengthInSeconds
+    );
     if (device.capabilities.ppkSetPowerMode) {
         if (!options.bits || options.bits.length !== bufferLength) {
             options.bits = new Uint8Array(bufferLength);
@@ -110,7 +116,11 @@ export function samplingStart() {
         if (options.triggerMarkers) {
             options.triggerMarkers = [];
         }
-        dispatch(chartWindowAction(null, null, getState().app.chart.windowDuration), null, null);
+        dispatch(
+            chartWindowAction(null, null, getState().app.chart.windowDuration),
+            null,
+            null
+        );
         dispatch(chartCursorAction(null, null));
         dispatch(samplingStartAction());
         await device.ppkAverageStart();
@@ -148,7 +158,9 @@ export const updateSpikeFilter = () => async (_, getState) => {
     persistentStore.set('spikeFilter.alpha', alpha);
     persistentStore.set('spikeFilter.alpha4', alpha4);
     await device.ppkSetSpikeFilter(spikeFilter);
-    logger.info(`Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha4} in range 4)`);
+    logger.info(
+        `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha4} in range 4)`
+    );
 };
 
 export function close() {
@@ -179,7 +191,9 @@ const initGains = () => async dispatch => {
     const { ug } = device.modifiers;
     // if any value is ug is outside of [0.9..1.1] range:
     if (ug.reduce((p, c) => Math.abs(c - 1) > 0.1 || p, false)) {
-        logger.info('Found out of range user gain, setting all gains back to 1.0');
+        logger.info(
+            'Found out of range user gain, setting all gains back to 1.0'
+        );
         ug.splice(0, 5, 1, 1, 1, 1, 1);
         await device.ppkSetUserGains(0, ug[0]);
         await device.ppkSetUserGains(1, ug[1]);
@@ -197,7 +211,9 @@ export function open(deviceInfo) {
         }
 
         const onSample = ({
-            value, bits, timestamp,
+            value,
+            bits,
+            timestamp,
             trigger = false,
             triggerMarker = false,
         }) => {
@@ -220,7 +236,9 @@ export function open(deviceInfo) {
 
             if (timestamp) {
                 if (triggerMarker) {
-                    options.triggerMarkers.push(timestamp - options.samplingTime);
+                    options.triggerMarkers.push(
+                        timestamp - options.samplingTime
+                    );
                 }
 
                 let ts = options.timestamp;
@@ -255,8 +273,10 @@ export function open(deviceInfo) {
                 options.index = 0;
             }
 
-            if ((windowBegin !== 0 || windowEnd !== 0)
-                && options.timestamp >= windowBegin + (bufferLengthInSeconds * 1e6)) {
+            if (
+                (windowBegin !== 0 || windowEnd !== 0) &&
+                options.timestamp >= windowBegin + bufferLengthInSeconds * 1e6
+            ) {
                 // stop average when reaches end of buffer (i.e. would overwrite chart data)
                 dispatch(samplingStop());
             }
@@ -275,11 +295,13 @@ export function open(deviceInfo) {
             } else {
                 dispatch(triggerLevelSetAction(null));
             }
-            dispatch(updateRegulatorAction({
-                vdd: metadata.vdd,
-                currentVDD: metadata.vdd,
-                ...device.vddRange,
-            }));
+            dispatch(
+                updateRegulatorAction({
+                    vdd: metadata.vdd,
+                    currentVDD: metadata.vdd,
+                    ...device.vddRange,
+                })
+            );
             await dispatch(initGains());
             if (device.capabilities.ppkSetSpikeFilter) {
                 dispatch(updateSpikeFilter());
@@ -297,7 +319,9 @@ export function open(deviceInfo) {
             dispatch({ type: 'DEVICE_DESELECTED' });
         }
 
-        dispatch(deviceOpenedAction(deviceInfo.serialNumber, device.capabilities));
+        dispatch(
+            deviceOpenedAction(deviceInfo.serialNumber, device.capabilities)
+        );
 
         logger.info('PPK opened');
 
@@ -348,7 +372,9 @@ export const updateGains = index => async (_, getState) => {
 export function triggerLengthUpdate(value) {
     return async () => {
         const triggerLengthMicroSec = value * 1000;
-        const triggerLength = Math.floor(triggerLengthMicroSec / options.samplingTime);
+        const triggerLength = Math.floor(
+            triggerLengthMicroSec / options.samplingTime
+        );
         // If division returns a decimal, round downward to nearest integer
         await device.ppkTriggerWindowSet(triggerLength);
         logger.info(`Trigger length updated to ${value} ms`);
@@ -363,9 +389,9 @@ export function triggerStart() {
 
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
-        const high = (triggerLevel >> 16) & 0xFF;
-        const mid = (triggerLevel >> 8) & 0xFF;
-        const low = triggerLevel & 0xFF;
+        const high = (triggerLevel >> 16) & 0xff;
+        const mid = (triggerLevel >> 8) & 0xff;
+        const low = triggerLevel & 0xff;
 
         await device.ppkTriggerSet(high, mid, low);
         dispatch(toggleTriggerAction(true));
@@ -377,9 +403,9 @@ export function triggerSingleSet() {
         dispatch(goLive());
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
-        const high = (triggerLevel >> 16) & 0xFF;
-        const mid = (triggerLevel >> 8) & 0xFF;
-        const low = triggerLevel & 0xFF;
+        const high = (triggerLevel >> 16) & 0xff;
+        const mid = (triggerLevel >> 8) & 0xff;
+        const low = triggerLevel & 0xff;
 
         await device.ppkTriggerSingleSet(high, mid, low);
         dispatch(triggerSingleSetAction());
@@ -404,7 +430,11 @@ export function setPowerMode(isSmuMode) {
 
 export function updateResistors() {
     return async (_, getState) => {
-        const { userResLo, userResMid, userResHi } = getState().app.resistorCalibration;
+        const {
+            userResLo,
+            userResMid,
+            userResHi,
+        } = getState().app.resistorCalibration;
         logger.info(`Resistors set to ${userResLo}/${userResMid}/${userResHi}`);
         await device.ppkUpdateResistors(userResLo, userResMid, userResHi);
     };
@@ -446,16 +476,19 @@ export function spikeFilteringToggle() {
 export function switchingPointsUpSet() {
     return async (_, getState) => {
         const { switchUpSliderPosition } = getState().app.switchingPoints;
-        const pot = 13500.0 * ((((10.98194 * switchUpSliderPosition) / 1000) / 0.41) - 1);
-        await device.ppkSwitchPointUp(parseInt((pot), 10));
+        const pot =
+            13500.0 * ((10.98194 * switchUpSliderPosition) / 1000 / 0.41 - 1);
+        await device.ppkSwitchPointUp(parseInt(pot, 10));
     };
 }
 
 export function switchingPointsDownSet() {
     return async (dispatch, getState) => {
         const { switchDownSliderPosition } = getState().app.switchingPoints;
-        const pot = (2000.0 * (((16.3 * (500 - switchDownSliderPosition)) / 100.0) - 1)) - 30000.0;
-        await device.ppkSwitchPointDown(parseInt((pot / 2), 10));
+        const pot =
+            2000.0 * ((16.3 * (500 - switchDownSliderPosition)) / 100.0 - 1) -
+            30000.0;
+        await device.ppkSwitchPointDown(parseInt(pot / 2, 10));
         dispatch(switchingPointsDownSetAction(switchDownSliderPosition));
     };
 }

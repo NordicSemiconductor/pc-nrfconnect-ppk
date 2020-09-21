@@ -60,15 +60,19 @@ const TimeSpan = ({
     className = '',
 }) => {
     const dispatch = useDispatch();
-    const chartCursor = useCallback((...args) => dispatch(chartCursorAction(...args)), [dispatch]);
+    const chartCursor = useCallback(
+        (...args) => dispatch(chartCursorAction(...args)),
+        [dispatch]
+    );
 
     const [drag, setDrag] = useState(null);
     const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
 
     const w1 = windowEnd || options.timestamp - options.samplingTime;
-    const w0 = windowBegin || (w1 - windowDuration);
+    const w0 = windowBegin || w1 - windowDuration;
 
-    const duration = (cursorBegin === null) ? windowDuration : (cursorEnd - cursorBegin);
+    const duration =
+        cursorBegin === null ? windowDuration : cursorEnd - cursorBegin;
 
     let time = unit(duration, 'us');
     if (duration > 60 * 1e6) {
@@ -79,9 +83,8 @@ const TimeSpan = ({
 
     const showHandles = cursorBegin !== null && w0 !== 0;
 
-    const [begin, end] = cursorBegin === null
-        ? [w0, w1]
-        : [cursorBegin, cursorEnd];
+    const [begin, end] =
+        cursorBegin === null ? [w0, w1] : [cursorBegin, cursorEnd];
 
     const onPointerDown = ({ clientX, pointerId, target }) => {
         target.setPointerCapture(pointerId);
@@ -97,19 +100,26 @@ const TimeSpan = ({
             {showHandles && (
                 <div
                     className="cursor begin"
-                    style={{ left: `${(100 * (cursorBegin - w0)) / windowDuration}%` }}
+                    style={{
+                        left: `${(100 * (cursorBegin - w0)) / windowDuration}%`,
+                    }}
                     onPointerDown={onPointerDown}
                     onPointerMove={({ clientX, target }) => {
                         if (drag) {
-                            chartCursor(drag.cursorBegin
-                                + (windowDuration
-                                    * ((clientX - drag.clientX)
-                                    / target.parentElement.offsetWidth)), cursorEnd);
+                            chartCursor(
+                                drag.cursorBegin +
+                                    windowDuration *
+                                        ((clientX - drag.clientX) /
+                                            target.parentElement.offsetWidth),
+                                cursorEnd
+                            );
                         }
                     }}
                     onPointerUp={onPointerUp}
                 >
-                    <svg height={26} width={11}>{handle}</svg>
+                    <svg height={26} width={11}>
+                        {handle}
+                    </svg>
                 </div>
             )}
             <div
@@ -126,19 +136,26 @@ const TimeSpan = ({
             {showHandles && (
                 <div
                     className="cursor end"
-                    style={{ left: `${(100 * (cursorEnd - w0)) / windowDuration}%` }}
+                    style={{
+                        left: `${(100 * (cursorEnd - w0)) / windowDuration}%`,
+                    }}
                     onPointerDown={onPointerDown}
                     onPointerMove={({ clientX, target }) => {
                         if (drag) {
-                            chartCursor(cursorBegin, drag.cursorEnd
-                                + (windowDuration
-                                    * ((clientX - drag.clientX)
-                                        / target.parentElement.offsetWidth)));
+                            chartCursor(
+                                cursorBegin,
+                                drag.cursorEnd +
+                                    windowDuration *
+                                        ((clientX - drag.clientX) /
+                                            target.parentElement.offsetWidth)
+                            );
                         }
                     }}
                     onPointerUp={onPointerUp}
                 >
-                    <svg height={26} width={11}>{handle}</svg>
+                    <svg height={26} width={11}>
+                        {handle}
+                    </svg>
                 </div>
             )}
         </div>

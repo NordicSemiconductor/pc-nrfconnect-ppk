@@ -41,7 +41,7 @@ import PPKCmd from '../constants';
 
 const getAllPropertyNames = obj => {
     const proto = Object.getPrototypeOf(obj);
-    const inherited = (proto) ? getAllPropertyNames(proto) : [];
+    const inherited = proto ? getAllPropertyNames(proto) : [];
     return [...new Set(Object.getOwnPropertyNames(obj).concat(inherited))];
 };
 
@@ -104,6 +104,6 @@ export default class Device extends EventEmitter {
     ppkUpdateRegulator(vdd) {
         this.currentVdd = vdd;
         // eslint-disable-next-line no-bitwise
-        return this.sendCommand([PPKCmd.RegulatorSet, vdd >> 8, vdd & 0xFF]);
+        return this.sendCommand([PPKCmd.RegulatorSet, vdd >> 8, vdd & 0xff]);
     }
 }

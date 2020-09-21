@@ -58,8 +58,10 @@ export const resetSpikeFilterToDefaults = () => ({
 
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
-        case SPIKE_FILTER_UPDATE: return { ...state, ...action };
-        default: return state;
+        case SPIKE_FILTER_UPDATE:
+            return { ...state, ...action };
+        default:
+            return state;
     }
 };
 

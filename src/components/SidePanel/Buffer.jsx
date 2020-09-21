@@ -43,7 +43,7 @@ const totalInUs = bufferLengthInSeconds * 1000000;
 
 export default () => {
     const { bufferRemaining } = useSelector(chartState);
-    const percentage = 100 - ((100 * bufferRemaining) / totalInUs);
+    const percentage = 100 - (100 * bufferRemaining) / totalInUs;
 
     return (
         <div className="buffer">
@@ -54,7 +54,9 @@ export default () => {
                     style={{ width: `${percentage}%` }}
                 />
             </div>
-            <div className="label mt-2">Buffer {`${percentage.toFixed()}%`} full</div>
+            <div className="label mt-2">
+                Buffer {`${percentage.toFixed()}%`} full
+            </div>
         </div>
     );
 };

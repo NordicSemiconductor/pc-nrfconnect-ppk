@@ -70,9 +70,12 @@ export const resistorsResetAction = ({
     userResLo,
 });
 
-export const updateHighResistorAction = userResHi => updateResistorAction({ userResHi });
-export const updateMidResistorAction = userResMid => updateResistorAction({ userResMid });
-export const updateLowResistorAction = userResLo => updateResistorAction({ userResLo });
+export const updateHighResistorAction = userResHi =>
+    updateResistorAction({ userResHi });
+export const updateMidResistorAction = userResMid =>
+    updateResistorAction({ userResMid });
+export const updateLowResistorAction = userResLo =>
+    updateResistorAction({ userResLo });
 
 const defined = (a, b) => (a !== undefined ? a : b);
 

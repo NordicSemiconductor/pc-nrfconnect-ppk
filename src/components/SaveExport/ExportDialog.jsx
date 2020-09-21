@@ -74,44 +74,72 @@ const indexer = (i, j, d) => {
     return r;
 };
 
-const selectivePrint = (strArr, selectArr) => `${strArr.filter((_, i) => selectArr[i]).join(',')}\n`;
+const selectivePrint = (strArr, selectArr) =>
+    `${strArr.filter((_, i) => selectArr[i]).join(',')}\n`;
 
 const exportChart = (
-    filename, indexBegin, indexEnd, index, {
-        timestamp, current, bits, bitsSeparated,
-    },
-    setProgress, cancel,
+    filename,
+    indexBegin,
+    indexEnd,
+    index,
+    { timestamp, current, bits, bitsSeparated },
+    setProgress,
+    cancel
 ) => dispatch => {
     if (!filename) {
         return Promise.resolve();
     }
     const fd = fs.openSync(filename, 'w');
     const selection = [timestamp, current, bits, bitsSeparated];
-    fs.writeSync(fd, selectivePrint(['Timestamp(ms)', 'Current(uA)', 'D0-D7', 'D0,D1,D2,D3,D4,D5,D6,D7'], selection));
+    fs.writeSync(
+        fd,
+        selectivePrint(
+            [
+                'Timestamp(ms)',
+                'Current(uA)',
+                'D0-D7',
+                'D0,D1,D2,D3,D4,D5,D6,D7',
+            ],
+            selection
+        )
+    );
 
     return indexer(indexBegin, indexEnd, 10000)
-        .map(([start, len]) => () => new Promise((resolve, reject) => {
-            if (cancel.current) {
-                reject();
-            }
-            let content = '';
-            for (let n = start; n <= start + len; n += 1) {
-                const k = (n + options.data.length) % options.data.length;
-                const v = options.data[k];
-                if (!Number.isNaN(v)) {
-                    const b = options.bits
-                        ? options.bits[k].toString(2).padStart(8, '0')
-                        : '';
-                    content += selectivePrint([indexToTimestamp(n, index) / 1000, v.toFixed(3), b, b.split('').join(',')], selection);
+        .map(([start, len]) => () =>
+            new Promise((resolve, reject) => {
+                if (cancel.current) {
+                    reject();
                 }
-            }
-            fs.write(fd, content, () => {
-                setProgress(Math.round(
-                    ((start - indexBegin) / (indexEnd - indexBegin)) * 100,
-                ));
-                resolve();
-            });
-        }))
+                let content = '';
+                for (let n = start; n <= start + len; n += 1) {
+                    const k = (n + options.data.length) % options.data.length;
+                    const v = options.data[k];
+                    if (!Number.isNaN(v)) {
+                        const b = options.bits
+                            ? options.bits[k].toString(2).padStart(8, '0')
+                            : '';
+                        content += selectivePrint(
+                            [
+                                indexToTimestamp(n, index) / 1000,
+                                v.toFixed(3),
+                                b,
+                                b.split('').join(','),
+                            ],
+                            selection
+                        );
+                    }
+                }
+                fs.write(fd, content, () => {
+                    setProgress(
+                        Math.round(
+                            ((start - indexBegin) / (indexEnd - indexBegin)) *
+                                100
+                        )
+                    );
+                    resolve();
+                });
+            })
+        )
         .reduce((prev, task) => prev.then(task), Promise.resolve())
         .catch(() => logger.info('Exported cancelled'))
         .then(() => {
@@ -152,23 +180,29 @@ export default () => {
     }, [isExportDialogVisible]);
 
     const end = windowEnd || options.timestamp;
-    const begin = windowBegin || (end - windowDuration);
+    const begin = windowBegin || end - windowDuration;
 
-    const [from, to] = (cursorBegin === null) ? [begin, end] : [cursorBegin, cursorEnd];
+    const [from, to] =
+        cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
     const duration = to - from;
 
     const indexBegin = Math.ceil(timestampToIndex(from, index));
     const indexEnd = Math.floor(timestampToIndex(to, index));
 
     const records = indexEnd - indexBegin;
-    const recordLength = (settings.timestamp * 10)
-        + (settings.current * 10)
-        + (settings.bits * 8)
-        + (settings.bitsSeparated * 16);
-    const filesize = mathjs.to(unit(recordLength * records, 'bytes'), 'MB')
+    const recordLength =
+        settings.timestamp * 10 +
+        settings.current * 10 +
+        settings.bits * 8 +
+        settings.bitsSeparated * 16;
+    const filesize = mathjs
+        .to(unit(recordLength * records, 'bytes'), 'MB')
         .format({ notation: 'fixed', precision: 0 });
 
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+    const timestamp = new Date()
+        .toISOString()
+        .replace(/[-:.]/g, '')
+        .slice(0, 15);
     const filename = join(lastSaveDir(), `ppk-${timestamp}.csv`);
 
     const close = () => {
@@ -193,17 +227,21 @@ export default () => {
                                 <h2>EXPORT FIELDS</h2>
                                 <div className="w-fit-content">
                                     <Toggle
-                                        onToggle={() => updateSettings({
-                                            timestamp: !settings.timestamp,
-                                        })}
+                                        onToggle={() =>
+                                            updateSettings({
+                                                timestamp: !settings.timestamp,
+                                            })
+                                        }
                                         isToggled={settings.timestamp}
                                         label="Timestamp"
                                         variant="secondary"
                                     />
                                     <Toggle
-                                        onToggle={() => updateSettings({
-                                            current: !settings.current,
-                                        })}
+                                        onToggle={() =>
+                                            updateSettings({
+                                                current: !settings.current,
+                                            })
+                                        }
                                         isToggled={settings.current}
                                         label="Current"
                                         variant="secondary"
@@ -211,18 +249,24 @@ export default () => {
                                     {hasDigitalChannels && (
                                         <>
                                             <Toggle
-                                                onToggle={() => updateSettings({
-                                                    bits: !settings.bits,
-                                                })}
+                                                onToggle={() =>
+                                                    updateSettings({
+                                                        bits: !settings.bits,
+                                                    })
+                                                }
                                                 isToggled={settings.bits}
                                                 label="Digital logic pins (single string field)"
                                                 variant="secondary"
                                             />
                                             <Toggle
-                                                onToggle={() => updateSettings({
-                                                    bitsSeparated: !settings.bitsSeparated,
-                                                })}
-                                                isToggled={settings.bitsSeparated}
+                                                onToggle={() =>
+                                                    updateSettings({
+                                                        bitsSeparated: !settings.bitsSeparated,
+                                                    })
+                                                }
+                                                isToggled={
+                                                    settings.bitsSeparated
+                                                }
                                                 label="Digital logic pins (separate fields)"
                                                 variant="secondary"
                                             />
@@ -238,9 +282,13 @@ export default () => {
                                 <h2>ESTIMATION</h2>
                                 <p>{records} records</p>
                                 <p>{filesize}</p>
-                                <p>{unit(duration, 'us')
-                                    .format({ notation: 'auto', precision: 4 })
-                                    .replace('u', '\u00B5')}
+                                <p>
+                                    {unit(duration, 'us')
+                                        .format({
+                                            notation: 'auto',
+                                            precision: 4,
+                                        })
+                                        .replace('u', '\u00B5')}
                                 </p>
                             </Card.Body>
                         </Card>
@@ -252,17 +300,29 @@ export default () => {
                 <Button
                     variant="primary"
                     onClick={() => {
-                        const fn = remote.dialog.showSaveDialog({ defaultPath: filename });
+                        const fn = remote.dialog.showSaveDialog({
+                            defaultPath: filename,
+                        });
                         if (!fn) return;
                         setLastSaveDir(dirname(fn));
-                        dispatch(exportChart(
-                            fn, indexBegin, indexEnd, index, settings, setProgress, cancel,
-                        ));
+                        dispatch(
+                            exportChart(
+                                fn,
+                                indexBegin,
+                                indexEnd,
+                                index,
+                                settings,
+                                setProgress,
+                                cancel
+                            )
+                        );
                     }}
                 >
                     Save
                 </Button>
-                <Button variant="secondary" onClick={close}>Close</Button>
+                <Button variant="secondary" onClick={close}>
+                    Close
+                </Button>
             </Modal.Footer>
         </Modal>
     );

@@ -49,7 +49,10 @@ import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 const { dialog } = remote;
 
 export const save = () => async (_, getState) => {
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+    const timestamp = new Date()
+        .toISOString()
+        .replace(/[-:.]/g, '')
+        .slice(0, 15);
     const filename = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), `ppk-${timestamp}.ppk`),
     });
@@ -65,8 +68,10 @@ export const save = () => async (_, getState) => {
     const deflateRaw = createDeflateRaw();
     deflateRaw.pipe(file);
 
-    const write = bf => new Promise(resolve => deflateRaw.write(bf, 'binary', resolve));
+    const write = bf =>
+        new Promise(resolve => deflateRaw.write(bf, 'binary', resolve));
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, bits, ...opts } = options;
     await write(serialize(opts));
     await write(serialize(getState().app.chart));
@@ -89,9 +94,10 @@ export const save = () => async (_, getState) => {
 };
 
 export const load = () => async dispatch => {
-    const [filename] = (await dialog.showOpenDialog({
-        defaultPath: lastSaveDir(),
-    })) || [];
+    const [filename] =
+        (await dialog.showOpenDialog({
+            defaultPath: lastSaveDir(),
+        })) || [];
     if (!filename) {
         return;
     }
@@ -106,10 +112,13 @@ export const load = () => async dispatch => {
         },
     });
 
-    await new Promise(resolve => fs.createReadStream(filename)
-        .pipe(createInflateRaw())
-        .pipe(content)
-        .on('finish', resolve));
+    await new Promise(resolve =>
+        fs
+            .createReadStream(filename)
+            .pipe(createInflateRaw())
+            .pipe(content)
+            .on('finish', resolve)
+    );
     buffer = buffer.slice(0, size);
 
     let pos = 0;
@@ -123,7 +132,9 @@ export const load = () => async dispatch => {
 
     len = buffer.slice(pos, pos + 4).readUInt32LE();
     pos += 4;
-    options.data = new Float32Array(new Uint8Array(buffer.slice(pos, pos + len)).buffer);
+    options.data = new Float32Array(
+        new Uint8Array(buffer.slice(pos, pos + len)).buffer
+    );
     pos += len;
 
     if (pos < buffer.length) {

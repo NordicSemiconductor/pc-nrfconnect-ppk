@@ -36,10 +36,7 @@
 
 import { connect } from 'react-redux';
 // import { startWatchingDevices, stopWatchingDevices } from 'nrfconnect/core';
-import {
-    getAppFile, logger,
-    DeviceSelector,
-} from 'pc-nrfconnect-shared';
+import { getAppFile, logger, DeviceSelector } from 'pc-nrfconnect-shared';
 
 import { open, close } from '../actions/deviceActions';
 
@@ -73,7 +70,9 @@ const mapState = () => ({
 
 const mapDispatch = dispatch => ({
     onDeviceSelected: device => {
-        logger.info(`Validating firmware for device with s/n ${device.serialNumber}`);
+        logger.info(
+            `Validating firmware for device with s/n ${device.serialNumber}`
+        );
     },
     onDeviceDeselected: () => {
         logger.info('Deselecting device');

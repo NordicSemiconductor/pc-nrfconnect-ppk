@@ -70,8 +70,10 @@ export default {
             if (dragSelect.dragStart) {
                 const { dragStart } = dragSelect;
                 const offsetX = dragStart.target.getBoundingClientRect().left;
-                const startX = Math.min(dragStart.clientX, event.clientX) - offsetX;
-                const endX = Math.max(dragStart.clientX, event.clientX) - offsetX;
+                const startX =
+                    Math.min(dragStart.clientX, event.clientX) - offsetX;
+                const endX =
+                    Math.max(dragStart.clientX, event.clientX) - offsetX;
 
                 if (endX > startX) {
                     const scale = chartInstance.scales.xScale;
@@ -91,15 +93,11 @@ export default {
 
     beforeDraw(chartInstance) {
         const {
-            chartArea: {
-                left, right, top, bottom: areaBottom,
-            },
+            chartArea: { left, right, top, bottom: areaBottom },
             chart: { ctx },
             scales: { xScale: scale },
             dragSelect: { dragStart, dragEnd },
-            canvas: {
-                height: bottom,
-            },
+            canvas: { height: bottom },
         } = chartInstance;
         const { cursor } = scale.options;
 
@@ -111,7 +109,8 @@ export default {
 
         if (typeof cursor.cursorBegin === 'number') {
             const { cursorBegin, cursorEnd } = cursor;
-            const sX = Math.ceil(scale.getPixelForValue(cursorBegin) - 0.5) - 0.5;
+            const sX =
+                Math.ceil(scale.getPixelForValue(cursorBegin) - 0.5) - 0.5;
             const eX = Math.ceil(scale.getPixelForValue(cursorEnd) - 0.5) - 0.5;
             const startX = Math.max(sX, left);
             const endX = Math.min(eX, right);
@@ -142,8 +141,14 @@ export default {
 
         if (dragStart && dragEnd) {
             const offsetX = dragStart.target.getBoundingClientRect().left;
-            const startX = Math.max(Math.min(dragStart.clientX, dragEnd.clientX) - offsetX, left);
-            const endX = Math.min(Math.max(dragStart.clientX, dragEnd.clientX) - offsetX, right);
+            const startX = Math.max(
+                Math.min(dragStart.clientX, dragEnd.clientX) - offsetX,
+                left
+            );
+            const endX = Math.min(
+                Math.max(dragStart.clientX, dragEnd.clientX) - offsetX,
+                right
+            );
             ctx.fillStyle = CHART_DRAG_COLOR;
             ctx.fillRect(startX, top, endX - startX, areaBottom - top);
         }

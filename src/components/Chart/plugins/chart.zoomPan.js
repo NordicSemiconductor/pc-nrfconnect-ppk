@@ -41,7 +41,7 @@ const wheelZoomFactor = 1.25;
 const isTrackPad = evt => {
     if (evt.deltaX) return true;
     if (evt.wheelDeltaY) {
-        if (evt.wheelDeltaY === (evt.deltaY * -3)) {
+        if (evt.wheelDeltaY === evt.deltaY * -3) {
             return true;
         }
     } else if (evt.deltaMode === 0) {
@@ -59,14 +59,23 @@ export default {
 
         const { canvas } = chartInstance.chart.ctx;
 
-        zoomPan.zoomAtOriginBy = (pX, factorX, xMin, xMax, pY, factorY, yMin, yMax) => {
+        zoomPan.zoomAtOriginBy = (
+            pX,
+            factorX,
+            xMin,
+            xMax,
+            pY,
+            factorY,
+            yMin,
+            yMax
+        ) => {
             const zX = Math.max(factorX, 0.1);
-            const newMinX = pX - ((pX - xMin) / zX);
-            const newMaxX = pX + ((xMax - pX) / zX);
+            const newMinX = pX - (pX - xMin) / zX;
+            const newMaxX = pX + (xMax - pX) / zX;
             if (pY !== undefined) {
                 const zY = Math.max(factorY, 0.1);
-                const newMinY = pY - ((pY - yMin) / zY);
-                const newMaxY = pY + ((yMax - pY) / zY);
+                const newMinY = pY - (pY - yMin) / zY;
+                const newMaxY = pY + (yMax - pY) / zY;
                 zoomPan.callback(newMinX, newMaxX, newMinY, newMaxY);
                 return;
             }
@@ -79,32 +88,47 @@ export default {
             }
 
             const { xScale, yScale } = chartInstance.scales;
-            const {
-                min: xMin, max: xMax, start: x0, end: x1, width,
-            } = xScale;
-            const {
-                min: yMin, max: yMax, start: y0, end: y1, height,
-            } = yScale;
+            const { min: xMin, max: xMax, start: x0, end: x1, width } = xScale;
+            const { min: yMin, max: yMax, start: y0, end: y1, height } = yScale;
             const { deltaX, deltaY } = event;
-            const { left: xOffset, top: yOffset } = event.target.getBoundingClientRect();
+            const {
+                left: xOffset,
+                top: yOffset,
+            } = event.target.getBoundingClientRect();
 
             if (isTrackPad(event)) {
                 if (event.shiftKey) {
-                    const pX = xMin + ((xMax - xMin) * (
-                        (event.clientX - xOffset - xScale.left) / width)
-                    );
-                    const pY = yMax + ((yMin - yMax) * (
-                        (event.clientY - yOffset - yScale.top) / height)
-                    );
+                    const pX =
+                        xMin +
+                        (xMax - xMin) *
+                            ((event.clientX - xOffset - xScale.left) / width);
+                    const pY =
+                        yMax +
+                        (yMin - yMax) *
+                            ((event.clientY - yOffset - yScale.top) / height);
                     const fx = 1.01 ** deltaX;
                     const fy = 1.01 ** deltaY;
-                    zoomPan.zoomAtOriginBy(pX, fx, xMin, xMax, pY, fy, yMin, yMax);
+                    zoomPan.zoomAtOriginBy(
+                        pX,
+                        fx,
+                        xMin,
+                        xMax,
+                        pY,
+                        fy,
+                        yMin,
+                        yMax
+                    );
                 } else {
                     const fx = (x1 - x0) / width;
                     const fy = (y0 - y1) / height;
                     const dx = fx * deltaX;
                     const dy = fy * deltaY;
-                    zoomPan.callback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
+                    zoomPan.callback(
+                        xMin + dx,
+                        xMax + dx,
+                        yMin + dy,
+                        yMax + dy
+                    );
                 }
                 return;
             }
@@ -135,17 +159,24 @@ export default {
                 return;
             }
             if (event.button === 0 || event.button === 2) {
-                const type = (event.button === 2) ? 'zoom' : 'pan';
+                const type = event.button === 2 ? 'zoom' : 'pan';
                 const { xScale, yScale } = chartInstance.scales;
                 const { min: xMin, max: xMax } = xScale;
                 const { max: yMin, min: yMax } = yScale;
-                const { left: xOffset, top: yOffset } = event.target.getBoundingClientRect();
-                const pX = xMin + ((xMax - xMin) * (
-                    (event.clientX - xOffset - xScale.left) / xScale.width)
-                );
-                const pY = yMin + ((yMax - yMin) * (
-                    (event.clientY - yOffset - yScale.top) / yScale.height)
-                );
+                const {
+                    left: xOffset,
+                    top: yOffset,
+                } = event.target.getBoundingClientRect();
+                const pX =
+                    xMin +
+                    (xMax - xMin) *
+                        ((event.clientX - xOffset - xScale.left) /
+                            xScale.width);
+                const pY =
+                    yMin +
+                    (yMax - yMin) *
+                        ((event.clientY - yOffset - yScale.top) /
+                            yScale.height);
 
                 zoomPan.dragStart = {
                     type,
@@ -162,27 +193,38 @@ export default {
         canvas.addEventListener('pointerdown', zoomPan.pointerDownHandler);
 
         zoomPan.pointerMoveHandler = ({
-            pointerId, target, clientX, clientY,
+            pointerId,
+            target,
+            clientX,
+            clientY,
         }) => {
             if (!zoomPan.dragStart) {
                 return;
             }
             target.setPointerCapture(pointerId);
             zoomPan.dragStart.moved = true;
-            const {
-                xMin, xMax, yMin, yMax, pX, pY,
-            } = zoomPan.dragStart;
+            const { xMin, xMax, yMin, yMax, pX, pY } = zoomPan.dragStart;
             const { xScale, yScale } = chartInstance.scales;
-            const { left: xOffset, top: yOffset } = target.getBoundingClientRect();
-            const qX = xMin + ((xMax - xMin) * (
-                (clientX - xOffset - xScale.left) / xScale.width)
-            );
-            const qY = yMin + ((yMax - yMin) * (
-                (clientY - yOffset - yScale.top) / yScale.height)
-            );
+            const {
+                left: xOffset,
+                top: yOffset,
+            } = target.getBoundingClientRect();
+            const qX =
+                xMin +
+                (xMax - xMin) *
+                    ((clientX - xOffset - xScale.left) / xScale.width);
+            const qY =
+                yMin +
+                (yMax - yMin) *
+                    ((clientY - yOffset - yScale.top) / yScale.height);
 
             if (zoomPan.dragStart.type === 'pan') {
-                zoomPan.callback(xMin + (pX - qX), xMax + (pX - qX), null, null);
+                zoomPan.callback(
+                    xMin + (pX - qX),
+                    xMax + (pX - qX),
+                    null,
+                    null
+                );
                 return;
             }
 
@@ -190,15 +232,27 @@ export default {
             const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
             zoomPan.zoomAtOriginBy(pX, zX, xMin, xMax, pY, zY, yMin, yMax);
         };
-        canvas.addEventListener('pointermove', zoomPan.pointerMoveHandler, false);
+        canvas.addEventListener(
+            'pointermove',
+            zoomPan.pointerMoveHandler,
+            false
+        );
 
         zoomPan.pointerUpHandler = () => {
-            if (zoomPan.dragStart && zoomPan.dragStart.type === 'zoom' && !zoomPan.dragStart.moved) {
+            if (
+                zoomPan.dragStart &&
+                zoomPan.dragStart.type === 'zoom' &&
+                !zoomPan.dragStart.moved
+            ) {
                 zoomPan.callback();
             }
             zoomPan.dragStart = null;
         };
         canvas.addEventListener('pointerup', zoomPan.pointerUpHandler, false);
-        canvas.addEventListener('pointerleave', zoomPan.pointerUpHandler, false);
+        canvas.addEventListener(
+            'pointerleave',
+            zoomPan.pointerUpHandler,
+            false
+        );
     },
 };

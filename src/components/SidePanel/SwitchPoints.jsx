@@ -84,22 +84,32 @@ const SwitchPoints = ({ eventKey }) => {
                         values={[switchUpSliderPosition]}
                         range={{ min: 38, max: 175 }}
                         onChange={[val => dispatch(switchingPointUpMoved(val))]}
-                        onChangeComplete={() => dispatch(switchingPointsUpSet())}
+                        onChangeComplete={() =>
+                            dispatch(switchingPointsUpSet())
+                        }
                     />
                     <Row className="mb-3">
                         <Col>{`${switchUpLow.toFixed(2)} \u00B5A`}</Col>
-                        <Col className="text-right">{`${switchUpHigh.toFixed(2)} mA`}</Col>
+                        <Col className="text-right">{`${switchUpHigh.toFixed(
+                            2
+                        )} mA`}</Col>
                     </Row>
                     Switch down
                     <Slider
                         values={[switchDownSliderPosition]}
                         range={{ min: 100, max: 400 }}
-                        onChange={[val => dispatch(switchingPointDownMovedAction(val))]}
-                        onChangeComplete={() => dispatch(switchingPointsDownSet())}
+                        onChange={[
+                            val => dispatch(switchingPointDownMovedAction(val)),
+                        ]}
+                        onChangeComplete={() =>
+                            dispatch(switchingPointsDownSet())
+                        }
                     />
                     <Row className="mb-2">
                         <Col>{`${switchDownLow.toFixed(2)} \u00B5A`}</Col>
-                        <Col className="text-right">{`${switchDownHigh.toFixed(2)} mA`}</Col>
+                        <Col className="text-right">{`${switchDownHigh.toFixed(
+                            2
+                        )} mA`}</Col>
                     </Row>
                     <Button
                         onClick={() => dispatch(switchingPointsReset())}

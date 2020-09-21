@@ -50,25 +50,24 @@ import ResistorCalibration from './ResistorCalibration';
 import Gains from './Gains';
 import SpikeFilter from './SpikeFilter';
 
-import {
-    appState,
-    toggleSaveChoiceDialog,
-} from '../../reducers/appReducer';
+import { appState, toggleSaveChoiceDialog } from '../../reducers/appReducer';
 import { load } from '../../actions/fileActions';
 
 import { options } from '../../globals';
 
 import './sidepanel.scss';
 
-const ppk1ug = 'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
-const ppk2ug = 'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+const ppk1ug =
+    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+const ppk2ug =
+    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 
 export default () => {
     const dispatch = useDispatch();
 
     const { capabilities, samplingRunning } = useSelector(appState);
 
-    const deviceOpen = (Object.keys(capabilities).length > 0);
+    const deviceOpen = Object.keys(capabilities).length > 0;
 
     return (
         <div className="sidepanel d-flex flex-column">
@@ -92,8 +91,8 @@ export default () => {
                         an existing data set.
                     </p>
                     <p>
-                        <i>PPK</i> or <i>PPK2</i> hardware is required to
-                        sample real-time measurements.
+                        <i>PPK</i> or <i>PPK2</i> hardware is required to sample
+                        real-time measurements.
                     </p>
                     <Button variant="link" onClick={() => openUrl(ppk1ug)}>
                         PPK User Guide

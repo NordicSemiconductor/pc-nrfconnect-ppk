@@ -42,7 +42,9 @@ import DigitalChannels from './DigitalChannels';
 import Collapse from './Collapse';
 
 import {
-    chartState, toggleDigitalChannels, toggleTimestamps,
+    chartState,
+    toggleDigitalChannels,
+    toggleTimestamps,
 } from '../../reducers/chartReducer';
 
 import { options } from '../../globals';

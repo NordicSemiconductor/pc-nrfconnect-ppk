@@ -59,7 +59,15 @@ const BufferView = ({ width }) => {
         const { timestamp } = options;
         let d = Math.min(diff, timestamp - windowEnd);
         d = Math.max(d, timestamp - totalInUs - windowBegin);
-        dispatch(chartWindowAction(windowBegin + d, windowEnd + d, windowDuration, null, null));
+        dispatch(
+            chartWindowAction(
+                windowBegin + d,
+                windowEnd + d,
+                windowDuration,
+                null,
+                null
+            )
+        );
     };
 
     const [x, setX] = useState(null);
@@ -82,7 +90,10 @@ const BufferView = ({ width }) => {
                 }}
                 onPointerMove={e => {
                     if (x !== null) {
-                        chartMove((totalInUs * (e.clientX - x)) / e.target.parentNode.clientWidth);
+                        chartMove(
+                            (totalInUs * (e.clientX - x)) /
+                                e.target.parentNode.clientWidth
+                        );
                         setX(e.clientX);
                     }
                 }}

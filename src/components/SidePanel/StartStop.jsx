@@ -60,7 +60,9 @@ export default () => {
 
     let btnLabel = samplingRunning ? 'Stop sampling' : 'Start sampling';
     if (capabilities.ppkTriggerSet) {
-        btnLabel = samplingRunning ? 'Stop average sampling' : 'Start average sampling';
+        btnLabel = samplingRunning
+            ? 'Stop average sampling'
+            : 'Start average sampling';
     }
 
     return (
@@ -70,9 +72,9 @@ export default () => {
                 className="start-btn mb-3"
                 variant="set"
                 disabled={!rttRunning}
-                onClick={() => dispatch(
-                    samplingRunning ? samplingStop() : samplingStart(),
-                )}
+                onClick={() =>
+                    dispatch(samplingRunning ? samplingStop() : samplingStart())
+                }
             >
                 {btnLabel}
             </Button>
