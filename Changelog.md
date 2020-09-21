@@ -2,6 +2,7 @@
 ### Updates
 - Updated for new rules of shared@4.9.3
 - Added supporting component for bootstrap tooltips
+- Updated ppk2 firmware to 7d45fe4
 
 ## Version 3.0.0-beta.1
 ### Updates
