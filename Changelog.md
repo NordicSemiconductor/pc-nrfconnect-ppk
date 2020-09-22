@@ -1,3 +1,7 @@
+## Version 3.0.0-beta.3
+### Updates
+- Fix broken build
+
 ## Version 3.0.0-beta.2
 ### Updates
 - Updated for new rules of shared@4.9.3
