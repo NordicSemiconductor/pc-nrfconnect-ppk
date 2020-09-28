@@ -34,8 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from 'pc-nrfconnect-shared';
-
 const initialState = {
     triggerLevel: null, // [microAmp]
     triggerSingleWaiting: false,
@@ -49,14 +47,10 @@ const TRIGGER_SINGLE_SET = 'TRIGGER_SINGLE_SET';
 const TRIGGER_TOGGLE = 'TRIGGER_TOGGLE';
 const TRIGGER_VALUE_SET = 'TRIGGER_VALUE_SET';
 
-export const triggerLevelSetAction = level => {
-    if (level === null) return { type: TRIGGER_VALUE_SET, triggerLevel: null };
+export const triggerLevelSetAction = triggerLevel => {
     return {
         type: TRIGGER_VALUE_SET,
-        triggerLevel:
-            level > 1000
-                ? Math.round(level / 1000) * 1000
-                : Math.max(1, Math.round(level)),
+        triggerLevel,
     };
 };
 
@@ -116,11 +110,6 @@ export default (state = initialState, { type, ...action }) => {
 
         case TRIGGER_VALUE_SET: {
             const { triggerLevel } = action;
-            if (state.triggerRunning) {
-                logger.info(
-                    `Updating trigger level to ${triggerLevel} \u00B5A`
-                );
-            }
             return { ...state, triggerLevel };
         }
         default:

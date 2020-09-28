@@ -52,12 +52,10 @@ import {
     triggerStop,
     triggerSingleSet,
     externalTriggerToggled,
+    updateTriggerLevel,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
-import {
-    triggerState,
-    triggerLevelSetAction,
-} from '../../reducers/triggerReducer';
+import { triggerState } from '../../reducers/triggerReducer';
 import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
 
 const SINGLE = 'SINGLE';
@@ -92,7 +90,7 @@ const Trigger = ({ eventKey }) => {
     }, [triggerLevel]);
 
     const sendTriggerLevel = unit => {
-        dispatch(triggerLevelSetAction(level * 1000 ** unit));
+        dispatch(updateTriggerLevel(level * 1000 ** unit));
         setLevelUnit(unit);
     };
 
