@@ -71,7 +71,7 @@ import {
     updateHasDigitalChannels,
     goLive,
 } from '../reducers/chartReducer';
-import { options, bufferLengthInSeconds } from '../globals';
+import { options, bufferLengthInSeconds, updateTitle } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
 
 let device = null;
@@ -181,6 +181,7 @@ export function close() {
         dispatch(deviceClosedAction());
         dispatch(triggerLevelSetAction(null));
         logger.info('PPK closed');
+        updateTitle();
     };
 }
 
@@ -324,6 +325,7 @@ export function open(deviceInfo) {
         );
 
         logger.info('PPK opened');
+        updateTitle(deviceInfo.serialNumber);
 
         device.on('error', (message, error) => {
             logger.error(message);
