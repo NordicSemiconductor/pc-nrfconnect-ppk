@@ -296,6 +296,7 @@ export function open(deviceInfo) {
             } else {
                 dispatch(triggerLevelSetAction(null));
             }
+            await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
                 updateRegulatorAction({
                     vdd: metadata.vdd,
