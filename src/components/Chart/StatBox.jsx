@@ -46,8 +46,14 @@ const Value = ({ label, u }) => {
     return (
         <div className="value-box">
             <div className="value">
-                {valStr}
-                <span className="unit">{unitStr.replace('u', '\u00B5')}</span>
+                {Number.isNaN(u.value) || (
+                    <>
+                        {valStr}
+                        <span className="unit">
+                            {unitStr.replace('u', '\u00B5')}
+                        </span>
+                    </>
+                )}
             </div>
             {label}
         </div>
