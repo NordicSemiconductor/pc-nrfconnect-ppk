@@ -35,7 +35,6 @@
  */
 
 import { connect } from 'react-redux';
-// import { startWatchingDevices, stopWatchingDevices } from 'nrfconnect/core';
 import { getAppFile, logger, DeviceSelector } from 'pc-nrfconnect-shared';
 
 import { open, close } from '../actions/deviceActions';
@@ -76,13 +75,10 @@ const mapDispatch = dispatch => ({
     },
     onDeviceDeselected: () => {
         logger.info('Deselecting device');
-        dispatch(close()).then(() => {
-            // dispatch(startWatchingDevices());
-        });
+        dispatch(close());
     },
     releaseCurrentDevice: () => dispatch(close()),
     onDeviceIsReady: device => {
-        // dispatch(stopWatchingDevices());
         logger.info(`Opening device with s/n ${device.serialNumber}`);
         dispatch(open(device));
     },
