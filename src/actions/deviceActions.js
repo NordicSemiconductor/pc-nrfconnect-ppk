@@ -71,7 +71,7 @@ import {
     updateHasDigitalChannels,
     goLive,
 } from '../reducers/chartReducer';
-import { options, bufferLengthInSeconds } from '../globals';
+import { options, bufferLengthInSeconds, updateTitle } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
 
 let device = null;
@@ -181,6 +181,7 @@ export function close() {
         dispatch(deviceClosedAction());
         dispatch(triggerLevelSetAction(null));
         logger.info('PPK closed');
+        updateTitle();
     };
 }
 
@@ -295,6 +296,7 @@ export function open(deviceInfo) {
             } else {
                 dispatch(triggerLevelSetAction(null));
             }
+            await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
                 updateRegulatorAction({
                     vdd: metadata.vdd,
@@ -324,6 +326,7 @@ export function open(deviceInfo) {
         );
 
         logger.info('PPK opened');
+        updateTitle(deviceInfo.serialNumber);
 
         device.on('error', (message, error) => {
             logger.error(message);
@@ -500,5 +503,25 @@ export function switchingPointsReset() {
         // Set these initial values in hardware
         await dispatch(switchingPointsUpSet());
         await dispatch(switchingPointsDownSet());
+    };
+}
+
+export function updateTriggerLevel(level) {
+    return async (dispatch, getState) => {
+        const triggerLevel = Math.round(level);
+        const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
+        dispatch(triggerLevelSetAction(triggerLevel));
+
+        const high = (triggerLevel >> 16) & 0xff;
+        const mid = (triggerLevel >> 8) & 0xff;
+        const low = triggerLevel & 0xff;
+
+        if (triggerSingleWaiting) {
+            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
+            await device.ppkTriggerSingleSet(high, mid, low);
+        } else if (triggerRunning) {
+            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
+            await device.ppkTriggerSet(high, mid, low);
+        }
     };
 }

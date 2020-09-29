@@ -60,16 +60,14 @@ import {
     chartCursorAction,
     chartState,
 } from '../../reducers/chartReducer';
-import {
-    triggerState,
-    triggerLevelSetAction,
-} from '../../reducers/triggerReducer';
+import { triggerState } from '../../reducers/triggerReducer';
 import { appState } from '../../reducers/appReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
+import { updateTriggerLevel } from '../../actions/deviceActions';
 
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
@@ -234,7 +232,7 @@ const Chart = () => {
     const { samplingRunning } = useSelector(appState);
     const { index } = options;
 
-    const sendTriggerLevel = level => dispatch(triggerLevelSetAction(level));
+    const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
 
     const chartRef = useRef(null);
 

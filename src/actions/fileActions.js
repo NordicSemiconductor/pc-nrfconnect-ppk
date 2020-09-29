@@ -41,7 +41,7 @@ import { Writable } from 'stream';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
 import { logger } from 'nrfconnect/core';
-import { options } from '../globals';
+import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 
 import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
@@ -101,6 +101,8 @@ export const load = () => async dispatch => {
     if (!filename) {
         return;
     }
+
+    updateTitle(filename);
 
     let buffer = Buffer.alloc(370 * 1e6);
     let size = 0;

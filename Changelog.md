@@ -1,3 +1,12 @@
+## Version 3.0.0-beta.4
+### Updates
+- Removed trigger level slider and updated the input line behaviour
+- Fixed displaying NaN values
+- Fixed updating trigger level while trigger is active
+- Log trigger level change from chart
+- Fixed currentVdd for calculations
+- Updated window title with filename or serialnumber
+
 ## Version 3.0.0-beta.3
 ### Updates
 - Fix broken build

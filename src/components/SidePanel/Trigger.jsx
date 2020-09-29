@@ -52,12 +52,10 @@ import {
     triggerStop,
     triggerSingleSet,
     externalTriggerToggled,
+    updateTriggerLevel,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
-import {
-    triggerState,
-    triggerLevelSetAction,
-} from '../../reducers/triggerReducer';
+import { triggerState } from '../../reducers/triggerReducer';
 import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
 
 const SINGLE = 'SINGLE';
@@ -87,12 +85,14 @@ const Trigger = ({ eventKey }) => {
     useEffect(() => {
         setLevelUnit(triggerLevel > 1000);
         setLevel(
-            triggerLevel > 1000 ? Math.round(triggerLevel / 1000) : triggerLevel
+            triggerLevel > 1000
+                ? Number((triggerLevel / 1000).toFixed(3))
+                : triggerLevel
         );
     }, [triggerLevel]);
 
     const sendTriggerLevel = unit => {
-        dispatch(triggerLevelSetAction(level * 1000 ** unit));
+        dispatch(updateTriggerLevel(level * 1000 ** unit));
         setLevelUnit(unit);
     };
 
@@ -209,9 +209,14 @@ const Trigger = ({ eventKey }) => {
                     <span className="flex-fill">Level</span>
                     <NumberInlineInput
                         value={level}
-                        range={{ min: 1, max: 1000 }}
-                        onChange={value => setLevel(parseInt(value, 10))}
+                        range={{
+                            min: 0,
+                            max: levelUnit ? 1000 : 1000000,
+                            decimals: levelUnit ? 0 : 3,
+                        }}
+                        onChange={value => setLevel(value)}
                         onChangeComplete={() => sendTriggerLevel(levelUnit)}
+                        chars={8}
                     />
                     <Dropdown>
                         <Dropdown.Toggle
@@ -236,13 +241,6 @@ const Trigger = ({ eventKey }) => {
                         </Dropdown.Menu>
                     </Dropdown>
                 </Form.Label>
-                <Slider
-                    id="slider-trigger-level"
-                    values={[level]}
-                    range={{ min: 1, max: 1000 }}
-                    onChange={[value => setLevel(parseInt(value, 10))]}
-                    onChangeComplete={() => sendTriggerLevel(levelUnit)}
-                />
             </div>
         </Collapse>
     );

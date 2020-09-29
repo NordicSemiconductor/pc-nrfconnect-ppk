@@ -34,6 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { remote } from 'electron';
+
 export const bufferLengthInSeconds = 60 * 12;
 
 const samplingTime = 10;
@@ -56,3 +58,10 @@ export const timestampToIndex = (ts, index = options.index) =>
 
 export const indexToTimestamp = (i, index = options.index) =>
     options.timestamp - ((index - i) * 1e6) / options.samplesPerSecond;
+
+export const updateTitle = info => {
+    const title = remote.getCurrentWindow().getTitle().split(':')[0];
+    remote
+        .getCurrentWindow()
+        .setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
+};
