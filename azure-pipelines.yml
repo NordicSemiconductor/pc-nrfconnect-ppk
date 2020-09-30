@@ -9,7 +9,7 @@ steps:
     versionSpec: 14
 - script: |
     set -o errexit -o pipefail
-    npm i
+    npm ci
     npm run lint
     npm run build
     npm pack

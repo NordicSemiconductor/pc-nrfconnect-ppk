@@ -7,4 +7,3 @@ jest.json
 log.txt
 node_modules
 npm-debug.log
-package-lock.json
