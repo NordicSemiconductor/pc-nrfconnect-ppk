@@ -1,3 +1,8 @@
+## Version 3.0.0-beta.6
+### Updates
+- Updated firmware to d38cae1
+- Disabled power output by default
+
 ## Version 3.0.0-beta.5
 ### Updates
 - Updated firmware to cdbd883 and filter defaults
