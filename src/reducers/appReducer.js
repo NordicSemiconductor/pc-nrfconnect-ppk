@@ -38,7 +38,7 @@ const initialState = {
     portName: null,
     metadata: [],
     isSmuMode: false,
-    deviceRunning: true,
+    deviceRunning: false,
     rttRunning: false,
     capabilities: {},
     samplingRunning: false,
