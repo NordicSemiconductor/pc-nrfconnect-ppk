@@ -1,7 +1,7 @@
 ## Version 3.0.0-beta.6
 ### Updates
 - Updated firmware to d38cae1
-- Disabled power ouput by default
+- Disabled power output by default
 
 ## Version 3.0.0-beta.5
 ### Updates
