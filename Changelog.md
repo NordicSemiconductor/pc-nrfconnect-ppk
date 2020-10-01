@@ -1,3 +1,7 @@
+## Version 3.0.0-beta.5
+### Updates
+- Updated firmware to cdbd883 and filter defaults
+
 ## Version 3.0.0-beta.4
 ### Updates
 - Removed trigger level slider and updated the input line behaviour

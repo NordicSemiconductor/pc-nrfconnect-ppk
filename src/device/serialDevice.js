@@ -51,7 +51,7 @@ const MEAS_LOGIC = generateMask(8, 24);
 const getMaskedValue = (value, { mask, pos }) => (value & mask) >> pos;
 
 class SerialDevice extends Device {
-    adcMult = 1.2 / 163840;
+    adcMult = 1.8 / 163840;
 
     modifiers = {
         r: [1031.64, 101.65, 10.15, 0.94, 0.043],
@@ -74,8 +74,8 @@ class SerialDevice extends Device {
 
         this.capabilities.digitalChannels = true;
         this.spikeFilter = {
-            alpha: 0.04,
-            alpha4: 0.04,
+            alpha: 0.18,
+            alpha4: 0.06,
             samples: 3,
         };
 
