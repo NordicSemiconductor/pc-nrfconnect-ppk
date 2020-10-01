@@ -36,7 +36,7 @@
 
 import persistentStore from '../utils/persistentStore';
 
-const defaults = { samples: 5, alpha: 0.12, alpha4: 0.06 };
+const defaults = { samples: 3, alpha: 0.18, alpha4: 0.06 };
 
 const initialState = {
     samples: persistentStore.get('spikeFilter.samples', defaults.samples),
