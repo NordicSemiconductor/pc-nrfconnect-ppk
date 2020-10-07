@@ -60,7 +60,7 @@ export const indexToTimestamp = (i, index = options.index) =>
     options.timestamp - ((index - i) * 1e6) / options.samplesPerSecond;
 
 export const updateTitle = info => {
-    const title = remote.getCurrentWindow().getTitle().split(':')[0];
+    const title = remote.getCurrentWindow().getTitle().split(':')[0].trim();
     remote
         .getCurrentWindow()
         .setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
