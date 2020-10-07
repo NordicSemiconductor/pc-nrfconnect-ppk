@@ -40,14 +40,22 @@ const { execPath, platform } = process;
 
 const asarPath = (() => {
     switch (true) {
-        case (/node_modules/.test(execPath)):
+        case /node_modules/.test(execPath):
             return resolve(execPath.split('node_modules')[0]);
         case platform === 'win32':
             return resolve(execPath, '..', 'resources', 'app.asar');
         case platform === 'darwin':
-            return resolve(execPath.split('/Frameworks/')[0], 'Resources', 'app.asar');
+            return resolve(
+                execPath.split('/Frameworks/')[0],
+                'Resources',
+                'app.asar'
+            );
         case platform === 'linux':
-            return resolve(execPath.split('/').slice(0, -1).join('/'), 'resources', 'app.asar');
+            return resolve(
+                execPath.split('/').slice(0, -1).join('/'),
+                'resources',
+                'app.asar'
+            );
         default:
             return null;
     }
@@ -59,7 +67,7 @@ const SerialPort = require(resolve(asarPath, 'node_modules', 'serialport'));
 let port = null;
 process.on('message', msg => {
     if (msg.open) {
-        console.log('\x1b[2J');
+        console.log('\x1b[2J'); // ansi clear screen
         process.send({ opening: msg.open });
         port = new SerialPort(msg.open, { autoOpen: false });
 
@@ -69,7 +77,9 @@ process.on('message', msg => {
         });
         setInterval(() => {
             if (data.length === 0) return;
-            process.send(data);
+            process.send(data.slice(), err => {
+                if (err) console.log(err);
+            });
             data = Buffer.alloc(0);
         }, 30);
         port.open(err => {
