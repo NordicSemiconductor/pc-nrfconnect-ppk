@@ -1,3 +1,9 @@
+## Version 3.0.0-beta.7
+### Updates
+- Update DUT power toggle label
+- Prevent data loss from child process
+- Fix window title update
+
 ## Version 3.0.0-beta.6
 ### Updates
 - Updated firmware to d38cae1

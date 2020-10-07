@@ -82,7 +82,7 @@ export default () => {
                 <Toggle
                     onToggle={() => dispatch(toggleDUT(deviceRunning))}
                     isToggled={deviceRunning}
-                    label="Supply power to test device"
+                    label="Enable power output"
                     variant="secondary"
                 />
             )}
