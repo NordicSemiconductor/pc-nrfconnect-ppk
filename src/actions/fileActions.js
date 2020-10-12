@@ -53,7 +53,7 @@ export const save = () => async (_, getState) => {
         .toISOString()
         .replace(/[-:.]/g, '')
         .slice(0, 15);
-    const filename = await dialog.showSaveDialog({
+    const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), `ppk-${timestamp}.ppk`),
     });
     if (!filename) {
@@ -94,7 +94,9 @@ export const save = () => async (_, getState) => {
 };
 
 export const load = () => async dispatch => {
-    const [filename] =
+    const {
+        filePaths: [filename],
+    } =
         (await dialog.showOpenDialog({
             defaultPath: lastSaveDir(),
         })) || [];
