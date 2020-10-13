@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { func, node } from 'prop-types';
+import { func, shape } from 'prop-types';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -124,7 +124,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
 ChartTop.propTypes = {
     chartPause: func.isRequired,
     zoomToWindow: func.isRequired,
-    chartRef: node.isRequired,
+    chartRef: shape({}).isRequired,
 };
 
 export default ChartTop;

@@ -65,9 +65,12 @@ const EXTERNAL = 'EXTERNAL';
 const Trigger = ({ eventKey }) => {
     const dispatch = useDispatch();
     const { rttRunning, capabilities } = useSelector(appState);
-    const { externalTrigger, triggerRunning, triggerLevel } = useSelector(
-        triggerState
-    );
+    const {
+        externalTrigger,
+        triggerRunning,
+        triggerLevel,
+        triggerSingleWaiting,
+    } = useSelector(triggerState);
 
     const { triggerHandleVisible } = useSelector(chartState);
 
@@ -105,7 +108,7 @@ const Trigger = ({ eventKey }) => {
     let startLabel = 'External';
     let onStartClicked = null;
     if (!externalTrigger) {
-        if (!triggerRunning) {
+        if (!(triggerRunning || triggerSingleWaiting)) {
             startLabel = 'Start';
             if (triggerMode === SINGLE) {
                 onStartClicked = () => dispatch(triggerSingleSet());
@@ -172,7 +175,9 @@ const Trigger = ({ eventKey }) => {
                 </Button>
             </ButtonGroup>
             <Button
-                className="w-100 mb-2"
+                className={`w-100 mb-2 ${
+                    triggerRunning || triggerSingleWaiting ? 'active-anim' : ''
+                }`}
                 disabled={!rttRunning || externalTrigger}
                 variant="set"
                 onClick={onStartClicked}
@@ -212,7 +217,7 @@ const Trigger = ({ eventKey }) => {
                         range={{
                             min: 0,
                             max: levelUnit ? 1000 : 1000000,
-                            decimals: levelUnit ? 0 : 3,
+                            decimals: levelUnit ? 3 : 0,
                         }}
                         onChange={value => setLevel(value)}
                         onChangeComplete={() => sendTriggerLevel(levelUnit)}

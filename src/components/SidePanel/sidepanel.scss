@@ -55,10 +55,27 @@
 
     .btn {
         font-size: 12px;
+        overflow: hidden;
+        position: relative;
     }
     .btn-link {
         width: fit-content;
         padding-left: 0;
+    }
+    .btn.active-anim::after {
+        content: '';
+        background: $gray-700;
+        height: 2px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        animation: snake 4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    }
+
+    @keyframes snake {
+        0% { transform: translate(-100%); }
+        100% { transform: translate(100%); }
     }
 
     .btn-set {

@@ -35,55 +35,31 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Button from 'react-bootstrap/Button';
-import { Toggle } from 'pc-nrfconnect-shared';
+import Mousetrap from 'mousetrap';
 
-import PowerMode from './PowerMode';
+export default ComposedComponent =>
+    class WithHotkey extends React.Component {
+        constructor(props) {
+            super(props);
+            this.bindings = [];
+            this.bindHotkey = this.bindHotkey.bind(this);
+        }
 
-import {
-    samplingStart,
-    samplingStop,
-    toggleDUT,
-} from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+        componentWillUnmount() {
+            this.bindings.forEach(key => Mousetrap.unbind(key));
+        }
 
-export default () => {
-    const dispatch = useDispatch();
+        bindHotkey(key, callback) {
+            Mousetrap.bind(key, callback);
+            this.bindings.push(key);
+        }
 
-    const {
-        deviceRunning,
-        rttRunning,
-        capabilities,
-        samplingRunning,
-    } = useSelector(appState);
-
-    const btnStr = samplingRunning ? 'Stop' : 'Start';
-    const avgStr = capabilities.ppkTriggerSet ? ' average' : '';
-
-    return (
-        <div className="d-flex flex-column start-stop">
-            <PowerMode />
-            <Button
-                className={`start-btn mb-3 ${
-                    samplingRunning ? 'active-anim' : ''
-                }`}
-                variant="set"
-                disabled={!rttRunning}
-                onClick={() =>
-                    dispatch(samplingRunning ? samplingStop() : samplingStart())
-                }
-            >
-                {`${btnStr}${avgStr} sampling`}
-            </Button>
-            {capabilities.ppkToggleDUT && (
-                <Toggle
-                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
-                    isToggled={deviceRunning}
-                    label="Enable power output"
-                    variant="secondary"
+        render() {
+            return (
+                <ComposedComponent
+                    bindHotkey={this.bindHotkey}
+                    {...this.props}
                 />
-            )}
-        </div>
-    );
-};
+            );
+        }
+    };

@@ -40,6 +40,7 @@ const initialState = {
     isSmuMode: false,
     deviceRunning: false,
     rttRunning: false,
+    advancedMode: false,
     capabilities: {},
     samplingRunning: false,
     isSaveChoiceDialogVisible: false,
@@ -53,10 +54,12 @@ const RTT_CALLED_START = 'RTT_CALLED_START';
 const SAMPLING_STARTED = 'SAMPLING_STARTED';
 const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
 const SET_POWER_MODE = 'SET_POWER_MODE';
+const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
 const TOGGLE_SAVE_CHOICE_DIALOG = 'TOGGLE_SAVE_CHOICE_DIALOG';
 const SHOW_EXPORT_DIALOG = 'SHOW_EXPORT_DIALOG';
 const HIDE_EXPORT_DIALOG = 'HIDE_EXPORT_DIALOG';
 
+export const toggleAdvancedModeAction = () => ({ type: TOGGLE_ADVANCED_MODE });
 export const samplingStartAction = () => ({ type: SAMPLING_STARTED });
 export const samplingStoppedAction = () => ({ type: SAMPLING_STOPPED });
 
@@ -99,6 +102,8 @@ export default (state = initialState, { type, ...action }) => {
             return { ...state, ...action };
         case RTT_CALLED_START:
             return { ...state, rttRunning: true };
+        case TOGGLE_ADVANCED_MODE:
+            return { ...state, advancedMode: !state.advancedMode };
         case TOGGLE_SAVE_CHOICE_DIALOG:
             return {
                 ...state,
