@@ -1,3 +1,9 @@
+## Version 3.0.0-beta.8
+### Updates
+- Fixed trigger range
+- Added animation to running sampling and trigger state
+- Reintroduced advanced mode
+
 ## Version 3.0.0-beta.7
 ### Updates
 - Update DUT power toggle label
