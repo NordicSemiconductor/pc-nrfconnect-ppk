@@ -58,25 +58,21 @@ export default () => {
         samplingRunning,
     } = useSelector(appState);
 
-    let btnLabel = samplingRunning ? 'Stop sampling' : 'Start sampling';
-    if (capabilities.ppkTriggerSet) {
-        btnLabel = samplingRunning
-            ? 'Stop average sampling'
-            : 'Start average sampling';
-    }
+    const btnStr = samplingRunning ? 'Stop' : 'Start';
+    const avgStr = capabilities.ppkTriggerSet ? ' average' : '';
 
     return (
         <div className="d-flex flex-column start-stop">
             <PowerMode />
             <Button
-                className="start-btn mb-3"
+                className={`start-btn mb-3 ${samplingRunning ? 'active' : ''}`}
                 variant="set"
                 disabled={!rttRunning}
                 onClick={() =>
                     dispatch(samplingRunning ? samplingStop() : samplingStart())
                 }
             >
-                {btnLabel}
+                {`${btnStr}${avgStr} sampling`}
             </Button>
             {capabilities.ppkToggleDUT && (
                 <Toggle
