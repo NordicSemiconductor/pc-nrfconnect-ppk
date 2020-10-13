@@ -35,6 +35,7 @@
  */
 
 import React from 'react';
+import { func } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 
@@ -49,8 +50,13 @@ import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 import Gains from './Gains';
 import SpikeFilter from './SpikeFilter';
+import WithHotkey from '../../utils/WithHotKey';
 
-import { appState, toggleSaveChoiceDialog } from '../../reducers/appReducer';
+import {
+    appState,
+    toggleAdvancedModeAction,
+    toggleSaveChoiceDialog,
+} from '../../reducers/appReducer';
 import { load } from '../../actions/fileActions';
 
 import { options } from '../../globals';
@@ -62,10 +68,13 @@ const ppk1ug =
 const ppk2ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 
-export default () => {
+const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
+    bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
-    const { capabilities, samplingRunning } = useSelector(appState);
+    const { capabilities, samplingRunning, advancedMode } = useSelector(
+        appState
+    );
 
     const deviceOpen = Object.keys(capabilities).length > 0;
 
@@ -121,7 +130,7 @@ export default () => {
                     Save / Export
                 </Button>
             )}
-            {deviceOpen && (
+            {deviceOpen && advancedMode && (
                 <>
                     <SwitchPoints eventKey="2" />
                     <ResistorCalibration eventKey="3" />
@@ -132,3 +141,8 @@ export default () => {
         </div>
     );
 };
+
+SidePanel.propTypes = {
+    bindHotkey: func.isRequired,
+};
+export default WithHotkey(SidePanel);
