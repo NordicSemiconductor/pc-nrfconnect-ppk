@@ -176,7 +176,7 @@ const Trigger = ({ eventKey }) => {
             </ButtonGroup>
             <Button
                 className={`w-100 mb-2 ${
-                    triggerRunning || triggerSingleWaiting ? 'active' : ''
+                    triggerRunning || triggerSingleWaiting ? 'active-anim' : ''
                 }`}
                 disabled={!rttRunning || externalTrigger}
                 variant="set"

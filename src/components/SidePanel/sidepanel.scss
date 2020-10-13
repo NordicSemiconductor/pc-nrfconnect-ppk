@@ -62,7 +62,7 @@
         width: fit-content;
         padding-left: 0;
     }
-    .btn.active::after {
+    .btn.active-anim::after {
         content: '';
         background: $gray-700;
         height: 2px;

@@ -65,7 +65,9 @@ export default () => {
         <div className="d-flex flex-column start-stop">
             <PowerMode />
             <Button
-                className={`start-btn mb-3 ${samplingRunning ? 'active' : ''}`}
+                className={`start-btn mb-3 ${
+                    samplingRunning ? 'active-anim' : ''
+                }`}
                 variant="set"
                 disabled={!rttRunning}
                 onClick={() =>
