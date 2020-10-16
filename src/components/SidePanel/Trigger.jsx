@@ -106,10 +106,13 @@ const Trigger = ({ eventKey }) => {
     }
 
     let startLabel = 'External';
+    let startTitle;
     let onStartClicked = null;
     if (!externalTrigger) {
         if (!(triggerRunning || triggerSingleWaiting)) {
             startLabel = 'Start trigger sampling​';
+            startTitle =
+                'Start sampling at 77kHz for a short duration when the set trigger level is reached';
             if (triggerMode === SINGLE) {
                 onStartClicked = () => dispatch(triggerSingleSet());
             } else {
@@ -119,6 +122,7 @@ const Trigger = ({ eventKey }) => {
             onStartClicked = () => dispatch(triggerStop());
             if (triggerMode === SINGLE) {
                 startLabel = 'Wait';
+                startTitle = 'Waiting for samples above trigger level';
             } else {
                 startLabel = 'Stop trigger sampling.';
             }
@@ -140,6 +144,7 @@ const Trigger = ({ eventKey }) => {
         >
             <ButtonGroup className="mb-2 trigger-mode d-flex flex-row">
                 <Button
+                    title="Sample once​"
                     disabled={!rttRunning || triggerMode === SINGLE}
                     variant={triggerMode === SINGLE ? 'set' : 'unset'}
                     onClick={() => {
@@ -152,6 +157,7 @@ const Trigger = ({ eventKey }) => {
                     Single
                 </Button>
                 <Button
+                    title="Sample until stopped by user​"
                     disabled={!rttRunning || triggerMode === CONTINUOUS}
                     variant={triggerMode === CONTINUOUS ? 'set' : 'unset'}
                     onClick={() => {
@@ -164,6 +170,7 @@ const Trigger = ({ eventKey }) => {
                     Continuous
                 </Button>
                 <Button
+                    title="Sample controlled from TRIG IN​"
                     disabled={!rttRunning || triggerMode === EXTERNAL}
                     variant={triggerMode === EXTERNAL ? 'set' : 'unset'}
                     onClick={() => {
@@ -175,6 +182,7 @@ const Trigger = ({ eventKey }) => {
                 </Button>
             </ButtonGroup>
             <Button
+                title={startTitle}
                 className={`w-100 mb-2 ${
                     triggerRunning || triggerSingleWaiting ? 'active-anim' : ''
                 }`}
@@ -184,7 +192,10 @@ const Trigger = ({ eventKey }) => {
             >
                 {startLabel}
             </Button>
-            <Form.Label htmlFor="slider-trigger-window">
+            <Form.Label
+                title="Duration of trigger window"
+                htmlFor="slider-trigger-window"
+            >
                 <span className="flex-fill">Length</span>
                 <NumberInlineInput
                     value={triggerLength}
@@ -198,6 +209,7 @@ const Trigger = ({ eventKey }) => {
                 ms
             </Form.Label>
             <Slider
+                title="Duration of trigger window"
                 id="slider-trigger-window"
                 values={[triggerLength]}
                 range={range}
@@ -206,7 +218,10 @@ const Trigger = ({ eventKey }) => {
                     dispatch(triggerLengthUpdate(triggerLength))
                 }
             />
-            <div className={externalTrigger ? 'disabled' : ''}>
+            <div
+                title="Rising edge level to run trigger​"
+                className={externalTrigger ? 'disabled' : ''}
+            >
                 <Form.Label
                     htmlFor="slider-trigger-level"
                     className="d-flex flex-row align-items-baseline"
