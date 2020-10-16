@@ -109,7 +109,7 @@ const Trigger = ({ eventKey }) => {
     let onStartClicked = null;
     if (!externalTrigger) {
         if (!(triggerRunning || triggerSingleWaiting)) {
-            startLabel = 'Start';
+            startLabel = 'Start trigger sampling​';
             if (triggerMode === SINGLE) {
                 onStartClicked = () => dispatch(triggerSingleSet());
             } else {
@@ -120,7 +120,7 @@ const Trigger = ({ eventKey }) => {
             if (triggerMode === SINGLE) {
                 startLabel = 'Wait';
             } else {
-                startLabel = 'Stop';
+                startLabel = 'Stop trigger sampling.';
             }
         }
     }
