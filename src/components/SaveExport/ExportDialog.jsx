@@ -210,6 +210,25 @@ export default () => {
         dispatch(hideExportDialog());
     };
 
+    const saveFile = async () => {
+        const { filePath: fn } = await remote.dialog.showSaveDialog({
+            defaultPath: filename,
+        });
+        if (!fn) return;
+        setLastSaveDir(dirname(fn));
+        dispatch(
+            exportChart(
+                fn,
+                indexBegin,
+                indexEnd,
+                index,
+                settings,
+                setProgress,
+                cancel
+            )
+        );
+    };
+
     return (
         <Modal
             show={isExportDialogVisible}
@@ -297,27 +316,7 @@ export default () => {
                 <ProgressBar now={progress} animated className="mt-4" />
             </Modal.Body>
             <Modal.Footer>
-                <Button
-                    variant="primary"
-                    onClick={() => {
-                        const fn = remote.dialog.showSaveDialog({
-                            defaultPath: filename,
-                        });
-                        if (!fn) return;
-                        setLastSaveDir(dirname(fn));
-                        dispatch(
-                            exportChart(
-                                fn,
-                                indexBegin,
-                                indexEnd,
-                                index,
-                                settings,
-                                setProgress,
-                                cancel
-                            )
-                        );
-                    }}
-                >
+                <Button variant="primary" onClick={saveFile}>
                     Save
                 </Button>
                 <Button variant="secondary" onClick={close}>
