@@ -79,8 +79,11 @@ const SwitchPoints = ({ eventKey }) => {
         <Collapse heading="SWITCH LEVELS" eventKey={eventKey}>
             {capabilities.ppkSwitchPointUp && (
                 <>
-                    Switch up
+                    <span title="Set dynamic range switching levels. See user guide for details.">
+                        Switch up
+                    </span>
                     <Slider
+                        title="Set dynamic range switching levels. See user guide for details."
                         values={[switchUpSliderPosition]}
                         range={{ min: 38, max: 175 }}
                         onChange={[val => dispatch(switchingPointUpMoved(val))]}
@@ -122,6 +125,7 @@ const SwitchPoints = ({ eventKey }) => {
             )}
             {capabilities.ppkSpikeFilteringOn && (
                 <Toggle
+                    title="Removes excessive current spikes caused by measurement circuitry"
                     onToggle={() => dispatch(spikeFilteringToggle())}
                     isToggled={spikeFiltering}
                     label="Spike filtering"
