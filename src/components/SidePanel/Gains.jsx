@@ -56,7 +56,7 @@ const Gains = ({ eventKey }) => {
     }
     const range = { min: 90, max: 110 };
     return (
-        <Collapse title="GAINS" eventKey={eventKey}>
+        <Collapse heading="GAINS" eventKey={eventKey}>
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>
                     <Form.Label className="pt-2 d-flex flex-row justify-content-between">

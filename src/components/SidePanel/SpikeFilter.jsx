@@ -60,7 +60,7 @@ const SpikeFilter = ({ eventKey }) => {
         return null;
     }
     return (
-        <Collapse title="SPIKE FILTER" eventKey={eventKey}>
+        <Collapse heading="SPIKE FILTER" eventKey={eventKey}>
             <Form.Label className="pt-2 d-flex flex-row justify-content-between">
                 <span>Samples to smooth</span>
                 <span>{samples}</span>

@@ -76,7 +76,7 @@ const SwitchPoints = ({ eventKey }) => {
     }
 
     return (
-        <Collapse title="SWITCH LEVELS" eventKey={eventKey}>
+        <Collapse heading="SWITCH LEVELS" eventKey={eventKey}>
             {capabilities.ppkSwitchPointUp && (
                 <>
                     Switch up

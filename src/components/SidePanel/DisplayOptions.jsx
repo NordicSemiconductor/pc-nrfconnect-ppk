@@ -61,7 +61,7 @@ export default () => {
 
     return (
         <Collapse
-            title="DISPLAY OPTIONS"
+            heading="DISPLAY OPTIONS"
             eventKey="10"
             defaultCollapsed={false}
             className="mb-2"

@@ -137,7 +137,7 @@ const Trigger = ({ eventKey }) => {
 
     return (
         <Collapse
-            title="TRIGGER"
+            heading="TRIGGER"
             eventKey={eventKey}
             className="trigger-collapse"
             onToggled={onTriggerToggled}

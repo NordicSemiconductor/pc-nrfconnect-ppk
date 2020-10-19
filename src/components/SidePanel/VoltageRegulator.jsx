@@ -65,7 +65,7 @@ const VoltageRegulator = ({ eventKey }) => {
     return (
         <BootstrapCollapse in={isVoltageSettable}>
             <div>
-                <Collapse title="VOLTAGE ADJUSTMENT" eventKey={eventKey}>
+                <Collapse heading="VOLTAGE ADJUSTMENT" eventKey={eventKey}>
                     <Form.Label htmlFor="slider-vdd">
                         <span className="flex-fill">Supply</span>
                         <NumberInlineInput
