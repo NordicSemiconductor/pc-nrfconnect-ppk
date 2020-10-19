@@ -1,3 +1,10 @@
+## Version 3.0.0-beta.9
+### Updates
+- Updated firmware to 1.0.0-1b5c1ac
+- Added tooltips
+- Hid the voltage slider if voltage is not settable
+- Updated label of trigger button
+
 ## Version 3.0.0-beta.8
 ### Updates
 - Fixed trigger range
