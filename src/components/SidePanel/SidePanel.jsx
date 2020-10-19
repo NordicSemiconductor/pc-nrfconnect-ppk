@@ -49,7 +49,11 @@ import Gains from './Gains';
 import SpikeFilter from './SpikeFilter';
 import WithHotkey from '../../utils/WithHotKey';
 
-import { appState, toggleAdvancedModeAction } from '../../reducers/appReducer';
+import {
+    toggleAdvancedModeAction,
+    advancedMode as advancedModeSelector,
+    deviceOpen as deviceOpenSelector,
+} from '../../reducers/appReducer';
 
 import { options } from '../../globals';
 import Instructions from './Instructions';
@@ -61,9 +65,8 @@ const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
     bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
-    const { capabilities, advancedMode } = useSelector(appState);
-
-    const deviceOpen = Object.keys(capabilities).length > 0;
+    const advancedMode = useSelector(advancedModeSelector);
+    const deviceOpen = useSelector(deviceOpenSelector);
 
     return (
         <div className="sidepanel d-flex flex-column">
