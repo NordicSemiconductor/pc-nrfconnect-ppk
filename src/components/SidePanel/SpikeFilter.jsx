@@ -87,7 +87,7 @@ const SpikeFilter = ({ eventKey }) => {
                 title="Higher values filter more aggressively"
                 className="pt-2 d-flex flex-row justify-content-between"
             >
-                <span>Coefficient</span>
+                <span>Coefficient for range 1-4</span>
                 <span>{alpha}</span>
             </Form.Label>
             <Slider
@@ -105,7 +105,7 @@ const SpikeFilter = ({ eventKey }) => {
                 title="Higher values filter more aggressively"
                 className="pt-2 d-flex flex-row justify-content-between"
             >
-                <span>Coefficient for range 4</span>
+                <span>Coefficient for range 5</span>
                 <span>{alpha4}</span>
             </Form.Label>
             <Slider
