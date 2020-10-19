@@ -47,8 +47,6 @@ import {
     toggleTimestamps,
 } from '../../reducers/chartReducer';
 
-import { options } from '../../globals';
-
 export default () => {
     const dispatch = useDispatch();
     const {
@@ -56,8 +54,6 @@ export default () => {
         timestampsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
-
-    if (options.timestamp === null) return null;
 
     return (
         <Collapse

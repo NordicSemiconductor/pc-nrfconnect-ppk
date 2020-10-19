@@ -67,22 +67,25 @@ const SidePanel = ({ bindHotkey }) => {
 
     return (
         <div className="sidepanel d-flex flex-column">
-            {deviceOpen || (
-                <>
-                    <Load />
-                    <Instructions />
-                </>
-            )}
-            {deviceOpen && (
+            {deviceOpen ? (
                 <>
                     <StartStop />
                     <Buffer />
                     <Trigger eventKey="0" />
                     <VoltageRegulator eventKey="1" />
                 </>
+            ) : (
+                <>
+                    <Load />
+                    <Instructions />
+                </>
             )}
-            <DisplayOptions />
-            {options.timestamp === null || <Save />}
+            {options.timestamp === null || (
+                <>
+                    <DisplayOptions />
+                    <Save />
+                </>
+            )}
             {deviceOpen && advancedMode && (
                 <>
                     <SwitchPoints eventKey="2" />
