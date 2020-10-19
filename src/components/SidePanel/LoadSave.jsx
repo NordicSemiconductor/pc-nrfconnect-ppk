@@ -35,67 +35,53 @@
  */
 
 import React from 'react';
-import { func } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
 
-import Buffer from './Buffer';
-import DisplayOptions from './DisplayOptions';
-import StartStop from './StartStop';
-import Trigger from './Trigger';
-import VoltageRegulator from './VoltageRegulator';
-import SwitchPoints from './SwitchPoints';
-import ResistorCalibration from './ResistorCalibration';
-import Gains from './Gains';
-import SpikeFilter from './SpikeFilter';
-import WithHotkey from '../../utils/WithHotKey';
+import {
+    appState,
+    showExportDialog,
+    toggleSaveChoiceDialog,
+} from '../../reducers/appReducer';
+import { load } from '../../actions/fileActions';
 
-import { appState, toggleAdvancedModeAction } from '../../reducers/appReducer';
+const enableSave = false; // temporarily disable saving
 
-import { options } from '../../globals';
-import Instructions from './Instructions';
-import { Load, Save } from './LoadSave';
+const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
+const saveExportTitle = enableSave
+    ? 'Stop sampling to save or export'
+    : 'Stop sampling to export';
+const saveExportAction = enableSave ? toggleSaveChoiceDialog : showExportDialog;
 
-import './sidepanel.scss';
-
-const SidePanel = ({ bindHotkey }) => {
+export const Load = () => {
     const dispatch = useDispatch();
-    bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
 
-    const { capabilities, advancedMode } = useSelector(appState);
-
-    const deviceOpen = Object.keys(capabilities).length > 0;
+    if (!enableSave) return null;
 
     return (
-        <div className="sidepanel d-flex flex-column">
-            {deviceOpen || (
-                <>
-                    <Load />
-                    <Instructions />
-                </>
-            )}
-            {deviceOpen && (
-                <>
-                    <StartStop />
-                    <Buffer />
-                    <Trigger eventKey="0" />
-                    <VoltageRegulator eventKey="1" />
-                </>
-            )}
-            <DisplayOptions />
-            {options.timestamp === null || <Save />}
-            {deviceOpen && advancedMode && (
-                <>
-                    <SwitchPoints eventKey="2" />
-                    <ResistorCalibration eventKey="3" />
-                    <Gains eventKey="4" />
-                    <SpikeFilter eventKey="5" />
-                </>
-            )}
-        </div>
+        <Button
+            className="w-100"
+            variant="set"
+            onClick={() => dispatch(load())}
+        >
+            Load
+        </Button>
     );
 };
 
-SidePanel.propTypes = {
-    bindHotkey: func.isRequired,
+export const Save = () => {
+    const dispatch = useDispatch();
+    const { samplingRunning } = useSelector(appState);
+
+    return (
+        <Button
+            className="w-100 mt-3"
+            title={samplingRunning && saveExportTitle}
+            variant="set"
+            disabled={samplingRunning}
+            onClick={() => dispatch(saveExportAction())}
+        >
+            {saveExportLabel}
+        </Button>
+    );
 };
-export default WithHotkey(SidePanel);
