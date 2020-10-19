@@ -56,6 +56,7 @@ export default () => {
             <h2 className="mt-0">MODE</h2>
             <ButtonGroup className="power-mode mb-2">
                 <Button
+                    title="Measure current on device under test powered by PPK2"
                     variant={isSmuMode ? 'set' : 'unset'}
                     disabled={isSmuMode}
                     onClick={togglePowerMode}
@@ -64,6 +65,7 @@ export default () => {
                     <div className="dot sourcemeter" />
                 </Button>
                 <Button
+                    title="Measure current on device under test powered externally"
                     variant={isSmuMode ? 'unset' : 'set'}
                     disabled={!isSmuMode}
                     onClick={togglePowerMode}

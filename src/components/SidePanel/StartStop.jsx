@@ -61,10 +61,16 @@ export default () => {
     const btnStr = samplingRunning ? 'Stop' : 'Start';
     const avgStr = capabilities.ppkTriggerSet ? ' average' : '';
 
+    const startStopTitle =
+        !samplingRunning && capabilities.ppkTriggerSet
+            ? 'Start sampling at 7.7kHz. Each data point is averaged over 10 samples at 77kHz'
+            : undefined;
+
     return (
         <div className="d-flex flex-column start-stop">
             <PowerMode />
             <Button
+                title={startStopTitle}
                 className={`start-btn mb-3 ${
                     samplingRunning ? 'active-anim' : ''
                 }`}
@@ -78,6 +84,7 @@ export default () => {
             </Button>
             {capabilities.ppkToggleDUT && (
                 <Toggle
+                    title="Turn power on/off for device under test​"
                     onToggle={() => dispatch(toggleDUT(deviceRunning))}
                     isToggled={deviceRunning}
                     label="Enable power output"
