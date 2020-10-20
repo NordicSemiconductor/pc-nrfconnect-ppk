@@ -66,7 +66,11 @@ const ResistorCalibration = ({ eventKey }) => {
     }
 
     return (
-        <Collapse title="RESISTOR CALIBRATION" eventKey={eventKey}>
+        <Collapse
+            heading="RESISTOR CALIBRATION"
+            title="Fine tune resistor values of the measurement paths. See user guide for details."
+            eventKey={eventKey}
+        >
             <Form.Label htmlFor="slider-res-hi">
                 <span className="flex-fill">High</span>
                 <NumberInlineInput

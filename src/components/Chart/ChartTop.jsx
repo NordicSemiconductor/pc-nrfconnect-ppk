@@ -78,13 +78,6 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                 <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => zoomToWindow(1000)}
-                >
-                    1ms
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
                     onClick={() => zoomToWindow(10000)}
                 >
                     10ms
@@ -102,6 +95,13 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     onClick={() => zoomToWindow(1000000)}
                 >
                     1s
+                </Button>
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => zoomToWindow(10000000)}
+                >
+                    10s
                 </Button>
                 <Button
                     variant="secondary"

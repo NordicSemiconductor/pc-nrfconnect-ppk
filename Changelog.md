@@ -1,3 +1,9 @@
+## Version 3.0.0-beta.10
+### Updates
+- Log spike filter only in advanced mode
+- Replaced 1ms window with 10s window
+- Add more tooltips
+
 ## Version 3.0.0-beta.9
 ### Updates
 - Updated firmware to 1.0.0-1b5c1ac
