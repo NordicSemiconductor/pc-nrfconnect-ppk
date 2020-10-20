@@ -52,7 +52,7 @@ const gainTitles = [
     '~50µA - 500µA',
     '~500µA - 5mA',
     '~5mA - 60mA',
-    '~60mA- 1A',
+    '~60mA - 1A',
 ];
 
 const Gains = ({ eventKey }) => {
