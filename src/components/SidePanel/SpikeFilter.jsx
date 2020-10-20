@@ -60,13 +60,21 @@ const SpikeFilter = ({ eventKey }) => {
         return null;
     }
     return (
-        <Collapse title="SPIKE FILTER" eventKey={eventKey}>
-            <Form.Label className="pt-2 d-flex flex-row justify-content-between">
+        <Collapse
+            heading="SPIKE FILTER"
+            title="Adjust how the software filters current spikes"
+            eventKey={eventKey}
+        >
+            <Form.Label
+                title="Number of samples after a dynamic range switch to apply filter"
+                className="pt-2 d-flex flex-row justify-content-between"
+            >
                 <span>Samples to smooth</span>
                 <span>{samples}</span>
             </Form.Label>
             <Slider
                 id="slider-spike-samples"
+                title="Number of samples after a dynamic range switch to apply filter"
                 values={[samples]}
                 range={{ min: 1, max: 10 }}
                 onChange={[
@@ -75,12 +83,16 @@ const SpikeFilter = ({ eventKey }) => {
                 ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
-            <Form.Label className="pt-2 d-flex flex-row justify-content-between">
-                <span>Coefficient</span>
+            <Form.Label
+                title="Higher values filter more aggressively"
+                className="pt-2 d-flex flex-row justify-content-between"
+            >
+                <span>Coefficient for range 1-4</span>
                 <span>{alpha}</span>
             </Form.Label>
             <Slider
                 id="slider-spike-alpha"
+                title="Higher values filter more aggressively"
                 values={[alpha]}
                 range={{ min: 0, max: 0.5, decimals: 2 }}
                 onChange={[
@@ -89,12 +101,16 @@ const SpikeFilter = ({ eventKey }) => {
                 ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
-            <Form.Label className="pt-2 d-flex flex-row justify-content-between">
-                <span>Coefficient for range 4</span>
+            <Form.Label
+                title="Higher values filter more aggressively"
+                className="pt-2 d-flex flex-row justify-content-between"
+            >
+                <span>Coefficient for range 5</span>
                 <span>{alpha4}</span>
             </Form.Label>
             <Slider
                 id="slider-spike-alpha4"
+                title="Higher values filter more aggressively"
                 values={[alpha4]}
                 range={{ min: 0, max: 0.5, decimals: 2 }}
                 onChange={[

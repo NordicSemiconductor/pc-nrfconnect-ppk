@@ -43,7 +43,7 @@ import { useAccordionToggle } from 'react-bootstrap/AccordionToggle';
 
 import './collapse.scss';
 
-const ContextAwareToggle = ({ title, eventKey, onToggled }) => {
+const ContextAwareToggle = ({ title, heading, eventKey, onToggled }) => {
     const currentEventKey = useContext(AccordionContext);
     const decoratedOnClick = useAccordionToggle(eventKey);
     const isCurrentEventKey = currentEventKey === eventKey;
@@ -58,17 +58,19 @@ const ContextAwareToggle = ({ title, eventKey, onToggled }) => {
             onClick={decoratedOnClick}
             className={`collapse-toggle ${isCurrentEventKey ? 'show' : ''}`}
         >
-            <h2>{title}</h2>
+            <h2 title={title}>{heading}</h2>
         </button>
     );
 };
 ContextAwareToggle.propTypes = {
+    title: string,
     eventKey: string.isRequired,
-    title: string.isRequired,
+    heading: string.isRequired,
     onToggled: func.isRequired,
 };
 
 const Collapse = ({
+    heading,
     title,
     eventKey,
     className = '',
@@ -79,8 +81,9 @@ const Collapse = ({
     <Accordion defaultActiveKey={defaultCollapsed ? '' : eventKey}>
         <div className={`collapse-container ${className}`}>
             <ContextAwareToggle
-                eventKey={eventKey}
                 title={title}
+                eventKey={eventKey}
+                heading={heading}
                 onToggled={onToggled}
             />
             <Accordion.Collapse eventKey={eventKey}>
@@ -91,7 +94,8 @@ const Collapse = ({
 );
 
 Collapse.propTypes = {
-    title: string.isRequired,
+    heading: string.isRequired,
+    title: string,
     eventKey: string.isRequired,
     className: string,
     children: node,

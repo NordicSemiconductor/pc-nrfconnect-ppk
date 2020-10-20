@@ -47,6 +47,14 @@ import Collapse from './Collapse';
 import { appState } from '../../reducers/appReducer';
 import { updateGainsAction, gainsState } from '../../reducers/gainsReducer';
 
+const gainTitles = [
+    '~100nA - 50µA',
+    '~50µA - 500µA',
+    '~500µA - 5mA',
+    '~5mA - 60mA',
+    '~60mA- 1A',
+];
+
 const Gains = ({ eventKey }) => {
     const dispatch = useDispatch();
     const gains = useSelector(gainsState);
@@ -54,17 +62,26 @@ const Gains = ({ eventKey }) => {
     if (!capabilities.ppkSetUserGains) {
         return null;
     }
+
     const range = { min: 90, max: 110 };
     return (
-        <Collapse title="GAINS" eventKey={eventKey}>
+        <Collapse
+            heading="GAINS"
+            title="Adjust gains to correct potential measurement errors​"
+            eventKey={eventKey}
+        >
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>
-                    <Form.Label className="pt-2 d-flex flex-row justify-content-between">
+                    <Form.Label
+                        title={gainTitles[index]}
+                        className="pt-2 d-flex flex-row justify-content-between"
+                    >
                         <span>Range {index + 1}</span>
                         <span>{(gain / 100).toFixed(2)}</span>
                     </Form.Label>
                     <Slider
                         id={`slider-gains-${index}`}
+                        title={gainTitles[index]}
                         values={[gain]}
                         range={range}
                         onChange={[
