@@ -1,3 +1,7 @@
+## Version 3.0.0-beta.10
+### Updates
+- Log spike filter only in advanced mode
+
 ## Version 3.0.0-beta.9
 ### Updates
 - Updated firmware to 1.0.0-1b5c1ac
