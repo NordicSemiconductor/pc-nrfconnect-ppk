@@ -1,6 +1,7 @@
 ## Version 3.0.0-beta.10
 ### Updates
 - Log spike filter only in advanced mode
+- Replaced 1ms window with 10s window
 
 ## Version 3.0.0-beta.9
 ### Updates
