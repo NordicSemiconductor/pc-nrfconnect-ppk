@@ -36,7 +36,7 @@
 
 import { remote } from 'electron';
 
-export const bufferLengthInSeconds = 60 * 12;
+export const bufferLengthInSeconds = 60 * 5;
 
 const samplingTime = 10;
 const samplesPerSecond = 1e6 / samplingTime;

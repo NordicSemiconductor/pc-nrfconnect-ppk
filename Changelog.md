@@ -1,3 +1,8 @@
+## Version 3.0.0-beta.11
+### Updates
+- Set max buffer to 5min
+- Update digital channel visibility to 10s window limit
+
 ## Version 3.0.0-beta.10
 ### Updates
 - Log spike filter only in advanced mode
