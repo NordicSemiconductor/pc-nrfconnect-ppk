@@ -75,7 +75,7 @@ class SerialDevice extends Device {
         this.capabilities.digitalChannels = true;
         this.spikeFilter = {
             alpha: 0.18,
-            alpha4: 0.06,
+            alpha5: 0.06,
             samples: 3,
         };
 
@@ -128,8 +128,8 @@ class SerialDevice extends Device {
         this.rollingAvg4 =
             this.rollingAvg4 === undefined
                 ? adc
-                : this.spikeFilter.alpha4 * adc +
-                  (1.0 - this.spikeFilter.alpha4) * this.rollingAvg4;
+                : this.spikeFilter.alpha5 * adc +
+                  (1.0 - this.spikeFilter.alpha5) * this.rollingAvg4;
 
         if (this.prevRange === undefined) {
             this.prevRange = range;

@@ -153,14 +153,14 @@ export const updateSpikeFilter = () => async (_, getState) => {
         return;
     }
     const { spikeFilter } = getState().app;
-    const { samples, alpha, alpha4 } = spikeFilter;
+    const { samples, alpha, alpha5 } = spikeFilter;
     persistentStore.set('spikeFilter.samples', samples);
     persistentStore.set('spikeFilter.alpha', alpha);
-    persistentStore.set('spikeFilter.alpha4', alpha4);
+    persistentStore.set('spikeFilter.alpha5', alpha5);
     await device.ppkSetSpikeFilter(spikeFilter);
     if (getState().app.app.advancedMode) {
         logger.info(
-            `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha4} in range 5)`
+            `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
         );
     }
 };
