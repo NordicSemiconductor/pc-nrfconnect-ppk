@@ -54,7 +54,7 @@ import {
 
 const SpikeFilter = ({ eventKey }) => {
     const dispatch = useDispatch();
-    const { samples, alpha, alpha4 } = useSelector(spikeFilterState);
+    const { samples, alpha, alpha5 } = useSelector(spikeFilterState);
     const { capabilities } = useSelector(appState);
     if (!capabilities.ppkSetUserGains) {
         return null;
@@ -106,16 +106,16 @@ const SpikeFilter = ({ eventKey }) => {
                 className="pt-2 d-flex flex-row justify-content-between"
             >
                 <span>Coefficient for range 5</span>
-                <span>{alpha4}</span>
+                <span>{alpha5}</span>
             </Form.Label>
             <Slider
-                id="slider-spike-alpha4"
+                id="slider-spike-alpha5"
                 title="Higher values filter more aggressively"
-                values={[alpha4]}
+                values={[alpha5]}
                 range={{ min: 0, max: 0.5, decimals: 2 }}
                 onChange={[
                     value =>
-                        dispatch(updateSpikeFilterAction({ alpha4: value })),
+                        dispatch(updateSpikeFilterAction({ alpha5: value })),
                 ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
