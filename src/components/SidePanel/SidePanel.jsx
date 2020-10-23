@@ -58,6 +58,7 @@ import {
 import { options } from '../../globals';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
+import PowerMode from './PowerMode';
 
 import './sidepanel.scss';
 
@@ -72,6 +73,7 @@ const SidePanel = ({ bindHotkey }) => {
         <div className="sidepanel d-flex flex-column">
             {deviceOpen ? (
                 <>
+                    <PowerMode />
                     <StartStop />
                     <Buffer />
                     <Trigger eventKey="0" />

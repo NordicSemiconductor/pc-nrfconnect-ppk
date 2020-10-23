@@ -42,10 +42,10 @@ import Form from 'react-bootstrap/Form';
 import { Slider } from 'pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
-import Collapse from './Collapse';
-
 import { appState } from '../../reducers/appReducer';
 import { updateGainsAction, gainsState } from '../../reducers/gainsReducer';
+
+import Group from './Group';
 
 const gainTitles = [
     '~100nA - 50µA',
@@ -65,10 +65,10 @@ const Gains = ({ eventKey }) => {
 
     const range = { min: 90, max: 110 };
     return (
-        <Collapse
-            heading="GAINS"
+        <Group
+            heading="Gains"
             title="Adjust gains to correct potential measurement errors​"
-            eventKey={eventKey}
+            collapse={{ collapsable: true, eventKey }}
         >
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>
@@ -91,7 +91,7 @@ const Gains = ({ eventKey }) => {
                     />
                 </React.Fragment>
             ))}
-        </Collapse>
+        </Group>
     );
 };
 

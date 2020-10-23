@@ -36,6 +36,7 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
+import Group from './Group';
 import { chartState } from '../../reducers/chartReducer';
 import { bufferLengthInSeconds } from '../../globals';
 
@@ -46,17 +47,16 @@ export default () => {
     const percentage = 100 - (100 * bufferRemaining) / totalInUs;
 
     return (
-        <div className="buffer">
-            <h2>CAPTURE STATUS</h2>
+        <Group heading="Capture status">
             <div className="buffer-total">
                 <div
                     className="buffer-used progress-bar-striped"
                     style={{ width: `${percentage}%` }}
                 />
             </div>
-            <div className="label mt-2">
+            <div className="buffer-label">
                 Buffer {`${percentage.toFixed()}%`} full
             </div>
-        </div>
+        </Group>
     );
 };

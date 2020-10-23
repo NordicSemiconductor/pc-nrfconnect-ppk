@@ -75,7 +75,7 @@ export const Save = () => {
 
     return (
         <Button
-            className="w-100 mt-3"
+            className="w-100"
             title={samplingRunning ? saveExportTitle : undefined}
             variant="set"
             disabled={samplingRunning}

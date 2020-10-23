@@ -42,7 +42,6 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 import { Slider, Toggle } from 'pc-nrfconnect-shared';
-import Collapse from './Collapse';
 
 import {
     spikeFilteringToggle,
@@ -56,6 +55,8 @@ import {
     switchingPointsState,
 } from '../../reducers/switchingPointsReducer';
 import { appState } from '../../reducers/appReducer';
+
+import Group from './Group';
 
 const SwitchPoints = ({ eventKey }) => {
     const dispatch = useDispatch();
@@ -76,7 +77,10 @@ const SwitchPoints = ({ eventKey }) => {
     }
 
     return (
-        <Collapse heading="SWITCH LEVELS" eventKey={eventKey}>
+        <Group
+            heading="Switch levels"
+            collapse={{ collapsable: true, eventKey }}
+        >
             {capabilities.ppkSwitchPointUp && (
                 <>
                     <span title="Set dynamic range switching levels. See user guide for details.">
@@ -132,7 +136,7 @@ const SwitchPoints = ({ eventKey }) => {
                     variant="secondary"
                 />
             )}
-        </Collapse>
+        </Group>
     );
 };
 

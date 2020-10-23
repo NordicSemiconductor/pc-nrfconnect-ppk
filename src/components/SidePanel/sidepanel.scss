@@ -1,13 +1,14 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-.core19-app-content .core19-side-panel {
-    background-color: $gray-50;
-}
-
 .sidepanel {
+    > * {
+        margin-top: 36px;
+    }
+
+    // FIXME: Remove this hack to undo the padding from shared
+    margin-top: -24px;
+
     font-size: 12px;
-    padding: 8px 0;
-    min-height: 100%;
 
     .form-label, .form-group {
         margin-bottom: 0ex;
@@ -18,33 +19,20 @@
         align-items: baseline;
     }
 
-    .number-inline-input {
-        font-size: 14px;
-
-        &:focus { background-color: $white; }
-    }
-
-    .disabled {
-        pointer-events: none;
-        opacity: 0.6;
-    }
-
     .input-group.text {
         border-radius: 0;
     }
 
-    .buffer {
-        .buffer-total {
-            background-color: $gray-100;
-            padding: 2px;
-            .buffer-used {
-                background-color: $gray-700;
-                height: 24px;
-            }
+    .buffer-total {
+        background-color: $gray-100;
+        padding: 2px;
+        .buffer-used {
+            background-color: $gray-700;
+            height: 24px;
         }
-        .label {
-            font-size: 10px;
-        }
+    }
+    .buffer-label {
+        font-size: 10px;
     }
 
     .digital-channels .btn {
@@ -113,10 +101,6 @@
         .btn-set .amperemeter {
             background: $nordic-blue;
         }
-    }
-
-    .trigger-collapse .slider {
-        margin-bottom: 0.5rem;
     }
 
     .dropdown {

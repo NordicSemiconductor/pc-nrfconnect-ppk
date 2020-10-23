@@ -41,6 +41,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
 import { setPowerMode } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
+import Group from './Group';
 
 export default () => {
     const dispatch = useDispatch();
@@ -52,9 +53,8 @@ export default () => {
     }
 
     return (
-        <>
-            <h2 className="mt-0">MODE</h2>
-            <ButtonGroup className="power-mode mb-2">
+        <Group heading="Mode">
+            <ButtonGroup className="power-mode w-100">
                 <Button
                     title="Measure current on device under test powered by PPK2"
                     variant={isSmuMode ? 'set' : 'unset'}
@@ -74,6 +74,6 @@ export default () => {
                     <div className="dot amperemeter" />
                 </Button>
             </ButtonGroup>
-        </>
+        </Group>
     );
 };

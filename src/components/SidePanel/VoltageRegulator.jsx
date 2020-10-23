@@ -44,13 +44,13 @@ import BootstrapCollapse from 'react-bootstrap/Collapse';
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
-import Collapse from './Collapse';
 
 import { appState } from '../../reducers/appReducer';
 import {
     voltageRegulatorState,
     moveVoltageRegulatorVddAction,
 } from '../../reducers/voltageRegulatorReducer';
+import Group from './Group';
 
 const VoltageRegulator = ({ eventKey }) => {
     const dispatch = useDispatch();
@@ -65,7 +65,10 @@ const VoltageRegulator = ({ eventKey }) => {
     return (
         <BootstrapCollapse in={isVoltageSettable}>
             <div>
-                <Collapse heading="VOLTAGE ADJUSTMENT" eventKey={eventKey}>
+                <Group
+                    heading="Voltage adjustment"
+                    collapse={{ collapsable: true, eventKey }}
+                >
                     <Form.Label htmlFor="slider-vdd">
                         <span className="flex-fill">Supply</span>
                         <NumberInlineInput
@@ -90,7 +93,7 @@ const VoltageRegulator = ({ eventKey }) => {
                         ]}
                         onChangeComplete={() => dispatch(updateRegulator(vdd))}
                     />
-                </Collapse>
+                </Group>
             </div>
         </BootstrapCollapse>
     );

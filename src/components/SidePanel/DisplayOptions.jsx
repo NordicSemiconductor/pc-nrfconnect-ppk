@@ -39,7 +39,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Toggle } from 'pc-nrfconnect-shared';
 
 import DigitalChannels from './DigitalChannels';
-import Collapse from './Collapse';
+import Group from './Group';
 
 import {
     chartState,
@@ -56,11 +56,13 @@ export default () => {
     } = useSelector(chartState);
 
     return (
-        <Collapse
-            heading="DISPLAY OPTIONS"
-            eventKey="10"
-            defaultCollapsed={false}
-            className="mb-2"
+        <Group
+            heading="Display options"
+            collapse={{
+                collapsable: true,
+                defaultCollapsed: false,
+                eventKey: '10',
+            }}
         >
             <Toggle
                 onToggle={() => dispatch(toggleTimestamps())}
@@ -79,6 +81,6 @@ export default () => {
                     <DigitalChannels />
                 </>
             )}
-        </Collapse>
+        </Group>
     );
 };

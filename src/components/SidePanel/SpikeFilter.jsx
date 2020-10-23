@@ -43,14 +43,14 @@ import Form from 'react-bootstrap/Form';
 import { Slider } from 'pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
-import Collapse from './Collapse';
-
 import { appState } from '../../reducers/appReducer';
 import {
     updateSpikeFilterAction,
     spikeFilterState,
     resetSpikeFilterToDefaults,
 } from '../../reducers/spikeFilterReducer';
+
+import Group from './Group';
 
 const SpikeFilter = ({ eventKey }) => {
     const dispatch = useDispatch();
@@ -60,10 +60,10 @@ const SpikeFilter = ({ eventKey }) => {
         return null;
     }
     return (
-        <Collapse
-            heading="SPIKE FILTER"
+        <Group
+            heading="Spike filter"
             title="Adjust how the software filters current spikes"
-            eventKey={eventKey}
+            collapse={{ collapsable: true, eventKey }}
         >
             <Form.Label
                 title="Number of samples after a dynamic range switch to apply filter"
@@ -129,7 +129,7 @@ const SpikeFilter = ({ eventKey }) => {
             >
                 Defaults
             </Button>
-        </Collapse>
+        </Group>
     );
 };
 

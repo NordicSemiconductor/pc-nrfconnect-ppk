@@ -44,8 +44,6 @@ import Form from 'react-bootstrap/Form';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
-import Collapse from './Collapse';
-
 import {
     triggerLengthUpdate,
     triggerStart,
@@ -57,6 +55,8 @@ import {
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
+
+import Group from './Group';
 
 const SINGLE = 'SINGLE';
 const CONTINUOUS = 'CONTINUOUS';
@@ -136,13 +136,15 @@ const Trigger = ({ eventKey }) => {
     };
 
     return (
-        <Collapse
-            heading="TRIGGER"
-            eventKey={eventKey}
-            className="trigger-collapse"
-            onToggled={onTriggerToggled}
+        <Group
+            heading="Trigger"
+            collapse={{
+                collapsable: true,
+                onToggled: onTriggerToggled,
+                eventKey,
+            }}
         >
-            <ButtonGroup className="mb-2 trigger-mode d-flex flex-row">
+            <ButtonGroup className="mb-2 w-100 trigger-mode d-flex flex-row">
                 <Button
                     title="Sample once​"
                     disabled={!rttRunning || triggerMode === SINGLE}
@@ -262,7 +264,7 @@ const Trigger = ({ eventKey }) => {
                     </Dropdown>
                 </Form.Label>
             </div>
-        </Collapse>
+        </Group>
     );
 };
 

@@ -38,34 +38,36 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 
 import { openUrl } from 'pc-nrfconnect-shared';
+import Group from './Group';
 
 const ppk1ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 const ppk2ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 
-export default () => {
-    return (
-        <>
-            <h2>INSTRUCTIONS</h2>
-            <p>
-                The Power Profiler Kit (PPK) is an affordable, flexible tool
-                that measures real-time power consumption of your designs.
-            </p>
-            <p>
-                Select a device to sample real-time measurements or load an
-                existing data set.
-            </p>
-            <p>
-                <i>PPK</i> or <i>PPK2</i> hardware is required to sample
-                real-time measurements.
-            </p>
+export default () => (
+    <Group heading="Instructions">
+        <p>
+            The Power Profiler Kit (PPK) is an affordable, flexible tool that
+            measures real-time power consumption of your designs.
+        </p>
+        <p>
+            Select a device to sample real-time measurements or load an existing
+            data set.
+        </p>
+        <p>
+            <i>PPK</i> or <i>PPK2</i> hardware is required to sample real-time
+            measurements.
+        </p>
+        <p>
             <Button variant="link" onClick={() => openUrl(ppk1ug)}>
                 PPK User Guide
             </Button>
+        </p>
+        <p>
             <Button variant="link" onClick={() => openUrl(ppk2ug)}>
                 PPK2 User Guide
             </Button>
-        </>
-    );
-};
+        </p>
+    </Group>
+);
