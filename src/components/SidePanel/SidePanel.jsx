@@ -123,6 +123,7 @@ const SidePanel = ({ bindHotkey }) => {
             {options.timestamp === null || (
                 <Button
                     className="w-100 mt-3"
+                    title={samplingRunning && 'Stop sampling to save or export'}
                     variant="set"
                     disabled={samplingRunning}
                     onClick={() => dispatch(toggleSaveChoiceDialog())}
