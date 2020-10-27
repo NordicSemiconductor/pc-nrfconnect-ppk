@@ -1,3 +1,7 @@
+## Version 3.0.0-beta.13
+### Updates
+- Also remove loading while saving is removed.
+
 ## Version 3.0.0-beta.12
 ### Updates
 - When the save/export button is disabled explain in tooltip why
