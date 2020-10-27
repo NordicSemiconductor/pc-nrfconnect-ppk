@@ -4,6 +4,8 @@
 - Unified the naming of the last range in the spike filter to be range
   number 5. If you changed the coefficient for range 5, you will have
   to set it again, as the old setting is not restored.
+- Add 3 second button
+- Temporarily disable saving because it breaks compatibility. Export remains.
 
 ## Version 3.0.0-beta.11
 ### Updates
