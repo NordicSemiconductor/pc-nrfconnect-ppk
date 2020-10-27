@@ -54,6 +54,7 @@ import WithHotkey from '../../utils/WithHotKey';
 
 import {
     appState,
+    showExportDialog,
     toggleAdvancedModeAction,
     toggleSaveChoiceDialog,
 } from '../../reducers/appReducer';
@@ -67,6 +68,14 @@ const ppk1ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 const ppk2ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+
+const enableSave = false; // temporarily disable saving
+
+const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
+const saveExportTitle = enableSave
+    ? 'Stop sampling to save or export'
+    : 'Stop sampling to export';
+const saveExportAction = enableSave ? toggleSaveChoiceDialog : showExportDialog;
 
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
@@ -123,11 +132,12 @@ const SidePanel = ({ bindHotkey }) => {
             {options.timestamp === null || (
                 <Button
                     className="w-100 mt-3"
+                    title={samplingRunning && saveExportTitle}
                     variant="set"
                     disabled={samplingRunning}
-                    onClick={() => dispatch(toggleSaveChoiceDialog())}
+                    onClick={() => dispatch(saveExportAction())}
                 >
-                    Save / Export
+                    {saveExportLabel}
                 </Button>
             )}
             {deviceOpen && advancedMode && (

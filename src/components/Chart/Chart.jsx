@@ -238,7 +238,7 @@ const Chart = () => {
 
     const { data, bits } = options;
 
-    let numberOfBits = windowDuration <= 10000000 ? nbDigitalChannels : 0;
+    let numberOfBits = windowDuration <= 3000000 ? nbDigitalChannels : 0;
     if (!bits) {
         numberOfBits = 0;
     }
