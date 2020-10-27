@@ -76,7 +76,7 @@ export const Save = () => {
     return (
         <Button
             className="w-100 mt-3"
-            title={samplingRunning && saveExportTitle}
+            title={samplingRunning ? saveExportTitle : undefined}
             variant="set"
             disabled={samplingRunning}
             onClick={() => dispatch(saveExportAction())}
