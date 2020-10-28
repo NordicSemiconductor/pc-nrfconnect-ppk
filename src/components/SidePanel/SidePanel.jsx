@@ -91,13 +91,15 @@ const SidePanel = ({ bindHotkey }) => {
         <div className="sidepanel d-flex flex-column">
             {deviceOpen || (
                 <>
-                    <Button
-                        className="w-100"
-                        variant="set"
-                        onClick={() => dispatch(load())}
-                    >
-                        Load
-                    </Button>
+                    {enableSave && (
+                        <Button
+                            className="w-100"
+                            variant="set"
+                            onClick={() => dispatch(load())}
+                        >
+                            Load
+                        </Button>
+                    )}
                     <h2>INSTRUCTIONS</h2>
                     <p>
                         The Power Profiler Kit (PPK) is an affordable, flexible
