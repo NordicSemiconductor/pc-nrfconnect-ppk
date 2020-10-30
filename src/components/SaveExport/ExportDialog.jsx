@@ -149,6 +149,22 @@ const exportChart = (
         });
 };
 
+const useToggledSetting = (initialState, label) => {
+    const [value, setValue] = useState(initialState);
+
+    const ToggleComponent = () => (
+        <div className="export-toggle">
+            <Toggle
+                onToggle={() => setValue(!value)}
+                isToggled={value}
+                label={label}
+                variant="secondary"
+            />
+        </div>
+    );
+    return [value, ToggleComponent];
+};
+
 export default () => {
     const dispatch = useDispatch();
     const {
@@ -162,13 +178,16 @@ export default () => {
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
 
-    const [settings, setSettings] = useState({
-        timestamp: true,
-        current: true,
-        bits: hasDigitalChannels,
-        bitsSeparated: false,
-    });
-    const updateSettings = change => setSettings({ ...settings, ...change });
+    const [timestamp, TimestampToggle] = useToggledSetting(true, 'Timestamp');
+    const [current, CurrentToggle] = useToggledSetting(true, 'Current');
+    const [bits, BitsToggle] = useToggledSetting(
+        hasDigitalChannels,
+        'Digital logic pins (single string field)'
+    );
+    const [bitsSeparated, BitsSeparatedToggle] = useToggledSetting(
+        false,
+        'Digital logic pins (separate fields)'
+    );
 
     const cancel = useRef(false);
     const [progress, setProgress] = useState(0);
@@ -191,19 +210,13 @@ export default () => {
 
     const records = indexEnd - indexBegin;
     const recordLength =
-        settings.timestamp * 10 +
-        settings.current * 10 +
-        settings.bits * 8 +
-        settings.bitsSeparated * 16;
+        timestamp * 10 + current * 10 + bits * 8 + bitsSeparated * 16;
     const filesize = mathjs
         .to(unit(recordLength * records, 'bytes'), 'MB')
         .format({ notation: 'fixed', precision: 0 });
 
-    const timestamp = new Date()
-        .toISOString()
-        .replace(/[-:.]/g, '')
-        .slice(0, 15);
-    const filename = join(lastSaveDir(), `ppk-${timestamp}.csv`);
+    const now = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+    const filename = join(lastSaveDir(), `ppk-${now}.csv`);
 
     const close = () => {
         cancel.current = true;
@@ -222,7 +235,7 @@ export default () => {
                 indexBegin,
                 indexEnd,
                 index,
-                settings,
+                { timestamp, current, bits, bitsSeparated },
                 setProgress,
                 cancel
             )
@@ -243,52 +256,14 @@ export default () => {
                     <Col sm={8}>
                         <Card className="h-100">
                             <Card.Body>
-                                <h2>EXPORT FIELDS</h2>
+                                <h2>Export fields</h2>
                                 <div className="w-fit-content">
-                                    <Toggle
-                                        onToggle={() =>
-                                            updateSettings({
-                                                timestamp: !settings.timestamp,
-                                            })
-                                        }
-                                        isToggled={settings.timestamp}
-                                        label="Timestamp"
-                                        variant="secondary"
-                                    />
-                                    <Toggle
-                                        onToggle={() =>
-                                            updateSettings({
-                                                current: !settings.current,
-                                            })
-                                        }
-                                        isToggled={settings.current}
-                                        label="Current"
-                                        variant="secondary"
-                                    />
+                                    <TimestampToggle />
+                                    <CurrentToggle />
                                     {hasDigitalChannels && (
                                         <>
-                                            <Toggle
-                                                onToggle={() =>
-                                                    updateSettings({
-                                                        bits: !settings.bits,
-                                                    })
-                                                }
-                                                isToggled={settings.bits}
-                                                label="Digital logic pins (single string field)"
-                                                variant="secondary"
-                                            />
-                                            <Toggle
-                                                onToggle={() =>
-                                                    updateSettings({
-                                                        bitsSeparated: !settings.bitsSeparated,
-                                                    })
-                                                }
-                                                isToggled={
-                                                    settings.bitsSeparated
-                                                }
-                                                label="Digital logic pins (separate fields)"
-                                                variant="secondary"
-                                            />
+                                            <BitsToggle />
+                                            <BitsSeparatedToggle />
                                         </>
                                     )}
                                 </div>
@@ -298,7 +273,7 @@ export default () => {
                     <Col sm={4}>
                         <Card className="h-100">
                             <Card.Body>
-                                <h2>ESTIMATION</h2>
+                                <h2>Estimation</h2>
                                 <p>{records} records</p>
                                 <p>{filesize}</p>
                                 <p>

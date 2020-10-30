@@ -12,15 +12,15 @@
         margin-top: 2rem;
 
         text-transform: uppercase;
-        font-size: smaller;
+        font-size: 10px;
         font-weight: normal;
         letter-spacing: 0.5ex;
 
         color: $gray-400;
     }
 
-    .row h2 {
-        margin-top: 0;
+    .export-toggle {
+        margin-bottom: 0.5rem;
     }
 
     .w-fit-content {
