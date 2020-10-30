@@ -35,7 +35,6 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
@@ -52,7 +51,7 @@ import {
 } from '../../reducers/voltageRegulatorReducer';
 import Group from './Group';
 
-const VoltageRegulator = ({ eventKey }) => {
+const VoltageRegulator = () => {
     const dispatch = useDispatch();
     const { vdd, min, max } = useSelector(voltageRegulatorState);
     const {
@@ -67,7 +66,7 @@ const VoltageRegulator = ({ eventKey }) => {
             <div>
                 <Group
                     heading="Voltage adjustment"
-                    collapse={{ collapsable: true, eventKey }}
+                    collapse={{ collapsable: true }}
                 >
                     <Form.Label htmlFor="slider-vdd">
                         <span className="flex-fill">Supply</span>
@@ -97,10 +96,6 @@ const VoltageRegulator = ({ eventKey }) => {
             </div>
         </BootstrapCollapse>
     );
-};
-
-VoltageRegulator.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default VoltageRegulator;

@@ -35,7 +35,6 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
@@ -55,7 +54,7 @@ const gainTitles = [
     '~60mA - 1A',
 ];
 
-const Gains = ({ eventKey }) => {
+const Gains = () => {
     const dispatch = useDispatch();
     const gains = useSelector(gainsState);
     const { capabilities } = useSelector(appState);
@@ -68,7 +67,7 @@ const Gains = ({ eventKey }) => {
         <Group
             heading="Gains"
             title="Adjust gains to correct potential measurement errors​"
-            collapse={{ collapsable: true, eventKey }}
+            collapse={{ collapsable: true }}
         >
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>
@@ -93,10 +92,6 @@ const Gains = ({ eventKey }) => {
             ))}
         </Group>
     );
-};
-
-Gains.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default Gains;

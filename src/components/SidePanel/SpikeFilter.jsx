@@ -35,7 +35,6 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Button from 'react-bootstrap/Button';
@@ -52,7 +51,7 @@ import {
 
 import Group from './Group';
 
-const SpikeFilter = ({ eventKey }) => {
+const SpikeFilter = () => {
     const dispatch = useDispatch();
     const { samples, alpha, alpha5 } = useSelector(spikeFilterState);
     const { capabilities } = useSelector(appState);
@@ -63,7 +62,7 @@ const SpikeFilter = ({ eventKey }) => {
         <Group
             heading="Spike filter"
             title="Adjust how the software filters current spikes"
-            collapse={{ collapsable: true, eventKey }}
+            collapse={{ collapsable: true }}
         >
             <Form.Label
                 title="Number of samples after a dynamic range switch to apply filter"
@@ -131,10 +130,6 @@ const SpikeFilter = ({ eventKey }) => {
             </Button>
         </Group>
     );
-};
-
-SpikeFilter.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default SpikeFilter;

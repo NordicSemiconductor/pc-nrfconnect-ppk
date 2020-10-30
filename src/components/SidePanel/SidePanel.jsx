@@ -76,8 +76,8 @@ const SidePanel = ({ bindHotkey }) => {
                     <PowerMode />
                     <StartStop />
                     <Buffer />
-                    <Trigger eventKey="0" />
-                    <VoltageRegulator eventKey="1" />
+                    <Trigger />
+                    <VoltageRegulator />
                 </>
             ) : (
                 <>
@@ -93,10 +93,10 @@ const SidePanel = ({ bindHotkey }) => {
             )}
             {deviceOpen && advancedMode && (
                 <>
-                    <SwitchPoints eventKey="2" />
-                    <ResistorCalibration eventKey="3" />
-                    <Gains eventKey="4" />
-                    <SpikeFilter eventKey="5" />
+                    <SwitchPoints />
+                    <ResistorCalibration />
+                    <Gains />
+                    <SpikeFilter />
                 </>
             )}
         </div>

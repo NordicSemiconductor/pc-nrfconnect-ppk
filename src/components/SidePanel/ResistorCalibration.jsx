@@ -35,7 +35,6 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -53,7 +52,7 @@ import {
 
 import Group from './Group';
 
-const ResistorCalibration = ({ eventKey }) => {
+const ResistorCalibration = () => {
     const dispatch = useDispatch();
     const { userResLo, userResMid, userResHi } = useSelector(
         resistorCalibrationState
@@ -68,7 +67,7 @@ const ResistorCalibration = ({ eventKey }) => {
         <Group
             heading="Resistor calibration"
             title="Fine tune resistor values of the measurement paths. See user guide for details."
-            collapse={{ collapsable: true, eventKey }}
+            collapse={{ collapsable: true }}
         >
             <Form.Label htmlFor="slider-res-hi">
                 <span className="flex-fill">High</span>
@@ -142,10 +141,6 @@ const ResistorCalibration = ({ eventKey }) => {
             </ButtonGroup>
         </Group>
     );
-};
-
-ResistorCalibration.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default ResistorCalibration;

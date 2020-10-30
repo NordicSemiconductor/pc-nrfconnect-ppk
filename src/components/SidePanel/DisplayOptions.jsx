@@ -61,7 +61,6 @@ export default () => {
             collapse={{
                 collapsable: true,
                 defaultCollapsed: false,
-                eventKey: '10',
             }}
         >
             <Toggle

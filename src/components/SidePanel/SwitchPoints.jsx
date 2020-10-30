@@ -35,7 +35,6 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
@@ -58,7 +57,7 @@ import { appState } from '../../reducers/appReducer';
 
 import Group from './Group';
 
-const SwitchPoints = ({ eventKey }) => {
+const SwitchPoints = () => {
     const dispatch = useDispatch();
 
     const {
@@ -77,10 +76,7 @@ const SwitchPoints = ({ eventKey }) => {
     }
 
     return (
-        <Group
-            heading="Switch levels"
-            collapse={{ collapsable: true, eventKey }}
-        >
+        <Group heading="Switch levels" collapse={{ collapsable: true }}>
             {capabilities.ppkSwitchPointUp && (
                 <>
                     <span title="Set dynamic range switching levels. See user guide for details.">
@@ -138,10 +134,6 @@ const SwitchPoints = ({ eventKey }) => {
             )}
         </Group>
     );
-};
-
-SwitchPoints.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default SwitchPoints;

@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useRef } from 'react';
 import { bool, func, node, shape, string } from 'prop-types';
 
 import Accordion from 'react-bootstrap/Accordion';
@@ -90,21 +90,22 @@ ContextAwareToggle.propTypes = {
 const CollapseableGroup = ({
     heading,
     title,
-    eventKey,
     children = null,
     defaultCollapsed = true,
     onToggled,
 }) => {
+    const eventKey = useRef(Math.random().toString());
+
     return (
-        <Accordion defaultActiveKey={defaultCollapsed ? '' : eventKey}>
+        <Accordion defaultActiveKey={defaultCollapsed ? '' : eventKey.current}>
             <div className="collapse-container">
                 <ContextAwareToggle
                     heading={heading}
                     title={title}
-                    eventKey={eventKey}
+                    eventKey={eventKey.current}
                     onToggled={onToggled}
                 />
-                <Accordion.Collapse eventKey={eventKey}>
+                <Accordion.Collapse eventKey={eventKey.current}>
                     <>{children}</>
                 </Accordion.Collapse>
             </div>
@@ -115,7 +116,6 @@ const CollapseableGroup = ({
 CollapseableGroup.propTypes = {
     heading: string.isRequired,
     title: string,
-    eventKey: string.isRequired,
     children: node,
     defaultCollapsed: bool,
     onToggled: func,
@@ -133,7 +133,6 @@ const Group = ({
             <CollapseableGroup
                 heading={heading}
                 title={title}
-                eventKey={collapse.eventKey}
                 defaultCollapsed={collapse.defaultCollapsed}
                 onToggled={collapse.onToggled}
             >
@@ -155,7 +154,6 @@ Group.propTypes = {
         collapsable: bool,
         defaultCollapsed: bool,
         onToggled: func,
-        eventKey: string,
     }),
 };
 

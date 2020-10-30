@@ -35,7 +35,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -62,7 +61,7 @@ const SINGLE = 'SINGLE';
 const CONTINUOUS = 'CONTINUOUS';
 const EXTERNAL = 'EXTERNAL';
 
-const Trigger = ({ eventKey }) => {
+const Trigger = () => {
     const dispatch = useDispatch();
     const { rttRunning, capabilities } = useSelector(appState);
     const {
@@ -141,7 +140,6 @@ const Trigger = ({ eventKey }) => {
             collapse={{
                 collapsable: true,
                 onToggled: onTriggerToggled,
-                eventKey,
             }}
         >
             <ButtonGroup className="mb-2 w-100 trigger-mode d-flex flex-row">
@@ -266,10 +264,6 @@ const Trigger = ({ eventKey }) => {
             </div>
         </Group>
     );
-};
-
-Trigger.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default Trigger;
