@@ -1,0 +1,50 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.statbox {
+    flex: 1;
+    text-align: center;
+    font-size: 8pt;
+    align-self: stretch;
+
+    .statbox-header {
+        position: relative;
+        margin: -1px;
+        padding-left: 4px;
+        text-align: start;
+        height: 1rem;
+        .btn {
+            padding: 0 0.5rem;
+            float: right;
+            margin-bottom: 3px;
+            font-size: 10px;
+            line-height: 11px;
+        }
+        h2 {
+            letter-spacing: initial;
+        }
+    }
+
+    .value-box {
+        border: 1px solid $gray-200;
+        margin-right: -1px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem;
+        justify-content: center;
+        margin-bottom: -1px;
+
+        .value {
+            font-size: 20px;
+            height: 28px;
+            .unit {
+                font-size: 9pt;
+            }
+        }
+    }
+}
+.statbox:nth-child(2) {
+    .value-box {
+        background-color: $gray-100;
+    }
+}
