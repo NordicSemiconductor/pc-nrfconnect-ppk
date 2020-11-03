@@ -40,6 +40,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
+import SelectableContext from 'react-bootstrap/SelectableContext';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
@@ -240,28 +241,41 @@ const Trigger = () => {
                         onChangeComplete={() => sendTriggerLevel(levelUnit)}
                         chars={8}
                     />
-                    <Dropdown className="inline-dropdown">
-                        <Dropdown.Toggle
-                            id="dropdown-current-unit"
-                            variant="plain"
-                        >
-                            {levelUnit ? 'mA' : '\u00B5A'}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item
-                                eventKey="0"
-                                onSelect={() => sendTriggerLevel(false)}
+                    {/* The context in the next line is a hack to work around
+                        a bug in react-bootstrap described in
+                        https://github.com/react-bootstrap/react-bootstrap/issues/4176#issuecomment-549999503
+
+                        When we are certain that this app is only run with by
+                        a launcher that provides a version of
+                        react-bootstrap >= 1.4 this hack can be removed.
+
+                        The bug that this hack fixes is that selecting a value in the
+                        dropdown also closes the collapsable trigger group around it.
+                        */}
+                    <SelectableContext.Provider value={false}>
+                        <Dropdown className="inline-dropdown">
+                            <Dropdown.Toggle
+                                id="dropdown-current-unit"
+                                variant="plain"
                             >
-                                {'\u00B5A'}
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                eventKey="0"
-                                onSelect={() => sendTriggerLevel(true)}
-                            >
-                                mA
-                            </Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
+                                {levelUnit ? 'mA' : '\u00B5A'}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item
+                                    eventKey="1"
+                                    onSelect={() => sendTriggerLevel(false)}
+                                >
+                                    {'\u00B5A'}
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    eventKey="2"
+                                    onSelect={() => sendTriggerLevel(true)}
+                                >
+                                    mA
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </SelectableContext.Provider>
                 </Form.Label>
             </div>
         </Group>
