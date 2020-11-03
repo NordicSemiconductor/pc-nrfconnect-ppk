@@ -1,0 +1,14 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.sidepanel {
+    .digital-channels {
+        width: 100%;
+
+        .channel {
+            padding: 0.25rem 0;
+            height: 1.6rem;
+            margin: 1px;
+            line-height: 1rem;
+        }
+    }
+}

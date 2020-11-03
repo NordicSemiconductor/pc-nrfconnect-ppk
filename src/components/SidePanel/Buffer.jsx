@@ -40,6 +40,8 @@ import Group from './Group';
 import { chartState } from '../../reducers/chartReducer';
 import { bufferLengthInSeconds } from '../../globals';
 
+import './buffer.scss';
+
 const totalInUs = bufferLengthInSeconds * 1000000;
 
 export default () => {

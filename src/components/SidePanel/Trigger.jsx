@@ -57,6 +57,8 @@ import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
 
 import Group from './Group';
 
+import './inline-dropdown.scss';
+
 const SINGLE = 'SINGLE';
 const CONTINUOUS = 'CONTINUOUS';
 const EXTERNAL = 'EXTERNAL';
@@ -238,7 +240,7 @@ const Trigger = () => {
                         onChangeComplete={() => sendTriggerLevel(levelUnit)}
                         chars={8}
                     />
-                    <Dropdown>
+                    <Dropdown className="inline-dropdown">
                         <Dropdown.Toggle
                             id="dropdown-current-unit"
                             variant="plain"

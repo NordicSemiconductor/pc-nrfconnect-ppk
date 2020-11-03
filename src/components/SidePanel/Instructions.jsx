@@ -40,6 +40,8 @@ import Button from 'react-bootstrap/Button';
 import { openUrl } from 'pc-nrfconnect-shared';
 import Group from './Group';
 
+import './instructions.scss';
+
 const ppk1ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 const ppk2ug =
@@ -59,15 +61,19 @@ export default () => (
             <i>PPK</i> or <i>PPK2</i> hardware is required to sample real-time
             measurements.
         </p>
-        <p>
-            <Button variant="link" onClick={() => openUrl(ppk1ug)}>
-                PPK User Guide
-            </Button>
-        </p>
-        <p>
-            <Button variant="link" onClick={() => openUrl(ppk2ug)}>
-                PPK2 User Guide
-            </Button>
-        </p>
+        <Button
+            className="user-guide-link"
+            variant="link"
+            onClick={() => openUrl(ppk1ug)}
+        >
+            PPK User Guide
+        </Button>
+        <Button
+            className="user-guide-link"
+            variant="link"
+            onClick={() => openUrl(ppk2ug)}
+        >
+            PPK2 User Guide
+        </Button>
     </Group>
 );
