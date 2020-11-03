@@ -8,11 +8,9 @@
     margin-top: -24px;
     font-size: 12px;
 
-    // Above are things that apply for all sidepanels and really should be set in shared
+    color: $gray-600;
 
-    .btn {
-        font-size: 12px;
-    }
+    // Above are things that apply for all sidepanels and really should be set in shared
 
     .form-label {
         margin-bottom: 0ex;
@@ -37,9 +35,9 @@
     }
 
     .btn-set {
-        color: $gray-700;
+        color: $gray-900;
         background-color: $white;
-        border-color: $gray-700;
+        border-color: $gray-200;
     }
     .btn-unset {
         color: $white;
