@@ -55,6 +55,7 @@ import {
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
+import { options } from '../../globals';
 
 import Group from './Group';
 
@@ -66,6 +67,7 @@ const EXTERNAL = 'EXTERNAL';
 
 const Trigger = () => {
     const dispatch = useDispatch();
+    const { currentPane } = useSelector(({ appLayout }) => appLayout);
     const { rttRunning, capabilities } = useSelector(appState);
     const {
         externalTrigger,
@@ -75,6 +77,8 @@ const Trigger = () => {
     } = useSelector(triggerState);
 
     const { triggerHandleVisible } = useSelector(chartState);
+
+    const hasExternal = 'ppkTriggerExtToggle' in capabilities;
 
     const range = {
         min: (450 * 13) / 1e3,
@@ -103,18 +107,17 @@ const Trigger = () => {
 
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 
-    if (!capabilities.ppkTriggerSet) {
+    if (currentPane !== 0) {
         return null;
     }
 
-    let startLabel = 'External';
     let startTitle;
     let onStartClicked = null;
     if (!externalTrigger) {
         if (!(triggerRunning || triggerSingleWaiting)) {
-            startLabel = 'Start trigger sampling​';
-            startTitle =
-                'Start sampling at 77kHz for a short duration when the set trigger level is reached';
+            startTitle = `Start sampling at ${Math.round(
+                options.samplesPerSecond / 1000
+            )}kHz for a short duration when the set trigger level is reached`;
             if (triggerMode === SINGLE) {
                 onStartClicked = () => dispatch(triggerSingleSet());
             } else {
@@ -123,10 +126,7 @@ const Trigger = () => {
         } else {
             onStartClicked = () => dispatch(triggerStop());
             if (triggerMode === SINGLE) {
-                startLabel = 'Wait';
                 startTitle = 'Waiting for samples above trigger level';
-            } else {
-                startLabel = 'Stop trigger sampling.';
             }
         }
     }
@@ -145,56 +145,6 @@ const Trigger = () => {
                 onToggled: onTriggerToggled,
             }}
         >
-            <ButtonGroup className="mb-2 w-100 trigger-mode d-flex flex-row">
-                <Button
-                    title="Sample once​"
-                    disabled={!rttRunning || triggerMode === SINGLE}
-                    variant={triggerMode === SINGLE ? 'set' : 'unset'}
-                    onClick={() => {
-                        setTriggerMode(SINGLE);
-                        if (externalTrigger) {
-                            dispatch(externalTriggerToggled(false));
-                        }
-                    }}
-                >
-                    Single
-                </Button>
-                <Button
-                    title="Sample until stopped by user​"
-                    disabled={!rttRunning || triggerMode === CONTINUOUS}
-                    variant={triggerMode === CONTINUOUS ? 'set' : 'unset'}
-                    onClick={() => {
-                        setTriggerMode(CONTINUOUS);
-                        if (externalTrigger) {
-                            dispatch(externalTriggerToggled(false));
-                        }
-                    }}
-                >
-                    Continuous
-                </Button>
-                <Button
-                    title="Sample controlled from TRIG IN​"
-                    disabled={!rttRunning || triggerMode === EXTERNAL}
-                    variant={triggerMode === EXTERNAL ? 'set' : 'unset'}
-                    onClick={() => {
-                        setTriggerMode(EXTERNAL);
-                        dispatch(externalTriggerToggled(true));
-                    }}
-                >
-                    External
-                </Button>
-            </ButtonGroup>
-            <Button
-                title={startTitle}
-                className={`w-100 mb-2 ${
-                    triggerRunning || triggerSingleWaiting ? 'active-anim' : ''
-                }`}
-                disabled={!rttRunning || externalTrigger}
-                variant="set"
-                onClick={onStartClicked}
-            >
-                {startLabel}
-            </Button>
             <Form.Label
                 title="Duration of trigger window"
                 htmlFor="slider-trigger-window"
@@ -244,11 +194,9 @@ const Trigger = () => {
                     {/* The context in the next line is a hack to work around
                         a bug in react-bootstrap described in
                         https://github.com/react-bootstrap/react-bootstrap/issues/4176#issuecomment-549999503
-
                         When we are certain that this app is only run with by
                         a launcher that provides a version of
                         react-bootstrap >= 1.4 this hack can be removed.
-
                         The bug that this hack fixes is that selecting a value in the
                         dropdown also closes the collapsible trigger group around it.
                         */}
@@ -278,6 +226,58 @@ const Trigger = () => {
                     </SelectableContext.Provider>
                 </Form.Label>
             </div>
+            <ButtonGroup className="mb-2 w-100 trigger-mode d-flex flex-row">
+                <Button
+                    title="Sample once​"
+                    disabled={!rttRunning || triggerMode === SINGLE}
+                    variant={triggerMode === SINGLE ? 'set' : 'unset'}
+                    onClick={() => {
+                        setTriggerMode(SINGLE);
+                        if (externalTrigger) {
+                            dispatch(externalTriggerToggled(false));
+                        }
+                    }}
+                >
+                    Single
+                </Button>
+                <Button
+                    title="Sample until stopped by user​"
+                    disabled={!rttRunning || triggerMode === CONTINUOUS}
+                    variant={triggerMode === CONTINUOUS ? 'set' : 'unset'}
+                    onClick={() => {
+                        setTriggerMode(CONTINUOUS);
+                        if (externalTrigger) {
+                            dispatch(externalTriggerToggled(false));
+                        }
+                    }}
+                >
+                    Continuous
+                </Button>
+                {hasExternal && (
+                    <Button
+                        title="Sample controlled from TRIG IN​"
+                        disabled={!rttRunning || triggerMode === EXTERNAL}
+                        variant={triggerMode === EXTERNAL ? 'set' : 'unset'}
+                        onClick={() => {
+                            setTriggerMode(EXTERNAL);
+                            dispatch(externalTriggerToggled(true));
+                        }}
+                    >
+                        External
+                    </Button>
+                )}
+            </ButtonGroup>
+            <Button
+                title={startTitle}
+                className={`w-100 mb-2 ${
+                    triggerRunning || triggerSingleWaiting ? 'active-anim' : ''
+                }`}
+                disabled={!rttRunning || externalTrigger}
+                variant="set"
+                onClick={onStartClicked}
+            >
+                Start
+            </Button>
         </Group>
     );
 };

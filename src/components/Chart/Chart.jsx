@@ -39,6 +39,10 @@
 /* eslint operator-assignment: off */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+<<<<<<< HEAD
+=======
+import { bool } from 'prop-types';
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
 import { useDispatch, useSelector } from 'react-redux';
 import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
@@ -110,10 +114,13 @@ const formatCurrent = uA =>
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
+<<<<<<< HEAD
 const lineData = emptyArray();
 const bitsData = [...Array(nbDigitalChannels)].map(() => emptyArray());
 const bitIndexes = new Array(nbDigitalChannels);
 const lastBits = new Array(nbDigitalChannels);
+=======
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
 
 const bitsChartOptions = {
     scales: {
@@ -176,7 +183,11 @@ const calcStats = (data, begin, end, index) => {
     };
 };
 
+<<<<<<< HEAD
 const Chart = () => {
+=======
+const Chart = ({ digitalChannelsEnabled = false }) => {
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
     const dispatch = useDispatch();
     const chartWindow = useCallback(
         (windowBegin, windowEnd, yMin, yMax) =>
@@ -223,6 +234,11 @@ const Chart = () => {
         hasDigitalChannels,
         triggerHandleVisible,
     } = useSelector(chartState);
+<<<<<<< HEAD
+=======
+    const showDigitalChannels =
+        digitalChannelsVisible && digitalChannelsEnabled;
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
     const {
         triggerLevel,
         triggerRunning,
@@ -236,9 +252,25 @@ const Chart = () => {
 
     const chartRef = useRef(null);
 
+<<<<<<< HEAD
     const { data, bits } = options;
 
     let numberOfBits = windowDuration <= 3000000 ? nbDigitalChannels : 0;
+=======
+    const [lineData] = useState(emptyArray());
+    const [bitsData] = useState(
+        [...Array(nbDigitalChannels)].map(() => emptyArray())
+    );
+    const [bitIndexes] = useState(new Array(nbDigitalChannels));
+    const [lastBits] = useState(new Array(nbDigitalChannels));
+
+    const { data, bits } = options;
+
+    let numberOfBits =
+        windowDuration <= 3000000 && showDigitalChannels
+            ? nbDigitalChannels
+            : 0;
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
     if (!bits) {
         numberOfBits = 0;
     }
@@ -583,10 +615,17 @@ const Chart = () => {
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}
                 >
+<<<<<<< HEAD
                     <StatBox {...windowStats} label="Window" />
                     <StatBox
                         {...selectionStats}
                         label="Selection"
+=======
+                    <StatBox {...windowStats} label="WINDOW" />
+                    <StatBox
+                        {...selectionStats}
+                        label="SELECTION"
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
                         action={
                             <Button
                                 variant="secondary"
@@ -600,7 +639,11 @@ const Chart = () => {
                     />
                 </div>
             </div>
+<<<<<<< HEAD
             {hasDigitalChannels && digitalChannelsVisible && (
+=======
+            {hasDigitalChannels && showDigitalChannels && (
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
                 <div className="chart-bits-container">
                     {bitsChartData.map((_, i) => (
                         <div key={`${i + 1}`} className="chart-bits">
@@ -631,4 +674,11 @@ const Chart = () => {
     );
 };
 
+<<<<<<< HEAD
+=======
+Chart.propTypes = {
+    digitalChannelsEnabled: bool,
+};
+
+>>>>>>> f987597... Move Chart back to common, reshuffled Trigger
 export default Chart;

@@ -35,5 +35,10 @@
  */
 
 import React from 'react';
+import { useSelector } from 'react-redux';
+import Chart from '../Chart/Chart';
 
-export default () => <div />;
+export default () => {
+    const { currentPane } = useSelector(({ appLayout }) => appLayout);
+    return currentPane === 1 ? <Chart digitalChannelsEnabled /> : null;
+};
