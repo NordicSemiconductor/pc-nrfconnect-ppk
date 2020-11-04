@@ -1,5 +1,3 @@
-@import "~pc-nrfconnect-shared/src/variables";
-
 .sidepanel-group {
     .body {
         > * {
@@ -12,8 +10,6 @@
     }
 
     .heading {
-        color: $gray-400;
-
         margin-bottom: 16px;
 
         font-size: 10px;

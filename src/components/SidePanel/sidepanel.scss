@@ -2,13 +2,13 @@
 
 .sidepanel {
     > * {
-        margin-top: 36px;
+        margin-top: 32px;
     }
 
     margin-top: -24px;
     font-size: 12px;
 
-    color: $gray-600;
+    color: $gray-700;
 
     // Above are things that apply for all sidepanels and really should be set in shared
 
@@ -35,9 +35,9 @@
     }
 
     .btn-set {
-        color: $gray-900;
+        color: $gray-700;
         background-color: $white;
-        border-color: $gray-200;
+        border-color: $gray-700;
     }
     .btn-unset {
         color: $white;
