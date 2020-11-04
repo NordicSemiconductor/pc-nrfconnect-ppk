@@ -62,7 +62,7 @@ const SpikeFilter = () => {
         <Group
             heading="Spike filter"
             title="Adjust how the software filters current spikes"
-            collapse={{ collapsable: true }}
+            collapse={{ collapsible: true }}
         >
             <Form.Label
                 title="Number of samples after a dynamic range switch to apply filter"

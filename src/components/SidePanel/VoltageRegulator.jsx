@@ -66,7 +66,7 @@ const VoltageRegulator = () => {
             <div>
                 <Group
                     heading="Voltage adjustment"
-                    collapse={{ collapsable: true }}
+                    collapse={{ collapsible: true }}
                 >
                     <Form.Label htmlFor="slider-vdd">
                         <span className="flex-fill">Supply</span>

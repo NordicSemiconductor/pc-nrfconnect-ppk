@@ -76,7 +76,7 @@ const SwitchPoints = () => {
     }
 
     return (
-        <Group heading="Switch levels" collapse={{ collapsable: true }}>
+        <Group heading="Switch levels" collapse={{ collapsible: true }}>
             {capabilities.ppkSwitchPointUp && (
                 <>
                     <span title="Set dynamic range switching levels. See user guide for details.">

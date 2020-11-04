@@ -87,7 +87,7 @@ ContextAwareToggle.propTypes = {
     onToggled: func.isRequired,
 };
 
-const CollapseableGroup = ({
+const CollapsibleGroup = ({
     heading,
     title,
     children = null,
@@ -113,7 +113,7 @@ const CollapseableGroup = ({
     );
 };
 
-CollapseableGroup.propTypes = {
+CollapsibleGroup.propTypes = {
     heading: string.isRequired,
     title: string,
     children: node,
@@ -125,19 +125,19 @@ const Group = ({
     className = '',
     heading,
     title,
-    collapse = { collapsable: false },
+    collapse = { collapsible: false },
     children,
 }) =>
-    collapse.collapsable ? (
+    collapse.collapsible ? (
         <div className={`sidepanel-group ${className}`}>
-            <CollapseableGroup
+            <CollapsibleGroup
                 heading={heading}
                 title={title}
                 defaultCollapsed={collapse.defaultCollapsed}
                 onToggled={collapse.onToggled}
             >
                 <div className="body">{children}</div>
-            </CollapseableGroup>
+            </CollapsibleGroup>
         </div>
     ) : (
         <div className={`sidepanel-group ${className}`}>
@@ -151,7 +151,7 @@ Group.propTypes = {
     title: string,
     children: node,
     collapse: shape({
-        collapsable: bool,
+        collapsible: bool,
         defaultCollapsed: bool,
         onToggled: func,
     }),

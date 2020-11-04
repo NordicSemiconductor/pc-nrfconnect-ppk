@@ -67,7 +67,7 @@ const Gains = () => {
         <Group
             heading="Gains"
             title="Adjust gains to correct potential measurement errors​"
-            collapse={{ collapsable: true }}
+            collapse={{ collapsible: true }}
         >
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>

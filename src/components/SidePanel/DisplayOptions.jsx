@@ -59,7 +59,7 @@ export default () => {
         <Group
             heading="Display options"
             collapse={{
-                collapsable: true,
+                collapsible: true,
                 defaultCollapsed: false,
             }}
         >

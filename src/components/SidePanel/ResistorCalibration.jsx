@@ -67,7 +67,7 @@ const ResistorCalibration = () => {
         <Group
             heading="Resistor calibration"
             title="Fine tune resistor values of the measurement paths. See user guide for details."
-            collapse={{ collapsable: true }}
+            collapse={{ collapsible: true }}
         >
             <Form.Label htmlFor="slider-res-hi">
                 <span className="flex-fill">High</span>

@@ -141,7 +141,7 @@ const Trigger = () => {
         <Group
             heading="Trigger"
             collapse={{
-                collapsable: true,
+                collapsible: true,
                 onToggled: onTriggerToggled,
             }}
         >
@@ -250,7 +250,7 @@ const Trigger = () => {
                         react-bootstrap >= 1.4 this hack can be removed.
 
                         The bug that this hack fixes is that selecting a value in the
-                        dropdown also closes the collapsable trigger group around it.
+                        dropdown also closes the collapsible trigger group around it.
                         */}
                     <SelectableContext.Provider value={false}>
                         <Dropdown className="inline-dropdown">
