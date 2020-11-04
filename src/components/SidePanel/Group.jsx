@@ -84,7 +84,7 @@ ContextAwareToggle.propTypes = {
     heading: string.isRequired,
     title: string,
     eventKey: string.isRequired,
-    onToggled: func.isRequired,
+    onToggled: func,
 };
 
 const CollapsibleGroup = ({
