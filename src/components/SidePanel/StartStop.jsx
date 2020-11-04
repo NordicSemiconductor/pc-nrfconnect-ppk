@@ -39,14 +39,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import { Toggle } from 'pc-nrfconnect-shared';
 
-import PowerMode from './PowerMode';
-
 import {
     samplingStart,
     samplingStop,
     toggleDUT,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
+
+import Group from './Group';
 
 export default () => {
     const dispatch = useDispatch();
@@ -67,13 +67,10 @@ export default () => {
             : undefined;
 
     return (
-        <div className="d-flex flex-column start-stop">
-            <PowerMode />
+        <Group>
             <Button
                 title={startStopTitle}
-                className={`start-btn mb-3 ${
-                    samplingRunning ? 'active-anim' : ''
-                }`}
+                className={`w-100 ${samplingRunning ? 'active-anim' : ''}`}
                 variant="set"
                 disabled={!rttRunning}
                 onClick={() =>
@@ -91,6 +88,6 @@ export default () => {
                     variant="secondary"
                 />
             )}
-        </div>
+        </Group>
     );
 };

@@ -124,3 +124,7 @@ export default (state = initialState, { type, ...action }) => {
 };
 
 export const appState = ({ app }) => app.app;
+
+export const advancedMode = state => state.app.app.advancedMode;
+export const deviceOpen = state =>
+    Object.keys(state.app.app.capabilities).length > 0;

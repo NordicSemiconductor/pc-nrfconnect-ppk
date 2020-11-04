@@ -18,15 +18,6 @@
     }
 }
 
-h2:not(.about-card-title)  {
-    margin-top: 32px;
-    margin-bottom: 16px;
-
-    font-size: 10px;
-    font-weight: normal;
-    letter-spacing: 0.5ex;
-}
-
 .btn-lg, .btn-sm {
     border-radius: 0;
 }
@@ -56,5 +47,9 @@ h2:not(.about-card-title)  {
     }
     .toggle-label {
         font-size: 12px; // overridden
+    }
+
+    label {
+        margin-bottom: 0;
     }
 }

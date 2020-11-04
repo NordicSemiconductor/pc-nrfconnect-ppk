@@ -35,17 +35,13 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
-import Collapse from './Collapse';
-
 import { updateResistors, resetResistors } from '../../actions/deviceActions';
-
 import { appState } from '../../reducers/appReducer';
 import {
     updateHighResistorAction,
@@ -54,7 +50,9 @@ import {
     resistorCalibrationState,
 } from '../../reducers/resistorCalibrationReducer';
 
-const ResistorCalibration = ({ eventKey }) => {
+import Group from './Group';
+
+const ResistorCalibration = () => {
     const dispatch = useDispatch();
     const { userResLo, userResMid, userResHi } = useSelector(
         resistorCalibrationState
@@ -66,10 +64,10 @@ const ResistorCalibration = ({ eventKey }) => {
     }
 
     return (
-        <Collapse
-            heading="RESISTOR CALIBRATION"
+        <Group
+            heading="Resistor calibration"
             title="Fine tune resistor values of the measurement paths. See user guide for details."
-            eventKey={eventKey}
+            collapse={{ collapsible: true }}
         >
             <Form.Label htmlFor="slider-res-hi">
                 <span className="flex-fill">High</span>
@@ -141,12 +139,8 @@ const ResistorCalibration = ({ eventKey }) => {
                     Reset
                 </Button>
             </ButtonGroup>
-        </Collapse>
+        </Group>
     );
-};
-
-ResistorCalibration.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default ResistorCalibration;

@@ -41,6 +41,8 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 
 import { chartState, setDigitalChannels } from '../../reducers/chartReducer';
 
+import './digital-channels.scss';
+
 export default () => {
     const dispatch = useDispatch();
     const { digitalChannels, hasDigitalChannels } = useSelector(chartState);
@@ -62,7 +64,7 @@ export default () => {
 
     return (
         <ToggleButtonGroup
-            className="digital-channels w-100"
+            className="digital-channels"
             type="checkbox"
             value={value}
         >
@@ -71,7 +73,7 @@ export default () => {
                     key={`d${i + 1}`}
                     checked={channel}
                     variant={channel ? 'set' : 'unset'}
-                    className="text-smaller px-0 py-1"
+                    className="channel"
                     value={i}
                     onChange={() => toggle(i)}
                     active

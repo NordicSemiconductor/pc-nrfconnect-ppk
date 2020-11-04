@@ -35,14 +35,12 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 import { Slider, Toggle } from 'pc-nrfconnect-shared';
-import Collapse from './Collapse';
 
 import {
     spikeFilteringToggle,
@@ -57,7 +55,9 @@ import {
 } from '../../reducers/switchingPointsReducer';
 import { appState } from '../../reducers/appReducer';
 
-const SwitchPoints = ({ eventKey }) => {
+import Group from './Group';
+
+const SwitchPoints = () => {
     const dispatch = useDispatch();
 
     const {
@@ -76,7 +76,7 @@ const SwitchPoints = ({ eventKey }) => {
     }
 
     return (
-        <Collapse heading="SWITCH LEVELS" eventKey={eventKey}>
+        <Group heading="Switch levels" collapse={{ collapsible: true }}>
             {capabilities.ppkSwitchPointUp && (
                 <>
                     <span title="Set dynamic range switching levels. See user guide for details.">
@@ -132,12 +132,8 @@ const SwitchPoints = ({ eventKey }) => {
                     variant="secondary"
                 />
             )}
-        </Collapse>
+        </Group>
     );
-};
-
-SwitchPoints.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default SwitchPoints;

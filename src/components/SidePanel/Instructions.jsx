@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,30 +35,45 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
+
+import { openUrl } from 'pc-nrfconnect-shared';
 import Group from './Group';
-import { chartState } from '../../reducers/chartReducer';
-import { bufferLengthInSeconds } from '../../globals';
 
-import './buffer.scss';
+import './instructions.scss';
 
-const totalInUs = bufferLengthInSeconds * 1000000;
+const ppk1ug =
+    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+const ppk2ug =
+    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 
-export default () => {
-    const { bufferRemaining } = useSelector(chartState);
-    const percentage = 100 - (100 * bufferRemaining) / totalInUs;
-
-    return (
-        <Group heading="Capture status">
-            <div className="buffer-total">
-                <div
-                    className="buffer-used progress-bar-striped"
-                    style={{ width: `${percentage}%` }}
-                />
-            </div>
-            <div className="buffer-label">
-                Buffer {`${percentage.toFixed()}%`} full
-            </div>
-        </Group>
-    );
-};
+export default () => (
+    <Group heading="Instructions">
+        <p>
+            The Power Profiler Kit (PPK) is an affordable, flexible tool that
+            measures real-time power consumption of your designs.
+        </p>
+        <p>
+            Select a device to sample real-time measurements or load an existing
+            data set.
+        </p>
+        <p>
+            <i>PPK</i> or <i>PPK2</i> hardware is required to sample real-time
+            measurements.
+        </p>
+        <Button
+            className="user-guide-link"
+            variant="link"
+            onClick={() => openUrl(ppk1ug)}
+        >
+            PPK User Guide
+        </Button>
+        <Button
+            className="user-guide-link"
+            variant="link"
+            onClick={() => openUrl(ppk2ug)}
+        >
+            PPK2 User Guide
+        </Button>
+    </Group>
+);

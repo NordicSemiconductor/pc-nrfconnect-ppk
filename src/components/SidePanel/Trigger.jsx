@@ -35,16 +35,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
+import SelectableContext from 'react-bootstrap/SelectableContext';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
-
-import Collapse from './Collapse';
 
 import {
     triggerLengthUpdate,
@@ -58,11 +56,15 @@ import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
 
+import Group from './Group';
+
+import './inline-dropdown.scss';
+
 const SINGLE = 'SINGLE';
 const CONTINUOUS = 'CONTINUOUS';
 const EXTERNAL = 'EXTERNAL';
 
-const Trigger = ({ eventKey }) => {
+const Trigger = () => {
     const dispatch = useDispatch();
     const { rttRunning, capabilities } = useSelector(appState);
     const {
@@ -136,13 +138,14 @@ const Trigger = ({ eventKey }) => {
     };
 
     return (
-        <Collapse
-            heading="TRIGGER"
-            eventKey={eventKey}
-            className="trigger-collapse"
-            onToggled={onTriggerToggled}
+        <Group
+            heading="Trigger"
+            collapse={{
+                collapsible: true,
+                onToggled: onTriggerToggled,
+            }}
         >
-            <ButtonGroup className="mb-2 trigger-mode d-flex flex-row">
+            <ButtonGroup className="mb-2 w-100 trigger-mode d-flex flex-row">
                 <Button
                     title="Sample once​"
                     disabled={!rttRunning || triggerMode === SINGLE}
@@ -238,36 +241,45 @@ const Trigger = ({ eventKey }) => {
                         onChangeComplete={() => sendTriggerLevel(levelUnit)}
                         chars={8}
                     />
-                    <Dropdown>
-                        <Dropdown.Toggle
-                            id="dropdown-current-unit"
-                            variant="plain"
-                        >
-                            {levelUnit ? 'mA' : '\u00B5A'}
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item
-                                eventKey="0"
-                                onSelect={() => sendTriggerLevel(false)}
+                    {/* The context in the next line is a hack to work around
+                        a bug in react-bootstrap described in
+                        https://github.com/react-bootstrap/react-bootstrap/issues/4176#issuecomment-549999503
+
+                        When we are certain that this app is only run with by
+                        a launcher that provides a version of
+                        react-bootstrap >= 1.4 this hack can be removed.
+
+                        The bug that this hack fixes is that selecting a value in the
+                        dropdown also closes the collapsible trigger group around it.
+                        */}
+                    <SelectableContext.Provider value={false}>
+                        <Dropdown className="inline-dropdown">
+                            <Dropdown.Toggle
+                                id="dropdown-current-unit"
+                                variant="plain"
                             >
-                                {'\u00B5A'}
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                eventKey="0"
-                                onSelect={() => sendTriggerLevel(true)}
-                            >
-                                mA
-                            </Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
+                                {levelUnit ? 'mA' : '\u00B5A'}
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item
+                                    eventKey="1"
+                                    onSelect={() => sendTriggerLevel(false)}
+                                >
+                                    {'\u00B5A'}
+                                </Dropdown.Item>
+                                <Dropdown.Item
+                                    eventKey="2"
+                                    onSelect={() => sendTriggerLevel(true)}
+                                >
+                                    mA
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </SelectableContext.Provider>
                 </Form.Label>
             </div>
-        </Collapse>
+        </Group>
     );
-};
-
-Trigger.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default Trigger;

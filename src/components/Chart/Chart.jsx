@@ -583,10 +583,10 @@ const Chart = () => {
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}
                 >
-                    <StatBox {...windowStats} label="WINDOW" />
+                    <StatBox {...windowStats} label="Window" />
                     <StatBox
                         {...selectionStats}
-                        label="SELECTION"
+                        label="Selection"
                         action={
                             <Button
                                 variant="secondary"

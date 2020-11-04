@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,30 +35,53 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
-import Group from './Group';
-import { chartState } from '../../reducers/chartReducer';
-import { bufferLengthInSeconds } from '../../globals';
+import { useDispatch, useSelector } from 'react-redux';
+import Button from 'react-bootstrap/Button';
 
-import './buffer.scss';
+import {
+    appState,
+    showExportDialog,
+    toggleSaveChoiceDialog,
+} from '../../reducers/appReducer';
+import { load } from '../../actions/fileActions';
 
-const totalInUs = bufferLengthInSeconds * 1000000;
+const enableSave = false; // temporarily disable saving
 
-export default () => {
-    const { bufferRemaining } = useSelector(chartState);
-    const percentage = 100 - (100 * bufferRemaining) / totalInUs;
+const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
+const saveExportTitle = enableSave
+    ? 'Stop sampling to save or export'
+    : 'Stop sampling to export';
+const saveExportAction = enableSave ? toggleSaveChoiceDialog : showExportDialog;
+
+export const Load = () => {
+    const dispatch = useDispatch();
+
+    if (!enableSave) return null;
 
     return (
-        <Group heading="Capture status">
-            <div className="buffer-total">
-                <div
-                    className="buffer-used progress-bar-striped"
-                    style={{ width: `${percentage}%` }}
-                />
-            </div>
-            <div className="buffer-label">
-                Buffer {`${percentage.toFixed()}%`} full
-            </div>
-        </Group>
+        <Button
+            className="w-100"
+            variant="set"
+            onClick={() => dispatch(load())}
+        >
+            Load
+        </Button>
+    );
+};
+
+export const Save = () => {
+    const dispatch = useDispatch();
+    const { samplingRunning } = useSelector(appState);
+
+    return (
+        <Button
+            className="w-100"
+            title={samplingRunning ? saveExportTitle : undefined}
+            variant="set"
+            disabled={samplingRunning}
+            onClick={() => dispatch(saveExportAction())}
+        >
+            {saveExportLabel}
+        </Button>
     );
 };
