@@ -37,29 +37,30 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import { Toggle } from 'pc-nrfconnect-shared';
+import Form from 'react-bootstrap/Form';
 
-import {
-    samplingStart,
-    samplingStop,
-    toggleDUT,
-} from '../../actions/deviceActions';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 
 import Group from './Group';
 
+import {
+    updateSampleFreqLog10,
+    updateDurationSeconds,
+    dataLoggerState,
+} from '../../reducers/dataLoggerReducer';
+
 export default () => {
     const dispatch = useDispatch();
 
+    const { rttRunning, capabilities, samplingRunning } = useSelector(appState);
     const {
-        deviceRunning,
-        rttRunning,
-        capabilities,
-        samplingRunning,
-    } = useSelector(appState);
-
-    const btnStr = samplingRunning ? 'Stop' : 'Start';
-    const avgStr = capabilities.ppkTriggerSet ? ' average' : '';
+        sampleFreqLog10,
+        sampleFreq,
+        durationSeconds,
+        maxPower10,
+    } = useSelector(dataLoggerState);
 
     const startStopTitle =
         !samplingRunning && capabilities.ppkTriggerSet
@@ -68,26 +69,46 @@ export default () => {
 
     return (
         <Group>
+            <Form.Label htmlFor="data-logger-sampling-frequency">
+                {sampleFreq} samples per second
+            </Form.Label>
+            <Slider
+                id="data-logger-sampling-frequency"
+                values={[sampleFreqLog10]}
+                range={{ min: 0, max: maxPower10 }}
+                onChange={[value => dispatch(updateSampleFreqLog10(value))]}
+                onChangeComplete={() => {}}
+            />
+            <Form.Label htmlFor="slider-data-logger-duration">
+                Sample for{' '}
+                <NumberInlineInput
+                    value={durationSeconds}
+                    range={{ min: 1, max: 7 * 24 * 60 * 60 }}
+                    onChange={value => dispatch(updateDurationSeconds(value))}
+                    onChangeComplete={() => {}}
+                />{' '}
+                seconds
+            </Form.Label>
+            <Slider
+                id="slider-data-logger-duration"
+                values={[durationSeconds]}
+                range={{ min: 1, max: 7 * 24 * 60 * 60 }}
+                onChange={[value => dispatch(updateDurationSeconds(value))]}
+                onChangeComplete={() => {}}
+            />
             <Button
                 title={startStopTitle}
-                className={`w-100 ${samplingRunning ? 'active-anim' : ''}`}
+                className={`w-100 start-btn my-3 ${
+                    samplingRunning ? 'active-anim' : ''
+                }`}
                 variant="set"
                 disabled={!rttRunning}
                 onClick={() =>
                     dispatch(samplingRunning ? samplingStop() : samplingStart())
                 }
             >
-                {`${btnStr}${avgStr} sampling`}
+                {samplingRunning ? 'Stop' : 'Start'}
             </Button>
-            {capabilities.ppkToggleDUT && (
-                <Toggle
-                    title="Turn power on/off for device under test​"
-                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
-                    isToggled={deviceRunning}
-                    label="Enable power output"
-                    variant="secondary"
-                />
-            )}
         </Group>
     );
 };

@@ -127,6 +127,7 @@ class RTTDevice extends Device {
     constructor(device) {
         super();
 
+        this.capabilities.maxContinuousSamplingTimeUs = 130;
         this.serialNumber = parseInt(device.serialNumber, 10);
         this.isRttOpen = false;
 

@@ -38,7 +38,9 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import Chart from '../Chart/Chart';
 
+import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
+
 export default () => {
-    const { currentPane } = useSelector(({ appLayout }) => appLayout);
+    const currentPane = useSelector(currentPaneSelector);
     return currentPane === 0 ? <Chart /> : null;
 };

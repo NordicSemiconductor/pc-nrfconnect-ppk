@@ -62,7 +62,10 @@ import {
     chartState,
 } from '../../reducers/chartReducer';
 import { triggerState } from '../../reducers/triggerReducer';
-import { appState } from '../../reducers/appReducer';
+import {
+    appState,
+    currentPane as currentPaneSelector,
+} from '../../reducers/appReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
@@ -218,7 +221,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         digitalChannelsVisible,
         timestampsVisible,
         hasDigitalChannels,
-        triggerHandleVisible,
     } = useSelector(chartState);
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
@@ -229,6 +231,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         externalTrigger,
     } = useSelector(triggerState);
     const { samplingRunning } = useSelector(appState);
+    const currentPane = useSelector(currentPaneSelector);
+
     const { index } = options;
 
     const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
@@ -537,7 +541,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         sendTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible: triggerHandleVisible && !externalTrigger,
+        triggerHandleVisible: currentPane === 0 && !externalTrigger,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];

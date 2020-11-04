@@ -54,7 +54,6 @@ import {
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
-import { chartState, toggleTriggerHandle } from '../../reducers/chartReducer';
 import { options } from '../../globals';
 
 import Group from './Group';
@@ -67,7 +66,6 @@ const EXTERNAL = 'EXTERNAL';
 
 const Trigger = () => {
     const dispatch = useDispatch();
-    const { currentPane } = useSelector(({ appLayout }) => appLayout);
     const { rttRunning, capabilities } = useSelector(appState);
     const {
         externalTrigger,
@@ -75,8 +73,6 @@ const Trigger = () => {
         triggerLevel,
         triggerSingleWaiting,
     } = useSelector(triggerState);
-
-    const { triggerHandleVisible } = useSelector(chartState);
 
     const hasExternal = 'ppkTriggerExtToggle' in capabilities;
 
@@ -107,10 +103,6 @@ const Trigger = () => {
 
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 
-    if (currentPane !== 0) {
-        return null;
-    }
-
     let startTitle;
     let onStartClicked = null;
     if (!externalTrigger) {
@@ -131,20 +123,8 @@ const Trigger = () => {
         }
     }
 
-    const onTriggerToggled = enable => {
-        if (triggerHandleVisible !== enable) {
-            dispatch(toggleTriggerHandle());
-        }
-    };
-
     return (
-        <Group
-            heading="Trigger"
-            collapse={{
-                collapsible: true,
-                onToggled: onTriggerToggled,
-            }}
-        >
+        <Group heading="Trigger">
             <Form.Label
                 title="Duration of trigger window"
                 htmlFor="slider-trigger-window"

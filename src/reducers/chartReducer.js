@@ -60,7 +60,6 @@ const initialState = {
     ),
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
-    triggerHandleVisible: persistentStore.get('triggerHandleVisible', true),
     yAxisLock: false,
 };
 
@@ -71,7 +70,6 @@ const LOAD_CHART_STATE = 'LOAD_CHART_STATE';
 const DIGITAL_CHANNELS = 'DIGITAL_CHANNELS';
 const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
 const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
-const TOGGLE_TRIGGER_HANDLE = 'TOGGLE_TRIGGER_HANDLE';
 const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
 
@@ -169,7 +167,6 @@ export const setDigitalChannels = digitalChannels => ({
 
 export const toggleDigitalChannels = () => ({ type: TOGGLE_DIGITAL_CHANNELS });
 export const toggleTimestamps = () => ({ type: TOGGLE_TIMESTAMPS });
-export const toggleTriggerHandle = () => ({ type: TOGGLE_TRIGGER_HANDLE });
 export const toggleYAxisLock = (yMin, yMax) => ({
     type: TOGGLE_Y_AXIS_LOCK,
     yMin,
@@ -253,16 +250,6 @@ export default (state = initialState, { type, ...action }) => {
             return {
                 ...state,
                 timestampsVisible: !state.timestampsVisible,
-            };
-        }
-        case TOGGLE_TRIGGER_HANDLE: {
-            persistentStore.set(
-                'triggerHandleVisible',
-                !state.triggerHandleVisible
-            );
-            return {
-                ...state,
-                triggerHandleVisible: !state.triggerHandleVisible,
             };
         }
         case TOGGLE_Y_AXIS_LOCK: {

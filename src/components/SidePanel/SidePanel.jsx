@@ -38,6 +38,7 @@ import React from 'react';
 import { func } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
+import PowerMode from './PowerMode';
 import Buffer from './Buffer';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
@@ -53,12 +54,12 @@ import {
     toggleAdvancedModeAction,
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
+    currentPane as currentPaneSelector,
 } from '../../reducers/appReducer';
 
 import { options } from '../../globals';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
-import PowerMode from './PowerMode';
 
 import './sidepanel.scss';
 
@@ -68,23 +69,28 @@ const SidePanel = ({ bindHotkey }) => {
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
+    const currentPane = useSelector(currentPaneSelector);
+
+    if (!deviceOpen) {
+        return (
+            <div className="sidepanel d-flex flex-column">
+                <Load />
+                <Instructions />
+            </div>
+        );
+    }
+
+    if (currentPane > 1) {
+        return null;
+    }
 
     return (
         <div className="sidepanel d-flex flex-column">
-            {deviceOpen ? (
-                <>
-                    <PowerMode />
-                    <StartStop />
-                    <Buffer />
-                    <Trigger />
-                    <VoltageRegulator />
-                </>
-            ) : (
-                <>
-                    <Load />
-                    <Instructions />
-                </>
-            )}
+            <PowerMode />
+            {currentPane === 0 && <Trigger />}
+            {currentPane === 1 && <StartStop />}
+            {currentPane === 1 && <Buffer />}
+            <VoltageRegulator />
             {options.timestamp === null || (
                 <>
                     <DisplayOptions />
