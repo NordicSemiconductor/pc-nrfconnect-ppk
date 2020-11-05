@@ -74,7 +74,7 @@ const Trigger = () => {
         triggerSingleWaiting,
     } = useSelector(triggerState);
 
-    const hasExternal = 'ppkTriggerExtToggle' in capabilities;
+    const hasExternal = !!capabilities.ppkTriggerExtToggle;
 
     const range = {
         min: (450 * 13) / 1e3,
