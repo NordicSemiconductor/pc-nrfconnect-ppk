@@ -35,14 +35,12 @@
  */
 
 import React from 'react';
-import Chart from './Chart/Chart';
-import SaveChoiceDialog from './SaveExport/SaveChoiceDialog';
-import ExportDialog from './SaveExport/ExportDialog';
+import { useSelector } from 'react-redux';
+import Chart from '../Chart/Chart';
 
-export default () => (
-    <>
-        <Chart />
-        <SaveChoiceDialog />
-        <ExportDialog />
-    </>
-);
+import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
+
+export default () => {
+    const currentPane = useSelector(currentPaneSelector);
+    return currentPane === 1 ? <Chart digitalChannelsEnabled /> : null;
+};

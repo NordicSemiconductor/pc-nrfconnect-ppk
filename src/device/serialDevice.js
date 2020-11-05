@@ -72,6 +72,7 @@ class SerialDevice extends Device {
     constructor(deviceInfo) {
         super();
 
+        this.capabilities.maxContinuousSamplingTimeUs = 10;
         this.capabilities.digitalChannels = true;
         this.spikeFilter = {
             alpha: 0.18,

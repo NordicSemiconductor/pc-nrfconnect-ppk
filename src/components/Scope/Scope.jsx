@@ -35,22 +35,12 @@
  */
 
 import React from 'react';
-import { App } from 'pc-nrfconnect-shared';
-import Scope from './components/Scope/Scope';
-import DataLogger from './components/DataLogger/DataLogger';
-import SidePanel from './components/SidePanel/SidePanel';
-import DeviceSelector from './components/DeviceSelector';
-import reducers from './reducers';
-import './index.scss';
+import { useSelector } from 'react-redux';
+import Chart from '../Chart/Chart';
 
-export default () => (
-    <App
-        appReducer={reducers}
-        deviceSelect={<DeviceSelector />}
-        sidePanel={<SidePanel />}
-        panes={[
-            ['Scope', Scope],
-            ['Data Logger', DataLogger],
-        ]}
-    />
-);
+import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
+
+export default () => {
+    const currentPane = useSelector(currentPaneSelector);
+    return currentPane === 0 ? <Chart /> : null;
+};

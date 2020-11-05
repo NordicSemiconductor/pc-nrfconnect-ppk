@@ -39,6 +39,7 @@
 /* eslint operator-assignment: off */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { bool } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
@@ -61,13 +62,25 @@ import {
     chartState,
 } from '../../reducers/chartReducer';
 import { triggerState } from '../../reducers/triggerReducer';
-import { appState } from '../../reducers/appReducer';
+import {
+    appState,
+    currentPane as currentPaneSelector,
+} from '../../reducers/appReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
 import { updateTriggerLevel } from '../../actions/deviceActions';
+
+const uninitialisedToken = Symbol('uninitialisedToken');
+const useLazyInitialisedRef = initialiser => {
+    const ref = useRef(uninitialisedToken);
+    if (ref.current === uninitialisedToken) {
+        ref.current = initialiser();
+    }
+    return ref;
+};
 
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
@@ -110,10 +123,6 @@ const formatCurrent = uA =>
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
-const lineData = emptyArray();
-const bitsData = [...Array(nbDigitalChannels)].map(() => emptyArray());
-const bitIndexes = new Array(nbDigitalChannels);
-const lastBits = new Array(nbDigitalChannels);
 
 const bitsChartOptions = {
     scales: {
@@ -176,7 +185,7 @@ const calcStats = (data, begin, end, index) => {
     };
 };
 
-const Chart = () => {
+const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
     const chartWindow = useCallback(
         (windowBegin, windowEnd, yMin, yMax) =>
@@ -221,8 +230,9 @@ const Chart = () => {
         digitalChannelsVisible,
         timestampsVisible,
         hasDigitalChannels,
-        triggerHandleVisible,
     } = useSelector(chartState);
+    const showDigitalChannels =
+        digitalChannelsVisible && digitalChannelsEnabled;
     const {
         triggerLevel,
         triggerRunning,
@@ -230,15 +240,29 @@ const Chart = () => {
         externalTrigger,
     } = useSelector(triggerState);
     const { samplingRunning } = useSelector(appState);
+    const currentPane = useSelector(currentPaneSelector);
+
     const { index } = options;
 
     const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
 
     const chartRef = useRef(null);
 
+    const lineData = useLazyInitialisedRef(emptyArray).current;
+    const bitsData = useLazyInitialisedRef(() =>
+        [...Array(nbDigitalChannels)].map(() => emptyArray())
+    ).current;
+    const bitIndexes = useLazyInitialisedRef(() => new Array(nbDigitalChannels))
+        .current;
+    const lastBits = useLazyInitialisedRef(() => new Array(nbDigitalChannels))
+        .current;
+
     const { data, bits } = options;
 
-    let numberOfBits = windowDuration <= 3000000 ? nbDigitalChannels : 0;
+    let numberOfBits =
+        windowDuration <= 3000000 && showDigitalChannels
+            ? nbDigitalChannels
+            : 0;
     if (!bits) {
         numberOfBits = 0;
     }
@@ -528,7 +552,7 @@ const Chart = () => {
         sendTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible: triggerHandleVisible && !externalTrigger,
+        triggerHandleVisible: currentPane === 0 && !externalTrigger,
     };
 
     const bitXaxis = bitsChartOptions.scales.xAxes[0];
@@ -600,7 +624,7 @@ const Chart = () => {
                     />
                 </div>
             </div>
-            {hasDigitalChannels && digitalChannelsVisible && (
+            {hasDigitalChannels && showDigitalChannels && (
                 <div className="chart-bits-container">
                     {bitsChartData.map((_, i) => (
                         <div key={`${i + 1}`} className="chart-bits">
@@ -629,6 +653,10 @@ const Chart = () => {
             )}
         </div>
     );
+};
+
+Chart.propTypes = {
+    digitalChannelsEnabled: bool,
 };
 
 export default Chart;

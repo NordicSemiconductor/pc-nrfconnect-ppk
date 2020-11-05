@@ -38,14 +38,15 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { Toggle } from 'pc-nrfconnect-shared';
 
-import { setPowerMode } from '../../actions/deviceActions';
+import { setPowerMode, toggleDUT } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import Group from './Group';
 
 export default () => {
     const dispatch = useDispatch();
-    const { capabilities, isSmuMode } = useSelector(appState);
+    const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
     if (!capabilities.ppkSetPowerMode) {
@@ -74,6 +75,15 @@ export default () => {
                     <div className="dot amperemeter" />
                 </Button>
             </ButtonGroup>
+            {capabilities.ppkToggleDUT && (
+                <Toggle
+                    title="Turn power on/off for device under test​"
+                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
+                    isToggled={deviceRunning}
+                    label="Enable power output"
+                    variant="secondary"
+                />
+            )}
         </Group>
     );
 };

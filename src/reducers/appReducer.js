@@ -128,3 +128,5 @@ export const appState = ({ app }) => app.app;
 export const advancedMode = state => state.app.app.advancedMode;
 export const deviceOpen = state =>
     Object.keys(state.app.app.capabilities).length > 0;
+
+export const currentPane = state => state.appLayout.currentPane;

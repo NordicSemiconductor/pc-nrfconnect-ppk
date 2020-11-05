@@ -38,6 +38,9 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 
+import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
+import ExportDialog from '../SaveExport/ExportDialog';
+
 import {
     appState,
     showExportDialog,
@@ -74,14 +77,18 @@ export const Save = () => {
     const { samplingRunning } = useSelector(appState);
 
     return (
-        <Button
-            className="w-100"
-            title={samplingRunning ? saveExportTitle : undefined}
-            variant="set"
-            disabled={samplingRunning}
-            onClick={() => dispatch(saveExportAction())}
-        >
-            {saveExportLabel}
-        </Button>
+        <>
+            <Button
+                className="w-100"
+                title={samplingRunning ? saveExportTitle : undefined}
+                variant="set"
+                disabled={samplingRunning}
+                onClick={() => dispatch(saveExportAction())}
+            >
+                {saveExportLabel}
+            </Button>
+            <SaveChoiceDialog />
+            <ExportDialog />
+        </>
     );
 };

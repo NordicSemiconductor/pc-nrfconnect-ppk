@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,23 +34,57 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { App } from 'pc-nrfconnect-shared';
-import Scope from './components/Scope/Scope';
-import DataLogger from './components/DataLogger/DataLogger';
-import SidePanel from './components/SidePanel/SidePanel';
-import DeviceSelector from './components/DeviceSelector';
-import reducers from './reducers';
-import './index.scss';
+const initialState = {
+    samplingTime: 10,
+    sampleFreqLog10: 5,
+    sampleFreq: 10 ** 5,
+    maxSampleFreq: 10 ** 5,
+    durationSeconds: 300,
+};
 
-export default () => (
-    <App
-        appReducer={reducers}
-        deviceSelect={<DeviceSelector />}
-        sidePanel={<SidePanel />}
-        panes={[
-            ['Scope', Scope],
-            ['Data Logger', DataLogger],
-        ]}
-    />
-);
+const DL_SAMPLE_FREQ_LOG_10 = 'DL_SAMPLE_FREQ_LOG_10';
+const DL_DURATION_SECONDS = 'DL_DURATION_SECONDS';
+
+export const updateSampleFreqLog10 = sampleFreqLog10 => ({
+    type: DL_SAMPLE_FREQ_LOG_10,
+    sampleFreqLog10,
+});
+
+export const updateDurationSeconds = durationSeconds => ({
+    type: DL_DURATION_SECONDS,
+    durationSeconds,
+});
+
+export default (state = initialState, { type, ...action }) => {
+    switch (type) {
+        case 'DEVICE_OPENED': {
+            const samplingTime =
+                action.capabilities.maxContinuousSamplingTimeUs;
+            const sampleFreq = Math.round(10000 / samplingTime) * 100;
+            const maxPower10 = Math.ceil(Math.log10(sampleFreq));
+            return {
+                ...state,
+                samplingTime,
+                sampleFreq,
+                maxSampleFreq: sampleFreq,
+                maxPower10,
+                sampleFreqLog10: maxPower10,
+            };
+        }
+        case DL_SAMPLE_FREQ_LOG_10:
+            return {
+                ...state,
+                ...action,
+                sampleFreq: Math.min(
+                    10 ** action.sampleFreqLog10,
+                    state.maxSampleFreq
+                ),
+            };
+        case DL_DURATION_SECONDS:
+            return { ...state, ...action };
+        default:
+            return state;
+    }
+};
+
+export const dataLoggerState = ({ app }) => app.dataLogger;
