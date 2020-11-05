@@ -73,6 +73,15 @@ import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
 import { updateTriggerLevel } from '../../actions/deviceActions';
 
+const uninitialisedToken = Symbol('uninitialisedToken');
+const useLazyInitialisedRef = initialiser => {
+    const ref = useRef(uninitialisedToken);
+    if (ref.current === uninitialisedToken) {
+        ref.current = initialiser();
+    }
+    return ref;
+};
+
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
 
@@ -239,12 +248,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const chartRef = useRef(null);
 
-    const [lineData] = useState(emptyArray());
-    const [bitsData] = useState(
+    const lineData = useLazyInitialisedRef(emptyArray).current;
+    const bitsData = useLazyInitialisedRef(() =>
         [...Array(nbDigitalChannels)].map(() => emptyArray())
-    );
-    const [bitIndexes] = useState(new Array(nbDigitalChannels));
-    const [lastBits] = useState(new Array(nbDigitalChannels));
+    ).current;
+    const bitIndexes = useLazyInitialisedRef(() => new Array(nbDigitalChannels))
+        .current;
+    const lastBits = useLazyInitialisedRef(() => new Array(nbDigitalChannels))
+        .current;
 
     const { data, bits } = options;
 
