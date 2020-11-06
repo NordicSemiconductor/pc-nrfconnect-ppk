@@ -52,6 +52,7 @@ import WithHotkey from '../../utils/WithHotKey';
 
 import {
     toggleAdvancedModeAction,
+    toggleSaveFunctionality,
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
     currentPane as currentPaneSelector,
@@ -66,6 +67,7 @@ import './sidepanel.scss';
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
     bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+    bindHotkey('alt+ctrl+shift+l', () => dispatch(toggleSaveFunctionality()));
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
