@@ -61,6 +61,8 @@ import {
     triggerLevelSetAction,
     triggerSingleSetAction,
     externalTriggerToggledAction,
+    triggerLengthSetAction,
+    triggerWindowRangeAction,
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
@@ -69,9 +71,13 @@ import {
     animationAction,
     chartCursorAction,
     updateHasDigitalChannels,
-    goLive,
 } from '../reducers/chartReducer';
-import { options, bufferLengthInSeconds, updateTitle } from '../globals';
+import {
+    options,
+    bufferLengthInSeconds,
+    updateTitle,
+    indexToTimestamp,
+} from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
 
 let device = null;
@@ -90,10 +96,8 @@ const setupOptions = () => dispatch => {
             options.bits = new Uint8Array(bufferLength);
         }
         options.bits.fill(0);
-        options.triggerMarkers = null;
     } else {
         options.bits = null;
-        options.triggerMarkers = [];
     }
     if (options.data.length !== bufferLength) {
         options.data = new Float32Array(bufferLength);
@@ -113,9 +117,6 @@ export function samplingStart() {
         }
         options.index = 0;
         options.timestamp = undefined;
-        if (options.triggerMarkers) {
-            options.triggerMarkers = [];
-        }
         dispatch(
             chartWindowAction(null, null, getState().app.chart.windowDuration),
             null,
@@ -195,7 +196,7 @@ const initGains = () => async dispatch => {
     // if any value is ug is outside of [0.9..1.1] range:
     if (ug.reduce((p, c) => Math.abs(c - 1) > 0.1 || p, false)) {
         logger.info(
-            'Found out of range user gain, setting all gains back to 1.0'
+            'Found out-of-range user gain, setting all gains back to 1.0'
         );
         ug.splice(0, 5, 1, 1, 1, 1, 1);
         await device.ppkSetUserGains(0, ug[0]);
@@ -213,24 +214,41 @@ export function open(deviceInfo) {
             await dispatch(close());
         }
 
-        const onSample = ({
-            value,
-            bits,
-            timestamp,
-            trigger = false,
-            triggerMarker = false,
-        }) => {
+        let isTrigger = 0;
+        let triggerIndex = 0;
+        const onSample = ({ value, bits, timestamp }) => {
             if (options.timestamp === undefined) {
                 options.timestamp = 0;
             }
-            const { samplingRunning } = getState().app.app;
-            const { windowBegin, windowEnd } = getState().app.chart;
-            if (!samplingRunning && !trigger) {
-                // skip incoming data after stopped
-                return;
+
+            const {
+                app: { samplingRunning },
+                trigger: { triggerSingleWaiting, triggerLevel, triggerLength },
+                chart: { windowBegin, windowEnd },
+            } = getState().app;
+
+            if (!samplingRunning) {
+                const wnd = Math.floor(
+                    (triggerLength * 1000) / options.samplingTime
+                );
+                if (!isTrigger) {
+                    if (value >= triggerLevel) {
+                        isTrigger = 1;
+                        triggerIndex = options.index;
+                    }
+                } else {
+                    isTrigger += 1;
+                }
+                if (isTrigger > wnd) {
+                    isTrigger = 0;
+                    options.triggerIndex = options.index;
+                    const from = indexToTimestamp(triggerIndex);
+                    const to = indexToTimestamp(options.triggerIndex);
+                    dispatch(chartWindowAction(from, to, to - from));
+                }
             }
 
-            if (trigger && getState().app.trigger.triggerSingleWaiting) {
+            if (triggerSingleWaiting) {
                 logger.info('Trigger received, stopped waiting');
                 dispatch(clearSingleTriggingAction());
             }
@@ -238,12 +256,6 @@ export function open(deviceInfo) {
             const zeroCappedValue = zeroCap(value);
 
             if (timestamp) {
-                if (triggerMarker) {
-                    options.triggerMarkers.push(
-                        timestamp - options.samplingTime
-                    );
-                }
-
                 let ts = options.timestamp;
                 while (ts > timestamp - options.samplingTime) {
                     ts -= options.samplingTime;
@@ -293,11 +305,9 @@ export function open(deviceInfo) {
             console.log(metadata);
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
-            if (device.capabilities.ppkTriggerSet) {
-                dispatch(triggerLevelSetAction(1000));
-            } else {
-                dispatch(triggerLevelSetAction(null));
-            }
+            dispatch(triggerLevelSetAction(1000));
+            dispatch(triggerWindowRangeAction(device.triggerWindowRange));
+            await dispatch(triggerLengthUpdate(10));
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
                 updateRegulatorAction({
@@ -342,7 +352,9 @@ export function open(deviceInfo) {
         let renderIndex;
         updateRequestInterval = setInterval(() => {
             if (renderIndex !== options.index) {
-                requestAnimationFrame(() => dispatch(animationAction()));
+                requestAnimationFrame(() => {
+                    dispatch(animationAction());
+                });
                 renderIndex = options.index;
             }
         }, 30);
@@ -375,51 +387,45 @@ export const updateGains = index => async (_, getState) => {
  * @returns {null} Nothing
  */
 export function triggerLengthUpdate(value) {
-    return async () => {
-        const triggerLengthMicroSec = value * 1000;
-        const triggerLength = Math.floor(
-            triggerLengthMicroSec / options.samplingTime
-        );
+    return async dispatch => {
+        dispatch(triggerLengthSetAction(value));
         // If division returns a decimal, round downward to nearest integer
-        await device.ppkTriggerWindowSet(triggerLength);
+        if (device.capabilities.ppkTriggerWindowSet) {
+            await device.ppkTriggerWindowSet(value);
+        }
         logger.info(`Trigger length updated to ${value} ms`);
     };
 }
 
 export function triggerStart() {
     return async (dispatch, getState) => {
-        dispatch(goLive());
+        options.triggerIndex = options.index;
+        // dispatch(goLive());
         dispatch(toggleTriggerAction(true));
         dispatch(clearSingleTriggingAction());
 
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
-        const high = (triggerLevel >> 16) & 0xff;
-        const mid = (triggerLevel >> 8) & 0xff;
-        const low = triggerLevel & 0xff;
 
-        await device.ppkTriggerSet(high, mid, low);
-        dispatch(toggleTriggerAction(true));
+        await device.ppkTriggerSet(triggerLevel);
     };
 }
 
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
-        dispatch(goLive());
+        options.triggerIndex = options.index;
+        // dispatch(goLive());
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
-        const high = (triggerLevel >> 16) & 0xff;
-        const mid = (triggerLevel >> 8) & 0xff;
-        const low = triggerLevel & 0xff;
 
-        await device.ppkTriggerSingleSet(high, mid, low);
+        await device.ppkTriggerSingleSet(triggerLevel);
         dispatch(triggerSingleSetAction());
     };
 }
 
 export function toggleDUT(isOn) {
     return async dispatch => {
-        await device.ppkToggleDUT(isOn ? 0 : 1);
+        await device.ppkToggleDUT(isOn ? 1 : 0);
         logger.info(`DUT ${isOn ? 'ON' : 'OFF'}`);
         dispatch(toggleDUTAction());
     };
@@ -458,6 +464,7 @@ export function externalTriggerToggled(chbState) {
     return async dispatch => {
         if (chbState) {
             await device.ppkTriggerStop();
+            options.triggerIndex = options.index;
             logger.info('Starting external trigger');
         } else {
             logger.info('Stopping external trigger');

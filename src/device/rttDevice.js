@@ -87,6 +87,13 @@ const promiseTimeout = (ms, promise) =>
         }),
     ]);
 
+const triggerLevelConv = triggerLevel => {
+    const high = (triggerLevel >> 16) & 0xff;
+    const mid = (triggerLevel >> 8) & 0xff;
+    const low = triggerLevel & 0xff;
+    return [high, mid, low];
+};
+
 class RTTDevice extends Device {
     // Allocate memory for the float value
     averageBuf = new ArrayBuffer(4);
@@ -123,6 +130,8 @@ class RTTDevice extends Device {
     triggerRunning = false;
 
     triggerWaiting = false;
+
+    triggerWindowRange = { min: (450 * 13) / 1e3, max: (4000 * 13) / 1e3 };
 
     constructor(device) {
         super();
@@ -434,12 +443,7 @@ class RTTDevice extends Device {
             const value =
                 this.getAdcResult[currentMeasurementRange](adcResult) * 1e6;
 
-            this.onSampleCallback({
-                value,
-                timestamp,
-                trigger: true,
-                triggerMarker: i === 0 || i === this.dataPayload.length - 2,
-            });
+            this.onSampleCallback({ value, timestamp });
             timestamp += this.adcSamplingTimeUs;
         }
     }
@@ -501,23 +505,30 @@ class RTTDevice extends Device {
         return this.sendCommand([PPKCmd.TriggerStop]);
     }
 
-    ppkTriggerSet(...args) {
+    ppkTriggerSet(triggerLevel) {
         this.triggerRunning = true;
         this.startReadLoop();
-        return this.sendCommand([PPKCmd.TriggerSet, ...args]);
+        return this.sendCommand([
+            PPKCmd.TriggerSet,
+            ...triggerLevelConv(triggerLevel),
+        ]);
     }
 
-    ppkTriggerSingleSet(...args) {
+    ppkTriggerSingleSet(triggerLevel) {
         this.triggerWaiting = true;
         this.startReadLoop();
-        return this.sendCommand([PPKCmd.TriggerSingleSet, ...args]);
+        return this.sendCommand([
+            PPKCmd.TriggerSingleSet,
+            ...triggerLevelConv(triggerLevel),
+        ]);
     }
 
     ppkTriggerExtToggle() {
         return this.sendCommand([PPKCmd.TriggerExtToggle]);
     }
 
-    ppkTriggerWindowSet(wnd) {
+    ppkTriggerWindowSet(value) {
+        const wnd = Math.floor((value * 1000) / this.adcSamplingTimeUs);
         return this.sendCommand([
             PPKCmd.TriggerWindowSet,
             wnd >> 8,

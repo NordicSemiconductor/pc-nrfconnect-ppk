@@ -48,7 +48,7 @@ export const options = {
     bits: null,
     index: 0,
     timestamp: null,
-    triggerMarkers: null,
+    triggerIndex: null,
 };
 
 export const nbDigitalChannels = 8;

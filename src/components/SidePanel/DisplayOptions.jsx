@@ -46,6 +46,7 @@ import {
     toggleDigitalChannels,
     toggleTimestamps,
 } from '../../reducers/chartReducer';
+import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
 
 export default () => {
     const dispatch = useDispatch();
@@ -54,6 +55,7 @@ export default () => {
         timestampsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
+    const currentPane = useSelector(currentPaneSelector);
 
     return (
         <Group
@@ -69,7 +71,7 @@ export default () => {
                 label="Timestamps"
                 variant="secondary"
             />
-            {hasDigitalChannels && (
+            {hasDigitalChannels && currentPane === 1 && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(toggleDigitalChannels())}
