@@ -48,16 +48,9 @@ import {
 } from '../../reducers/appReducer';
 import { load } from '../../actions/fileActions';
 
-const enableSave = false; // temporarily disable saving
-
-const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
-const saveExportTitle = enableSave
-    ? 'Stop sampling to save or export'
-    : 'Stop sampling to export';
-const saveExportAction = enableSave ? toggleSaveChoiceDialog : showExportDialog;
-
 export const Load = () => {
     const dispatch = useDispatch();
+    const { enableSave } = useSelector(appState);
 
     if (!enableSave) return null;
 
@@ -74,7 +67,15 @@ export const Load = () => {
 
 export const Save = () => {
     const dispatch = useDispatch();
-    const { samplingRunning } = useSelector(appState);
+    const { samplingRunning, enableSave } = useSelector(appState);
+
+    const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
+    const saveExportTitle = enableSave
+        ? 'Stop sampling to save or export'
+        : 'Stop sampling to export';
+    const saveExportAction = enableSave
+        ? toggleSaveChoiceDialog
+        : showExportDialog;
 
     return (
         <>
