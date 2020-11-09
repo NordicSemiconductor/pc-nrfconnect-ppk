@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,51 +34,56 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint-disable import/first */
-
-jest.mock('../../actions/deviceActions', () => ({
-    PPK_METADATA: 'PPK_METADATA',
-    RESISTORS_RESET: 'RESISTORS_RESET',
-}));
-
-import reducer from '../resistorCalibrationReducer';
+import reducer, * as triggerActions from '../triggerReducer';
 
 const initialState = reducer(undefined, {});
 
-describe('resistorCalibrationReducer', () => {
-    it('should not update user resistor values if they are undefined', () => {
-        const state = reducer(initialState, {
-            type: 'USER_RESISTOR_UPDATED',
-            userResHi: undefined,
-            userResMid: undefined,
-            userResLo: undefined,
+describe('triggerReducer', () => {
+    describe('modify attributes', () => {
+        it('should set trigger level', () => {
+            const state = reducer(initialState, {
+                type: triggerActions.TRIGGER_LEVEL_SET,
+                triggerLevel: 5,
+            });
+            expect(state.triggerLevel).toEqual(5);
         });
-        expect(state.userResHi).toEqual(initialState.userResHi);
-        expect(state.userResMid).toEqual(initialState.userResMid);
-        expect(state.userResLo).toEqual(initialState.userResLo);
+
+        it('should set trigger length', () => {
+            const state = reducer(initialState, {
+                type: triggerActions.TRIGGER_LENGTH_SET,
+                triggerLength: 37.85,
+            });
+            expect(state.triggerLength).toEqual(37.85);
+        });
+
+        it('should set window ranges', () => {
+            const state = reducer(initialState, {
+                type: triggerActions.TRIGGER_WINDOW_RANGE,
+                triggerWindowRange: {
+                    min: 5,
+                    max: 50,
+                },
+            });
+            expect(state.triggerWindowRange.min).toEqual(5);
+            expect(state.triggerWindowRange.max).toEqual(50);
+        });
     });
 
-    // it('should not update user resistor values if they cannot be parsed as floats', () => {
-    //     const state = reducer(initialState, {
-    //         type: 'USER_RESISTOR_UPDATED',
-    //         userResHi: 'foo',
-    //         userResMid: '*',
-    //         userResLo: '!',
-    //     });
-    //     expect(state.userResHi).toEqual(initialState.userResHi);
-    //     expect(state.userResMid).toEqual(initialState.userResMid);
-    //     expect(state.userResLo).toEqual(initialState.userResLo);
-    // });
+    describe('trigger single set', () => {
+        const waitingState = reducer(initialState, {
+            type: triggerActions.TRIGGER_SINGLE_SET,
+        });
 
-    // it('should update user resistor values if they can be parsed as floats', () => {
-    //     const state = reducer(initialState, {
-    //         type: 'USER_RESISTOR_UPDATED',
-    //         userResHi: '42',
-    //         userResMid: '1.234',
-    //         userResLo: '13.37',
-    //     });
-    //     expect(state.userResHi).toEqual(42);
-    //     expect(state.userResMid).toEqual(1.234);
-    //     expect(state.userResLo).toEqual(13.37);
-    // });
+        it('should start trigger', () => {
+            expect(waitingState.triggerSingleWaiting).toBe(true);
+            expect(waitingState.triggerRunning).toBe(false);
+        });
+
+        it('should clear trigger', () => {
+            const clearedState = reducer(waitingState, {
+                type: triggerActions.TRIGGER_SINGLE_CLEAR,
+            });
+            expect(clearedState.triggerSingleWaiting).toBe(false);
+        });
+    });
 });
