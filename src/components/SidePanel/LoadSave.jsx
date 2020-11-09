@@ -47,6 +47,7 @@ import {
     toggleSaveChoiceDialog,
 } from '../../reducers/appReducer';
 import { load } from '../../actions/fileActions';
+import { triggerState } from '../../reducers/triggerReducer';
 
 export const Load = () => {
     const dispatch = useDispatch();
@@ -68,6 +69,7 @@ export const Load = () => {
 export const Save = () => {
     const dispatch = useDispatch();
     const { samplingRunning, enableSave } = useSelector(appState);
+    const { triggerSingleWaiting, triggerRunning } = useSelector(triggerState);
 
     const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
     const saveExportTitle = enableSave
@@ -77,13 +79,15 @@ export const Save = () => {
         ? toggleSaveChoiceDialog
         : showExportDialog;
 
+    const disabled = samplingRunning || triggerSingleWaiting || triggerRunning;
+
     return (
         <>
             <Button
                 className="w-100"
-                title={samplingRunning ? saveExportTitle : undefined}
+                title={disabled ? saveExportTitle : undefined}
                 variant="set"
-                disabled={samplingRunning}
+                disabled={disabled}
                 onClick={() => dispatch(saveExportAction())}
             >
                 {saveExportLabel}

@@ -78,7 +78,7 @@ export default () => {
             {capabilities.ppkToggleDUT && (
                 <Toggle
                     title="Turn power on/off for device under test​"
-                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
+                    onToggle={() => dispatch(toggleDUT(!deviceRunning))}
                     isToggled={deviceRunning}
                     label="Enable power output"
                     variant="secondary"

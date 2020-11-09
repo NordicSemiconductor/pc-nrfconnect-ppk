@@ -72,20 +72,18 @@ const Trigger = () => {
         triggerRunning,
         triggerLevel,
         triggerSingleWaiting,
+        triggerWindowRange,
+        triggerLength,
     } = useSelector(triggerState);
 
     const hasExternal = !!capabilities.ppkTriggerExtToggle;
 
-    const range = {
-        min: (450 * 13) / 1e3,
-        max: (4000 * 13) / 1e3,
-        decimals: 2,
-    };
+    const range = { ...triggerWindowRange, decimals: 2 };
 
     const [level, setLevel] = useState(triggerLevel);
     // use true for mA, false for uA
     const [levelUnit, setLevelUnit] = useState(false);
-    const [triggerLength, setTriggerLength] = useState(range.min);
+    const [triggerLen, setTriggerLen] = useState(triggerLength);
 
     useEffect(() => {
         setLevelUnit(triggerLevel > 1000);
@@ -103,10 +101,12 @@ const Trigger = () => {
 
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 
+    let startLabel = 'External';
     let startTitle;
     let onStartClicked = null;
     if (!externalTrigger) {
         if (!(triggerRunning || triggerSingleWaiting)) {
+            startLabel = 'Start';
             startTitle = `Start sampling at ${Math.round(
                 options.samplesPerSecond / 1000
             )}kHz for a short duration when the set trigger level is reached`;
@@ -118,7 +118,10 @@ const Trigger = () => {
         } else {
             onStartClicked = () => dispatch(triggerStop());
             if (triggerMode === SINGLE) {
+                startLabel = 'Wait';
                 startTitle = 'Waiting for samples above trigger level';
+            } else {
+                startLabel = 'Stop';
             }
         }
     }
@@ -131,11 +134,11 @@ const Trigger = () => {
             >
                 <span className="flex-fill">Length</span>
                 <NumberInlineInput
-                    value={triggerLength}
+                    value={triggerLen}
                     range={range}
-                    onChange={value => setTriggerLength(value)}
+                    onChange={value => setTriggerLen(value)}
                     onChangeComplete={() =>
-                        dispatch(triggerLengthUpdate(triggerLength))
+                        dispatch(triggerLengthUpdate(triggerLen))
                     }
                     chars={6}
                 />{' '}
@@ -144,11 +147,11 @@ const Trigger = () => {
             <Slider
                 title="Duration of trigger window"
                 id="slider-trigger-window"
-                values={[triggerLength]}
+                values={[triggerLen]}
                 range={range}
-                onChange={[value => setTriggerLength(value)]}
+                onChange={[value => setTriggerLen(value)]}
                 onChangeComplete={() =>
-                    dispatch(triggerLengthUpdate(triggerLength))
+                    dispatch(triggerLengthUpdate(triggerLen))
                 }
             />
             <div
@@ -256,7 +259,7 @@ const Trigger = () => {
                 variant="set"
                 onClick={onStartClicked}
             >
-                Start
+                {startLabel}
             </Button>
         </Group>
     );

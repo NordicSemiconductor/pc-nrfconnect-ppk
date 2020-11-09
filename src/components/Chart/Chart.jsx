@@ -49,7 +49,6 @@ import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 import crossHairPlugin from './plugins/chart.crossHair';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
-import triggerRangePlugin from './plugins/chart.triggerRange';
 
 import ChartTop from './ChartTop';
 import BufferView from './BufferView';
@@ -582,7 +581,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                             zoomPanPlugin,
                             triggerLevelPlugin,
                             crossHairPlugin,
-                            triggerRangePlugin,
                             {
                                 id: 'notifier',
                                 afterLayout(chart) {
