@@ -39,6 +39,7 @@
 import { logger } from 'nrfconnect/core';
 import isDev from 'electron-is-dev';
 import Device from '../device';
+import RttDevice from '../device/rttDevice';
 import persistentStore from '../utils/persistentStore';
 
 import {
@@ -49,6 +50,8 @@ import {
     setPowerModeAction,
     samplingStartAction,
     samplingStoppedAction,
+    setDeviceTypeAction,
+    DEVICE_TYPES,
 } from '../reducers/appReducer';
 import {
     switchingPointsResetAction,
@@ -290,7 +293,6 @@ export function open(deviceInfo) {
             dispatch(setupOptions());
             const metadata = device.parseMeta(await device.start());
 
-            console.log(metadata);
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
             if (device.capabilities.ppkTriggerSet) {
@@ -315,7 +317,16 @@ export function open(deviceInfo) {
                 // 2 = SMU
                 dispatch(setPowerModeAction(metadata.mode === 2));
             }
+
             dispatch(rttStartAction());
+            dispatch(
+                setDeviceTypeAction(
+                    device instanceof RttDevice
+                        ? DEVICE_TYPES.ppk1
+                        : DEVICE_TYPES.ppk2
+                )
+            );
+
             logger.info('PPK started');
         } catch (err) {
             logger.error('Failed to start PPK');
