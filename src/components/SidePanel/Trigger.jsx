@@ -37,7 +37,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import SelectableContext from 'react-bootstrap/SelectableContext';
@@ -49,12 +48,12 @@ import {
     triggerStart,
     triggerStop,
     triggerSingleSet,
-    externalTriggerToggled,
     updateTriggerLevel,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 import { options } from '../../globals';
+import TriggerModeGroup from './TriggerModeGroup';
 
 import Group from './Group';
 
@@ -62,7 +61,6 @@ import './inline-dropdown.scss';
 
 const SINGLE = 'SINGLE';
 const CONTINUOUS = 'CONTINUOUS';
-const EXTERNAL = 'EXTERNAL';
 
 const Trigger = () => {
     const dispatch = useDispatch();
@@ -75,8 +73,6 @@ const Trigger = () => {
         triggerWindowRange,
         triggerLength,
     } = useSelector(triggerState);
-
-    const hasExternal = !!capabilities.ppkTriggerExtToggle;
 
     const range = { ...triggerWindowRange, decimals: 2 };
 
@@ -125,28 +121,6 @@ const Trigger = () => {
             }
         }
     }
-
-    const setSingleTriggerMode = () => {
-        if (triggerMode === CONTINUOUS) {
-            dispatch(triggerStop());
-        }
-        setTriggerMode(SINGLE);
-        if (externalTrigger) {
-            dispatch(externalTriggerToggled(false));
-        }
-    };
-
-    const setContinuousTriggerMode = () => {
-        setTriggerMode(CONTINUOUS);
-        if (externalTrigger) {
-            dispatch(externalTriggerToggled(false));
-        }
-    };
-
-    const setExternalTriggerMode = () => {
-        setTriggerMode(EXTERNAL);
-        dispatch(externalTriggerToggled(true));
-    };
 
     return (
         <Group heading="Trigger">
@@ -231,34 +205,13 @@ const Trigger = () => {
                     </SelectableContext.Provider>
                 </Form.Label>
             </div>
-            <ButtonGroup className="mb-2 w-100 trigger-mode d-flex flex-row">
-                <Button
-                    title="Sample once"
-                    disabled={!rttRunning || triggerMode === SINGLE}
-                    variant={triggerMode === SINGLE ? 'set' : 'unset'}
-                    onClick={setSingleTriggerMode}
-                >
-                    Single
-                </Button>
-                <Button
-                    title="Sample until stopped by user"
-                    disabled={!rttRunning || triggerMode === CONTINUOUS}
-                    variant={triggerMode === CONTINUOUS ? 'set' : 'unset'}
-                    onClick={setContinuousTriggerMode}
-                >
-                    Continuous
-                </Button>
-                {hasExternal && (
-                    <Button
-                        title="Sample controlled from TRIG IN"
-                        disabled={!rttRunning || triggerMode === EXTERNAL}
-                        variant={triggerMode === EXTERNAL ? 'set' : 'unset'}
-                        onClick={setExternalTriggerMode}
-                    >
-                        External
-                    </Button>
-                )}
-            </ButtonGroup>
+            <TriggerModeGroup
+                triggerMode={triggerMode}
+                setTriggerMode={setTriggerMode}
+                hasExternal={!!capabilities.ppkTriggerExtToggle}
+                externalTrigger={externalTrigger}
+                rttRunning={rttRunning}
+            />
             <Button
                 title={startTitle}
                 className={`w-100 mb-2 ${
