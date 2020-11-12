@@ -34,11 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export const DEVICE_TYPES = {
-    ppk1: 'ppk1',
-    ppk2: 'ppk2',
-};
-
 const initialState = {
     portName: null,
     metadata: [],
@@ -50,12 +45,11 @@ const initialState = {
     samplingRunning: false,
     isSaveChoiceDialogVisible: false,
     isExportDialogVisible: false,
-    deviceType: null,
 };
 
 const DEVICE_CLOSED = 'DEVICE_CLOSED';
 const DEVICE_OPENED = 'DEVICE_OPENED';
-const DEVICE_UNDER_TEST_TOGGLE = 'DEVICE_UNDER_TEST_TOGGLE';
+const SET_DEVICE_RUNNING = 'SET_DEVICE_RUNNING';
 const RTT_CALLED_START = 'RTT_CALLED_START';
 const SAMPLING_STARTED = 'SAMPLING_STARTED';
 const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
@@ -64,7 +58,6 @@ const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
 const TOGGLE_SAVE_CHOICE_DIALOG = 'TOGGLE_SAVE_CHOICE_DIALOG';
 const SHOW_EXPORT_DIALOG = 'SHOW_EXPORT_DIALOG';
 const HIDE_EXPORT_DIALOG = 'HIDE_EXPORT_DIALOG';
-const SET_DEVICE_TYPE = 'SET_DEVICE_TYPE';
 
 export const toggleAdvancedModeAction = () => ({ type: TOGGLE_ADVANCED_MODE });
 export const samplingStartAction = () => ({ type: SAMPLING_STARTED });
@@ -77,7 +70,10 @@ export const deviceOpenedAction = (portName, capabilities) => ({
 });
 
 export const deviceClosedAction = () => ({ type: DEVICE_CLOSED });
-export const toggleDUTAction = () => ({ type: DEVICE_UNDER_TEST_TOGGLE });
+export const setDeviceRunningAction = isRunning => ({
+    type: SET_DEVICE_RUNNING,
+    isRunning,
+});
 
 export const setPowerModeAction = isSmuMode => ({
     type: SET_POWER_MODE,
@@ -90,10 +86,6 @@ export const toggleSaveChoiceDialog = () => ({
 });
 export const showExportDialog = () => ({ type: SHOW_EXPORT_DIALOG });
 export const hideExportDialog = () => ({ type: HIDE_EXPORT_DIALOG });
-export const setDeviceTypeAction = deviceType => ({
-    type: SET_DEVICE_TYPE,
-    deviceType,
-});
 
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
@@ -107,8 +99,8 @@ export default (state = initialState, { type, ...action }) => {
         }
         case DEVICE_CLOSED:
             return initialState;
-        case DEVICE_UNDER_TEST_TOGGLE:
-            return { ...state, deviceRunning: !state.deviceRunning };
+        case SET_DEVICE_RUNNING:
+            return { ...state, deviceRunning: action.isRunning };
         case SET_POWER_MODE:
             return { ...state, ...action };
         case RTT_CALLED_START:
@@ -128,12 +120,6 @@ export default (state = initialState, { type, ...action }) => {
             return { ...state, samplingRunning: true };
         case SAMPLING_STOPPED:
             return { ...state, samplingRunning: false };
-        case SET_DEVICE_TYPE:
-            return {
-                ...state,
-                deviceType: action.deviceType,
-                deviceRunning: action.deviceType === DEVICE_TYPES.ppk1,
-            };
         default:
     }
     return state;

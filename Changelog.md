@@ -1,3 +1,8 @@
+## Version 3.0.0-beta.14
+### Updates
+- Enable power mode should be default on for PPK1.
+- Switching from continuous trigger mode to single trigger mode should stop sampling.
+
 ## Version 3.0.0-beta.13
 ### Updates
 - Also remove loading while saving is removed.

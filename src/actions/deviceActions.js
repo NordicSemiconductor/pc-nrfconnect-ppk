@@ -39,19 +39,16 @@
 import { logger } from 'nrfconnect/core';
 import isDev from 'electron-is-dev';
 import Device from '../device';
-import RttDevice from '../device/rttDevice';
 import persistentStore from '../utils/persistentStore';
 
 import {
     deviceOpenedAction,
     deviceClosedAction,
     rttStartAction,
-    toggleDUTAction,
+    setDeviceRunningAction,
     setPowerModeAction,
     samplingStartAction,
     samplingStoppedAction,
-    setDeviceTypeAction,
-    DEVICE_TYPES,
 } from '../reducers/appReducer';
 import {
     switchingPointsResetAction,
@@ -291,6 +288,7 @@ export function open(deviceInfo) {
         try {
             device = new Device(deviceInfo, onSample);
             dispatch(setupOptions());
+            dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
 
             dispatch(resistorsResetAction(metadata));
@@ -319,13 +317,6 @@ export function open(deviceInfo) {
             }
 
             dispatch(rttStartAction());
-            dispatch(
-                setDeviceTypeAction(
-                    device instanceof RttDevice
-                        ? DEVICE_TYPES.ppk1
-                        : DEVICE_TYPES.ppk2
-                )
-            );
 
             logger.info('PPK started');
         } catch (err) {
@@ -428,11 +419,11 @@ export function triggerSingleSet() {
     };
 }
 
-export function toggleDUT(isOn) {
+export function setDeviceRunning(isRunning) {
     return async dispatch => {
-        await device.ppkToggleDUT(isOn ? 0 : 1);
-        logger.info(`DUT ${isOn ? 'ON' : 'OFF'}`);
-        dispatch(toggleDUTAction());
+        await device.ppkToggleDUT(isRunning ? 1 : 0);
+        logger.info(`DUT ${isRunning ? 'ON' : 'OFF'}`);
+        dispatch(setDeviceRunningAction(isRunning));
     };
 }
 

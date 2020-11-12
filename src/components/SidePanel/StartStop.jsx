@@ -44,7 +44,7 @@ import PowerMode from './PowerMode';
 import {
     samplingStart,
     samplingStop,
-    toggleDUT,
+    setDeviceRunning,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 
@@ -85,7 +85,7 @@ export default () => {
             {capabilities.ppkToggleDUT && (
                 <Toggle
                     title="Turn power on/off for device under test​"
-                    onToggle={() => dispatch(toggleDUT(deviceRunning))}
+                    onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
                     isToggled={deviceRunning}
                     label="Enable power output"
                     variant="secondary"

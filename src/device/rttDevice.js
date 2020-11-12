@@ -124,6 +124,8 @@ class RTTDevice extends Device {
 
     triggerWaiting = false;
 
+    isRunningInitially = true;
+
     constructor(device) {
         super();
 
