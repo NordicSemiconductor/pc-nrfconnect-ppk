@@ -45,7 +45,7 @@ import {
     deviceOpenedAction,
     deviceClosedAction,
     rttStartAction,
-    toggleDUTAction,
+    setDeviceRunningAction,
     setPowerModeAction,
     samplingStartAction,
     samplingStoppedAction,
@@ -288,9 +288,9 @@ export function open(deviceInfo) {
         try {
             device = new Device(deviceInfo, onSample);
             dispatch(setupOptions());
+            dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
 
-            console.log(metadata);
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
             if (device.capabilities.ppkTriggerSet) {
@@ -315,7 +315,9 @@ export function open(deviceInfo) {
                 // 2 = SMU
                 dispatch(setPowerModeAction(metadata.mode === 2));
             }
+
             dispatch(rttStartAction());
+
             logger.info('PPK started');
         } catch (err) {
             logger.error('Failed to start PPK');
@@ -417,11 +419,11 @@ export function triggerSingleSet() {
     };
 }
 
-export function toggleDUT(isOn) {
+export function setDeviceRunning(isRunning) {
     return async dispatch => {
-        await device.ppkToggleDUT(isOn ? 0 : 1);
-        logger.info(`DUT ${isOn ? 'ON' : 'OFF'}`);
-        dispatch(toggleDUTAction());
+        await device.ppkDeviceRunning(isRunning ? 1 : 0);
+        logger.info(`DUT ${isRunning ? 'ON' : 'OFF'}`);
+        dispatch(setDeviceRunningAction(isRunning));
     };
 }
 

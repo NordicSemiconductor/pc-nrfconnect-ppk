@@ -69,6 +69,8 @@ class SerialDevice extends Device {
 
     vddRange = { min: 800, max: 5000 };
 
+    isRunningInitially = false;
+
     constructor(deviceInfo) {
         super();
 
