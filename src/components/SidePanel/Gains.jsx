@@ -67,7 +67,7 @@ const Gains = ({ eventKey }) => {
     return (
         <Collapse
             heading="GAINS"
-            title="Adjust gains to correct potential measurement errors​"
+            title="Adjust gains to correct potential measurement errors"
             eventKey={eventKey}
         >
             {gains.map((gain, index) => (

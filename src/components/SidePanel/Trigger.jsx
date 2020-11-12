@@ -110,7 +110,7 @@ const Trigger = ({ eventKey }) => {
     let onStartClicked = null;
     if (!externalTrigger) {
         if (!(triggerRunning || triggerSingleWaiting)) {
-            startLabel = 'Start trigger sampling​';
+            startLabel = 'Start trigger sampling';
             startTitle =
                 'Start sampling at 77kHz for a short duration when the set trigger level is reached';
             if (triggerMode === SINGLE) {
@@ -166,7 +166,7 @@ const Trigger = ({ eventKey }) => {
         >
             <ButtonGroup className="mb-2 trigger-mode d-flex flex-row">
                 <Button
-                    title="Sample once​"
+                    title="Sample once"
                     disabled={!rttRunning || triggerMode === SINGLE}
                     variant={triggerMode === SINGLE ? 'set' : 'unset'}
                     onClick={setSingleTriggerMode}
@@ -174,7 +174,7 @@ const Trigger = ({ eventKey }) => {
                     Single
                 </Button>
                 <Button
-                    title="Sample until stopped by user​"
+                    title="Sample until stopped by user"
                     disabled={!rttRunning || triggerMode === CONTINUOUS}
                     variant={triggerMode === CONTINUOUS ? 'set' : 'unset'}
                     onClick={setContinuousTriggerMode}
@@ -182,7 +182,7 @@ const Trigger = ({ eventKey }) => {
                     Continuous
                 </Button>
                 <Button
-                    title="Sample controlled from TRIG IN​"
+                    title="Sample controlled from TRIG IN"
                     disabled={!rttRunning || triggerMode === EXTERNAL}
                     variant={triggerMode === EXTERNAL ? 'set' : 'unset'}
                     onClick={setExternalTriggerMode}
@@ -228,7 +228,7 @@ const Trigger = ({ eventKey }) => {
                 }
             />
             <div
-                title="Rising edge level to run trigger​"
+                title="Rising edge level to run trigger"
                 className={externalTrigger ? 'disabled' : ''}
             >
                 <Form.Label
