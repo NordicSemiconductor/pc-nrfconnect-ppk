@@ -82,7 +82,7 @@ export default () => {
             >
                 {`${btnStr}${avgStr} sampling`}
             </Button>
-            {capabilities.ppkToggleDUT && (
+            {capabilities.ppkDeviceRunning && (
                 <Toggle
                     title="Turn power on/off for device under test"
                     onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}

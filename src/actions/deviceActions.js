@@ -421,7 +421,7 @@ export function triggerSingleSet() {
 
 export function setDeviceRunning(isRunning) {
     return async dispatch => {
-        await device.ppkToggleDUT(isRunning ? 1 : 0);
+        await device.ppkDeviceRunning(isRunning ? 1 : 0);
         logger.info(`DUT ${isRunning ? 'ON' : 'OFF'}`);
         dispatch(setDeviceRunningAction(isRunning));
     };
