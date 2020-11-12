@@ -99,8 +99,8 @@ export default class Device extends EventEmitter {
         return this.sendCommand([PPKCmd.AverageStop]);
     }
 
-    ppkToggleDUT(...args) {
-        return this.sendCommand([PPKCmd.DutToggle, ...args]);
+    ppkDeviceRunning(...args) {
+        return this.sendCommand([PPKCmd.DeviceRunningSet, ...args]);
     }
 
     ppkUpdateRegulator(vdd) {

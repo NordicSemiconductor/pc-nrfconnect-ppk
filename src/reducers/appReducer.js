@@ -50,7 +50,7 @@ const initialState = {
 
 const DEVICE_CLOSED = 'DEVICE_CLOSED';
 const DEVICE_OPENED = 'DEVICE_OPENED';
-const DEVICE_UNDER_TEST_TOGGLE = 'DEVICE_UNDER_TEST_TOGGLE';
+const SET_DEVICE_RUNNING = 'SET_DEVICE_RUNNING';
 const RTT_CALLED_START = 'RTT_CALLED_START';
 const SAMPLING_STARTED = 'SAMPLING_STARTED';
 const SAMPLING_STOPPED = 'SAMPLING_STOPPED';
@@ -72,7 +72,10 @@ export const deviceOpenedAction = (portName, capabilities) => ({
 });
 
 export const deviceClosedAction = () => ({ type: DEVICE_CLOSED });
-export const toggleDUTAction = () => ({ type: DEVICE_UNDER_TEST_TOGGLE });
+export const setDeviceRunningAction = isRunning => ({
+    type: SET_DEVICE_RUNNING,
+    isRunning,
+});
 
 export const setPowerModeAction = isSmuMode => ({
     type: SET_POWER_MODE,
@@ -102,8 +105,8 @@ export default (state = initialState, { type, ...action }) => {
         }
         case DEVICE_CLOSED:
             return initialState;
-        case DEVICE_UNDER_TEST_TOGGLE:
-            return { ...state, deviceRunning: !state.deviceRunning };
+        case SET_DEVICE_RUNNING:
+            return { ...state, deviceRunning: action.isRunning };
         case SET_POWER_MODE:
             return { ...state, ...action };
         case RTT_CALLED_START:
