@@ -126,6 +126,28 @@ const Trigger = () => {
         }
     }
 
+    const setSingleTriggerMode = () => {
+        if (triggerMode === CONTINUOUS) {
+            dispatch(triggerStop());
+        }
+        setTriggerMode(SINGLE);
+        if (externalTrigger) {
+            dispatch(externalTriggerToggled(false));
+        }
+    };
+
+    const setContinuousTriggerMode = () => {
+        setTriggerMode(CONTINUOUS);
+        if (externalTrigger) {
+            dispatch(externalTriggerToggled(false));
+        }
+    };
+
+    const setExternalTriggerMode = () => {
+        setTriggerMode(EXTERNAL);
+        dispatch(externalTriggerToggled(true));
+    };
+
     return (
         <Group heading="Trigger">
             <Form.Label
@@ -214,12 +236,7 @@ const Trigger = () => {
                     title="Sample once​"
                     disabled={!rttRunning || triggerMode === SINGLE}
                     variant={triggerMode === SINGLE ? 'set' : 'unset'}
-                    onClick={() => {
-                        setTriggerMode(SINGLE);
-                        if (externalTrigger) {
-                            dispatch(externalTriggerToggled(false));
-                        }
-                    }}
+                    onClick={setSingleTriggerMode}
                 >
                     Single
                 </Button>
@@ -227,12 +244,7 @@ const Trigger = () => {
                     title="Sample until stopped by user​"
                     disabled={!rttRunning || triggerMode === CONTINUOUS}
                     variant={triggerMode === CONTINUOUS ? 'set' : 'unset'}
-                    onClick={() => {
-                        setTriggerMode(CONTINUOUS);
-                        if (externalTrigger) {
-                            dispatch(externalTriggerToggled(false));
-                        }
-                    }}
+                    onClick={setContinuousTriggerMode}
                 >
                     Continuous
                 </Button>
@@ -241,10 +253,7 @@ const Trigger = () => {
                         title="Sample controlled from TRIG IN​"
                         disabled={!rttRunning || triggerMode === EXTERNAL}
                         variant={triggerMode === EXTERNAL ? 'set' : 'unset'}
-                        onClick={() => {
-                            setTriggerMode(EXTERNAL);
-                            dispatch(externalTriggerToggled(true));
-                        }}
+                        onClick={setExternalTriggerMode}
                     >
                         External
                     </Button>
