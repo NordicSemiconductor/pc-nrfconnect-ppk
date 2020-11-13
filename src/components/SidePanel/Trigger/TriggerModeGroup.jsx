@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import {
     externalTriggerToggled,
     triggerStop,
-} from '../../actions/deviceActions';
+} from '../../../actions/deviceActions';
 
 const SINGLE = 'SINGLE';
 const CONTINUOUS = 'CONTINUOUS';

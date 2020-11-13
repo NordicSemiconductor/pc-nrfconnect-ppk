@@ -34,12 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
-import SelectableContext from 'react-bootstrap/SelectableContext';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
@@ -48,12 +46,12 @@ import {
     triggerStart,
     triggerStop,
     triggerSingleSet,
-    updateTriggerLevel,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 import { options } from '../../globals';
-import TriggerModeGroup from './TriggerModeGroup';
+import TriggerModeGroup from './Trigger/TriggerModeGroup';
+import TriggerLevel from './Trigger/TriggerLevel';
 
 import Group from './Group';
 
@@ -76,24 +74,7 @@ const Trigger = () => {
 
     const range = { ...triggerWindowRange, decimals: 2 };
 
-    const [level, setLevel] = useState(triggerLevel);
-    // use true for mA, false for uA
-    const [levelUnit, setLevelUnit] = useState(false);
     const [triggerLen, setTriggerLen] = useState(triggerLength);
-
-    useEffect(() => {
-        setLevelUnit(triggerLevel > 1000);
-        setLevel(
-            triggerLevel > 1000
-                ? Number((triggerLevel / 1000).toFixed(3))
-                : triggerLevel
-        );
-    }, [triggerLevel]);
-
-    const sendTriggerLevel = unit => {
-        dispatch(updateTriggerLevel(level * 1000 ** unit));
-        setLevelUnit(unit);
-    };
 
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 
@@ -150,61 +131,10 @@ const Trigger = () => {
                     dispatch(triggerLengthUpdate(triggerLen))
                 }
             />
-            <div
-                title="Rising edge level to run trigger"
-                className={externalTrigger ? 'disabled' : ''}
-            >
-                <Form.Label
-                    htmlFor="slider-trigger-level"
-                    className="d-flex flex-row align-items-baseline"
-                >
-                    <span className="flex-fill">Level</span>
-                    <NumberInlineInput
-                        value={level}
-                        range={{
-                            min: 0,
-                            max: levelUnit ? 1000 : 1000000,
-                            decimals: levelUnit ? 3 : 0,
-                        }}
-                        onChange={value => setLevel(value)}
-                        onChangeComplete={() => sendTriggerLevel(levelUnit)}
-                        chars={8}
-                    />
-                    {/* The context in the next line is a hack to work around
-                        a bug in react-bootstrap described in
-                        https://github.com/react-bootstrap/react-bootstrap/issues/4176#issuecomment-549999503
-                        When we are certain that this app is only run with by
-                        a launcher that provides a version of
-                        react-bootstrap >= 1.4 this hack can be removed.
-                        The bug that this hack fixes is that selecting a value in the
-                        dropdown also closes the collapsible trigger group around it.
-                        */}
-                    <SelectableContext.Provider value={false}>
-                        <Dropdown className="inline-dropdown">
-                            <Dropdown.Toggle
-                                id="dropdown-current-unit"
-                                variant="plain"
-                            >
-                                {levelUnit ? 'mA' : '\u00B5A'}
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Item
-                                    eventKey="1"
-                                    onSelect={() => sendTriggerLevel(false)}
-                                >
-                                    {'\u00B5A'}
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                    eventKey="2"
-                                    onSelect={() => sendTriggerLevel(true)}
-                                >
-                                    mA
-                                </Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </SelectableContext.Provider>
-                </Form.Label>
-            </div>
+            <TriggerLevel
+                triggerLevel={triggerLevel}
+                externalTrigger={externalTrigger}
+            />
             <TriggerModeGroup
                 triggerMode={triggerMode}
                 setTriggerMode={setTriggerMode}
