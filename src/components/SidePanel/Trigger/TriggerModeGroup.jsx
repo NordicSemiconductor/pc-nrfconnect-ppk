@@ -8,10 +8,7 @@ import {
     externalTriggerToggled,
     triggerStop,
 } from '../../../actions/deviceActions';
-
-const SINGLE = 'SINGLE';
-const CONTINUOUS = 'CONTINUOUS';
-const EXTERNAL = 'EXTERNAL';
+import { SINGLE, CONTINUOUS, EXTERNAL } from './constants';
 
 const TriggerModeGroup = ({
     triggerMode,

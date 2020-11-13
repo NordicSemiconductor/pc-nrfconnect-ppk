@@ -36,38 +36,28 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { triggerLengthUpdate } from '../../../actions/deviceActions';
+import { appState } from '../../../reducers/appReducer';
+import { triggerState } from '../../../reducers/triggerReducer';
 
-import {
-    triggerLengthUpdate,
-    triggerStart,
-    triggerStop,
-    triggerSingleSet,
-} from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
-import { triggerState } from '../../reducers/triggerReducer';
-import { options } from '../../globals';
-import TriggerModeGroup from './Trigger/TriggerModeGroup';
-import TriggerLevel from './Trigger/TriggerLevel';
+import TriggerModeGroup from './TriggerModeGroup';
+import TriggerLevel from './TriggerLevel';
+import TriggerStart from './TriggerStart';
 
-import Group from './Group';
+import Group from '../Group';
 
-import './inline-dropdown.scss';
-
-const SINGLE = 'SINGLE';
-const CONTINUOUS = 'CONTINUOUS';
+import '../inline-dropdown.scss';
+import { CONTINUOUS } from './constants';
 
 const Trigger = () => {
     const dispatch = useDispatch();
     const { rttRunning, capabilities } = useSelector(appState);
     const {
         externalTrigger,
-        triggerRunning,
         triggerLevel,
-        triggerSingleWaiting,
         triggerWindowRange,
         triggerLength,
     } = useSelector(triggerState);
@@ -75,33 +65,7 @@ const Trigger = () => {
     const range = { ...triggerWindowRange, decimals: 2 };
 
     const [triggerLen, setTriggerLen] = useState(triggerLength);
-
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
-
-    let startLabel = 'External';
-    let startTitle;
-    let onStartClicked = null;
-    if (!externalTrigger) {
-        if (!(triggerRunning || triggerSingleWaiting)) {
-            startLabel = 'Start';
-            startTitle = `Start sampling at ${Math.round(
-                options.samplesPerSecond / 1000
-            )}kHz for a short duration when the set trigger level is reached`;
-            if (triggerMode === SINGLE) {
-                onStartClicked = () => dispatch(triggerSingleSet());
-            } else {
-                onStartClicked = () => dispatch(triggerStart());
-            }
-        } else {
-            onStartClicked = () => dispatch(triggerStop());
-            if (triggerMode === SINGLE) {
-                startLabel = 'Wait';
-                startTitle = 'Waiting for samples above trigger level';
-            } else {
-                startLabel = 'Stop';
-            }
-        }
-    }
 
     return (
         <Group heading="Trigger">
@@ -142,17 +106,7 @@ const Trigger = () => {
                 externalTrigger={externalTrigger}
                 rttRunning={rttRunning}
             />
-            <Button
-                title={startTitle}
-                className={`w-100 mb-2 ${
-                    triggerRunning || triggerSingleWaiting ? 'active-anim' : ''
-                }`}
-                disabled={!rttRunning || externalTrigger}
-                variant="set"
-                onClick={onStartClicked}
-            >
-                {startLabel}
-            </Button>
+            <TriggerStart triggerMode={triggerMode} rttRunning={rttRunning} />
         </Group>
     );
 };
