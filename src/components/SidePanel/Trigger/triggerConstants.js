@@ -34,45 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-
-import { appState } from '../../../reducers/appReducer';
-import { triggerState } from '../../../reducers/triggerReducer';
-
-import { TriggerLength, TriggerModeGroup, TriggerLevel, TriggerStart } from '.';
-
-import Group from '../Group';
-
-import './trigger.scss';
-import { CONTINUOUS } from './triggerConstants';
-
-const Trigger = () => {
-    const { rttRunning, capabilities } = useSelector(appState);
-    const { externalTrigger, triggerLevel, triggerRunning } = useSelector(
-        triggerState
-    );
-
-    const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
-
-    return (
-        <Group heading="Trigger">
-            <TriggerLength />
-            <TriggerLevel
-                triggerLevel={triggerLevel}
-                externalTrigger={externalTrigger}
-            />
-            <TriggerModeGroup
-                triggerMode={triggerMode}
-                setTriggerMode={setTriggerMode}
-                hasExternal={!!capabilities.ppkTriggerExtToggle}
-                externalTrigger={externalTrigger}
-                rttRunning={rttRunning}
-                triggerRunning={triggerRunning}
-            />
-            <TriggerStart triggerMode={triggerMode} rttRunning={rttRunning} />
-        </Group>
-    );
-};
-
-export default Trigger;
+export const SINGLE = 'SINGLE';
+export const CONTINUOUS = 'CONTINUOUS';
+export const EXTERNAL = 'EXTERNAL';

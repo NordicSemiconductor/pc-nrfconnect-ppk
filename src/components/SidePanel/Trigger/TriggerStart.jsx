@@ -1,3 +1,39 @@
+/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+ *
+ * All rights reserved.
+ *
+ * Use in source and binary forms, redistribution in binary form only, with
+ * or without modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions in binary form, except as embedded into a Nordic
+ *    Semiconductor ASA integrated circuit in a product or a software update for
+ *    such product, must reproduce the above copyright notice, this list of
+ *    conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ *
+ * 2. Neither the name of Nordic Semiconductor ASA nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * 3. This software, with or without modification, must only be used with a Nordic
+ *    Semiconductor ASA integrated circuit.
+ *
+ * 4. Any software provided in binary form under this license must not be reverse
+ *    engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
@@ -9,48 +45,74 @@ import {
     triggerStop,
     triggerSingleSet,
 } from '../../../actions/deviceActions';
-import { SINGLE } from './constants';
+import { SINGLE } from './triggerConstants';
 
-const TriggerStart = ({ triggerMode, rttRunning, triggerRunning }) => {
-    const dispatch = useDispatch();
-    const { externalTrigger, triggerSingleWaiting } = useSelector(triggerState);
+const LABEL_START = 'Start';
+const LABEL_STOP = 'Stop';
+const LABEL_WAIT = 'Wait';
+const TITLE_IDLE = `Start sampling at ${Math.round(
+    options.samplesPerSecond / 1000
+)}kHz for a short duration when the set trigger level is reached`;
+const TITLE_RUNNING = 'Waiting for samples above trigger level';
 
-    let startLabel = 'External';
-    let startTitle;
-    let onStartClicked = null;
-
-    if (!externalTrigger) {
-        if (!(triggerRunning || triggerSingleWaiting)) {
-            startLabel = 'Start';
-            startTitle = `Start sampling at ${Math.round(
-                options.samplesPerSecond / 1000
-            )}kHz for a short duration when the set trigger level is reached`;
-            if (triggerMode === SINGLE) {
-                onStartClicked = () => dispatch(triggerSingleSet());
-            } else {
-                onStartClicked = () => dispatch(triggerStart());
-            }
-        } else {
-            onStartClicked = () => dispatch(triggerStop());
-            if (triggerMode === SINGLE) {
-                startLabel = 'Wait';
-                startTitle = 'Waiting for samples above trigger level';
-            } else {
-                startLabel = 'Stop';
-            }
-        }
+function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {
+    if (externalTrigger) {
+        return ['External', null, null];
     }
+    if (isRunning) {
+        return triggerMode === SINGLE
+            ? attrs.runningSingle
+            : attrs.runningContinuous;
+    }
+    return triggerMode === SINGLE ? attrs.idleSingle : attrs.idleContinuous;
+}
+
+const TriggerStart = ({ triggerMode, rttRunning }) => {
+    const dispatch = useDispatch();
+    const {
+        externalTrigger,
+        triggerSingleWaiting,
+        triggerRunning,
+    } = useSelector(triggerState);
+
+    const buttonAttributes = {
+        // [label, title, onClick]
+        idleSingle: [
+            LABEL_START,
+            TITLE_IDLE,
+            () => dispatch(triggerSingleSet()),
+        ],
+        idleContinuous: [
+            LABEL_START,
+            TITLE_IDLE,
+            () => dispatch(triggerStart()),
+        ],
+        runningSingle: [
+            LABEL_WAIT,
+            TITLE_RUNNING,
+            () => dispatch(triggerStop()),
+        ],
+        runningContinuous: [LABEL_STOP, null, () => dispatch(triggerStop())],
+    };
+
+    const isRunning = triggerRunning || triggerSingleWaiting;
+
+    const [label, title, onClick] = getButtonValues({
+        externalTrigger,
+        isRunning,
+        triggerMode,
+        attrs: buttonAttributes,
+    });
+
     return (
         <Button
-            title={startTitle}
-            className={`w-100 mb-2 ${
-                triggerRunning || triggerSingleWaiting ? 'active-anim' : ''
-            }`}
+            title={title}
+            className={`w-100 mb-2 ${isRunning ? 'active-anim' : ''}`}
             disabled={!rttRunning || externalTrigger}
             variant="set"
-            onClick={onStartClicked}
+            onClick={onClick}
         >
-            {startLabel}
+            {label}
         </Button>
     );
 };
@@ -60,5 +122,4 @@ export default TriggerStart;
 TriggerStart.propTypes = {
     triggerMode: PropTypes.string.isRequired,
     rttRunning: PropTypes.bool.isRequired,
-    triggerRunning: PropTypes.bool.isRequired,
 };
