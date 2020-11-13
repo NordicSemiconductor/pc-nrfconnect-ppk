@@ -35,66 +35,29 @@
  */
 
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Form from 'react-bootstrap/Form';
+import { useSelector } from 'react-redux';
 
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
-import { triggerLengthUpdate } from '../../../actions/deviceActions';
 import { appState } from '../../../reducers/appReducer';
 import { triggerState } from '../../../reducers/triggerReducer';
 
-import TriggerModeGroup from './TriggerModeGroup';
-import TriggerLevel from './TriggerLevel';
-import TriggerStart from './TriggerStart';
+import { TriggerLength, TriggerModeGroup, TriggerLevel, TriggerStart } from '.';
 
 import Group from '../Group';
 
-import '../inline-dropdown.scss';
+import './trigger.scss';
 import { CONTINUOUS } from './constants';
 
 const Trigger = () => {
-    const dispatch = useDispatch();
     const { rttRunning, capabilities } = useSelector(appState);
-    const {
-        externalTrigger,
-        triggerLevel,
-        triggerWindowRange,
-        triggerLength,
-    } = useSelector(triggerState);
+    const { externalTrigger, triggerLevel, triggerRunning } = useSelector(
+        triggerState
+    );
 
-    const range = { ...triggerWindowRange, decimals: 2 };
-
-    const [triggerLen, setTriggerLen] = useState(triggerLength);
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 
     return (
         <Group heading="Trigger">
-            <Form.Label
-                title="Duration of trigger window"
-                htmlFor="slider-trigger-window"
-            >
-                <span className="flex-fill">Length</span>
-                <NumberInlineInput
-                    value={triggerLen}
-                    range={range}
-                    onChange={value => setTriggerLen(value)}
-                    onChangeComplete={() =>
-                        dispatch(triggerLengthUpdate(triggerLen))
-                    }
-                    chars={6}
-                />{' '}
-                ms
-            </Form.Label>
-            <Slider
-                title="Duration of trigger window"
-                id="slider-trigger-window"
-                values={[triggerLen]}
-                range={range}
-                onChange={[value => setTriggerLen(value)]}
-                onChangeComplete={() =>
-                    dispatch(triggerLengthUpdate(triggerLen))
-                }
-            />
+            <TriggerLength />
             <TriggerLevel
                 triggerLevel={triggerLevel}
                 externalTrigger={externalTrigger}
@@ -105,8 +68,13 @@ const Trigger = () => {
                 hasExternal={!!capabilities.ppkTriggerExtToggle}
                 externalTrigger={externalTrigger}
                 rttRunning={rttRunning}
+                triggerRunning={triggerRunning}
             />
-            <TriggerStart triggerMode={triggerMode} rttRunning={rttRunning} />
+            <TriggerStart
+                triggerMode={triggerMode}
+                rttRunning={rttRunning}
+                triggerRunning={triggerRunning}
+            />
         </Group>
     );
 };

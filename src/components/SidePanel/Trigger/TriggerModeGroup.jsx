@@ -16,10 +16,11 @@ const TriggerModeGroup = ({
     hasExternal,
     externalTrigger,
     rttRunning,
+    triggerRunning,
 }) => {
     const dispatch = useDispatch();
     const setSingleTriggerMode = () => {
-        if (triggerMode === CONTINUOUS) {
+        if (triggerRunning && triggerMode === CONTINUOUS) {
             dispatch(triggerStop());
         }
         setTriggerMode(SINGLE);
@@ -79,4 +80,5 @@ TriggerModeGroup.propTypes = {
     hasExternal: PropTypes.bool.isRequired,
     externalTrigger: PropTypes.bool.isRequired,
     rttRunning: PropTypes.bool.isRequired,
+    triggerRunning: PropTypes.bool.isRequired,
 };

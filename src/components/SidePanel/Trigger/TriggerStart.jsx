@@ -11,13 +11,9 @@ import {
 } from '../../../actions/deviceActions';
 import { SINGLE } from './constants';
 
-const TriggerStart = ({ triggerMode, rttRunning }) => {
+const TriggerStart = ({ triggerMode, rttRunning, triggerRunning }) => {
     const dispatch = useDispatch();
-    const {
-        externalTrigger,
-        triggerRunning,
-        triggerSingleWaiting,
-    } = useSelector(triggerState);
+    const { externalTrigger, triggerSingleWaiting } = useSelector(triggerState);
 
     let startLabel = 'External';
     let startTitle;
@@ -64,4 +60,5 @@ export default TriggerStart;
 TriggerStart.propTypes = {
     triggerMode: PropTypes.string.isRequired,
     rttRunning: PropTypes.bool.isRequired,
+    triggerRunning: PropTypes.bool.isRequired,
 };
