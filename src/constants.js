@@ -45,7 +45,7 @@ export default {
     RangeSet: 0x08, // (no-firmware)
     LCDSet: 0x09, // (no-firmware)
     TriggerStop: 0x0a,
-    DutToggle: 0x0c,
+    DeviceRunningSet: 0x0c,
     RegulatorSet: 0x0d,
     SwitchPointDown: 0x0e,
     SwitchPointUp: 0x0f,

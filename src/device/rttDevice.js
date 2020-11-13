@@ -133,6 +133,8 @@ class RTTDevice extends Device {
 
     triggerWindowRange = { min: (450 * 13) / 1e3, max: (4000 * 13) / 1e3 };
 
+    isRunningInitially = true;
+
     constructor(device) {
         super();
 

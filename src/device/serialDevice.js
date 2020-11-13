@@ -71,6 +71,8 @@ class SerialDevice extends Device {
 
     triggerWindowRange = { min: 1, max: 100 };
 
+    isRunningInitially = false;
+
     constructor(deviceInfo) {
         super();
 

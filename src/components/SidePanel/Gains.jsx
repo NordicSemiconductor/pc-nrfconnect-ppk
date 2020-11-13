@@ -66,7 +66,7 @@ const Gains = () => {
     return (
         <Group
             heading="Gains"
-            title="Adjust gains to correct potential measurement errors​"
+            title="Adjust gains to correct potential measurement errors"
             collapse={{ collapsible: true }}
         >
             {gains.map((gain, index) => (

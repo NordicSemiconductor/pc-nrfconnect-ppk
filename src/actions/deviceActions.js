@@ -45,7 +45,7 @@ import {
     deviceOpenedAction,
     deviceClosedAction,
     rttStartAction,
-    toggleDUTAction,
+    setDeviceRunningAction,
     setPowerModeAction,
     samplingStartAction,
     samplingStoppedAction,
@@ -300,9 +300,9 @@ export function open(deviceInfo) {
         try {
             device = new Device(deviceInfo, onSample);
             dispatch(setupOptions());
+            dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
 
-            console.log(metadata);
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
             dispatch(triggerLevelSetAction(1000));
@@ -400,7 +400,6 @@ export function triggerLengthUpdate(value) {
 export function triggerStart() {
     return async (dispatch, getState) => {
         options.triggerIndex = options.index;
-        // dispatch(goLive());
         dispatch(toggleTriggerAction(true));
         dispatch(clearSingleTriggingAction());
 
@@ -414,7 +413,6 @@ export function triggerStart() {
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
         options.triggerIndex = options.index;
-        // dispatch(goLive());
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
 
@@ -423,11 +421,11 @@ export function triggerSingleSet() {
     };
 }
 
-export function toggleDUT(isOn) {
+export function setDeviceRunning(isRunning) {
     return async dispatch => {
-        await device.ppkToggleDUT(isOn ? 1 : 0);
-        logger.info(`DUT ${isOn ? 'ON' : 'OFF'}`);
-        dispatch(toggleDUTAction());
+        await device.ppkDeviceRunning(isRunning ? 1 : 0);
+        logger.info(`DUT ${isRunning ? 'ON' : 'OFF'}`);
+        dispatch(setDeviceRunningAction(isRunning));
     };
 }
 
