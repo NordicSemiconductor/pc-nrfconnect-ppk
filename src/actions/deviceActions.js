@@ -235,6 +235,13 @@ export function open(deviceInfo) {
                     if (value >= triggerLevel) {
                         isTrigger = 1;
                         triggerIndex = options.index;
+
+                        if (triggerSingleWaiting) {
+                            logger.info('Trigger received, stopped waiting');
+                            dispatch(clearSingleTriggingAction());
+                            device.ppkTriggerStop();
+                            isTrigger = 0;
+                        }
                     }
                 } else {
                     isTrigger += 1;
@@ -246,11 +253,6 @@ export function open(deviceInfo) {
                     const to = indexToTimestamp(options.triggerIndex);
                     dispatch(chartWindowAction(from, to, to - from));
                 }
-            }
-
-            if (triggerSingleWaiting) {
-                logger.info('Trigger received, stopped waiting');
-                dispatch(clearSingleTriggingAction());
             }
 
             const zeroCappedValue = zeroCap(value);
