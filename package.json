@@ -43,9 +43,12 @@
     "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v4.9.4",
     "react": "16.13.1",
     "react-chartjs-2": "2.9.0",
+    "react-dom": "^17.0.1",
     "react-redux": "7.2.0"
   },
   "dependencies": {},
-  "eslintConfig": { "extends" : "./node_modules/pc-nrfconnect-shared/config/eslintrc.json" },
+  "eslintConfig": {
+    "extends": "./node_modules/pc-nrfconnect-shared/config/eslintrc.json"
+  },
   "prettier": "./node_modules/pc-nrfconnect-shared/config/prettier.config.js"
 }
