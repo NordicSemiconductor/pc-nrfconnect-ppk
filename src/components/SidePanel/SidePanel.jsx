@@ -42,7 +42,7 @@ import PowerMode from './PowerMode';
 import Buffer from './Buffer';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
-import Trigger from './Trigger';
+import Trigger from './Trigger/Trigger';
 import VoltageRegulator from './VoltageRegulator';
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
