@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '../../utils/testUtils';
-import Trigger from '../SidePanel/Trigger';
+import Trigger from '../SidePanel/Trigger/Trigger';
 
 const TRIGGER_LENGTH = 10;
 

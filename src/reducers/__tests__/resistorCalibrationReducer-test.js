@@ -57,28 +57,4 @@ describe('resistorCalibrationReducer', () => {
         expect(state.userResMid).toEqual(initialState.userResMid);
         expect(state.userResLo).toEqual(initialState.userResLo);
     });
-
-    // it('should not update user resistor values if they cannot be parsed as floats', () => {
-    //     const state = reducer(initialState, {
-    //         type: 'USER_RESISTOR_UPDATED',
-    //         userResHi: 'foo',
-    //         userResMid: '*',
-    //         userResLo: '!',
-    //     });
-    //     expect(state.userResHi).toEqual(initialState.userResHi);
-    //     expect(state.userResMid).toEqual(initialState.userResMid);
-    //     expect(state.userResLo).toEqual(initialState.userResLo);
-    // });
-
-    // it('should update user resistor values if they can be parsed as floats', () => {
-    //     const state = reducer(initialState, {
-    //         type: 'USER_RESISTOR_UPDATED',
-    //         userResHi: '42',
-    //         userResMid: '1.234',
-    //         userResLo: '13.37',
-    //     });
-    //     expect(state.userResHi).toEqual(42);
-    //     expect(state.userResMid).toEqual(1.234);
-    //     expect(state.userResLo).toEqual(13.37);
-    // });
 });
