@@ -47,14 +47,6 @@ import {
 } from '../../../actions/deviceActions';
 import { SINGLE } from './triggerConstants';
 
-const LABEL_START = 'Start';
-const LABEL_STOP = 'Stop';
-const LABEL_WAIT = 'Wait';
-const TITLE_IDLE = `Start sampling at ${Math.round(
-    options.samplesPerSecond / 1000
-)}kHz for a short duration when the set trigger level is reached`;
-const TITLE_RUNNING = 'Waiting for samples above trigger level';
-
 function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {
     if (externalTrigger) {
         return ['External', null, null];
@@ -74,6 +66,14 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
         triggerSingleWaiting,
         triggerRunning,
     } = useSelector(triggerState);
+
+    const LABEL_START = 'Start';
+    const LABEL_STOP = 'Stop';
+    const LABEL_WAIT = 'Wait';
+    const TITLE_IDLE = `Start sampling at ${Math.round(
+        options.samplesPerSecond / 1000
+    )}kHz for a short duration when the set trigger level is reached`;
+    const TITLE_RUNNING = 'Waiting for samples above trigger level';
 
     const buttonAttributes = {
         // [label, title, onClick]

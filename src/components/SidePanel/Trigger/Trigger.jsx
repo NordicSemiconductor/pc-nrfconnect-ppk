@@ -40,7 +40,10 @@ import { useSelector } from 'react-redux';
 import { appState } from '../../../reducers/appReducer';
 import { triggerState } from '../../../reducers/triggerReducer';
 
-import { TriggerLength, TriggerModeGroup, TriggerLevel, TriggerStart } from '.';
+import TriggerLength from './TriggerLength';
+import TriggerLevel from './TriggerLevel';
+import TriggerModeGroup from './TriggerModeGroup';
+import TriggerStart from './TriggerStart';
 
 import Group from '../Group';
 
