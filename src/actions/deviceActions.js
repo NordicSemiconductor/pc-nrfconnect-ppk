@@ -69,8 +69,8 @@ import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
 import {
     chartWindowAction,
     animationAction,
-    chartCursorAction,
     updateHasDigitalChannels,
+    resetCursorAndChart,
 } from '../reducers/chartReducer';
 import {
     options,
@@ -110,19 +110,14 @@ const setupOptions = () => dispatch => {
 
 /* Start reading current measurements */
 export function samplingStart() {
-    return async (dispatch, getState) => {
+    return async dispatch => {
         options.data.fill(NaN);
         if (options.bits) {
             options.bits.fill(0);
         }
         options.index = 0;
         options.timestamp = undefined;
-        dispatch(
-            chartWindowAction(null, null, getState().app.chart.windowDuration),
-            null,
-            null
-        );
-        dispatch(chartCursorAction(null, null));
+        dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
         await device.ppkAverageStart();
         logger.info('Sampling started');
@@ -410,6 +405,7 @@ export function triggerLengthUpdate(value) {
 
 export function triggerStart() {
     return async (dispatch, getState) => {
+        dispatch(resetCursorAndChart());
         dispatch(toggleTriggerAction(true));
         dispatch(clearSingleTriggerWaitingAction());
 
@@ -422,6 +418,7 @@ export function triggerStart() {
 
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
+        dispatch(resetCursorAndChart());
         dispatch(triggerSingleSetAction());
 
         const { triggerLevel } = getState().app.trigger;
