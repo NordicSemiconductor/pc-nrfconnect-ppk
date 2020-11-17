@@ -40,6 +40,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { unit } from 'mathjs';
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 
@@ -62,9 +63,13 @@ export default () => {
         maxPower10,
     } = useSelector(dataLoggerState);
 
+    const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
+        .format({ notation: 'fixed', precision: 1 })
+        .replace('.0', '')}`;
+
     const startStopTitle =
         !samplingRunning && capabilities.ppkTriggerSet
-            ? 'Start sampling at 7.7kHz. Each data point is averaged over 10 samples at 77kHz'
+            ? startButtonTooltip
             : undefined;
 
     return (

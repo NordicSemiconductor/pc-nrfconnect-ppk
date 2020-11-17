@@ -35,69 +35,80 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '../../utils/testUtils';
-import Trigger from '../SidePanel/Trigger/Trigger';
+import { render, screen } from '../../utils/testUtils';
+import StartStop from '../SidePanel/StartStop';
+import { SAMPLES_PER_AVERAGE } from '../../device/rttDevice';
 
-const TRIGGER_LENGTH = 10;
+const ppk2SampleFreq = 100000;
+const ppk1SampleFreq = 77000 / SAMPLES_PER_AVERAGE;
 
-const initialState = {
+const initialStatePpk2 = {
     app: {
         app: {
             rttRunning: true,
+            samplingRunning: false,
             capabilities: {
-                ppkTriggerExtToggle: false,
+                ppkTriggerSet: true,
             },
         },
-        trigger: {
-            externalTrigger: false,
-            triggerWindowRange: {
-                min: 1,
-                max: 100,
-            },
-            triggerLength: TRIGGER_LENGTH,
-            triggerLevel: 1000,
-            triggerSingleWaiting: false,
-            triggerRunning: false,
+        dataLogger: {
+            sampleFreqLog10: 5,
+            sampleFreq: ppk2SampleFreq,
+            durationSeconds: 300,
+            maxPower10: 5,
+            samplesPerAverage: null,
         },
     },
 };
 
-describe('Trigger', () => {
-    beforeEach(() => {
-        render(<Trigger />, {
-            initialState,
+const initialStatePpk1 = {
+    app: {
+        app: {
+            rttRunning: true,
+            samplingRunning: false,
+            capabilities: {
+                ppkTriggerSet: true,
+            },
+        },
+        dataLogger: {
+            sampleFreqLog10: 5,
+            sampleFreq: ppk1SampleFreq,
+            durationSeconds: 300,
+            maxPower10: 5,
+            samplesPerAverage: null,
+        },
+    },
+};
+
+const ppk2Tooltip = 'Start sampling at 100 kHz';
+const ppk1Tooltip = 'Start sampling at 7.7 kHz';
+
+describe('StartStop', () => {
+    describe('ppk2', () => {
+        beforeEach(() => {
+            render(<StartStop />, {
+                initialState: initialStatePpk2,
+            });
+        });
+
+        it('start button should have correct tooltip for PPK2', () => {
+            const startButton = screen.getByRole('button');
+            expect(startButton.textContent).toBe('Start');
+            expect(startButton.title).toBe(ppk2Tooltip);
         });
     });
 
-    it('should be possible to switch modes', () => {
-        const singleButton = screen.getByText(/single/i);
-        const continuousButton = screen.getByText(/continuous/i);
-        expect(singleButton).toBeInTheDocument();
-        expect(continuousButton).toBeInTheDocument();
-        expect(singleButton).not.toHaveAttribute('disabled');
-        expect(continuousButton).toHaveAttribute('disabled');
-        fireEvent.click(singleButton);
-        expect(singleButton).toHaveAttribute('disabled');
-        expect(continuousButton).not.toHaveAttribute('disabled');
-    });
+    describe('ppk1', () => {
+        beforeEach(() => {
+            render(<StartStop />, {
+                initialState: initialStatePpk1,
+            });
+        });
 
-    it('should update slider value if input field is changed, but only if the input is valid', () => {
-        const triggerLengthInput = screen.getByText(/length/i).nextSibling;
-        const sliderValue = screen.getByRole('slider');
-        expect(sliderValue.getAttribute('aria-valuenow')).toBe(
-            `${TRIGGER_LENGTH}`
-        );
-        fireEvent.change(triggerLengthInput, {
-            target: { value: 'abc' },
+        it('start button should have correct tooltip for PPK1', () => {
+            const startButton = screen.getByRole('button');
+            expect(startButton.textContent).toBe('Start');
+            expect(startButton.title).toBe(ppk1Tooltip);
         });
-        expect(triggerLengthInput).toHaveClass('invalid');
-        expect(sliderValue.getAttribute('aria-valuenow')).toBe(
-            `${TRIGGER_LENGTH}`
-        );
-        fireEvent.change(triggerLengthInput, {
-            target: { value: '15' },
-        });
-        expect(triggerLengthInput).not.toHaveClass('invalid');
-        expect(sliderValue.getAttribute('aria-valuenow')).toBe('15');
     });
 });
