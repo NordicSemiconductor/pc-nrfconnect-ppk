@@ -57,7 +57,7 @@ import {
 } from '../reducers/switchingPointsReducer';
 import {
     toggleTriggerAction,
-    clearSingleTriggingAction,
+    clearSingleTriggerWaitingAction,
     triggerLevelSetAction,
     triggerSingleSetAction,
     externalTriggerToggledAction,
@@ -145,7 +145,7 @@ export function triggerStop() {
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
         dispatch(toggleTriggerAction(false));
-        dispatch(clearSingleTriggingAction());
+        dispatch(clearSingleTriggerWaitingAction());
     };
 }
 
@@ -215,8 +215,9 @@ export function open(deviceInfo) {
         }
 
         let isTrigger = 0;
-        let triggerIndex = 0;
+        let prevValue = 0;
         const onSample = ({ value, bits, timestamp }) => {
+            // PPK1 always sets timestamp, while PPK2 never does
             if (options.timestamp === undefined) {
                 options.timestamp = 0;
             }
@@ -226,32 +227,6 @@ export function open(deviceInfo) {
                 trigger: { triggerSingleWaiting, triggerLevel, triggerLength },
                 chart: { windowBegin, windowEnd },
             } = getState().app;
-
-            if (!samplingRunning) {
-                const wnd = Math.floor(
-                    (triggerLength * 1000) / options.samplingTime
-                );
-                if (!isTrigger) {
-                    if (value >= triggerLevel) {
-                        isTrigger = 1;
-                        triggerIndex = options.index;
-                    }
-                } else {
-                    isTrigger += 1;
-                }
-                if (isTrigger > wnd) {
-                    isTrigger = 0;
-                    options.triggerIndex = options.index;
-                    const from = indexToTimestamp(triggerIndex);
-                    const to = indexToTimestamp(options.triggerIndex);
-                    dispatch(chartWindowAction(from, to, to - from));
-                }
-            }
-
-            if (triggerSingleWaiting) {
-                logger.info('Trigger received, stopped waiting');
-                dispatch(clearSingleTriggingAction());
-            }
 
             const zeroCappedValue = zeroCap(value);
 
@@ -288,6 +263,38 @@ export function open(deviceInfo) {
                 options.index = 0;
             }
 
+            if (!samplingRunning) {
+                const wnd = Math.floor(
+                    (triggerLength * 1000) / options.samplingTime
+                );
+                if (!isTrigger) {
+                    if (
+                        timestamp !== undefined ||
+                        (value >= triggerLevel && prevValue < triggerLevel)
+                    ) {
+                        isTrigger = 1;
+                        if (triggerSingleWaiting) {
+                            logger.info('Trigger received, stopped waiting');
+                            dispatch(clearSingleTriggerWaitingAction());
+                            if (timestamp === undefined) {
+                                device.ppkTriggerStop();
+                            }
+                        }
+                    }
+                } else {
+                    isTrigger += 1;
+                }
+                if (isTrigger >= wnd) {
+                    isTrigger = 0;
+                    const triggerBeginIndex =
+                        (options.index - wnd + options.data.length) %
+                        options.data.length;
+                    const from = indexToTimestamp(triggerBeginIndex);
+                    const to = indexToTimestamp(options.index);
+                    dispatch(chartWindowAction(from, to, to - from));
+                }
+            }
+
             if (
                 (windowBegin !== 0 || windowEnd !== 0) &&
                 options.timestamp >= windowBegin + bufferLengthInSeconds * 1e6
@@ -295,6 +302,7 @@ export function open(deviceInfo) {
                 // stop average when reaches end of buffer (i.e. would overwrite chart data)
                 dispatch(samplingStop());
             }
+            prevValue = value;
         };
 
         try {
@@ -351,7 +359,10 @@ export function open(deviceInfo) {
         clearInterval(updateRequestInterval);
         let renderIndex;
         updateRequestInterval = setInterval(() => {
-            if (renderIndex !== options.index) {
+            if (
+                renderIndex !== options.index &&
+                getState().app.app.samplingRunning
+            ) {
                 requestAnimationFrame(() => {
                     dispatch(animationAction());
                 });
@@ -399,9 +410,8 @@ export function triggerLengthUpdate(value) {
 
 export function triggerStart() {
     return async (dispatch, getState) => {
-        options.triggerIndex = options.index;
         dispatch(toggleTriggerAction(true));
-        dispatch(clearSingleTriggingAction());
+        dispatch(clearSingleTriggerWaitingAction());
 
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
@@ -412,12 +422,12 @@ export function triggerStart() {
 
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
-        options.triggerIndex = options.index;
+        dispatch(triggerSingleSetAction());
+
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
 
         await device.ppkTriggerSingleSet(triggerLevel);
-        dispatch(triggerSingleSetAction());
     };
 }
 
@@ -462,7 +472,6 @@ export function externalTriggerToggled(chbState) {
     return async dispatch => {
         if (chbState) {
             await device.ppkTriggerStop();
-            options.triggerIndex = options.index;
             logger.info('Starting external trigger');
         } else {
             logger.info('Stopping external trigger');

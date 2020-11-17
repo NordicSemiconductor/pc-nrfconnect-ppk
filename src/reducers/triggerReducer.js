@@ -70,7 +70,9 @@ export const toggleTriggerAction = triggerRunning => ({
 });
 
 export const triggerSingleSetAction = () => ({ type: TRIGGER_SINGLE_SET });
-export const clearSingleTriggingAction = () => ({ type: TRIGGER_SINGLE_CLEAR });
+export const clearSingleTriggerWaitingAction = () => ({
+    type: TRIGGER_SINGLE_CLEAR,
+});
 export const externalTriggerToggledAction = () => ({
     type: EXTERNAL_TRIGGER_TOGGLE,
 });

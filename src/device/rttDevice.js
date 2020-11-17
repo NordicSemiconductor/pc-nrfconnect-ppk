@@ -161,8 +161,6 @@ class RTTDevice extends Device {
             case ETX: {
                 if (this.dataPayload.length === 4) {
                     this.handleAverageDataSet();
-                    this.timestamp +=
-                        this.adcSamplingTimeUs * SAMPLES_PER_AVERAGE;
                 } else if (this.dataPayload.length === 5) {
                     this.timestamp = this.convertSysTick2MicroSeconds(
                         this.dataPayload.slice(0, 4)
@@ -412,10 +410,9 @@ class RTTDevice extends Device {
         }
         try {
             const value = this.viewFloat[0];
-            let { timestamp } = this;
             for (let i = 0; i < SAMPLES_PER_AVERAGE; i += 1) {
-                this.onSampleCallback({ value, timestamp });
-                timestamp += this.adcSamplingTimeUs;
+                this.onSampleCallback({ value, timestamp: this.timestamp });
+                this.timestamp += this.adcSamplingTimeUs;
             }
         } catch (err) {
             this.emit('error', 'Average data error, restart application', err);
@@ -428,8 +425,6 @@ class RTTDevice extends Device {
             this.triggerBuf = new ArrayBuffer(this.dataPayload.length);
             this.viewUint8 = new Uint8Array(this.triggerBuf);
         }
-
-        let { timestamp } = this;
 
         this.viewUint8.set(this.dataPayload);
         const view = new DataView(this.triggerBuf);
@@ -445,8 +440,8 @@ class RTTDevice extends Device {
             const value =
                 this.getAdcResult[currentMeasurementRange](adcResult) * 1e6;
 
-            this.onSampleCallback({ value, timestamp });
-            timestamp += this.adcSamplingTimeUs;
+            this.onSampleCallback({ value, timestamp: this.timestamp });
+            this.timestamp += this.adcSamplingTimeUs;
         }
     }
 
