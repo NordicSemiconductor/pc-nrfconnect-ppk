@@ -1,3 +1,7 @@
+## Version 3.0.3
+## Fixed
+- Small visual glitch when used with nRF Connect for Desktop 3.6.1: The top margin in the side panel was shrunken
+
 ## Version 3.0.2
 ## Fixed
 - The CSV export was exporting the wrong portion of data #123
