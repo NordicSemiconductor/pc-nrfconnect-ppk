@@ -43,7 +43,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Toggle } from 'pc-nrfconnect-shared';
 
 import {
-    goLive,
+    resetCursorAndChart,
     toggleYAxisLock,
     chartState,
 } from '../../reducers/chartReducer';
@@ -120,7 +120,9 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
             </ButtonGroup>
             <Toggle
                 label="LIVE VIEW"
-                onToggle={() => (live ? chartPause() : dispatch(goLive()))}
+                onToggle={() =>
+                    live ? chartPause() : dispatch(resetCursorAndChart())
+                }
                 isToggled={live}
                 variant="secondary"
             />

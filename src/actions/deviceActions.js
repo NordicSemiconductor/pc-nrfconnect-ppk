@@ -71,6 +71,7 @@ import {
     animationAction,
     chartCursorAction,
     updateHasDigitalChannels,
+    resetCursorAndChart,
 } from '../reducers/chartReducer';
 import {
     options,
@@ -410,6 +411,7 @@ export function triggerLengthUpdate(value) {
 
 export function triggerStart() {
     return async (dispatch, getState) => {
+        dispatch(resetCursorAndChart());
         dispatch(toggleTriggerAction(true));
         dispatch(clearSingleTriggerWaitingAction());
 
@@ -422,6 +424,7 @@ export function triggerStart() {
 
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
+        dispatch(resetCursorAndChart());
         dispatch(triggerSingleSetAction());
 
         const { triggerLevel } = getState().app.trigger;
