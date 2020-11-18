@@ -57,6 +57,7 @@ import {
     showExportDialog,
     toggleAdvancedModeAction,
     toggleSaveChoiceDialog,
+    toggleSaveAction,
 } from '../../reducers/appReducer';
 import { load } from '../../actions/fileActions';
 
@@ -69,21 +70,25 @@ const ppk1ug =
 const ppk2ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 
-const enableSave = false; // temporarily disable saving
-
-const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
-const saveExportTitle = enableSave
-    ? 'Stop sampling to save or export'
-    : 'Stop sampling to export';
-const saveExportAction = enableSave ? toggleSaveChoiceDialog : showExportDialog;
-
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
     bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+    bindHotkey('alt+ctrl+shift+l', () => dispatch(toggleSaveAction()));
 
-    const { capabilities, samplingRunning, advancedMode } = useSelector(
-        appState
-    );
+    const {
+        capabilities,
+        samplingRunning,
+        advancedMode,
+        enableSave,
+    } = useSelector(appState);
+
+    const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
+    const saveExportTitle = enableSave
+        ? 'Stop sampling to save or export'
+        : 'Stop sampling to export';
+    const saveExportAction = enableSave
+        ? toggleSaveChoiceDialog
+        : showExportDialog;
 
     const deviceOpen = Object.keys(capabilities).length > 0;
 
