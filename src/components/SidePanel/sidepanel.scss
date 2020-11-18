@@ -1,4 +1,4 @@
-@import "~pc-nrfconnect-shared/src/variables";
+@import '~pc-nrfconnect-shared/src/variables';
 
 .sidepanel {
     > * {
@@ -18,20 +18,29 @@
         align-items: baseline;
     }
 
-    .btn.active-anim::after {
-        content: '';
-        background: $gray-700;
-        height: 2px;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        animation: snake 4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    .btn.active-anim {
+        overflow: hidden;
+        position: relative;
+
+        &::after {
+            content: '';
+            background: $gray-700;
+            height: 2px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            animation: snake 4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
     }
 
     @keyframes snake {
-        0% { transform: translate(-100%); }
-        100% { transform: translate(100%); }
+        0% {
+            transform: translate(-100%);
+        }
+        100% {
+            transform: translate(100%);
+        }
     }
 
     .btn-set {
@@ -45,7 +54,8 @@
         border-color: $gray-700;
     }
 
-    .power-mode, .trigger-mode {
+    .power-mode,
+    .trigger-mode {
         padding: 4px;
         background-color: $gray-700;
         button {
