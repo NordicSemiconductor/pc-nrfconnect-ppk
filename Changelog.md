@@ -1,3 +1,7 @@
+## Version 3.0.0-beta.15
+### Updates
+- Add hotkey combination for toggling save/load functionality
+
 ## Version 3.0.0-beta.14
 ### Updates
 - Enable power mode should be default on for PPK1.
