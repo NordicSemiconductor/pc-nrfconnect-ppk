@@ -46,7 +46,7 @@ import {
     showExportDialog,
     toggleSaveChoiceDialog,
 } from '../../reducers/appReducer';
-import { load } from '../../actions/fileActions';
+import { load, screenshot } from '../../actions/fileActions';
 import { triggerState } from '../../reducers/triggerReducer';
 
 export const Load = () => {
@@ -91,6 +91,14 @@ export const Save = () => {
                 onClick={() => dispatch(saveExportAction())}
             >
                 {saveExportLabel}
+            </Button>
+            <Button
+                className="w-100"
+                variant="set"
+                disabled={disabled}
+                onClick={() => dispatch(screenshot())}
+            >
+                Screenshot
             </Button>
             <SaveChoiceDialog />
             <ExportDialog />

@@ -1,3 +1,7 @@
+## Unreleased
+### Updates
+- Add screenshot functionality
+
 ## Version 3.0.0-beta.13
 ### Updates
 - Also remove loading while saving is removed.
