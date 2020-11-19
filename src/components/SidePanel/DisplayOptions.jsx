@@ -48,7 +48,10 @@ import {
     togglePreSampling,
     togglePostSampling,
 } from '../../reducers/chartReducer';
-import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
+import {
+    currentPane as currentPaneSelector,
+    appState,
+} from '../../reducers/appReducer';
 
 export default () => {
     const dispatch = useDispatch();
@@ -60,6 +63,9 @@ export default () => {
         postSamplingOn,
     } = useSelector(chartState);
     const currentPane = useSelector(currentPaneSelector);
+    const {
+        capabilities: { prePostTriggering },
+    } = useSelector(appState);
 
     return (
         <Group
@@ -86,7 +92,7 @@ export default () => {
                     <DigitalChannels />
                 </>
             )}
-            {hasDigitalChannels && currentPane === 0 && (
+            {prePostTriggering && currentPane === 0 && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(togglePreSampling())}
