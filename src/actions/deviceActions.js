@@ -289,8 +289,14 @@ export function open(deviceInfo) {
                 }
                 if (isTrigger >= wnd) {
                     isTrigger = 0;
+                    const { preSamplingOn } = getState().app.chart;
+                    const numberOfSamplesIn5ms = 500;
+                    const startIndex = preSamplingOn
+                        ? options.index - numberOfSamplesIn5ms
+                        : options.index;
+
                     const triggerBeginIndex =
-                        (options.index - wnd + options.data.length) %
+                        (startIndex - wnd + options.data.length) %
                         options.data.length;
                     const from = indexToTimestamp(triggerBeginIndex);
                     const to = options.timestamp;
