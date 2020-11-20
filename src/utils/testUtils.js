@@ -34,6 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import { render as rtlRender } from '@testing-library/react';
 import { createStore } from 'redux';
