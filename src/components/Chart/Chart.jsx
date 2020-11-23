@@ -41,119 +41,30 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { bool } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { Line } from 'react-chartjs-2';
 import Button from 'react-bootstrap/Button';
-import { unit } from 'mathjs';
-
-import dragSelectPlugin from './plugins/chart.dragSelect';
-import zoomPanPlugin from './plugins/chart.zoomPan';
-import crossHairPlugin from './plugins/chart.crossHair';
-import triggerLevelPlugin from './plugins/chart.triggerLevel';
 
 import ChartTop from './ChartTop';
 import BufferView from './BufferView';
 import StatBox from './StatBox';
 import TimeSpan from './TimeSpan';
+import DigitalChannels from './DigitalChannels';
+import ChartContainer from './ChartContainer';
 
 import {
     chartWindowAction,
     chartCursorAction,
     chartState,
 } from '../../reducers/chartReducer';
-import { triggerState } from '../../reducers/triggerReducer';
-import {
-    appState,
-    currentPane as currentPaneSelector,
-} from '../../reducers/appReducer';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
-import { yAxisWidthPx, rightMarginPx } from './chart.scss';
-import colors from '../colors.scss';
-import { updateTriggerLevel } from '../../actions/deviceActions';
+import { rightMarginPx } from './chart.scss';
+import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
 
-const uninitialisedToken = Symbol('uninitialisedToken');
-const useLazyInitialisedRef = initialiser => {
-    const ref = useRef(uninitialisedToken);
-    if (ref.current === uninitialisedToken) {
-        ref.current = initialiser();
-    }
-    return ref;
-};
-
-const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
-
-const dataColor = colors.nordicBlue;
-const valueRange = { min: 0, max: undefined };
-
-const timestampToLabel = (usecs, index, array) => {
-    const microseconds = Math.abs(usecs);
-    const sign = usecs < 0 ? '-' : '';
-    if (!array) {
-        return `${sign}${Number(microseconds / 1e3).toFixed(3)} ms`;
-    }
-    if (index > 0 && index < array.length - 1) {
-        const first = array[0];
-        const last = array[array.length - 1];
-        const range = last - first;
-        if (usecs - first < range / 8 || last - usecs < range / 8) {
-            return undefined;
-        }
-    }
-
-    const d = new Date(microseconds / 1e3);
-    const h = d.getUTCHours().toString().padStart(2, '0');
-    const m = d.getUTCMinutes().toString().padStart(2, '0');
-    const s = d.getUTCSeconds().toString().padStart(2, '0');
-
-    const time = `${sign}${h}:${m}:${s}`;
-    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
-        3
-    )}`.padStart(7, '0');
-
-    return [time, subsecond];
-};
-
-const formatCurrent = uA =>
-    unit(uA, 'uA')
-        .format({ notation: 'auto', precision: 4 })
-        .replace('u', '\u00B5');
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
-
-const bitsChartOptions = {
-    scales: {
-        xAxes: [
-            {
-                id: 'xScale',
-                display: false,
-                type: 'linear',
-                ticks: {},
-                tickMarkLength: 0,
-                drawTicks: false,
-                cursor: {},
-            },
-        ],
-        yAxes: [
-            {
-                type: 'linear',
-                display: false,
-                ticks: {
-                    min: -0.5,
-                    max: 0.5,
-                },
-            },
-        ],
-    },
-    redraw: true,
-    maintainAspectRatio: false,
-    animation: { duration: 0 },
-    hover: { animationDuration: 0 },
-    responsiveAnimationDuration: 0,
-    legend: { display: false },
-};
 
 const calcStats = (data, begin, end, index) => {
     if (begin === null || end === null) {
@@ -223,37 +134,24 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowDuration,
         cursorBegin,
         cursorEnd,
-        yMin,
-        yMax,
         digitalChannels,
         digitalChannelsVisible,
-        timestampsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
-    const {
-        triggerLevel,
-        triggerRunning,
-        triggerSingleWaiting,
-        externalTrigger,
-    } = useSelector(triggerState);
-    const { samplingRunning } = useSelector(appState);
-    const currentPane = useSelector(currentPaneSelector);
 
     const { index } = options;
 
-    const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
-
     const chartRef = useRef(null);
 
-    const lineData = useLazyInitialisedRef(emptyArray).current;
-    const bitsData = useLazyInitialisedRef(() =>
+    const lineData = useLazyInitializedRef(emptyArray).current;
+    const bitsData = useLazyInitializedRef(() =>
         [...Array(nbDigitalChannels)].map(() => emptyArray())
     ).current;
-    const bitIndexes = useLazyInitialisedRef(() => new Array(nbDigitalChannels))
+    const bitIndexes = useLazyInitializedRef(() => new Array(nbDigitalChannels))
         .current;
-    const lastBits = useLazyInitialisedRef(() => new Array(nbDigitalChannels))
+    const lastBits = useLazyInitializedRef(() => new Array(nbDigitalChannels))
         .current;
 
     const { data, bits } = options;
@@ -268,6 +166,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
+
+    const cursorData = {
+        cursorBegin,
+        cursorEnd,
+        begin,
+        end,
+    };
 
     const [len, setLen] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
@@ -437,129 +342,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
-    const bitsChartData = bitsData
-        .map((b, i) => ({
-            datasets: [
-                {
-                    borderColor: dataColor,
-                    borderWidth: 1.5,
-                    fill: false,
-                    data: b.slice(0, bitIndexes[i]),
-                    pointRadius: 0,
-                    pointHoverRadius: 0,
-                    pointHitRadius: 0,
-                    pointBorderWidth: 0,
-                    lineTension: 0,
-                    label: `${i}`,
-                    steppedLine: 'before',
-                },
-            ],
-        }))
-        .filter((_, i) => digitalChannels[i]);
-
-    const live =
-        windowBegin === 0 &&
-        windowEnd === 0 &&
-        (samplingRunning || triggerRunning || triggerSingleWaiting);
-    const snapping = step <= 0.16 && !live;
-
-    const pointRadius = step <= 0.08 ? 4 : 2;
-
-    const chartData = {
-        datasets: [
-            {
-                borderColor: dataColor,
-                borderWidth: step > 2 ? 1 : 1.5,
-                fill: false,
-                data: lineData.slice(0, mappedIndex),
-                pointRadius: snapping ? pointRadius : 0,
-                pointHoverRadius: snapping ? pointRadius : 0,
-                pointHitRadius: snapping ? pointRadius : 0,
-                pointBackgroundColor: colors.white,
-                pointHoverBackgroundColor: dataColor,
-                pointBorderWidth: 1.5,
-                pointHoverBorderWidth: 1.5,
-                pointBorderColor: dataColor,
-                pointHoverBorderColor: dataColor,
-                lineTension: snapping ? 0.2 : 0,
-                label: 'Current',
-                yAxisID: 'yScale',
-                labelCallback: ({ y }) => formatCurrent(y),
-            },
-        ],
-    };
-
-    const chartOptions = {
-        scales: {
-            xAxes: [
-                {
-                    id: 'xScale',
-                    type: 'linear',
-                    display: true,
-                    ticks: {
-                        display: timestampsVisible,
-                        minRotation: 0,
-                        maxRotation: 0,
-                        autoSkipPadding: 25,
-                        min: begin,
-                        max: end,
-                        callback: timestampToLabel,
-                        maxTicksLimit: 7,
-                    },
-                    gridLines: {
-                        display: true,
-                        drawBorder: true,
-                        drawOnChartArea: true,
-                    },
-                    cursor: { cursorBegin, cursorEnd },
-                afterFit: scale => { scale.paddingRight = rightMargin; }, // eslint-disable-line
-                },
-            ],
-            yAxes: [
-                {
-                    id: 'yScale',
-                    type: 'linear',
-                    ticks: {
-                        minRotation: 0,
-                        maxRotation: 0,
-                        min: yMin === null ? valueRange.min : yMin,
-                        max: yMax === null ? valueRange.max : yMax,
-                        maxTicksLimit: 7,
-                        padding: 0,
-                        callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
-                    },
-                    gridLines: {
-                        display: true,
-                        drawBorder: true,
-                        drawOnChartArea: true,
-                    },
-                afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
-                },
-            ],
-        },
-        redraw: true,
-        maintainAspectRatio: false,
-        animation: { duration: 0 },
-        hover: { animationDuration: 0 },
-        responsiveAnimationDuration: 0,
-        tooltips: { enabled: false },
-        legend: { display: false },
-        formatX: timestampToLabel,
-        formatY: formatCurrent,
-        triggerLevel,
-        triggerActive: triggerRunning || triggerSingleWaiting,
-        sendTriggerLevel,
-        snapping,
-        live,
-        triggerHandleVisible: currentPane === 0 && !externalTrigger,
-    };
-
-    const bitXaxis = bitsChartOptions.scales.xAxes[0];
-    bitXaxis.ticks.min = begin;
-    bitXaxis.ticks.max = end;
-    bitXaxis.cursor.cursorBegin = cursorBegin;
-    bitXaxis.cursor.cursorEnd = cursorEnd;
-
     return (
         <div className="chart-outer">
             <div className="chart-current">
@@ -571,30 +353,15 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 />
                 <BufferView width={chartAreaWidth} />
                 <TimeSpan width={chartAreaWidth + 1} className="window" />
-                <div className="chart-container">
-                    <Line
-                        ref={chartRef}
-                        data={chartData}
-                        options={chartOptions}
-                        plugins={[
-                            dragSelectPlugin,
-                            zoomPanPlugin,
-                            triggerLevelPlugin,
-                            crossHairPlugin,
-                            {
-                                id: 'notifier',
-                                afterLayout(chart) {
-                                    const { chartArea, width } = chart;
-                                    chartArea.right = width - rightMargin;
-                                    const { left, right } = chart.chartArea;
-                                    const w = Math.trunc(right - left);
-                                    setLen(Math.min(w, 2000));
-                                    setChartAreaWidth(w);
-                                },
-                            },
-                        ]}
-                    />
-                </div>
+                <ChartContainer
+                    setLen={setLen}
+                    setChartAreaWidth={setChartAreaWidth}
+                    step={step}
+                    chartRef={chartRef}
+                    cursorData={cursorData}
+                    lineData={lineData}
+                    mappedIndex={mappedIndex}
+                />
                 <TimeSpan
                     cursorBegin={cursorBegin}
                     cursorEnd={cursorEnd}
@@ -623,31 +390,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 </div>
             </div>
             {hasDigitalChannels && showDigitalChannels && (
-                <div className="chart-bits-container">
-                    {bitsChartData.map((_, i) => (
-                        <div key={`${i + 1}`} className="chart-bits">
-                            <span>{bitsChartData[i].datasets[0].label}</span>
-                            <div
-                                className="chart-container"
-                                style={{ paddingRight: `${rightMargin}px` }}
-                            >
-                                <Line
-                                    data={bitsChartData[i]}
-                                    options={bitsChartOptions}
-                                    plugins={[crossHairPlugin]}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                    {numberOfBits === 0 && (
-                        <div className="info">
-                            <p>
-                                Zoom in on the main chart to see the digital
-                                channels
-                            </p>
-                        </div>
-                    )}
-                </div>
+                <DigitalChannels
+                    bitsData={bitsData}
+                    digitalChannels={digitalChannels}
+                    bitIndexes={bitIndexes}
+                    numberOfBits={numberOfBits}
+                    cursorData={cursorData}
+                />
             )}
         </div>
     );
