@@ -54,6 +54,7 @@ import ChartTop from './ChartTop';
 import BufferView from './BufferView';
 import StatBox from './StatBox';
 import TimeSpan from './TimeSpan';
+import DigitalChannels from './DigitalChannels';
 
 import {
     chartWindowAction,
@@ -122,38 +123,6 @@ const formatCurrent = uA =>
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
-
-const bitsChartOptions = {
-    scales: {
-        xAxes: [
-            {
-                id: 'xScale',
-                display: false,
-                type: 'linear',
-                ticks: {},
-                tickMarkLength: 0,
-                drawTicks: false,
-                cursor: {},
-            },
-        ],
-        yAxes: [
-            {
-                type: 'linear',
-                display: false,
-                ticks: {
-                    min: -0.5,
-                    max: 0.5,
-                },
-            },
-        ],
-    },
-    redraw: true,
-    maintainAspectRatio: false,
-    animation: { duration: 0 },
-    hover: { animationDuration: 0 },
-    responsiveAnimationDuration: 0,
-    legend: { display: false },
-};
 
 const calcStats = (data, begin, end, index) => {
     if (begin === null || end === null) {
@@ -268,6 +237,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
+
+    const cursorData = {
+        cursorBegin,
+        cursorEnd,
+        begin,
+        end,
+    };
 
     const [len, setLen] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
@@ -437,26 +413,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
-    const bitsChartData = bitsData
-        .map((b, i) => ({
-            datasets: [
-                {
-                    borderColor: dataColor,
-                    borderWidth: 1.5,
-                    fill: false,
-                    data: b.slice(0, bitIndexes[i]),
-                    pointRadius: 0,
-                    pointHoverRadius: 0,
-                    pointHitRadius: 0,
-                    pointBorderWidth: 0,
-                    lineTension: 0,
-                    label: `${i}`,
-                    steppedLine: 'before',
-                },
-            ],
-        }))
-        .filter((_, i) => digitalChannels[i]);
-
     const live =
         windowBegin === 0 &&
         windowEnd === 0 &&
@@ -464,7 +420,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const snapping = step <= 0.16 && !live;
 
     const pointRadius = step <= 0.08 ? 4 : 2;
-
     const chartData = {
         datasets: [
             {
@@ -554,12 +509,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         triggerHandleVisible: currentPane === 0 && !externalTrigger,
     };
 
-    const bitXaxis = bitsChartOptions.scales.xAxes[0];
-    bitXaxis.ticks.min = begin;
-    bitXaxis.ticks.max = end;
-    bitXaxis.cursor.cursorBegin = cursorBegin;
-    bitXaxis.cursor.cursorEnd = cursorEnd;
-
     return (
         <div className="chart-outer">
             <div className="chart-current">
@@ -623,31 +572,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 </div>
             </div>
             {hasDigitalChannels && showDigitalChannels && (
-                <div className="chart-bits-container">
-                    {bitsChartData.map((_, i) => (
-                        <div key={`${i + 1}`} className="chart-bits">
-                            <span>{bitsChartData[i].datasets[0].label}</span>
-                            <div
-                                className="chart-container"
-                                style={{ paddingRight: `${rightMargin}px` }}
-                            >
-                                <Line
-                                    data={bitsChartData[i]}
-                                    options={bitsChartOptions}
-                                    plugins={[crossHairPlugin]}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                    {numberOfBits === 0 && (
-                        <div className="info">
-                            <p>
-                                Zoom in on the main chart to see the digital
-                                channels
-                            </p>
-                        </div>
-                    )}
-                </div>
+                <DigitalChannels
+                    bitsData={bitsData}
+                    dataColor={dataColor}
+                    digitalChannels={digitalChannels}
+                    bitIndexes={bitIndexes}
+                    numberOfBits={numberOfBits}
+                    cursorData={cursorData}
+                />
             )}
         </div>
     );
