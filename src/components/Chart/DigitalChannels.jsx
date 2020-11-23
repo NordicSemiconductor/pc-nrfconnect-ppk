@@ -1,10 +1,12 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { string, number, bool, arrayOf, shape } from 'prop-types';
+import { number, bool, arrayOf, shape } from 'prop-types';
 import { rightMarginPx } from './chart.scss';
 import crossHairPlugin from './plugins/chart.crossHair';
+import colors from '../colors.scss';
 
 const rightMargin = parseInt(rightMarginPx, 10);
+const dataColor = colors.nordicBlue;
 
 const bitsChartOptions = {
     scales: {
@@ -40,7 +42,6 @@ const bitsChartOptions = {
 
 const DigitalChannels = ({
     bitsData,
-    dataColor,
     digitalChannels,
     bitIndexes,
     numberOfBits,
@@ -103,7 +104,6 @@ DigitalChannels.propTypes = {
             y: number,
         })
     ).isRequired,
-    dataColor: string.isRequired,
     digitalChannels: arrayOf(bool).isRequired,
     bitIndexes: arrayOf(number).isRequired,
     numberOfBits: number.isRequired,
