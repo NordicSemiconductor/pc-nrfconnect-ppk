@@ -59,6 +59,8 @@ import {
     dataLoggerState,
 } from '../../reducers/dataLoggerReducer';
 
+const fmtOpts = { notation: 'fixed', precision: 1 };
+
 export default () => {
     const dispatch = useDispatch();
 
@@ -72,9 +74,11 @@ export default () => {
     } = useSelector(dataLoggerState);
 
     const ramSize = sampleFreq * durationSeconds * 4;
-
+    const period = 1 / sampleFreq;
+    const formattedRamSize = unit(ramSize, 'byte').to('MB').format(fmtOpts);
+    const formattedPeriod = unit(period, 's').format(fmtOpts).replace('.0', '');
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
-        .format({ notation: 'fixed', precision: 1 })
+        .format(fmtOpts)
         .replace('.0', '')}`;
 
     const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
@@ -110,18 +114,9 @@ export default () => {
                 />
             </div>
             <div className="small">
-                Estimated RAM required{' '}
-                {unit(ramSize, 'byte')
-                    .to('MB')
-                    .format({ notation: 'fixed', precision: 1 })}
+                Estimated RAM required {formattedRamSize}
                 <br />
-                {unit(1 / sampleFreq, 's')
-                    .format({
-                        notation: 'fixed',
-                        precision: 1,
-                    })
-                    .replace('.0', '')}{' '}
-                period
+                {formattedPeriod} period
             </div>
             <Button
                 title={startStopTitle}

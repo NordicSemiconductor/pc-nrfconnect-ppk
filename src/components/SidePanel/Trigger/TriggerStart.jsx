@@ -70,16 +70,15 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
 
     const { capabilities } = useSelector(appState);
 
+    const formattedFreq = unit(1e6 / capabilities.samplingTimeUs, 'Hz').format({
+        notation: 'fixed',
+        precision: 0,
+    });
+
     const LABEL_START = 'Start';
     const LABEL_STOP = 'Stop';
     const LABEL_WAIT = 'Wait';
-    const TITLE_IDLE = `Start sampling at ${unit(
-        1e6 / capabilities.samplingTimeUs,
-        'Hz'
-    ).format({
-        notation: 'fixed',
-        precision: 0,
-    })} for a short duration when the set trigger level is reached`;
+    const TITLE_IDLE = `Start sampling at ${formattedFreq} for a short duration when the set trigger level is reached`;
     const TITLE_RUNNING = 'Waiting for samples above trigger level';
 
     const buttonAttributes = {
