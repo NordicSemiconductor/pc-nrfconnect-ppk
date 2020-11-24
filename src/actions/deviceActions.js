@@ -85,27 +85,40 @@ let updateRequestInterval;
 
 const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
-const setupOptions = () => dispatch => {
-    options.samplingTime = device.adcSamplingTimeUs;
-    options.samplesPerSecond = 1e6 / options.samplingTime;
-    const bufferLength = Math.trunc(
-        options.samplesPerSecond * bufferLengthInSeconds
-    );
-    if (device.capabilities.ppkSetPowerMode) {
-        if (!options.bits || options.bits.length !== bufferLength) {
-            options.bits = new Uint8Array(bufferLength);
-        }
-        options.bits.fill(0);
+export const setupOptions = () => (dispatch, getState) => {
+    if (!device) return;
+    let d = 300; // buffer length in seconds for scope
+    if (getState().appLayout === 0) {
+        // in scope
+        options.samplingTime = device.adcSamplingTimeUs;
+        options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
     } else {
-        options.bits = null;
+        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
+        d = durationSeconds;
+        options.samplingTime = 1e6 / sampleFreq;
+        options.samplesPerSecond = sampleFreq;
     }
-    if (options.data.length !== bufferLength) {
-        options.data = new Float32Array(bufferLength);
+    const bufferLength = Math.trunc(d * options.samplesPerSecond);
+    try {
+        if (device.capabilities.ppkSetPowerMode) {
+            if (!options.bits || options.bits.length !== bufferLength) {
+                options.bits = new Uint8Array(bufferLength);
+            }
+            options.bits.fill(0);
+        } else {
+            options.bits = null;
+        }
+        if (options.data.length !== bufferLength) {
+            options.data = new Float32Array(bufferLength);
+        }
+        options.data.fill(NaN);
+        options.index = 0;
+        options.timestamp = 0;
+    } catch (err) {
+        logger.error(err);
     }
-    options.data.fill(NaN);
-    options.index = 0;
-    options.timestamp = 0;
     dispatch(updateHasDigitalChannels());
+    dispatch(animationAction());
 };
 
 /* Start reading current measurements */
@@ -126,6 +139,7 @@ export function samplingStart() {
 
 export function samplingStop() {
     return async dispatch => {
+        if (!device) return;
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         logger.info('Sampling stopped');
@@ -134,9 +148,7 @@ export function samplingStop() {
 
 export function triggerStop() {
     return async dispatch => {
-        if (!device.capabilities.ppkTriggerStop) {
-            return;
-        }
+        if (!device) return;
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
         dispatch(toggleTriggerAction(false));
@@ -211,6 +223,8 @@ export function open(deviceInfo) {
 
         let isTrigger = 0;
         let prevValue = 0;
+        let nbSamples = 0;
+        let nbSamplesTotal = 0;
         const onSample = ({ value, bits, timestamp }) => {
             // PPK1 always sets timestamp, while PPK2 never does
             if (options.timestamp === undefined) {
@@ -221,38 +235,32 @@ export function open(deviceInfo) {
                 app: { samplingRunning },
                 trigger: { triggerSingleWaiting, triggerLevel, triggerLength },
                 chart: { windowBegin, windowEnd },
+                dataLogger: { maxSampleFreq, sampleFreq },
             } = getState().app;
 
-            const zeroCappedValue = zeroCap(value);
+            let zeroCappedValue = zeroCap(value);
 
-            if (timestamp) {
-                let ts = options.timestamp;
-                while (ts > timestamp - options.samplingTime) {
-                    ts -= options.samplingTime;
-                    options.data[options.index] = NaN;
-                    options.index -= 1;
-                    if (options.index === -1) {
-                        options.index = options.data.length - 1;
-                    }
+            if (samplingRunning) {
+                nbSamples += 1;
+                nbSamplesTotal += 1;
+                const f = Math.min(nbSamplesTotal, maxSampleFreq / sampleFreq);
+                zeroCappedValue =
+                    prevValue === undefined
+                        ? zeroCappedValue
+                        : prevValue + (zeroCappedValue - prevValue) / f;
+                if (nbSamples < maxSampleFreq / sampleFreq) {
+                    prevValue = zeroCappedValue;
+                    return;
                 }
-                ts = options.timestamp;
-                while (ts < timestamp - options.samplingTime) {
-                    ts += options.samplingTime;
-                    options.data[options.index] = NaN;
-                    options.index += 1;
-                    if (options.index === options.data.length) {
-                        options.index = 0;
-                    }
-                }
-                options.data[options.index] = zeroCappedValue;
-                options.index += 1;
-                options.timestamp = timestamp;
-            } else {
-                options.data[options.index] = zeroCappedValue;
-                options.bits[options.index] = bits;
-                options.index += 1;
-                options.timestamp += options.samplingTime;
+                nbSamples = 0;
             }
+
+            options.data[options.index] = zeroCappedValue;
+            if (options.bits) {
+                options.bits[options.index] = bits;
+            }
+            options.index += 1;
+            options.timestamp += options.samplingTime;
 
             if (options.index === options.data.length) {
                 options.index = 0;
@@ -285,7 +293,7 @@ export function open(deviceInfo) {
                         (options.index - wnd + options.data.length) %
                         options.data.length;
                     const from = indexToTimestamp(triggerBeginIndex);
-                    const to = indexToTimestamp(options.index);
+                    const to = options.timestamp;
                     dispatch(chartWindowAction(from, to, to - from));
                 }
             }
@@ -297,7 +305,7 @@ export function open(deviceInfo) {
                 // stop average when reaches end of buffer (i.e. would overwrite chart data)
                 dispatch(samplingStop());
             }
-            prevValue = value;
+            prevValue = zeroCappedValue;
         };
 
         try {

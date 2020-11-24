@@ -139,6 +139,7 @@ class RTTDevice extends Device {
         super();
 
         this.capabilities.maxContinuousSamplingTimeUs = 130;
+        this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
         this.serialNumber = parseInt(device.serialNumber, 10);
         this.isRttOpen = false;
 
@@ -410,10 +411,10 @@ class RTTDevice extends Device {
         }
         try {
             const value = this.viewFloat[0];
-            for (let i = 0; i < SAMPLES_PER_AVERAGE; i += 1) {
-                this.onSampleCallback({ value, timestamp: this.timestamp });
-                this.timestamp += this.adcSamplingTimeUs;
-            }
+            // for (let i = 0; i < SAMPLES_PER_AVERAGE; i += 1) {
+            // }
+            this.onSampleCallback({ value, timestamp: this.timestamp });
+            this.timestamp += this.adcSamplingTimeUs;
         } catch (err) {
             this.emit('error', 'Average data error, restart application', err);
         }
