@@ -64,3 +64,6 @@ export const updateTitle = info => {
         .getCurrentWindow()
         .setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
 };
+
+export const SCOPE_PANE = 0;
+export const DATA_LOGGER_PANE = 1;

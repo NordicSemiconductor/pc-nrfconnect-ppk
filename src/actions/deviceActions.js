@@ -79,6 +79,7 @@ import {
     indexToTimestamp,
 } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
+import { isScopePane } from '../utils/panes';
 
 let device = null;
 let updateRequestInterval;
@@ -88,7 +89,8 @@ const zeroCap = isDev ? n => n : n => Math.max(0, n);
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
     let d = 300; // buffer length in seconds for scope
-    if (getState().appLayout === 0) {
+    const { currentPane } = getState().appLayout;
+    if (isScopePane(currentPane)) {
         // in scope
         options.samplingTime = device.adcSamplingTimeUs;
         options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;

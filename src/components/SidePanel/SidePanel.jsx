@@ -54,12 +54,12 @@ import {
     toggleSaveFunctionality,
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
-    currentPane as currentPaneSelector,
 } from '../../reducers/appReducer';
 
 import { options } from '../../globals';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
+import { isScopePane, isDataLoggerPane } from '../../utils/panes';
 
 import './sidepanel.scss';
 
@@ -70,7 +70,9 @@ const SidePanel = ({ bindHotkey }) => {
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
-    const currentPane = useSelector(currentPaneSelector);
+
+    const scopePane = isScopePane();
+    const dataLoggerPane = isDataLoggerPane();
 
     if (!deviceOpen) {
         return (
@@ -81,15 +83,15 @@ const SidePanel = ({ bindHotkey }) => {
         );
     }
 
-    if (currentPane > 1) {
+    if (!scopePane && !dataLoggerPane) {
         return null;
     }
 
     return (
         <div className="sidepanel d-flex flex-column">
             <PowerMode />
-            {currentPane === 0 && <Trigger />}
-            {currentPane === 1 && <StartStop />}
+            {scopePane && <Trigger />}
+            {dataLoggerPane && <StartStop />}
             <VoltageRegulator />
             {options.timestamp === null || (
                 <>

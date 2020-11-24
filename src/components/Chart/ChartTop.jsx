@@ -47,15 +47,13 @@ import {
     toggleYAxisLock,
     chartState,
 } from '../../reducers/chartReducer';
-
-import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
+import { isDataLoggerPane } from '../../utils/panes';
 
 import './charttop.scss';
 
 const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
     const dispatch = useDispatch();
     const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
-    const currentPane = useSelector(currentPaneSelector);
     const live = windowBegin === 0 && windowEnd === 0;
 
     return (
@@ -77,7 +75,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                 variant="secondary"
                 labelRight
             />
-            {currentPane === 1 && (
+            {isDataLoggerPane() && (
                 <ButtonGroup>
                     <Button
                         variant="secondary"
