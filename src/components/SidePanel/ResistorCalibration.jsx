@@ -75,7 +75,7 @@ const ResistorCalibration = ({ eventKey }) => {
                 <span className="flex-fill">High</span>
                 <NumberInlineInput
                     value={userResHi}
-                    range={{ min: 1, max: 3 }}
+                    range={{ min: 1, max: 3, decimals: 2 }}
                     onChange={value =>
                         dispatch(updateHighResistorAction(value))
                     }
@@ -95,7 +95,7 @@ const ResistorCalibration = ({ eventKey }) => {
                 <span className="flex-fill">Mid</span>
                 <NumberInlineInput
                     value={userResMid}
-                    range={{ min: 25, max: 35 }}
+                    range={{ min: 25, max: 35, decimals: 1 }}
                     onChange={value => dispatch(updateMidResistorAction(value))}
                     onChangeComplete={() => dispatch(updateResistors())}
                     chars={6}
