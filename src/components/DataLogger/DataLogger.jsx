@@ -34,13 +34,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Chart from '../Chart/Chart';
 
 import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
+import { samplingStop, setupOptions } from '../../actions/deviceActions';
+
+const thisPane = 1;
 
 export default () => {
-    const currentPane = useSelector(currentPaneSelector);
-    return currentPane === 1 ? <Chart digitalChannelsEnabled /> : null;
+    const dispatch = useDispatch();
+    const active = useSelector(currentPaneSelector) === thisPane;
+    useEffect(() => {
+        dispatch(setupOptions());
+        return active ? () => dispatch(samplingStop()) : undefined;
+    }, [active, dispatch]);
+    return active && <Chart digitalChannelsEnabled />;
 };
