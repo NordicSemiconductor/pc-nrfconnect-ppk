@@ -34,13 +34,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Chart from '../Chart/Chart';
 
 import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
+import { setupOptions, triggerStop } from '../../actions/deviceActions';
+
+const thisPane = 0;
 
 export default () => {
-    const currentPane = useSelector(currentPaneSelector);
-    return currentPane === 0 ? <Chart /> : null;
+    const dispatch = useDispatch();
+    const active = useSelector(currentPaneSelector) === thisPane;
+    useEffect(() => {
+        dispatch(setupOptions());
+        return active ? () => dispatch(triggerStop()) : undefined;
+    }, [active, dispatch]);
+    return active && <Chart />;
 };

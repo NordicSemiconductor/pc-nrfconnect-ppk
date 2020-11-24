@@ -34,12 +34,25 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+const ranges = [
+    { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 500 }, // 1Hz
+    { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 50 }, // 10Hz
+    { name: 'hours', multiplier: 60 * 60, min: 1, max: 120 }, // 100Hz
+    { name: 'hours', multiplier: 60 * 60, min: 1, max: 12 }, // 1kHz
+    { name: 'minutes', multiplier: 60, min: 1, max: 72 }, // 7.7-10kHz
+    { name: 'seconds', multiplier: 1, min: 60, max: 432 }, // 100kHz
+];
+
+const initialFreqLog10 = 5;
+
 const initialState = {
     samplingTime: 10,
-    sampleFreqLog10: 5,
-    sampleFreq: 10 ** 5,
-    maxSampleFreq: 10 ** 5,
+    maxFreqLog10: initialFreqLog10,
+    sampleFreqLog10: initialFreqLog10,
+    sampleFreq: 10 ** initialFreqLog10,
+    maxSampleFreq: 10 ** initialFreqLog10,
     durationSeconds: 300,
+    range: ranges[initialFreqLog10],
 };
 
 const DL_SAMPLE_FREQ_LOG_10 = 'DL_SAMPLE_FREQ_LOG_10';
@@ -48,6 +61,7 @@ const DL_DURATION_SECONDS = 'DL_DURATION_SECONDS';
 export const updateSampleFreqLog10 = sampleFreqLog10 => ({
     type: DL_SAMPLE_FREQ_LOG_10,
     sampleFreqLog10,
+    range: ranges[sampleFreqLog10],
 });
 
 export const updateDurationSeconds = durationSeconds => ({
@@ -61,25 +75,35 @@ export default (state = initialState, { type, ...action }) => {
             const samplingTime =
                 action.capabilities.maxContinuousSamplingTimeUs;
             const sampleFreq = Math.round(10000 / samplingTime) * 100;
-            const maxPower10 = Math.ceil(Math.log10(sampleFreq));
+            const maxFreqLog10 = Math.ceil(Math.log10(sampleFreq));
             return {
                 ...state,
                 samplingTime,
                 sampleFreq,
                 maxSampleFreq: sampleFreq,
-                maxPower10,
-                sampleFreqLog10: maxPower10,
+                maxFreqLog10,
+                sampleFreqLog10: maxFreqLog10,
+                range: ranges[maxFreqLog10],
             };
         }
-        case DL_SAMPLE_FREQ_LOG_10:
+        case DL_SAMPLE_FREQ_LOG_10: {
+            const { durationSeconds } = state;
+            const {
+                range: { min, max, multiplier },
+            } = action;
             return {
                 ...state,
                 ...action,
+                durationSeconds: Math.min(
+                    Math.max(min * multiplier, durationSeconds),
+                    max * multiplier
+                ),
                 sampleFreq: Math.min(
                     10 ** action.sampleFreqLog10,
                     state.maxSampleFreq
                 ),
             };
+        }
         case DL_DURATION_SECONDS:
             return { ...state, ...action };
         default:

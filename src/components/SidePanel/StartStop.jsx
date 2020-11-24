@@ -34,14 +34,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { Slider } from 'pc-nrfconnect-shared';
 import { unit } from 'mathjs';
-import { samplingStart, samplingStop } from '../../actions/deviceActions';
+
+import NumberWithUnit from './NumberWithUnitInput';
+
+import {
+    samplingStart,
+    samplingStop,
+    setupOptions,
+} from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 
 import Group from './Group';
@@ -52,55 +59,65 @@ import {
     dataLoggerState,
 } from '../../reducers/dataLoggerReducer';
 
+const fmtOpts = { notation: 'fixed', precision: 1 };
+
 export default () => {
     const dispatch = useDispatch();
 
-    const { rttRunning, capabilities, samplingRunning } = useSelector(appState);
+    const { rttRunning, samplingRunning } = useSelector(appState);
     const {
         sampleFreqLog10,
         sampleFreq,
         durationSeconds,
-        maxPower10,
+        maxFreqLog10,
+        range,
     } = useSelector(dataLoggerState);
 
+    const ramSize = sampleFreq * durationSeconds * 4;
+    const period = 1 / sampleFreq;
+    const formattedRamSize = unit(ramSize, 'byte').to('MB').format(fmtOpts);
+    const formattedPeriod = unit(period, 's').format(fmtOpts).replace('.0', '');
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
-        .format({ notation: 'fixed', precision: 1 })
+        .format(fmtOpts)
         .replace('.0', '')}`;
 
-    const startStopTitle =
-        !samplingRunning && capabilities.ppkTriggerSet
-            ? startButtonTooltip
-            : undefined;
+    const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
+
+    const completeChange = useCallback(() => dispatch(setupOptions()), [
+        dispatch,
+    ]);
 
     return (
         <Group>
-            <Form.Label htmlFor="data-logger-sampling-frequency">
-                {sampleFreq} samples per second
-            </Form.Label>
-            <Slider
-                id="data-logger-sampling-frequency"
-                values={[sampleFreqLog10]}
-                range={{ min: 0, max: maxPower10 }}
-                onChange={[value => dispatch(updateSampleFreqLog10(value))]}
-                onChangeComplete={() => {}}
-            />
-            <Form.Label htmlFor="slider-data-logger-duration">
-                Sample for{' '}
-                <NumberInlineInput
+            <div className={samplingRunning ? 'disabled' : ''}>
+                <Form.Label htmlFor="data-logger-sampling-frequency">
+                    {sampleFreq} samples per second
+                </Form.Label>
+                <Slider
+                    id="data-logger-sampling-frequency"
+                    values={[sampleFreqLog10]}
+                    range={{ min: 0, max: maxFreqLog10 }}
+                    onChange={[v => dispatch(updateSampleFreqLog10(v))]}
+                    onChangeComplete={completeChange}
+                    disabled={samplingRunning}
+                />
+                <NumberWithUnit
+                    label="Sample for"
+                    unit={range.name}
+                    multiplier={range.multiplier}
+                    range={range}
                     value={durationSeconds}
-                    range={{ min: 1, max: 7 * 24 * 60 * 60 }}
-                    onChange={value => dispatch(updateDurationSeconds(value))}
-                    onChangeComplete={() => {}}
-                />{' '}
-                seconds
-            </Form.Label>
-            <Slider
-                id="slider-data-logger-duration"
-                values={[durationSeconds]}
-                range={{ min: 1, max: 7 * 24 * 60 * 60 }}
-                onChange={[value => dispatch(updateDurationSeconds(value))]}
-                onChangeComplete={() => {}}
-            />
+                    onChange={v => dispatch(updateDurationSeconds(v))}
+                    onChangeComplete={completeChange}
+                    disabled={samplingRunning}
+                    slider
+                />
+            </div>
+            <div className="small">
+                Estimated RAM required {formattedRamSize}
+                <br />
+                {formattedPeriod} period
+            </div>
             <Button
                 title={startStopTitle}
                 className={`w-100 start-btn my-3 ${
