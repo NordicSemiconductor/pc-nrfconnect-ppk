@@ -67,7 +67,8 @@ export default () => {
         sampleFreqLog10,
         sampleFreq,
         durationSeconds,
-        maxPower10,
+        maxFreqLog10,
+        range,
     } = useSelector(dataLoggerState);
 
     const ramSize = sampleFreq * durationSeconds * 4;
@@ -78,23 +79,9 @@ export default () => {
 
     const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
 
-    const change = useCallback(
-        value => dispatch(updateDurationSeconds(value)),
-        [dispatch]
-    );
     const completeChange = useCallback(() => dispatch(setupOptions()), [
         dispatch,
     ]);
-
-    const units = [
-        { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 500 }, // 1Hz
-        { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 50 }, // 10Hz
-        { name: 'hours', multiplier: 60 * 60, min: 1, max: 120 }, // 100Hz
-        { name: 'hours', multiplier: 60 * 60, min: 1, max: 12 }, // 1kHz
-        { name: 'minutes', multiplier: 60, min: 1, max: 72 }, // 7.7-10kHz
-        { name: 'seconds', multiplier: 1, min: 60, max: 432 }, // 100kHz
-    ];
-    const selectedUnit = units[sampleFreqLog10];
 
     return (
         <Group>
@@ -105,18 +92,18 @@ export default () => {
                 <Slider
                     id="data-logger-sampling-frequency"
                     values={[sampleFreqLog10]}
-                    range={{ min: 0, max: maxPower10 }}
-                    onChange={[value => dispatch(updateSampleFreqLog10(value))]}
+                    range={{ min: 0, max: maxFreqLog10 }}
+                    onChange={[v => dispatch(updateSampleFreqLog10(v))]}
                     onChangeComplete={completeChange}
                     disabled={samplingRunning}
                 />
                 <NumberWithUnit
                     label="Sample for"
-                    unit={selectedUnit.name}
-                    multiplier={selectedUnit.multiplier}
-                    range={selectedUnit}
+                    unit={range.name}
+                    multiplier={range.multiplier}
+                    range={range}
                     value={durationSeconds}
-                    onChange={change}
+                    onChange={v => dispatch(updateDurationSeconds(v))}
                     onChangeComplete={completeChange}
                     disabled={samplingRunning}
                     slider

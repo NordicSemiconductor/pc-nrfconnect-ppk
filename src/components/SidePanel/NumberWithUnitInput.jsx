@@ -54,22 +54,14 @@ const NumberWithUnit = ({
     slider = false,
     ...props
 }) => {
-    const [internalValue, setInternalValue] = useState(value);
+    const [internalValue, setInternalValue] = useState(value / multiplier);
 
-    const completeChange = () => {
-        onChange(internalValue * multiplier);
-        onChangeComplete();
+    const change = n => {
+        setInternalValue(n);
+        onChange(n * multiplier);
     };
 
-    useEffect(() => {
-        const v = value / multiplier;
-        if (v < range.min || v > range.max) {
-            onChange(Math.min(range.max, Math.max(range.min, v)));
-            onChangeComplete();
-        } else {
-            setInternalValue(value / multiplier);
-        }
-    }, [multiplier, onChange, onChangeComplete, range.max, range.min, value]);
+    useEffect(() => setInternalValue(value / multiplier), [multiplier, value]);
 
     return (
         <div
@@ -81,8 +73,8 @@ const NumberWithUnit = ({
                 <NumberInlineInput
                     value={internalValue}
                     range={range}
-                    onChange={setInternalValue}
-                    onChangeComplete={completeChange}
+                    onChange={change}
+                    onChangeComplete={onChangeComplete}
                     disabled={disabled}
                     {...props}
                 />
@@ -92,8 +84,8 @@ const NumberWithUnit = ({
                 <Slider
                     values={[internalValue]}
                     range={range}
-                    onChange={[setInternalValue]}
-                    onChangeComplete={completeChange}
+                    onChange={[change]}
+                    onChangeComplete={onChangeComplete}
                     disabled={disabled}
                 />
             )}
