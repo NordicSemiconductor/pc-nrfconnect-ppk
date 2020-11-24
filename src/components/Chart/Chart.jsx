@@ -44,7 +44,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 
 import ChartTop from './ChartTop';
-import BufferView from './BufferView';
 import StatBox from './StatBox';
 import TimeSpan from './TimeSpan';
 import DigitalChannels from './DigitalChannels';
@@ -351,7 +350,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
                 />
-                <BufferView width={chartAreaWidth} />
                 <TimeSpan width={chartAreaWidth + 1} className="window" />
                 <ChartContainer
                     setLen={setLen}

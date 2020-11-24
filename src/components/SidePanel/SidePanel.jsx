@@ -39,7 +39,6 @@ import { func } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import PowerMode from './PowerMode';
-import Buffer from './Buffer';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
 import Trigger from './Trigger/Trigger';
@@ -91,7 +90,6 @@ const SidePanel = ({ bindHotkey }) => {
             <PowerMode />
             {currentPane === 0 && <Trigger />}
             {currentPane === 1 && <StartStop />}
-            {currentPane === 1 && <Buffer />}
             <VoltageRegulator />
             {options.timestamp === null || (
                 <>
