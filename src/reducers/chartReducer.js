@@ -61,6 +61,8 @@ const initialState = {
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     yAxisLock: false,
+    preSamplingOn: false,
+    postSamplingOn: false,
 };
 
 const ANIMATION = 'ANIMATION';
@@ -72,6 +74,8 @@ const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
 const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
 const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
+const TOGGLE_PRE_SAMPLING = 'TOGGLE_PRE_SAMPLING';
+const TOGGLE_POST_SAMPLING = 'TOGGLE_POST_SAMPLING';
 
 const MIN_WINDOW_DURATION = 500;
 const MAX_WINDOW_DURATION = 120000000;
@@ -172,6 +176,12 @@ export const toggleYAxisLock = (yMin, yMax) => ({
     yMin,
     yMax,
 });
+export const togglePreSampling = () => ({
+    type: TOGGLE_PRE_SAMPLING,
+});
+export const togglePostSampling = () => ({
+    type: TOGGLE_POST_SAMPLING,
+});
 
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
@@ -257,6 +267,16 @@ export default (state = initialState, { type, ...action }) => {
             const { yMin, yMax, ...s } = state;
             return { ...s, ...action, yAxisLock: !state.yAxisLock };
         }
+        case TOGGLE_PRE_SAMPLING:
+            return {
+                ...state,
+                preSamplingOn: !state.preSamplingOn,
+            };
+        case TOGGLE_POST_SAMPLING:
+            return {
+                ...state,
+                postSamplingOn: !state.postSamplingOn,
+            };
         case UPDATE_HAS_DIGITAL_CHANNELS:
             return { ...state, ...action };
         default:

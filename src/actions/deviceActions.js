@@ -267,9 +267,12 @@ export function open(deviceInfo) {
             }
 
             if (!samplingRunning) {
-                const wnd = Math.floor(
+                const numberOfSamplesIn5ms = 500;
+                const { preSamplingOn, postSamplingOn } = getState().app.chart;
+                let wnd = Math.floor(
                     (triggerLength * 1000) / options.samplingTime
                 );
+                if (postSamplingOn) wnd += numberOfSamplesIn5ms;
                 if (!isTrigger) {
                     if (
                         timestamp !== undefined ||
@@ -289,8 +292,12 @@ export function open(deviceInfo) {
                 }
                 if (isTrigger >= wnd) {
                     isTrigger = 0;
+                    const startIndex = preSamplingOn
+                        ? options.index - numberOfSamplesIn5ms
+                        : options.index;
+
                     const triggerBeginIndex =
-                        (options.index - wnd + options.data.length) %
+                        (startIndex - wnd + options.data.length) %
                         options.data.length;
                     const from = indexToTimestamp(triggerBeginIndex);
                     const to = options.timestamp;

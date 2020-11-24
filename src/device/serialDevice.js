@@ -79,6 +79,7 @@ class SerialDevice extends Device {
         this.capabilities.maxContinuousSamplingTimeUs = this.adcSamplingTimeUs;
         this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
         this.capabilities.digitalChannels = true;
+        this.capabilities.prePostTriggering = true;
         this.spikeFilter = {
             alpha: 0.18,
             alpha5: 0.06,
