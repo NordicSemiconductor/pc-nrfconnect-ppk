@@ -34,14 +34,21 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { Slider } from 'pc-nrfconnect-shared';
 import { unit } from 'mathjs';
-import { samplingStart, samplingStop } from '../../actions/deviceActions';
+
+import NumberWithUnit from './NumberWithUnitInput';
+
+import {
+    samplingStart,
+    samplingStop,
+    setupOptions,
+} from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 
 import Group from './Group';
@@ -55,7 +62,7 @@ import {
 export default () => {
     const dispatch = useDispatch();
 
-    const { rttRunning, capabilities, samplingRunning } = useSelector(appState);
+    const { rttRunning, samplingRunning } = useSelector(appState);
     const {
         sampleFreqLog10,
         sampleFreq,
@@ -63,44 +70,72 @@ export default () => {
         maxPower10,
     } = useSelector(dataLoggerState);
 
+    const ramSize = sampleFreq * durationSeconds * 4;
+
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
         .format({ notation: 'fixed', precision: 1 })
         .replace('.0', '')}`;
 
-    const startStopTitle =
-        !samplingRunning && capabilities.ppkTriggerSet
-            ? startButtonTooltip
-            : undefined;
+    const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
+
+    const change = useCallback(
+        value => dispatch(updateDurationSeconds(value)),
+        [dispatch]
+    );
+    const completeChange = useCallback(() => dispatch(setupOptions()), [
+        dispatch,
+    ]);
+
+    const units = [
+        { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 500 }, // 1Hz
+        { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 50 }, // 10Hz
+        { name: 'hours', multiplier: 60 * 60, min: 1, max: 120 }, // 100Hz
+        { name: 'hours', multiplier: 60 * 60, min: 1, max: 12 }, // 1kHz
+        { name: 'minutes', multiplier: 60, min: 1, max: 72 }, // 7.7-10kHz
+        { name: 'seconds', multiplier: 1, min: 60, max: 432 }, // 100kHz
+    ];
+    const selectedUnit = units[sampleFreqLog10];
 
     return (
         <Group>
-            <Form.Label htmlFor="data-logger-sampling-frequency">
-                {sampleFreq} samples per second
-            </Form.Label>
-            <Slider
-                id="data-logger-sampling-frequency"
-                values={[sampleFreqLog10]}
-                range={{ min: 0, max: maxPower10 }}
-                onChange={[value => dispatch(updateSampleFreqLog10(value))]}
-                onChangeComplete={() => {}}
-            />
-            <Form.Label htmlFor="slider-data-logger-duration">
-                Sample for{' '}
-                <NumberInlineInput
+            <div className={samplingRunning ? 'disabled' : ''}>
+                <Form.Label htmlFor="data-logger-sampling-frequency">
+                    {sampleFreq} samples per second
+                </Form.Label>
+                <Slider
+                    id="data-logger-sampling-frequency"
+                    values={[sampleFreqLog10]}
+                    range={{ min: 0, max: maxPower10 }}
+                    onChange={[value => dispatch(updateSampleFreqLog10(value))]}
+                    onChangeComplete={completeChange}
+                    disabled={samplingRunning}
+                />
+                <NumberWithUnit
+                    label="Sample for"
+                    unit={selectedUnit.name}
+                    multiplier={selectedUnit.multiplier}
+                    range={selectedUnit}
                     value={durationSeconds}
-                    range={{ min: 1, max: 7 * 24 * 60 * 60 }}
-                    onChange={value => dispatch(updateDurationSeconds(value))}
-                    onChangeComplete={() => {}}
-                />{' '}
-                seconds
-            </Form.Label>
-            <Slider
-                id="slider-data-logger-duration"
-                values={[durationSeconds]}
-                range={{ min: 1, max: 7 * 24 * 60 * 60 }}
-                onChange={[value => dispatch(updateDurationSeconds(value))]}
-                onChangeComplete={() => {}}
-            />
+                    onChange={change}
+                    onChangeComplete={completeChange}
+                    disabled={samplingRunning}
+                    slider
+                />
+            </div>
+            <div className="small">
+                Estimated RAM required{' '}
+                {unit(ramSize, 'byte')
+                    .to('MB')
+                    .format({ notation: 'fixed', precision: 1 })}
+                <br />
+                {unit(1 / sampleFreq, 's')
+                    .format({
+                        notation: 'fixed',
+                        precision: 1,
+                    })
+                    .replace('.0', '')}{' '}
+                period
+            </div>
             <Button
                 title={startStopTitle}
                 className={`w-100 start-btn my-3 ${

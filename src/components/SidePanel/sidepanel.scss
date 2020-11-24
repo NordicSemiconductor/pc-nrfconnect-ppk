@@ -80,4 +80,13 @@
             background: $nordic-blue;
         }
     }
+
+    .disabled {
+        opacity: 38%;
+        pointer-events: none;
+    }
+
+    .dropdown-toggle {
+        font-size: inherit;
+    }
 }
