@@ -57,6 +57,7 @@ const initialStatePpk2 = {
             durationSeconds: 300,
             maxFreqLog10: 5,
             samplesPerAverage: null,
+            range: { name: 'minutes', multiplier: 60, min: 1, max: 72 },
         },
     },
 };
@@ -76,6 +77,7 @@ const initialStatePpk1 = {
             durationSeconds: 300,
             maxFreqLog10: 5,
             samplesPerAverage: null,
+            range: { name: 'minutes', multiplier: 60, min: 1, max: 72 },
         },
     },
 };
