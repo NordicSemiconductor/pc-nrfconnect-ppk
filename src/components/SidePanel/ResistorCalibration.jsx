@@ -35,6 +35,7 @@
  */
 
 import React from 'react';
+import { exact, func, number, string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -51,6 +52,45 @@ import {
 } from '../../reducers/resistorCalibrationReducer';
 
 import Group from './Group';
+
+const ResistorSlider = ({ id, label, value, range, actionOnChange, chars }) => {
+    const dispatch = useDispatch();
+
+    return (
+        <>
+            <Form.Label htmlFor={id}>
+                <span className="flex-fill">{label}</span>
+                <NumberInlineInput
+                    value={value}
+                    range={range}
+                    onChange={newValue => dispatch(actionOnChange(newValue))}
+                    onChangeComplete={() => dispatch(updateResistors())}
+                    chars={chars}
+                />
+                <span className="mdi mdi-omega" />
+            </Form.Label>
+            <Slider
+                id={id}
+                values={[value]}
+                range={range}
+                onChange={[newValue => dispatch(actionOnChange(newValue))]}
+                onChangeComplete={() => dispatch(updateResistors())}
+            />
+        </>
+    );
+};
+ResistorSlider.propTypes = {
+    id: string.isRequired,
+    label: string.isRequired,
+    value: number.isRequired,
+    range: exact({
+        min: number.isRequired,
+        max: number.isRequired,
+        decimals: number,
+    }).isRequired,
+    actionOnChange: func.isRequired,
+    chars: number.isRequired,
+};
 
 const ResistorCalibration = () => {
     const dispatch = useDispatch();
@@ -69,61 +109,29 @@ const ResistorCalibration = () => {
             title="Fine tune resistor values of the measurement paths. See user guide for details."
             collapse={{ collapsible: true }}
         >
-            <Form.Label htmlFor="slider-res-hi">
-                <span className="flex-fill">High</span>
-                <NumberInlineInput
-                    value={userResHi}
-                    range={{ min: 1, max: 3, decimals: 2 }}
-                    onChange={value =>
-                        dispatch(updateHighResistorAction(value))
-                    }
-                    onChangeComplete={() => dispatch(updateResistors())}
-                    chars={6}
-                />
-                <span className="mdi mdi-omega" />
-            </Form.Label>
-            <Slider
+            <ResistorSlider
                 id="slider-res-hi"
-                values={[userResHi]}
+                label="High"
+                value={userResHi}
                 range={{ min: 1, max: 3, decimals: 2 }}
-                onChange={[value => dispatch(updateHighResistorAction(value))]}
-                onChangeComplete={() => dispatch(updateResistors())}
+                actionOnChange={updateHighResistorAction}
+                chars={6}
             />
-            <Form.Label htmlFor="slider-res-mid">
-                <span className="flex-fill">Mid</span>
-                <NumberInlineInput
-                    value={userResMid}
-                    range={{ min: 25, max: 35, decimals: 1 }}
-                    onChange={value => dispatch(updateMidResistorAction(value))}
-                    onChangeComplete={() => dispatch(updateResistors())}
-                    chars={6}
-                />
-                <span className="mdi mdi-omega" />
-            </Form.Label>
-            <Slider
+            <ResistorSlider
                 id="slider-res-mid"
-                values={[userResMid]}
+                label="Mid"
+                value={userResMid}
                 range={{ min: 25, max: 35, decimals: 1 }}
-                onChange={[value => dispatch(updateMidResistorAction(value))]}
-                onChangeComplete={() => dispatch(updateResistors())}
+                actionOnChange={updateMidResistorAction}
+                chars={6}
             />
-            <Form.Label htmlFor="slider-res-low">
-                <span className="flex-fill">Low</span>
-                <NumberInlineInput
-                    value={userResLo}
-                    range={{ min: 450, max: 550 }}
-                    onChange={value => dispatch(updateLowResistorAction(value))}
-                    onChangeComplete={() => dispatch(updateResistors())}
-                    chars={5}
-                />
-                <span className="mdi mdi-omega" />
-            </Form.Label>
-            <Slider
+            <ResistorSlider
                 id="slider-res-low"
-                values={[userResLo]}
+                label="Low"
+                value={userResLo}
                 range={{ min: 450, max: 550 }}
-                onChange={[value => dispatch(updateLowResistorAction(value))]}
-                onChangeComplete={() => dispatch(updateResistors())}
+                actionOnChange={updateLowResistorAction}
+                chars={5}
             />
             <ButtonGroup className="mt-2 w-100">
                 <Button
