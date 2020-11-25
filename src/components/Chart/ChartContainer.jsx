@@ -46,14 +46,12 @@ import zoomPanPlugin from './plugins/chart.zoomPan';
 import crossHairPlugin from './plugins/chart.crossHair';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
 
-import {
-    appState,
-    currentPane as currentPaneSelector,
-} from '../../reducers/appReducer';
+import { appState } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { updateTriggerLevel } from '../../actions/deviceActions';
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
+import { isScopePane } from '../../utils/panes';
 
 const valueRange = { min: 0, max: undefined };
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
@@ -119,7 +117,6 @@ const ChartContainer = ({
         timestampsVisible,
     } = useSelector(chartState);
     const { samplingRunning } = useSelector(appState);
-    const currentPane = useSelector(currentPaneSelector);
     const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
     const live =
         windowBegin === 0 &&
@@ -214,7 +211,7 @@ const ChartContainer = ({
         sendTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible: currentPane === 0 && !externalTrigger,
+        triggerHandleVisible: isScopePane() && !externalTrigger,
     };
     return (
         <div className="chart-container">

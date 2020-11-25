@@ -48,10 +48,8 @@ import {
     togglePreSampling,
     togglePostSampling,
 } from '../../reducers/chartReducer';
-import {
-    currentPane as currentPaneSelector,
-    appState,
-} from '../../reducers/appReducer';
+import { appState } from '../../reducers/appReducer';
+import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
@@ -62,7 +60,6 @@ export default () => {
         preSamplingOn,
         postSamplingOn,
     } = useSelector(chartState);
-    const currentPane = useSelector(currentPaneSelector);
     const {
         capabilities: { prePostTriggering },
     } = useSelector(appState);
@@ -81,7 +78,7 @@ export default () => {
                 label="Timestamps"
                 variant="secondary"
             />
-            {hasDigitalChannels && currentPane === 1 && (
+            {hasDigitalChannels && isDataLoggerPane() && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(toggleDigitalChannels())}
@@ -92,7 +89,7 @@ export default () => {
                     <DigitalChannels />
                 </>
             )}
-            {prePostTriggering && currentPane === 0 && (
+            {prePostTriggering && isScopePane() && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(togglePreSampling())}

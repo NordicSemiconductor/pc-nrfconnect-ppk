@@ -35,17 +35,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import Chart from '../Chart/Chart';
 
-import { currentPane as currentPaneSelector } from '../../reducers/appReducer';
 import { samplingStop, setupOptions } from '../../actions/deviceActions';
-
-const thisPane = 1;
+import { isDataLoggerPane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
-    const active = useSelector(currentPaneSelector) === thisPane;
+    const active = isDataLoggerPane();
     useEffect(() => {
         dispatch(setupOptions());
         return active ? () => dispatch(samplingStop()) : undefined;

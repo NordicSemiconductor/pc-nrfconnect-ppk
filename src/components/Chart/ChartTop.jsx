@@ -47,6 +47,7 @@ import {
     toggleYAxisLock,
     chartState,
 } from '../../reducers/chartReducer';
+import { isDataLoggerPane } from '../../utils/panes';
 
 import './charttop.scss';
 
@@ -74,50 +75,52 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                 variant="secondary"
                 labelRight
             />
-            <ButtonGroup>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => zoomToWindow(10000)}
-                >
-                    10ms
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => zoomToWindow(100000)}
-                >
-                    100ms
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => zoomToWindow(1000000)}
-                >
-                    1s
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => zoomToWindow(3000000)}
-                >
-                    3s
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => zoomToWindow(10000000)}
-                >
-                    10s
-                </Button>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => zoomToWindow(60000000)}
-                >
-                    1min
-                </Button>
-            </ButtonGroup>
+            {isDataLoggerPane() && (
+                <ButtonGroup>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => zoomToWindow(10000)}
+                    >
+                        10ms
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => zoomToWindow(100000)}
+                    >
+                        100ms
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => zoomToWindow(1000000)}
+                    >
+                        1s
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => zoomToWindow(3000000)}
+                    >
+                        3s
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => zoomToWindow(10000000)}
+                    >
+                        10s
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => zoomToWindow(60000000)}
+                    >
+                        1min
+                    </Button>
+                </ButtonGroup>
+            )}
             <Toggle
                 label="LIVE VIEW"
                 onToggle={() =>

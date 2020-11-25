@@ -34,36 +34,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { remote } from 'electron';
+import { useSelector } from 'react-redux';
+import { currentPane as currentPaneSelector } from '../reducers/appReducer';
 
-export const bufferLengthInSeconds = 60 * 5;
+const SCOPE = 0;
+const DATA_LOGGER = 1;
 
-const samplingTime = 10;
-const samplesPerSecond = 1e6 / samplingTime;
+export const isScopePane = (currentPane = null) =>
+    getCurrentPane(SCOPE, currentPane);
 
-export const options = {
-    samplingTime,
-    samplesPerSecond,
-    data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
-    bits: null,
-    index: 0,
-    timestamp: null,
+export const isDataLoggerPane = (currentPane = null) =>
+    getCurrentPane(DATA_LOGGER, currentPane);
+
+const getCurrentPane = (pane, currentPane = null) => {
+    if (currentPane !== null) {
+        return currentPane === pane;
+    }
+    try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        return useSelector(currentPaneSelector) === pane;
+    } catch (err) {
+        const errorMessage =
+            'The current pane (number) should be passed in as argument when used outside a React component';
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+    }
 };
-
-export const nbDigitalChannels = 8;
-
-export const timestampToIndex = (ts, index = options.index) =>
-    index - ((options.timestamp - ts) * options.samplesPerSecond) / 1e6;
-
-export const indexToTimestamp = (i, index = options.index) =>
-    options.timestamp - ((index - i) * 1e6) / options.samplesPerSecond;
-
-export const updateTitle = info => {
-    const title = remote.getCurrentWindow().getTitle().split(':')[0].trim();
-    remote
-        .getCurrentWindow()
-        .setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
-};
-
-export const SCOPE_PANE = 0;
-export const DATA_LOGGER_PANE = 1;
