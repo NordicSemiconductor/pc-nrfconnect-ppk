@@ -114,7 +114,7 @@ const ResistorCalibration = ({ eventKey }) => {
                 id="slider-res-hi"
                 label="High"
                 value={userResHi}
-                range={{ min: 1, max: 3, decimals: 2 }}
+                range={{ min: 1, max: 3, decimals: 3 }}
                 actionOnChange={updateHighResistorAction}
                 chars={6}
             />
