@@ -50,6 +50,13 @@ const getCurrentPane = (pane, currentPane = null) => {
     if (currentPane !== null) {
         return currentPane === pane;
     }
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useSelector(currentPaneSelector) === pane;
+    try {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        return useSelector(currentPaneSelector) === pane;
+    } catch (err) {
+        const errorMessage =
+            'The current pane (number) should be passed in as argument when used outside a React component';
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+    }
 };
