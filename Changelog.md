@@ -1,3 +1,7 @@
+## Version 3.0.0-beta.16
+### Updates
+- Fix resistor calibration inputs that marked some valid values as invalid.
+
 ## Version 3.0.0-beta.15
 ### Updates
 - Add hotkey combination for toggling save/load functionality
