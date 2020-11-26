@@ -36,7 +36,7 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Group } from '../../../from_pc-nrfconnect-shared';
+import { Group } from 'pc-nrfconnect-shared';
 
 import { appState } from '../../../reducers/appReducer';
 import { triggerState } from '../../../reducers/triggerReducer';
