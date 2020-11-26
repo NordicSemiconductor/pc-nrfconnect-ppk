@@ -35,8 +35,8 @@
  */
 
 import React from 'react';
-import { func } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHotKey } from '../../from_pc-nrfconnect-shared';
 
 import PowerMode from './PowerMode';
 import DisplayOptions from './DisplayOptions';
@@ -47,7 +47,6 @@ import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 import Gains from './Gains';
 import SpikeFilter from './SpikeFilter';
-import WithHotkey from '../../utils/WithHotKey';
 
 import {
     toggleAdvancedModeAction,
@@ -63,10 +62,10 @@ import { isScopePane, isDataLoggerPane } from '../../utils/panes';
 
 import './sidepanel.scss';
 
-const SidePanel = ({ bindHotkey }) => {
+export default () => {
     const dispatch = useDispatch();
-    bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
-    bindHotkey('alt+ctrl+shift+l', () => dispatch(toggleSaveFunctionality()));
+    useHotKey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+    useHotKey('alt+ctrl+shift+l', () => dispatch(toggleSaveFunctionality()));
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
@@ -110,8 +109,3 @@ const SidePanel = ({ bindHotkey }) => {
         </div>
     );
 };
-
-SidePanel.propTypes = {
-    bindHotkey: func.isRequired,
-};
-export default WithHotkey(SidePanel);
