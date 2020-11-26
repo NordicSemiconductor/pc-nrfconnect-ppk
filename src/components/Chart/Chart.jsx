@@ -620,8 +620,8 @@ const Chart = () => {
                     {numberOfBits === 0 && (
                         <div className="info">
                             <p>
-                                Zoom in on the main chart to see the digital
-                                channels
+                                To see the digital channels, use a maximum
+                                window size of 3 seconds.
                             </p>
                         </div>
                     )}
