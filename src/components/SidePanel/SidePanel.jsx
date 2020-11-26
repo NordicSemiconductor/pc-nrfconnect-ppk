@@ -69,6 +69,8 @@ const ppk1ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
 const ppk2ug =
     'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+const PPK2_PURCHASE_URL =
+    'https://www.nordicsemi.com/About-us/BuyOnline?search_token=nRF-PPK2';
 
 const SidePanel = ({ bindHotkey }) => {
     const dispatch = useDispatch();
@@ -124,6 +126,14 @@ const SidePanel = ({ bindHotkey }) => {
                     </Button>
                     <Button variant="link" onClick={() => openUrl(ppk2ug)}>
                         PPK2 User Guide
+                    </Button>
+
+                    <Button
+                        variant="set"
+                        className="mt-3"
+                        onClick={() => openUrl(PPK2_PURCHASE_URL)}
+                    >
+                        Get PPK2 device
                     </Button>
                 </>
             )}
