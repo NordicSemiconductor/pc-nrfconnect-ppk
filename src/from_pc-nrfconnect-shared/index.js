@@ -34,4 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// The following components can be removed if this app can rely on
+// launcher 3.6.1 being used
+export { default as SidePanel } from './SidePanel/SidePanel';
+export { Group, CollapsibleGroup } from './SidePanel/Group';
+
 export { default as useHotKey } from './utils/useHotKey';

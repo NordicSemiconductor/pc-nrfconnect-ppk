@@ -1,0 +1,10 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.core19-side-panel-copy {
+    font-size: 12px;
+    color: $gray-700;
+
+    > * {
+        margin-top: 32px;
+    }
+}

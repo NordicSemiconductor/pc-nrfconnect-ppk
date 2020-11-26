@@ -41,6 +41,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 import { Slider, Toggle } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
 
 import {
     spikeFilteringToggle,
@@ -54,8 +55,6 @@ import {
     switchingPointsState,
 } from '../../reducers/switchingPointsReducer';
 import { appState } from '../../reducers/appReducer';
-
-import Group from './Group';
 
 const SwitchPoints = () => {
     const dispatch = useDispatch();
@@ -76,7 +75,7 @@ const SwitchPoints = () => {
     }
 
     return (
-        <Group heading="Switch levels" collapse={{ collapsible: true }}>
+        <CollapsibleGroup heading="Switch levels">
             {capabilities.ppkSwitchPointUp && (
                 <>
                     <span title="Set dynamic range switching levels. See user guide for details.">
@@ -132,7 +131,7 @@ const SwitchPoints = () => {
                     variant="secondary"
                 />
             )}
-        </Group>
+        </CollapsibleGroup>
     );
 };
 

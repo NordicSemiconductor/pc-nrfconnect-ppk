@@ -39,12 +39,11 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
 import { Slider } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import { updateGainsAction, gainsState } from '../../reducers/gainsReducer';
-
-import Group from './Group';
 
 const gainTitles = [
     '~100nA - 50µA',
@@ -64,10 +63,9 @@ const Gains = () => {
 
     const range = { min: 90, max: 110 };
     return (
-        <Group
+        <CollapsibleGroup
             heading="Gains"
             title="Adjust gains to correct potential measurement errors"
-            collapse={{ collapsible: true }}
         >
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>
@@ -90,7 +88,7 @@ const Gains = () => {
                     />
                 </React.Fragment>
             ))}
-        </Group>
+        </CollapsibleGroup>
     );
 };
 

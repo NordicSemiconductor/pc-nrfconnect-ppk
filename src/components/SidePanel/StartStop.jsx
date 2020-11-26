@@ -38,9 +38,9 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-
 import { Slider } from 'pc-nrfconnect-shared';
 import { unit } from 'mathjs';
+import { Group } from '../../from_pc-nrfconnect-shared';
 
 import NumberWithUnit from './NumberWithUnitInput';
 
@@ -50,8 +50,6 @@ import {
     setupOptions,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
-
-import Group from './Group';
 
 import {
     updateSampleFreqLog10,

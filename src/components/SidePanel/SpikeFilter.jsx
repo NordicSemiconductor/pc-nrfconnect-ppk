@@ -40,6 +40,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { Slider } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
@@ -49,8 +50,6 @@ import {
     resetSpikeFilterToDefaults,
 } from '../../reducers/spikeFilterReducer';
 
-import Group from './Group';
-
 const SpikeFilter = () => {
     const dispatch = useDispatch();
     const { samples, alpha, alpha5 } = useSelector(spikeFilterState);
@@ -59,10 +58,9 @@ const SpikeFilter = () => {
         return null;
     }
     return (
-        <Group
+        <CollapsibleGroup
             heading="Spike filter"
             title="Adjust how the software filters current spikes"
-            collapse={{ collapsible: true }}
         >
             <Form.Label
                 title="Number of samples after a dynamic range switch to apply filter"
@@ -128,7 +126,7 @@ const SpikeFilter = () => {
             >
                 Defaults
             </Button>
-        </Group>
+        </CollapsibleGroup>
     );
 };
 

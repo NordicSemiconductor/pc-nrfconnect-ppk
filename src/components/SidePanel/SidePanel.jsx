@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHotKey } from '../../from_pc-nrfconnect-shared';
+import { SidePanel, useHotKey } from '../../from_pc-nrfconnect-shared';
 
 import PowerMode from './PowerMode';
 import DisplayOptions from './DisplayOptions';
@@ -75,10 +75,10 @@ export default () => {
 
     if (!deviceOpen) {
         return (
-            <div className="sidepanel d-flex flex-column">
+            <SidePanel className="side-panel">
                 <Load />
                 <Instructions />
-            </div>
+            </SidePanel>
         );
     }
 
@@ -87,7 +87,7 @@ export default () => {
     }
 
     return (
-        <div className="sidepanel d-flex flex-column">
+        <SidePanel className="side-panel">
             <PowerMode />
             {scopePane && <Trigger />}
             {dataLoggerPane && <StartStop />}
@@ -106,6 +106,6 @@ export default () => {
                     <SpikeFilter />
                 </>
             )}
-        </div>
+        </SidePanel>
     );
 };

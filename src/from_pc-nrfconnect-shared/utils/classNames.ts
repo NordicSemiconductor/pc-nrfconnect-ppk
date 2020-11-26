@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,32 +34,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import Mousetrap from 'mousetrap';
+const isString = (o: unknown) => typeof o === 'string';
 
-export default ComposedComponent =>
-    class WithHotkey extends React.Component {
-        constructor(props) {
-            super(props);
-            this.bindings = [];
-            this.bindHotkey = this.bindHotkey.bind(this);
-        }
-
-        componentWillUnmount() {
-            this.bindings.forEach(key => Mousetrap.unbind(key));
-        }
-
-        bindHotkey(key, callback) {
-            Mousetrap.bind(key, callback);
-            this.bindings.push(key);
-        }
-
-        render() {
-            return (
-                <ComposedComponent
-                    bindHotkey={this.bindHotkey}
-                    {...this.props}
-                />
-            );
-        }
-    };
+/**
+ * Combine a list of class names into a space separated strings.
+ * Filters out all values that are not strings. The idea of this function is
+ * to use it with conditionals and potentially unset values like this:
+ *
+ *     classNames(
+ *          'fixed-class-name',
+ *          isVisible && 'visible',
+ *          isEnabled ? 'enabled' : 'disabled',
+ *          potentiallyUndefined,
+ *     )
+ *
+ * @param {...unknown} className - An arbitrary list of class names or other objects
+ * @returns {string} the combined class name
+ */
+export default (...className: unknown[]) =>
+    className.filter(isString).join(' ');

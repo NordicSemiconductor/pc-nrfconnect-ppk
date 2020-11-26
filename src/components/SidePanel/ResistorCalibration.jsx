@@ -41,6 +41,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
 
 import { updateResistors, resetResistors } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
@@ -50,8 +51,6 @@ import {
     updateLowResistorAction,
     resistorCalibrationState,
 } from '../../reducers/resistorCalibrationReducer';
-
-import Group from './Group';
 
 const ResistorSlider = ({ id, label, value, range, actionOnChange, chars }) => {
     const dispatch = useDispatch();
@@ -104,10 +103,9 @@ const ResistorCalibration = () => {
     }
 
     return (
-        <Group
+        <CollapsibleGroup
             heading="Resistor calibration"
             title="Fine tune resistor values of the measurement paths. See user guide for details."
-            collapse={{ collapsible: true }}
         >
             <ResistorSlider
                 id="slider-res-hi"
@@ -147,7 +145,7 @@ const ResistorCalibration = () => {
                     Reset
                 </Button>
             </ButtonGroup>
-        </Group>
+        </CollapsibleGroup>
     );
 };
 
