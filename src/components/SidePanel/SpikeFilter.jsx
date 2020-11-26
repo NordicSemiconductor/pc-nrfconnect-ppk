@@ -39,8 +39,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { Slider } from 'pc-nrfconnect-shared';
-import { CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
+import { CollapsibleGroup, Slider } from '../../from_pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';

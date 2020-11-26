@@ -38,9 +38,8 @@ import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { Slider } from 'pc-nrfconnect-shared';
 import { unit } from 'mathjs';
-import { Group } from '../../from_pc-nrfconnect-shared';
+import { Group, Slider } from '../../from_pc-nrfconnect-shared';
 
 import NumberWithUnit from './NumberWithUnitInput';
 
@@ -92,6 +91,7 @@ export default () => {
                     {sampleFreq} samples per second
                 </Form.Label>
                 <Slider
+                    ticks
                     id="data-logger-sampling-frequency"
                     values={[sampleFreqLog10]}
                     range={{ min: 0, max: maxFreqLog10 }}

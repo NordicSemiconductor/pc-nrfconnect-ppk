@@ -34,19 +34,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// The following components can be removed if this app can rely on
-// launcher 3.6.1 being used
-export { default as SidePanel } from './SidePanel/SidePanel';
-export { Group, CollapsibleGroup } from './SidePanel/Group';
+import { useEffect, useRef, useState } from 'react';
 
-export { default as useHotKey } from './utils/useHotKey';
+/**
+ * Observe and return the width of an element
+ *
+ * @returns {[elementWidth, elementRef]} The width of the element and the ref which has to be
+ * attached to the target element.
+ */
+export default () => {
+    const elementRef = useRef();
+    const [elementWidth, setElementWidth] = useState();
+    const reportWidth = () => setElementWidth(elementRef.current.clientWidth);
 
-// The following components below can be removed if this app can rely on a
-// launcher being used that provides shared v4.16.0
-import './shared.scss'; // eslint-disable-line import/first
+    useEffect(() => {
+        reportWidth();
 
-export { default as Slider } from './Slider/Slider';
-export { default as Toggle } from './Toggle/Toggle';
+        const widthObserver = new ResizeObserver(reportWidth);
+        widthObserver.observe(elementRef.current);
+        return () => widthObserver.disconnect();
+    }, []);
 
-export { default as InlineInput } from './InlineInput/InlineInput';
-export { default as NumberInlineInput } from './InlineInput/NumberInlineInput';
+    return [elementWidth, elementRef];
+};

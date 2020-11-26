@@ -40,7 +40,7 @@ import { func, shape } from 'prop-types';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import { Toggle } from 'pc-nrfconnect-shared';
+import { Toggle } from '../../from_pc-nrfconnect-shared';
 
 import {
     resetCursorAndChart,

@@ -34,19 +34,40 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// The following components can be removed if this app can rely on
-// launcher 3.6.1 being used
-export { default as SidePanel } from './SidePanel/SidePanel';
-export { Group, CollapsibleGroup } from './SidePanel/Group';
+import React from 'react';
+import { bool, func, number } from 'prop-types';
 
-export { default as useHotKey } from './utils/useHotKey';
+import InlineInput from './InlineInput';
+import rangeShape from '../Slider/rangeShape';
 
-// The following components below can be removed if this app can rely on a
-// launcher being used that provides shared v4.16.0
-import './shared.scss'; // eslint-disable-line import/first
+import './number-inline-input.scss';
 
-export { default as Slider } from './Slider/Slider';
-export { default as Toggle } from './Toggle/Toggle';
+const isInRange = (value, { min, max, decimals = 0 }) =>
+    value >= min && value <= max && value === Number(value.toFixed(decimals));
 
-export { default as InlineInput } from './InlineInput/InlineInput';
-export { default as NumberInlineInput } from './InlineInput/NumberInlineInput';
+const NumberInlineInput = ({
+    disabled,
+    value,
+    range,
+    onChange,
+    onChangeComplete = () => {},
+}) => (
+    <InlineInput
+        className="number-inline-input"
+        disabled={disabled}
+        value={String(value)}
+        isValid={newValue => isInRange(Number(newValue), range)}
+        onChange={newValue => onChange(Number(newValue))}
+        onChangeComplete={newValue => onChangeComplete(Number(newValue))}
+    />
+);
+
+NumberInlineInput.propTypes = {
+    disabled: bool,
+    value: number.isRequired,
+    range: rangeShape.isRequired,
+    onChange: func.isRequired,
+    onChangeComplete: func,
+};
+
+export default NumberInlineInput;

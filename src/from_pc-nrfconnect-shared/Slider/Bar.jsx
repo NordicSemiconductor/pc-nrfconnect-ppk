@@ -34,19 +34,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// The following components can be removed if this app can rely on
-// launcher 3.6.1 being used
-export { default as SidePanel } from './SidePanel/SidePanel';
-export { Group, CollapsibleGroup } from './SidePanel/Group';
+import React from 'react';
+import { number } from 'prop-types';
 
-export { default as useHotKey } from './utils/useHotKey';
+import './bar.scss';
 
-// The following components below can be removed if this app can rely on a
-// launcher being used that provides shared v4.16.0
-import './shared.scss'; // eslint-disable-line import/first
+const Bar = ({ start, end }) => (
+    <>
+        <div className="bar background" />
+        <div
+            className="bar foreground"
+            style={{
+                left: `${start}%`,
+                width: `${end - start}%`,
+            }}
+        />
+    </>
+);
+Bar.propTypes = {
+    start: number.isRequired,
+    end: number.isRequired,
+};
 
-export { default as Slider } from './Slider/Slider';
-export { default as Toggle } from './Toggle/Toggle';
-
-export { default as InlineInput } from './InlineInput/InlineInput';
-export { default as NumberInlineInput } from './InlineInput/NumberInlineInput';
+export default Bar;

@@ -1,0 +1,9 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.number-inline-input {
+    text-align: center;
+    border-bottom-color: $gray-200;
+    font-size: 14px;
+
+    &:focus { background-color: $white; }
+}

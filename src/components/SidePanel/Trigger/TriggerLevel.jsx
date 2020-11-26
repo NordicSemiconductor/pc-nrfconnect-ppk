@@ -38,9 +38,9 @@ import React, { useState, useEffect } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import SelectableContext from 'react-bootstrap/SelectableContext';
-import { NumberInlineInput } from 'pc-nrfconnect-shared';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
+import { NumberInlineInput } from '../../../from_pc-nrfconnect-shared';
 import { updateTriggerLevel } from '../../../actions/deviceActions';
 
 const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
@@ -82,7 +82,6 @@ const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
                     }}
                     onChange={value => setLevel(value)}
                     onChangeComplete={() => sendTriggerLevel(levelUnit)}
-                    chars={8}
                 />
                 {/* The context in the next line is a hack to work around
                         a bug in react-bootstrap described in

@@ -40,8 +40,11 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import { Slider, Toggle } from 'pc-nrfconnect-shared';
-import { CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
+import {
+    CollapsibleGroup,
+    Slider,
+    Toggle,
+} from '../../from_pc-nrfconnect-shared';
 
 import {
     spikeFilteringToggle,

@@ -34,19 +34,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// The following components can be removed if this app can rely on
-// launcher 3.6.1 being used
-export { default as SidePanel } from './SidePanel/SidePanel';
-export { Group, CollapsibleGroup } from './SidePanel/Group';
+export const constrainedToPercentage = percentage => {
+    if (percentage < 0) return 0;
+    if (percentage > 100) return 100;
+    return percentage;
+};
 
-export { default as useHotKey } from './utils/useHotKey';
-
-// The following components below can be removed if this app can rely on a
-// launcher being used that provides shared v4.16.0
-import './shared.scss'; // eslint-disable-line import/first
-
-export { default as Slider } from './Slider/Slider';
-export { default as Toggle } from './Toggle/Toggle';
-
-export { default as InlineInput } from './InlineInput/InlineInput';
-export { default as NumberInlineInput } from './InlineInput/NumberInlineInput';
+export const toPercentage = (v, { min, max }) =>
+    ((v - min) * 100) / (max - min);
+export const fromPercentage = (v, { min, max, decimals = 0 }) =>
+    Number(((v * (max - min)) / 100 + min).toFixed(decimals));
