@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,31 +35,39 @@
  */
 
 import React from 'react';
-import Mousetrap from 'mousetrap';
+import { bool, func, number } from 'prop-types';
 
-export default ComposedComponent =>
-    class WithHotkey extends React.Component {
-        constructor(props) {
-            super(props);
-            this.bindings = [];
-            this.bindHotkey = this.bindHotkey.bind(this);
-        }
+import InlineInput from './InlineInput';
+import rangeShape from '../Slider/rangeShape';
 
-        componentWillUnmount() {
-            this.bindings.forEach(key => Mousetrap.unbind(key));
-        }
+import './number-inline-input.scss';
 
-        bindHotkey(key, callback) {
-            Mousetrap.bind(key, callback);
-            this.bindings.push(key);
-        }
+const isInRange = (value, { min, max, decimals = 0 }) =>
+    value >= min && value <= max && value === Number(value.toFixed(decimals));
 
-        render() {
-            return (
-                <ComposedComponent
-                    bindHotkey={this.bindHotkey}
-                    {...this.props}
-                />
-            );
-        }
-    };
+const NumberInlineInput = ({
+    disabled,
+    value,
+    range,
+    onChange,
+    onChangeComplete = () => {},
+}) => (
+    <InlineInput
+        className="number-inline-input"
+        disabled={disabled}
+        value={String(value)}
+        isValid={newValue => isInRange(Number(newValue), range)}
+        onChange={newValue => onChange(Number(newValue))}
+        onChangeComplete={newValue => onChangeComplete(Number(newValue))}
+    />
+);
+
+NumberInlineInput.propTypes = {
+    disabled: bool,
+    value: number.isRequired,
+    range: rangeShape.isRequired,
+    onChange: func.isRequired,
+    onChangeComplete: func,
+};
+
+export default NumberInlineInput;

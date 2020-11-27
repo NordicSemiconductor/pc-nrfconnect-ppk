@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,77 +34,85 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useEffect } from 'react';
-import { number, string, func, bool } from 'prop-types';
-import Form from 'react-bootstrap/Form';
-import rangeShape from 'pc-nrfconnect-shared/src/Slider/rangeShape';
-import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
+import React from 'react';
+import { arrayOf, bool, func, number, string } from 'prop-types';
+import classNames from '../utils/classNames';
 
-const NumberWithUnit = ({
-    title = '',
-    className = '',
-    label,
-    unit,
-    multiplier,
+import Bar from './Bar';
+import Handle from './Handle';
+import useWidthObserver from './useWidthObserver';
+import rangeShape from './rangeShape';
+import { toPercentage } from './percentage';
+import Ticks from './Ticks';
+
+import './slider.scss';
+
+const Slider = ({
+    id,
+    title,
+    disabled = false,
+    values,
     range,
-    value,
+    ticks,
     onChange,
     onChangeComplete,
-    disabled = false,
-    slider = false,
-    ...props
 }) => {
-    const [internalValue, setInternalValue] = useState(value / multiplier);
+    if (values.length === 0)
+        console.error('"values" must contain at least on element');
+    if (values.length !== onChange.length)
+        console.error(
+            `Props 'values' and 'onChange' must have the same size but were ${values} and ${onChange}`
+        );
+    if (range.min > range.max)
+        console.error(
+            `range.min must not be higher than range.max: ${JSON.stringify(
+                range
+            )}`
+        );
 
-    const change = n => {
-        setInternalValue(n);
-        onChange(n * multiplier);
+    const [sliderWidth, sliderRef] = useWidthObserver();
+
+    const valueRange = {
+        min: values.length === 1 ? range.min : Math.min(...values),
+        max: Math.max(...values),
     };
-
-    useEffect(() => setInternalValue(value / multiplier), [multiplier, value]);
 
     return (
         <div
+            className={classNames('slider', disabled && 'disabled')}
+            id={id}
             title={title}
-            className={`${className} ${disabled ? 'disabled' : ''}`}
+            ref={sliderRef}
         >
-            <Form.Label className="d-flex flex-row align-items-baseline">
-                <span>{label}&nbsp;</span>
-                <NumberInlineInput
-                    value={internalValue}
+            <Bar
+                start={toPercentage(valueRange.min, range)}
+                end={toPercentage(valueRange.max, range)}
+            />
+            {ticks && <Ticks valueRange={valueRange} range={range} />}
+            {values.map((value, index) => (
+                <Handle
+                    key={index} // eslint-disable-line react/no-array-index-key
+                    value={value}
                     range={range}
-                    onChange={change}
-                    onChangeComplete={onChangeComplete}
                     disabled={disabled}
-                    {...props}
-                />
-                <span>&nbsp;{unit}</span>
-            </Form.Label>
-            {slider && (
-                <Slider
-                    values={[internalValue]}
-                    range={range}
-                    onChange={[change]}
+                    onChange={onChange[index]}
                     onChangeComplete={onChangeComplete}
-                    disabled={disabled}
+                    sliderWidth={sliderWidth}
                 />
-            )}
+            ))}
         </div>
     );
 };
 
-NumberWithUnit.propTypes = {
+Slider.propTypes = {
+    id: string,
     title: string,
-    className: string,
-    label: string.isRequired,
-    value: number.isRequired,
-    unit: string.isRequired,
-    multiplier: number.isRequired,
-    range: rangeShape.isRequired,
-    onChange: func.isRequired,
-    onChangeComplete: func.isRequired,
     disabled: bool,
-    slider: bool,
+    values: arrayOf(number.isRequired).isRequired,
+    range: rangeShape.isRequired,
+    ticks: bool,
+    onChange: arrayOf(func.isRequired).isRequired,
+    onChangeComplete: func,
 };
 
-export default NumberWithUnit;
+export default Slider;

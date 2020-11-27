@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,48 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Group } from '../../../from_pc-nrfconnect-shared';
+import { number, shape } from 'prop-types';
 
-import { appState } from '../../../reducers/appReducer';
-import { triggerState } from '../../../reducers/triggerReducer';
-
-import TriggerLength from './TriggerLength';
-import TriggerLevel from './TriggerLevel';
-import TriggerModeGroup from './TriggerModeGroup';
-import TriggerStart from './TriggerStart';
-
-import { CONTINUOUS } from './triggerConstants';
-
-import './trigger.scss';
-
-const Trigger = () => {
-    const { rttRunning, capabilities } = useSelector(appState);
-    const { externalTrigger, triggerLevel, triggerRunning } = useSelector(
-        triggerState
-    );
-
-    const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
-
-    return (
-        <Group heading="Trigger">
-            <TriggerLength />
-            <TriggerLevel
-                triggerLevel={triggerLevel}
-                externalTrigger={externalTrigger}
-            />
-            <TriggerModeGroup
-                triggerMode={triggerMode}
-                setTriggerMode={setTriggerMode}
-                hasExternal={!!capabilities.ppkTriggerExtToggle}
-                externalTrigger={externalTrigger}
-                rttRunning={rttRunning}
-                triggerRunning={triggerRunning}
-            />
-            <TriggerStart triggerMode={triggerMode} rttRunning={rttRunning} />
-        </Group>
-    );
-};
-
-export default Trigger;
+export default shape({
+    min: number.isRequired,
+    max: number.isRequired,
+    decimals: number,
+});

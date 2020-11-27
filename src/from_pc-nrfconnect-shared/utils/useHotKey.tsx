@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,48 +34,19 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Group } from '../../../from_pc-nrfconnect-shared';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 
-import { appState } from '../../../reducers/appReducer';
-import { triggerState } from '../../../reducers/triggerReducer';
+import { useEffect } from 'react';
+import Mousetrap from 'mousetrap';
 
-import TriggerLength from './TriggerLength';
-import TriggerLevel from './TriggerLevel';
-import TriggerModeGroup from './TriggerModeGroup';
-import TriggerStart from './TriggerStart';
+export default (key: string | string[], onKeypress: () => void) => {
+    useEffect(() => {
+        Mousetrap.bind(key, onKeypress);
 
-import { CONTINUOUS } from './triggerConstants';
-
-import './trigger.scss';
-
-const Trigger = () => {
-    const { rttRunning, capabilities } = useSelector(appState);
-    const { externalTrigger, triggerLevel, triggerRunning } = useSelector(
-        triggerState
-    );
-
-    const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
-
-    return (
-        <Group heading="Trigger">
-            <TriggerLength />
-            <TriggerLevel
-                triggerLevel={triggerLevel}
-                externalTrigger={externalTrigger}
-            />
-            <TriggerModeGroup
-                triggerMode={triggerMode}
-                setTriggerMode={setTriggerMode}
-                hasExternal={!!capabilities.ppkTriggerExtToggle}
-                externalTrigger={externalTrigger}
-                rttRunning={rttRunning}
-                triggerRunning={triggerRunning}
-            />
-            <TriggerStart triggerMode={triggerMode} rttRunning={rttRunning} />
-        </Group>
-    );
+        return () => {
+            Mousetrap.unbind(key);
+        };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps -- Only run this on
+    // mount/unmount, currently we do not want to support changing keybindings inbetween
 };
-
-export default Trigger;

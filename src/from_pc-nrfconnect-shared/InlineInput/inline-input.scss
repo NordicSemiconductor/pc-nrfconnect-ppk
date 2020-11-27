@@ -1,0 +1,32 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.inline-input {
+    all: inherit;
+
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: transparent;
+
+    overflow-x: hidden;
+
+    &:focus {
+        border-bottom-color: $gray-200;
+    }
+
+    &.invalid {
+        border-bottom-color: $brand-danger;
+    }
+
+    &.disabled {
+        // No clue why, but setting the opacity for disabled elements in shared.scss
+        // is not effective for the inline input, but it works if we set it here
+        opacity: $disabled-opacity;
+    }
+}
+
+// To prevent opacity from stacking up
+.disabled, :disabled {
+    .inline-input.disabled {
+        opacity: 1;
+    }
+}

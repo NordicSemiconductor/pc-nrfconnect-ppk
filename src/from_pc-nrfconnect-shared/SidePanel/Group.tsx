@@ -34,19 +34,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import React, { useContext, useRef } from 'react';
-import { bool, func, node, shape, string } from 'prop-types';
+import { bool, func, string } from 'prop-types';
 
 import Accordion from 'react-bootstrap/Accordion';
+
 import AccordionContext from 'react-bootstrap/AccordionContext';
 import { useAccordionToggle } from 'react-bootstrap/AccordionToggle';
 
-// Hack: PseudoButton is not part of the official API but we use it here until we move the Group component to pc-nrfconnect-shared
 import PseudoButton from 'pc-nrfconnect-shared/src/PseudoButton/PseudoButton';
 
 import './group.scss';
+import classNames from '../utils/classNames';
 
-const Heading = ({ label, title }) =>
+const Heading: React.FC<{
+    label?: string;
+    title?: string;
+}> = ({ label, title }) =>
     label == null ? null : (
         <h2 className="heading" title={title}>
             {label}
@@ -57,24 +64,23 @@ Heading.propTypes = {
     title: string,
 };
 
-const ContextAwareToggle = ({
-    heading,
-    title,
-    eventKey,
-    onToggled = () => {},
-}) => {
+const ContextAwareToggle: React.FC<{
+    heading: string;
+    title?: string;
+    eventKey: string;
+    onToggled?: ((isNowExpanded: boolean) => void) | null;
+}> = ({ heading, title, eventKey, onToggled }) => {
     const currentEventKey = useContext(AccordionContext);
-    const decoratedOnClick = useAccordionToggle(eventKey);
     const isCurrentEventKey = currentEventKey === eventKey;
+    const decoratedOnClick = useAccordionToggle(
+        eventKey,
+        () => onToggled && onToggled(!isCurrentEventKey)
+    );
 
     return (
         <PseudoButton
-            onClick={() => {
-                decoratedOnClick();
-                const isNowExpanded = !isCurrentEventKey;
-                onToggled(isNowExpanded);
-            }}
-            className={`group-toggle ${isCurrentEventKey ? 'show' : ''}`}
+            onClick={decoratedOnClick}
+            className={classNames('group-toggle', isCurrentEventKey && 'show')}
         >
             <Heading label={heading} title={title} />
         </PseudoButton>
@@ -87,7 +93,14 @@ ContextAwareToggle.propTypes = {
     onToggled: func,
 };
 
-const CollapsibleGroup = ({
+export const CollapsibleGroup: React.FC<{
+    className?: string;
+    heading: string;
+    title?: string;
+    defaultCollapsed?: boolean | null;
+    onToggled?: ((isNowExpanded: boolean) => void) | null;
+}> = ({
+    className = '',
     heading,
     title,
     children = null,
@@ -97,64 +110,46 @@ const CollapsibleGroup = ({
     const eventKey = useRef(Math.random().toString());
 
     return (
-        <Accordion defaultActiveKey={defaultCollapsed ? '' : eventKey.current}>
-            <div className="collapse-container">
-                <ContextAwareToggle
-                    heading={heading}
-                    title={title}
-                    eventKey={eventKey.current}
-                    onToggled={onToggled}
-                />
-                <Accordion.Collapse eventKey={eventKey.current}>
-                    <>{children}</>
-                </Accordion.Collapse>
-            </div>
-        </Accordion>
+        <div className={`sidepanel-group ${className}`}>
+            <Accordion
+                defaultActiveKey={defaultCollapsed ? '' : eventKey.current}
+            >
+                <div className="collapse-container">
+                    <ContextAwareToggle
+                        heading={heading}
+                        title={title}
+                        eventKey={eventKey.current}
+                        onToggled={onToggled}
+                    />
+                    <Accordion.Collapse eventKey={eventKey.current}>
+                        <div className="body">{children}</div>
+                    </Accordion.Collapse>
+                </div>
+            </Accordion>
+        </div>
     );
 };
 
 CollapsibleGroup.propTypes = {
+    className: string,
     heading: string.isRequired,
     title: string,
-    children: node,
     defaultCollapsed: bool,
     onToggled: func,
 };
 
-const Group = ({
-    className = '',
-    heading,
-    title,
-    collapse = { collapsible: false },
-    children,
-}) =>
-    collapse.collapsible ? (
-        <div className={`sidepanel-group ${className}`}>
-            <CollapsibleGroup
-                heading={heading}
-                title={title}
-                defaultCollapsed={collapse.defaultCollapsed}
-                onToggled={collapse.onToggled}
-            >
-                <div className="body">{children}</div>
-            </CollapsibleGroup>
-        </div>
-    ) : (
-        <div className={`sidepanel-group ${className}`}>
-            <Heading label={heading} title={title} />
-            <div className="body">{children}</div>
-        </div>
-    );
+export const Group: React.FC<{
+    className?: string;
+    heading?: string;
+    title?: string;
+}> = ({ className = '', heading, title, children }) => (
+    <div className={`sidepanel-group ${className}`}>
+        <Heading label={heading} title={title} />
+        <div className="body">{children}</div>
+    </div>
+);
 Group.propTypes = {
     className: string,
     heading: string,
     title: string,
-    children: node,
-    collapse: shape({
-        collapsible: bool,
-        defaultCollapsed: bool,
-        onToggled: func,
-    }),
 };
-
-export default Group;

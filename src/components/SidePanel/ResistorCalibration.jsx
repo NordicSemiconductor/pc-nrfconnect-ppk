@@ -40,7 +40,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import {
+    CollapsibleGroup,
+    NumberInlineInput,
+    Slider,
+} from '../../from_pc-nrfconnect-shared';
 
 import { updateResistors, resetResistors } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
@@ -51,9 +55,7 @@ import {
     resistorCalibrationState,
 } from '../../reducers/resistorCalibrationReducer';
 
-import Group from './Group';
-
-const ResistorSlider = ({ id, label, value, range, actionOnChange, chars }) => {
+const ResistorSlider = ({ id, label, value, range, actionOnChange }) => {
     const dispatch = useDispatch();
 
     return (
@@ -65,7 +67,6 @@ const ResistorSlider = ({ id, label, value, range, actionOnChange, chars }) => {
                     range={range}
                     onChange={newValue => dispatch(actionOnChange(newValue))}
                     onChangeComplete={() => dispatch(updateResistors())}
-                    chars={chars}
                 />
                 <span className="mdi mdi-omega" />
             </Form.Label>
@@ -89,7 +90,6 @@ ResistorSlider.propTypes = {
         decimals: number,
     }).isRequired,
     actionOnChange: func.isRequired,
-    chars: number.isRequired,
 };
 
 const ResistorCalibration = () => {
@@ -104,10 +104,9 @@ const ResistorCalibration = () => {
     }
 
     return (
-        <Group
+        <CollapsibleGroup
             heading="Resistor calibration"
             title="Fine tune resistor values of the measurement paths. See user guide for details."
-            collapse={{ collapsible: true }}
         >
             <ResistorSlider
                 id="slider-res-hi"
@@ -115,7 +114,6 @@ const ResistorCalibration = () => {
                 value={userResHi}
                 range={{ min: 1, max: 3, decimals: 3 }}
                 actionOnChange={updateHighResistorAction}
-                chars={6}
             />
             <ResistorSlider
                 id="slider-res-mid"
@@ -123,7 +121,6 @@ const ResistorCalibration = () => {
                 value={userResMid}
                 range={{ min: 25, max: 35, decimals: 1 }}
                 actionOnChange={updateMidResistorAction}
-                chars={6}
             />
             <ResistorSlider
                 id="slider-res-low"
@@ -131,7 +128,6 @@ const ResistorCalibration = () => {
                 value={userResLo}
                 range={{ min: 450, max: 550 }}
                 actionOnChange={updateLowResistorAction}
-                chars={5}
             />
             <ButtonGroup className="mt-2 w-100">
                 <Button
@@ -147,7 +143,7 @@ const ResistorCalibration = () => {
                     Reset
                 </Button>
             </ButtonGroup>
-        </Group>
+        </CollapsibleGroup>
     );
 };
 

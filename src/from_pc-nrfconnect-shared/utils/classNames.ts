@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,29 +34,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { node, string } from 'prop-types';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+const isString = (o: unknown) => typeof o === 'string';
 
-const WithTip = ({ tip, placement = 'right', children }) => (
-    <OverlayTrigger
-        placement={placement}
-        delay={{ show: 250, hide: 400 }}
-        overlay={props => (
-            <Tooltip id="button-tooltip" {...props}>
-                {tip}
-            </Tooltip>
-        )}
-    >
-        {children}
-    </OverlayTrigger>
-);
-
-WithTip.propTypes = {
-    tip: string.isRequired,
-    placement: string,
-    children: node.isRequired,
-};
-
-export default WithTip;
+/**
+ * Combine a list of class names into a space separated strings.
+ * Filters out all values that are not strings. The idea of this function is
+ * to use it with conditionals and potentially unset values like this:
+ *
+ *     classNames(
+ *          'fixed-class-name',
+ *          isVisible && 'visible',
+ *          isEnabled ? 'enabled' : 'disabled',
+ *          potentiallyUndefined,
+ *     )
+ *
+ * @param {...unknown} className - An arbitrary list of class names or other objects
+ * @returns {string} the combined class name
+ */
+export default (...className: unknown[]) =>
+    className.filter(isString).join(' ');

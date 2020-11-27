@@ -37,7 +37,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import fs from 'fs';
 import { useDispatch, useSelector } from 'react-redux';
-import { Toggle } from 'pc-nrfconnect-shared';
 import { logger } from 'nrfconnect/core';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
@@ -50,6 +49,7 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 
+import { Toggle } from '../../from_pc-nrfconnect-shared';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { options, timestampToIndex, indexToTimestamp } from '../../globals';

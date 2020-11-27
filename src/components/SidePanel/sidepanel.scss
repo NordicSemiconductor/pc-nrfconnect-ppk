@@ -1,17 +1,6 @@
 @import '~pc-nrfconnect-shared/src/variables';
 
-.sidepanel {
-    > * {
-        margin-top: 32px;
-    }
-
-    margin-top: -24px;
-    font-size: 12px;
-
-    color: $gray-700;
-
-    // Above are things that apply for all sidepanels and really should be set in shared
-
+.side-panel {
     .form-label {
         margin-bottom: 0ex;
         display: flex;
@@ -79,11 +68,6 @@
         .btn-set .amperemeter {
             background: $nordic-blue;
         }
-    }
-
-    .disabled {
-        opacity: 38%;
-        pointer-events: none;
     }
 
     .dropdown-toggle {

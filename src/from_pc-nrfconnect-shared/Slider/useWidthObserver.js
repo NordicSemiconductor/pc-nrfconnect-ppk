@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,48 +34,26 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Group } from '../../../from_pc-nrfconnect-shared';
+import { useEffect, useRef, useState } from 'react';
 
-import { appState } from '../../../reducers/appReducer';
-import { triggerState } from '../../../reducers/triggerReducer';
+/**
+ * Observe and return the width of an element
+ *
+ * @returns {[elementWidth, elementRef]} The width of the element and the ref which has to be
+ * attached to the target element.
+ */
+export default () => {
+    const elementRef = useRef();
+    const [elementWidth, setElementWidth] = useState();
+    const reportWidth = () => setElementWidth(elementRef.current.clientWidth);
 
-import TriggerLength from './TriggerLength';
-import TriggerLevel from './TriggerLevel';
-import TriggerModeGroup from './TriggerModeGroup';
-import TriggerStart from './TriggerStart';
+    useEffect(() => {
+        reportWidth();
 
-import { CONTINUOUS } from './triggerConstants';
+        const widthObserver = new ResizeObserver(reportWidth);
+        widthObserver.observe(elementRef.current);
+        return () => widthObserver.disconnect();
+    }, []);
 
-import './trigger.scss';
-
-const Trigger = () => {
-    const { rttRunning, capabilities } = useSelector(appState);
-    const { externalTrigger, triggerLevel, triggerRunning } = useSelector(
-        triggerState
-    );
-
-    const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
-
-    return (
-        <Group heading="Trigger">
-            <TriggerLength />
-            <TriggerLevel
-                triggerLevel={triggerLevel}
-                externalTrigger={externalTrigger}
-            />
-            <TriggerModeGroup
-                triggerMode={triggerMode}
-                setTriggerMode={setTriggerMode}
-                hasExternal={!!capabilities.ppkTriggerExtToggle}
-                externalTrigger={externalTrigger}
-                rttRunning={rttRunning}
-                triggerRunning={triggerRunning}
-            />
-            <TriggerStart triggerMode={triggerMode} rttRunning={rttRunning} />
-        </Group>
-    );
+    return [elementWidth, elementRef];
 };
-
-export default Trigger;
