@@ -44,7 +44,8 @@
     "react": "16.13.1",
     "react-chartjs-2": "2.9.0",
     "react-dom": "^17.0.1",
-    "react-redux": "7.2.0"
+    "react-redux": "7.2.0",
+    "redux-mock-store": "^1.5.4"
   },
   "dependencies": {},
   "eslintConfig": {

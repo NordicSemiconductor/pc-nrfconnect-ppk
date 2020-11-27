@@ -44,6 +44,7 @@ const initialState = {
         min: (450 * 13) / 1e3,
         max: (4000 * 13) / 1e3,
     },
+    triggerStartIndex: null,
 };
 
 export const EXTERNAL_TRIGGER_TOGGLE = 'EXTERNAL_TRIGGER_TOGGLE';
@@ -53,6 +54,7 @@ export const TRIGGER_TOGGLE = 'TRIGGER_TOGGLE';
 export const TRIGGER_LEVEL_SET = 'TRIGGER_LEVEL_SET';
 export const TRIGGER_LENGTH_SET = 'TRIGGER_LENGTH_SET';
 export const TRIGGER_WINDOW_RANGE = 'TRIGGER_WINDOW_RANGE';
+export const SET_TRIGGER_START = 'SET_TRIGGER_START';
 
 export const triggerLevelSetAction = triggerLevel => ({
     type: TRIGGER_LEVEL_SET,
@@ -67,6 +69,11 @@ export const triggerLengthSetAction = triggerLength => ({
 export const toggleTriggerAction = triggerRunning => ({
     type: TRIGGER_TOGGLE,
     triggerRunning,
+});
+
+export const setTriggerStartAction = triggerStartIndex => ({
+    type: SET_TRIGGER_START,
+    triggerStartIndex,
 });
 
 export const triggerSingleSetAction = () => ({ type: TRIGGER_SINGLE_SET });
@@ -124,7 +131,11 @@ export default (state = initialState, { type, ...action }) => {
                 triggerSingleWaiting,
             };
         }
-
+        case SET_TRIGGER_START:
+            return {
+                ...state,
+                triggerStartIndex: action.triggerStartIndex,
+            };
         case TRIGGER_LEVEL_SET:
         case TRIGGER_LENGTH_SET:
         case TRIGGER_WINDOW_RANGE: {
