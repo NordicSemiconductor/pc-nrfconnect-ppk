@@ -66,9 +66,9 @@ import { options } from '../../globals';
 import './sidepanel.scss';
 
 const ppk1ug =
-    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+    'https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html';
 const ppk2ug =
-    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+    'https://infocenter.nordicsemi.com/topic/ug_ppk2/UG/ppk/PPK_user_guide_Intro.html';
 const PPK2_PURCHASE_URL =
     'https://www.nordicsemi.com/About-us/BuyOnline?search_token=nRF-PPK2';
 
