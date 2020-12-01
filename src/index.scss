@@ -1,0 +1,60 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.core19-app-content {
+    color: $gray-700;
+
+    .core19-main-and-log {
+        background-color: $gray-100;
+        .core19-main-container {
+            margin: 0.5rem;
+        }
+    }
+
+    .core19-side-panel {
+        overflow: overlay;
+    }
+    .core19-side-panel::-webkit-scrollbar-thumb {
+        border-color: $gray-50;
+    }
+}
+
+h2:not(.about-card-title)  {
+    margin-top: 32px;
+    margin-bottom: 16px;
+
+    font-size: 10px;
+    font-weight: normal;
+    letter-spacing: 0.5ex;
+}
+
+.btn-lg, .btn-sm {
+    border-radius: 0;
+}
+
+.input-group-addon {
+    min-width: 60px;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+.form-group:not(:first-child) {
+    .form-check {
+        padding-top: 1.25rem;
+    }
+}
+
+.modal {
+    background-color: #00000080;
+}
+
+// missing from shared
+.toggle {
+    min-height: fit-content;
+    .toggle-handle-secondary-toggled {
+        background: white; // overridden
+    }
+    .toggle-label {
+        font-size: 12px; // overridden
+    }
+}

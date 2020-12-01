@@ -9,7 +9,7 @@ The PPK measures current consumption for a connected nRF5x Development Kit or an
 
 All functionality is described in the [User Guide](https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html).
 
-![screenshot](resources/screenshot.gif)
+![screenshot](resources/screenshot.png)
 
 ## Installation
 

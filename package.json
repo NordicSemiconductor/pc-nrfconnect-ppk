@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfconnect-ppk",
-  "version": "2.3.1",
+  "version": "3.0.0",
   "description": "Power Profiler",
   "displayName": "Power Profiler",
   "repository": {
@@ -10,13 +10,14 @@
   "author": "Nordic Semiconductor ASA",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
-    "nrfconnect": "^3.3.0"
+    "nrfconnect": "^3.6.0"
   },
   "main": "dist/bundle.js",
   "files": [
     "dist/",
     "resources/icon.*",
     "firmware/*",
+    "worker/*",
     "icon.png",
     "LICENSE"
   ],
@@ -25,9 +26,8 @@
     "webpack": "nrfconnect-scripts build-dev",
     "build": "nrfconnect-scripts build-prod",
     "nordic-publish": "nrfconnect-scripts nordic-publish",
-    "lint-init": "nrfconnect-scripts lint-init",
-    "lint": "nrfconnect-scripts lint lib index.jsx",
-    "lintfix": "nrfconnect-scripts lint --fix lib index.jsx",
+    "lint": "nrfconnect-scripts lint src",
+    "lintfix": "nrfconnect-scripts lint --fix src",
     "test": "nrfconnect-scripts test",
     "test-watch": "nrfconnect-scripts test --watch",
     "clean": "npm run clean-dist && npm run clean-modules",
@@ -35,12 +35,17 @@
     "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
   },
   "devDependencies": {
-    "chart.js": "2.8.0",
-    "mathjs": "6.0.2",
-    "mousetrap": "1.6.3",
-    "pc-nrfconnect-devdep": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-devdep.git#semver:3.3.0",
-    "react-chartjs-2": "2.7.6",
-    "react-rangeslider": "2.2.0"
+    "bson": "4.0.4",
+    "chart.js": "2.9.3",
+    "electron-is-dev": "1.2.0",
+    "electron-store": "5.1.1",
+    "mathjs": "6.6.1",
+    "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v4.9.4",
+    "react": "16.13.1",
+    "react-chartjs-2": "2.9.0",
+    "react-redux": "7.2.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "eslintConfig": { "extends" : "./node_modules/pc-nrfconnect-shared/config/eslintrc.json" },
+  "prettier": "./node_modules/pc-nrfconnect-shared/config/prettier.config.js"
 }
