@@ -1,0 +1,47 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.accordion {
+    .collapse-container.disabled {
+        opacity: 0.3;
+    }
+
+    .collapse-toggle {
+        -webkit-appearance: none;
+        border: none;
+        background: none;
+        outline: none;
+        padding: 0;
+        color: $gray-700;
+
+        width: 100%;
+        text-align: left;
+
+        h2 {
+            line-height: 13px;
+            margin-bottom: 0;
+            transition: margin-bottom 0.2s ease-in-out;
+            position: relative;
+            &::after {
+                content: "\f140";
+                font-family: "Material Design Icons";
+                font-size: 15px;
+                display: inline-block;
+                vertical-align: middle;
+                transition: transform 0.2s ease-in-out;
+                position: absolute;
+                right: 0;
+                transform-origin: 8px 6px;
+                margin-right: -5px;
+            }
+        }
+    }
+
+    .collapse-toggle.show {
+        h2 {
+            margin-bottom: 16px;
+        }
+        h2::after {
+            transform: rotate(-180deg);
+        }
+    }
+}
