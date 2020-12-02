@@ -73,7 +73,7 @@ export default () => {
                     <Col>
                         <Card className="h-100">
                             <Card.Body className="pb-0">
-                                <h2>SAVE SESSION DATA</h2>
+                                <h2>Save session data</h2>
                                 <p>
                                     Great if you want to view the data again in
                                     this application. Not usable by other
@@ -98,7 +98,7 @@ export default () => {
                     <Col>
                         <Card className="h-100">
                             <Card.Body className="pb-0">
-                                <h2>EXPORT SELECTED RANGE</h2>
+                                <h2>Export selected range</h2>
                                 <p>
                                     Great if you want to manipulate your data in
                                     other software. Can not be opened by this

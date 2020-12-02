@@ -1,0 +1,26 @@
+@import "./variables";
+
+.slider .handle {
+    position: absolute;
+    border-style: solid;
+    border-radius: 50%;
+    outline: 0;
+
+    border-color: $color-selected;
+    border-width: $handle-radius;
+    top: $handle-radius-selected - $handle-radius;
+    margin-left: -$handle-radius;
+
+    transition-property: border-color, border-width, top, margin-left;
+    transition-duration: 100ms;
+}
+
+.slider:not(.disabled) {
+    .handle:hover, .handle.dragged {
+        border-width: $handle-radius-selected;
+        top: 0;
+        margin-left: -$handle-radius-selected;
+
+        z-index: 1;
+    }
+}

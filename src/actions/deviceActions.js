@@ -57,71 +57,82 @@ import {
 } from '../reducers/switchingPointsReducer';
 import {
     toggleTriggerAction,
-    clearSingleTriggingAction,
+    clearSingleTriggerWaitingAction,
     triggerLevelSetAction,
     triggerSingleSetAction,
     externalTriggerToggledAction,
+    triggerLengthSetAction,
+    triggerWindowRangeAction,
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
 import {
     chartWindowAction,
     animationAction,
-    chartCursorAction,
     updateHasDigitalChannels,
-    goLive,
+    resetCursorAndChart,
 } from '../reducers/chartReducer';
-import { options, bufferLengthInSeconds, updateTitle } from '../globals';
+import {
+    options,
+    bufferLengthInSeconds,
+    updateTitle,
+    indexToTimestamp,
+} from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
+import { isScopePane } from '../utils/panes';
 
 let device = null;
 let updateRequestInterval;
 
 const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
-const setupOptions = () => dispatch => {
-    options.samplingTime = device.adcSamplingTimeUs;
-    options.samplesPerSecond = 1e6 / options.samplingTime;
-    const bufferLength = Math.trunc(
-        options.samplesPerSecond * bufferLengthInSeconds
-    );
-    if (device.capabilities.ppkSetPowerMode) {
-        if (!options.bits || options.bits.length !== bufferLength) {
-            options.bits = new Uint8Array(bufferLength);
-        }
-        options.bits.fill(0);
-        options.triggerMarkers = null;
+export const setupOptions = () => (dispatch, getState) => {
+    if (!device) return;
+    let d = 300; // buffer length in seconds for scope
+    const { currentPane } = getState().appLayout;
+    if (isScopePane(currentPane)) {
+        // in scope
+        options.samplingTime = device.adcSamplingTimeUs;
+        options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
     } else {
-        options.bits = null;
-        options.triggerMarkers = [];
+        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
+        d = durationSeconds;
+        options.samplingTime = 1e6 / sampleFreq;
+        options.samplesPerSecond = sampleFreq;
     }
-    if (options.data.length !== bufferLength) {
-        options.data = new Float32Array(bufferLength);
+    const bufferLength = Math.trunc(d * options.samplesPerSecond);
+    try {
+        if (device.capabilities.ppkSetPowerMode) {
+            if (!options.bits || options.bits.length !== bufferLength) {
+                options.bits = new Uint8Array(bufferLength);
+            }
+            options.bits.fill(0);
+        } else {
+            options.bits = null;
+        }
+        if (options.data.length !== bufferLength) {
+            options.data = new Float32Array(bufferLength);
+        }
+        options.data.fill(NaN);
+        options.index = 0;
+        options.timestamp = 0;
+    } catch (err) {
+        logger.error(err);
     }
-    options.data.fill(NaN);
-    options.index = 0;
-    options.timestamp = 0;
     dispatch(updateHasDigitalChannels());
+    dispatch(animationAction());
 };
 
 /* Start reading current measurements */
 export function samplingStart() {
-    return async (dispatch, getState) => {
+    return async dispatch => {
         options.data.fill(NaN);
         if (options.bits) {
             options.bits.fill(0);
         }
         options.index = 0;
         options.timestamp = undefined;
-        if (options.triggerMarkers) {
-            options.triggerMarkers = [];
-        }
-        dispatch(
-            chartWindowAction(null, null, getState().app.chart.windowDuration),
-            null,
-            null
-        );
-        dispatch(chartCursorAction(null, null));
+        dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
         await device.ppkAverageStart();
         logger.info('Sampling started');
@@ -130,6 +141,7 @@ export function samplingStart() {
 
 export function samplingStop() {
     return async dispatch => {
+        if (!device) return;
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         logger.info('Sampling stopped');
@@ -138,13 +150,11 @@ export function samplingStop() {
 
 export function triggerStop() {
     return async dispatch => {
-        if (!device.capabilities.ppkTriggerStop) {
-            return;
-        }
+        if (!device) return;
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
         dispatch(toggleTriggerAction(false));
-        dispatch(clearSingleTriggingAction());
+        dispatch(clearSingleTriggerWaitingAction());
     };
 }
 
@@ -195,7 +205,7 @@ const initGains = () => async dispatch => {
     // if any value is ug is outside of [0.9..1.1] range:
     if (ug.reduce((p, c) => Math.abs(c - 1) > 0.1 || p, false)) {
         logger.info(
-            'Found out of range user gain, setting all gains back to 1.0'
+            'Found out-of-range user gain, setting all gains back to 1.0'
         );
         ug.splice(0, 5, 1, 1, 1, 1, 1);
         await device.ppkSetUserGains(0, ug[0]);
@@ -213,67 +223,88 @@ export function open(deviceInfo) {
             await dispatch(close());
         }
 
-        const onSample = ({
-            value,
-            bits,
-            timestamp,
-            trigger = false,
-            triggerMarker = false,
-        }) => {
+        let isTrigger = 0;
+        let prevValue = 0;
+        let nbSamples = 0;
+        let nbSamplesTotal = 0;
+        const onSample = ({ value, bits, timestamp }) => {
+            // PPK1 always sets timestamp, while PPK2 never does
             if (options.timestamp === undefined) {
                 options.timestamp = 0;
             }
-            const { samplingRunning } = getState().app.app;
-            const { windowBegin, windowEnd } = getState().app.chart;
-            if (!samplingRunning && !trigger) {
-                // skip incoming data after stopped
-                return;
+
+            const {
+                app: { samplingRunning },
+                trigger: { triggerSingleWaiting, triggerLevel, triggerLength },
+                chart: { windowBegin, windowEnd },
+                dataLogger: { maxSampleFreq, sampleFreq },
+            } = getState().app;
+
+            let zeroCappedValue = zeroCap(value);
+
+            if (samplingRunning) {
+                nbSamples += 1;
+                nbSamplesTotal += 1;
+                const f = Math.min(nbSamplesTotal, maxSampleFreq / sampleFreq);
+                zeroCappedValue =
+                    prevValue === undefined
+                        ? zeroCappedValue
+                        : prevValue + (zeroCappedValue - prevValue) / f;
+                if (nbSamples < maxSampleFreq / sampleFreq) {
+                    prevValue = zeroCappedValue;
+                    return;
+                }
+                nbSamples = 0;
             }
 
-            if (trigger && getState().app.trigger.triggerSingleWaiting) {
-                logger.info('Trigger received, stopped waiting');
-                dispatch(clearSingleTriggingAction());
-            }
-
-            const zeroCappedValue = zeroCap(value);
-
-            if (timestamp) {
-                if (triggerMarker) {
-                    options.triggerMarkers.push(
-                        timestamp - options.samplingTime
-                    );
-                }
-
-                let ts = options.timestamp;
-                while (ts > timestamp - options.samplingTime) {
-                    ts -= options.samplingTime;
-                    options.data[options.index] = NaN;
-                    options.index -= 1;
-                    if (options.index === -1) {
-                        options.index = options.data.length - 1;
-                    }
-                }
-                ts = options.timestamp;
-                while (ts < timestamp - options.samplingTime) {
-                    ts += options.samplingTime;
-                    options.data[options.index] = NaN;
-                    options.index += 1;
-                    if (options.index === options.data.length) {
-                        options.index = 0;
-                    }
-                }
-                options.data[options.index] = zeroCappedValue;
-                options.index += 1;
-                options.timestamp = timestamp;
-            } else {
-                options.data[options.index] = zeroCappedValue;
+            options.data[options.index] = zeroCappedValue;
+            if (options.bits) {
                 options.bits[options.index] = bits;
-                options.index += 1;
-                options.timestamp += options.samplingTime;
             }
+            options.index += 1;
+            options.timestamp += options.samplingTime;
 
             if (options.index === options.data.length) {
                 options.index = 0;
+            }
+
+            if (!samplingRunning) {
+                const numberOfSamplesIn5ms = 500;
+                const { preSamplingOn, postSamplingOn } = getState().app.chart;
+                let wnd = Math.floor(
+                    (triggerLength * 1000) / options.samplingTime
+                );
+                if (postSamplingOn) wnd += numberOfSamplesIn5ms;
+                if (!isTrigger) {
+                    if (
+                        timestamp !== undefined ||
+                        (value >= triggerLevel && prevValue < triggerLevel)
+                    ) {
+                        isTrigger = 1;
+                        if (triggerSingleWaiting) {
+                            logger.info('Trigger received, stopped waiting');
+                            dispatch(clearSingleTriggerWaitingAction());
+                            if (timestamp === undefined) {
+                                device.ppkTriggerStop();
+                            }
+                        }
+                    }
+                } else {
+                    isTrigger += 1;
+                }
+                if (isTrigger >= wnd) {
+                    isTrigger = 0;
+                    const startIndex = preSamplingOn
+                        ? options.index - numberOfSamplesIn5ms
+                        : options.index;
+
+                    const triggerBeginIndex =
+                        (startIndex - wnd + options.data.length) %
+                        options.data.length;
+                    const from = indexToTimestamp(triggerBeginIndex);
+                    const to = options.timestamp;
+                    dispatch(chartWindowAction(from, to, to - from));
+                }
             }
 
             if (
@@ -283,6 +314,7 @@ export function open(deviceInfo) {
                 // stop average when reaches end of buffer (i.e. would overwrite chart data)
                 dispatch(samplingStop());
             }
+            prevValue = zeroCappedValue;
         };
 
         try {
@@ -293,11 +325,9 @@ export function open(deviceInfo) {
 
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
-            if (device.capabilities.ppkTriggerSet) {
-                dispatch(triggerLevelSetAction(1000));
-            } else {
-                dispatch(triggerLevelSetAction(null));
-            }
+            dispatch(triggerLevelSetAction(1000));
+            dispatch(triggerWindowRangeAction(device.triggerWindowRange));
+            await dispatch(triggerLengthUpdate(10));
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
                 updateRegulatorAction({
@@ -343,8 +373,13 @@ export function open(deviceInfo) {
         clearInterval(updateRequestInterval);
         let renderIndex;
         updateRequestInterval = setInterval(() => {
-            if (renderIndex !== options.index) {
-                requestAnimationFrame(() => dispatch(animationAction()));
+            if (
+                renderIndex !== options.index &&
+                getState().app.app.samplingRunning
+            ) {
+                requestAnimationFrame(() => {
+                    dispatch(animationAction());
+                });
                 renderIndex = options.index;
             }
         }, 30);
@@ -377,45 +412,38 @@ export const updateGains = index => async (_, getState) => {
  * @returns {null} Nothing
  */
 export function triggerLengthUpdate(value) {
-    return async () => {
-        const triggerLengthMicroSec = value * 1000;
-        const triggerLength = Math.floor(
-            triggerLengthMicroSec / options.samplingTime
-        );
+    return async dispatch => {
+        dispatch(triggerLengthSetAction(value));
         // If division returns a decimal, round downward to nearest integer
-        await device.ppkTriggerWindowSet(triggerLength);
+        if (device.capabilities.ppkTriggerWindowSet) {
+            await device.ppkTriggerWindowSet(value);
+        }
         logger.info(`Trigger length updated to ${value} ms`);
     };
 }
 
 export function triggerStart() {
     return async (dispatch, getState) => {
-        dispatch(goLive());
+        dispatch(resetCursorAndChart());
         dispatch(toggleTriggerAction(true));
-        dispatch(clearSingleTriggingAction());
+        dispatch(clearSingleTriggerWaitingAction());
 
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
-        const high = (triggerLevel >> 16) & 0xff;
-        const mid = (triggerLevel >> 8) & 0xff;
-        const low = triggerLevel & 0xff;
 
-        await device.ppkTriggerSet(high, mid, low);
-        dispatch(toggleTriggerAction(true));
+        await device.ppkTriggerSet(triggerLevel);
     };
 }
 
 export function triggerSingleSet() {
     return async (dispatch, getState) => {
-        dispatch(goLive());
+        dispatch(resetCursorAndChart());
+        dispatch(triggerSingleSetAction());
+
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
-        const high = (triggerLevel >> 16) & 0xff;
-        const mid = (triggerLevel >> 8) & 0xff;
-        const low = triggerLevel & 0xff;
 
-        await device.ppkTriggerSingleSet(high, mid, low);
-        dispatch(triggerSingleSetAction());
+        await device.ppkTriggerSingleSet(triggerLevel);
     };
 }
 

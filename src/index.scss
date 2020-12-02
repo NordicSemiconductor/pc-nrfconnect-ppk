@@ -1,32 +1,5 @@
 @import "~pc-nrfconnect-shared/src/variables";
 
-.core19-app-content {
-    color: $gray-700;
-
-    .core19-main-and-log {
-        background-color: $gray-100;
-        .core19-main-container {
-            margin: 0.5rem;
-        }
-    }
-
-    .core19-side-panel {
-        overflow: overlay;
-    }
-    .core19-side-panel::-webkit-scrollbar-thumb {
-        border-color: $gray-50;
-    }
-}
-
-h2:not(.about-card-title)  {
-    margin-top: 32px;
-    margin-bottom: 16px;
-
-    font-size: 10px;
-    font-weight: normal;
-    letter-spacing: 0.5ex;
-}
-
 .btn-lg, .btn-sm {
     border-radius: 0;
 }

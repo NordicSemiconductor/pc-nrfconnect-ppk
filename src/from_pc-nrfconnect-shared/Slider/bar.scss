@@ -1,0 +1,18 @@
+@import "./variables";
+
+.slider .bar {
+    position: absolute;
+    top: $handle-radius-selected - 0.5 * $bar-height;
+    height: $bar-height;
+    margin: 0 (-$handle-radius);
+
+    &.background {
+        left: 0;
+        right: 0;
+        background-color: $color-unselected;
+    }
+
+    &.foreground {
+        background-color: $color-selected;
+    }
+}

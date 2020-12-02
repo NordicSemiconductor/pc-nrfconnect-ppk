@@ -39,20 +39,30 @@ const initialState = {
     triggerSingleWaiting: false,
     triggerRunning: false,
     externalTrigger: false,
+    triggerLength: 0,
+    triggerWindowRange: {
+        min: (450 * 13) / 1e3,
+        max: (4000 * 13) / 1e3,
+    },
 };
 
-const EXTERNAL_TRIGGER_TOGGLE = 'EXTERNAL_TRIGGER_TOGGLE';
-const TRIGGER_SINGLE_CLEAR = 'TRIGGER_SINGLE_CLEAR';
-const TRIGGER_SINGLE_SET = 'TRIGGER_SINGLE_SET';
-const TRIGGER_TOGGLE = 'TRIGGER_TOGGLE';
-const TRIGGER_VALUE_SET = 'TRIGGER_VALUE_SET';
+export const EXTERNAL_TRIGGER_TOGGLE = 'EXTERNAL_TRIGGER_TOGGLE';
+export const TRIGGER_SINGLE_CLEAR = 'TRIGGER_SINGLE_CLEAR';
+export const TRIGGER_SINGLE_SET = 'TRIGGER_SINGLE_SET';
+export const TRIGGER_TOGGLE = 'TRIGGER_TOGGLE';
+export const TRIGGER_LEVEL_SET = 'TRIGGER_LEVEL_SET';
+export const TRIGGER_LENGTH_SET = 'TRIGGER_LENGTH_SET';
+export const TRIGGER_WINDOW_RANGE = 'TRIGGER_WINDOW_RANGE';
 
-export const triggerLevelSetAction = triggerLevel => {
-    return {
-        type: TRIGGER_VALUE_SET,
-        triggerLevel,
-    };
-};
+export const triggerLevelSetAction = triggerLevel => ({
+    type: TRIGGER_LEVEL_SET,
+    triggerLevel,
+});
+
+export const triggerLengthSetAction = triggerLength => ({
+    type: TRIGGER_LENGTH_SET,
+    triggerLength,
+});
 
 export const toggleTriggerAction = triggerRunning => ({
     type: TRIGGER_TOGGLE,
@@ -60,9 +70,16 @@ export const toggleTriggerAction = triggerRunning => ({
 });
 
 export const triggerSingleSetAction = () => ({ type: TRIGGER_SINGLE_SET });
-export const clearSingleTriggingAction = () => ({ type: TRIGGER_SINGLE_CLEAR });
+export const clearSingleTriggerWaitingAction = () => ({
+    type: TRIGGER_SINGLE_CLEAR,
+});
 export const externalTriggerToggledAction = () => ({
     type: EXTERNAL_TRIGGER_TOGGLE,
+});
+
+export const triggerWindowRangeAction = ({ min, max }) => ({
+    type: TRIGGER_WINDOW_RANGE,
+    triggerWindowRange: { min, max },
 });
 
 export default (state = initialState, { type, ...action }) => {
@@ -108,9 +125,10 @@ export default (state = initialState, { type, ...action }) => {
             };
         }
 
-        case TRIGGER_VALUE_SET: {
-            const { triggerLevel } = action;
-            return { ...state, triggerLevel };
+        case TRIGGER_LEVEL_SET:
+        case TRIGGER_LENGTH_SET:
+        case TRIGGER_WINDOW_RANGE: {
+            return { ...state, ...action };
         }
         default:
     }

@@ -35,141 +35,77 @@
  */
 
 import React from 'react';
-import { func } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import Button from 'react-bootstrap/Button';
+import { SidePanel, useHotKey } from '../../from_pc-nrfconnect-shared';
 
-import { openUrl } from 'pc-nrfconnect-shared/src/open';
-
-import Buffer from './Buffer';
+import PowerMode from './PowerMode';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
-import Trigger from './Trigger';
+import Trigger from './Trigger/Trigger';
 import VoltageRegulator from './VoltageRegulator';
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 import Gains from './Gains';
 import SpikeFilter from './SpikeFilter';
-import WithHotkey from '../../utils/WithHotKey';
 
 import {
-    appState,
-    showExportDialog,
     toggleAdvancedModeAction,
-    toggleSaveChoiceDialog,
-    toggleSaveAction,
+    toggleSaveFunctionality,
+    advancedMode as advancedModeSelector,
+    deviceOpen as deviceOpenSelector,
 } from '../../reducers/appReducer';
-import { load } from '../../actions/fileActions';
 
 import { options } from '../../globals';
+import Instructions from './Instructions';
+import { Load, Save } from './LoadSave';
+import { isScopePane, isDataLoggerPane } from '../../utils/panes';
 
 import './sidepanel.scss';
 
-const ppk1ug =
-    'https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html';
-const ppk2ug =
-    'https://infocenter.nordicsemi.com/topic/ug_ppk2/UG/ppk/PPK_user_guide_Intro.html';
-const PPK2_PURCHASE_URL =
-    'https://www.nordicsemi.com/About-us/BuyOnline?search_token=nRF-PPK2';
-
-const SidePanel = ({ bindHotkey }) => {
+export default () => {
     const dispatch = useDispatch();
-    bindHotkey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
-    bindHotkey('alt+ctrl+shift+l', () => dispatch(toggleSaveAction()));
+    useHotKey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+    useHotKey('alt+ctrl+shift+l', () => dispatch(toggleSaveFunctionality()));
 
-    const {
-        capabilities,
-        samplingRunning,
-        advancedMode,
-        enableSave,
-    } = useSelector(appState);
+    const advancedMode = useSelector(advancedModeSelector);
+    const deviceOpen = useSelector(deviceOpenSelector);
 
-    const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
-    const saveExportTitle = enableSave
-        ? 'Stop sampling to save or export'
-        : 'Stop sampling to export';
-    const saveExportAction = enableSave
-        ? toggleSaveChoiceDialog
-        : showExportDialog;
+    const scopePane = isScopePane();
+    const dataLoggerPane = isDataLoggerPane();
 
-    const deviceOpen = Object.keys(capabilities).length > 0;
+    if (!deviceOpen) {
+        return (
+            <SidePanel className="side-panel">
+                <Load />
+                <Instructions />
+            </SidePanel>
+        );
+    }
+
+    if (!scopePane && !dataLoggerPane) {
+        return null;
+    }
 
     return (
-        <div className="sidepanel d-flex flex-column">
-            {deviceOpen || (
-                <>
-                    {enableSave && (
-                        <Button
-                            className="w-100"
-                            variant="set"
-                            onClick={() => dispatch(load())}
-                        >
-                            Load
-                        </Button>
-                    )}
-                    <h2>INSTRUCTIONS</h2>
-                    <p>
-                        The Power Profiler Kit (PPK) is an affordable, flexible
-                        tool that measures real-time power consumption of your
-                        designs.
-                    </p>
-                    <p>
-                        Select a device to sample real-time measurements or load
-                        an existing data set.
-                    </p>
-                    <p>
-                        <i>PPK</i> or <i>PPK2</i> hardware is required to sample
-                        real-time measurements.
-                    </p>
-                    <Button variant="link" onClick={() => openUrl(ppk1ug)}>
-                        PPK User Guide
-                    </Button>
-                    <Button variant="link" onClick={() => openUrl(ppk2ug)}>
-                        PPK2 User Guide
-                    </Button>
-
-                    <Button
-                        variant="set"
-                        className="mt-3"
-                        onClick={() => openUrl(PPK2_PURCHASE_URL)}
-                    >
-                        Get PPK2 device
-                    </Button>
-                </>
-            )}
-            {deviceOpen && (
-                <>
-                    <StartStop />
-                    <Buffer />
-                    <Trigger eventKey="0" />
-                    <VoltageRegulator eventKey="1" />
-                </>
-            )}
-            <DisplayOptions />
+        <SidePanel className="side-panel">
+            <PowerMode />
+            {scopePane && <Trigger />}
+            {dataLoggerPane && <StartStop />}
+            <VoltageRegulator />
             {options.timestamp === null || (
-                <Button
-                    className="w-100 mt-3"
-                    title={samplingRunning && saveExportTitle}
-                    variant="set"
-                    disabled={samplingRunning}
-                    onClick={() => dispatch(saveExportAction())}
-                >
-                    {saveExportLabel}
-                </Button>
+                <>
+                    <DisplayOptions />
+                    <Save />
+                </>
             )}
             {deviceOpen && advancedMode && (
                 <>
-                    <SwitchPoints eventKey="2" />
-                    <ResistorCalibration eventKey="3" />
-                    <Gains eventKey="4" />
-                    <SpikeFilter eventKey="5" />
+                    <SwitchPoints />
+                    <ResistorCalibration />
+                    <Gains />
+                    <SpikeFilter />
                 </>
             )}
-        </div>
+        </SidePanel>
     );
 };
-
-SidePanel.propTypes = {
-    bindHotkey: func.isRequired,
-};
-export default WithHotkey(SidePanel);

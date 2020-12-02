@@ -1,0 +1,22 @@
+@import "./variables";
+
+.slider .ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-right: -$handle-radius;
+
+    .tick {
+        border-style: solid;
+        border-radius: 50%;
+        outline: 0;
+
+        border-color: $color-unselected;
+        border-width: $tick-radius;
+        margin-top: $handle-radius-selected - $tick-radius;
+        margin-left: -$handle-radius;
+
+        &.selected {
+            border-color: $color-selected;
+        }
+    }
+}

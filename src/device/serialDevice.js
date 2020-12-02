@@ -69,12 +69,17 @@ class SerialDevice extends Device {
 
     vddRange = { min: 800, max: 5000 };
 
+    triggerWindowRange = { min: 1, max: 100 };
+
     isRunningInitially = false;
 
     constructor(deviceInfo) {
         super();
 
+        this.capabilities.maxContinuousSamplingTimeUs = this.adcSamplingTimeUs;
+        this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
         this.capabilities.digitalChannels = true;
+        this.capabilities.prePostTriggering = true;
         this.spikeFilter = {
             alpha: 0.18,
             alpha5: 0.06,
@@ -217,11 +222,7 @@ class SerialDevice extends Device {
             console.log(err.message, 'original value', adcValue);
             // to keep timestamp consistent, undefined must be emitted
             this.onSampleCallback({});
-            this.emit(
-                'warning',
-                'Average data error2, restart application',
-                err
-            );
+            this.emit('warning', 'Data error2, restart application', err);
         }
     }
 
@@ -292,6 +293,18 @@ class SerialDevice extends Device {
             ...this.spikeFilter,
             ...spikeFilter,
         };
+    }
+
+    ppkTriggerSet() {
+        return super.ppkAverageStart();
+    }
+
+    ppkTriggerStop() {
+        return super.ppkAverageStop();
+    }
+
+    ppkTriggerSingleSet() {
+        return super.ppkAverageStart();
     }
 }
 

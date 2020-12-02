@@ -60,8 +60,9 @@ const initialState = {
     ),
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
-    triggerHandleVisible: persistentStore.get('triggerHandleVisible', true),
     yAxisLock: false,
+    preSamplingOn: false,
+    postSamplingOn: false,
 };
 
 const ANIMATION = 'ANIMATION';
@@ -71,9 +72,10 @@ const LOAD_CHART_STATE = 'LOAD_CHART_STATE';
 const DIGITAL_CHANNELS = 'DIGITAL_CHANNELS';
 const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
 const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
-const TOGGLE_TRIGGER_HANDLE = 'TOGGLE_TRIGGER_HANDLE';
 const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
+const TOGGLE_PRE_SAMPLING = 'TOGGLE_PRE_SAMPLING';
+const TOGGLE_POST_SAMPLING = 'TOGGLE_POST_SAMPLING';
 
 const MIN_WINDOW_DURATION = 500;
 const MAX_WINDOW_DURATION = 120000000;
@@ -144,7 +146,7 @@ export const chartWindowAction = (
 export const chartReset = windowDuration =>
     chartWindowAction(null, null, windowDuration);
 export const resetCursor = () => chartCursorAction(null, null);
-export const goLive = () => (dispatch, getState) => {
+export const resetCursorAndChart = () => (dispatch, getState) => {
     dispatch(chartReset(getState().app.chart.windowDuration));
     dispatch(resetCursor());
 };
@@ -169,11 +171,16 @@ export const setDigitalChannels = digitalChannels => ({
 
 export const toggleDigitalChannels = () => ({ type: TOGGLE_DIGITAL_CHANNELS });
 export const toggleTimestamps = () => ({ type: TOGGLE_TIMESTAMPS });
-export const toggleTriggerHandle = () => ({ type: TOGGLE_TRIGGER_HANDLE });
 export const toggleYAxisLock = (yMin, yMax) => ({
     type: TOGGLE_Y_AXIS_LOCK,
     yMin,
     yMax,
+});
+export const togglePreSampling = () => ({
+    type: TOGGLE_PRE_SAMPLING,
+});
+export const togglePostSampling = () => ({
+    type: TOGGLE_POST_SAMPLING,
 });
 
 function calcBuffer(windowDuration, windowEnd) {
@@ -255,21 +262,21 @@ export default (state = initialState, { type, ...action }) => {
                 timestampsVisible: !state.timestampsVisible,
             };
         }
-        case TOGGLE_TRIGGER_HANDLE: {
-            persistentStore.set(
-                'triggerHandleVisible',
-                !state.triggerHandleVisible
-            );
-            return {
-                ...state,
-                triggerHandleVisible: !state.triggerHandleVisible,
-            };
-        }
         case TOGGLE_Y_AXIS_LOCK: {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { yMin, yMax, ...s } = state;
             return { ...s, ...action, yAxisLock: !state.yAxisLock };
         }
+        case TOGGLE_PRE_SAMPLING:
+            return {
+                ...state,
+                preSamplingOn: !state.preSamplingOn,
+            };
+        case TOGGLE_POST_SAMPLING:
+            return {
+                ...state,
+                postSamplingOn: !state.postSamplingOn,
+            };
         case UPDATE_HAS_DIGITAL_CHANNELS:
             return { ...state, ...action };
         default:

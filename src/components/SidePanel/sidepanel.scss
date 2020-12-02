@@ -1,81 +1,35 @@
-@import "~pc-nrfconnect-shared/src/variables";
+@import '~pc-nrfconnect-shared/src/variables';
 
-.core19-app-content .core19-side-panel {
-    background-color: $gray-50;
-}
-
-.sidepanel {
-    font-size: 12px;
-    padding: 8px 0;
-    min-height: 100%;
-
-    .form-label, .form-group {
-        margin-bottom: 0ex;
-    }
-
+.side-panel {
     .form-label {
+        margin-bottom: 0ex;
         display: flex;
         align-items: baseline;
     }
 
-    .number-inline-input {
-        font-size: 14px;
-
-        &:focus { background-color: $white; }
-    }
-
-    .disabled {
-        pointer-events: none;
-        opacity: 0.6;
-    }
-
-    .input-group.text {
-        border-radius: 0;
-    }
-
-    .buffer {
-        .buffer-total {
-            background-color: $gray-100;
-            padding: 2px;
-            .buffer-used {
-                background-color: $gray-700;
-                height: 24px;
-            }
-        }
-        .label {
-            font-size: 10px;
-        }
-    }
-
-    .digital-channels .btn {
-        height: 1.6rem;
-        margin: 1px;
-        line-height: 1rem;
-    }
-
-    .btn {
-        font-size: 12px;
+    .btn.active-anim {
         overflow: hidden;
         position: relative;
-    }
-    .btn-link {
-        width: fit-content;
-        padding-left: 0;
-    }
-    .btn.active-anim::after {
-        content: '';
-        background: $gray-700;
-        height: 2px;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        animation: snake 4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+
+        &::after {
+            content: '';
+            background: $gray-700;
+            height: 2px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            animation: snake 4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
     }
 
     @keyframes snake {
-        0% { transform: translate(-100%); }
-        100% { transform: translate(100%); }
+        0% {
+            transform: translate(-100%);
+        }
+        100% {
+            transform: translate(100%);
+        }
     }
 
     .btn-set {
@@ -89,7 +43,8 @@
         border-color: $gray-700;
     }
 
-    .power-mode, .trigger-mode {
+    .power-mode,
+    .trigger-mode {
         padding: 4px;
         background-color: $gray-700;
         button {
@@ -115,37 +70,7 @@
         }
     }
 
-    .trigger-collapse .slider {
-        margin-bottom: 0.5rem;
-    }
-
-    .dropdown {
-        .dropdown-toggle {
-            padding: 0 0.25rem 2px;
-            color: inherit;
-            &::after {
-                content: "\f140";
-                font-family: "Material Design Icons";
-                font-size: 15px;
-                display: initial;
-                margin-left: unset;
-                vertical-align: unset;
-                border: none;
-            }
-            &:focus {
-                outline: 0;
-                box-shadow: none;
-            }
-        }
-        .dropdown-menu {
-            font-size: 12px;
-            padding: 0;
-            border: none;
-            transform: none !important;
-            min-width: initial;
-        }
-        .dropdown-item {
-            padding: 0.25rem;
-        }
+    .dropdown-toggle {
+        font-size: inherit;
     }
 }

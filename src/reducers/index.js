@@ -44,6 +44,7 @@ import voltageRegulator from './voltageRegulatorReducer';
 import resistorCalibration from './resistorCalibrationReducer';
 import gains from './gainsReducer';
 import spikeFilter from './spikeFilterReducer';
+import dataLogger from './dataLoggerReducer';
 
 export default combineReducers({
     app,
@@ -54,4 +55,5 @@ export default combineReducers({
     resistorCalibration,
     gains,
     spikeFilter,
+    dataLogger,
 });

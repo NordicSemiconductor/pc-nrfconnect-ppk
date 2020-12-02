@@ -113,7 +113,7 @@ const plugin = {
             ctx.closePath();
             ctx.stroke();
 
-            if (chartInstance.id === 0) {
+            if (chartInstance.height > 32) {
                 const [time, subsecond] = formatX(
                     xScale.getValueForPixel(left + layerX),
                     0,
@@ -143,7 +143,7 @@ const plugin = {
 
         canvas.style.cursor = 'pointer';
 
-        if (yScale && plugin.moveEvent.id === 0) {
+        if (yScale) {
             ctx.save();
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;

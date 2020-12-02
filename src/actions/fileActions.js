@@ -152,3 +152,33 @@ export const load = () => async dispatch => {
     dispatch(setChartState(chartState));
     logger.info(`State restored from: ${filename}`);
 };
+
+export const screenshot = () => async () => {
+    const win = remote.getCurrentWindow();
+    const mainElement = document.querySelector('.core19-main-container');
+    const { x, y, width, height } = mainElement.getBoundingClientRect();
+    const chartTop = mainElement.querySelector('.chart-top');
+    const { marginTop, height: h } = getComputedStyle(chartTop);
+    const chopOff = parseInt(marginTop, 10) + parseInt(h, 10);
+    const image = await win.capturePage({
+        x,
+        y: y + chopOff,
+        width,
+        height: height - chopOff,
+    });
+
+    const timestamp = new Date()
+        .toISOString()
+        .replace(/[-:.]/g, '')
+        .slice(0, 15);
+    const { filePath: filename } = await dialog.showSaveDialog({
+        defaultPath: join(lastSaveDir(), `ppk-${timestamp}.png`),
+    });
+    if (!filename) {
+        return;
+    }
+
+    setLastSaveDir(dirname(filename));
+
+    fs.writeFileSync(filename, image.toPNG());
+};

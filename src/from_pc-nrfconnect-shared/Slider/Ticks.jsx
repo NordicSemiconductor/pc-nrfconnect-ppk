@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,28 +35,38 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { chartState } from '../../reducers/chartReducer';
-import { bufferLengthInSeconds } from '../../globals';
+import { exact, number } from 'prop-types';
+import lodashRange from 'lodash.range';
+import classNames from '../utils/classNames';
 
-const totalInUs = bufferLengthInSeconds * 1000000;
+import rangeShape from './rangeShape';
 
-export default () => {
-    const { bufferRemaining } = useSelector(chartState);
-    const percentage = 100 - (100 * bufferRemaining) / totalInUs;
+import './ticks.scss';
+
+const Ticks = ({ valueRange, range: { min, max, decimals = 0 } }) => {
+    const step = 0.1 ** decimals;
+
+    const isSelected = value =>
+        value >= valueRange.min && value <= valueRange.max;
 
     return (
-        <div className="buffer">
-            <h2>CAPTURE STATUS</h2>
-            <div className="buffer-total">
+        <div className="ticks">
+            {lodashRange(min, max + step, step).map(value => (
                 <div
-                    className="buffer-used progress-bar-striped"
-                    style={{ width: `${percentage}%` }}
+                    key={String(value)}
+                    className={classNames(
+                        'tick',
+                        isSelected(value) && 'selected'
+                    )}
                 />
-            </div>
-            <div className="label mt-2">
-                Buffer {`${percentage.toFixed()}%`} full
-            </div>
+            ))}
         </div>
     );
 };
+Ticks.propTypes = {
+    range: rangeShape.isRequired,
+    valueRange: exact({ min: number.isRequired, max: number.isRequired })
+        .isRequired,
+};
+
+export default Ticks;

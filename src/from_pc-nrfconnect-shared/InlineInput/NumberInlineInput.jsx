@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,14 +35,39 @@
  */
 
 import React from 'react';
-import Chart from './Chart/Chart';
-import SaveChoiceDialog from './SaveExport/SaveChoiceDialog';
-import ExportDialog from './SaveExport/ExportDialog';
+import { bool, func, number } from 'prop-types';
 
-export default () => (
-    <>
-        <Chart />
-        <SaveChoiceDialog />
-        <ExportDialog />
-    </>
+import InlineInput from './InlineInput';
+import rangeShape from '../Slider/rangeShape';
+
+import './number-inline-input.scss';
+
+const isInRange = (value, { min, max, decimals = 0 }) =>
+    value >= min && value <= max && value === Number(value.toFixed(decimals));
+
+const NumberInlineInput = ({
+    disabled,
+    value,
+    range,
+    onChange,
+    onChangeComplete = () => {},
+}) => (
+    <InlineInput
+        className="number-inline-input"
+        disabled={disabled}
+        value={String(value)}
+        isValid={newValue => isInRange(Number(newValue), range)}
+        onChange={newValue => onChange(Number(newValue))}
+        onChangeComplete={newValue => onChangeComplete(Number(newValue))}
+    />
 );
+
+NumberInlineInput.propTypes = {
+    disabled: bool,
+    value: number.isRequired,
+    range: rangeShape.isRequired,
+    onChange: func.isRequired,
+    onChangeComplete: func,
+};
+
+export default NumberInlineInput;
