@@ -147,9 +147,14 @@ const bitsChartOptions = {
     legend: { display: false },
 };
 
-const calcStats = (data, begin, end, index) => {
-    if (begin === null || end === null) {
+const calcStats = (data, _begin, _end, index) => {
+    if (_begin === null || _end === null) {
         return null;
+    }
+    let begin = _begin;
+    let end = _end;
+    if (end < begin) {
+        [begin, end] = [end, begin];
     }
     const indexBegin = Math.ceil(timestampToIndex(begin, index));
     const indexEnd = Math.floor(timestampToIndex(end, index));
