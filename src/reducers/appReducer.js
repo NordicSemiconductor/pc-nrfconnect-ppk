@@ -88,7 +88,6 @@ export const toggleSaveChoiceDialog = () => ({
 });
 export const showExportDialog = () => ({ type: SHOW_EXPORT_DIALOG });
 export const hideExportDialog = () => ({ type: HIDE_EXPORT_DIALOG });
-export const toggleSaveAction = () => ({ type: TOGGLE_SAVE });
 
 export const toggleSaveFunctionality = () => ({
     type: TOGGLE_SAVE_FUNCTIONALITY,
@@ -120,11 +119,6 @@ export default (state = initialState, { type, ...action }) => {
             return {
                 ...state,
                 isSaveChoiceDialogVisible: !state.isSaveChoiceDialogVisible,
-            };
-        case TOGGLE_SAVE:
-            return {
-                ...state,
-                enableSave: !state.enableSave,
             };
         case SHOW_EXPORT_DIALOG:
             return { ...state, isExportDialogVisible: true };
