@@ -233,6 +233,7 @@ export function open(deviceInfo) {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq, sampleFreq },
             } = getState().app;
+            const { currentPane } = getState().appLayout;
 
             let zeroCappedValue = zeroCap(value);
 
@@ -262,7 +263,7 @@ export function open(deviceInfo) {
                 options.index = 0;
             }
 
-            if (!samplingRunning) {
+            if (isScopePane(currentPane) && !samplingRunning) {
                 dispatch(
                     processTriggerSample(value, device, {
                         samplingTime: options.samplingTime,
