@@ -47,6 +47,8 @@ const urls = {
         'https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html',
     ppk2UserGuide:
         'https://infocenter.nordicsemi.com/topic/ug_ppk2/UG/ppk/PPK_user_guide_Intro.html',
+    purchase:
+        'https://www.nordicsemi.com/About-us/BuyOnline?search_token=nRF-PPK2',
 };
 
 export default () => (
@@ -76,6 +78,13 @@ export default () => (
             onClick={() => openUrl(urls.ppk2UserGuide)}
         >
             PPK2 User Guide
+        </Button>
+        <Button
+            variant="set"
+            className="mt-3"
+            onClick={() => openUrl(urls.purchase)}
+        >
+            Get PPK2 device
         </Button>
     </Group>
 );
