@@ -1,0 +1,10 @@
+@import "~pc-nrfconnect-shared/src/variables";
+
+.disabled, :disabled {
+    opacity: $disabled-opacity;
+
+    // To prevent opacity from stacking up
+    .disabled, :disabled {
+        opacity: 1;
+    }
+}

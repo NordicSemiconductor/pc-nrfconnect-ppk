@@ -35,16 +35,13 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { Slider } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup, Slider } from '../../from_pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
-import Collapse from './Collapse';
-
 import { appState } from '../../reducers/appReducer';
 import {
     updateSpikeFilterAction,
@@ -52,7 +49,7 @@ import {
     resetSpikeFilterToDefaults,
 } from '../../reducers/spikeFilterReducer';
 
-const SpikeFilter = ({ eventKey }) => {
+const SpikeFilter = () => {
     const dispatch = useDispatch();
     const { samples, alpha, alpha5 } = useSelector(spikeFilterState);
     const { capabilities } = useSelector(appState);
@@ -60,10 +57,9 @@ const SpikeFilter = ({ eventKey }) => {
         return null;
     }
     return (
-        <Collapse
-            heading="SPIKE FILTER"
+        <CollapsibleGroup
+            heading="Spike filter"
             title="Adjust how the software filters current spikes"
-            eventKey={eventKey}
         >
             <Form.Label
                 title="Number of samples after a dynamic range switch to apply filter"
@@ -129,12 +125,8 @@ const SpikeFilter = ({ eventKey }) => {
             >
                 Defaults
             </Button>
-        </Collapse>
+        </CollapsibleGroup>
     );
-};
-
-SpikeFilter.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default SpikeFilter;

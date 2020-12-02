@@ -34,29 +34,29 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
-import { node, string } from 'prop-types';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import { render as rtlRender } from '@testing-library/react';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+import reducer from '../reducers';
+import ResizeObserver from '../../__mocks__/resizeObserver';
 
-const WithTip = ({ tip, placement = 'right', children }) => (
-    <OverlayTrigger
-        placement={placement}
-        delay={{ show: 250, hide: 400 }}
-        overlay={props => (
-            <Tooltip id="button-tooltip" {...props}>
-                {tip}
-            </Tooltip>
-        )}
-    >
-        {children}
-    </OverlayTrigger>
-);
+function render(
+    ui,
+    {
+        initialState,
+        store = createStore(reducer, initialState),
+        ...renderOptions
+    } = {}
+) {
+    // eslint-disable-next-line react/prop-types
+    function Wrapper({ children }) {
+        return <Provider store={store}>{children}</Provider>;
+    }
+    return rtlRender(ui, { wrapper: Wrapper, ...renderOptions });
+}
 
-WithTip.propTypes = {
-    tip: string.isRequired,
-    placement: string,
-    children: node.isRequired,
-};
-
-export default WithTip;
+export * from '@testing-library/react';
+export { render };

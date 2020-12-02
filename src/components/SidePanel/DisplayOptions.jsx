@@ -36,18 +36,19 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Toggle } from 'pc-nrfconnect-shared';
+import { Toggle, CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
 
 import DigitalChannels from './DigitalChannels';
-import Collapse from './Collapse';
 
 import {
     chartState,
     toggleDigitalChannels,
     toggleTimestamps,
+    togglePreSampling,
+    togglePostSampling,
 } from '../../reducers/chartReducer';
-
-import { options } from '../../globals';
+import { appState } from '../../reducers/appReducer';
+import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
@@ -55,24 +56,22 @@ export default () => {
         digitalChannelsVisible,
         timestampsVisible,
         hasDigitalChannels,
+        preSamplingOn,
+        postSamplingOn,
     } = useSelector(chartState);
-
-    if (options.timestamp === null) return null;
+    const {
+        capabilities: { prePostTriggering },
+    } = useSelector(appState);
 
     return (
-        <Collapse
-            heading="DISPLAY OPTIONS"
-            eventKey="10"
-            defaultCollapsed={false}
-            className="mb-2"
-        >
+        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
             <Toggle
                 onToggle={() => dispatch(toggleTimestamps())}
                 isToggled={timestampsVisible}
                 label="Timestamps"
                 variant="secondary"
             />
-            {hasDigitalChannels && (
+            {hasDigitalChannels && isDataLoggerPane() && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(toggleDigitalChannels())}
@@ -83,6 +82,22 @@ export default () => {
                     <DigitalChannels />
                 </>
             )}
-        </Collapse>
+            {prePostTriggering && isScopePane() && (
+                <>
+                    <Toggle
+                        onToggle={() => dispatch(togglePreSampling())}
+                        isToggled={preSamplingOn}
+                        label="5ms pre-sample"
+                        variant="secondary"
+                    />
+                    <Toggle
+                        onToggle={() => dispatch(togglePostSampling())}
+                        isToggled={postSamplingOn}
+                        label="5ms post-sample"
+                        variant="secondary"
+                    />
+                </>
+            )}
+        </CollapsibleGroup>
     );
 };

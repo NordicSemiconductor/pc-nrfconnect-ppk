@@ -48,7 +48,6 @@ export const options = {
     bits: null,
     index: 0,
     timestamp: null,
-    triggerMarkers: null,
 };
 
 export const nbDigitalChannels = 8;
@@ -65,3 +64,6 @@ export const updateTitle = info => {
         .getCurrentWindow()
         .setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
 };
+
+export const SCOPE_PANE = 0;
+export const DATA_LOGGER_PANE = 1;

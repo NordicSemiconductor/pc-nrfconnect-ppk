@@ -35,15 +35,12 @@
  */
 
 import React from 'react';
-import { string } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
-import { Slider } from 'pc-nrfconnect-shared';
+import { Slider, CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
-import Collapse from './Collapse';
-
 import { appState } from '../../reducers/appReducer';
 import { updateGainsAction, gainsState } from '../../reducers/gainsReducer';
 
@@ -55,7 +52,7 @@ const gainTitles = [
     '~60mA - 1A',
 ];
 
-const Gains = ({ eventKey }) => {
+const Gains = () => {
     const dispatch = useDispatch();
     const gains = useSelector(gainsState);
     const { capabilities } = useSelector(appState);
@@ -65,10 +62,9 @@ const Gains = ({ eventKey }) => {
 
     const range = { min: 90, max: 110 };
     return (
-        <Collapse
-            heading="GAINS"
+        <CollapsibleGroup
+            heading="Gains"
             title="Adjust gains to correct potential measurement errors"
-            eventKey={eventKey}
         >
             {gains.map((gain, index) => (
                 <React.Fragment key={`${index + 1}`}>
@@ -91,12 +87,8 @@ const Gains = ({ eventKey }) => {
                     />
                 </React.Fragment>
             ))}
-        </Collapse>
+        </CollapsibleGroup>
     );
-};
-
-Gains.propTypes = {
-    eventKey: string.isRequired,
 };
 
 export default Gains;

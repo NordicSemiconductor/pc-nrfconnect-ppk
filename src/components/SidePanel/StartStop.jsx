@@ -34,44 +34,91 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import { Toggle } from 'pc-nrfconnect-shared';
+import Form from 'react-bootstrap/Form';
+import { unit } from 'mathjs';
+import { Group, Slider } from '../../from_pc-nrfconnect-shared';
 
-import PowerMode from './PowerMode';
+import NumberWithUnit from './NumberWithUnitInput';
 
 import {
     samplingStart,
     samplingStop,
-    setDeviceRunning,
+    setupOptions,
 } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
+
+import {
+    updateSampleFreqLog10,
+    updateDurationSeconds,
+    dataLoggerState,
+} from '../../reducers/dataLoggerReducer';
+
+const fmtOpts = { notation: 'fixed', precision: 1 };
 
 export default () => {
     const dispatch = useDispatch();
 
+    const { rttRunning, samplingRunning } = useSelector(appState);
     const {
-        deviceRunning,
-        rttRunning,
-        capabilities,
-        samplingRunning,
-    } = useSelector(appState);
+        sampleFreqLog10,
+        sampleFreq,
+        durationSeconds,
+        maxFreqLog10,
+        range,
+    } = useSelector(dataLoggerState);
 
-    const btnStr = samplingRunning ? 'Stop' : 'Start';
-    const avgStr = capabilities.ppkTriggerSet ? ' average' : '';
+    const ramSize = sampleFreq * durationSeconds * 4;
+    const period = 1 / sampleFreq;
+    const formattedRamSize = unit(ramSize, 'byte').to('MB').format(fmtOpts);
+    const formattedPeriod = unit(period, 's').format(fmtOpts).replace('.0', '');
+    const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
+        .format(fmtOpts)
+        .replace('.0', '')}`;
 
-    const startStopTitle =
-        !samplingRunning && capabilities.ppkTriggerSet
-            ? 'Start sampling at 7.7kHz. Each data point is averaged over 10 samples at 77kHz'
-            : undefined;
+    const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
+
+    const completeChange = useCallback(() => dispatch(setupOptions()), [
+        dispatch,
+    ]);
 
     return (
-        <div className="d-flex flex-column start-stop">
-            <PowerMode />
+        <Group>
+            <div className={samplingRunning ? 'disabled' : ''}>
+                <Form.Label htmlFor="data-logger-sampling-frequency">
+                    {sampleFreq} samples per second
+                </Form.Label>
+                <Slider
+                    ticks
+                    id="data-logger-sampling-frequency"
+                    values={[sampleFreqLog10]}
+                    range={{ min: 0, max: maxFreqLog10 }}
+                    onChange={[v => dispatch(updateSampleFreqLog10(v))]}
+                    onChangeComplete={completeChange}
+                    disabled={samplingRunning}
+                />
+                <NumberWithUnit
+                    label="Sample for"
+                    unit={range.name}
+                    multiplier={range.multiplier}
+                    range={range}
+                    value={durationSeconds}
+                    onChange={v => dispatch(updateDurationSeconds(v))}
+                    onChangeComplete={completeChange}
+                    disabled={samplingRunning}
+                    slider
+                />
+            </div>
+            <div className="small">
+                Estimated RAM required {formattedRamSize}
+                <br />
+                {formattedPeriod} period
+            </div>
             <Button
                 title={startStopTitle}
-                className={`start-btn mb-3 ${
+                className={`w-100 start-btn my-3 ${
                     samplingRunning ? 'active-anim' : ''
                 }`}
                 variant="set"
@@ -80,17 +127,8 @@ export default () => {
                     dispatch(samplingRunning ? samplingStop() : samplingStart())
                 }
             >
-                {`${btnStr}${avgStr} sampling`}
+                {samplingRunning ? 'Stop' : 'Start'}
             </Button>
-            {capabilities.ppkDeviceRunning && (
-                <Toggle
-                    title="Turn power on/off for device under test"
-                    onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
-                    isToggled={deviceRunning}
-                    label="Enable power output"
-                    variant="secondary"
-                />
-            )}
-        </div>
+        </Group>
     );
 };

@@ -87,6 +87,13 @@ const promiseTimeout = (ms, promise) =>
         }),
     ]);
 
+const triggerLevelConv = triggerLevel => {
+    const high = (triggerLevel >> 16) & 0xff;
+    const mid = (triggerLevel >> 8) & 0xff;
+    const low = triggerLevel & 0xff;
+    return [high, mid, low];
+};
+
 class RTTDevice extends Device {
     // Allocate memory for the float value
     averageBuf = new ArrayBuffer(4);
@@ -124,11 +131,15 @@ class RTTDevice extends Device {
 
     triggerWaiting = false;
 
+    triggerWindowRange = { min: (450 * 13) / 1e3, max: (4000 * 13) / 1e3 };
+
     isRunningInitially = true;
 
     constructor(device) {
         super();
 
+        this.capabilities.maxContinuousSamplingTimeUs = 130;
+        this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
         this.serialNumber = parseInt(device.serialNumber, 10);
         this.isRttOpen = false;
 
@@ -151,8 +162,6 @@ class RTTDevice extends Device {
             case ETX: {
                 if (this.dataPayload.length === 4) {
                     this.handleAverageDataSet();
-                    this.timestamp +=
-                        this.adcSamplingTimeUs * SAMPLES_PER_AVERAGE;
                 } else if (this.dataPayload.length === 5) {
                     this.timestamp = this.convertSysTick2MicroSeconds(
                         this.dataPayload.slice(0, 4)
@@ -402,11 +411,10 @@ class RTTDevice extends Device {
         }
         try {
             const value = this.viewFloat[0];
-            let { timestamp } = this;
-            for (let i = 0; i < SAMPLES_PER_AVERAGE; i += 1) {
-                this.onSampleCallback({ value, timestamp });
-                timestamp += this.adcSamplingTimeUs;
-            }
+            // for (let i = 0; i < SAMPLES_PER_AVERAGE; i += 1) {
+            // }
+            this.onSampleCallback({ value, timestamp: this.timestamp });
+            this.timestamp += this.adcSamplingTimeUs;
         } catch (err) {
             this.emit('error', 'Average data error, restart application', err);
         }
@@ -418,8 +426,6 @@ class RTTDevice extends Device {
             this.triggerBuf = new ArrayBuffer(this.dataPayload.length);
             this.viewUint8 = new Uint8Array(this.triggerBuf);
         }
-
-        let { timestamp } = this;
 
         this.viewUint8.set(this.dataPayload);
         const view = new DataView(this.triggerBuf);
@@ -435,13 +441,8 @@ class RTTDevice extends Device {
             const value =
                 this.getAdcResult[currentMeasurementRange](adcResult) * 1e6;
 
-            this.onSampleCallback({
-                value,
-                timestamp,
-                trigger: true,
-                triggerMarker: i === 0 || i === this.dataPayload.length - 2,
-            });
-            timestamp += this.adcSamplingTimeUs;
+            this.onSampleCallback({ value, timestamp: this.timestamp });
+            this.timestamp += this.adcSamplingTimeUs;
         }
     }
 
@@ -502,23 +503,30 @@ class RTTDevice extends Device {
         return this.sendCommand([PPKCmd.TriggerStop]);
     }
 
-    ppkTriggerSet(...args) {
+    ppkTriggerSet(triggerLevel) {
         this.triggerRunning = true;
         this.startReadLoop();
-        return this.sendCommand([PPKCmd.TriggerSet, ...args]);
+        return this.sendCommand([
+            PPKCmd.TriggerSet,
+            ...triggerLevelConv(triggerLevel),
+        ]);
     }
 
-    ppkTriggerSingleSet(...args) {
+    ppkTriggerSingleSet(triggerLevel) {
         this.triggerWaiting = true;
         this.startReadLoop();
-        return this.sendCommand([PPKCmd.TriggerSingleSet, ...args]);
+        return this.sendCommand([
+            PPKCmd.TriggerSingleSet,
+            ...triggerLevelConv(triggerLevel),
+        ]);
     }
 
     ppkTriggerExtToggle() {
         return this.sendCommand([PPKCmd.TriggerExtToggle]);
     }
 
-    ppkTriggerWindowSet(wnd) {
+    ppkTriggerWindowSet(value) {
+        const wnd = Math.floor((value * 1000) / this.adcSamplingTimeUs);
         return this.sendCommand([
             PPKCmd.TriggerWindowSet,
             wnd >> 8,

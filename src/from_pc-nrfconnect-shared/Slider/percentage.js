@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,60 +34,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint no-param-reassign: off */
-
-import { options } from '../../../globals';
-import colors from '../../colors.scss';
-
-const { gray700: color } = colors;
-
-const plugin = {
-    id: 'triggerRange',
-
-    beforeDatasetsDraw(chartInstance) {
-        const {
-            chartArea: { top, left, right },
-            chart: { ctx },
-            scales: { xScale: scale },
-        } = chartInstance;
-
-        if (!options.triggerMarkers) return;
-
-        const min = scale.getValueForPixel(left);
-        const max = scale.getValueForPixel(right);
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(left, top, right - left, 16);
-        ctx.clip();
-        ctx.fillStyle = color;
-
-        options.triggerMarkers
-            .reduce((pairs, _, i, array) => {
-                if (!(i % 2)) {
-                    const [a, b] = array.slice(i, i + 2);
-                    if (b > min && a < max) {
-                        pairs.push([a, b]);
-                    }
-                }
-                return pairs;
-            }, [])
-            .forEach(([a, b]) => {
-                const x1 = scale.getPixelForValue(a);
-                const x2 = scale.getPixelForValue(b);
-                const d = x2 - x1;
-                const s = d / Math.max(1, Math.floor(d / 6));
-                for (let x = x1; x < x2 + 1; x += s) {
-                    ctx.beginPath();
-                    ctx.moveTo(x - 3, top);
-                    ctx.lineTo(x + 3, top);
-                    ctx.lineTo(x, top + 4);
-                    ctx.fill();
-                }
-            });
-
-        ctx.restore();
-    },
+export const constrainedToPercentage = percentage => {
+    if (percentage < 0) return 0;
+    if (percentage > 100) return 100;
+    return percentage;
 };
 
-export default plugin;
+export const toPercentage = (v, { min, max }) =>
+    ((v - min) * 100) / (max - min);
+export const fromPercentage = (v, { min, max, decimals = 0 }) =>
+    Number(((v * (max - min)) / 100 + min).toFixed(decimals));

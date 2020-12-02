@@ -38,42 +38,49 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { Group, Toggle } from '../../from_pc-nrfconnect-shared';
 
-import { setPowerMode } from '../../actions/deviceActions';
+import { setPowerMode, setDeviceRunning } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 
 export default () => {
     const dispatch = useDispatch();
-    const { capabilities, isSmuMode } = useSelector(appState);
+    const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
-    if (!capabilities.ppkSetPowerMode) {
-        return null;
-    }
-
     return (
-        <>
-            <h2 className="mt-0">MODE</h2>
-            <ButtonGroup className="power-mode mb-2">
-                <Button
-                    title="Measure current on device under test powered by PPK2"
-                    variant={isSmuMode ? 'set' : 'unset'}
-                    disabled={isSmuMode}
-                    onClick={togglePowerMode}
-                >
-                    Source meter
-                    <div className="dot sourcemeter" />
-                </Button>
-                <Button
-                    title="Measure current on device under test powered externally"
-                    variant={isSmuMode ? 'unset' : 'set'}
-                    disabled={!isSmuMode}
-                    onClick={togglePowerMode}
-                >
-                    Ampere meter
-                    <div className="dot amperemeter" />
-                </Button>
-            </ButtonGroup>
-        </>
+        <Group heading="Mode">
+            {capabilities.ppkSetPowerMode && (
+                <ButtonGroup className="power-mode w-100">
+                    <Button
+                        title="Measure current on device under test powered by PPK2"
+                        variant={isSmuMode ? 'set' : 'unset'}
+                        disabled={isSmuMode}
+                        onClick={togglePowerMode}
+                    >
+                        Source meter
+                        <div className="dot sourcemeter" />
+                    </Button>
+                    <Button
+                        title="Measure current on device under test powered externally"
+                        variant={isSmuMode ? 'unset' : 'set'}
+                        disabled={!isSmuMode}
+                        onClick={togglePowerMode}
+                    >
+                        Ampere meter
+                        <div className="dot amperemeter" />
+                    </Button>
+                </ButtonGroup>
+            )}
+            {capabilities.ppkDeviceRunning && (
+                <Toggle
+                    title="Turn power on/off for device under test"
+                    onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
+                    isToggled={deviceRunning}
+                    label="Enable power output"
+                    variant="secondary"
+                />
+            )}
+        </Group>
     );
 };
