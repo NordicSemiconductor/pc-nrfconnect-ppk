@@ -2,6 +2,7 @@
 ### Updates
 - Add screenshot functionality
 ## Fixed
+- The CSV export was exporting the wrong portion of data.
 - Fix issue where moving the right handle past the left handle in the chart selection would break the values displayed in the selection window.
 
 ## Version 3.0.1
