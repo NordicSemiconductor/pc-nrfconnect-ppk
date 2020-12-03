@@ -42,10 +42,14 @@ import { Group } from '../../from_pc-nrfconnect-shared';
 
 import './instructions.scss';
 
-const ppk1ug =
-    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
-const ppk2ug =
-    'https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_ppk%2FUG%2Fppk%2FPPK_user_guide_Intro.html';
+const urls = {
+    ppkUserGuide:
+        'https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html',
+    ppk2UserGuide:
+        'https://infocenter.nordicsemi.com/topic/ug_ppk2/UG/ppk/PPK_user_guide_Intro.html',
+    purchase:
+        'https://www.nordicsemi.com/About-us/BuyOnline?search_token=nRF-PPK2',
+};
 
 export default () => (
     <Group heading="Instructions">
@@ -64,16 +68,23 @@ export default () => (
         <Button
             className="user-guide-link"
             variant="link"
-            onClick={() => openUrl(ppk1ug)}
+            onClick={() => openUrl(urls.ppkUserGuide)}
         >
             PPK User Guide
         </Button>
         <Button
             className="user-guide-link"
             variant="link"
-            onClick={() => openUrl(ppk2ug)}
+            onClick={() => openUrl(urls.ppk2UserGuide)}
         >
             PPK2 User Guide
+        </Button>
+        <Button
+            variant="set"
+            className="mt-3"
+            onClick={() => openUrl(urls.purchase)}
+        >
+            Get PPK2 device
         </Button>
     </Group>
 );
