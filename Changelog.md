@@ -1,3 +1,7 @@
+## Unreleased
+## Fixed
+- The CSV export was exporting the wrong portion of data.
+
 ## Version 3.0.1
 ## Fixed
 - Fix connecting PPK via J-Link Lite
