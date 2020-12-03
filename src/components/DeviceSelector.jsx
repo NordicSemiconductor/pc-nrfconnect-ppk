@@ -59,7 +59,6 @@ const deviceSetup = {
             fwIdAddress: 0x10000,
         },
     },
-    needSerialport: true,
 };
 
 const mapState = () => ({
