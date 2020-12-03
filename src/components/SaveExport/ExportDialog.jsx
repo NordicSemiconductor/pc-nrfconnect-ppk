@@ -118,12 +118,7 @@ const exportChart = (
                             ? options.bits[k].toString(2).padStart(8, '0')
                             : '';
                         content += selectivePrint(
-                            [
-                                n / 100,
-                                v.toFixed(3),
-                                b,
-                                b.split('').join(','),
-                            ],
+                            [n / 100, v.toFixed(3), b, b.split('').join(',')],
                             selection
                         );
                     }
@@ -215,14 +210,7 @@ export default () => {
         if (!fn) return;
         setLastSaveDir(dirname(fn));
         dispatch(
-            exportChart(
-                fn,
-                indexBegin,
-                indexEnd,
-                settings,
-                setProgress,
-                cancel
-            )
+            exportChart(fn, indexBegin, indexEnd, settings, setProgress, cancel)
         );
     };
 
