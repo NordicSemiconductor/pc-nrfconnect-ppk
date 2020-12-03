@@ -52,7 +52,7 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { options, timestampToIndex, indexToTimestamp } from '../../globals';
+import { options } from '../../globals';
 
 import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 
@@ -81,7 +81,6 @@ const exportChart = (
     filename,
     indexBegin,
     indexEnd,
-    index,
     { timestamp, current, bits, bitsSeparated },
     setProgress,
     cancel
@@ -120,7 +119,7 @@ const exportChart = (
                             : '';
                         content += selectivePrint(
                             [
-                                indexToTimestamp(n, index) / 1000,
+                                n / 100,
                                 v.toFixed(3),
                                 b,
                                 b.split('').join(','),
@@ -157,7 +156,6 @@ export default () => {
         cursorBegin,
         cursorEnd,
         windowDuration,
-        index,
         hasDigitalChannels,
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
@@ -186,8 +184,8 @@ export default () => {
         cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
     const duration = to - from;
 
-    const indexBegin = Math.ceil(timestampToIndex(from, index));
-    const indexEnd = Math.floor(timestampToIndex(to, index));
+    const indexBegin = Math.ceil(from / 10);
+    const indexEnd = Math.floor(to / 10);
 
     const records = indexEnd - indexBegin;
     const recordLength =
@@ -221,7 +219,6 @@ export default () => {
                 fn,
                 indexBegin,
                 indexEnd,
-                index,
                 settings,
                 setProgress,
                 cancel
