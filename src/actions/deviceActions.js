@@ -72,6 +72,7 @@ import {
     updateHasDigitalChannels,
     resetCursorAndChart,
 } from '../reducers/chartReducer';
+import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
 import {
     options,
     bufferLengthInSeconds,
@@ -319,6 +320,11 @@ export function open(deviceInfo) {
 
         try {
             device = new Device(deviceInfo, onSample);
+            dispatch(
+                setSamplingAttrsAction(
+                    device.capabilities.maxContinuousSamplingTimeUs
+                )
+            );
             dispatch(setupOptions());
             dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
