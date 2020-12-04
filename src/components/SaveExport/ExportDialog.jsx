@@ -76,7 +76,7 @@ const useToggledSetting = (initialState, label) => {
 };
 
 const calculateTotalSize = (
-    { timestampToggled, currentToggled, bitsToggled, bitsSeparatedToggled },
+    [timestampToggled, currentToggled, bitsToggled, bitsSeparatedToggled],
     numberOfRecords
 ) => {
     const recordLength =
@@ -119,6 +119,12 @@ export default () => {
         false,
         'Digital logic pins (separate fields)'
     );
+    const contentSelection = [
+        timestampToggled,
+        currentToggled,
+        bitsToggled,
+        bitsSeparatedToggled,
+    ];
 
     const cancel = useRef(false);
     const [progress, setProgress] = useState(0);
@@ -129,27 +135,20 @@ export default () => {
         }
     }, [isExportDialogVisible]);
 
-    const end = windowEnd || options.timestamp;
-    const begin = windowBegin || end - windowDuration;
+    const end = windowEnd == null ? options.timestamp : windowEnd;
+    const begin = windowBegin == null ? end - windowDuration : windowBegin;
 
     const [from, to] =
         cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
-    const duration = to - from;
 
     const indexBegin = Math.ceil(timestampToIndex(from));
     const indexEnd = Math.floor(timestampToIndex(to));
-
     const numberOfRecords = indexEnd - indexBegin + 1;
+    const filesize = calculateTotalSize(contentSelection, numberOfRecords);
 
-    const toggleStatus = {
-        timestampToggled,
-        currentToggled,
-        bitsToggled,
-        bitsSeparatedToggled,
-    };
-    const filesize = calculateTotalSize(toggleStatus, numberOfRecords);
     const filename = createFileName();
 
+    const duration = to - from;
     const formattedDuration = unit(duration, 'us')
         .format({
             notation: 'auto',
@@ -173,12 +172,7 @@ export default () => {
                 fn,
                 indexBegin,
                 indexEnd,
-                {
-                    timestamp: timestampToggled,
-                    current: currentToggled,
-                    bits: bitsToggled,
-                    bitsSeparated: bitsSeparatedToggled,
-                },
+                contentSelection,
                 setProgress,
                 cancel
             )

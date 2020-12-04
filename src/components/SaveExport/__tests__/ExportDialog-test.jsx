@@ -48,7 +48,9 @@ const initialState = {
     app: {
         chart: {
             windowBegin: 0,
-            windowEnd: 100,
+            windowEnd: 999999,
+            cursorBegin: null,
+            hasDigitalChannels: true,
         },
         app: {
             isExportDialogVisible: true,
@@ -58,4 +60,16 @@ const initialState = {
 
 describe('ExportDialog', () => {
     render(<ExportDialog />, { initialState });
+    const numberOfRecordsText = '100000 records';
+    const totalSizeLargerThanZeroPattern = /[1-9][0-9]*\sMB/;
+    const durationLargerThanZeroPattern = /[1-9][0-9]*\ss/;
+
+    it('should show the number of records', () => {
+        const numberOfRecords = screen.getByText(numberOfRecordsText);
+        expect(numberOfRecords).not.toBe(undefined);
+        const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
+        expect(totalSize).not.toBe(undefined);
+        const duration = screen.getByText(durationLargerThanZeroPattern);
+        expect(duration).not.toBe(undefined);
+    });
 });

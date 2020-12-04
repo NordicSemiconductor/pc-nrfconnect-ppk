@@ -56,7 +56,7 @@ const indexer = (i, j, d) => {
 const selectivePrint = (strArr, selectArr) =>
     `${strArr.filter((_, i) => selectArr[i]).join(',')}\n`;
 
-export const formatDataToCsv = (
+export const formatDataForExport = (
     start,
     length,
     bufferData,
@@ -87,7 +87,7 @@ export default (
     filename,
     indexBegin,
     indexEnd,
-    { timestampToggled, currentToggled, bitsToggled, bitsSeparatedToggled },
+    contentSelection,
     setProgress,
     cancel
 ) => dispatch => {
@@ -95,12 +95,6 @@ export default (
         return Promise.resolve();
     }
     const fd = fs.openSync(filename, 'w');
-    const selection = [
-        timestampToggled,
-        currentToggled,
-        bitsToggled,
-        bitsSeparatedToggled,
-    ];
     fs.writeSync(
         fd,
         selectivePrint(
@@ -110,7 +104,7 @@ export default (
                 'D0-D7',
                 'D0,D1,D2,D3,D4,D5,D6,D7',
             ],
-            selection
+            contentSelection
         )
     );
 
@@ -120,12 +114,12 @@ export default (
                 if (cancel.current) {
                     reject();
                 }
-                const content = formatDataToCsv(
+                const content = formatDataForExport(
                     start,
                     len,
                     options.data,
                     options.bits,
-                    selection
+                    contentSelection
                 );
                 fs.write(fd, content, () => {
                     setProgress(
