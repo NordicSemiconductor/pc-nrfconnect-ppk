@@ -206,7 +206,7 @@ export default () => {
     const indexBegin = Math.ceil(from / 10);
     const indexEnd = Math.floor(to / 10);
 
-    const records = indexEnd - indexBegin;
+    const records = indexEnd - indexBegin + 1;
     const recordLength =
         timestamp * 10 + current * 10 + bits * 8 + bitsSeparated * 16;
     const filesize = mathjs
