@@ -57,6 +57,7 @@ const initialState = {
 
 const DL_SAMPLE_FREQ_LOG_10 = 'DL_SAMPLE_FREQ_LOG_10';
 const DL_DURATION_SECONDS = 'DL_DURATION_SECONDS';
+const SET_SAMPLING_ATTRS = 'SET_SAMPLING_ATTRS';
 
 export const updateSampleFreqLog10 = sampleFreqLog10 => ({
     type: DL_SAMPLE_FREQ_LOG_10,
@@ -69,11 +70,15 @@ export const updateDurationSeconds = durationSeconds => ({
     durationSeconds,
 });
 
+export const setSamplingAttrsAction = maxContinuousSamplingTimeUs => ({
+    type: SET_SAMPLING_ATTRS,
+    maxContinuousSamplingTimeUs,
+});
+
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
-        case 'DEVICE_OPENED': {
-            const samplingTime =
-                action.capabilities.maxContinuousSamplingTimeUs;
+        case SET_SAMPLING_ATTRS: {
+            const samplingTime = action.maxContinuousSamplingTimeUs;
             const sampleFreq = Math.round(10000 / samplingTime) * 100;
             const maxFreqLog10 = Math.ceil(Math.log10(sampleFreq));
             return {
