@@ -52,7 +52,7 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { options } from '../../globals';
+import { indexToTimestamp, options } from '../../globals';
 
 import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 
@@ -118,7 +118,12 @@ const exportChart = (
                             ? options.bits[k].toString(2).padStart(8, '0')
                             : '';
                         content += selectivePrint(
-                            [n / 100, v.toFixed(3), b, b.split('').join(',')],
+                            [
+                                indexToTimestamp(n) / 1000,
+                                v.toFixed(3),
+                                b,
+                                b.split('').join(','),
+                            ],
                             selection
                         );
                     }
