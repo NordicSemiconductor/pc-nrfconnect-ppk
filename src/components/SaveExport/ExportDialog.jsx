@@ -52,7 +52,7 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 import { Toggle } from '../../from_pc-nrfconnect-shared';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { indexToTimestamp, options } from '../../globals';
+import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 
 import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 
@@ -203,8 +203,8 @@ export default () => {
         cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
     const duration = to - from;
 
-    const indexBegin = Math.ceil(from / 10);
-    const indexEnd = Math.floor(to / 10);
+    const indexBegin = Math.ceil(timestampToIndex(from));
+    const indexEnd = Math.floor(timestampToIndex(to));
 
     const records = indexEnd - indexBegin + 1;
     const recordLength =
