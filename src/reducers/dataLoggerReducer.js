@@ -72,15 +72,13 @@ export const updateDurationSeconds = durationSeconds => ({
 
 export const setSamplingAttrsAction = maxContinuousSamplingTimeUs => ({
     type: SET_SAMPLING_ATTRS,
-    payload: {
-        maxContinuousSamplingTimeUs,
-    },
+    maxContinuousSamplingTimeUs,
 });
 
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case SET_SAMPLING_ATTRS: {
-            const samplingTime = action.payload.maxContinuousSamplingTimeUs;
+            const samplingTime = action.maxContinuousSamplingTimeUs;
             const sampleFreq = Math.round(10000 / samplingTime) * 100;
             const maxFreqLog10 = Math.ceil(Math.log10(sampleFreq));
             return {
