@@ -187,7 +187,7 @@ export default () => {
     const indexBegin = Math.ceil(from / 10);
     const indexEnd = Math.floor(to / 10);
 
-    const records = indexEnd - indexBegin;
+    const records = indexEnd - indexBegin + 1;
     const recordLength =
         settings.timestamp * 10 +
         settings.current * 10 +
