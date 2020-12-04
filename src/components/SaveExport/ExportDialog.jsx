@@ -35,9 +35,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import fs from 'fs';
 import { useDispatch, useSelector } from 'react-redux';
-import { logger } from 'nrfconnect/core';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
 import * as mathjs from 'mathjs';
@@ -52,102 +50,14 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 import { Toggle } from '../../from_pc-nrfconnect-shared';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { options, timestampToIndex, indexToTimestamp } from '../../globals';
+import { options, timestampToIndex } from '../../globals';
 
 import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
+import exportChart from '../../actions/exportChartAction';
 
 import './saveexport.scss';
 
 const { unit } = mathjs;
-
-// create and array of [index, length] to split longer range
-const indexer = (i, j, d) => {
-    let k = i;
-    const r = [];
-    while (d < j - k) {
-        r.push([k, d]);
-        k += d;
-    }
-    if (k < j) {
-        r.push([k, j - k]);
-    }
-    return r;
-};
-
-const selectivePrint = (strArr, selectArr) =>
-    `${strArr.filter((_, i) => selectArr[i]).join(',')}\n`;
-
-const exportChart = (
-    filename,
-    indexBegin,
-    indexEnd,
-    index,
-    { timestamp, current, bits, bitsSeparated },
-    setProgress,
-    cancel
-) => dispatch => {
-    if (!filename) {
-        return Promise.resolve();
-    }
-    const fd = fs.openSync(filename, 'w');
-    const selection = [timestamp, current, bits, bitsSeparated];
-    fs.writeSync(
-        fd,
-        selectivePrint(
-            [
-                'Timestamp(ms)',
-                'Current(uA)',
-                'D0-D7',
-                'D0,D1,D2,D3,D4,D5,D6,D7',
-            ],
-            selection
-        )
-    );
-
-    return indexer(indexBegin, indexEnd, 10000)
-        .map(([start, len]) => () =>
-            new Promise((resolve, reject) => {
-                if (cancel.current) {
-                    reject();
-                }
-                let content = '';
-                for (let n = start; n <= start + len; n += 1) {
-                    const k = (n + options.data.length) % options.data.length;
-                    const v = options.data[k];
-                    if (!Number.isNaN(v)) {
-                        const b = options.bits
-                            ? options.bits[k].toString(2).padStart(8, '0')
-                            : '';
-                        content += selectivePrint(
-                            [
-                                indexToTimestamp(n, index) / 1000,
-                                v.toFixed(3),
-                                b,
-                                b.split('').join(','),
-                            ],
-                            selection
-                        );
-                    }
-                }
-                fs.write(fd, content, () => {
-                    setProgress(
-                        Math.round(
-                            ((start - indexBegin) / (indexEnd - indexBegin)) *
-                                100
-                        )
-                    );
-                    resolve();
-                });
-            })
-        )
-        .reduce((prev, task) => prev.then(task), Promise.resolve())
-        .catch(() => logger.info('Exported cancelled'))
-        .then(() => {
-            fs.closeSync(fd);
-            dispatch(hideExportDialog());
-            logger.info(`Exported CSV to: ${filename}`);
-        });
-};
 
 const useToggledSetting = (initialState, label) => {
     const [value, setValue] = useState(initialState);
@@ -165,6 +75,25 @@ const useToggledSetting = (initialState, label) => {
     return [value, ToggleComponent];
 };
 
+const calculateTotalSize = (
+    { timestampToggled, currentToggled, bitsToggled, bitsSeparatedToggled },
+    numberOfRecords
+) => {
+    const recordLength =
+        timestampToggled * 10 +
+        currentToggled * 10 +
+        bitsToggled * 8 +
+        bitsSeparatedToggled * 16;
+    return mathjs
+        .to(unit(recordLength * numberOfRecords, 'bytes'), 'MB')
+        .format({ notation: 'fixed', precision: 0 });
+};
+
+const createFileName = () => {
+    const now = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+    return join(lastSaveDir(), `ppk-${now}.csv`);
+};
+
 export default () => {
     const dispatch = useDispatch();
     const {
@@ -173,18 +102,20 @@ export default () => {
         cursorBegin,
         cursorEnd,
         windowDuration,
-        index,
         hasDigitalChannels,
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
 
-    const [timestamp, TimestampToggle] = useToggledSetting(true, 'Timestamp');
-    const [current, CurrentToggle] = useToggledSetting(true, 'Current');
-    const [bits, BitsToggle] = useToggledSetting(
+    const [timestampToggled, TimestampToggle] = useToggledSetting(
+        true,
+        'Timestamp'
+    );
+    const [currentToggled, CurrentToggle] = useToggledSetting(true, 'Current');
+    const [bitsToggled, BitsToggle] = useToggledSetting(
         hasDigitalChannels,
         'Digital logic pins (single string field)'
     );
-    const [bitsSeparated, BitsSeparatedToggle] = useToggledSetting(
+    const [bitsSeparatedToggled, BitsSeparatedToggle] = useToggledSetting(
         false,
         'Digital logic pins (separate fields)'
     );
@@ -205,18 +136,26 @@ export default () => {
         cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
     const duration = to - from;
 
-    const indexBegin = Math.ceil(timestampToIndex(from, index));
-    const indexEnd = Math.floor(timestampToIndex(to, index));
+    const indexBegin = Math.ceil(timestampToIndex(from));
+    const indexEnd = Math.floor(timestampToIndex(to));
 
-    const records = indexEnd - indexBegin;
-    const recordLength =
-        timestamp * 10 + current * 10 + bits * 8 + bitsSeparated * 16;
-    const filesize = mathjs
-        .to(unit(recordLength * records, 'bytes'), 'MB')
-        .format({ notation: 'fixed', precision: 0 });
+    const numberOfRecords = indexEnd - indexBegin + 1;
 
-    const now = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
-    const filename = join(lastSaveDir(), `ppk-${now}.csv`);
+    const toggleStatus = {
+        timestampToggled,
+        currentToggled,
+        bitsToggled,
+        bitsSeparatedToggled,
+    };
+    const filesize = calculateTotalSize(toggleStatus, numberOfRecords);
+    const filename = createFileName();
+
+    const formattedDuration = unit(duration, 'us')
+        .format({
+            notation: 'auto',
+            precision: 4,
+        })
+        .replace('u', '\u00B5');
 
     const close = () => {
         cancel.current = true;
@@ -234,8 +173,12 @@ export default () => {
                 fn,
                 indexBegin,
                 indexEnd,
-                index,
-                { timestamp, current, bits, bitsSeparated },
+                {
+                    timestamp: timestampToggled,
+                    current: currentToggled,
+                    bits: bitsToggled,
+                    bitsSeparated: bitsSeparatedToggled,
+                },
                 setProgress,
                 cancel
             )
@@ -274,16 +217,9 @@ export default () => {
                         <Card className="h-100">
                             <Card.Body>
                                 <h2>Estimation</h2>
-                                <p>{records} records</p>
+                                <p>{numberOfRecords} records</p>
                                 <p>{filesize}</p>
-                                <p>
-                                    {unit(duration, 'us')
-                                        .format({
-                                            notation: 'auto',
-                                            precision: 4,
-                                        })
-                                        .replace('u', '\u00B5')}
-                                </p>
+                                <p>{formattedDuration}</p>
                             </Card.Body>
                         </Card>
                     </Col>
