@@ -1,11 +1,16 @@
 ## Unreleased
-<<<<<<< HEAD
 ### Updates
 - Add screenshot functionality
-=======
+
+## Version 3.0.2
 ## Fixed
-- Fix issue where moving the right handle past the left handle in the chart selection would break the values displayed in the selection window.
->>>>>>> e17beb7... Swap begin and end indexes if end handle is moved past begin handle
+- The CSV export was exporting the wrong portion of data #123
+
+## Version 3.0.1
+## Fixed
+- Fix connecting PPK via J-Link Lite #122
+- Fix issue where moving the right handle past the left handle in the chart selection would break the values displayed in the selection window #119
+
 
 ## Version 3.0.0
 ### Changed
