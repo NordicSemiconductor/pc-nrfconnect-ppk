@@ -67,20 +67,15 @@ import {
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
 import {
-    chartWindowAction,
     animationAction,
     updateHasDigitalChannels,
     resetCursorAndChart,
 } from '../reducers/chartReducer';
 import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
-import {
-    options,
-    bufferLengthInSeconds,
-    updateTitle,
-    indexToTimestamp,
-} from '../globals';
+import { options, updateTitle } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
 import { isScopePane } from '../utils/panes';
+import { processTriggerSample } from './triggerActions';
 
 let device = null;
 let updateRequestInterval;
@@ -224,11 +219,11 @@ export function open(deviceInfo) {
             await dispatch(close());
         }
 
-        let isTrigger = 0;
         let prevValue = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
-        const onSample = ({ value, bits, timestamp }) => {
+
+        const onSample = ({ value, bits }) => {
             // PPK1 always sets timestamp, while PPK2 never does
             if (options.timestamp === undefined) {
                 options.timestamp = 0;
@@ -236,10 +231,9 @@ export function open(deviceInfo) {
 
             const {
                 app: { samplingRunning },
-                trigger: { triggerSingleWaiting, triggerLevel, triggerLength },
-                chart: { windowBegin, windowEnd },
                 dataLogger: { maxSampleFreq, sampleFreq },
             } = getState().app;
+            const { currentPane } = getState().appLayout;
 
             let zeroCappedValue = zeroCap(value);
 
@@ -269,53 +263,15 @@ export function open(deviceInfo) {
                 options.index = 0;
             }
 
-            if (!samplingRunning) {
-                const numberOfSamplesIn5ms = 500;
-                const { preSamplingOn, postSamplingOn } = getState().app.chart;
-                let wnd = Math.floor(
-                    (triggerLength * 1000) / options.samplingTime
+            if (isScopePane(currentPane) && !samplingRunning) {
+                dispatch(
+                    processTriggerSample(value, device, {
+                        samplingTime: options.samplingTime,
+                        dataIndex: options.index,
+                        dataBuffer: options.data,
+                    })
                 );
-                if (postSamplingOn) wnd += numberOfSamplesIn5ms;
-                if (!isTrigger) {
-                    if (
-                        timestamp !== undefined ||
-                        (value >= triggerLevel && prevValue < triggerLevel)
-                    ) {
-                        isTrigger = 1;
-                        if (triggerSingleWaiting) {
-                            logger.info('Trigger received, stopped waiting');
-                            dispatch(clearSingleTriggerWaitingAction());
-                            if (timestamp === undefined) {
-                                device.ppkTriggerStop();
-                            }
-                        }
-                    }
-                } else {
-                    isTrigger += 1;
-                }
-                if (isTrigger >= wnd) {
-                    isTrigger = 0;
-                    const startIndex = preSamplingOn
-                        ? options.index - numberOfSamplesIn5ms
-                        : options.index;
-
-                    const triggerBeginIndex =
-                        (startIndex - wnd + options.data.length) %
-                        options.data.length;
-                    const from = indexToTimestamp(triggerBeginIndex);
-                    const to = options.timestamp;
-                    dispatch(chartWindowAction(from, to, to - from));
-                }
             }
-
-            if (
-                (windowBegin !== 0 || windowEnd !== 0) &&
-                options.timestamp >= windowBegin + bufferLengthInSeconds * 1e6
-            ) {
-                // stop average when reaches end of buffer (i.e. would overwrite chart data)
-                dispatch(samplingStop());
-            }
-            prevValue = zeroCappedValue;
         };
 
         try {
