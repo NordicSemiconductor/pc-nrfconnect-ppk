@@ -45,6 +45,7 @@ const initialState = {
         max: (4000 * 13) / 1e3,
     },
     triggerStartIndex: null,
+    triggerWindowOffset: 0,
 };
 
 export const EXTERNAL_TRIGGER_TOGGLE = 'EXTERNAL_TRIGGER_TOGGLE';
@@ -55,6 +56,7 @@ export const TRIGGER_LEVEL_SET = 'TRIGGER_LEVEL_SET';
 export const TRIGGER_LENGTH_SET = 'TRIGGER_LENGTH_SET';
 export const TRIGGER_WINDOW_RANGE = 'TRIGGER_WINDOW_RANGE';
 export const SET_TRIGGER_START = 'SET_TRIGGER_START';
+export const SET_WINDOW_OFFSET = 'SET_WINDOW_OFFSET';
 
 export const triggerLevelSetAction = triggerLevel => ({
     type: TRIGGER_LEVEL_SET,
@@ -87,6 +89,11 @@ export const externalTriggerToggledAction = () => ({
 export const triggerWindowRangeAction = ({ min, max }) => ({
     type: TRIGGER_WINDOW_RANGE,
     triggerWindowRange: { min, max },
+});
+
+export const setWindowOffsetAction = offset => ({
+    type: SET_WINDOW_OFFSET,
+    offset,
 });
 
 export default (state = initialState, { type, ...action }) => {
@@ -135,6 +142,11 @@ export default (state = initialState, { type, ...action }) => {
             return {
                 ...state,
                 triggerStartIndex: action.triggerStartIndex,
+            };
+        case SET_WINDOW_OFFSET:
+            return {
+                ...state,
+                triggerWindowOffset: action.offset,
             };
         case TRIGGER_LEVEL_SET:
         case TRIGGER_LENGTH_SET:

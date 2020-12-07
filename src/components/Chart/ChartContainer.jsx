@@ -115,6 +115,7 @@ const ChartContainer = ({
         yMin,
         yMax,
         timestampsVisible,
+        showGridLines,
     } = useSelector(chartState);
     const { samplingRunning } = useSelector(appState);
     const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
@@ -167,7 +168,7 @@ const ChartContainer = ({
                         maxTicksLimit: 7,
                     },
                     gridLines: {
-                        display: true,
+                        display: showGridLines,
                         drawBorder: true,
                         drawOnChartArea: true,
                     },
@@ -189,7 +190,7 @@ const ChartContainer = ({
                         callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
                     },
                     gridLines: {
-                        display: true,
+                        display: showGridLines,
                         drawBorder: true,
                         drawOnChartArea: true,
                     },
@@ -213,29 +214,32 @@ const ChartContainer = ({
         live,
         triggerHandleVisible: isRealTimePane() && !externalTrigger,
     };
+
+    const plugins = [
+        dragSelectPlugin,
+        zoomPanPlugin,
+        triggerLevelPlugin,
+        crossHairPlugin,
+        {
+            id: 'notifier',
+            afterLayout(chart) {
+                const { chartArea, width } = chart;
+                chartArea.right = width - rightMargin;
+                const { left, right } = chart.chartArea;
+                const w = Math.trunc(right - left);
+                setLen(Math.min(w, 2000));
+                setChartAreaWidth(w);
+            },
+        },
+    ];
+
     return (
         <div className="chart-container">
             <Line
                 ref={chartRef}
                 data={chartData}
                 options={chartOptions}
-                plugins={[
-                    dragSelectPlugin,
-                    zoomPanPlugin,
-                    triggerLevelPlugin,
-                    crossHairPlugin,
-                    {
-                        id: 'notifier',
-                        afterLayout(chart) {
-                            const { chartArea, width } = chart;
-                            chartArea.right = width - rightMargin;
-                            const { left, right } = chart.chartArea;
-                            const w = Math.trunc(right - left);
-                            setLen(Math.min(w, 2000));
-                            setChartAreaWidth(w);
-                        },
-                    },
-                ]}
+                plugins={plugins}
             />
         </div>
     );

@@ -35,58 +35,46 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
+import { unit } from 'mathjs';
+import { number } from 'prop-types';
 
-import DigitalChannels from './DigitalChannels';
+const formatTime = duration => {
+    let time = unit(duration, 'us');
+    if (duration > 60 * 1e6) {
+        time = time.to('min');
+    }
+    const v = time.format({ notation: 'fixed', precision: 2 });
+    return v.split(' ');
+};
 
-import {
-    chartState,
-    toggleDigitalChannels,
-    toggleTimestamps,
-    toggleGridLines,
-} from '../../reducers/chartReducer';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {
+    const start = begin !== undefined ? (100 * begin) / totalDuration : 0;
+    const width =
+        begin !== undefined && end !== undefined
+            ? (100 * (end - begin)) / totalDuration
+            : 100;
 
-export default () => {
-    const dispatch = useDispatch();
-    const {
-        digitalChannelsVisible,
-        timestampsVisible,
-        hasDigitalChannels,
-        showGridLines,
-    } = useSelector(chartState);
+    const [valStr, unitStr] = formatTime(duration);
+    const label = `\u0394${valStr}${unitStr.replace('u', '\u00B5')}`;
 
     return (
-        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="secondary"
-            />
-            {hasDigitalChannels && isDataLoggerPane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleDigitalChannels())}
-                        isToggled={digitalChannelsVisible}
-                        label="Digital channels"
-                        variant="secondary"
-                    />
-                    <DigitalChannels />
-                </>
-            )}
-            {isRealTimePane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleGridLines())}
-                        isToggled={showGridLines}
-                        label="Show grid"
-                        variant="secondary"
-                    />
-                </>
-            )}
-        </CollapsibleGroup>
+        <div
+            className="span"
+            style={{
+                left: `${start}%`,
+                width: `${width}%`,
+            }}
+        >
+            <div className="value">{label}</div>
+        </div>
     );
+};
+
+export default TimeSpanLabel;
+
+TimeSpanLabel.propTypes = {
+    duration: number.isRequired,
+    begin: number,
+    end: number,
+    totalDuration: number,
 };

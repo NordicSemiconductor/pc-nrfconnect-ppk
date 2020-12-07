@@ -45,7 +45,8 @@ import Button from 'react-bootstrap/Button';
 
 import ChartTop from './ChartTop';
 import StatBox from './StatBox';
-import TimeSpan from './TimeSpan';
+import TimeSpanTop from './TimeSpan/TimeSpanTop';
+import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import DigitalChannels from './DigitalChannels';
 import ChartContainer from './ChartContainer';
 
@@ -355,7 +356,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
                 />
-                <TimeSpan width={chartAreaWidth + 1} className="window" />
+                <TimeSpanTop width={chartAreaWidth + 1} />
                 <ChartContainer
                     setLen={setLen}
                     setChartAreaWidth={setChartAreaWidth}
@@ -365,11 +366,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     lineData={lineData}
                     mappedIndex={mappedIndex}
                 />
-                <TimeSpan
+                <TimeSpanBottom
                     cursorBegin={cursorBegin}
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
-                    className="selection"
                 />
                 <div
                     className="chart-bottom"

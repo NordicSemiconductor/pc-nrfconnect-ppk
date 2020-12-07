@@ -1,16 +1,22 @@
-@import "~pc-nrfconnect-shared/src/variables";
-@import "./chart.scss";
+@import '~pc-nrfconnect-shared/src/variables';
+@import './../chart.scss';
 
 .timespan {
     margin-left: $yAxisWidthPx;
     height: 1rem;
     position: relative;
-    overflow: hidden;
 
     &.selection {
         height: 26px;
         margin-top: -10px;
         padding-top: 10px;
+        overflow: 'hidden';
+    }
+
+    &.offset {
+        height: 26px;
+        margin-top: -10px;
+        overflow: initial !important;
     }
 
     .span {
@@ -57,6 +63,13 @@
         line {
             stroke-width: 1;
             stroke: $gray-50;
+        }
+    }
+
+    .triggerOffset {
+        svg {
+            fill: $nordic-blue;
+            transform: rotate(180deg);
         }
     }
 }

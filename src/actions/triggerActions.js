@@ -50,12 +50,12 @@ export function processTriggerSample(currentValue, device, samplingData) {
             dataBuffer,
         } = samplingData;
         const {
-            chart: { preSamplingOn, postSamplingOn },
             trigger: {
                 triggerLength,
                 triggerLevel,
                 triggerSingleWaiting,
                 triggerStartIndex,
+                triggerWindowOffset,
             },
         } = getState().app;
 
@@ -66,42 +66,38 @@ export function processTriggerSample(currentValue, device, samplingData) {
             return;
         }
 
-        const windowSize = calculateWindowSize(
-            triggerLength,
-            samplingTime,
-            postSamplingOn,
-            device.numberOfSamplesIn5Ms
-        );
+        const windowSize = calculateWindowSize(triggerLength, samplingTime);
 
         const enoughSamplesCollected =
             (triggerStartIndex + windowSize) % dataBuffer.length <=
             currentIndex;
 
-        if (enoughSamplesCollected) {
-            if (triggerSingleWaiting) {
-                logger.info('Trigger received, stopped waiting');
-                dispatch(clearSingleTriggerWaitingAction());
-                device.ppkTriggerStop();
-            }
-
-            const startIndex = preSamplingOn
-                ? triggerStartIndex - device.numberOfSamplesIn5Ms
-                : triggerStartIndex;
-            const from = indexToTimestamp(startIndex);
-            const to = indexToTimestamp(currentIndex);
-            dispatch(chartWindowAction(from, to, to - from));
-            dispatch(setTriggerStartAction(null));
+        if (!enoughSamplesCollected) return;
+        if (triggerSingleWaiting) {
+            logger.info('Trigger received, stopped waiting');
+            dispatch(clearSingleTriggerWaitingAction());
+            device.ppkTriggerStop();
         }
+
+        const shiftedIndex = getShiftedIndex(
+            device.capabilities.prePostTriggering,
+            windowSize,
+            triggerWindowOffset
+        );
+
+        const from = indexToTimestamp(triggerStartIndex + shiftedIndex);
+        const to = indexToTimestamp(currentIndex + shiftedIndex);
+        dispatch(chartWindowAction(from, to, to - from));
+        dispatch(setTriggerStartAction(null));
     };
 }
 
-export function calculateWindowSize(
-    triggerLength,
-    samplingTime,
-    postSamplingOn,
-    samplesToAdd
-) {
-    let windowSize = Math.floor((triggerLength * 1000) / samplingTime);
-    if (postSamplingOn) windowSize += samplesToAdd;
-    return windowSize;
+function getShiftedIndex(supportsPrePostTriggering, windowSize, triggerOffset) {
+    if (!supportsPrePostTriggering) return 0;
+    const offsetToSamples = Math.ceil(triggerOffset / 10);
+    return -windowSize / 2 - offsetToSamples;
+}
+
+export function calculateWindowSize(triggerLength, samplingTime) {
+    return Math.floor((triggerLength * 1000) / samplingTime);
 }

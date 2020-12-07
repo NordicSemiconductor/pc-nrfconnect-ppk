@@ -38,7 +38,7 @@
 
 import colors from '../../colors.scss';
 
-const { gray700: color, white } = colors;
+const { gray700: color, white, nordicBlue } = colors;
 
 const plugin = {
     id: 'triggerLevel',
@@ -59,13 +59,15 @@ const plugin = {
         if (y < top || y > bottom) {
             return null;
         }
+        const width = 24;
+        const height = 10;
         return {
             y: Math.ceil(y - 0.5) + 0.5,
             label: {
-                x: left - 62,
-                y: y - 9.5,
-                w: 80,
-                h: 18,
+                x: left - width,
+                y: y - height / 2 - 0.5,
+                w: width,
+                h: height,
             },
         };
     },
@@ -89,19 +91,15 @@ const plugin = {
         const { label } = this.getCoords(chartInstance) || {};
         if (!label) return;
         chartInstance.triggerLine.y = evt.layerY;
+        const {
+            scales: { yScale },
+            options: { sendTriggerLevel },
+        } = chartInstance;
+        sendTriggerLevel(yScale.getValueForPixel(chartInstance.triggerLine.y));
     },
 
     pointerLeaveHandler(chartInstance) {
         if (!chartInstance.triggerLine) return;
-        if (chartInstance.triggerLine.y !== null) {
-            const {
-                scales: { yScale },
-                options: { sendTriggerLevel },
-            } = chartInstance;
-            sendTriggerLevel(
-                yScale.getValueForPixel(chartInstance.triggerLine.y)
-            );
-        }
         chartInstance.triggerLine.y = null;
     },
 
@@ -135,59 +133,82 @@ const plugin = {
         const { y, label } = coords;
 
         ctx.save();
-        ctx.lineWidth = 0.5;
-        ctx.strokeStyle = color;
-        ctx.setLineDash([4, 5]);
-        ctx.beginPath();
-        ctx.moveTo(left, y);
-        ctx.lineTo(right, y);
-        ctx.closePath();
-        ctx.stroke();
-        ctx.setLineDash([]);
 
-        ctx.fillStyle = color;
+        function drawDashedLine() {
+            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = color;
+            ctx.setLineDash([4, 5]);
+            ctx.beginPath();
+            ctx.moveTo(left, y - 1); // Moving it 1px up seems to center it on the label
+            ctx.lineTo(right, y - 1); // Moving it 1px up seems to center it on the label
+            ctx.closePath();
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
 
-        ctx.translate(label.x, label.y);
-        ctx.beginPath();
-        ctx.moveTo(0, 2);
-        ctx.bezierCurveTo(0, 1, 1, 0, 2, 0);
-        ctx.lineTo(label.w - 20, 0);
-        ctx.bezierCurveTo(
-            label.w - 15,
-            0,
-            label.w,
-            label.h / 2,
-            label.w,
-            label.h / 2
-        );
-        ctx.bezierCurveTo(
-            label.w,
-            label.h / 2,
-            label.w - 15,
-            label.h,
-            label.w - 20,
-            label.h
-        );
-        ctx.lineTo(2, label.h);
-        ctx.bezierCurveTo(1, label.h, 0, label.h - 1, 0, label.h - 2);
-        ctx.closePath();
-        ctx.fill();
+        function drawHandle() {
+            ctx.fillStyle = nordicBlue;
 
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = colors.gray50;
-        ctx.beginPath();
-        ctx.moveTo(4, 3);
-        ctx.lineTo(4, label.h - 3);
-        ctx.moveTo(8, 3);
-        ctx.lineTo(8, label.h - 3);
-        ctx.moveTo(12, 3);
-        ctx.lineTo(12, label.h - 3);
-        ctx.closePath();
-        ctx.stroke();
+            ctx.translate(label.x, label.y);
+            ctx.beginPath();
+            ctx.moveTo(0, 2);
+            ctx.bezierCurveTo(0, 1, 1, 0, 2, 0);
+            const curveStart = label.w - 8;
+            ctx.lineTo(curveStart, 0);
+            ctx.bezierCurveTo(
+                label.w - 5,
+                0,
+                label.w,
+                label.h / 2,
+                label.w,
+                label.h / 2
+            );
+            ctx.bezierCurveTo(
+                label.w,
+                label.h / 2,
+                label.w - 5,
+                label.h,
+                curveStart,
+                label.h
+            );
+            ctx.lineTo(2, label.h);
+            ctx.bezierCurveTo(1, label.h, 0, label.h - 1, 0, label.h - 2);
+            ctx.closePath();
+            ctx.fill();
 
-        ctx.textAlign = 'right';
-        ctx.fillStyle = white;
-        ctx.fillText(formatY(triggerLevel), label.w - 18, label.h / 2 + 4);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = colors.gray50;
+            ctx.beginPath();
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        function drawHandleLines() {
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = colors.gray50;
+            ctx.beginPath();
+            ctx.moveTo(4, 3);
+            ctx.lineTo(4, label.h - 3);
+            ctx.moveTo(8, 3);
+            ctx.lineTo(8, label.h - 3);
+            ctx.moveTo(12, 3);
+            ctx.lineTo(12, label.h - 3);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        function drawText() {
+            ctx.textAlign = 'right';
+            ctx.fillStyle = white;
+            ctx.fillText(formatY(triggerLevel), label.w - 18, label.h / 2 + 4);
+        }
+
+        drawDashedLine();
+        drawHandle();
+        // drawHandleLines();
+        // drawText(ctx);
 
         ctx.restore();
     },

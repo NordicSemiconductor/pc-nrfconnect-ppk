@@ -34,59 +34,69 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
+import React, { useState, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { number } from 'prop-types';
+import { setWindowOffsetAction } from '../../../reducers/triggerReducer';
 
-import DigitalChannels from './DigitalChannels';
+import './timespan.scss';
 
-import {
-    chartState,
-    toggleDigitalChannels,
-    toggleTimestamps,
-    toggleGridLines,
-} from '../../reducers/chartReducer';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+const windowOffsetHandleSvg = (
+    <g>
+        <path d="M 0 24 C 0 25 1 26 2 26 L 9 26 C 10 26 11 25 11 24 L 11 11 C 11 7 5.5 0 5.5 0 C 5.5 0 0 7 0 11 z" />
+    </g>
+);
 
-export default () => {
+const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
     const dispatch = useDispatch();
-    const {
-        digitalChannelsVisible,
-        timestampsVisible,
-        hasDigitalChannels,
-        showGridLines,
-    } = useSelector(chartState);
+    const setWindowOffset = useCallback(
+        (...args) => dispatch(setWindowOffsetAction(...args)),
+        [dispatch]
+    );
+    const [drag, setDrag] = useState(null);
+
+    const onPointerDown = ({ clientX, pointerId, target }) => {
+        target.setPointerCapture(pointerId);
+        setDrag({ clientX, triggerWindowOffset });
+    };
+    const onPointerMove = ({ clientX, target }) => {
+        if (!drag) return;
+        setWindowOffset(
+            drag.triggerWindowOffset +
+                (duration * (clientX - drag.clientX)) /
+                    target.parentElement.offsetWidth
+        );
+    };
+
+    const onPointerUp = ({ target, pointerId }) => {
+        target.releasePointerCapture(pointerId);
+        setDrag(null);
+    };
+
+    const handlePosition = triggerWindowOffset
+        ? 100 * ((triggerWindowOffset + duration) / duration - 0.5)
+        : 50;
 
     return (
-        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="secondary"
-            />
-            {hasDigitalChannels && isDataLoggerPane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleDigitalChannels())}
-                        isToggled={digitalChannelsVisible}
-                        label="Digital channels"
-                        variant="secondary"
-                    />
-                    <DigitalChannels />
-                </>
-            )}
-            {isRealTimePane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleGridLines())}
-                        isToggled={showGridLines}
-                        label="Show grid"
-                        variant="secondary"
-                    />
-                </>
-            )}
-        </CollapsibleGroup>
+        <div
+            className="cursor begin triggerOffset"
+            style={{
+                left: `${handlePosition}%`,
+            }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+        >
+            <svg height={24} width={10}>
+                {windowOffsetHandleSvg}
+            </svg>
+        </div>
     );
+};
+
+export default WindowOffsetSlider;
+
+WindowOffsetSlider.propTypes = {
+    triggerWindowOffset: number,
+    duration: number,
 };
