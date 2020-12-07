@@ -37,10 +37,6 @@
 import React from 'react';
 import { render, screen } from '../../utils/testUtils';
 import StartStop from '../SidePanel/StartStop';
-import { SAMPLES_PER_AVERAGE } from '../../device/rttDevice';
-
-const ppk2SampleFreq = 100000;
-const ppk1SampleFreq = 77000 / SAMPLES_PER_AVERAGE;
 
 const initialStatePpk2 = {
     app: {
@@ -53,7 +49,7 @@ const initialStatePpk2 = {
         },
         dataLogger: {
             sampleFreqLog10: 5,
-            sampleFreq: ppk2SampleFreq,
+            sampleFreq: 100000,
             durationSeconds: 300,
             maxFreqLog10: 5,
             samplesPerAverage: null,
@@ -73,7 +69,7 @@ const initialStatePpk1 = {
         },
         dataLogger: {
             sampleFreqLog10: 5,
-            sampleFreq: ppk1SampleFreq,
+            sampleFreq: 7700,
             durationSeconds: 300,
             maxFreqLog10: 5,
             samplesPerAverage: null,
