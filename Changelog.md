@@ -1,6 +1,9 @@
 ## Unreleased
+### Added
+- Trigger function for PPK2
 ### Updates
 - Add screenshot functionality
+- Split real-time and data logger views
 
 ## Version 3.0.2
 ## Fixed
