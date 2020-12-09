@@ -36,7 +36,8 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Toggle, CollapsibleGroup } from '../../from_pc-nrfconnect-shared';
+import { CollapsibleGroup } from 'pc-nrfconnect-shared';
+import { Toggle } from '../../from_pc-nrfconnect-shared';
 
 import DigitalChannels from './DigitalChannels';
 

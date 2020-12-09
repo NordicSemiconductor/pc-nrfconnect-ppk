@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SidePanel, useHotKey } from '../../from_pc-nrfconnect-shared';
+import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
 import PowerMode from './PowerMode';
 import DisplayOptions from './DisplayOptions';

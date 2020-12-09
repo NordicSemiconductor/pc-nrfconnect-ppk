@@ -39,12 +39,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Form from 'react-bootstrap/Form';
 import BootstrapCollapse from 'react-bootstrap/Collapse';
-
-import {
-    CollapsibleGroup,
-    NumberInlineInput,
-    Slider,
-} from '../../from_pc-nrfconnect-shared';
+import { CollapsibleGroup } from 'pc-nrfconnect-shared';
+import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
 
