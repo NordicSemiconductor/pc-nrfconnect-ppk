@@ -53,21 +53,21 @@ const mockStore = configureMockStore(middlewares);
 const mockPpk2Device = {
     numberOfSamplesIn5Ms: 500,
     ppkTriggerStop: jest.fn(),
+    capabilities: {
+        prePostTriggering: true,
+    },
 };
 
 const defaultTriggerLength = 10;
 const defaultTriggerLevel = 10;
 const initialState = {
     app: {
-        chart: {
-            preSamplingOn: false,
-            postSamplingOn: false,
-        },
         trigger: {
             triggerLength: defaultTriggerLength,
             triggerLevel: defaultTriggerLevel,
             triggerSingleWaiting: false,
             triggerStartIndex: null,
+            triggerWindowOffset: 0,
         },
     },
 };
@@ -83,21 +83,9 @@ describe('Handle trigger', () => {
         it('should calculate window size', () => {
             const windowSize = calculateWindowSize(
                 defaultTriggerLength,
-                samplingData.samplingTime,
-                initialState.app.chart.postSamplingOn,
-                mockPpk2Device.numberOfSamplesIn5Ms
+                samplingData.samplingTime
             );
             expect(windowSize).toBe(1000);
-        });
-
-        it('should add 500 samples to the size if postSampling is on', () => {
-            const windowSize = calculateWindowSize(
-                defaultTriggerLength,
-                samplingData.samplingTime,
-                true,
-                mockPpk2Device.numberOfSamplesIn5Ms
-            );
-            expect(windowSize).toBe(1500);
         });
     });
 
@@ -129,46 +117,6 @@ describe('Handle trigger', () => {
         );
         const from = indexToTimestamp(initialIndex);
         const to = indexToTimestamp(newIndex);
-        const expectedActions = [
-            {
-                type: 'CHART_WINDOW',
-                windowBegin: from,
-                windowEnd: to,
-                windowDuration: to - from,
-                yMax: undefined,
-                yMin: undefined,
-            },
-            { type: 'SET_TRIGGER_START', triggerStartIndex: null },
-        ];
-        expect(store.getActions()).toEqual(expectedActions);
-    });
-
-    it('should move windowBegin by 500 samples if presampling is on', () => {
-        const startIndex = 600;
-        const endIndex = 1600;
-        const store = mockStore({
-            app: {
-                ...initialState.app,
-                chart: {
-                    ...initialState.app.chart,
-                    preSamplingOn: true,
-                },
-                trigger: {
-                    ...initialState.app.trigger,
-                    triggerStartIndex: startIndex,
-                },
-            },
-        });
-        store.dispatch(
-            processTriggerSample(5, mockPpk2Device, {
-                ...samplingData,
-                dataIndex: endIndex,
-            })
-        );
-        const from = indexToTimestamp(
-            startIndex - mockPpk2Device.numberOfSamplesIn5Ms
-        );
-        const to = indexToTimestamp(endIndex);
         const expectedActions = [
             {
                 type: 'CHART_WINDOW',

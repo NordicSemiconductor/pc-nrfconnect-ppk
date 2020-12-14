@@ -80,9 +80,9 @@ export function processTriggerSample(currentValue, device, samplingData) {
         }
 
         const shiftedIndex = getShiftedIndex(
-            device.capabilities.prePostTriggering,
             windowSize,
-            triggerWindowOffset
+            triggerWindowOffset,
+            device.capabilities.prePostTriggering
         );
 
         const from = indexToTimestamp(triggerStartIndex + shiftedIndex);
@@ -92,8 +92,13 @@ export function processTriggerSample(currentValue, device, samplingData) {
     };
 }
 
-function getShiftedIndex(supportsPrePostTriggering, windowSize, triggerOffset) {
+function getShiftedIndex(
+    windowSize,
+    triggerOffset = 0,
+    supportsPrePostTriggering = false
+) {
     if (!supportsPrePostTriggering) return 0;
+    if (triggerOffset === 0) return 0;
     const offsetToSamples = Math.ceil(triggerOffset / 10);
     return -windowSize / 2 - offsetToSamples;
 }
