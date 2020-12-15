@@ -50,11 +50,10 @@ jest.mock('nrfconnect/core', () => {
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
-const mockPpk2Device = {
-    numberOfSamplesIn5Ms: 500,
+const mockDevice = {
     ppkTriggerStop: jest.fn(),
     capabilities: {
-        prePostTriggering: true,
+        prePostTriggering: false,
     },
 };
 
@@ -71,9 +70,9 @@ const initialState = {
         },
     },
 };
-const initialIndex = 5;
+const beginIndex = 5;
 const samplingData = {
-    dataIndex: initialIndex,
+    dataIndex: beginIndex,
     samplingTime: 10,
     dataBuffer: new Array(2000).fill(100),
 };
@@ -91,9 +90,9 @@ describe('Handle trigger', () => {
 
     it('should set triggerStart if value is higher than trigger level', () => {
         const store = mockStore(initialState);
-        store.dispatch(processTriggerSample(15, mockPpk2Device, samplingData));
+        store.dispatch(processTriggerSample(15, mockDevice, samplingData));
         const expectedActions = [
-            { type: 'SET_TRIGGER_START', triggerStartIndex: initialIndex },
+            { type: 'SET_TRIGGER_START', triggerStartIndex: beginIndex },
         ];
         expect(store.getActions()).toEqual(expectedActions);
     });
@@ -105,30 +104,22 @@ describe('Handle trigger', () => {
                 ...initialState.app,
                 trigger: {
                     ...initialState.app.trigger,
-                    triggerStartIndex: initialIndex,
+                    triggerStartIndex: beginIndex,
                 },
             },
         });
         store.dispatch(
-            processTriggerSample(5, mockPpk2Device, {
+            processTriggerSample(5, mockDevice, {
                 ...samplingData,
                 dataIndex: newIndex,
             })
         );
-        const from = indexToTimestamp(initialIndex);
-        const to = indexToTimestamp(newIndex);
-        const expectedActions = [
-            {
-                type: 'CHART_WINDOW',
-                windowBegin: from,
-                windowEnd: to,
-                windowDuration: to - from,
-                yMax: undefined,
-                yMin: undefined,
-            },
-            { type: 'SET_TRIGGER_START', triggerStartIndex: null },
-        ];
-        expect(store.getActions()).toEqual(expectedActions);
+        expect(store.getActions()).toEqual(
+            getExpectedChartActions(
+                indexToTimestamp(beginIndex),
+                indexToTimestamp(newIndex)
+            )
+        );
     });
 
     describe('Single trigger', () => {
@@ -138,7 +129,7 @@ describe('Handle trigger', () => {
                 ...initialState.app,
                 trigger: {
                     ...initialState.app.trigger,
-                    triggerStartIndex: initialIndex,
+                    triggerStartIndex: beginIndex,
                     triggerSingleWaiting: true,
                 },
             },
@@ -146,29 +137,21 @@ describe('Handle trigger', () => {
 
         it('should reset single trigger and issue device stop samping command', () => {
             store.dispatch(
-                processTriggerSample(5, mockPpk2Device, {
+                processTriggerSample(5, mockDevice, {
                     ...samplingData,
                     dataIndex: newIndex,
                 })
             );
-            const from = indexToTimestamp(initialIndex);
-            const to = indexToTimestamp(newIndex);
-            const expectedActions = [
+            expect(store.getActions()).toEqual([
                 {
                     type: 'TRIGGER_SINGLE_CLEAR',
                 },
-                {
-                    type: 'CHART_WINDOW',
-                    windowBegin: from,
-                    windowEnd: to,
-                    windowDuration: to - from,
-                    yMax: undefined,
-                    yMin: undefined,
-                },
-                { type: 'SET_TRIGGER_START', triggerStartIndex: null },
-            ];
-            expect(store.getActions()).toEqual(expectedActions);
-            expect(mockPpk2Device.ppkTriggerStop).toHaveBeenCalledTimes(1);
+                ...getExpectedChartActions(
+                    indexToTimestamp(beginIndex),
+                    indexToTimestamp(newIndex)
+                ),
+            ]);
+            expect(mockDevice.ppkTriggerStop).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -186,14 +169,14 @@ describe('Handle trigger', () => {
         it('Should handle the buffer wrapping around', () => {
             // window size here will be 1000, so it should start drawing at index 500
             store.dispatch(
-                processTriggerSample(5, mockPpk2Device, {
+                processTriggerSample(5, mockDevice, {
                     ...samplingData,
                     dataIndex: 499,
                 })
             );
             expect(store.getActions().length).toBe(0);
             store.dispatch(
-                processTriggerSample(5, mockPpk2Device, {
+                processTriggerSample(5, mockDevice, {
                     ...samplingData,
                     dataIndex: 500,
                 })
@@ -201,4 +184,93 @@ describe('Handle trigger', () => {
             expect(store.getActions().length).toBe(2);
         });
     });
+
+    describe('Window offset', () => {
+        const mockDeviceWithSamplingCapabilities = {
+            ...mockDevice,
+            capabilities: {
+                ...mockDevice.capabilities,
+                prePostTriggering: true,
+            },
+        };
+        const endIndex = beginIndex + 1000;
+        const windowSize = calculateWindowSize(
+            defaultTriggerLength,
+            samplingData.samplingTime
+        );
+
+        it('should by default shift window by half the window size for given hw', () => {
+            const store = mockStore({
+                app: {
+                    ...initialState.app,
+                    trigger: {
+                        ...initialState.app.trigger,
+                        triggerStartIndex: beginIndex,
+                    },
+                },
+            });
+            store.dispatch(
+                processTriggerSample(5, mockDeviceWithSamplingCapabilities, {
+                    ...samplingData,
+                    dataIndex: endIndex,
+                })
+            );
+            const expectedShiftedIndex = windowSize / 2;
+            expect(expectedShiftedIndex).toBe(500);
+            const from = indexToTimestamp(beginIndex - expectedShiftedIndex);
+            const to = indexToTimestamp(endIndex - expectedShiftedIndex);
+            expect(store.getActions()).toEqual(
+                getExpectedChartActions(from, to)
+            );
+        });
+
+        it('should shift window according to given offset', () => {
+            const triggerWindowOffset = 500;
+            const store = mockStore({
+                app: {
+                    ...initialState.app,
+                    trigger: {
+                        ...initialState.app.trigger,
+                        triggerStartIndex: beginIndex,
+                        triggerWindowOffset,
+                    },
+                },
+            });
+            store.dispatch(
+                processTriggerSample(5, mockDeviceWithSamplingCapabilities, {
+                    ...samplingData,
+                    dataIndex: endIndex,
+                })
+            );
+
+            // triggerWindowOffset = 500 translates to 50 samples offset with a samplingTime of 10
+            // Currently the implementation is such that triggerWindowOffset === -windowSize / 2
+            // shifts the window all the way to the left, while triggerWindowOffset === windowSize / 2
+            // shifts the window all the way to the right.
+            //
+            // For PPK2, default trigger position inside window should be center, e.g. it will be shifted
+            // by half the size of the window plus the given offset.
+            const shift = triggerWindowOffset / samplingData.samplingTime;
+            const expectedShiftedIndex = windowSize / 2 + shift;
+            expect(shift).toBe(50);
+            expect(expectedShiftedIndex).toBe(550);
+            const from = indexToTimestamp(beginIndex - expectedShiftedIndex);
+            const to = indexToTimestamp(endIndex - expectedShiftedIndex);
+            expect(store.getActions()).toEqual(
+                getExpectedChartActions(from, to)
+            );
+        });
+    });
 });
+
+const getExpectedChartActions = (from, to) => [
+    {
+        type: 'CHART_WINDOW',
+        windowBegin: from,
+        windowEnd: to,
+        windowDuration: to - from,
+        yMax: undefined,
+        yMin: undefined,
+    },
+    { type: 'SET_TRIGGER_START', triggerStartIndex: null },
+];

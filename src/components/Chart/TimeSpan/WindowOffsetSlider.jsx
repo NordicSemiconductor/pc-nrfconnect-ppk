@@ -86,6 +86,7 @@ const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
+            data-testid="offsetHandler"
         >
             <svg height={24} width={10}>
                 {windowOffsetHandleSvg}

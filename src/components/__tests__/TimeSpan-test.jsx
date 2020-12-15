@@ -35,41 +35,53 @@
  */
 
 import React from 'react';
-import { render, screen } from '../../../utils/testUtils';
-import ExportDialog from '../ExportDialog';
-
-jest.mock('nrfconnect/core', () => {
-    return {
-        getAppDataDir: () => '',
-    };
-});
+import { render, screen } from '../../utils/testUtils';
+import TimeSpanTop from '../Chart/TimeSpan/TimeSpanTop';
 
 const initialState = {
     app: {
         chart: {
-            windowBegin: 0,
-            windowEnd: 999999,
-            cursorBegin: null,
-            hasDigitalChannels: true,
+            windowDuration: 1000,
+        },
+        trigger: {
+            triggerRunning: false,
+            triggerWindowOffset: 0,
         },
         app: {
-            isExportDialogVisible: true,
+            capabilities: {
+                prePostTriggering: false,
+            },
         },
     },
 };
 
-describe('ExportDialog', () => {
-    render(<ExportDialog />, { initialState });
-    const numberOfRecordsText = '100000 records';
-    const totalSizeLargerThanZeroPattern = /[1-9][0-9]*\sMB/;
-    const durationLargerThanZeroPattern = /[1-9][0-9]*\ss/;
+test('should hide offset handler if device does not support it', () => {
+    render(<TimeSpanTop />, { initialState });
 
-    it('should show the number of records', () => {
-        const numberOfRecords = screen.getByText(numberOfRecordsText);
-        expect(numberOfRecords).not.toBe(undefined);
-        const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
-        expect(totalSize).not.toBe(undefined);
-        const duration = screen.getByText(durationLargerThanZeroPattern);
-        expect(duration).not.toBe(undefined);
+    const handler = screen.queryByTestId('offsetHandler');
+    expect(handler).toBeNull();
+});
+
+test('should show offset handler if trigger running and device has capabilities', () => {
+    const triggerRunningWithCapabilitiesState = {
+        app: {
+            ...initialState.app,
+            trigger: {
+                ...initialState.app.trigger,
+                triggerRunning: true,
+            },
+            app: {
+                capabilities: {
+                    prePostTriggering: true,
+                },
+            },
+        },
+    };
+
+    render(<TimeSpanTop />, {
+        initialState: triggerRunningWithCapabilitiesState,
     });
+
+    const handler = screen.queryByTestId('offsetHandler');
+    expect(handler).not.toBeNull();
 });

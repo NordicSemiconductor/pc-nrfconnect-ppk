@@ -74,7 +74,6 @@ const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
 const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
 const TOGGLE_GRID_LINES = 'TOGGLE_GRID_LINES';
-const SET_WINDOW_OFFSET = 'SET_WINDOW_OFFSET';
 
 const MIN_WINDOW_DURATION = 500;
 const MAX_WINDOW_DURATION = 120000000;
@@ -267,11 +266,6 @@ export default (state = initialState, { type, ...action }) => {
             return {
                 ...state,
                 showGridLines: !state.showGridLines,
-            };
-        case SET_WINDOW_OFFSET:
-            return {
-                ...state,
-                triggerWindowOffset: action.offset,
             };
         case UPDATE_HAS_DIGITAL_CHANNELS:
             return { ...state, ...action };
