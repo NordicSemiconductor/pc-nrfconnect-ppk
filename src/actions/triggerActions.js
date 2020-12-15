@@ -81,28 +81,29 @@ export function processTriggerSample(currentValue, device, samplingData) {
 
         const shiftedIndex = getShiftedIndex(
             windowSize,
+            samplingTime,
             triggerWindowOffset,
             device.capabilities.prePostTriggering
         );
 
-        const from = indexToTimestamp(triggerStartIndex + shiftedIndex);
-        const to = indexToTimestamp(currentIndex + shiftedIndex);
+        const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
+        const to = indexToTimestamp(currentIndex - shiftedIndex);
         dispatch(chartWindowAction(from, to, to - from));
         dispatch(setTriggerStartAction(null));
     };
 }
 
+// PPK2 trigger point should by default be shifted to middle of window
 function getShiftedIndex(
     windowSize,
+    samplingTime,
     triggerOffset = 0,
     supportsPrePostTriggering = false
 ) {
     if (!supportsPrePostTriggering) return 0;
-    if (triggerOffset === 0) return 0;
-    const offsetToSamples = Math.ceil(triggerOffset / 10);
-    return -windowSize / 2 - offsetToSamples;
+    const offsetToSamples = Math.ceil(triggerOffset / samplingTime);
+    return windowSize / 2 + offsetToSamples;
 }
 
-export function calculateWindowSize(triggerLength, samplingTime) {
-    return Math.floor((triggerLength * 1000) / samplingTime);
-}
+export const calculateWindowSize = (triggerLength, samplingTime) =>
+    Math.floor((triggerLength * 1000) / samplingTime);
