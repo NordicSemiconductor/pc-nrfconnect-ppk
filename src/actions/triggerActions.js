@@ -42,6 +42,21 @@ import {
     setTriggerStartAction,
 } from '../reducers/triggerReducer';
 
+// PPK2 trigger point should by default be shifted to middle of window
+const getShiftedIndex = (
+    windowSize,
+    samplingTime,
+    triggerOffset = 0,
+    supportsPrePostTriggering = false
+) => {
+    if (!supportsPrePostTriggering) return 0;
+    const offsetToSamples = Math.ceil(triggerOffset / samplingTime);
+    return windowSize / 2 + offsetToSamples;
+};
+
+export const calculateWindowSize = (triggerLength, samplingTime) =>
+    Math.floor((triggerLength * 1000) / samplingTime);
+
 export function processTriggerSample(currentValue, device, samplingData) {
     return (dispatch, getState) => {
         const {
@@ -92,18 +107,3 @@ export function processTriggerSample(currentValue, device, samplingData) {
         dispatch(setTriggerStartAction(null));
     };
 }
-
-// PPK2 trigger point should by default be shifted to middle of window
-function getShiftedIndex(
-    windowSize,
-    samplingTime,
-    triggerOffset = 0,
-    supportsPrePostTriggering = false
-) {
-    if (!supportsPrePostTriggering) return 0;
-    const offsetToSamples = Math.ceil(triggerOffset / samplingTime);
-    return windowSize / 2 + offsetToSamples;
-}
-
-export const calculateWindowSize = (triggerLength, samplingTime) =>
-    Math.floor((triggerLength * 1000) / samplingTime);

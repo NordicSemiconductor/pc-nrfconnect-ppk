@@ -183,32 +183,8 @@ const plugin = {
             ctx.stroke();
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        function drawHandleLines() {
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = colors.gray50;
-            ctx.beginPath();
-            ctx.moveTo(4, 3);
-            ctx.lineTo(4, label.h - 3);
-            ctx.moveTo(8, 3);
-            ctx.lineTo(8, label.h - 3);
-            ctx.moveTo(12, 3);
-            ctx.lineTo(12, label.h - 3);
-            ctx.closePath();
-            ctx.stroke();
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        function drawText() {
-            ctx.textAlign = 'right';
-            ctx.fillStyle = white;
-            ctx.fillText(formatY(triggerLevel), label.w - 18, label.h / 2 + 4);
-        }
-
         drawDashedLine();
         drawHandle();
-        // drawHandleLines();
-        // drawText(ctx);
 
         ctx.restore();
     },

@@ -61,7 +61,7 @@ const initialState = {
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     yAxisLock: false,
-    showGridLines: true,
+    showGridLines: persistentStore.get('gridlinesVisible', true),
 };
 
 const ANIMATION = 'ANIMATION';
@@ -263,6 +263,7 @@ export default (state = initialState, { type, ...action }) => {
             return { ...s, ...action, yAxisLock: !state.yAxisLock };
         }
         case TOGGLE_GRID_LINES:
+            persistentStore.set('gridlinesVisible', !state.showGridLines);
             return {
                 ...state,
                 showGridLines: !state.showGridLines,

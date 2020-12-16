@@ -42,9 +42,9 @@ import { setWindowOffsetAction } from '../../../reducers/triggerReducer';
 import './timespan.scss';
 
 const windowOffsetHandleSvg = (
-    <g>
+    <svg height={24} width={10}>
         <path d="M 0 24 C 0 25 1 26 2 26 L 9 26 C 10 26 11 25 11 24 L 11 11 C 11 7 5.5 0 5.5 0 C 5.5 0 0 7 0 11 z" />
-    </g>
+    </svg>
 );
 
 const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
@@ -88,9 +88,7 @@ const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
             onPointerUp={onPointerUp}
             data-testid="offsetHandler"
         >
-            <svg height={24} width={10}>
-                {windowOffsetHandleSvg}
-            </svg>
+            {windowOffsetHandleSvg}
         </div>
     );
 };
