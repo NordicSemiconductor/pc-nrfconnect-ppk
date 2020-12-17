@@ -34,6 +34,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// This utility cannot be used within other hooks (e.g. useEffect and useCallback). If you want to check
+// the current pane inside useEffect you should create a variable first and
+// check that, e.g.
+//
+// const isScope = getScopePane();
+// useEffect(() => {
+//   if (isScope) ...
+// }, [isScope])
+
 import { useSelector } from 'react-redux';
 import { currentPane as currentPaneSelector } from '../reducers/appReducer';
 
@@ -54,8 +63,7 @@ const getCurrentPane = (pane, currentPane = null) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         return useSelector(currentPaneSelector) === pane;
     } catch (err) {
-        const errorMessage =
-            'The current pane (number) should be passed in as argument when used outside a React component';
+        const errorMessage = `The current pane (number) should be passed in as argument when used outside a React component.\n${err}`;
         console.error(errorMessage);
         throw new Error(errorMessage);
     }

@@ -35,16 +35,16 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { number, string } from 'prop-types';
+import { number } from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
-import { unit } from 'mathjs';
-import { chartState, chartCursorAction } from '../../reducers/chartReducer';
+import { chartState, chartCursorAction } from '../../../reducers/chartReducer';
 
-import { options } from '../../globals';
+import { options } from '../../../globals';
+import TimeSpanLabel from './TimeSpanLabel';
 
 import './timespan.scss';
 
-const handle = (
+const handleSvg = (
     <g>
         <path d="M 0 24 C 0 25 1 26 2 26 L 9 26 C 10 26 11 25 11 24 L 11 11 C 11 7 5.5 0 5.5 0 C 5.5 0 0 7 0 11 z" />
         <line x1="3" y1="22" x2="8" y2="22" />
@@ -53,12 +53,7 @@ const handle = (
     </g>
 );
 
-const TimeSpan = ({
-    cursorBegin = null,
-    cursorEnd = null,
-    width,
-    className = '',
-}) => {
+const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
     const dispatch = useDispatch();
     const chartCursor = useCallback(
         (...args) => dispatch(chartCursorAction(...args)),
@@ -71,20 +66,7 @@ const TimeSpan = ({
     const w1 = windowEnd || options.timestamp - options.samplingTime;
     const w0 = windowBegin || w1 - windowDuration;
 
-    const duration =
-        cursorBegin === null ? windowDuration : cursorEnd - cursorBegin;
-
-    let time = unit(duration, 'us');
-    if (duration > 60 * 1e6) {
-        time = time.to('min');
-    }
-    const v = time.format({ notation: 'fixed', precision: 2 });
-    const [valStr, unitStr] = v.split(' ');
-
     const showHandles = cursorBegin !== null && w0 !== 0;
-
-    const [begin, end] =
-        cursorBegin === null ? [w0, w1] : [cursorBegin, cursorEnd];
 
     const onPointerDown = ({ clientX, pointerId, target }) => {
         target.setPointerCapture(pointerId);
@@ -94,9 +76,8 @@ const TimeSpan = ({
         target.releasePointerCapture(pointerId);
         setDrag(null);
     };
-
     return (
-        <div className={`timespan ${className}`} style={{ width }}>
+        <div className="timespan selection" style={{ width }}>
             {showHandles && (
                 <div
                     className="cursor begin"
@@ -118,21 +99,11 @@ const TimeSpan = ({
                     onPointerUp={onPointerUp}
                 >
                     <svg height={26} width={11}>
-                        {handle}
+                        {handleSvg}
                     </svg>
                 </div>
             )}
-            <div
-                className="span"
-                style={{
-                    left: `${(100 * (begin - w0)) / windowDuration}%`,
-                    width: `${(100 * (end - begin)) / windowDuration}%`,
-                }}
-            >
-                <div className="value">
-                    {`\u0394${valStr}${unitStr.replace('u', '\u00B5')}`}
-                </div>
-            </div>
+            <TimeSpanLabel duration={windowDuration} />
             {showHandles && (
                 <div
                     className="cursor end"
@@ -154,7 +125,7 @@ const TimeSpan = ({
                     onPointerUp={onPointerUp}
                 >
                     <svg height={26} width={11}>
-                        {handle}
+                        {handleSvg}
                     </svg>
                 </div>
             )}
@@ -162,11 +133,10 @@ const TimeSpan = ({
     );
 };
 
-TimeSpan.propTypes = {
+TimeSpanBottom.propTypes = {
     cursorBegin: number,
     cursorEnd: number,
     width: number.isRequired,
-    className: string,
 };
 
-export default TimeSpan;
+export default TimeSpanBottom;

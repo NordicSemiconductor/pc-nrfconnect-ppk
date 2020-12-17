@@ -35,58 +35,61 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
+import { useSelector } from 'react-redux';
+import { number } from 'prop-types';
+import { chartState } from '../../../reducers/chartReducer';
+import { triggerState } from '../../../reducers/triggerReducer';
+import { appState } from '../../../reducers/appReducer';
 
-import DigitalChannels from './DigitalChannels';
+import WindowOffsetSlider from './WindowOffsetSlider';
+import TimeSpanLabel from './TimeSpanLabel';
 
-import {
-    chartState,
-    toggleDigitalChannels,
-    toggleTimestamps,
-    toggleGridLines,
-} from '../../reducers/chartReducer';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import './timespan.scss';
 
-export default () => {
-    const dispatch = useDispatch();
+const TimeSpanTop = ({ width }) => {
+    const { windowDuration } = useSelector(chartState);
+    const { triggerRunning, triggerWindowOffset } = useSelector(triggerState);
     const {
-        digitalChannelsVisible,
-        timestampsVisible,
-        hasDigitalChannels,
-        showGridLines,
-    } = useSelector(chartState);
+        capabilities: { prePostTriggering },
+    } = useSelector(appState);
+
+    const showHandle = prePostTriggering && triggerRunning;
+    const distanceFromOriginToTriggerHandle = showHandle
+        ? triggerWindowOffset + windowDuration / 2
+        : null;
 
     return (
-        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="secondary"
-            />
-            {hasDigitalChannels && isDataLoggerPane() && (
+        <div className="timespan window" style={{ width }}>
+            {showHandle ? (
                 <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleDigitalChannels())}
-                        isToggled={digitalChannelsVisible}
-                        label="Digital channels"
-                        variant="secondary"
+                    <TimeSpanLabel
+                        begin={0}
+                        end={distanceFromOriginToTriggerHandle}
+                        duration={distanceFromOriginToTriggerHandle}
+                        totalDuration={windowDuration}
                     />
-                    <DigitalChannels />
-                </>
-            )}
-            {isRealTimePane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleGridLines())}
-                        isToggled={showGridLines}
-                        label="Show grid"
-                        variant="secondary"
+                    <WindowOffsetSlider
+                        triggerWindowOffset={triggerWindowOffset}
+                        duration={windowDuration}
+                    />
+                    <TimeSpanLabel
+                        begin={distanceFromOriginToTriggerHandle}
+                        end={windowDuration}
+                        duration={
+                            windowDuration - distanceFromOriginToTriggerHandle
+                        }
+                        totalDuration={windowDuration}
                     />
                 </>
+            ) : (
+                <TimeSpanLabel duration={windowDuration} />
             )}
-        </CollapsibleGroup>
+        </div>
     );
+};
+
+export default TimeSpanTop;
+
+TimeSpanTop.propTypes = {
+    width: number,
 };

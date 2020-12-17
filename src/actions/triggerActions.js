@@ -42,6 +42,21 @@ import {
     setTriggerStartAction,
 } from '../reducers/triggerReducer';
 
+// PPK2 trigger point should by default be shifted to middle of window
+const getShiftedIndex = (
+    windowSize,
+    samplingTime,
+    triggerOffset = 0,
+    supportsPrePostTriggering = false
+) => {
+    if (!supportsPrePostTriggering) return 0;
+    const offsetToSamples = Math.ceil(triggerOffset / samplingTime);
+    return windowSize / 2 + offsetToSamples;
+};
+
+export const calculateWindowSize = (triggerLength, samplingTime) =>
+    Math.floor((triggerLength * 1000) / samplingTime);
+
 export function processTriggerSample(currentValue, device, samplingData) {
     return (dispatch, getState) => {
         const {
@@ -50,12 +65,12 @@ export function processTriggerSample(currentValue, device, samplingData) {
             dataBuffer,
         } = samplingData;
         const {
-            chart: { preSamplingOn, postSamplingOn },
             trigger: {
                 triggerLength,
                 triggerLevel,
                 triggerSingleWaiting,
                 triggerStartIndex,
+                triggerWindowOffset,
             },
         } = getState().app;
 
@@ -66,42 +81,29 @@ export function processTriggerSample(currentValue, device, samplingData) {
             return;
         }
 
-        const windowSize = calculateWindowSize(
-            triggerLength,
-            samplingTime,
-            postSamplingOn,
-            device.numberOfSamplesIn5Ms
-        );
+        const windowSize = calculateWindowSize(triggerLength, samplingTime);
 
         const enoughSamplesCollected =
             (triggerStartIndex + windowSize) % dataBuffer.length <=
             currentIndex;
 
-        if (enoughSamplesCollected) {
-            if (triggerSingleWaiting) {
-                logger.info('Trigger received, stopped waiting');
-                dispatch(clearSingleTriggerWaitingAction());
-                device.ppkTriggerStop();
-            }
-
-            const startIndex = preSamplingOn
-                ? triggerStartIndex - device.numberOfSamplesIn5Ms
-                : triggerStartIndex;
-            const from = indexToTimestamp(startIndex);
-            const to = indexToTimestamp(currentIndex);
-            dispatch(chartWindowAction(from, to, to - from));
-            dispatch(setTriggerStartAction(null));
+        if (!enoughSamplesCollected) return;
+        if (triggerSingleWaiting) {
+            logger.info('Trigger received, stopped waiting');
+            dispatch(clearSingleTriggerWaitingAction());
+            device.ppkTriggerStop();
         }
-    };
-}
 
-export function calculateWindowSize(
-    triggerLength,
-    samplingTime,
-    postSamplingOn,
-    samplesToAdd
-) {
-    let windowSize = Math.floor((triggerLength * 1000) / samplingTime);
-    if (postSamplingOn) windowSize += samplesToAdd;
-    return windowSize;
+        const shiftedIndex = getShiftedIndex(
+            windowSize,
+            samplingTime,
+            triggerWindowOffset,
+            device.capabilities.prePostTriggering
+        );
+
+        const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
+        const to = indexToTimestamp(currentIndex - shiftedIndex);
+        dispatch(chartWindowAction(from, to, to - from));
+        dispatch(setTriggerStartAction(null));
+    };
 }

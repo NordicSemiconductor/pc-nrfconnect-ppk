@@ -35,58 +35,53 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
+import { render, screen } from '../../utils/testUtils';
+import TimeSpanTop from '../Chart/TimeSpan/TimeSpanTop';
 
-import DigitalChannels from './DigitalChannels';
-
-import {
-    chartState,
-    toggleDigitalChannels,
-    toggleTimestamps,
-    toggleGridLines,
-} from '../../reducers/chartReducer';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
-
-export default () => {
-    const dispatch = useDispatch();
-    const {
-        digitalChannelsVisible,
-        timestampsVisible,
-        hasDigitalChannels,
-        showGridLines,
-    } = useSelector(chartState);
-
-    return (
-        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="secondary"
-            />
-            {hasDigitalChannels && isDataLoggerPane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleDigitalChannels())}
-                        isToggled={digitalChannelsVisible}
-                        label="Digital channels"
-                        variant="secondary"
-                    />
-                    <DigitalChannels />
-                </>
-            )}
-            {isRealTimePane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleGridLines())}
-                        isToggled={showGridLines}
-                        label="Show grid"
-                        variant="secondary"
-                    />
-                </>
-            )}
-        </CollapsibleGroup>
-    );
+const initialState = {
+    app: {
+        chart: {
+            windowDuration: 1000,
+        },
+        trigger: {
+            triggerRunning: false,
+            triggerWindowOffset: 0,
+        },
+        app: {
+            capabilities: {
+                prePostTriggering: false,
+            },
+        },
+    },
 };
+
+test('should hide offset handler if device does not support it', () => {
+    render(<TimeSpanTop />, { initialState });
+
+    const handler = screen.queryByTestId('offsetHandler');
+    expect(handler).toBeNull();
+});
+
+test('should show offset handler if trigger running and device has capabilities', () => {
+    const triggerRunningWithCapabilitiesState = {
+        app: {
+            ...initialState.app,
+            trigger: {
+                ...initialState.app.trigger,
+                triggerRunning: true,
+            },
+            app: {
+                capabilities: {
+                    prePostTriggering: true,
+                },
+            },
+        },
+    };
+
+    render(<TimeSpanTop />, {
+        initialState: triggerRunningWithCapabilitiesState,
+    });
+
+    const handler = screen.queryByTestId('offsetHandler');
+    expect(handler).not.toBeNull();
+});

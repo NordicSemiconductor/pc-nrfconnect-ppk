@@ -39,7 +39,10 @@ import { Line } from 'react-chartjs-2';
 import { unit } from 'mathjs';
 import { useSelector, useDispatch } from 'react-redux';
 import { func, number, shape, arrayOf } from 'prop-types';
-import { triggerState } from '../../reducers/triggerReducer';
+import {
+    triggerState,
+    triggerLevelSetAction,
+} from '../../reducers/triggerReducer';
 
 import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
@@ -48,7 +51,7 @@ import triggerLevelPlugin from './plugins/chart.triggerLevel';
 
 import { appState } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { updateTriggerLevel } from '../../actions/deviceActions';
+import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
 import { isRealTimePane } from '../../utils/panes';
@@ -115,9 +118,11 @@ const ChartContainer = ({
         yMin,
         yMax,
         timestampsVisible,
+        showGridLines,
     } = useSelector(chartState);
     const { samplingRunning } = useSelector(appState);
-    const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
+    const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
+    const updateTriggerLevel = level => dispatch(triggerLevelSetAction(level));
     const live =
         windowBegin === 0 &&
         windowEnd === 0 &&
@@ -167,7 +172,7 @@ const ChartContainer = ({
                         maxTicksLimit: 7,
                     },
                     gridLines: {
-                        display: true,
+                        display: showGridLines,
                         drawBorder: true,
                         drawOnChartArea: true,
                     },
@@ -189,7 +194,7 @@ const ChartContainer = ({
                         callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
                     },
                     gridLines: {
-                        display: true,
+                        display: showGridLines,
                         drawBorder: true,
                         drawOnChartArea: true,
                     },
@@ -209,33 +214,37 @@ const ChartContainer = ({
         triggerLevel,
         triggerActive: triggerRunning || triggerSingleWaiting,
         sendTriggerLevel,
+        updateTriggerLevel,
         snapping,
         live,
         triggerHandleVisible: isRealTimePane() && !externalTrigger,
     };
+
+    const plugins = [
+        dragSelectPlugin,
+        zoomPanPlugin,
+        triggerLevelPlugin,
+        crossHairPlugin,
+        {
+            id: 'notifier',
+            afterLayout(chart) {
+                const { chartArea, width } = chart;
+                chartArea.right = width - rightMargin;
+                const { left, right } = chart.chartArea;
+                const w = Math.trunc(right - left);
+                setLen(Math.min(w, 2000));
+                setChartAreaWidth(w);
+            },
+        },
+    ];
+
     return (
         <div className="chart-container">
             <Line
                 ref={chartRef}
                 data={chartData}
                 options={chartOptions}
-                plugins={[
-                    dragSelectPlugin,
-                    zoomPanPlugin,
-                    triggerLevelPlugin,
-                    crossHairPlugin,
-                    {
-                        id: 'notifier',
-                        afterLayout(chart) {
-                            const { chartArea, width } = chart;
-                            chartArea.right = width - rightMargin;
-                            const { left, right } = chart.chartArea;
-                            const w = Math.trunc(right - left);
-                            setLen(Math.min(w, 2000));
-                            setChartAreaWidth(w);
-                        },
-                    },
-                ]}
+                plugins={plugins}
             />
         </div>
     );

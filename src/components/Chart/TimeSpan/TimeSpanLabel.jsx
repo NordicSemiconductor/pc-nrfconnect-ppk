@@ -35,41 +35,46 @@
  */
 
 import React from 'react';
-import { render, screen } from '../../../utils/testUtils';
-import ExportDialog from '../ExportDialog';
+import { unit } from 'mathjs';
+import { number } from 'prop-types';
 
-jest.mock('nrfconnect/core', () => {
-    return {
-        getAppDataDir: () => '',
-    };
-});
-
-const initialState = {
-    app: {
-        chart: {
-            windowBegin: 0,
-            windowEnd: 999999,
-            cursorBegin: null,
-            hasDigitalChannels: true,
-        },
-        app: {
-            isExportDialogVisible: true,
-        },
-    },
+const formatTime = duration => {
+    let time = unit(duration, 'us');
+    if (duration > 60 * 1e6) {
+        time = time.to('min');
+    }
+    const v = time.format({ notation: 'fixed', precision: 2 });
+    return v.split(' ');
 };
 
-describe('ExportDialog', () => {
-    render(<ExportDialog />, { initialState });
-    const numberOfRecordsText = '100000 records';
-    const totalSizeLargerThanZeroPattern = /[1-9][0-9]*\sMB/;
-    const durationLargerThanZeroPattern = /[1-9][0-9]*\ss/;
+const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {
+    const start = begin !== undefined ? (100 * begin) / totalDuration : 0;
+    const width =
+        begin !== undefined && end !== undefined
+            ? (100 * (end - begin)) / totalDuration
+            : 100;
 
-    it('should show the number of records', () => {
-        const numberOfRecords = screen.getByText(numberOfRecordsText);
-        expect(numberOfRecords).not.toBe(undefined);
-        const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
-        expect(totalSize).not.toBe(undefined);
-        const duration = screen.getByText(durationLargerThanZeroPattern);
-        expect(duration).not.toBe(undefined);
-    });
-});
+    const [valStr, unitStr] = formatTime(duration);
+    const label = `\u0394${valStr}${unitStr.replace('u', '\u00B5')}`;
+
+    return (
+        <div
+            className="span"
+            style={{
+                left: `${start}%`,
+                width: `${width}%`,
+            }}
+        >
+            <div className="value">{label}</div>
+        </div>
+    );
+};
+
+export default TimeSpanLabel;
+
+TimeSpanLabel.propTypes = {
+    duration: number.isRequired,
+    begin: number,
+    end: number,
+    totalDuration: number,
+};

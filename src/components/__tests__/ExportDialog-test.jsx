@@ -35,58 +35,41 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
+import { render, screen } from '../../utils/testUtils';
+import ExportDialog from '../SaveExport/ExportDialog';
 
-import DigitalChannels from './DigitalChannels';
+jest.mock('nrfconnect/core', () => {
+    return {
+        getAppDataDir: () => '',
+    };
+});
 
-import {
-    chartState,
-    toggleDigitalChannels,
-    toggleTimestamps,
-    toggleGridLines,
-} from '../../reducers/chartReducer';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
-
-export default () => {
-    const dispatch = useDispatch();
-    const {
-        digitalChannelsVisible,
-        timestampsVisible,
-        hasDigitalChannels,
-        showGridLines,
-    } = useSelector(chartState);
-
-    return (
-        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="secondary"
-            />
-            {hasDigitalChannels && isDataLoggerPane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleDigitalChannels())}
-                        isToggled={digitalChannelsVisible}
-                        label="Digital channels"
-                        variant="secondary"
-                    />
-                    <DigitalChannels />
-                </>
-            )}
-            {isRealTimePane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleGridLines())}
-                        isToggled={showGridLines}
-                        label="Show grid"
-                        variant="secondary"
-                    />
-                </>
-            )}
-        </CollapsibleGroup>
-    );
+const initialState = {
+    app: {
+        chart: {
+            windowBegin: 0,
+            windowEnd: 999999,
+            cursorBegin: null,
+            hasDigitalChannels: true,
+        },
+        app: {
+            isExportDialogVisible: true,
+        },
+    },
 };
+
+describe('ExportDialog', () => {
+    render(<ExportDialog />, { initialState });
+    const numberOfRecordsText = '100000 records';
+    const totalSizeLargerThanZeroPattern = /[1-9][0-9]*\sMB/;
+    const durationLargerThanZeroPattern = /[1-9][0-9]*\ss/;
+
+    it('should show the number of records', () => {
+        const numberOfRecords = screen.getByText(numberOfRecordsText);
+        expect(numberOfRecords).not.toBe(undefined);
+        const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
+        expect(totalSize).not.toBe(undefined);
+        const duration = screen.getByText(durationLargerThanZeroPattern);
+        expect(duration).not.toBe(undefined);
+    });
+});
