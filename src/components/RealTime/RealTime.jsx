@@ -39,11 +39,11 @@ import { useDispatch } from 'react-redux';
 import Chart from '../Chart/Chart';
 
 import { setupOptions, triggerStop } from '../../actions/deviceActions';
-import { isScopePane } from '../../utils/panes';
+import { isRealTimePane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
-    const active = isScopePane();
+    const active = isRealTimePane();
     useEffect(() => {
         dispatch(setupOptions());
         return active ? () => dispatch(triggerStop()) : undefined;

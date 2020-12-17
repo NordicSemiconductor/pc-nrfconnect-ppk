@@ -49,7 +49,7 @@ import {
     togglePostSampling,
 } from '../../reducers/chartReducer';
 import { appState } from '../../reducers/appReducer';
-import { isDataLoggerPane, isScopePane } from '../../utils/panes';
+import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
@@ -83,7 +83,7 @@ export default () => {
                     <DigitalChannels />
                 </>
             )}
-            {prePostTriggering && isScopePane() && (
+            {prePostTriggering && isRealTimePane() && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(togglePreSampling())}
