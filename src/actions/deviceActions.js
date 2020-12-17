@@ -70,12 +70,13 @@ import {
     animationAction,
     updateHasDigitalChannels,
     resetCursorAndChart,
+    chartWindowAction,
 } from '../reducers/chartReducer';
 import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
-import { options, updateTitle } from '../globals';
+import { options, updateTitle, indexToTimestamp } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
 import { isRealTimePane } from '../utils/panes';
-import { processTriggerSample } from './triggerActions';
+import { processTriggerSample, calculateWindowSize } from './triggerActions';
 
 let device = null;
 let updateRequestInterval;
@@ -222,6 +223,17 @@ export function open(deviceInfo) {
         let prevValue = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
+        const { currentPane } = getState().appLayout;
+
+        const initializeChartForRealTime = () => {
+            const { triggerLength } = getState().app.trigger;
+            const windowSize = calculateWindowSize(
+                triggerLength,
+                options.samplingTime
+            );
+            const end = indexToTimestamp(windowSize);
+            dispatch(chartWindowAction(0, end, end));
+        };
 
         const onSample = ({ value, bits }) => {
             // PPK1 always sets timestamp, while PPK2 never does
@@ -233,7 +245,6 @@ export function open(deviceInfo) {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq, sampleFreq },
             } = getState().app;
-            const { currentPane } = getState().appLayout;
 
             let zeroCappedValue = zeroCap(value);
 
@@ -309,6 +320,10 @@ export function open(deviceInfo) {
             }
 
             dispatch(rttStartAction());
+
+            if (isRealTimePane(currentPane)) {
+                initializeChartForRealTime();
+            }
 
             logger.info('PPK started');
         } catch (err) {
