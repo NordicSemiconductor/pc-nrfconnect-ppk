@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { App } from 'pc-nrfconnect-shared';
-import Scope from './components/Scope/Scope';
+import RealTime from './components/RealTime/RealTime';
 import DataLogger from './components/DataLogger/DataLogger';
 import SidePanel from './components/SidePanel/SidePanel';
 import DeviceSelector from './components/DeviceSelector';
@@ -49,7 +49,7 @@ export default () => (
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
         panes={[
-            ['Scope', Scope],
+            ['Real-time', RealTime],
             ['Data Logger', DataLogger],
         ]}
     />

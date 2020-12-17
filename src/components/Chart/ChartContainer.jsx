@@ -51,7 +51,7 @@ import { chartState } from '../../reducers/chartReducer';
 import { updateTriggerLevel } from '../../actions/deviceActions';
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
-import { isScopePane } from '../../utils/panes';
+import { isRealTimePane } from '../../utils/panes';
 
 const valueRange = { min: 0, max: undefined };
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
@@ -211,7 +211,7 @@ const ChartContainer = ({
         sendTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible: isScopePane() && !externalTrigger,
+        triggerHandleVisible: isRealTimePane() && !externalTrigger,
     };
     return (
         <div className="chart-container">

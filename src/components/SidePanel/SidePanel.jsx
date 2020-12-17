@@ -58,7 +58,7 @@ import {
 import { options } from '../../globals';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
-import { isScopePane, isDataLoggerPane } from '../../utils/panes';
+import { isRealTimePane, isDataLoggerPane } from '../../utils/panes';
 
 import './sidepanel.scss';
 
@@ -70,7 +70,7 @@ export default () => {
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
 
-    const scopePane = isScopePane();
+    const realTimePane = isRealTimePane();
     const dataLoggerPane = isDataLoggerPane();
 
     if (!deviceOpen) {
@@ -82,14 +82,14 @@ export default () => {
         );
     }
 
-    if (!scopePane && !dataLoggerPane) {
+    if (!realTimePane && !dataLoggerPane) {
         return null;
     }
 
     return (
         <SidePanel className="side-panel">
             <PowerMode />
-            {scopePane && <Trigger />}
+            {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}
             <VoltageRegulator />
             {options.timestamp === null || (

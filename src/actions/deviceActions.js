@@ -74,7 +74,7 @@ import {
 import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
 import { options, updateTitle } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
-import { isScopePane } from '../utils/panes';
+import { isRealTimePane } from '../utils/panes';
 import { processTriggerSample } from './triggerActions';
 
 let device = null;
@@ -84,10 +84,10 @@ const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
-    let d = 300; // buffer length in seconds for scope
+    let d = 300; // buffer length in seconds for real-time
     const { currentPane } = getState().appLayout;
-    if (isScopePane(currentPane)) {
-        // in scope
+    if (isRealTimePane(currentPane)) {
+        // in real-time
         options.samplingTime = device.adcSamplingTimeUs;
         options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
     } else {
@@ -263,7 +263,7 @@ export function open(deviceInfo) {
                 options.index = 0;
             }
 
-            if (isScopePane(currentPane) && !samplingRunning) {
+            if (isRealTimePane(currentPane) && !samplingRunning) {
                 dispatch(
                     processTriggerSample(value, device, {
                         samplingTime: options.samplingTime,
