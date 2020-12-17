@@ -38,7 +38,13 @@
 /* eslint no-plusplus: off */
 /* eslint operator-assignment: off */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {
+    useState,
+    useRef,
+    useEffect,
+    useCallback,
+    useMemo,
+} from 'react';
 import { bool } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
@@ -66,7 +72,7 @@ import dataSelectorInitialiser from './data/dataSelector';
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
-const calcStats = (data, _begin, _end, index) => {
+const calcStats = (_begin, _end) => {
     if (_begin === null || _end === null) {
         return null;
     }
@@ -75,6 +81,8 @@ const calcStats = (data, _begin, _end, index) => {
     if (end < begin) {
         [begin, end] = [end, begin];
     }
+
+    const { data, index } = options;
     const indexBegin = Math.ceil(timestampToIndex(begin, index));
     const indexEnd = Math.floor(timestampToIndex(end, index));
 
@@ -175,8 +183,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [len, setLen] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
-    const windowStats = calcStats(data, begin, end, index);
-    const selectionStats = calcStats(data, cursorBegin, cursorEnd, index);
+    const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
+    const selectionStats = useMemo(() => calcStats(cursorBegin, cursorEnd), [
+        cursorBegin,
+        cursorEnd,
+    ]);
 
     const resetCursor = useCallback(() => chartCursor(null, null), [
         chartCursor,
@@ -239,15 +250,26 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const originalIndexEnd = timestampToIndex(end, index);
     const step = (originalIndexEnd - originalIndexBegin) / len;
 
-    const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
+    const [lineData, bitsData] = useMemo(() => {
+        const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
 
-    const [lineData, bitsData] = dataProcessor.process(
+        return dataProcessor.process(
+            begin,
+            end,
+            numberOfBits,
+            len,
+            windowDuration
+        );
+    }, [
         begin,
+        dataAccumulator,
+        dataSelector,
         end,
-        numberOfBits,
         len,
-        windowDuration
-    );
+        numberOfBits,
+        step,
+        windowDuration,
+    ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
