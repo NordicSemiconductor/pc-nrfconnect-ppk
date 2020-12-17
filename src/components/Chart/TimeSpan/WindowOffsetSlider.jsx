@@ -87,6 +87,7 @@ const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             data-testid="offsetHandler"
+            title="Slide right or left handle to shift window placement"
         >
             {windowOffsetHandleSvg}
         </div>

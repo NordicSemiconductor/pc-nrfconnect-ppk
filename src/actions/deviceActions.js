@@ -500,12 +500,11 @@ export function switchingPointsReset() {
     };
 }
 
-export function updateTriggerLevel(level) {
+export function updateTriggerLevel(triggerLevel) {
     return async (dispatch, getState) => {
-        const triggerLevel = Math.round(Math.min(1000000, Math.max(0, level)));
-        const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
         dispatch(triggerLevelSetAction(triggerLevel));
 
+        const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
         const high = (triggerLevel >> 16) & 0xff;
         const mid = (triggerLevel >> 8) & 0xff;
         const low = triggerLevel & 0xff;

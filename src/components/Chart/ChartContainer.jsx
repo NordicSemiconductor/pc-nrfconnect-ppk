@@ -39,7 +39,10 @@ import { Line } from 'react-chartjs-2';
 import { unit } from 'mathjs';
 import { useSelector, useDispatch } from 'react-redux';
 import { func, number, shape, arrayOf } from 'prop-types';
-import { triggerState } from '../../reducers/triggerReducer';
+import {
+    triggerState,
+    triggerLevelSetAction,
+} from '../../reducers/triggerReducer';
 
 import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
@@ -48,7 +51,7 @@ import triggerLevelPlugin from './plugins/chart.triggerLevel';
 
 import { appState } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { updateTriggerLevel } from '../../actions/deviceActions';
+import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
 import { isRealTimePane } from '../../utils/panes';
@@ -118,7 +121,8 @@ const ChartContainer = ({
         showGridLines,
     } = useSelector(chartState);
     const { samplingRunning } = useSelector(appState);
-    const sendTriggerLevel = level => dispatch(updateTriggerLevel(level));
+    const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
+    const updateTriggerLevel = level => dispatch(triggerLevelSetAction(level));
     const live =
         windowBegin === 0 &&
         windowEnd === 0 &&
@@ -210,6 +214,7 @@ const ChartContainer = ({
         triggerLevel,
         triggerActive: triggerRunning || triggerSingleWaiting,
         sendTriggerLevel,
+        updateTriggerLevel,
         snapping,
         live,
         triggerHandleVisible: isRealTimePane() && !externalTrigger,

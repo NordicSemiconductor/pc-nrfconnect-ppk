@@ -38,7 +38,10 @@
 
 import colors from '../../colors.scss';
 
-const { gray700: color, white, nordicBlue } = colors;
+const { gray700: color, nordicBlue } = colors;
+
+const getTriggerLevelFromCoordinate = coordinate =>
+    Math.round(Math.min(1000000, Math.max(0, coordinate)));
 
 const plugin = {
     id: 'triggerLevel',
@@ -93,13 +96,25 @@ const plugin = {
         chartInstance.triggerLine.y = evt.layerY;
         const {
             scales: { yScale },
-            options: { sendTriggerLevel },
+            options: { updateTriggerLevel },
         } = chartInstance;
-        sendTriggerLevel(yScale.getValueForPixel(chartInstance.triggerLine.y));
+        const level = getTriggerLevelFromCoordinate(
+            yScale.getValueForPixel(chartInstance.triggerLine.y)
+        );
+        updateTriggerLevel(level);
     },
 
     pointerLeaveHandler(chartInstance) {
-        if (!chartInstance.triggerLine) return;
+        if (chartInstance.triggerLine.y !== null) {
+            const {
+                scales: { yScale },
+                options: { sendTriggerLevel },
+            } = chartInstance;
+            const level = getTriggerLevelFromCoordinate(
+                yScale.getValueForPixel(chartInstance.triggerLine.y)
+            );
+            sendTriggerLevel(level);
+        }
         chartInstance.triggerLine.y = null;
     },
 
@@ -124,7 +139,6 @@ const plugin = {
         const {
             chartArea: { left, right },
             chart: { ctx },
-            options: { formatY, triggerLevel },
         } = chartInstance;
 
         const coords = this.getCoords(chartInstance);
