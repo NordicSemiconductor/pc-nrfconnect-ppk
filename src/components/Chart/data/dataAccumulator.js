@@ -41,10 +41,14 @@ import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
+const digitalOnValue = 0.4;
+const digitalOffValue = -digitalOnValue;
+
 export default () => ({
     lineData: emptyArray(),
     bitsData: [...Array(nbDigitalChannels)].map(() => emptyArray()),
     bitIndexes: new Array(nbDigitalChannels),
+    bitAccumulator: new Array(nbDigitalChannels),
 
     process(begin, end, numberOfBits, len, windowDuration) {
         const { bits, data, index } = options;
@@ -55,10 +59,6 @@ export default () => ({
 
         let mappedIndex = 0;
         this.bitIndexes.fill(0);
-
-        for (let i = 0; i < numberOfBits; ++i) {
-            this.bitsData[i][0] = { x: undefined, y: undefined };
-        }
 
         for (
             let originalIndex = originalIndexBegin;
@@ -71,11 +71,27 @@ export default () => ({
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
             let max = -Number.MAX_VALUE;
+            for (let i = 0; i < numberOfBits; ++i) {
+                this.bitAccumulator[i] = { wasOn: false, wasOff: false };
+            }
+
             for (let n = k; n < l; ++n) {
-                const v = data[(n + data.length) % data.length];
+                const ni = (n + data.length) % data.length;
+                const v = data[ni];
                 if (!Number.isNaN(v)) {
                     if (v > max) max = v;
                     if (v < min) min = v;
+
+                    if (numberOfBits > 0) {
+                        const b = bits[ni];
+                        for (let i = 0; i < numberOfBits; ++i) {
+                            if (((b >> i) & 1) === 1) {
+                                this.bitAccumulator[i].wasOn = true;
+                            } else {
+                                this.bitAccumulator[i].wasOff = true;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -90,29 +106,15 @@ export default () => ({
             this.lineData[mappedIndex].y = max;
 
             for (let i = 0; i < numberOfBits; ++i) {
-                let y1;
-                for (let n = k; n < l; ++n) {
-                    const ni = (n + data.length) % data.length;
-                    if (!Number.isNaN(data[ni])) {
-                        const v = (((bits[ni] >> i) & 1) - 0.5) * 0.8;
-                        if (y1 === undefined || v !== y1) {
-                            if (
-                                (this.bitsData[i][this.bitIndexes[i] - 1] || {})
-                                    .y !== v ||
-                                mappedIndex === len + len - 1
-                            ) {
-                                this.bitsData[i][
-                                    this.bitIndexes[i]
-                                ].x = timestamp;
-                                this.bitsData[i][this.bitIndexes[i]].y = v;
-                                ++this.bitIndexes[i];
-                            }
-                            if (y1 !== undefined) {
-                                break;
-                            }
-                            y1 = v;
-                        }
-                    }
+                if (this.bitAccumulator[i].wasOn) {
+                    this.bitsData[i][this.bitIndexes[i]].x = timestamp;
+                    this.bitsData[i][this.bitIndexes[i]].y = digitalOnValue;
+                    ++this.bitIndexes[i];
+                }
+                if (this.bitAccumulator[i].wasOff) {
+                    this.bitsData[i][this.bitIndexes[i]].x = timestamp;
+                    this.bitsData[i][this.bitIndexes[i]].y = digitalOffValue;
+                    ++this.bitIndexes[i];
                 }
             }
         }
