@@ -60,6 +60,7 @@ import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
 import { rightMarginPx } from './chart.scss';
 import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
+import { doubleBitValue } from '../../utils/bitConversion';
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
@@ -161,10 +162,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const { data, bits } = options;
 
-    let numberOfBits =
-        windowDuration <= 3000000 && showDigitalChannels
-            ? nbDigitalChannels
-            : 0;
+    let numberOfBits = showDigitalChannels ? nbDigitalChannels : 0;
     if (!bits) {
         numberOfBits = 0;
     }
@@ -287,7 +285,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 for (let n = k; n < l; ++n) {
                     const ni = (n + data.length) % data.length;
                     if (!Number.isNaN(data[ni])) {
-                        const v = (((bits[ni] >> i) & 1) - 0.5) * 0.8;
+                        const v = [-0.5, -0.4, 0.4, 0][
+                            doubleBitValue(bits[ni], i)
+                        ];
                         if (y1 === undefined || v !== y1) {
                             if (
                                 (bitsData[i][bitIndexes[i] - 1] || {}).y !==
@@ -331,7 +331,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             for (let i = 0; i < numberOfBits; ++i) {
                 const y = Number.isNaN(v)
                     ? undefined
-                    : (((bits[k] >> i) & 1) - 0.5) * 0.8;
+                    : [-0.5, -0.4, 0.4, 0][doubleBitValue(bits[k], i)];
                 bitsData[i][bitIndexes[i]].x = timestamp;
                 if (n === originalIndexEndCeiled) {
                     bitsData[i][bitIndexes[i]].y = lastBits[i];

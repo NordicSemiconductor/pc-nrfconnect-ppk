@@ -77,6 +77,7 @@ import { options, updateTitle, indexToTimestamp } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
 import { isRealTimePane } from '../utils/panes';
 import { processTriggerSample, calculateWindowSize } from './triggerActions';
+import { convertBits16 } from '../utils/bitConversion';
 
 let device = null;
 let updateRequestInterval;
@@ -101,7 +102,7 @@ export const setupOptions = () => (dispatch, getState) => {
     try {
         if (device.capabilities.ppkSetPowerMode) {
             if (!options.bits || options.bits.length !== bufferLength) {
-                options.bits = new Uint8Array(bufferLength);
+                options.bits = new Uint16Array(bufferLength);
             }
             options.bits.fill(0);
         } else {
@@ -221,6 +222,7 @@ export function open(deviceInfo) {
         }
 
         let prevValue = 0;
+        let prevBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
         const { currentPane } = getState().appLayout;
@@ -247,17 +249,19 @@ export function open(deviceInfo) {
             } = getState().app;
 
             let zeroCappedValue = zeroCap(value);
+            const b16 = convertBits16(bits);
 
             if (samplingRunning) {
                 nbSamples += 1;
                 nbSamplesTotal += 1;
                 const f = Math.min(nbSamplesTotal, maxSampleFreq / sampleFreq);
-                zeroCappedValue =
-                    prevValue === undefined
-                        ? zeroCappedValue
-                        : prevValue + (zeroCappedValue - prevValue) / f;
+                if (prevValue !== undefined) {
+                    zeroCappedValue =
+                        prevValue + (zeroCappedValue - prevValue) / f;
+                }
                 if (nbSamples < maxSampleFreq / sampleFreq) {
                     prevValue = zeroCappedValue;
+                    prevBits |= b16;
                     return;
                 }
                 nbSamples = 0;
@@ -265,7 +269,8 @@ export function open(deviceInfo) {
 
             options.data[options.index] = zeroCappedValue;
             if (options.bits) {
-                options.bits[options.index] = bits;
+                options.bits[options.index] = b16 | prevBits;
+                prevBits = 0;
             }
             options.index += 1;
             options.timestamp += options.samplingTime;
