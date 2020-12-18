@@ -50,7 +50,6 @@ import SpikeFilter from './SpikeFilter';
 
 import {
     toggleAdvancedModeAction,
-    toggleSaveFunctionality,
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
 } from '../../reducers/appReducer';
@@ -65,7 +64,6 @@ import './sidepanel.scss';
 export default () => {
     const dispatch = useDispatch();
     useHotKey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
-    useHotKey('alt+ctrl+shift+l', () => dispatch(toggleSaveFunctionality()));
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);

@@ -41,19 +41,12 @@ import Button from 'react-bootstrap/Button';
 import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
 import ExportDialog from '../SaveExport/ExportDialog';
 
-import {
-    appState,
-    showExportDialog,
-    toggleSaveChoiceDialog,
-} from '../../reducers/appReducer';
+import { appState, toggleSaveChoiceDialog } from '../../reducers/appReducer';
 import { load, screenshot } from '../../actions/fileActions';
 import { triggerState } from '../../reducers/triggerReducer';
 
 export const Load = () => {
     const dispatch = useDispatch();
-    const { enableSave } = useSelector(appState);
-
-    if (!enableSave) return null;
 
     return (
         <Button
@@ -68,16 +61,8 @@ export const Load = () => {
 
 export const Save = () => {
     const dispatch = useDispatch();
-    const { samplingRunning, enableSave } = useSelector(appState);
+    const { samplingRunning } = useSelector(appState);
     const { triggerSingleWaiting, triggerRunning } = useSelector(triggerState);
-
-    const saveExportLabel = enableSave ? 'Save / Export' : 'Export';
-    const saveExportTitle = enableSave
-        ? 'Stop sampling to save or export'
-        : 'Stop sampling to export';
-    const saveExportAction = enableSave
-        ? toggleSaveChoiceDialog
-        : showExportDialog;
 
     const disabled = samplingRunning || triggerSingleWaiting || triggerRunning;
 
@@ -85,12 +70,12 @@ export const Save = () => {
         <>
             <Button
                 className="w-100"
-                title={disabled ? saveExportTitle : undefined}
+                title={disabled ? 'Stop sampling to save or export' : undefined}
                 variant="set"
                 disabled={disabled}
-                onClick={() => dispatch(saveExportAction())}
+                onClick={() => dispatch(toggleSaveChoiceDialog())}
             >
-                {saveExportLabel}
+                Save / Export
             </Button>
             <Button
                 className="w-100"
