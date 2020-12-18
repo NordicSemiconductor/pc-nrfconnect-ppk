@@ -74,7 +74,8 @@ export const save = () => async (_, getState) => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, bits, ...opts } = options;
-    await write(serialize(opts));
+    const { currentPane } = getState().appLayout;
+    await write(serialize({ ...opts, currentPane }));
     await write(serialize(getState().app.chart));
 
     const buf = Buffer.alloc(4);
@@ -128,7 +129,10 @@ export const load = () => async dispatch => {
 
     let pos = 0;
     let len = buffer.slice(pos, pos + 4).readUInt32LE();
-    Object.assign(options, deserialize(buffer.slice(pos, pos + len)));
+    const { currentPane, ...loadedOptions } = deserialize(
+        buffer.slice(pos, pos + len)
+    );
+    Object.assign(options, loadedOptions);
     pos += len;
 
     len = buffer.slice(pos, pos + 4).readUInt32LE();
@@ -152,6 +156,8 @@ export const load = () => async dispatch => {
 
     dispatch(setChartState(chartState));
     dispatch(setFileLoadedAction(true));
+    if (currentPane != null)
+        dispatch({ type: 'SET_CURRENT_PANE', currentPane });
     logger.info(`State restored from: ${filename}`);
 };
 
