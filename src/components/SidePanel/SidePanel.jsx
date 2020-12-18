@@ -52,6 +52,7 @@ import {
     toggleAdvancedModeAction,
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
+    appState,
 } from '../../reducers/appReducer';
 
 import { options } from '../../globals';
@@ -67,9 +68,20 @@ export default () => {
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
+    const { fileLoaded } = useSelector(appState);
 
     const realTimePane = isRealTimePane();
     const dataLoggerPane = isDataLoggerPane();
+
+    if (fileLoaded) {
+        return (
+            <SidePanel className="side-panel">
+                <Load />
+                <DisplayOptions />
+                <Save />
+            </SidePanel>
+        );
+    }
 
     if (!deviceOpen) {
         return (
