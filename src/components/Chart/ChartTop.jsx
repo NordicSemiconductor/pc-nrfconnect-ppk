@@ -36,7 +36,8 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { func, shape } from 'prop-types';
+import { func, shape, string } from 'prop-types';
+import { unit } from 'mathjs';
 
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -50,11 +51,37 @@ import {
 import { isDataLoggerPane } from '../../utils/panes';
 
 import './charttop.scss';
+import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 
 const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
     const dispatch = useDispatch();
     const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
+    const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const live = windowBegin === 0 && windowEnd === 0;
+
+    const TimeWindowButton = ({ label }) => (
+        <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => zoomToWindow(unit(label).to('us').toNumeric())}
+        >
+            {label}
+        </Button>
+    );
+    TimeWindowButton.propTypes = { label: string.isRequired };
+    const timeWindowLabels = [
+        '10ms',
+        '100ms',
+        '1s',
+        '3s',
+        '10s',
+        '1min',
+        '10min',
+        '1h',
+        '6h',
+        '1day',
+        '1week',
+    ].slice(maxFreqLog10 - sampleFreqLog10, maxFreqLog10 - sampleFreqLog10 + 6);
 
     return (
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
@@ -77,48 +104,9 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
             />
             {isDataLoggerPane() && (
                 <ButtonGroup>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => zoomToWindow(10000)}
-                    >
-                        10ms
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => zoomToWindow(100000)}
-                    >
-                        100ms
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => zoomToWindow(1000000)}
-                    >
-                        1s
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => zoomToWindow(3000000)}
-                    >
-                        3s
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => zoomToWindow(10000000)}
-                    >
-                        10s
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => zoomToWindow(60000000)}
-                    >
-                        1min
-                    </Button>
+                    {timeWindowLabels.map(label => (
+                        <TimeWindowButton label={label} />
+                    ))}
                 </ButtonGroup>
             )}
             <Toggle
