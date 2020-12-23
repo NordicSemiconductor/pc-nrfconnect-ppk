@@ -71,9 +71,7 @@ export default () => ({
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
             let max = -Number.MAX_VALUE;
-            for (let i = 0; i < numberOfBits; ++i) {
-                this.bitAccumulator[i] = { wasOn: false, wasOff: false };
-            }
+            this.bitAccumulator.fill(0);
 
             for (let n = k; n < l; ++n) {
                 const ni = (n + data.length) % data.length;
@@ -86,9 +84,7 @@ export default () => ({
                         const b = bits[ni];
                         for (let i = 0; i < numberOfBits; ++i) {
                             if (((b >> i) & 1) === 1) {
-                                this.bitAccumulator[i].wasOn = true;
-                            } else {
-                                this.bitAccumulator[i].wasOff = true;
+                                this.bitAccumulator[i]++;
                             }
                         }
                     }
@@ -105,16 +101,26 @@ export default () => ({
             this.lineData[mappedIndex].x = timestamp;
             this.lineData[mappedIndex].y = max;
 
-            for (let i = 0; i < numberOfBits; ++i) {
-                if (this.bitAccumulator[i].wasOn) {
-                    this.bitsData[i][this.bitIndexes[i]].x = timestamp;
-                    this.bitsData[i][this.bitIndexes[i]].y = digitalOnValue;
-                    ++this.bitIndexes[i];
-                }
-                if (this.bitAccumulator[i].wasOff) {
-                    this.bitsData[i][this.bitIndexes[i]].x = timestamp;
-                    this.bitsData[i][this.bitIndexes[i]].y = digitalOffValue;
-                    ++this.bitIndexes[i];
+            const dataForCurrentTimestampExists =
+                this.lineData[mappedIndex].y != null;
+            if (dataForCurrentTimestampExists) {
+                const maxCount = l - k;
+                for (let i = 0; i < numberOfBits; ++i) {
+                    const wasAtLeastOnceOn = this.bitAccumulator[i] > 0;
+                    if (wasAtLeastOnceOn) {
+                        this.bitsData[i][this.bitIndexes[i]].x = timestamp;
+                        this.bitsData[i][this.bitIndexes[i]].y = digitalOnValue;
+                        ++this.bitIndexes[i];
+                    }
+
+                    const wasAtLeastOnceOff = this.bitAccumulator[i] < maxCount;
+                    if (wasAtLeastOnceOff) {
+                        this.bitsData[i][this.bitIndexes[i]].x = timestamp;
+                        this.bitsData[i][
+                            this.bitIndexes[i]
+                        ].y = digitalOffValue;
+                        ++this.bitIndexes[i];
+                    }
                 }
             }
         }
