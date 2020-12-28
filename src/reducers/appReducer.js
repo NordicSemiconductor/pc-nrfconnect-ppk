@@ -45,6 +45,7 @@ const initialState = {
     samplingRunning: false,
     isSaveChoiceDialogVisible: false,
     isExportDialogVisible: false,
+    fileLoaded: false,
 };
 
 const DEVICE_CLOSED = 'DEVICE_CLOSED';
@@ -58,6 +59,7 @@ const TOGGLE_ADVANCED_MODE = 'TOGGLE_ADVANCED_MODE';
 const TOGGLE_SAVE_CHOICE_DIALOG = 'TOGGLE_SAVE_CHOICE_DIALOG';
 const SHOW_EXPORT_DIALOG = 'SHOW_EXPORT_DIALOG';
 const HIDE_EXPORT_DIALOG = 'HIDE_EXPORT_DIALOG';
+const SET_FILE_LOADED = 'SET_FILE_LOADED';
 
 export const toggleAdvancedModeAction = () => ({ type: TOGGLE_ADVANCED_MODE });
 export const samplingStartAction = () => ({ type: SAMPLING_STARTED });
@@ -87,6 +89,11 @@ export const toggleSaveChoiceDialog = () => ({
 export const showExportDialog = () => ({ type: SHOW_EXPORT_DIALOG });
 export const hideExportDialog = () => ({ type: HIDE_EXPORT_DIALOG });
 
+export const setFileLoadedAction = loaded => ({
+    type: SET_FILE_LOADED,
+    loaded,
+});
+
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case DEVICE_OPENED: {
@@ -111,6 +118,11 @@ export default (state = initialState, { type, ...action }) => {
             return {
                 ...state,
                 isSaveChoiceDialogVisible: !state.isSaveChoiceDialogVisible,
+            };
+        case SET_FILE_LOADED:
+            return {
+                ...state,
+                fileLoaded: action.loaded,
             };
         case SHOW_EXPORT_DIALOG:
             return { ...state, isExportDialogVisible: true };
