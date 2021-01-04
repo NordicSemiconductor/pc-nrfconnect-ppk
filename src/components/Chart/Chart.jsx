@@ -162,7 +162,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         .current;
     const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
-    let numberOfBits = showDigitalChannels ? nbDigitalChannels : 0;
+    let numberOfBits =
+        windowDuration <= 3000000 && showDigitalChannels
+            ? nbDigitalChannels
+            : 0;
     if (!bits) {
         numberOfBits = 0;
     }
