@@ -129,6 +129,43 @@ const processWheelEvents = () => {
     }
 };
 
+let processingPointerMoveEvents = false;
+let pointerMoveEventToProcess;
+
+const processPointerMoveEvents = () => {
+    processingPointerMoveEvents = false;
+
+    const { event, dragStart, scales, callback } = pointerMoveEventToProcess;
+
+    if (!callback) {
+        return;
+    }
+
+    const { clientX, clientY } = event;
+    const {
+        left: xOffset,
+        top: yOffset,
+    } = event.target.getBoundingClientRect();
+
+    const { xMin, xMax, yMin, yMax, pX, pY } = dragStart;
+    const { xScale, yScale } = scales;
+    const qX =
+        xMin +
+        (xMax - xMin) * ((clientX - xOffset - xScale.left) / xScale.width);
+    const qY =
+        yMin +
+        (yMax - yMin) * ((clientY - yOffset - yScale.top) / yScale.height);
+
+    if (dragStart.type === 'pan') {
+        callback(xMin + (pX - qX), xMax + (pX - qX), null, null);
+        return;
+    }
+
+    const zX = (wheelZoomFactor * 4) ** ((qX - pX) / (xMax - xMin));
+    const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
+    zoomAtOrigin(callback, pX, zX, xMin, xMax, pY, zY, yMin, yMax);
+};
+
 export default {
     id: 'zoomPan',
 
@@ -198,55 +235,24 @@ export default {
         };
         canvas.addEventListener('pointerdown', zoomPan.pointerDownHandler);
 
-        zoomPan.pointerMoveHandler = ({
-            pointerId,
-            target,
-            clientX,
-            clientY,
-        }) => {
+        zoomPan.pointerMoveHandler = event => {
             if (!zoomPan.dragStart) {
                 return;
             }
-            target.setPointerCapture(pointerId);
+            event.target.setPointerCapture(event.pointerId);
             zoomPan.dragStart.moved = true;
-            const { xMin, xMax, yMin, yMax, pX, pY } = zoomPan.dragStart;
-            const { xScale, yScale } = chartInstance.scales;
-            const {
-                left: xOffset,
-                top: yOffset,
-            } = target.getBoundingClientRect();
-            const qX =
-                xMin +
-                (xMax - xMin) *
-                    ((clientX - xOffset - xScale.left) / xScale.width);
-            const qY =
-                yMin +
-                (yMax - yMin) *
-                    ((clientY - yOffset - yScale.top) / yScale.height);
 
-            if (zoomPan.dragStart.type === 'pan') {
-                zoomPan.callback(
-                    xMin + (pX - qX),
-                    xMax + (pX - qX),
-                    null,
-                    null
-                );
-                return;
+            pointerMoveEventToProcess = {
+                event,
+                dragStart: { ...zoomPan.dragStart },
+                scales: chartInstance.scales,
+                callback: zoomPan.callback,
+            };
+
+            if (!processingPointerMoveEvents) {
+                processingPointerMoveEvents = true;
+                requestAnimationFrame(processPointerMoveEvents);
             }
-
-            const zX = (wheelZoomFactor * 4) ** ((qX - pX) / (xMax - xMin));
-            const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
-            zoomAtOrigin(
-                zoomPan.callback,
-                pX,
-                zX,
-                xMin,
-                xMax,
-                pY,
-                zY,
-                yMin,
-                yMax
-            );
         };
         canvas.addEventListener(
             'pointermove',
