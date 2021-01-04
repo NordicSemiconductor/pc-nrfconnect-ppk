@@ -46,4 +46,14 @@ export const convertBits16 = b8 =>
     (((b8 & 2) + 2) << 1) |
     ((b8 & 1) + 1);
 
+/**
+ * @function doubleBitValue
+ * @param {number} b16 16-bit input of 8 bit-pairs
+ * @param {number} n index of bit-pair
+ * @returns {number}
+ * - 0 (b00): invalid (undefined)
+ * - 1 (b01): was all 0
+ * - 2 (b10): was all 1
+ * - 3 (b11): was both 0 and 1
+ */
 export const doubleBitValue = (b16, n) => 3 & (b16 >> (n + n));
