@@ -50,6 +50,30 @@ const isTrackPad = evt => {
     return false;
 };
 
+const zoomAtOrigin = (
+    callback,
+    pX,
+    factorX,
+    xMin,
+    xMax,
+    pY,
+    factorY,
+    yMin,
+    yMax
+) => {
+    const zX = Math.max(factorX, 0.1);
+    const newMinX = pX - (pX - xMin) / zX;
+    const newMaxX = pX + (xMax - pX) / zX;
+    if (pY !== undefined) {
+        const zY = Math.max(factorY, 0.1);
+        const newMinY = pY - (pY - yMin) / zY;
+        const newMaxY = pY + (yMax - pY) / zY;
+        callback(newMinX, newMaxX, newMinY, newMaxY);
+        return;
+    }
+    callback(newMinX, newMaxX, null, null);
+};
+
 export default {
     id: 'zoomPan',
 
@@ -58,29 +82,6 @@ export default {
         chartInstance.zoomPan = zoomPan;
 
         const { canvas } = chartInstance.chart.ctx;
-
-        zoomPan.zoomAtOriginBy = (
-            pX,
-            factorX,
-            xMin,
-            xMax,
-            pY,
-            factorY,
-            yMin,
-            yMax
-        ) => {
-            const zX = Math.max(factorX, 0.1);
-            const newMinX = pX - (pX - xMin) / zX;
-            const newMaxX = pX + (xMax - pX) / zX;
-            if (pY !== undefined) {
-                const zY = Math.max(factorY, 0.1);
-                const newMinY = pY - (pY - yMin) / zY;
-                const newMaxY = pY + (yMax - pY) / zY;
-                zoomPan.callback(newMinX, newMaxX, newMinY, newMaxY);
-                return;
-            }
-            zoomPan.callback(newMinX, newMaxX, null, null);
-        };
 
         zoomPan.wheelHandler = event => {
             if (!zoomPan.callback) {
@@ -108,7 +109,8 @@ export default {
                             ((event.clientY - yOffset - yScale.top) / height);
                     const fx = 1.01 ** deltaX;
                     const fy = 1.01 ** deltaY;
-                    zoomPan.zoomAtOriginBy(
+                    zoomAtOrigin(
+                        zoomPan.callback,
                         pX,
                         fx,
                         xMin,
@@ -142,7 +144,7 @@ export default {
                 return;
             }
             const p = xScale.getValueForPixel(event.clientX - xOffset);
-            zoomPan.zoomAtOriginBy(p, z, xMin, xMax);
+            zoomAtOrigin(zoomPan.callback, p, z, xMin, xMax);
         };
         canvas.addEventListener('wheel', zoomPan.wheelHandler);
 
@@ -230,7 +232,17 @@ export default {
 
             const zX = (wheelZoomFactor * 4) ** ((qX - pX) / (xMax - xMin));
             const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
-            zoomPan.zoomAtOriginBy(pX, zX, xMin, xMax, pY, zY, yMin, yMax);
+            zoomAtOrigin(
+                zoomPan.callback,
+                pX,
+                zX,
+                xMin,
+                xMax,
+                pY,
+                zY,
+                yMin,
+                yMax
+            );
         };
         canvas.addEventListener(
             'pointermove',
