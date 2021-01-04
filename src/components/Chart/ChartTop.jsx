@@ -105,7 +105,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
             {isDataLoggerPane() && (
                 <ButtonGroup>
                     {timeWindowLabels.map(label => (
-                        <TimeWindowButton label={label} />
+                        <TimeWindowButton label={label} key={label} />
                     ))}
                 </ButtonGroup>
             )}
