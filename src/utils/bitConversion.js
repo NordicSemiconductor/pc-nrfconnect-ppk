@@ -36,6 +36,14 @@
 
 /* eslint-disable no-bitwise */
 
+/**
+ * @function convertBits16
+ * @param {number} b8 8-bit input
+ * @returns {number} 16-bit value of bit pairs
+ * - convertBits16(0b00000000) => 0b0101010101010101
+ * - convertBits16(0b11111111) => 0b1010101010101010
+ * - (convertBits16(0b00000000) | convertBits16(0b11111111)) => 0b1111111111111111
+ */
 export const convertBits16 = b8 =>
     (((b8 & 128) + 128) << 7) |
     (((b8 & 64) + 64) << 6) |
