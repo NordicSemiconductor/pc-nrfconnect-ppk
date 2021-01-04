@@ -34,9 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// This utility cannot be used within other hooks (e.g. useEffect and useCallback). If you want to check
-// the current pane inside useEffect you should create a variable first and
-// check that, e.g.
+// This utility cannot be used within other hooks (e.g. useEffect and useCallback), nor within loops,
+// conditiions or nested functions. If you want to check  the current pane inside useEffect you should
+// create a variable first and check that:
 //
 // const isScope = getScopePane();
 // useEffect(() => {
