@@ -148,8 +148,10 @@ export default (state = initialState, { type, ...action }) => {
                 ...state,
                 triggerWindowOffset: action.offset,
             };
+        case TRIGGER_LENGTH_SET: {
+            return { ...state, ...action, triggerWindowOffset: 0 };
+        }
         case TRIGGER_LEVEL_SET:
-        case TRIGGER_LENGTH_SET:
         case TRIGGER_WINDOW_RANGE: {
             return { ...state, ...action };
         }
