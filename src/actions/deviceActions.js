@@ -49,6 +49,7 @@ import {
     setPowerModeAction,
     samplingStartAction,
     samplingStoppedAction,
+    setFileLoadedAction,
 } from '../reducers/appReducer';
 import {
     switchingPointsResetAction,
@@ -320,6 +321,7 @@ export function open(deviceInfo) {
             }
 
             dispatch(rttStartAction());
+            dispatch(setFileLoadedAction(false));
 
             if (isRealTimePane(currentPane)) {
                 initializeChartForRealTime();

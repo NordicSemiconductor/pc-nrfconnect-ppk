@@ -79,7 +79,6 @@ const bitsChartOptions = {
 const DigitalChannels = ({
     bitsData,
     digitalChannels,
-    bitIndexes,
     numberOfBits,
     cursorData: { begin, end, cursorBegin, cursorEnd },
 }) => {
@@ -89,19 +88,19 @@ const DigitalChannels = ({
     bitXaxis.cursor.cursorBegin = cursorBegin;
     bitXaxis.cursor.cursorEnd = cursorEnd;
     const bitsChartData = bitsData
-        .map((b, i) => ({
+        .map((bitData, i) => ({
             datasets: [
                 {
                     borderColor: dataColor,
                     borderWidth: 1.5,
                     fill: false,
-                    data: b.slice(0, bitIndexes[i]),
+                    data: bitData,
                     pointRadius: 0,
                     pointHoverRadius: 0,
                     pointHitRadius: 0,
                     pointBorderWidth: 0,
                     lineTension: 0,
-                    label: `${i}`,
+                    label: i,
                     steppedLine: 'before',
                 },
             ],
@@ -135,13 +134,14 @@ const DigitalChannels = ({
 
 DigitalChannels.propTypes = {
     bitsData: arrayOf(
-        shape({
-            x: number,
-            y: number,
-        })
+        arrayOf(
+            shape({
+                x: number.isRequired,
+                y: number.isRequired,
+            }).isRequired
+        ).isRequired
     ).isRequired,
     digitalChannels: arrayOf(bool).isRequired,
-    bitIndexes: arrayOf(number).isRequired,
     numberOfBits: number.isRequired,
     cursorData: shape({
         cursorBegin: number,
