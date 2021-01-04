@@ -55,6 +55,9 @@ export const isRealTimePane = (currentPane = null) =>
 export const isDataLoggerPane = (currentPane = null) =>
     getCurrentPane(DATA_LOGGER, currentPane);
 
+export const paneName = currentPane =>
+    currentPane === REAL_TIME ? 'real-time' : 'data-logger';
+
 const getCurrentPane = (pane, currentPane = null) => {
     if (currentPane !== null) {
         return currentPane === pane;

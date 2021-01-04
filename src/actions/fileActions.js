@@ -35,15 +35,15 @@
  */
 
 import fs from 'fs';
-import { serialize, deserialize } from 'bson';
-import { createInflateRaw, createDeflateRaw } from 'zlib';
-import { Writable } from 'stream';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
 import { logger } from 'nrfconnect/core';
 import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 import { setCurrentPane, setFileLoadedAction } from '../reducers/appReducer';
+import saveData from '../utils/SaveFileFormatter';
+import loadData from '../utils/LoadFileFormatter';
+import { paneName } from '../utils/panes';
 
 import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 
@@ -54,44 +54,28 @@ export const save = () => async (_, getState) => {
         .toISOString()
         .replace(/[-:.]/g, '')
         .slice(0, 15);
+    const { currentPane } = getState().appLayout;
+    const saveFileName = `ppk-${timestamp}-${paneName(currentPane)}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(lastSaveDir(), `ppk-${timestamp}.ppk`),
+        defaultPath: join(lastSaveDir(), saveFileName),
     });
     if (!filename) {
         return;
     }
-
     setLastSaveDir(dirname(filename));
-
-    const file = fs.createWriteStream(filename);
-    file.on('error', err => console.log(err.stack));
-
-    const deflateRaw = createDeflateRaw();
-    deflateRaw.pipe(file);
-
-    const write = bf =>
-        new Promise(resolve => deflateRaw.write(bf, 'binary', resolve));
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, bits, ...opts } = options;
-    const { currentPane } = getState().appLayout;
-    await write(serialize({ ...opts, currentPane }));
-    await write(serialize(getState().app.chart));
+    const dataToBeSaved = {
+        data,
+        bits,
+        metadata: {
+            options: { ...opts, currentPane },
+            chartState: getState().app.chart,
+        },
+    };
 
-    const buf = Buffer.alloc(4);
-    let objbuf = Buffer.from(options.data.buffer);
-    buf.writeUInt32LE(objbuf.byteLength);
-    await write(buf);
-    await write(objbuf);
-
-    if (options.bits) {
-        objbuf = Buffer.from(options.bits.buffer);
-        buf.writeUInt32LE(objbuf.byteLength);
-        await write(buf);
-        await write(objbuf);
-    }
-    deflateRaw.end();
-
+    const saver = saveData();
+    saver.initialise(filename, dataToBeSaved);
+    await saver.writeFile();
     logger.info(`State saved to: ${filename}`);
 };
 
@@ -108,53 +92,19 @@ export const load = () => async dispatch => {
 
     updateTitle(filename);
 
-    let buffer = Buffer.alloc(370 * 1e6);
-    let size = 0;
-    const content = new Writable({
-        write(chunk, _encoding, callback) {
-            chunk.copy(buffer, size, 0);
-            size += chunk.length;
-            callback();
-        },
-    });
+    const loader = loadData();
+    await loader.initialise(filename);
 
-    await new Promise(resolve =>
-        fs
-            .createReadStream(filename)
-            .pipe(createInflateRaw())
-            .pipe(content)
-            .on('finish', resolve)
-    );
-    buffer = buffer.slice(0, size);
+    const { dataBuffer, bits, metadata } = loader.loadData();
 
-    let pos = 0;
-    let len = buffer.slice(pos, pos + 4).readUInt32LE();
-    const { currentPane, ...loadedOptions } = deserialize(
-        buffer.slice(pos, pos + len)
-    );
+    const {
+        chartState,
+        options: { currentPane, ...loadedOptions },
+    } = metadata;
+
     Object.assign(options, loadedOptions);
-    pos += len;
-
-    len = buffer.slice(pos, pos + 4).readUInt32LE();
-    const chartState = deserialize(buffer.slice(pos, pos + len));
-    pos += len;
-
-    len = buffer.slice(pos, pos + 4).readUInt32LE();
-    pos += 4;
-    options.data = new Float32Array(
-        new Uint8Array(buffer.slice(pos, pos + len)).buffer
-    );
-    pos += len;
-
-    if (pos < buffer.length) {
-        len = buffer.slice(pos, pos + 4).readUInt32LE();
-        pos += 4;
-        options.bits = new Uint16Array(
-            new Uint8Array(buffer.slice(pos, pos + len)).buffer
-        );
-    } else {
-        options.bits = null;
-    }
+    options.data = dataBuffer;
+    options.bits = bits;
 
     dispatch(setChartState(chartState));
     dispatch(setFileLoadedAction(true));
