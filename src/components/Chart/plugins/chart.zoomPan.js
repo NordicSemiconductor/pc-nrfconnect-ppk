@@ -74,6 +74,61 @@ const zoomAtOrigin = (
     callback(newMinX, newMaxX, null, null);
 };
 
+let processingWheelEvents = false;
+let wheelEventToProcess;
+
+const processWheelEvents = () => {
+    processingWheelEvents = false;
+
+    const { event, scales, callback } = wheelEventToProcess;
+
+    if (!callback) {
+        return;
+    }
+
+    const { clientX, clientY, deltaX, deltaY } = event;
+
+    const {
+        left: xOffset,
+        top: yOffset,
+    } = event.target.getBoundingClientRect();
+
+    const isTrackPadEvent = isTrackPad(event);
+    const isTrackpadPan = isTrackPadEvent && !event.shiftKey;
+    const isTrackpadZoom = isTrackPadEvent && event.shiftKey;
+
+    const { xScale, yScale } = scales;
+    const { min: xMin, max: xMax, start: x0, end: x1, width } = scales.xScale;
+    const { min: yMin, max: yMax, start: y0, end: y1, height } = scales.yScale;
+
+    if (isTrackpadZoom) {
+        const pX =
+            xMin + (xMax - xMin) * ((clientX - xOffset - xScale.left) / width);
+        const pY =
+            yMax + (yMin - yMax) * ((clientY - yOffset - yScale.top) / height);
+        const fx = 1.01 ** deltaX;
+        const fy = 1.01 ** deltaY;
+        zoomAtOrigin(callback, pX, fx, xMin, xMax, pY, fy, yMin, yMax);
+    } else if (isTrackpadPan) {
+        const fx = (x1 - x0) / width;
+        const fy = (y0 - y1) / height;
+        const dx = fx * deltaX;
+        const dy = fy * deltaY;
+        callback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
+    } else {
+        let z = 0;
+        if (deltaY < 0) {
+            z = wheelZoomFactor;
+        } else if (deltaY > 0) {
+            z = 1 / wheelZoomFactor;
+        } else {
+            return;
+        }
+        const p = xScale.getValueForPixel(clientX - xOffset);
+        zoomAtOrigin(callback, p, z, xMin, xMax);
+    }
+};
+
 export default {
     id: 'zoomPan',
 
@@ -84,67 +139,16 @@ export default {
         const { canvas } = chartInstance.chart.ctx;
 
         zoomPan.wheelHandler = event => {
-            if (!zoomPan.callback) {
-                return;
-            }
+            wheelEventToProcess = {
+                event,
+                scales: chartInstance.scales,
+                callback: zoomPan.callback,
+            };
 
-            const { xScale, yScale } = chartInstance.scales;
-            const { min: xMin, max: xMax, start: x0, end: x1, width } = xScale;
-            const { min: yMin, max: yMax, start: y0, end: y1, height } = yScale;
-            const { deltaX, deltaY } = event;
-            const {
-                left: xOffset,
-                top: yOffset,
-            } = event.target.getBoundingClientRect();
-
-            if (isTrackPad(event)) {
-                if (event.shiftKey) {
-                    const pX =
-                        xMin +
-                        (xMax - xMin) *
-                            ((event.clientX - xOffset - xScale.left) / width);
-                    const pY =
-                        yMax +
-                        (yMin - yMax) *
-                            ((event.clientY - yOffset - yScale.top) / height);
-                    const fx = 1.01 ** deltaX;
-                    const fy = 1.01 ** deltaY;
-                    zoomAtOrigin(
-                        zoomPan.callback,
-                        pX,
-                        fx,
-                        xMin,
-                        xMax,
-                        pY,
-                        fy,
-                        yMin,
-                        yMax
-                    );
-                } else {
-                    const fx = (x1 - x0) / width;
-                    const fy = (y0 - y1) / height;
-                    const dx = fx * deltaX;
-                    const dy = fy * deltaY;
-                    zoomPan.callback(
-                        xMin + dx,
-                        xMax + dx,
-                        yMin + dy,
-                        yMax + dy
-                    );
-                }
-                return;
+            if (!processingWheelEvents) {
+                processingWheelEvents = true;
+                requestAnimationFrame(processWheelEvents);
             }
-
-            let z = 0;
-            if (deltaY < 0) {
-                z = wheelZoomFactor;
-            } else if (deltaY > 0) {
-                z = 1 / wheelZoomFactor;
-            } else {
-                return;
-            }
-            const p = xScale.getValueForPixel(event.clientX - xOffset);
-            zoomAtOrigin(zoomPan.callback, p, z, xMin, xMax);
         };
         canvas.addEventListener('wheel', zoomPan.wheelHandler);
 
