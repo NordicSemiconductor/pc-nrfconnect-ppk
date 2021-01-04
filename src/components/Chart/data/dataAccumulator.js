@@ -84,8 +84,11 @@ export default () => ({
                     if (numberOfBits > 0) {
                         for (let i = 0; i < numberOfBits; ++i) {
                             const b = doubleBitValue(bits[ni], i);
-                            if (b > 1) {
+                            if (b === 2) {
                                 this.bitAccumulator[i]++;
+                            }
+                            if (b === 3) {
+                                this.bitAccumulator[i] += 0.5;
                             }
                         }
                     }
