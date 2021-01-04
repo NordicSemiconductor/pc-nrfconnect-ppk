@@ -38,7 +38,13 @@
 /* eslint no-plusplus: off */
 /* eslint operator-assignment: off */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {
+    useState,
+    useRef,
+    useEffect,
+    useCallback,
+    useMemo,
+} from 'react';
 import { bool } from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
@@ -60,14 +66,13 @@ import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
 
 import { rightMarginPx } from './chart.scss';
 import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
-import { doubleBitValue } from '../../utils/bitConversion';
+
+import dataAccumulatorInitialiser from './data/dataAccumulator';
+import dataSelectorInitialiser from './data/dataSelector';
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
-const emptyArray = () =>
-    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
-
-const calcStats = (data, _begin, _end, index) => {
+const calcStats = (_begin, _end) => {
     if (_begin === null || _end === null) {
         return null;
     }
@@ -76,6 +81,8 @@ const calcStats = (data, _begin, _end, index) => {
     if (end < begin) {
         [begin, end] = [end, begin];
     }
+
+    const { data, index } = options;
     const indexBegin = Math.ceil(timestampToIndex(begin, index));
     const indexEnd = Math.floor(timestampToIndex(end, index));
 
@@ -147,20 +154,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
-    const { index } = options;
+    const { bits, data, index } = options;
 
     const chartRef = useRef(null);
 
-    const lineData = useLazyInitializedRef(emptyArray).current;
-    const bitsData = useLazyInitializedRef(() =>
-        [...Array(nbDigitalChannels)].map(() => emptyArray())
-    ).current;
-    const bitIndexes = useLazyInitializedRef(() => new Array(nbDigitalChannels))
+    const dataAccumulator = useLazyInitializedRef(dataAccumulatorInitialiser)
         .current;
-    const lastBits = useLazyInitializedRef(() => new Array(nbDigitalChannels))
-        .current;
-
-    const { data, bits } = options;
+    const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
     let numberOfBits = showDigitalChannels ? nbDigitalChannels : 0;
     if (!bits) {
@@ -180,8 +180,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [len, setLen] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
-    const windowStats = calcStats(data, begin, end, index);
-    const selectionStats = calcStats(data, cursorBegin, cursorEnd, index);
+    const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
+    const selectionStats = useMemo(() => calcStats(cursorBegin, cursorEnd), [
+        cursorBegin,
+        cursorEnd,
+    ]);
 
     const resetCursor = useCallback(() => chartCursor(null, null), [
         chartCursor,
@@ -244,106 +247,26 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const originalIndexEnd = timestampToIndex(end, index);
     const step = (originalIndexEnd - originalIndexBegin) / len;
 
-    let mappedIndex = 0;
-    bitIndexes.fill(0);
+    const [lineData, bitsData] = useMemo(() => {
+        const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
 
-    for (let i = 0; i < numberOfBits; ++i) {
-        bitsData[i][0] = { x: undefined, y: undefined };
-    }
-    if (step > 1) {
-        for (
-            let originalIndex = originalIndexBegin;
-            mappedIndex < len + len;
-            ++mappedIndex, originalIndex = originalIndex + step
-        ) {
-            const timestamp =
-                begin + windowDuration * (mappedIndex / (len + len));
-            const k = Math.floor(originalIndex);
-            const l = Math.floor(originalIndex + step);
-            let min = Number.MAX_VALUE;
-            let max = -Number.MAX_VALUE;
-            for (let n = k; n < l; ++n) {
-                const v = data[(n + data.length) % data.length];
-                if (!Number.isNaN(v)) {
-                    if (v > max) max = v;
-                    if (v < min) min = v;
-                }
-            }
-
-            if (min > max) {
-                min = undefined;
-                max = undefined;
-            }
-            lineData[mappedIndex].x = timestamp;
-            lineData[mappedIndex].y = min;
-            ++mappedIndex;
-            lineData[mappedIndex].x = timestamp;
-            lineData[mappedIndex].y = max;
-
-            for (let i = 0; i < numberOfBits; ++i) {
-                let y1;
-                for (let n = k; n < l; ++n) {
-                    const ni = (n + data.length) % data.length;
-                    if (!Number.isNaN(data[ni])) {
-                        const v = [-0.5, -0.4, 0.4, 0][
-                            doubleBitValue(bits[ni], i)
-                        ];
-                        if (y1 === undefined || v !== y1) {
-                            if (
-                                (bitsData[i][bitIndexes[i] - 1] || {}).y !==
-                                    v ||
-                                mappedIndex === len + len - 1
-                            ) {
-                                bitsData[i][bitIndexes[i]].x = timestamp;
-                                bitsData[i][bitIndexes[i]].y = v;
-                                ++bitIndexes[i];
-                            }
-                            if (y1 !== undefined) {
-                                break;
-                            }
-                            y1 = v;
-                        }
-                    }
-                }
-            }
-        }
-    } else {
-        lastBits.fill(undefined);
-        let last;
-        const originalIndexBeginFloored = Math.floor(originalIndexBegin);
-        const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
-        for (
-            let n = originalIndexBeginFloored;
-            n <= originalIndexEndCeiled;
-            ++mappedIndex, ++n
-        ) {
-            const k = (n + data.length) % data.length;
-            const v = data[k];
-            const timestamp =
-                begin +
-                ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
-            lineData[mappedIndex].x = timestamp;
-            if (n < originalIndexEndCeiled) {
-                last = Number.isNaN(v) ? undefined : v;
-            }
-            lineData[mappedIndex].y = last;
-
-            for (let i = 0; i < numberOfBits; ++i) {
-                const y = Number.isNaN(v)
-                    ? undefined
-                    : [-0.5, -0.4, 0.4, 0][doubleBitValue(bits[k], i)];
-                bitsData[i][bitIndexes[i]].x = timestamp;
-                if (n === originalIndexEndCeiled) {
-                    bitsData[i][bitIndexes[i]].y = lastBits[i];
-                    ++bitIndexes[i];
-                } else if ((bitsData[i][bitIndexes[i] - 1] || {}).y !== y) {
-                    bitsData[i][bitIndexes[i]].y = y;
-                    lastBits[i] = y;
-                    ++bitIndexes[i];
-                }
-            }
-        }
-    }
+        return dataProcessor.process(
+            begin,
+            end,
+            numberOfBits,
+            len,
+            windowDuration
+        );
+    }, [
+        begin,
+        dataAccumulator,
+        dataSelector,
+        end,
+        len,
+        numberOfBits,
+        step,
+        windowDuration,
+    ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
@@ -364,7 +287,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     chartRef={chartRef}
                     cursorData={cursorData}
                     lineData={lineData}
-                    mappedIndex={mappedIndex}
                 />
                 <TimeSpanBottom
                     cursorBegin={cursorBegin}
@@ -396,7 +318,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 <DigitalChannels
                     bitsData={bitsData}
                     digitalChannels={digitalChannels}
-                    bitIndexes={bitIndexes}
                     numberOfBits={numberOfBits}
                     cursorData={cursorData}
                 />
