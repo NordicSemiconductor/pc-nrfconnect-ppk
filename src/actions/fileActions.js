@@ -149,7 +149,9 @@ export const load = () => async dispatch => {
     if (pos < buffer.length) {
         len = buffer.slice(pos, pos + 4).readUInt32LE();
         pos += 4;
-        options.bits = new Uint16Array(buffer.slice(pos, pos + len));
+        options.bits = new Uint16Array(
+            new Uint8Array(buffer.slice(pos, pos + len)).buffer
+        );
     } else {
         options.bits = null;
     }
