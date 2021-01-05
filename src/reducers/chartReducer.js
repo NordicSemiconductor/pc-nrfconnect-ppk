@@ -88,26 +88,6 @@ export const chartCursorAction = (cursorBegin, cursorEnd) => ({
     cursorEnd,
 });
 
-export const chartWindowAction = (
-    windowBegin,
-    windowEnd,
-    windowDuration,
-    yMin,
-    yMax
-) => (dispatch, getState) => {
-    const { sampleFreq, maxSampleFreq } = getState().app.dataLogger;
-    const { currentPane } = getState().appLayout;
-    const sf = currentPane === 0 ? maxSampleFreq : sampleFreq;
-    const duration =
-        windowDuration === null
-            ? null
-            : Math.min(
-                  MAX_WINDOW_DURATION / sf,
-                  Math.max(MIN_WINDOW_DURATION / sf, windowDuration)
-              );
-    dispatch(chartWindowAction2(windowBegin, windowEnd, duration, yMin, yMax));
-};
-
 const chartWindowAction2 = (
     windowBegin,
     windowEnd,
@@ -155,6 +135,26 @@ const chartWindowAction2 = (
         yMin: y0,
         yMax: y1,
     };
+};
+
+export const chartWindowAction = (
+    windowBegin,
+    windowEnd,
+    windowDuration,
+    yMin,
+    yMax
+) => (dispatch, getState) => {
+    const { sampleFreq, maxSampleFreq } = getState().app.dataLogger;
+    const { currentPane } = getState().appLayout;
+    const sf = currentPane === 0 ? maxSampleFreq : sampleFreq;
+    const duration =
+        windowDuration === null
+            ? null
+            : Math.min(
+                  MAX_WINDOW_DURATION / sf,
+                  Math.max(MIN_WINDOW_DURATION / sf, windowDuration)
+              );
+    dispatch(chartWindowAction2(windowBegin, windowEnd, duration, yMin, yMax));
 };
 
 export const resetCursor = () => chartCursorAction(null, null);
