@@ -48,6 +48,7 @@ import dragSelectPlugin from './plugins/chart.dragSelect';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 import crossHairPlugin from './plugins/chart.crossHair';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
+import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 
 import { appState } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
@@ -112,6 +113,7 @@ const ChartContainer = ({
     const {
         windowBegin,
         windowEnd,
+        windowDuration,
         cursorBegin,
         cursorEnd,
         yMin,
@@ -122,6 +124,7 @@ const ChartContainer = ({
     const { samplingRunning } = useSelector(appState);
     const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
     const updateTriggerLevel = level => dispatch(triggerLevelSetAction(level));
+
     const live =
         windowBegin === 0 &&
         windowEnd === 0 &&
@@ -216,12 +219,15 @@ const ChartContainer = ({
         snapping,
         live,
         triggerHandleVisible: isRealTimePane() && !externalTrigger,
+        triggerOrigin,
+        windowDuration,
     };
 
     const plugins = [
         dragSelectPlugin,
         zoomPanPlugin,
         triggerLevelPlugin,
+        triggerOriginPlugin,
         crossHairPlugin,
         {
             id: 'notifier',

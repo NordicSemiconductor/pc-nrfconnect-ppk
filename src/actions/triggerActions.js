@@ -44,6 +44,7 @@ import {
 import {
     clearSingleTriggerWaitingAction,
     setTriggerStartAction,
+    setTriggerOriginAction,
 } from '../reducers/triggerReducer';
 
 // PPK2 trigger point should by default be shifted to middle of window
@@ -109,12 +110,12 @@ export function processTriggerSample(currentValue, device, samplingData) {
             triggerWindowOffset,
             device.capabilities.prePostTriggering
         );
-
         const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
         const to = indexToTimestamp(currentIndex - shiftedIndex);
         dispatch(chartWindowUnLockAction());
         dispatch(chartWindowAction(from, to, to - from));
         dispatch(chartWindowLockAction());
+        dispatch(setTriggerOriginAction(triggerStartIndex));
         dispatch(setTriggerStartAction(null));
     };
 }

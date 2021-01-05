@@ -43,6 +43,7 @@ import { appState } from '../../../reducers/appReducer';
 
 import WindowOffsetSlider from './WindowOffsetSlider';
 import TimeSpanLabel from './TimeSpanLabel';
+import { isRealTimePane } from '../../../utils/panes';
 
 import './timespan.scss';
 
@@ -53,7 +54,7 @@ const TimeSpanTop = ({ width }) => {
         capabilities: { prePostTriggering },
     } = useSelector(appState);
 
-    const showHandle = prePostTriggering;
+    const showHandle = isRealTimePane() && prePostTriggering;
     const distanceFromOriginToTriggerHandle = showHandle
         ? triggerWindowOffset + windowDuration / 2
         : null;

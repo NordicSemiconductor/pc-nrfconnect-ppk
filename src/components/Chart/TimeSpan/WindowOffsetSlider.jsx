@@ -61,11 +61,18 @@ const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
     };
     const onPointerMove = ({ clientX, target }) => {
         if (!drag) return;
-        setWindowOffset(
+        let offset =
             drag.triggerWindowOffset +
-                (duration * (clientX - drag.clientX)) /
-                    target.parentElement.offsetWidth
-        );
+            (duration * (clientX - drag.clientX)) /
+                target.parentElement.offsetWidth;
+        // prevent dragging handle out of bounds
+        const span = duration / 2;
+        if (offset > span) {
+            offset = span;
+        } else if (offset < -span) {
+            offset = -span;
+        }
+        setWindowOffset(offset);
     };
 
     const onPointerUp = ({ target, pointerId }) => {
