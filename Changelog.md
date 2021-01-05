@@ -4,6 +4,7 @@
 ### Updates
 - Add screenshot functionality
 - Split real-time and data logger views
+- Enhanced performance to make the UI more responsive
 
 ## Version 3.0.2
 ## Fixed
