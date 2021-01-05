@@ -44,49 +44,49 @@ import colors from '../colors.scss';
 const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
 
-const bitsChartOptions = {
-    scales: {
-        xAxes: [
-            {
-                id: 'xScale',
-                display: false,
-                type: 'linear',
-                ticks: {},
-                tickMarkLength: 0,
-                drawTicks: false,
-                cursor: {},
-            },
-        ],
-        yAxes: [
-            {
-                type: 'linear',
-                display: false,
-                ticks: {
-                    min: -0.5,
-                    max: 0.5,
-                },
-            },
-        ],
-    },
-    redraw: true,
-    maintainAspectRatio: false,
-    animation: { duration: 0 },
-    hover: { animationDuration: 0 },
-    responsiveAnimationDuration: 0,
-    legend: { display: false },
-};
-
 const DigitalChannels = ({
     bitsData,
     digitalChannels,
     numberOfBits,
     cursorData: { begin, end, cursorBegin, cursorEnd },
 }) => {
-    const bitXaxis = bitsChartOptions.scales.xAxes[0];
-    bitXaxis.ticks.min = begin;
-    bitXaxis.ticks.max = end;
-    bitXaxis.cursor.cursorBegin = cursorBegin;
-    bitXaxis.cursor.cursorEnd = cursorEnd;
+    const bitsChartOptions = {
+        scales: {
+            xAxes: [
+                {
+                    id: 'xScale',
+                    display: false,
+                    type: 'linear',
+                    ticks: {
+                        min: begin,
+                        max: end,
+                    },
+                    tickMarkLength: 0,
+                    drawTicks: false,
+                    cursor: {
+                        cursorBegin,
+                        cursorEnd,
+                    },
+                },
+            ],
+            yAxes: [
+                {
+                    type: 'linear',
+                    display: false,
+                    ticks: {
+                        min: -0.5,
+                        max: 0.5,
+                    },
+                },
+            ],
+        },
+        maintainAspectRatio: false,
+        animation: { duration: 0 },
+        hover: { animationDuration: 0 },
+        responsiveAnimationDuration: 0,
+        legend: { display: false },
+    };
+
     const bitsChartData = bitsData
         .map((bitData, i) => ({
             datasets: [
