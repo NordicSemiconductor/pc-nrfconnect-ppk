@@ -35,6 +35,7 @@
  */
 
 import { options, nbDigitalChannels } from '../globals';
+import { isRealTimePane } from '../utils/panes';
 
 import persistentStore from '../utils/persistentStore';
 
@@ -146,7 +147,7 @@ export const chartWindowAction = (
 ) => (dispatch, getState) => {
     const { sampleFreq, maxSampleFreq } = getState().app.dataLogger;
     const { currentPane } = getState().appLayout;
-    const sf = currentPane === 0 ? maxSampleFreq : sampleFreq;
+    const sf = isRealTimePane(currentPane) ? maxSampleFreq : sampleFreq;
     const duration =
         windowDuration === null
             ? null
