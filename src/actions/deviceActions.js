@@ -226,7 +226,6 @@ export function open(deviceInfo) {
         let prevBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
-        const { currentPane } = getState().appLayout;
 
         const initializeChartForRealTime = () => {
             const { triggerLength } = getState().app.trigger;
@@ -248,6 +247,7 @@ export function open(deviceInfo) {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq, sampleFreq },
             } = getState().app;
+            const { currentPane } = getState().appLayout;
 
             let zeroCappedValue = zeroCap(value);
             const b16 = convertBits16(bits);
@@ -279,7 +279,6 @@ export function open(deviceInfo) {
             if (options.index === options.data.length) {
                 options.index = 0;
             }
-
             if (isRealTimePane(currentPane) && !samplingRunning) {
                 dispatch(
                     processTriggerSample(value, device, {
@@ -328,6 +327,7 @@ export function open(deviceInfo) {
             dispatch(rttStartAction());
             dispatch(setFileLoadedAction(false));
 
+            const { currentPane } = getState().appLayout;
             if (isRealTimePane(currentPane)) {
                 initializeChartForRealTime();
             }
