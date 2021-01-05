@@ -53,13 +53,8 @@ import { isDataLoggerPane } from '../../utils/panes';
 import './charttop.scss';
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 
-const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
-    const dispatch = useDispatch();
-    const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
-    const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
-    const live = windowBegin === 0 && windowEnd === 0;
-
-    const TimeWindowButton = ({ label }) => (
+const TimeWindowButton = ({ label, zoomToWindow }) => {
+    return (
         <Button
             variant="secondary"
             size="sm"
@@ -68,7 +63,19 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
             {label}
         </Button>
     );
-    TimeWindowButton.propTypes = { label: string.isRequired };
+};
+
+TimeWindowButton.propTypes = {
+    label: string.isRequired,
+    zoomToWindow: func.isRequired,
+};
+
+const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
+    const dispatch = useDispatch();
+    const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
+    const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
+    const live = windowBegin === 0 && windowEnd === 0;
+
     const timeWindowLabels = [
         '10ms',
         '100ms',
@@ -105,7 +112,11 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
             {isDataLoggerPane() && (
                 <ButtonGroup>
                     {timeWindowLabels.map(label => (
-                        <TimeWindowButton label={label} key={label} />
+                        <TimeWindowButton
+                            label={label}
+                            key={label}
+                            zoomToWindow={zoomToWindow}
+                        />
                     ))}
                 </ButtonGroup>
             )}
