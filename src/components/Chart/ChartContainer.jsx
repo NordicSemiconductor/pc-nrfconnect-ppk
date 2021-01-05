@@ -201,7 +201,6 @@ const ChartContainer = ({
                 },
             ],
         },
-        redraw: true,
         maintainAspectRatio: false,
         animation: { duration: 0 },
         hover: { animationDuration: 0 },
