@@ -37,6 +37,7 @@
 /* eslint no-plusplus: off */
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
+import { doubleBitValue } from '../../../utils/bitConversion';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
@@ -83,7 +84,7 @@ export default () => ({
             for (let i = 0; i < numberOfBits; ++i) {
                 const y = Number.isNaN(v)
                     ? undefined
-                    : (((bits[k] >> i) & 1) - 0.5) * 0.8;
+                    : [-0.5, -0.4, 0.4, 0][doubleBitValue(bits[k], i)];
                 this.bitsData[i][this.bitIndexes[i]].x = timestamp;
                 if (n === originalIndexEndCeiled) {
                     this.bitsData[i][this.bitIndexes[i]].y = this.lastBits[i];

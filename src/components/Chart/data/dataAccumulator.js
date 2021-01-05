@@ -37,6 +37,7 @@
 /* eslint no-plusplus: off */
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
+import { doubleBitValue } from '../../../utils/bitConversion';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
@@ -81,10 +82,13 @@ export default () => ({
                     if (v < min) min = v;
 
                     if (numberOfBits > 0) {
-                        const b = bits[ni];
                         for (let i = 0; i < numberOfBits; ++i) {
-                            if (((b >> i) & 1) === 1) {
+                            const b = doubleBitValue(bits[ni], i);
+                            if (b === 2) {
                                 this.bitAccumulator[i]++;
+                            }
+                            if (b === 3) {
+                                this.bitAccumulator[i] += 0.5;
                             }
                         }
                     }
@@ -102,7 +106,7 @@ export default () => ({
             this.lineData[mappedIndex].y = max;
 
             const dataForCurrentTimestampExists =
-                this.lineData[mappedIndex].y != null;
+                this.lineData[mappedIndex].y !== null;
             if (dataForCurrentTimestampExists) {
                 const maxCount = l - k;
                 for (let i = 0; i < numberOfBits; ++i) {

@@ -68,6 +68,13 @@ const initialState = {
             triggerStartIndex: null,
             triggerWindowOffset: 0,
         },
+        dataLogger: {
+            sampleFreq: 100000,
+            maxSampleFreq: 100000,
+        },
+    },
+    appLayout: {
+        currentPane: 0,
     },
 };
 const beginIndex = 5;
@@ -100,6 +107,7 @@ describe('Handle trigger', () => {
     it('should chart window if enough samples have been processed', () => {
         const newIndex = 1005;
         const store = mockStore({
+            ...initialState,
             app: {
                 ...initialState.app,
                 trigger: {
@@ -125,6 +133,7 @@ describe('Handle trigger', () => {
     describe('Single trigger', () => {
         const newIndex = 1005;
         const store = mockStore({
+            ...initialState,
             app: {
                 ...initialState.app,
                 trigger: {
@@ -157,6 +166,7 @@ describe('Handle trigger', () => {
 
     describe('Buffer functionality', () => {
         const store = mockStore({
+            ...initialState,
             app: {
                 ...initialState.app,
                 trigger: {
@@ -201,6 +211,7 @@ describe('Handle trigger', () => {
 
         it('should by default shift window by half the window size for given hw', () => {
             const store = mockStore({
+                ...initialState,
                 app: {
                     ...initialState.app,
                     trigger: {
@@ -227,6 +238,7 @@ describe('Handle trigger', () => {
         it('should shift window according to given offset', () => {
             const triggerWindowOffset = 500;
             const store = mockStore({
+                ...initialState,
                 app: {
                     ...initialState.app,
                     trigger: {

@@ -35,6 +35,7 @@
  */
 
 import { options, nbDigitalChannels } from '../globals';
+import { isRealTimePane } from '../utils/panes';
 
 import persistentStore from '../utils/persistentStore';
 
@@ -75,8 +76,8 @@ const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
 const TOGGLE_GRID_LINES = 'TOGGLE_GRID_LINES';
 
-const MIN_WINDOW_DURATION = 500;
-const MAX_WINDOW_DURATION = 120000000;
+const MIN_WINDOW_DURATION = 5e7;
+const MAX_WINDOW_DURATION = 1.2e13;
 const Y_MIN = -100;
 const Y_MAX = 1200000;
 
@@ -88,17 +89,13 @@ export const chartCursorAction = (cursorBegin, cursorEnd) => ({
     cursorEnd,
 });
 
-export const chartWindowAction = (
+const chartWindowAction2 = (
     windowBegin,
     windowEnd,
     windowDuration,
     yMin,
     yMax
 ) => {
-    const duration = Math.min(
-        MAX_WINDOW_DURATION,
-        Math.max(MIN_WINDOW_DURATION, windowDuration)
-    );
     let y0 = yMin;
     let y1 = yMax;
 
@@ -124,28 +121,48 @@ export const chartWindowAction = (
             type: CHART_WINDOW,
             windowBegin: 0,
             windowEnd: 0,
-            windowDuration: windowDuration === null ? null : duration,
+            windowDuration,
             yMin: y0,
             yMax: y1,
         };
     }
-    const half = duration / 2;
+    const half = windowDuration / 2;
     const center = (windowBegin + windowEnd) / 2;
     return {
         type: CHART_WINDOW,
         windowBegin: center - half,
         windowEnd: center + half,
-        windowDuration: duration,
+        windowDuration,
         yMin: y0,
         yMax: y1,
     };
 };
 
-export const chartReset = windowDuration =>
-    chartWindowAction(null, null, windowDuration);
+export const chartWindowAction = (
+    windowBegin,
+    windowEnd,
+    windowDuration,
+    yMin,
+    yMax
+) => (dispatch, getState) => {
+    const { sampleFreq, maxSampleFreq } = getState().app.dataLogger;
+    const { currentPane } = getState().appLayout;
+    const sf = isRealTimePane(currentPane) ? maxSampleFreq : sampleFreq;
+    const duration =
+        windowDuration === null
+            ? null
+            : Math.min(
+                  MAX_WINDOW_DURATION / sf,
+                  Math.max(MIN_WINDOW_DURATION / sf, windowDuration)
+              );
+    dispatch(chartWindowAction2(windowBegin, windowEnd, duration, yMin, yMax));
+};
+
 export const resetCursor = () => chartCursorAction(null, null);
 export const resetCursorAndChart = () => (dispatch, getState) => {
-    dispatch(chartReset(getState().app.chart.windowDuration));
+    dispatch(
+        chartWindowAction(null, null, getState().app.chart.windowDuration)
+    );
     dispatch(resetCursor());
 };
 

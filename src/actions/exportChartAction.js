@@ -68,6 +68,7 @@ export const formatDataForExport = (
         const k = (n + bufferData.length) % bufferData.length;
         const value = bufferData[k];
         if (!Number.isNaN(value)) {
+            // TODO: 16-bit binary for channel data
             const b = bitsData ? bitsData[k].toString(2).padStart(8, '0') : '';
             content += selectivePrint(
                 [

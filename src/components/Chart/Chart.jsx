@@ -69,6 +69,7 @@ import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
 
 import dataAccumulatorInitialiser from './data/dataAccumulator';
 import dataSelectorInitialiser from './data/dataSelector';
+import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
@@ -162,8 +163,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         .current;
     const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
+    const { sampleFreq } = useSelector(dataLoggerState);
+    const digitalChannelsWindowLimit = 3e11 / sampleFreq;
+
     let numberOfBits =
-        windowDuration <= 3000000 && showDigitalChannels
+        windowDuration <= digitalChannelsWindowLimit && showDigitalChannels
             ? nbDigitalChannels
             : 0;
     if (!bits) {
