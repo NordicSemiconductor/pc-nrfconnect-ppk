@@ -35,11 +35,11 @@
  */
 
 const ranges = [
-    { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 500 }, // 1Hz
+    { name: 'days', multiplier: 24 * 60 * 60, min: 7, max: 500 }, // 1Hz
     { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 50 }, // 10Hz
-    { name: 'hours', multiplier: 60 * 60, min: 1, max: 120 }, // 100Hz
+    { name: 'hours', multiplier: 60 * 60, min: 6, max: 120 }, // 100Hz
     { name: 'hours', multiplier: 60 * 60, min: 1, max: 12 }, // 1kHz
-    { name: 'minutes', multiplier: 60, min: 1, max: 72 }, // 7.7-10kHz
+    { name: 'minutes', multiplier: 60, min: 10, max: 72 }, // 7.7-10kHz
     { name: 'seconds', multiplier: 1, min: 60, max: 432 }, // 100kHz
 ];
 
