@@ -411,9 +411,7 @@ class RTTDevice extends Device {
         }
         try {
             const value = this.viewFloat[0];
-            // for (let i = 0; i < SAMPLES_PER_AVERAGE; i += 1) {
-            // }
-            this.onSampleCallback({ value, timestamp: this.timestamp });
+            this.onSampleCallback({ value });
             this.timestamp += this.adcSamplingTimeUs;
         } catch (err) {
             this.emit('error', 'Average data error, restart application', err);
@@ -422,7 +420,7 @@ class RTTDevice extends Device {
 
     handleTriggerDataSet() {
         this.triggerWaiting = false;
-        if (this.triggerBuf.length !== this.dataPayload.length) {
+        if (this.triggerBuf.byteLength !== this.dataPayload.length) {
             this.triggerBuf = new ArrayBuffer(this.dataPayload.length);
             this.viewUint8 = new Uint8Array(this.triggerBuf);
         }
@@ -441,7 +439,10 @@ class RTTDevice extends Device {
             const value =
                 this.getAdcResult[currentMeasurementRange](adcResult) * 1e6;
 
-            this.onSampleCallback({ value, timestamp: this.timestamp });
+            this.onSampleCallback({
+                value,
+                endOfTrigger: i === this.dataPayload.length - 2,
+            });
             this.timestamp += this.adcSamplingTimeUs;
         }
     }
@@ -526,7 +527,7 @@ class RTTDevice extends Device {
     }
 
     ppkTriggerWindowSet(value) {
-        const wnd = Math.floor((value * 1000) / this.adcSamplingTimeUs);
+        const wnd = Math.ceil((value * 1000) / this.adcSamplingTimeUs);
         return this.sendCommand([
             PPKCmd.TriggerWindowSet,
             wnd >> 8,

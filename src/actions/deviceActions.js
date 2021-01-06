@@ -237,8 +237,7 @@ export function open(deviceInfo) {
             dispatch(chartWindowAction(0, end, end));
         };
 
-        const onSample = ({ value, bits }) => {
-            // PPK1 always sets timestamp, while PPK2 never does
+        const onSample = ({ value, bits, endOfTrigger }) => {
             if (options.timestamp === undefined) {
                 options.timestamp = 0;
             }
@@ -246,7 +245,20 @@ export function open(deviceInfo) {
             const {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq, sampleFreq },
+                trigger: {
+                    triggerRunning,
+                    triggerStartIndex,
+                    triggerSingleWaiting,
+                },
             } = getState().app;
+            if (
+                !triggerRunning &&
+                !samplingRunning &&
+                !triggerStartIndex &&
+                !triggerSingleWaiting
+            ) {
+                return;
+            }
             const { currentPane } = getState().appLayout;
 
             let zeroCappedValue = zeroCap(value);
@@ -285,6 +297,7 @@ export function open(deviceInfo) {
                         samplingTime: options.samplingTime,
                         dataIndex: options.index,
                         dataBuffer: options.data,
+                        endOfTrigger,
                     })
                 );
             }
