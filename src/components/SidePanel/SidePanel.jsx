@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
@@ -53,18 +53,29 @@ import {
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
     appState,
+    setCurrentPane,
 } from '../../reducers/appReducer';
 
 import { options } from '../../globals';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
-import { isRealTimePane, isDataLoggerPane } from '../../utils/panes';
+import {
+    isRealTimePane,
+    isDataLoggerPane,
+    DATA_LOGGER,
+} from '../../utils/panes';
 
 import './sidepanel.scss';
+import persistentStore from '../../utils/persistentStore';
 
 export default () => {
     const dispatch = useDispatch();
     useHotKey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+    useEffect(() => {
+        dispatch(
+            setCurrentPane(persistentStore.get('currentPane', DATA_LOGGER))
+        );
+    }, [dispatch]);
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
