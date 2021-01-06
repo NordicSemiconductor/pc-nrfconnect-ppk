@@ -46,8 +46,8 @@
 import { useSelector } from 'react-redux';
 import { currentPane as currentPaneSelector } from '../reducers/appReducer';
 
-const REAL_TIME = 0;
-const DATA_LOGGER = 1;
+export const REAL_TIME = 1;
+export const DATA_LOGGER = 0;
 
 export const isRealTimePane = (currentPane = null) =>
     getCurrentPane(REAL_TIME, currentPane);

@@ -49,8 +49,8 @@ export default () => (
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
         panes={[
-            ['Real-time', RealTime],
             ['Data Logger', DataLogger],
+            ['Real-time', RealTime],
         ]}
     />
 );

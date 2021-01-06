@@ -43,7 +43,7 @@ import { join, dirname } from 'path';
 import { logger } from 'nrfconnect/core';
 import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
-import { setFileLoadedAction } from '../reducers/appReducer';
+import { setCurrentPane, setFileLoadedAction } from '../reducers/appReducer';
 
 import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 
@@ -158,8 +158,7 @@ export const load = () => async dispatch => {
 
     dispatch(setChartState(chartState));
     dispatch(setFileLoadedAction(true));
-    if (currentPane != null)
-        dispatch({ type: 'SET_CURRENT_PANE', currentPane });
+    if (currentPane !== null) dispatch(setCurrentPane(currentPane));
     logger.info(`State restored from: ${filename}`);
 };
 
