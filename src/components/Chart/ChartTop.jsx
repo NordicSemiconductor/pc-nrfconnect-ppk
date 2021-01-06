@@ -120,14 +120,16 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     ))}
                 </ButtonGroup>
             )}
-            <Toggle
-                label="LIVE VIEW"
-                onToggle={() =>
-                    live ? chartPause() : dispatch(resetCursorAndChart())
-                }
-                isToggled={live}
-                variant="secondary"
-            />
+            {isDataLoggerPane() && (
+                <Toggle
+                    label="LIVE VIEW"
+                    onToggle={() =>
+                        live ? chartPause() : dispatch(resetCursorAndChart())
+                    }
+                    isToggled={live}
+                    variant="secondary"
+                />
+            )}
         </div>
     );
 };
