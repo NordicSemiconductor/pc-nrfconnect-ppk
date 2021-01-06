@@ -63,6 +63,7 @@ export function processTriggerSample(currentValue, device, samplingData) {
             samplingTime,
             dataIndex: currentIndex,
             dataBuffer,
+            endOfTrigger, // boolean for PPK1 and undefined for PPK2
         } = samplingData;
         const {
             trigger: {
@@ -74,8 +75,10 @@ export function processTriggerSample(currentValue, device, samplingData) {
             },
         } = getState().app;
 
+        const isPPK1 = !device.capabilities.prePostTriggering;
+
         if (!triggerStartIndex) {
-            if (currentValue >= triggerLevel) {
+            if (currentValue >= triggerLevel || isPPK1) {
                 dispatch(setTriggerStartAction(currentIndex));
             }
             return;
@@ -83,11 +86,13 @@ export function processTriggerSample(currentValue, device, samplingData) {
 
         const windowSize = calculateWindowSize(triggerLength, samplingTime);
 
-        const enoughSamplesCollected =
-            (triggerStartIndex + windowSize) % dataBuffer.length <=
-            currentIndex;
+        const enoughSamplesCollected = isPPK1
+            ? endOfTrigger
+            : (triggerStartIndex + windowSize) % dataBuffer.length <=
+              currentIndex;
 
         if (!enoughSamplesCollected) return;
+
         if (triggerSingleWaiting) {
             logger.info('Trigger received, stopped waiting');
             dispatch(clearSingleTriggerWaitingAction());
