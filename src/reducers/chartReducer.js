@@ -230,8 +230,10 @@ export default (state = initialState, { type, ...action }) => {
             const { yAxisLock, windowBeginLock, windowEndLock } = state;
             if (windowBeginLock !== null) {
                 windowBegin = Math.max(windowBeginLock, windowBegin);
-                if (windowEnd === 0) windowEnd = windowEndLock;
-                else windowEnd = Math.min(windowEndLock, windowEnd);
+                windowEnd =
+                    windowEnd === 0
+                        ? windowEndLock
+                        : Math.min(windowEndLock, windowEnd);
                 windowDuration = windowEnd - windowBegin;
             }
             return {
