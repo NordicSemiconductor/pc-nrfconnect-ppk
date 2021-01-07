@@ -63,6 +63,8 @@ const initialState = {
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     yAxisLock: false,
     showGridLines: persistentStore.get('gridlinesVisible', true),
+    windowBeginLock: null, // [microseconds]
+    windowEndLock: null, // [microseconds]
 };
 
 const ANIMATION = 'ANIMATION';
@@ -75,6 +77,8 @@ const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
 const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
 const TOGGLE_GRID_LINES = 'TOGGLE_GRID_LINES';
+const CHART_WINDOW_LOCK = 'CHART_WINDOW_LOCK';
+const CHART_WINDOW_UNLOCK = 'CHART_WINDOW_UNLOCK';
 
 const MIN_WINDOW_DURATION = 5e7;
 const MAX_WINDOW_DURATION = 1.2e13;
@@ -158,6 +162,9 @@ export const chartWindowAction = (
     dispatch(chartWindowAction2(windowBegin, windowEnd, duration, yMin, yMax));
 };
 
+export const chartWindowLockAction = () => ({ type: CHART_WINDOW_LOCK });
+export const chartWindowUnLockAction = () => ({ type: CHART_WINDOW_UNLOCK });
+
 export const resetCursor = () => chartCursorAction(null, null);
 export const resetCursorAndChart = () => (dispatch, getState) => {
     dispatch(
@@ -218,14 +225,15 @@ export default (state = initialState, { type, ...action }) => {
             };
         }
         case CHART_WINDOW: {
-            const {
-                windowBegin,
-                windowEnd,
-                windowDuration,
-                yMin,
-                yMax,
-            } = action;
-            const { yAxisLock } = state;
+            let { windowBegin, windowEnd, windowDuration } = action;
+            const { yMin, yMax } = action;
+            const { yAxisLock, windowBeginLock, windowEndLock } = state;
+            if (windowBeginLock !== null) {
+                windowBegin = Math.max(windowBeginLock, windowBegin);
+                if (windowEnd === 0) windowEnd = windowEndLock;
+                else windowEnd = Math.min(windowEndLock, windowEnd);
+                windowDuration = windowEnd - windowBegin;
+            }
             return {
                 ...state,
                 windowBegin,
@@ -287,6 +295,18 @@ export default (state = initialState, { type, ...action }) => {
             };
         case UPDATE_HAS_DIGITAL_CHANNELS:
             return { ...state, ...action };
+        case CHART_WINDOW_LOCK:
+            return {
+                ...state,
+                windowBeginLock: state.windowBegin,
+                windowEndLock: state.windowEnd,
+            };
+        case CHART_WINDOW_UNLOCK:
+            return {
+                ...state,
+                windowBeginLock: null,
+                windowEndLock: null,
+            };
         default:
             return state;
     }

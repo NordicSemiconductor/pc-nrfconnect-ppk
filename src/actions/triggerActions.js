@@ -36,7 +36,11 @@
 
 import { logger } from 'nrfconnect/core';
 import { indexToTimestamp } from '../globals';
-import { chartWindowAction } from '../reducers/chartReducer';
+import {
+    chartWindowAction,
+    chartWindowLockAction,
+    chartWindowUnLockAction,
+} from '../reducers/chartReducer';
 import {
     clearSingleTriggerWaitingAction,
     setTriggerStartAction,
@@ -108,7 +112,9 @@ export function processTriggerSample(currentValue, device, samplingData) {
 
         const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
         const to = indexToTimestamp(currentIndex - shiftedIndex);
+        dispatch(chartWindowUnLockAction());
         dispatch(chartWindowAction(from, to, to - from));
+        dispatch(chartWindowLockAction());
         dispatch(setTriggerStartAction(null));
     };
 }

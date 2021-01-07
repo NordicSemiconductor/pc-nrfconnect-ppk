@@ -72,6 +72,7 @@ import {
     updateHasDigitalChannels,
     resetCursorAndChart,
     chartWindowAction,
+    chartWindowUnLockAction,
 } from '../reducers/chartReducer';
 import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
 import { options, updateTitle, indexToTimestamp } from '../globals';
@@ -118,6 +119,7 @@ export const setupOptions = () => (dispatch, getState) => {
     } catch (err) {
         logger.error(err);
     }
+    dispatch(chartWindowUnLockAction());
     dispatch(updateHasDigitalChannels());
     dispatch(animationAction());
 };

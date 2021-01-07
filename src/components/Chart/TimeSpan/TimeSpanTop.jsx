@@ -48,12 +48,12 @@ import './timespan.scss';
 
 const TimeSpanTop = ({ width }) => {
     const { windowDuration } = useSelector(chartState);
-    const { triggerRunning, triggerWindowOffset } = useSelector(triggerState);
+    const { triggerWindowOffset } = useSelector(triggerState);
     const {
         capabilities: { prePostTriggering },
     } = useSelector(appState);
 
-    const showHandle = prePostTriggering && triggerRunning;
+    const showHandle = prePostTriggering;
     const distanceFromOriginToTriggerHandle = showHandle
         ? triggerWindowOffset + windowDuration / 2
         : null;
