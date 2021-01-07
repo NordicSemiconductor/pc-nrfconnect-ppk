@@ -195,7 +195,7 @@ describe('Handle trigger', () => {
                     endOfTrigger: true,
                 })
             );
-            expect(store.getActions().length).toBe(2);
+            expect(store.getActions().length).toBe(4);
         });
     });
 
@@ -280,6 +280,7 @@ describe('Handle trigger', () => {
 });
 
 const getExpectedChartActions = (from, to) => [
+    { type: 'CHART_WINDOW_UNLOCK' },
     {
         type: 'CHART_WINDOW',
         windowBegin: from,
@@ -288,5 +289,6 @@ const getExpectedChartActions = (from, to) => [
         yMax: undefined,
         yMin: undefined,
     },
+    { type: 'CHART_WINDOW_LOCK' },
     { type: 'SET_TRIGGER_START', triggerStartIndex: null },
 ];
