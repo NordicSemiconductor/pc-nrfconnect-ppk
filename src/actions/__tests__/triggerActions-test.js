@@ -124,10 +124,7 @@ describe('Handle trigger', () => {
             })
         );
         expect(store.getActions()).toEqual(
-            getExpectedChartActions(
-                indexToTimestamp(beginIndex),
-                indexToTimestamp(newIndex)
-            )
+            getExpectedChartActions(beginIndex, newIndex)
         );
     });
 
@@ -157,10 +154,7 @@ describe('Handle trigger', () => {
                 {
                     type: 'TRIGGER_SINGLE_CLEAR',
                 },
-                ...getExpectedChartActions(
-                    indexToTimestamp(beginIndex),
-                    indexToTimestamp(newIndex)
-                ),
+                ...getExpectedChartActions(beginIndex, newIndex),
             ]);
             expect(mockDevice.ppkTriggerStop).toHaveBeenCalledTimes(1);
         });
@@ -195,7 +189,7 @@ describe('Handle trigger', () => {
                     endOfTrigger: true,
                 })
             );
-            expect(store.getActions().length).toBe(4);
+            expect(store.getActions().length).toBe(5);
         });
     });
 
@@ -232,10 +226,12 @@ describe('Handle trigger', () => {
             );
             const expectedShiftedIndex = windowSize / 2;
             expect(expectedShiftedIndex).toBe(500);
-            const from = indexToTimestamp(beginIndex - expectedShiftedIndex);
-            const to = indexToTimestamp(endIndex - expectedShiftedIndex);
             expect(store.getActions()).toEqual(
-                getExpectedChartActions(from, to)
+                getExpectedChartActions(
+                    beginIndex,
+                    endIndex,
+                    expectedShiftedIndex
+                )
             );
         });
 
@@ -270,25 +266,32 @@ describe('Handle trigger', () => {
             const expectedShiftedIndex = windowSize / 2 + shift;
             expect(shift).toBe(50);
             expect(expectedShiftedIndex).toBe(550);
-            const from = indexToTimestamp(beginIndex - expectedShiftedIndex);
-            const to = indexToTimestamp(endIndex - expectedShiftedIndex);
             expect(store.getActions()).toEqual(
-                getExpectedChartActions(from, to)
+                getExpectedChartActions(
+                    beginIndex,
+                    endIndex,
+                    expectedShiftedIndex
+                )
             );
         });
     });
 });
 
-const getExpectedChartActions = (from, to) => [
-    { type: 'CHART_WINDOW_UNLOCK' },
-    {
-        type: 'CHART_WINDOW',
-        windowBegin: from,
-        windowEnd: to,
-        windowDuration: to - from,
-        yMax: undefined,
-        yMin: undefined,
-    },
-    { type: 'CHART_WINDOW_LOCK' },
-    { type: 'SET_TRIGGER_START', triggerStartIndex: null },
-];
+const getExpectedChartActions = (fromIndex, toIndex, shift = 0) => {
+    const from = indexToTimestamp(fromIndex - shift);
+    const to = indexToTimestamp(toIndex - shift);
+    return [
+        { type: 'CHART_WINDOW_UNLOCK' },
+        {
+            type: 'CHART_WINDOW',
+            windowBegin: from,
+            windowEnd: to,
+            windowDuration: to - from,
+            yMax: undefined,
+            yMin: undefined,
+        },
+        { type: 'CHART_WINDOW_LOCK' },
+        { type: 'SET_TRIGGER_ORIGIN', origin: fromIndex },
+        { type: 'SET_TRIGGER_START', triggerStartIndex: null },
+    ];
+};

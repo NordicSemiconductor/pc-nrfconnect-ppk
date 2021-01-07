@@ -109,6 +109,7 @@ const ChartContainer = ({
         triggerRunning,
         triggerSingleWaiting,
         externalTrigger,
+        triggerOrigin,
     } = useSelector(triggerState);
     const {
         windowBegin,
@@ -124,7 +125,6 @@ const ChartContainer = ({
     const { samplingRunning } = useSelector(appState);
     const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
     const updateTriggerLevel = level => dispatch(triggerLevelSetAction(level));
-
     const live =
         windowBegin === 0 &&
         windowEnd === 0 &&
