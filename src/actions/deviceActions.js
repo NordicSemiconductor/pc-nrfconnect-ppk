@@ -261,7 +261,6 @@ export function open(deviceInfo) {
             ) {
                 return;
             }
-            const { currentPane } = getState().appLayout;
 
             let zeroCappedValue = zeroCap(value);
             const b16 = convertBits16(bits);
@@ -293,7 +292,7 @@ export function open(deviceInfo) {
             if (options.index === options.data.length) {
                 options.index = 0;
             }
-            if (isRealTimePane(currentPane) && !samplingRunning) {
+            if (triggerRunning || triggerSingleWaiting) {
                 dispatch(
                     processTriggerSample(value, device, {
                         samplingTime: options.samplingTime,

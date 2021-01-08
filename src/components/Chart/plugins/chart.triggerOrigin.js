@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2021, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,54 +34,47 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { render, screen } from '../../utils/testUtils';
-import TimeSpanTop from '../Chart/TimeSpan/TimeSpanTop';
+/* eslint no-param-reassign: off */
 
-const initialState = {
-    app: {
-        chart: {
-            windowDuration: 1000,
-        },
-        trigger: {
-            triggerRunning: false,
-            triggerWindowOffset: 0,
-        },
-        app: {
-            capabilities: {
-                prePostTriggering: false,
-            },
-        },
+import colors from '../../colors.scss';
+import { indexToTimestamp } from '../../../globals';
+
+const { gray700: color } = colors;
+
+const plugin = {
+    id: 'triggerorigin',
+
+    afterDraw(chartInstance) {
+        const {
+            chartArea: { top, bottom },
+            scales: { xScale },
+            chart: { ctx },
+            options: { triggerOrigin },
+        } = chartInstance;
+        if (!triggerOrigin) return;
+        // Not quite sure why we have to use the sample before, e.g. triggerOrigin - 1
+        const x = Math.ceil(
+            xScale.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
+        );
+
+        ctx.save();
+
+        function drawDashedLine() {
+            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = color;
+            ctx.setLineDash([4, 5]);
+            ctx.beginPath();
+            ctx.moveTo(x, top);
+            ctx.lineTo(x, bottom);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        drawDashedLine();
+
+        ctx.restore();
     },
 };
 
-test('should hide offset handler if device does not support it', () => {
-    render(<TimeSpanTop />, { initialState });
-
-    const handler = screen.queryByTestId('offsetHandler');
-    expect(handler).toBeNull();
-});
-
-test('should show offset handler if trigger running and device has capabilities', () => {
-    const triggerRunningWithCapabilitiesState = {
-        app: {
-            ...initialState.app,
-            trigger: {
-                ...initialState.app.trigger,
-                triggerRunning: true,
-            },
-            app: {
-                capabilities: {
-                    prePostTriggering: true,
-                },
-            },
-        },
-    };
-
-    render(<TimeSpanTop />, {
-        initialState: triggerRunningWithCapabilitiesState,
-    });
-
-    const handler = screen.queryByTestId('offsetHandler');
-    expect(handler).not.toBeNull();
-});
+export default plugin;
