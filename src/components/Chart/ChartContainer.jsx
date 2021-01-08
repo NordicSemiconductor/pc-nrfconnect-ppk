@@ -56,39 +56,12 @@ import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/de
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
 import { isRealTimePane } from '../../utils/panes';
+import { indexToTimestamp } from '../../globals';
 
 const valueRange = { min: 0, max: undefined };
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
-
-const timestampToLabel = (usecs, index, array) => {
-    const microseconds = Math.abs(usecs);
-    const sign = usecs < 0 ? '-' : '';
-    if (!array) {
-        return `${sign}${Number(microseconds / 1e3).toFixed(3)} ms`;
-    }
-    if (index > 0 && index < array.length - 1) {
-        const first = array[0];
-        const last = array[array.length - 1];
-        const range = last - first;
-        if (usecs - first < range / 8 || last - usecs < range / 8) {
-            return undefined;
-        }
-    }
-
-    const d = new Date(microseconds / 1e3);
-    const h = d.getUTCHours().toString().padStart(2, '0');
-    const m = d.getUTCMinutes().toString().padStart(2, '0');
-    const s = d.getUTCSeconds().toString().padStart(2, '0');
-
-    const time = `${sign}${h}:${m}:${s}`;
-    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
-        3
-    )}`.padStart(7, '0');
-
-    return [time, subsecond];
-};
 
 const formatCurrent = uA =>
     unit(uA, 'uA')
@@ -125,6 +98,42 @@ const ChartContainer = ({
     const { samplingRunning } = useSelector(appState);
     const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
     const updateTriggerLevel = level => dispatch(triggerLevelSetAction(level));
+
+    const timestampToLabel = React.useCallback(
+        (_usecs, index, array) => {
+            let usecs = _usecs;
+            if (triggerOrigin != null) {
+                usecs -= indexToTimestamp(triggerOrigin);
+            }
+            const microseconds = Math.abs(usecs);
+            const sign = usecs < 0 ? '-' : '';
+            if (!array) {
+                return `${sign}${Number(microseconds / 1e3).toFixed(3)} ms`;
+            }
+            if (index > 0 && index < array.length - 1) {
+                const first = array[0] - indexToTimestamp(triggerOrigin);
+                const last =
+                    array[array.length - 1] - indexToTimestamp(triggerOrigin);
+                const range = last - first;
+                if (usecs - first < range / 8 || last - usecs < range / 8) {
+                    return undefined;
+                }
+            }
+            const d = new Date(microseconds / 1e3);
+            const h = d.getUTCHours().toString().padStart(2, '0');
+            const m = d.getUTCMinutes().toString().padStart(2, '0');
+            const s = d.getUTCSeconds().toString().padStart(2, '0');
+
+            const time = `${sign}${h}:${m}:${s}`;
+            const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
+                3
+            )}`.padStart(7, '0');
+
+            return [time, subsecond];
+        },
+        [triggerOrigin]
+    );
+
     const live =
         windowBegin === 0 &&
         windowEnd === 0 &&
