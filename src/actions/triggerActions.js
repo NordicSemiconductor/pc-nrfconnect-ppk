@@ -115,7 +115,9 @@ export function processTriggerSample(currentValue, device, samplingData) {
         dispatch(chartWindowUnLockAction());
         dispatch(chartWindowAction(from, to, to - from));
         dispatch(chartWindowLockAction());
-        dispatch(setTriggerOriginAction(triggerStartIndex));
+        if (!isPPK1) {
+            dispatch(setTriggerOriginAction(triggerStartIndex));
+        }
         dispatch(setTriggerStartAction(null));
     };
 }
