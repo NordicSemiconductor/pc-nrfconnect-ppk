@@ -64,6 +64,7 @@ import {
     externalTriggerToggledAction,
     triggerLengthSetAction,
     triggerWindowRangeAction,
+    setTriggerOriginAction,
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
@@ -120,6 +121,7 @@ export const setupOptions = () => (dispatch, getState) => {
         logger.error(err);
     }
     dispatch(chartWindowUnLockAction());
+    dispatch(setTriggerOriginAction(null));
     dispatch(updateHasDigitalChannels());
     dispatch(animationAction());
 };

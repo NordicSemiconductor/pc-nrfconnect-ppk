@@ -55,6 +55,7 @@ const plugin = {
         const x = Math.ceil(
             xScale.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
         );
+        if (x < xScale.left || x > xScale.right) return;
 
         ctx.save();
 
