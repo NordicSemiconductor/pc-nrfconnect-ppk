@@ -52,7 +52,6 @@ const plugin = {
             options: { triggerOrigin },
         } = chartInstance;
         if (!triggerOrigin) return;
-        // Not quite sure why we have to use the sample before, e.g. triggerOrigin - 1
         const x = Math.ceil(
             xScale.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
         );

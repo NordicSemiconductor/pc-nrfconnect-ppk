@@ -50,10 +50,17 @@ jest.mock('nrfconnect/core', () => {
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
-const mockDevice = {
+const mockDevicePPK1 = {
     ppkTriggerStop: jest.fn(),
     capabilities: {
         prePostTriggering: false,
+    },
+};
+
+const mockDevicePPK2 = {
+    ppkTriggerStop: jest.fn(),
+    capabilities: {
+        prePostTriggering: true,
     },
 };
 
@@ -97,7 +104,7 @@ describe('Handle trigger', () => {
 
     it('should set triggerStart if value is higher than trigger level', () => {
         const store = mockStore(initialState);
-        store.dispatch(processTriggerSample(15, mockDevice, samplingData));
+        store.dispatch(processTriggerSample(15, mockDevicePPK1, samplingData));
         const expectedActions = [
             { type: 'SET_TRIGGER_START', triggerStartIndex: beginIndex },
         ];
@@ -117,14 +124,14 @@ describe('Handle trigger', () => {
             },
         });
         store.dispatch(
-            processTriggerSample(5, mockDevice, {
+            processTriggerSample(5, mockDevicePPK1, {
                 ...samplingData,
                 dataIndex: newIndex,
                 endOfTrigger: true,
             })
         );
         expect(store.getActions()).toEqual(
-            getExpectedChartActions(beginIndex, newIndex)
+            getExpectedChartActionsPPK1(beginIndex, newIndex)
         );
     });
 
@@ -144,7 +151,7 @@ describe('Handle trigger', () => {
 
         it('should reset single trigger and issue device stop samping command', () => {
             store.dispatch(
-                processTriggerSample(5, mockDevice, {
+                processTriggerSample(5, mockDevicePPK1, {
                     ...samplingData,
                     dataIndex: newIndex,
                     endOfTrigger: true,
@@ -154,9 +161,9 @@ describe('Handle trigger', () => {
                 {
                     type: 'TRIGGER_SINGLE_CLEAR',
                 },
-                ...getExpectedChartActions(beginIndex, newIndex),
+                ...getExpectedChartActionsPPK1(beginIndex, newIndex),
             ]);
-            expect(mockDevice.ppkTriggerStop).toHaveBeenCalledTimes(1);
+            expect(mockDevicePPK1.ppkTriggerStop).toHaveBeenCalledTimes(1);
         });
     });
 
@@ -175,7 +182,7 @@ describe('Handle trigger', () => {
         it('Should handle the buffer wrapping around', () => {
             // window size here will be 1000, so it should start drawing at index 500
             store.dispatch(
-                processTriggerSample(5, mockDevice, {
+                processTriggerSample(5, mockDevicePPK1, {
                     ...samplingData,
                     dataIndex: 499,
                     endOfTrigger: false,
@@ -183,24 +190,19 @@ describe('Handle trigger', () => {
             );
             expect(store.getActions().length).toBe(0);
             store.dispatch(
-                processTriggerSample(5, mockDevice, {
+                processTriggerSample(5, mockDevicePPK1, {
                     ...samplingData,
                     dataIndex: 500,
                     endOfTrigger: true,
                 })
             );
-            expect(store.getActions().length).toBe(5);
+            expect(store.getActions().length).toBe(
+                getExpectedChartActionsPPK1(null, null).length
+            );
         });
     });
 
     describe('Window offset', () => {
-        const mockDeviceWithSamplingCapabilities = {
-            ...mockDevice,
-            capabilities: {
-                ...mockDevice.capabilities,
-                prePostTriggering: true,
-            },
-        };
         const endIndex = beginIndex + 1000;
         const windowSize = calculateWindowSize(
             defaultTriggerLength,
@@ -219,7 +221,7 @@ describe('Handle trigger', () => {
                 },
             });
             store.dispatch(
-                processTriggerSample(5, mockDeviceWithSamplingCapabilities, {
+                processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: endIndex,
                 })
@@ -227,7 +229,7 @@ describe('Handle trigger', () => {
             const expectedShiftedIndex = windowSize / 2;
             expect(expectedShiftedIndex).toBe(500);
             expect(store.getActions()).toEqual(
-                getExpectedChartActions(
+                getExpectedChartActionsPPK2(
                     beginIndex,
                     endIndex,
                     expectedShiftedIndex
@@ -249,7 +251,7 @@ describe('Handle trigger', () => {
                 },
             });
             store.dispatch(
-                processTriggerSample(5, mockDeviceWithSamplingCapabilities, {
+                processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: endIndex,
                 })
@@ -267,7 +269,7 @@ describe('Handle trigger', () => {
             expect(shift).toBe(50);
             expect(expectedShiftedIndex).toBe(550);
             expect(store.getActions()).toEqual(
-                getExpectedChartActions(
+                getExpectedChartActionsPPK2(
                     beginIndex,
                     endIndex,
                     expectedShiftedIndex
@@ -277,7 +279,7 @@ describe('Handle trigger', () => {
     });
 });
 
-const getExpectedChartActions = (fromIndex, toIndex, shift = 0) => {
+const getExpectedChartActionsPPK2 = (fromIndex, toIndex, shift = 0) => {
     const from = indexToTimestamp(fromIndex - shift);
     const to = indexToTimestamp(toIndex - shift);
     return [
@@ -292,6 +294,24 @@ const getExpectedChartActions = (fromIndex, toIndex, shift = 0) => {
         },
         { type: 'CHART_WINDOW_LOCK' },
         { type: 'SET_TRIGGER_ORIGIN', origin: fromIndex },
+        { type: 'SET_TRIGGER_START', triggerStartIndex: null },
+    ];
+};
+
+const getExpectedChartActionsPPK1 = (fromIndex, toIndex) => {
+    const from = indexToTimestamp(fromIndex);
+    const to = indexToTimestamp(toIndex);
+    return [
+        { type: 'CHART_WINDOW_UNLOCK' },
+        {
+            type: 'CHART_WINDOW',
+            windowBegin: from,
+            windowEnd: to,
+            windowDuration: to - from,
+            yMax: undefined,
+            yMin: undefined,
+        },
+        { type: 'CHART_WINDOW_LOCK' },
         { type: 'SET_TRIGGER_START', triggerStartIndex: null },
     ];
 };
