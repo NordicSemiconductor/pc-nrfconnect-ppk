@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { options, nbDigitalChannels } from '../globals';
+import { options } from '../globals';
 import { isRealTimePane } from '../utils/panes';
 
 import persistentStore from '../utils/persistentStore';
@@ -55,10 +55,16 @@ const initialState = {
     bufferRemaining: initialBufferLength,
     index: 0,
     hasDigitalChannels: false,
-    digitalChannels: persistentStore.get(
-        'digitalChannels',
-        Array(nbDigitalChannels).fill(false)
-    ),
+    digitalChannels: persistentStore.get('digitalChannels', [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+    ]),
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     yAxisLock: false,
