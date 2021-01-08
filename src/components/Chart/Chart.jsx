@@ -146,6 +146,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowBegin,
         windowEnd,
         windowDuration,
+        windowBeginLock,
+        windowEndLock,
         cursorBegin,
         cursorEnd,
         digitalChannels,
@@ -209,14 +211,24 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 options.timestamp -
                 (data.length / options.samplesPerSecond) * 1e6;
 
-            const p0 = Math.max(0, earliestDataTime - beginX);
-            const p1 = Math.max(0, endX - options.timestamp);
+            const minLimit = windowBeginLock || earliestDataTime;
+            const maxLimit = windowEndLock || options.timestamp;
+            const p0 = Math.max(0, minLimit - beginX);
+            const p1 = Math.max(0, endX - maxLimit);
 
             if (p0 * p1 === 0) {
                 chartWindow(beginX - p1 + p0, endX - p1 + p0, beginY, endY);
             }
         },
-        [chartReset, chartWindow, data.length, windowDuration, resetCursor]
+        [
+            data.length,
+            windowBeginLock,
+            windowEndLock,
+            chartReset,
+            windowDuration,
+            resetCursor,
+            chartWindow,
+        ]
     );
 
     const zoomToWindow = useCallback(
