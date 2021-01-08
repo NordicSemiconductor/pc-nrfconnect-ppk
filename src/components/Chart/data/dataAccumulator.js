@@ -36,18 +36,40 @@
 /* eslint no-bitwise: off */
 /* eslint no-plusplus: off */
 
+import { digitalOffValue, digitalOnValue } from './bitDisplayValues';
 import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
 import { doubleBitValue } from '../../../utils/bitConversion';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
-const digitalOnValue = 0.4;
-const digitalOffValue = -digitalOnValue;
+const alwaysOn = { lowerLine: digitalOnValue, upperLine: digitalOnValue };
+const alwaysOff = { lowerLine: digitalOffValue, upperLine: digitalOffValue };
+const sometimesOnAndOff = {
+    lowerLine: digitalOffValue,
+    upperLine: digitalOnValue,
+};
+
+const bitLineData = (bitCount, maxCount) => {
+    const wasAlwaysOff = bitCount === 0;
+    const wasAlwaysOn = bitCount === maxCount;
+
+    if (wasAlwaysOn) {
+        return alwaysOn;
+    }
+    if (wasAlwaysOff) {
+        return alwaysOff;
+    }
+
+    return sometimesOnAndOff;
+};
 
 export default () => ({
     lineData: emptyArray(),
-    bitsData: [...Array(nbDigitalChannels)].map(() => emptyArray()),
+    bitsData: [...Array(nbDigitalChannels)].map(() => ({
+        lowerLine: emptyArray(),
+        upperLine: emptyArray(),
+    })),
     bitIndexes: new Array(nbDigitalChannels),
     bitAccumulator: new Array(nbDigitalChannels),
 
@@ -110,30 +132,29 @@ export default () => ({
             if (dataForCurrentTimestampExists) {
                 const maxCount = l - k;
                 for (let i = 0; i < numberOfBits; ++i) {
-                    const wasAtLeastOnceOn = this.bitAccumulator[i] > 0;
-                    if (wasAtLeastOnceOn) {
-                        this.bitsData[i][this.bitIndexes[i]].x = timestamp;
-                        this.bitsData[i][this.bitIndexes[i]].y = digitalOnValue;
-                        ++this.bitIndexes[i];
-                    }
+                    const { lowerLine, upperLine } = bitLineData(
+                        this.bitAccumulator[i],
+                        maxCount
+                    );
+                    const currentBit = this.bitsData[i];
 
-                    const wasAtLeastOnceOff = this.bitAccumulator[i] < maxCount;
-                    if (wasAtLeastOnceOff) {
-                        this.bitsData[i][this.bitIndexes[i]].x = timestamp;
-                        this.bitsData[i][
-                            this.bitIndexes[i]
-                        ].y = digitalOffValue;
-                        ++this.bitIndexes[i];
-                    }
+                    currentBit.lowerLine[this.bitIndexes[i]].x = timestamp;
+                    currentBit.lowerLine[this.bitIndexes[i]].y = lowerLine;
+
+                    currentBit.upperLine[this.bitIndexes[i]].x = timestamp;
+                    currentBit.upperLine[this.bitIndexes[i]].y = upperLine;
+
+                    ++this.bitIndexes[i];
                 }
             }
         }
 
         return [
             this.lineData.slice(0, mappedIndex),
-            this.bitsData.map((bitData, i) =>
-                bitData.slice(0, this.bitIndexes[i])
-            ),
+            this.bitsData.map((bitData, i) => ({
+                lowerLine: bitData.lowerLine.slice(0, this.bitIndexes[i]),
+                upperLine: bitData.upperLine.slice(0, this.bitIndexes[i]),
+            })),
         ];
     },
 });
