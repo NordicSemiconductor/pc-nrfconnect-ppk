@@ -105,14 +105,14 @@ const DigitalChannels = ({
                 {
                     ...commonLineData,
                     fill: false,
-                    data: bitData.lowerLine,
+                    data: bitData.mainLine,
                     label: String(i),
                 },
                 {
                     ...commonLineData,
                     fill: '-1',
-                    data: bitData.upperLine,
-                    label: `upper ${i}`, // This label is not displayed, just needed as an internal key
+                    data: bitData.uncertaintyLine,
+                    label: `uncertainty ${i}`, // This label is not displayed, just needed as an internal key
                 },
             ],
         }))
@@ -152,7 +152,7 @@ const lineData = arrayOf(
 
 DigitalChannels.propTypes = {
     bitsData: arrayOf(
-        exact({ lowerLine: lineData, upperLine: lineData }).isRequired
+        exact({ mainLine: lineData, uncertaintyLine: lineData }).isRequired
     ).isRequired,
     digitalChannels: arrayOf(bool).isRequired,
     numberOfBits: number.isRequired,

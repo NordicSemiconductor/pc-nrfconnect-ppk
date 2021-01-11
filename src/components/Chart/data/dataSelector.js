@@ -33,35 +33,18 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* eslint no-bitwise: off */
 /* eslint no-plusplus: off */
 
-import { digitalOffValue, digitalOnValue } from './bitDisplayValues';
-import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
-import { doubleBitValue } from '../../../utils/bitConversion';
+import { options, timestampToIndex } from '../../../globals';
+import { averagedBitState } from '../../../utils/bitConversion';
+import bitDataProcessor from './bitDataProcessor';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
-const alwaysOff = { lowerLine: digitalOffValue, upperLine: digitalOffValue };
-const alwaysOn = { lowerLine: digitalOnValue, upperLine: digitalOnValue };
-const sometimesOnAndOff = {
-    lowerLine: digitalOffValue,
-    upperLine: digitalOnValue,
-};
-const invalid = { upperLine: undefined, lowerLine: undefined };
-
-const splitBit = (b16, n) =>
-    [invalid, alwaysOff, alwaysOn, sometimesOnAndOff][doubleBitValue(b16, n)];
-
 export default () => ({
     lineData: emptyArray(),
-    bitsData: [...Array(nbDigitalChannels)].map(() => ({
-        lowerLine: emptyArray(),
-        upperLine: emptyArray(),
-    })),
-    bitIndexes: new Array(nbDigitalChannels),
-    previousBits: new Array(nbDigitalChannels),
+    bitDataProcessor: bitDataProcessor(),
 
     process(begin, end, numberOfBits) {
         const { bits, data, index } = options;
@@ -70,9 +53,10 @@ export default () => ({
         const originalIndexEnd = timestampToIndex(end, index);
 
         let mappedIndex = 0;
-        this.bitIndexes.fill(0);
+        let timestamp;
 
-        this.previousBits.fill(invalid);
+        this.bitDataProcessor.initialise(numberOfBits);
+
         let last;
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
@@ -83,7 +67,7 @@ export default () => ({
         ) {
             const k = (n + data.length) % data.length;
             const v = data[k];
-            const timestamp =
+            timestamp =
                 begin +
                 ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
             this.lineData[mappedIndex].x = timestamp;
@@ -92,38 +76,20 @@ export default () => ({
             }
             this.lineData[mappedIndex].y = last;
 
-            for (let i = 0; i < numberOfBits; ++i) {
-                const currentBit = Number.isNaN(v)
-                    ? invalid
-                    : splitBit(bits[k], i);
-
-                this.bitsData[i].lowerLine[this.bitIndexes[i]].x = timestamp;
-                this.bitsData[i].upperLine[this.bitIndexes[i]].x = timestamp;
-
-                if (n === originalIndexEndCeiled) {
-                    const previousBit = this.previousBits[i];
-                    this.bitsData[i].lowerLine[this.bitIndexes[i]].y =
-                        previousBit.lowerLine;
-                    this.bitsData[i].upperLine[this.bitIndexes[i]].y =
-                        previousBit.upperLine;
-                    ++this.bitIndexes[i];
-                } else if (this.previousBits[i] !== currentBit) {
-                    this.bitsData[i].lowerLine[this.bitIndexes[i]].y =
-                        currentBit.lowerLine;
-                    this.bitsData[i].upperLine[this.bitIndexes[i]].y =
-                        currentBit.upperLine;
-                    this.previousBits[i] = currentBit;
-                    ++this.bitIndexes[i];
+            if (!Number.isNaN(v)) {
+                for (let bitNumber = 0; bitNumber < numberOfBits; ++bitNumber) {
+                    this.bitDataProcessor.processNextBit(
+                        timestamp,
+                        bitNumber,
+                        averagedBitState(bits[k], bitNumber)
+                    );
                 }
             }
         }
 
         return [
             this.lineData.slice(0, mappedIndex),
-            this.bitsData.map((bitData, i) => ({
-                lowerLine: bitData.lowerLine.slice(0, this.bitIndexes[i]),
-                upperLine: bitData.upperLine.slice(0, this.bitIndexes[i]),
-            })),
+            this.bitDataProcessor.getLineData(),
         ];
     },
 });

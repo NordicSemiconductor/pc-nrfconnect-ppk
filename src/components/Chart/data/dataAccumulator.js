@@ -33,45 +33,24 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* eslint no-bitwise: off */
 /* eslint no-plusplus: off */
 
-import { digitalOffValue, digitalOnValue } from './bitDisplayValues';
 import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
-import { doubleBitValue } from '../../../utils/bitConversion';
+import {
+    averagedBitState,
+    always0,
+    always1,
+    sometimes0And1,
+} from '../../../utils/bitConversion';
+import bitDataProcessor from './bitDataProcessor';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
-const alwaysOn = { lowerLine: digitalOnValue, upperLine: digitalOnValue };
-const alwaysOff = { lowerLine: digitalOffValue, upperLine: digitalOffValue };
-const sometimesOnAndOff = {
-    lowerLine: digitalOffValue,
-    upperLine: digitalOnValue,
-};
-
-const bitLineData = (bitCount, maxCount) => {
-    const wasAlwaysOff = bitCount === 0;
-    const wasAlwaysOn = bitCount === maxCount;
-
-    if (wasAlwaysOn) {
-        return alwaysOn;
-    }
-    if (wasAlwaysOff) {
-        return alwaysOff;
-    }
-
-    return sometimesOnAndOff;
-};
-
 export default () => ({
     lineData: emptyArray(),
-    bitsData: [...Array(nbDigitalChannels)].map(() => ({
-        lowerLine: emptyArray(),
-        upperLine: emptyArray(),
-    })),
-    bitIndexes: new Array(nbDigitalChannels),
-    bitAccumulator: new Array(nbDigitalChannels),
+    bitDataProcessor: bitDataProcessor(),
+    bitStateAccumulator: new Array(nbDigitalChannels),
 
     process(begin, end, numberOfBits, len, windowDuration) {
         const { bits, data, index } = options;
@@ -81,20 +60,21 @@ export default () => ({
         const step = (originalIndexEnd - originalIndexBegin) / len;
 
         let mappedIndex = 0;
-        this.bitIndexes.fill(0);
+        let timestamp;
+
+        this.bitDataProcessor.initialise(numberOfBits);
 
         for (
             let originalIndex = originalIndexBegin;
             mappedIndex < len + len;
             ++mappedIndex, originalIndex += step
         ) {
-            const timestamp =
-                begin + windowDuration * (mappedIndex / (len + len));
+            timestamp = begin + windowDuration * (mappedIndex / (len + len));
             const k = Math.floor(originalIndex);
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
             let max = -Number.MAX_VALUE;
-            this.bitAccumulator.fill(0);
+            this.bitStateAccumulator.fill(null);
 
             for (let n = k; n < l; ++n) {
                 const ni = (n + data.length) % data.length;
@@ -103,15 +83,21 @@ export default () => ({
                     if (v > max) max = v;
                     if (v < min) min = v;
 
-                    if (numberOfBits > 0) {
-                        for (let i = 0; i < numberOfBits; ++i) {
-                            const b = doubleBitValue(bits[ni], i);
-                            if (b === 2) {
-                                this.bitAccumulator[i]++;
-                            }
-                            if (b === 3) {
-                                this.bitAccumulator[i] += 0.5;
-                            }
+                    for (let i = 0; i < numberOfBits; ++i) {
+                        const newBitState = averagedBitState(bits[ni], i);
+
+                        if (this.bitStateAccumulator[i] === null) {
+                            this.bitStateAccumulator[i] = newBitState;
+                        } else if (
+                            this.bitStateAccumulator[i] === always1 &&
+                            newBitState !== always1
+                        ) {
+                            this.bitStateAccumulator[i] = sometimes0And1;
+                        } else if (
+                            this.bitStateAccumulator[i] === always0 &&
+                            newBitState !== always0
+                        ) {
+                            this.bitStateAccumulator[i] = sometimes0And1;
                         }
                     }
                 }
@@ -127,34 +113,20 @@ export default () => ({
             this.lineData[mappedIndex].x = timestamp;
             this.lineData[mappedIndex].y = max;
 
-            const dataForCurrentTimestampExists =
-                this.lineData[mappedIndex].y !== null;
-            if (dataForCurrentTimestampExists) {
-                const maxCount = l - k;
-                for (let i = 0; i < numberOfBits; ++i) {
-                    const { lowerLine, upperLine } = bitLineData(
-                        this.bitAccumulator[i],
-                        maxCount
+            if (min !== undefined) {
+                for (let bitNumber = 0; bitNumber < numberOfBits; ++bitNumber) {
+                    this.bitDataProcessor.processNextBit(
+                        timestamp,
+                        bitNumber,
+                        this.bitStateAccumulator[bitNumber]
                     );
-                    const currentBit = this.bitsData[i];
-
-                    currentBit.lowerLine[this.bitIndexes[i]].x = timestamp;
-                    currentBit.lowerLine[this.bitIndexes[i]].y = lowerLine;
-
-                    currentBit.upperLine[this.bitIndexes[i]].x = timestamp;
-                    currentBit.upperLine[this.bitIndexes[i]].y = upperLine;
-
-                    ++this.bitIndexes[i];
                 }
             }
         }
 
         return [
             this.lineData.slice(0, mappedIndex),
-            this.bitsData.map((bitData, i) => ({
-                lowerLine: bitData.lowerLine.slice(0, this.bitIndexes[i]),
-                upperLine: bitData.upperLine.slice(0, this.bitIndexes[i]),
-            })),
+            this.bitDataProcessor.getLineData(),
         ];
     },
 });
