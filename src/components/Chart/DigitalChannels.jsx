@@ -45,7 +45,7 @@ const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
 
 const DigitalChannels = ({
-    bitsData,
+    lineData,
     digitalChannels,
     zoomedOutTooFar,
     cursorData: { begin, end, cursorBegin, cursorEnd },
@@ -99,19 +99,19 @@ const DigitalChannels = ({
         steppedLine: 'before',
     };
 
-    const bitsChartData = bitsData
-        .map((bitData, i) => ({
+    const bitsChartData = lineData
+        .map((singleBitLineData, i) => ({
             datasets: [
                 {
                     ...commonLineData,
                     fill: false,
-                    data: bitData.mainLine,
+                    data: singleBitLineData.mainLine,
                     label: String(i),
                 },
                 {
                     ...commonLineData,
                     fill: '-1',
-                    data: bitData.uncertaintyLine,
+                    data: singleBitLineData.uncertaintyLine,
                     label: `uncertainty ${i}`, // This label is not displayed, just needed as an internal key
                 },
             ],
@@ -151,7 +151,7 @@ const lineData = arrayOf(
 ).isRequired;
 
 DigitalChannels.propTypes = {
-    bitsData: arrayOf(
+    lineData: arrayOf(
         exact({ mainLine: lineData, uncertaintyLine: lineData }).isRequired
     ).isRequired,
     digitalChannels: arrayOf(bool).isRequired,

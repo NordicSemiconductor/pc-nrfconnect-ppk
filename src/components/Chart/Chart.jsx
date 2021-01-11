@@ -34,7 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint no-bitwise: off */
 /* eslint no-plusplus: off */
 /* eslint operator-assignment: off */
 
@@ -54,7 +53,7 @@ import StatBox from './StatBox';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import DigitalChannels from './DigitalChannels';
-import ChartContainer from './ChartContainer';
+import AmpereChart from './AmpereChart';
 
 import {
     chartWindowAction,
@@ -266,7 +265,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const originalIndexEnd = timestampToIndex(end, index);
     const step = (originalIndexEnd - originalIndexBegin) / len;
 
-    const [lineData, bitsData] = useMemo(() => {
+    const { ampereLineData, bitsLineData } = useMemo(() => {
         const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
 
         return dataProcessor.process(
@@ -299,13 +298,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     chartRef={chartRef}
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
-                <ChartContainer
+                <AmpereChart
                     setLen={setLen}
                     setChartAreaWidth={setChartAreaWidth}
                     step={step}
                     chartRef={chartRef}
                     cursorData={cursorData}
-                    lineData={lineData}
+                    lineData={ampereLineData}
                 />
                 <TimeSpanBottom
                     cursorBegin={cursorBegin}
@@ -335,7 +334,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             </div>
             {hasDigitalChannels && showDigitalChannels && (
                 <DigitalChannels
-                    bitsData={bitsData}
+                    lineData={bitsLineData}
                     digitalChannels={digitalChannels}
                     zoomedOutTooFar={zoomedOutTooFarForDigitalChannels}
                     cursorData={cursorData}

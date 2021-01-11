@@ -43,7 +43,7 @@ const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
 export default () => ({
-    lineData: emptyArray(),
+    ampereLineData: emptyArray(),
     bitDataProcessor: bitDataProcessor(),
 
     process(begin, end, numberOfBits) {
@@ -70,11 +70,11 @@ export default () => ({
             timestamp =
                 begin +
                 ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
-            this.lineData[mappedIndex].x = timestamp;
+            this.ampereLineData[mappedIndex].x = timestamp;
             if (n < originalIndexEndCeiled) {
                 last = Number.isNaN(v) ? undefined : v;
             }
-            this.lineData[mappedIndex].y = last;
+            this.ampereLineData[mappedIndex].y = last;
 
             if (!Number.isNaN(v)) {
                 for (let bitNumber = 0; bitNumber < numberOfBits; ++bitNumber) {
@@ -87,9 +87,9 @@ export default () => ({
             }
         }
 
-        return [
-            this.lineData.slice(0, mappedIndex),
-            this.bitDataProcessor.getLineData(),
-        ];
+        return {
+            ampereLineData: this.ampereLineData.slice(0, mappedIndex),
+            bitsLineData: this.bitDataProcessor.getLineData(),
+        };
     },
 });

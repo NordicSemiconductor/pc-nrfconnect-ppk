@@ -48,7 +48,7 @@ const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
 export default () => ({
-    lineData: emptyArray(),
+    ampereLineData: emptyArray(),
     bitDataProcessor: bitDataProcessor(),
     bitStateAccumulator: new Array(nbDigitalChannels),
 
@@ -107,11 +107,11 @@ export default () => ({
                 min = undefined;
                 max = undefined;
             }
-            this.lineData[mappedIndex].x = timestamp;
-            this.lineData[mappedIndex].y = min;
+            this.ampereLineData[mappedIndex].x = timestamp;
+            this.ampereLineData[mappedIndex].y = min;
             ++mappedIndex;
-            this.lineData[mappedIndex].x = timestamp;
-            this.lineData[mappedIndex].y = max;
+            this.ampereLineData[mappedIndex].x = timestamp;
+            this.ampereLineData[mappedIndex].y = max;
 
             if (min !== undefined) {
                 for (let bitNumber = 0; bitNumber < numberOfBits; ++bitNumber) {
@@ -124,9 +124,9 @@ export default () => ({
             }
         }
 
-        return [
-            this.lineData.slice(0, mappedIndex),
-            this.bitDataProcessor.getLineData(),
-        ];
+        return {
+            ampereLineData: this.ampereLineData.slice(0, mappedIndex),
+            bitsLineData: this.bitDataProcessor.getLineData(),
+        };
     },
 });

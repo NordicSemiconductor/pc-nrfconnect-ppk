@@ -68,7 +68,7 @@ const formatCurrent = uA =>
         .format({ notation: 'auto', precision: 4 })
         .replace('u', '\u00B5');
 
-const ChartContainer = ({
+const AmpereChart = ({
     setLen,
     setChartAreaWidth,
     step,
@@ -260,9 +260,7 @@ const ChartContainer = ({
     );
 };
 
-export default ChartContainer;
-
-ChartContainer.propTypes = {
+AmpereChart.propTypes = {
     setLen: func.isRequired,
     setChartAreaWidth: func.isRequired,
     step: number.isRequired,
@@ -278,3 +276,5 @@ ChartContainer.propTypes = {
         })
     ),
 };
+
+export default AmpereChart;
