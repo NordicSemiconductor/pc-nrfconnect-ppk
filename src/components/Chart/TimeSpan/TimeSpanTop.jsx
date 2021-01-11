@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { number } from 'prop-types';
 import { chartState } from '../../../reducers/chartReducer';
@@ -48,13 +48,20 @@ import { isRealTimePane } from '../../../utils/panes';
 import './timespan.scss';
 
 const TimeSpanTop = ({ width }) => {
+    const [isZoomed, setIsZoomed] = useState(false);
+
     const { windowDuration } = useSelector(chartState);
-    const { triggerWindowOffset } = useSelector(triggerState);
+    const { triggerWindowOffset, triggerLength } = useSelector(triggerState);
+
     const {
         capabilities: { prePostTriggering },
     } = useSelector(appState);
 
-    const showHandle = isRealTimePane() && prePostTriggering;
+    useEffect(() => {
+        setIsZoomed(triggerLength * 1000 > windowDuration);
+    }, [windowDuration, triggerLength]);
+
+    const showHandle = isRealTimePane() && prePostTriggering && !isZoomed;
     const distanceFromOriginToTriggerHandle = showHandle
         ? triggerWindowOffset + windowDuration / 2
         : null;
