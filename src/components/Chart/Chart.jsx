@@ -166,15 +166,15 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
     const { sampleFreq } = useSelector(dataLoggerState);
-    const digitalChannelsWindowLimit = 3e11 / sampleFreq;
 
-    let numberOfBits =
-        windowDuration <= digitalChannelsWindowLimit && showDigitalChannels
+    const digitalChannelsWindowLimit = 3e11 / sampleFreq;
+    const zoomedOutTooFarForDigitalChannels =
+        windowDuration > digitalChannelsWindowLimit;
+
+    const numberOfBits =
+        !zoomedOutTooFarForDigitalChannels && showDigitalChannels && bits
             ? nbDigitalChannels
             : 0;
-    if (!bits) {
-        numberOfBits = 0;
-    }
 
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
@@ -337,7 +337,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 <DigitalChannels
                     bitsData={bitsData}
                     digitalChannels={digitalChannels}
-                    numberOfBits={numberOfBits}
+                    zoomedOutTooFar={zoomedOutTooFarForDigitalChannels}
                     cursorData={cursorData}
                 />
             )}

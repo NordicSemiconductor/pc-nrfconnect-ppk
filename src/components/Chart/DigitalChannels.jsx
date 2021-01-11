@@ -47,7 +47,7 @@ const dataColor = colors.nordicBlue;
 const DigitalChannels = ({
     bitsData,
     digitalChannels,
-    numberOfBits,
+    zoomedOutTooFar,
     cursorData: { begin, end, cursorBegin, cursorEnd },
 }) => {
     const bitsChartOptions = {
@@ -134,7 +134,7 @@ const DigitalChannels = ({
                     </div>
                 </div>
             ))}
-            {numberOfBits === 0 && (
+            {zoomedOutTooFar && (
                 <div className="info">
                     <p>Zoom in on the main chart to see the digital channels</p>
                 </div>
@@ -155,7 +155,7 @@ DigitalChannels.propTypes = {
         exact({ mainLine: lineData, uncertaintyLine: lineData }).isRequired
     ).isRequired,
     digitalChannels: arrayOf(bool).isRequired,
-    numberOfBits: number.isRequired,
+    zoomedOutTooFar: bool.isRequired,
     cursorData: shape({
         cursorBegin: number,
         cursorEnd: number,
