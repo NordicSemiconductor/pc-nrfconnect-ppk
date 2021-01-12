@@ -45,9 +45,8 @@ import {
     chartState,
     toggleDigitalChannels,
     toggleTimestamps,
-    toggleGridLines,
 } from '../../reducers/chartReducer';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import { isDataLoggerPane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
@@ -55,7 +54,6 @@ export default () => {
         digitalChannelsVisible,
         timestampsVisible,
         hasDigitalChannels,
-        showGridLines,
     } = useSelector(chartState);
 
     return (
@@ -75,16 +73,6 @@ export default () => {
                         variant="secondary"
                     />
                     <DigitalChannels />
-                </>
-            )}
-            {isRealTimePane() && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleGridLines())}
-                        isToggled={showGridLines}
-                        label="Show grid"
-                        variant="secondary"
-                    />
                 </>
             )}
         </CollapsibleGroup>
