@@ -89,7 +89,7 @@ export default () => {
         <Group heading="Sample parameters">
             <div className={samplingRunning ? 'disabled' : ''}>
                 <Form.Label htmlFor="data-logger-sampling-frequency">
-                    {sampleFreq} samples per second
+                    {sampleFreq.toLocaleString('en')} samples per second
                 </Form.Label>
                 <Slider
                     ticks
