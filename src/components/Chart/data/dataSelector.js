@@ -35,19 +35,26 @@
  */
 /* eslint no-plusplus: off */
 
+import normalBitDataProcessor from './bitDataProcessor';
+import noOpBitDataProcessor from './noOpBitDataProcessor';
+
 import { options, timestampToIndex } from '../../../globals';
 import { averagedBitState } from '../../../utils/bitConversion';
-import bitDataProcessor from './bitDataProcessor';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
 export default () => ({
     ampereLineData: emptyArray(),
-    bitDataProcessor: bitDataProcessor(),
+    normalBitDataProcessor: normalBitDataProcessor(),
+    noOpBitDataProcessor: noOpBitDataProcessor(),
 
     process(begin, end, numberOfBits) {
         const { bits, data, index } = options;
+        const bitDataProcessor =
+            numberOfBits > 0
+                ? this.normalBitDataProcessor
+                : this.noOpBitDataProcessor;
 
         const originalIndexBegin = timestampToIndex(begin, index);
         const originalIndexEnd = timestampToIndex(end, index);
@@ -55,7 +62,7 @@ export default () => ({
         let mappedIndex = 0;
         let timestamp;
 
-        this.bitDataProcessor.initialise(numberOfBits);
+        bitDataProcessor.initialise(numberOfBits);
 
         let last;
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
@@ -78,7 +85,7 @@ export default () => ({
 
             if (!Number.isNaN(v)) {
                 for (let bitNumber = 0; bitNumber < numberOfBits; ++bitNumber) {
-                    this.bitDataProcessor.processNextBit(
+                    bitDataProcessor.processNextBit(
                         timestamp,
                         bitNumber,
                         averagedBitState(bits[k], bitNumber)
@@ -89,7 +96,7 @@ export default () => ({
 
         return {
             ampereLineData: this.ampereLineData.slice(0, mappedIndex),
-            bitsLineData: this.bitDataProcessor.getLineData(),
+            bitsLineData: bitDataProcessor.getLineData(),
         };
     },
 });

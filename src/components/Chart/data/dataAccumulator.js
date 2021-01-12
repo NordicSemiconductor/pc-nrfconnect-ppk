@@ -35,6 +35,9 @@
  */
 /* eslint no-plusplus: off */
 
+import normalBitDataProcessor from './bitDataProcessor';
+import noOpBitDataProcessor from './noOpBitDataProcessor';
+
 import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
 import {
     averagedBitState,
@@ -42,18 +45,22 @@ import {
     always1,
     sometimes0And1,
 } from '../../../utils/bitConversion';
-import bitDataProcessor from './bitDataProcessor';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
 export default () => ({
     ampereLineData: emptyArray(),
-    bitDataProcessor: bitDataProcessor(),
+    normalBitDataProcessor: normalBitDataProcessor(),
+    noOpBitDataProcessor: noOpBitDataProcessor(),
     bitStateAccumulator: new Array(nbDigitalChannels),
 
     process(begin, end, numberOfBits, len, windowDuration) {
         const { bits, data, index } = options;
+        const bitDataProcessor =
+            numberOfBits > 0
+                ? this.normalBitDataProcessor
+                : this.noOpBitDataProcessor;
 
         const originalIndexBegin = timestampToIndex(begin, index);
         const originalIndexEnd = timestampToIndex(end, index);
@@ -62,7 +69,7 @@ export default () => ({
         let mappedIndex = 0;
         let timestamp;
 
-        this.bitDataProcessor.initialise(numberOfBits);
+        bitDataProcessor.initialise(numberOfBits);
 
         for (
             let originalIndex = originalIndexBegin;
@@ -115,7 +122,7 @@ export default () => ({
 
             if (min !== undefined) {
                 for (let bitNumber = 0; bitNumber < numberOfBits; ++bitNumber) {
-                    this.bitDataProcessor.processNextBit(
+                    bitDataProcessor.processNextBit(
                         timestamp,
                         bitNumber,
                         this.bitStateAccumulator[bitNumber]
@@ -126,7 +133,7 @@ export default () => ({
 
         return {
             ampereLineData: this.ampereLineData.slice(0, mappedIndex),
-            bitsLineData: this.bitDataProcessor.getLineData(),
+            bitsLineData: bitDataProcessor.getLineData(),
         };
     },
 });
