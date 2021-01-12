@@ -166,7 +166,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const { sampleFreq } = useSelector(dataLoggerState);
 
-    const digitalChannelsWindowLimit = 3e11 / sampleFreq;
+    const digitalChannelsWindowLimit = 3e12 / sampleFreq;
     const zoomedOutTooFarForDigitalChannels =
         windowDuration > digitalChannelsWindowLimit;
 

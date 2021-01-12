@@ -5,6 +5,7 @@
 - Add screenshot functionality
 - Split real-time and data logger views
 - Enhanced performance to make the UI more responsive
+- Raise limit for displaying digital channels (on the highest resolution they were previously only shown for a time range of up to 3 seconds, now they are shown for up to 30 seconds).
 
 ## Version 3.0.2
 ## Fixed
