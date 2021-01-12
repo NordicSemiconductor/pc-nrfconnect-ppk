@@ -35,77 +35,31 @@
  */
 /* eslint no-plusplus: off */
 
-import { nbDigitalChannels } from '../../../globals';
-import { lineDataForBitState } from '../../../utils/bitConversion';
-
-const emptyArray = () =>
-    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
+import bitDataStorage from './bitDataStorage';
+import { options } from '../../../globals';
+import { averagedBitState } from '../../../utils/bitConversion';
 
 export default () => ({
-    lineData: [...Array(nbDigitalChannels)].map(() => ({
-        mainLine: emptyArray(),
-        uncertaintyLine: emptyArray(),
-    })),
-    bitIndexes: new Array(nbDigitalChannels),
-    previousBitStates: new Array(nbDigitalChannels),
+    bitDataStorage: bitDataStorage(),
 
     initialise(numberOfBits) {
-        this.bitIndexes.fill(0);
-        this.previousBitStates.fill(null);
+        this.bitDataStorage.initialise(numberOfBits);
         this.numberOfBits = numberOfBits;
     },
 
-    storeEntry(timestamp, bitNumber, bitState) {
-        const current = this.lineData[bitNumber];
-        const index = this.bitIndexes[bitNumber];
-        const lineData = lineDataForBitState[bitState];
+    processBits(bitIndex, timestamp) {
+        const bits = options.bits[bitIndex];
 
-        current.mainLine[index].x = timestamp;
-        current.mainLine[index].y = lineData.mainLine;
-
-        current.uncertaintyLine[index].x = timestamp;
-        current.uncertaintyLine[index].y = lineData.uncertaintyLine;
-
-        ++this.bitIndexes[bitNumber];
-    },
-
-    processNextBit(timestamp, bitNumber, bitState) {
-        this.latestTimestamp = timestamp;
-
-        const bitChanged = this.previousBitStates[bitNumber] !== bitState;
-        if (bitChanged) {
-            this.storeEntry(timestamp, bitNumber, bitState);
-
-            this.previousBitStates[bitNumber] = bitState;
-        }
-    },
-
-    addFinalEntries() {
         for (let i = 0; i < this.numberOfBits; ++i) {
-            const hasEntry = this.bitIndexes[i] > 0;
-            const lastEntryIsNotForLastTimestamp =
-                this.latestTimestamp !==
-                this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.timestamp;
-
-            if (hasEntry && lastEntryIsNotForLastTimestamp) {
-                this.storeEntry(
-                    this.latestTimestamp,
-                    i,
-                    this.previousBitStates[i]
-                );
-            }
+            this.bitDataStorage.storeBit(
+                timestamp,
+                i,
+                averagedBitState(bits, i)
+            );
         }
     },
 
     getLineData() {
-        this.addFinalEntries();
-
-        return this.lineData.map((bitData, i) => ({
-            mainLine: bitData.mainLine.slice(0, this.bitIndexes[i]),
-            uncertaintyLine: bitData.uncertaintyLine.slice(
-                0,
-                this.bitIndexes[i]
-            ),
-        }));
+        return this.bitDataStorage.getLineData();
     },
 });

@@ -35,31 +35,25 @@
  */
 /* eslint no-plusplus: off */
 
-import normalBitDataProcessor from './bitDataProcessor';
+import bitDataAccumulator from './bitDataAccumulator';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
 import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
-import {
-    averagedBitState,
-    always0,
-    always1,
-    sometimes0And1,
-} from '../../../utils/bitConversion';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
 export default () => ({
     ampereLineData: emptyArray(),
-    normalBitDataProcessor: normalBitDataProcessor(),
+    bitDataAccumulator: bitDataAccumulator(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
     bitStateAccumulator: new Array(nbDigitalChannels),
 
     process(begin, end, numberOfBits, len, windowDuration) {
-        const { bits, data, index } = options;
+        const { data, index } = options;
         const bitDataProcessor =
             numberOfBits > 0
-                ? this.normalBitDataProcessor
+                ? this.bitDataAccumulator
                 : this.noOpBitDataProcessor;
 
         const originalIndexBegin = timestampToIndex(begin, index);
@@ -81,7 +75,6 @@ export default () => ({
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
             let max = -Number.MAX_VALUE;
-            this.bitStateAccumulator.fill(null);
 
             for (let n = k; n < l; ++n) {
                 const ni = (n + data.length) % data.length;
@@ -90,23 +83,7 @@ export default () => ({
                     if (v > max) max = v;
                     if (v < min) min = v;
 
-                    for (let i = 0; i < numberOfBits; ++i) {
-                        const newBitState = averagedBitState(bits[ni], i);
-
-                        if (this.bitStateAccumulator[i] === null) {
-                            this.bitStateAccumulator[i] = newBitState;
-                        } else if (
-                            this.bitStateAccumulator[i] === always1 &&
-                            newBitState !== always1
-                        ) {
-                            this.bitStateAccumulator[i] = sometimes0And1;
-                        } else if (
-                            this.bitStateAccumulator[i] === always0 &&
-                            newBitState !== always0
-                        ) {
-                            this.bitStateAccumulator[i] = sometimes0And1;
-                        }
-                    }
+                    bitDataProcessor.processBits(ni);
                 }
             }
 
@@ -121,13 +98,7 @@ export default () => ({
             this.ampereLineData[mappedIndex].y = max;
 
             if (min !== undefined) {
-                for (let bitNumber = 0; bitNumber < numberOfBits; ++bitNumber) {
-                    bitDataProcessor.processNextBit(
-                        timestamp,
-                        bitNumber,
-                        this.bitStateAccumulator[bitNumber]
-                    );
-                }
+                bitDataProcessor.processAccumulatedBits(timestamp);
             }
         }
 

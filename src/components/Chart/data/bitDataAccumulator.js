@@ -35,59 +35,51 @@
  */
 /* eslint no-plusplus: off */
 
-import bitDataSelector from './bitDataSelector';
-import noOpBitDataProcessor from './noOpBitDataProcessor';
-
-import { options, timestampToIndex } from '../../../globals';
-
-const emptyArray = () =>
-    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
+import bitDataStorage from './bitDataStorage';
+import { nbDigitalChannels, options } from '../../../globals';
+import {
+    always0,
+    always1,
+    averagedBitState,
+    sometimes0And1,
+} from '../../../utils/bitConversion';
 
 export default () => ({
-    ampereLineData: emptyArray(),
-    bitDataSelector: bitDataSelector(),
-    noOpBitDataProcessor: noOpBitDataProcessor(),
+    bitDataStorage: bitDataStorage(),
+    accumulator: new Array(nbDigitalChannels),
 
-    process(begin, end, numberOfBits) {
-        const { data, index } = options;
-        const bitDataProcessor =
-            numberOfBits > 0 ? this.bitDataSelector : this.noOpBitDataProcessor;
+    initialise(numberOfBits) {
+        this.bitDataStorage.initialise(numberOfBits);
+        this.numberOfBits = numberOfBits;
+        this.accumulator.fill(null);
+    },
 
-        const originalIndexBegin = timestampToIndex(begin, index);
-        const originalIndexEnd = timestampToIndex(end, index);
+    processBits(bitIndex) {
+        const bits = options.bits[bitIndex];
 
-        let mappedIndex = 0;
-        let timestamp;
+        for (let i = 0; i < this.numberOfBits; ++i) {
+            const bitState = averagedBitState(bits, i);
 
-        bitDataProcessor.initialise(numberOfBits);
-
-        let last;
-        const originalIndexBeginFloored = Math.floor(originalIndexBegin);
-        const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
-        for (
-            let n = originalIndexBeginFloored;
-            n <= originalIndexEndCeiled;
-            ++mappedIndex, ++n
-        ) {
-            const k = (n + data.length) % data.length;
-            const v = data[k];
-            timestamp =
-                begin +
-                ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
-            this.ampereLineData[mappedIndex].x = timestamp;
-            if (n < originalIndexEndCeiled) {
-                last = Number.isNaN(v) ? undefined : v;
-            }
-            this.ampereLineData[mappedIndex].y = last;
-
-            if (!Number.isNaN(v)) {
-                bitDataProcessor.processBits(k, timestamp);
+            if (this.accumulator[i] === null) {
+                this.accumulator[i] = bitState;
+            } else if (
+                (this.accumulator[i] === always1 && bitState !== always1) ||
+                (this.accumulator[i] === always0 && bitState !== always0)
+            ) {
+                this.accumulator[i] = sometimes0And1;
             }
         }
+    },
 
-        return {
-            ampereLineData: this.ampereLineData.slice(0, mappedIndex),
-            bitsLineData: bitDataProcessor.getLineData(),
-        };
+    processAccumulatedBits(timestamp) {
+        for (let i = 0; i < this.numberOfBits; ++i) {
+            this.bitDataStorage.storeBit(timestamp, i, this.accumulator[i]);
+        }
+
+        this.accumulator.fill(null);
+    },
+
+    getLineData() {
+        return this.bitDataStorage.getLineData();
     },
 });

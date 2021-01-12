@@ -43,6 +43,7 @@ const emptyResult = [...Array(nbDigitalChannels)].map(() => ({
 
 export default () => ({
     initialise() {},
-    processNextBit() {},
+    processBits() {},
+    processAccumulatedBits() {},
     getLineData: () => emptyResult,
 });
