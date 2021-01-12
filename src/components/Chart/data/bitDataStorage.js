@@ -49,10 +49,10 @@ export default () => ({
     bitIndexes: new Array(nbDigitalChannels),
     previousBitStates: new Array(nbDigitalChannels),
 
-    initialise(numberOfBits) {
+    initialise(digitalChannelsToCompute) {
         this.bitIndexes.fill(0);
         this.previousBitStates.fill(null);
-        this.numberOfBits = numberOfBits;
+        this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
     storeEntry(timestamp, bitNumber, bitState) {
@@ -81,7 +81,7 @@ export default () => ({
     },
 
     addFinalEntries() {
-        for (let i = 0; i < this.numberOfBits; ++i) {
+        this.digitalChannelsToCompute.forEach(i => {
             const hasEntry = this.bitIndexes[i] > 0;
             const lastEntryIsNotForLastTimestamp =
                 this.latestTimestamp !==
@@ -94,7 +94,7 @@ export default () => ({
                     this.previousBitStates[i]
                 );
             }
-        }
+        });
     },
 
     getLineData() {

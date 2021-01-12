@@ -48,10 +48,12 @@ export default () => ({
     bitDataSelector: bitDataSelector(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
 
-    process(begin, end, numberOfBits) {
+    process(begin, end, digitalChannelsToCompute) {
         const { data, index } = options;
         const bitDataProcessor =
-            numberOfBits > 0 ? this.bitDataSelector : this.noOpBitDataProcessor;
+            digitalChannelsToCompute.length > 0
+                ? this.bitDataSelector
+                : this.noOpBitDataProcessor;
 
         const originalIndexBegin = timestampToIndex(begin, index);
         const originalIndexEnd = timestampToIndex(end, index);
@@ -59,7 +61,7 @@ export default () => ({
         let mappedIndex = 0;
         let timestamp;
 
-        bitDataProcessor.initialise(numberOfBits);
+        bitDataProcessor.initialise(digitalChannelsToCompute);
 
         let last;
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);

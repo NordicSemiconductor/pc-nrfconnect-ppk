@@ -48,16 +48,16 @@ export default () => ({
     bitDataStorage: bitDataStorage(),
     accumulator: new Array(nbDigitalChannels),
 
-    initialise(numberOfBits) {
-        this.bitDataStorage.initialise(numberOfBits);
-        this.numberOfBits = numberOfBits;
+    initialise(digitalChannelsToCompute) {
+        this.bitDataStorage.initialise(digitalChannelsToCompute);
+        this.digitalChannelsToCompute = digitalChannelsToCompute;
         this.accumulator.fill(null);
     },
 
     processBits(bitIndex) {
         const bits = options.bits[bitIndex];
 
-        for (let i = 0; i < this.numberOfBits; ++i) {
+        this.digitalChannelsToCompute.forEach(i => {
             const bitState = averagedBitState(bits, i);
 
             if (this.accumulator[i] === null) {
@@ -68,13 +68,13 @@ export default () => ({
             ) {
                 this.accumulator[i] = sometimes0And1;
             }
-        }
+        });
     },
 
     processAccumulatedBits(timestamp) {
-        for (let i = 0; i < this.numberOfBits; ++i) {
+        this.digitalChannelsToCompute.forEach(i => {
             this.bitDataStorage.storeBit(timestamp, i, this.accumulator[i]);
-        }
+        });
 
         this.accumulator.fill(null);
     },

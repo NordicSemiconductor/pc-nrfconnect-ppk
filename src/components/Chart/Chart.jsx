@@ -61,7 +61,7 @@ import {
     chartState,
 } from '../../reducers/chartReducer';
 
-import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
+import { options, timestampToIndex } from '../../globals';
 
 import { rightMarginPx } from './chart.scss';
 import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
@@ -170,10 +170,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const zoomedOutTooFarForDigitalChannels =
         windowDuration > digitalChannelsWindowLimit;
 
-    const numberOfBits =
+    const digitalChannelsToDisplay = digitalChannels
+        .map((isVisible, channelNumber) => (isVisible ? channelNumber : null))
+        .filter(channelNumber => channelNumber != null);
+
+    const digitalChannelsToCompute =
         !zoomedOutTooFarForDigitalChannels && showDigitalChannels && bits
-            ? nbDigitalChannels
-            : 0;
+            ? digitalChannelsToDisplay
+            : [];
 
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
@@ -271,7 +275,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         return dataProcessor.process(
             begin,
             end,
-            numberOfBits,
+            digitalChannelsToCompute,
             len,
             windowDuration
         );
@@ -281,7 +285,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         dataSelector,
         end,
         len,
-        numberOfBits,
+        digitalChannelsToCompute,
         step,
         windowDuration,
     ]);

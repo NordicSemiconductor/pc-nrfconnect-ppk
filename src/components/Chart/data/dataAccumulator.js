@@ -49,10 +49,10 @@ export default () => ({
     noOpBitDataProcessor: noOpBitDataProcessor(),
     bitStateAccumulator: new Array(nbDigitalChannels),
 
-    process(begin, end, numberOfBits, len, windowDuration) {
+    process(begin, end, digitalChannelsToCompute, len, windowDuration) {
         const { data, index } = options;
         const bitDataProcessor =
-            numberOfBits > 0
+            digitalChannelsToCompute.length > 0
                 ? this.bitDataAccumulator
                 : this.noOpBitDataProcessor;
 
@@ -63,7 +63,7 @@ export default () => ({
         let mappedIndex = 0;
         let timestamp;
 
-        bitDataProcessor.initialise(numberOfBits);
+        bitDataProcessor.initialise(digitalChannelsToCompute);
 
         for (
             let originalIndex = originalIndexBegin;

@@ -42,21 +42,21 @@ import { averagedBitState } from '../../../utils/bitConversion';
 export default () => ({
     bitDataStorage: bitDataStorage(),
 
-    initialise(numberOfBits) {
-        this.bitDataStorage.initialise(numberOfBits);
-        this.numberOfBits = numberOfBits;
+    initialise(digitalChannelsToCompute) {
+        this.bitDataStorage.initialise(digitalChannelsToCompute);
+        this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
     processBits(bitIndex, timestamp) {
         const bits = options.bits[bitIndex];
 
-        for (let i = 0; i < this.numberOfBits; ++i) {
+        this.digitalChannelsToCompute.forEach(i => {
             this.bitDataStorage.storeBit(
                 timestamp,
                 i,
                 averagedBitState(bits, i)
             );
-        }
+        });
     },
 
     getLineData() {
