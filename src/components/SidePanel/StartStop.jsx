@@ -88,18 +88,20 @@ export default () => {
     return (
         <Group heading="Sample parameters">
             <div className={samplingRunning ? 'disabled' : ''}>
-                <Form.Label htmlFor="data-logger-sampling-frequency">
-                    {sampleFreq.toLocaleString('en')} samples per second
-                </Form.Label>
-                <Slider
-                    ticks
-                    id="data-logger-sampling-frequency"
-                    values={[sampleFreqLog10]}
-                    range={{ min: 0, max: maxFreqLog10 }}
-                    onChange={[v => dispatch(updateSampleFreqLog10(v))]}
-                    onChangeComplete={completeChange}
-                    disabled={samplingRunning}
-                />
+                <div className="sample-frequency-group">
+                    <Form.Label htmlFor="data-logger-sampling-frequency">
+                        {sampleFreq.toLocaleString('en')} samples per second
+                    </Form.Label>
+                    <Slider
+                        ticks
+                        id="data-logger-sampling-frequency"
+                        values={[sampleFreqLog10]}
+                        range={{ min: 0, max: maxFreqLog10 }}
+                        onChange={[v => dispatch(updateSampleFreqLog10(v))]}
+                        onChangeComplete={completeChange}
+                        disabled={samplingRunning}
+                    />
+                </div>
                 <NumberWithUnit
                     label="Sample for"
                     unit={range.name}
@@ -112,14 +114,14 @@ export default () => {
                     slider
                 />
             </div>
-            <div className="small">
+            <div className="small buffer-summary">
                 Estimated RAM required {formattedRamSize}
                 <br />
                 {formattedPeriod} period
             </div>
             <Button
                 title={startStopTitle}
-                className={`w-100 start-btn my-3 ${
+                className={`w-100 start-btn ${
                     samplingRunning ? 'active-anim' : ''
                 }`}
                 variant="set"
