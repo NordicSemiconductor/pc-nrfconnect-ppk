@@ -73,4 +73,22 @@
     .dropdown-toggle {
         font-size: inherit;
     }
+
+    .save-load-btn-group {
+        button:not(:first-of-type) {
+            margin-top: 8px;
+        }
+    }
+
+    .sample-frequency-group {
+        margin-bottom: 12px;
+    }
+
+    .buffer-summary {
+        margin-top: 4px;
+    }
+
+    .start-btn {
+        margin-top: 24px;
+    }
 }

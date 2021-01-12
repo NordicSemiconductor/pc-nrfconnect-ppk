@@ -59,22 +59,29 @@ const Trigger = () => {
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 
     return (
-        <Group heading="Trigger">
-            <TriggerLength />
-            <TriggerLevel
-                triggerLevel={triggerLevel}
-                externalTrigger={externalTrigger}
-            />
-            <TriggerModeGroup
-                triggerMode={triggerMode}
-                setTriggerMode={setTriggerMode}
-                hasExternal={!!capabilities.ppkTriggerExtToggle}
-                externalTrigger={externalTrigger}
-                rttRunning={rttRunning}
-                triggerRunning={triggerRunning}
-            />
-            <TriggerStart triggerMode={triggerMode} rttRunning={rttRunning} />
-        </Group>
+        <>
+            <Group heading="Trigger parameters">
+                <TriggerLength />
+                <TriggerLevel
+                    triggerLevel={triggerLevel}
+                    externalTrigger={externalTrigger}
+                />
+            </Group>
+            <Group heading="Trigger type">
+                <TriggerModeGroup
+                    triggerMode={triggerMode}
+                    setTriggerMode={setTriggerMode}
+                    hasExternal={!!capabilities.ppkTriggerExtToggle}
+                    externalTrigger={externalTrigger}
+                    rttRunning={rttRunning}
+                    triggerRunning={triggerRunning}
+                />
+                <TriggerStart
+                    triggerMode={triggerMode}
+                    rttRunning={rttRunning}
+                />
+            </Group>
+        </>
     );
 };
 

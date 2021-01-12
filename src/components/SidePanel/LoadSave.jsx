@@ -68,23 +68,27 @@ export const Save = () => {
 
     return (
         <>
-            <Button
-                className="w-100"
-                title={disabled ? 'Stop sampling to save or export' : undefined}
-                variant="set"
-                disabled={disabled}
-                onClick={() => dispatch(toggleSaveChoiceDialog())}
-            >
-                Save / Export
-            </Button>
-            <Button
-                className="w-100"
-                variant="set"
-                disabled={disabled}
-                onClick={() => dispatch(screenshot())}
-            >
-                Screenshot
-            </Button>
+            <div className="save-load-btn-group">
+                <Button
+                    className="w-100"
+                    title={
+                        disabled ? 'Stop sampling to save or export' : undefined
+                    }
+                    variant="set"
+                    disabled={disabled}
+                    onClick={() => dispatch(toggleSaveChoiceDialog())}
+                >
+                    Save / Export
+                </Button>
+                <Button
+                    className="w-100 screenshot-btn"
+                    variant="set"
+                    disabled={disabled}
+                    onClick={() => dispatch(screenshot())}
+                >
+                    Screenshot
+                </Button>
+            </div>
             <SaveChoiceDialog />
             <ExportDialog />
         </>

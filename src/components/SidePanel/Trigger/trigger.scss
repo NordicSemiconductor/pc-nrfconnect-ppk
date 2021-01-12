@@ -4,8 +4,8 @@
             padding: 0 0.25rem 2px;
             color: inherit;
             &::after {
-                content: "\f140";
-                font-family: "Material Design Icons";
+                content: '\f140';
+                font-family: 'Material Design Icons';
                 font-size: 15px;
                 display: initial;
                 margin-left: unset;
@@ -27,5 +27,14 @@
         .dropdown-item {
             padding: 0.25rem;
         }
+    }
+
+    .trigger-level-container {
+        margin-top: 4px;
+    }
+
+    .trigger-btn {
+        margin-top: 24px;
+        margin-bottom: 0;
     }
 }

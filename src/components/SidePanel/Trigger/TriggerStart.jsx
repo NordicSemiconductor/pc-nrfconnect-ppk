@@ -113,7 +113,7 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
     return (
         <Button
             title={title}
-            className={`w-100 mb-2 ${isRunning ? 'active-anim' : ''}`}
+            className={`w-100 trigger-btn ${isRunning ? 'active-anim' : ''}`}
             disabled={!rttRunning || externalTrigger}
             variant="set"
             onClick={onClick}
