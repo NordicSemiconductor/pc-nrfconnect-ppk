@@ -68,7 +68,6 @@ const initialState = {
     digitalChannelsVisible: persistentStore.get('digitalChannelsVisible', true),
     timestampsVisible: persistentStore.get('timestampsVisible', false),
     yAxisLock: false,
-    showGridLines: persistentStore.get('gridlinesVisible', true),
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
 };
@@ -82,7 +81,6 @@ const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
 const TOGGLE_TIMESTAMPS = 'TOGGLE_TIMESTAMPS';
 const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
-const TOGGLE_GRID_LINES = 'TOGGLE_GRID_LINES';
 const CHART_WINDOW_LOCK = 'CHART_WINDOW_LOCK';
 const CHART_WINDOW_UNLOCK = 'CHART_WINDOW_UNLOCK';
 
@@ -204,9 +202,6 @@ export const toggleYAxisLock = (yMin, yMax) => ({
     yMin,
     yMax,
 });
-export const toggleGridLines = () => ({
-    type: TOGGLE_GRID_LINES,
-});
 
 function calcBuffer(windowDuration, windowEnd) {
     const { data, samplesPerSecond, timestamp } = options;
@@ -295,12 +290,6 @@ export default (state = initialState, { type, ...action }) => {
             const { yMin, yMax, ...s } = state;
             return { ...s, ...action, yAxisLock: !state.yAxisLock };
         }
-        case TOGGLE_GRID_LINES:
-            persistentStore.set('gridlinesVisible', !state.showGridLines);
-            return {
-                ...state,
-                showGridLines: !state.showGridLines,
-            };
         case UPDATE_HAS_DIGITAL_CHANNELS:
             return { ...state, ...action };
         case CHART_WINDOW_LOCK:

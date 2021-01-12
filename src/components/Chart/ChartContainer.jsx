@@ -93,7 +93,6 @@ const ChartContainer = ({
         yMin,
         yMax,
         timestampsVisible,
-        showGridLines,
     } = useSelector(chartState);
     const { samplingRunning } = useSelector(appState);
     const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
@@ -183,7 +182,6 @@ const ChartContainer = ({
                         maxTicksLimit: 7,
                     },
                     gridLines: {
-                        display: showGridLines,
                         drawBorder: true,
                         drawOnChartArea: true,
                     },
@@ -205,7 +203,6 @@ const ChartContainer = ({
                         callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
                     },
                     gridLines: {
-                        display: showGridLines,
                         drawBorder: true,
                         drawOnChartArea: true,
                     },
