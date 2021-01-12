@@ -62,11 +62,12 @@ const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
         dispatch(updateTriggerLevel(level * 1000 ** unit));
         setLevelUnit(unit);
     };
-
     return (
         <div
             title="Rising edge level to run trigger"
-            className={externalTrigger ? 'disabled' : ''}
+            className={`trigger-level-container ${
+                externalTrigger ? 'disabled' : ''
+            }`}
         >
             <Form.Label
                 htmlFor="slider-trigger-level"
