@@ -86,7 +86,7 @@ export default () => {
     ]);
 
     return (
-        <Group>
+        <Group heading="Sample parameters">
             <div className={samplingRunning ? 'disabled' : ''}>
                 <Form.Label htmlFor="data-logger-sampling-frequency">
                     {sampleFreq} samples per second
