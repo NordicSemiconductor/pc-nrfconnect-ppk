@@ -47,8 +47,8 @@ jest.mock('nrfconnect/core', () => {
 const initialState = {
     app: {
         chart: {
-            windowBegin: 0,
-            windowEnd: 999999,
+            windowBegin: 1,
+            windowEnd: 1000000,
             cursorBegin: null,
             hasDigitalChannels: true,
         },

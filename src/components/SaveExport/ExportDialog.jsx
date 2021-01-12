@@ -135,8 +135,8 @@ export default () => {
         }
     }, [isExportDialogVisible]);
 
-    const end = windowEnd == null ? options.timestamp : windowEnd;
-    const begin = windowBegin == null ? end - windowDuration : windowBegin;
+    const end = windowEnd || options.timestamp;
+    const begin = windowBegin || end - windowDuration;
 
     const [from, to] =
         cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
