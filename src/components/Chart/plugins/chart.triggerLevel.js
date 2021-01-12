@@ -48,7 +48,7 @@ const plugin = {
 
     getCoords(chartInstance) {
         const {
-            chartArea: { left, top, bottom },
+            chartArea: { left },
             scales: { yScale },
             options: { triggerLevel, triggerHandleVisible },
         } = chartInstance;
@@ -59,9 +59,6 @@ const plugin = {
             chartInstance.triggerLine.y !== null
                 ? chartInstance.triggerLine.y
                 : yScale.getPixelForValue(triggerLevel);
-        if (y < top || y > bottom) {
-            return null;
-        }
         const width = 24;
         const height = 10;
         return {
@@ -137,7 +134,7 @@ const plugin = {
 
     afterDraw(chartInstance) {
         const {
-            chartArea: { left, right },
+            chartArea: { left, right, top, bottom },
             chart: { ctx },
         } = chartInstance;
 
@@ -197,8 +194,25 @@ const plugin = {
             ctx.stroke();
         }
 
-        drawDashedLine();
-        drawHandle();
+        if (y > top && y < bottom) {
+            drawDashedLine();
+            drawHandle();
+        } else {
+            // draw indicators
+            ctx.fillStyle = nordicBlue;
+            if (y < top) {
+                ctx.translate(label.x + 12, top + 12);
+            } else {
+                ctx.translate(label.x + 12, bottom - 12);
+                ctx.rotate(Math.PI);
+            }
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(3.5, 6);
+            ctx.lineTo(-3.5, 6);
+            ctx.closePath();
+            ctx.fill();
+        }
 
         ctx.restore();
     },
