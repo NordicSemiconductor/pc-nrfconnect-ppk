@@ -33,35 +33,35 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/* eslint no-bitwise: off */
 /* eslint no-plusplus: off */
 
-import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
-import { doubleBitValue } from '../../../utils/bitConversion';
+import bitDataSelector from './bitDataSelector';
+import noOpBitDataProcessor from './noOpBitDataProcessor';
+
+import { options, timestampToIndex } from '../../../globals';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
 
 export default () => ({
-    lineData: emptyArray(),
-    bitsData: [...Array(nbDigitalChannels)].map(() => emptyArray()),
-    bitIndexes: new Array(nbDigitalChannels),
-    lastBits: new Array(nbDigitalChannels),
+    ampereLineData: emptyArray(),
+    bitDataSelector: bitDataSelector(),
+    noOpBitDataProcessor: noOpBitDataProcessor(),
 
-    process(begin, end, numberOfBits) {
-        const { bits, data, index } = options;
+    process(begin, end, digitalChannelsToCompute) {
+        const { data, index } = options;
+        const bitDataProcessor =
+            digitalChannelsToCompute.length > 0
+                ? this.bitDataSelector
+                : this.noOpBitDataProcessor;
 
         const originalIndexBegin = timestampToIndex(begin, index);
         const originalIndexEnd = timestampToIndex(end, index);
 
         let mappedIndex = 0;
-        this.bitIndexes.fill(0);
 
-        for (let i = 0; i < numberOfBits; ++i) {
-            this.bitsData[i][0] = { x: undefined, y: undefined };
-        }
+        bitDataProcessor.initialise(digitalChannelsToCompute);
 
-        this.lastBits.fill(undefined);
         let last;
         const originalIndexBeginFloored = Math.floor(originalIndexBegin);
         const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
@@ -75,35 +75,21 @@ export default () => ({
             const timestamp =
                 begin +
                 ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
-            this.lineData[mappedIndex].x = timestamp;
+            this.ampereLineData[mappedIndex].x = timestamp;
+
             if (n < originalIndexEndCeiled) {
                 last = Number.isNaN(v) ? undefined : v;
             }
-            this.lineData[mappedIndex].y = last;
+            this.ampereLineData[mappedIndex].y = last;
 
-            for (let i = 0; i < numberOfBits; ++i) {
-                const y = Number.isNaN(v)
-                    ? undefined
-                    : [-0.5, -0.4, 0.4, 0][doubleBitValue(bits[k], i)];
-                this.bitsData[i][this.bitIndexes[i]].x = timestamp;
-                if (n === originalIndexEndCeiled) {
-                    this.bitsData[i][this.bitIndexes[i]].y = this.lastBits[i];
-                    ++this.bitIndexes[i];
-                } else if (
-                    (this.bitsData[i][this.bitIndexes[i] - 1] || {}).y !== y
-                ) {
-                    this.bitsData[i][this.bitIndexes[i]].y = y;
-                    this.lastBits[i] = y;
-                    ++this.bitIndexes[i];
-                }
+            if (!Number.isNaN(v)) {
+                bitDataProcessor.processBits(k, timestamp);
             }
         }
 
-        return [
-            this.lineData.slice(0, mappedIndex),
-            this.bitsData.map((bitData, i) =>
-                bitData.slice(0, this.bitIndexes[i])
-            ),
-        ];
+        return {
+            ampereLineData: this.ampereLineData.slice(0, mappedIndex),
+            bitsLineData: bitDataProcessor.getLineData(),
+        };
     },
 });

@@ -34,7 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint no-bitwise: off */
 /* eslint no-plusplus: off */
 /* eslint operator-assignment: off */
 
@@ -54,7 +53,7 @@ import StatBox from './StatBox';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import DigitalChannels from './DigitalChannels';
-import ChartContainer from './ChartContainer';
+import AmpereChart from './AmpereChart';
 
 import {
     chartWindowAction,
@@ -62,7 +61,7 @@ import {
     chartState,
 } from '../../reducers/chartReducer';
 
-import { options, timestampToIndex, nbDigitalChannels } from '../../globals';
+import { options, timestampToIndex } from '../../globals';
 
 import { rightMarginPx } from './chart.scss';
 import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
@@ -166,15 +165,19 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
     const { sampleFreq } = useSelector(dataLoggerState);
-    const digitalChannelsWindowLimit = 3e11 / sampleFreq;
 
-    let numberOfBits =
-        windowDuration <= digitalChannelsWindowLimit && showDigitalChannels
-            ? nbDigitalChannels
-            : 0;
-    if (!bits) {
-        numberOfBits = 0;
-    }
+    const digitalChannelsWindowLimit = 3e12 / sampleFreq;
+    const zoomedOutTooFarForDigitalChannels =
+        windowDuration > digitalChannelsWindowLimit;
+
+    const digitalChannelsToDisplay = digitalChannels
+        .map((isVisible, channelNumber) => (isVisible ? channelNumber : null))
+        .filter(channelNumber => channelNumber != null);
+
+    const digitalChannelsToCompute =
+        !zoomedOutTooFarForDigitalChannels && showDigitalChannels && bits
+            ? digitalChannelsToDisplay
+            : [];
 
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
@@ -266,13 +269,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const originalIndexEnd = timestampToIndex(end, index);
     const step = (originalIndexEnd - originalIndexBegin) / len;
 
-    const [lineData, bitsData] = useMemo(() => {
+    const { ampereLineData, bitsLineData } = useMemo(() => {
         const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
 
         return dataProcessor.process(
             begin,
             end,
-            numberOfBits,
+            digitalChannelsToCompute,
             len,
             windowDuration
         );
@@ -282,7 +285,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         dataSelector,
         end,
         len,
-        numberOfBits,
+        digitalChannelsToCompute,
         step,
         windowDuration,
     ]);
@@ -299,13 +302,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     chartRef={chartRef}
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
-                <ChartContainer
+                <AmpereChart
                     setLen={setLen}
                     setChartAreaWidth={setChartAreaWidth}
                     step={step}
                     chartRef={chartRef}
                     cursorData={cursorData}
-                    lineData={lineData}
+                    lineData={ampereLineData}
                 />
                 <TimeSpanBottom
                     cursorBegin={cursorBegin}
@@ -335,9 +338,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             </div>
             {hasDigitalChannels && showDigitalChannels && (
                 <DigitalChannels
-                    bitsData={bitsData}
+                    lineData={bitsLineData}
                     digitalChannels={digitalChannels}
-                    numberOfBits={numberOfBits}
+                    zoomedOutTooFar={zoomedOutTooFarForDigitalChannels}
                     cursorData={cursorData}
                 />
             )}

@@ -36,7 +36,7 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import { number, bool, arrayOf, shape } from 'prop-types';
+import { exact, number, bool, arrayOf, shape } from 'prop-types';
 import { rightMarginPx } from './chart.scss';
 import crossHairPlugin from './plugins/chart.crossHair';
 import colors from '../colors.scss';
@@ -45,9 +45,9 @@ const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
 
 const DigitalChannels = ({
-    bitsData,
+    lineData,
     digitalChannels,
-    numberOfBits,
+    zoomedOutTooFar,
     cursorData: { begin, end, cursorBegin, cursorEnd },
 }) => {
     const bitsChartOptions = {
@@ -87,21 +87,32 @@ const DigitalChannels = ({
         legend: { display: false },
     };
 
-    const bitsChartData = bitsData
-        .map((bitData, i) => ({
+    const commonLineData = {
+        backgroundColor: dataColor,
+        borderColor: dataColor,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        pointHitRadius: 0,
+        pointBorderWidth: 0,
+        lineTension: 0,
+        steppedLine: 'before',
+    };
+
+    const bitsChartData = lineData
+        .map((singleBitLineData, i) => ({
             datasets: [
                 {
-                    borderColor: dataColor,
-                    borderWidth: 1.5,
+                    ...commonLineData,
                     fill: false,
-                    data: bitData,
-                    pointRadius: 0,
-                    pointHoverRadius: 0,
-                    pointHitRadius: 0,
-                    pointBorderWidth: 0,
-                    lineTension: 0,
-                    label: i,
-                    steppedLine: 'before',
+                    data: singleBitLineData.mainLine,
+                    label: String(i),
+                },
+                {
+                    ...commonLineData,
+                    fill: '-1',
+                    data: singleBitLineData.uncertaintyLine,
+                    label: `uncertainty ${i}`, // This label is not displayed, just needed as an internal key
                 },
             ],
         }))
@@ -123,7 +134,7 @@ const DigitalChannels = ({
                     </div>
                 </div>
             ))}
-            {numberOfBits === 0 && (
+            {zoomedOutTooFar && (
                 <div className="info">
                     <p>Zoom in on the main chart to see the digital channels</p>
                 </div>
@@ -132,17 +143,19 @@ const DigitalChannels = ({
     );
 };
 
+const lineData = arrayOf(
+    shape({
+        x: number.isRequired,
+        y: number,
+    }).isRequired
+).isRequired;
+
 DigitalChannels.propTypes = {
-    bitsData: arrayOf(
-        arrayOf(
-            shape({
-                x: number.isRequired,
-                y: number.isRequired,
-            }).isRequired
-        ).isRequired
+    lineData: arrayOf(
+        exact({ mainLine: lineData, uncertaintyLine: lineData }).isRequired
     ).isRequired,
     digitalChannels: arrayOf(bool).isRequired,
-    numberOfBits: number.isRequired,
+    zoomedOutTooFar: bool.isRequired,
     cursorData: shape({
         cursorBegin: number,
         cursorEnd: number,
