@@ -71,8 +71,8 @@ export const always0 = 1;
 export const always1 = 2;
 export const sometimes0And1 = 3;
 
-const lineDateFor1 = 0.4;
-const lineDateFor0 = -lineDateFor1;
+const lineDataFor1 = 0.4;
+const lineDataFor0 = -lineDataFor1;
 
 export const lineDataForBitState = [
     /* 0: invalid */ {
@@ -80,15 +80,15 @@ export const lineDataForBitState = [
         uncertaintyLine: undefined,
     },
     /* 1: always 0 */ {
-        mainLine: lineDateFor0,
-        uncertaintyLine: lineDateFor0,
+        mainLine: lineDataFor0,
+        uncertaintyLine: lineDataFor0,
     },
     /* 2: always 1 */ {
-        mainLine: lineDateFor1,
-        uncertaintyLine: lineDateFor1,
+        mainLine: lineDataFor1,
+        uncertaintyLine: lineDataFor1,
     },
     /* sometimes 0 and sometimes 1 */ {
-        mainLine: lineDateFor0,
-        uncertaintyLine: lineDateFor1,
+        mainLine: lineDataFor0,
+        uncertaintyLine: lineDataFor1,
     },
 ];

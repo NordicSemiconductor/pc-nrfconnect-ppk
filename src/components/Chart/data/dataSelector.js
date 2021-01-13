@@ -59,7 +59,6 @@ export default () => ({
         const originalIndexEnd = timestampToIndex(end, index);
 
         let mappedIndex = 0;
-        let timestamp;
 
         bitDataProcessor.initialise(digitalChannelsToCompute);
 
@@ -73,10 +72,11 @@ export default () => ({
         ) {
             const k = (n + data.length) % data.length;
             const v = data[k];
-            timestamp =
+            const timestamp =
                 begin +
                 ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
             this.ampereLineData[mappedIndex].x = timestamp;
+
             if (n < originalIndexEndCeiled) {
                 last = Number.isNaN(v) ? undefined : v;
             }

@@ -61,7 +61,6 @@ export default () => ({
         const step = (originalIndexEnd - originalIndexBegin) / len;
 
         let mappedIndex = 0;
-        let timestamp;
 
         bitDataProcessor.initialise(digitalChannelsToCompute);
 
@@ -70,7 +69,8 @@ export default () => ({
             mappedIndex < len + len;
             ++mappedIndex, originalIndex += step
         ) {
-            timestamp = begin + windowDuration * (mappedIndex / (len + len));
+            const timestamp =
+                begin + windowDuration * (mappedIndex / (len + len));
             const k = Math.floor(originalIndex);
             const l = Math.floor(originalIndex + step);
             let min = Number.MAX_VALUE;
