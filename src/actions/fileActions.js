@@ -40,6 +40,7 @@ import { join, dirname } from 'path';
 import { logger } from 'nrfconnect/core';
 import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
+import { setTriggerState } from '../reducers/triggerReducer';
 import { setCurrentPane, setFileLoadedAction } from '../reducers/appReducer';
 import saveData from '../utils/saveFileHandler';
 import loadData from '../utils/loadFileHandler';
@@ -71,6 +72,7 @@ export const save = () => async (_, getState) => {
         metadata: {
             options: { ...opts, currentPane },
             chartState: getState().app.chart,
+            triggerState: getState().app.trigger,
         },
     };
 
@@ -100,6 +102,7 @@ export const load = () => async dispatch => {
 
     const {
         chartState,
+        triggerState,
         options: { currentPane, ...loadedOptions },
     } = metadata;
 
@@ -109,6 +112,9 @@ export const load = () => async dispatch => {
 
     dispatch(setChartState(chartState));
     dispatch(setFileLoadedAction(true));
+    if (triggerState !== null) {
+        dispatch(setTriggerState(triggerState));
+    }
     if (currentPane !== null) dispatch(setCurrentPane(currentPane));
     logger.info(`State restored from: ${filename}`);
 };

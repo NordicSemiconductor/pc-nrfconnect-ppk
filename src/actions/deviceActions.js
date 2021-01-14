@@ -320,11 +320,18 @@ export function open(deviceInfo) {
             dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
 
+            const {
+                triggerLength,
+                triggerLevel,
+                triggerWindowRange,
+            } = getState().app.trigger;
+            if (!triggerLength) await dispatch(triggerLengthUpdate(10));
+            if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
+            if (!triggerWindowRange)
+                dispatch(triggerWindowRangeAction(device.triggerWindowRange));
+
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
-            dispatch(triggerLevelSetAction(1000));
-            dispatch(triggerWindowRangeAction(device.triggerWindowRange));
-            await dispatch(triggerLengthUpdate(10));
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
                 updateRegulatorAction({

@@ -59,6 +59,7 @@ export const TRIGGER_WINDOW_RANGE = 'TRIGGER_WINDOW_RANGE';
 export const SET_TRIGGER_START = 'SET_TRIGGER_START';
 export const SET_WINDOW_OFFSET = 'SET_WINDOW_OFFSET';
 export const SET_TRIGGER_ORIGIN = 'SET_TRIGGER_ORIGIN';
+export const LOAD_TRIGGER_STATE = 'LOAD_TRIGGER_STATE';
 
 export const triggerLevelSetAction = triggerLevel => ({
     type: TRIGGER_LEVEL_SET,
@@ -101,6 +102,11 @@ export const setWindowOffsetAction = offset => ({
 export const setTriggerOriginAction = origin => ({
     type: SET_TRIGGER_ORIGIN,
     origin,
+});
+
+export const setTriggerState = state => ({
+    type: LOAD_TRIGGER_STATE,
+    ...state,
 });
 
 export default (state = initialState, { type, ...action }) => {
@@ -160,6 +166,9 @@ export default (state = initialState, { type, ...action }) => {
         }
         case SET_TRIGGER_ORIGIN: {
             return { ...state, triggerOrigin: action.origin };
+        }
+        case LOAD_TRIGGER_STATE: {
+            return { ...state, ...action };
         }
         case TRIGGER_LEVEL_SET:
         case TRIGGER_WINDOW_RANGE: {
