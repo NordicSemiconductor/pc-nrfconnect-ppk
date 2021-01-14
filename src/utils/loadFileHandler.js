@@ -34,8 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint-disable no-underscore-dangle */
-
 import fs from 'fs';
 import { deserialize } from 'bson';
 import { createInflateRaw } from 'zlib';
@@ -52,77 +50,81 @@ const setupBuffer = async filename => {
         },
     });
 
-    await new Promise(resolve =>
-        fs
-            .createReadStream(filename)
-            .pipe(createInflateRaw())
-            .pipe(content)
-            .on('finish', resolve)
-    );
-    return buffer.slice(0, size);
+    await new Promise((resolve, reject) => {
+        const readStream = fs.createReadStream(filename).on('error', err => {
+            reject(err);
+        });
+        const pipedStream = readStream.pipe(createInflateRaw());
+        pipedStream.on('error', err => {
+            reject(err);
+        });
+        pipedStream.pipe(content).on('finish', resolve);
+    });
+
+    buffer.slice(0, size);
+
+    let pos = 0;
+
+    return {
+        readInitialChunk() {
+            const len = buffer.slice(pos, pos + 4).readUInt32LE();
+            const chunk = buffer.slice(pos, pos + len);
+            pos += len;
+
+            return chunk;
+        },
+        readChunk() {
+            const len = buffer.slice(pos, pos + 4).readUInt32LE();
+            pos += 4;
+            const chunk = buffer.slice(pos, pos + len);
+            pos += len;
+
+            return chunk;
+        },
+        isDepleted() {
+            pos < buffer.length;
+        },
+    };
 };
 
-export default () => ({
-    buffer: null,
-    pos: 0,
-    len: null,
+/* Old save file format had two subsequent objects containing the global
+options object and the chartState respectively, so we call loadMetadata
+once more to get the remaining data */
+const handleLegacyFiles = (buffer, metadata) => {
+    const additionalData = deserialize(buffer.readInitialChunk());
+    return {
+        options: { ...metadata, currentPane: metadata.currentPane },
+        chartState: { ...additionalData },
+    };
+};
 
-    async initialise(filename) {
-        this.buffer = await setupBuffer(filename);
-        this._moveBufferPointer();
-    },
-    load() {
-        let metadata = this._loadMetadata();
-        if (!Object.prototype.hasOwnProperty.call(metadata, 'version')) {
-            // no version property means that it's a legacy save file
-            metadata = this._handleLegacyFiles(metadata);
-        }
-        const dataBuffer = this._loadBuffer();
-        let bits = null;
-        if (this.pos < this.buffer.length) {
-            bits = this._loadBits();
-        }
+const loadMetadata = buffer => {
+    const metadata = deserialize(buffer.readInitialChunk());
+    if (metadata.version == null) {
+        // no version property means that it's a legacy save file
+        return handleLegacyFiles(buffer, metadata);
+    }
+
+    return metadata;
+};
+
+const loadData = buffer =>
+    new Float32Array(new Uint8Array(buffer.readChunk()).buffer);
+
+const loadBits = buffer =>
+    buffer.isDepleted()
+        ? null
+        : new Uint16Array(new Uint8Array(buffer.readChunk()).buffer);
+
+export default async filename => {
+    try {
+        const buffer = await setupBuffer(filename);
         return {
-            dataBuffer,
-            metadata,
-            bits,
+            metadata: loadMetadata(buffer),
+            dataBuffer: loadData(buffer),
+            bits: loadBits(buffer),
         };
-    },
-    _loadMetadata() {
-        const result = deserialize(
-            this.buffer.slice(this.pos, this.pos + this.len)
-        );
-        this._moveBufferPointer();
-        return result;
-    },
-    _loadBuffer() {
-        const result = new Float32Array(
-            new Uint8Array(
-                this.buffer.slice(this.pos, this.pos + this.len)
-            ).buffer
-        );
-        this._moveBufferPointer();
-        return result;
-    },
-    _loadBits() {
-        return new Uint16Array(
-            new Uint8Array(
-                this.buffer.slice(this.pos, this.pos + this.len)
-            ).buffer
-        );
-    },
-    _moveBufferPointer() {
-        this.pos += this.len;
-        this.len = this.buffer.slice(this.pos, this.pos + 4).readUInt32LE();
-    },
-    /* Old save file format had two subsequent objects containing the global
-    options object and the chartState respectively, so we call loadMetadata
-    once more to get the remaining data */
-    _handleLegacyFiles(metadata) {
-        const additionalData = this._loadMetadata();
-        return {
-            options: { ...metadata, currentPane: metadata.currentPane },
-            chartState: { ...additionalData },
-        };
-    },
-});
+    } catch (err) {
+        return false;
+    }
+};

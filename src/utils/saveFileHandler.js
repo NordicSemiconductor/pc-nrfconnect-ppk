@@ -34,49 +34,56 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint-disable no-underscore-dangle */
-
 import fs from 'fs';
 import { createDeflateRaw } from 'zlib';
 import { serialize } from 'bson';
+import { logger } from 'nrfconnect/core';
 
-export default () => ({
-    deflateRaw: null,
-    saveData: null,
-    version: 1,
+const CURRENT_VERSION = 1;
 
-    initialise(filename, saveData) {
-        this.saveData = saveData;
-        const file = fs.createWriteStream(filename);
-        file.on('error', err => console.log(err.stack));
-        this.deflateRaw = createDeflateRaw();
-        this.deflateRaw.pipe(file);
-    },
+const write = deflateRaw => data => {
+    return new Promise(resolve => deflateRaw.write(data, 'binary', resolve));
+};
 
-    async _writeBuffer(data) {
-        if (!data) return;
-        const { buffer } = data;
-        const buf = Buffer.alloc(4);
-        const objbuf = Buffer.from(buffer);
-        buf.writeUInt32LE(objbuf.byteLength);
-        await this._write(buf);
-        await this._write(objbuf);
-    },
-    _write(data) {
-        return new Promise(resolve =>
-            this.deflateRaw.write(data, 'binary', resolve)
-        );
-    },
+const writeBuffer = async (data, fileWriter) => {
+    if (!data) return;
+    const { buffer } = data;
+    const buf = Buffer.alloc(4);
+    const objbuf = Buffer.from(buffer);
+    buf.writeUInt32LE(objbuf.byteLength);
+    await fileWriter(buf);
+    await fileWriter(objbuf);
+};
 
-    async save() {
-        if (!this.saveData) return;
-        await this._write(
-            serialize({ ...this.saveData.metadata, version: this.version })
-        );
-        await this._writeBuffer(this.saveData.data);
-        if (this.saveData.bits) {
-            await this._writeBuffer(this.saveData.bits);
-        }
-        this.deflateRaw.end();
-    },
-});
+const initialise = filename => {
+    const file = fs.createWriteStream(filename);
+    file.on('error', err => console.log(err.stack));
+    const deflateRaw = createDeflateRaw();
+    deflateRaw.pipe(file);
+    return deflateRaw;
+};
+
+const save = async (saveData, fileWriter) => {
+    fileWriter(serialize({ ...saveData.metadata, version: CURRENT_VERSION }));
+
+    await writeBuffer(saveData.data, fileWriter);
+    if (saveData.bits) {
+        await writeBuffer(saveData.bits, fileWriter);
+    }
+};
+
+export default async (filename, saveData) => {
+    const deflateRaw = initialise(filename);
+    const fileWriter = write(deflateRaw);
+
+    if (!saveData) return false;
+    try {
+        await save(saveData, fileWriter);
+    } catch (err) {
+        logger.error(`Error saving state to ${filename}`);
+        return false;
+    } finally {
+        deflateRaw.end();
+    }
+    return true;
+};

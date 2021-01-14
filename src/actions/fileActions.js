@@ -76,10 +76,10 @@ export const save = () => async (_, getState) => {
         },
     };
 
-    const fileSaver = saveData();
-    fileSaver.initialise(filename, dataToBeSaved);
-    await fileSaver.save();
-    logger.info(`State saved to: ${filename}`);
+    const saved = await saveData(filename, dataToBeSaved);
+    if (saved) {
+        logger.info(`State saved to: ${filename}`);
+    }
 };
 
 export const load = () => async dispatch => {
@@ -94,11 +94,12 @@ export const load = () => async dispatch => {
     }
 
     updateTitle(filename);
-
-    const fileLoader = loadData();
-    await fileLoader.initialise(filename);
-
-    const { dataBuffer, bits, metadata } = fileLoader.load();
+    const result = await loadData(filename);
+    if (!result) {
+        logger.error(`Error loading from ${filename}`);
+        return;
+    }
+    const { dataBuffer, bits, metadata } = result;
 
     const {
         chartState,
