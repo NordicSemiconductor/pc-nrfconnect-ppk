@@ -41,19 +41,19 @@ import { logger } from 'nrfconnect/core';
 import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 import { setCurrentPane, setFileLoadedAction } from '../reducers/appReducer';
-import saveData from '../utils/SaveFileFormatter';
-import loadData from '../utils/LoadFileFormatter';
+import saveData from '../utils/saveFileHandler';
+import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
 
 import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 
 const { dialog } = remote;
 
+const getTimestamp = () =>
+    new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+
 export const save = () => async (_, getState) => {
-    const timestamp = new Date()
-        .toISOString()
-        .replace(/[-:.]/g, '')
-        .slice(0, 15);
+    const timestamp = getTimestamp();
     const { currentPane } = getState().appLayout;
     const saveFileName = `ppk-${timestamp}-${paneName(currentPane)}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
@@ -63,6 +63,7 @@ export const save = () => async (_, getState) => {
         return;
     }
     setLastSaveDir(dirname(filename));
+
     const { data, bits, ...opts } = options;
     const dataToBeSaved = {
         data,
@@ -73,9 +74,9 @@ export const save = () => async (_, getState) => {
         },
     };
 
-    const saver = saveData();
-    saver.initialise(filename, dataToBeSaved);
-    await saver.writeFile();
+    const fileSaver = saveData();
+    fileSaver.initialise(filename, dataToBeSaved);
+    await fileSaver.save();
     logger.info(`State saved to: ${filename}`);
 };
 
@@ -92,10 +93,10 @@ export const load = () => async dispatch => {
 
     updateTitle(filename);
 
-    const loader = loadData();
-    await loader.initialise(filename);
+    const fileLoader = loadData();
+    await fileLoader.initialise(filename);
 
-    const { dataBuffer, bits, metadata } = loader.loadData();
+    const { dataBuffer, bits, metadata } = fileLoader.load();
 
     const {
         chartState,
@@ -126,10 +127,7 @@ export const screenshot = () => async () => {
         height: height - chopOff,
     });
 
-    const timestamp = new Date()
-        .toISOString()
-        .replace(/[-:.]/g, '')
-        .slice(0, 15);
+    const timestamp = getTimestamp();
     const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), `ppk-${timestamp}.png`),
     });
