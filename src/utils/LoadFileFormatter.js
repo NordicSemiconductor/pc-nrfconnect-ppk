@@ -37,16 +37,8 @@ export default () => ({
     },
     loadData() {
         let metadata = this._loadMetadata();
-        // eslint-disable-next-line no-prototype-builtins
-        if (metadata.hasOwnProperty('version')) {
-            // new file
-        } else {
-            // Legacy data format
-            const additionalData = this._loadMetadata();
-            metadata = {
-                options: { ...metadata, currentPane: metadata.currentPane },
-                chartState: { ...additionalData },
-            };
+        if (!Object.prototype.hasOwnProperty.call(metadata, 'version')) {
+            metadata = this._handleLegacyFiles(metadata);
         }
         const dataBuffer = this._loadBuffer();
         let bits = null;
@@ -85,5 +77,14 @@ export default () => ({
                 this.buffer.slice(this.pos, this.pos + this.len)
             ).buffer
         );
+    },
+    _handleLegacyFiles(metadata) {
+        // Old save file format had two subsequent objects containing metadata, so
+        // we call loadMetadata once more to get the remaining data
+        const additionalData = this._loadMetadata();
+        return {
+            options: { ...metadata, currentPane: metadata.currentPane },
+            chartState: { ...additionalData },
+        };
     },
 });
