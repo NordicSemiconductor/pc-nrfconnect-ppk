@@ -35,7 +35,7 @@
  */
 
 import { fork } from 'child_process';
-import { getAppDir } from 'nrfconnect/core';
+import { getAppDir, logger } from 'nrfconnect/core';
 import path from 'path';
 
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
@@ -46,6 +46,7 @@ import PPKCmd from '../constants';
 const generateMask = (bits, pos) => ({ pos, mask: (2 ** bits - 1) << pos });
 const MEAS_ADC = generateMask(14, 0);
 const MEAS_RANGE = generateMask(3, 14);
+const MEAS_COUNTER = generateMask(6, 18);
 const MEAS_LOGIC = generateMask(8, 24);
 
 const getMaskedValue = (value, { mask, pos }) => (value & mask) >> pos;
@@ -93,6 +94,8 @@ class SerialDevice extends Device {
             path.resolve(getAppDir(), 'worker', 'serialDevice.js')
         );
         this.parser = null;
+        this.payloadCounter = null;
+        this.dataLossReported = false;
 
         this.child.on('message', m => {
             if (!this.parser) {
@@ -208,12 +211,31 @@ class SerialDevice extends Device {
         return Promise.resolve(cmd.length);
     }
 
+    dataLossReport() {
+        if (this.dataLossReported) return;
+        this.dataLossReported = true;
+        logger.error(
+            'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/master/doc/data-loss.md'
+        );
+    }
+
     handleRawDataSet(adcValue) {
         try {
             const currentMeasurementRange = Math.min(
                 getMaskedValue(adcValue, MEAS_RANGE),
                 this.modifiers.r.length
             );
+            const counter = getMaskedValue(adcValue, MEAS_COUNTER);
+            const expectedCounter = (this.payloadCounter + 1) & 0x3f;
+            if (this.payloadCounter !== null && expectedCounter !== counter) {
+                const diff = counter - expectedCounter;
+                const missingSamples = diff + 0x40 * (diff > 0);
+                this.dataLossReport();
+                for (let i = 0; i < missingSamples; i += 1) {
+                    this.onSampleCallback({});
+                }
+            }
+            this.payloadCounter = counter;
             const adcResult = getMaskedValue(adcValue, MEAS_ADC) * 4;
             const bits = getMaskedValue(adcValue, MEAS_LOGIC);
             const value =
@@ -224,7 +246,6 @@ class SerialDevice extends Device {
             console.log(err.message, 'original value', adcValue);
             // to keep timestamp consistent, undefined must be emitted
             this.onSampleCallback({});
-            this.emit('warning', 'Data error2, restart application', err);
         }
     }
 
@@ -297,7 +318,15 @@ class SerialDevice extends Device {
         };
     }
 
+    ppkAverageStart() {
+        this.payloadCounter = null;
+        this.dataLossReported = false;
+        return super.ppkAverageStart();
+    }
+
     ppkTriggerSet() {
+        this.payloadCounter = null;
+        this.dataLossReported = false;
         return super.ppkAverageStart();
     }
 
@@ -306,6 +335,8 @@ class SerialDevice extends Device {
     }
 
     ppkTriggerSingleSet() {
+        this.payloadCounter = null;
+        this.dataLossReported = false;
         return super.ppkAverageStart();
     }
 }
