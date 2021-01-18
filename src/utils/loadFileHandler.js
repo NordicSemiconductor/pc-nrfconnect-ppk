@@ -37,7 +37,8 @@
 import fs from 'fs';
 import { deserialize } from 'bson';
 import { createInflateRaw } from 'zlib';
-import { Writable } from 'stream';
+import { Writable, pipeline } from 'stream';
+import { promisify } from 'util';
 
 const setupBuffer = async filename => {
     const buffer = Buffer.alloc(370 * 1e6);
@@ -50,16 +51,11 @@ const setupBuffer = async filename => {
         },
     });
 
-    await new Promise((resolve, reject) => {
-        const readStream = fs.createReadStream(filename).on('error', err => {
-            reject(err);
-        });
-        const pipedStream = readStream.pipe(createInflateRaw());
-        pipedStream.on('error', err => {
-            reject(err);
-        });
-        pipedStream.pipe(content).on('finish', resolve);
-    });
+    await promisify(pipeline)(
+        fs.createReadStream(filename),
+        createInflateRaw(),
+        content
+    );
 
     buffer.slice(0, size);
 
