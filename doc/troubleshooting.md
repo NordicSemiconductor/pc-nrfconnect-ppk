@@ -1,4 +1,6 @@
-# Troubleshooting data loss with PPK2
+# Troubleshooting guide
+
+## Data loss with PPK2
 
 In some rare cases data loss can happen between the PPK2 firmware and the Power Profiler app.
 If this happens, first please check your data by zooming in on the chart and look for gaps.
