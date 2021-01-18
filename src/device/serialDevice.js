@@ -232,17 +232,15 @@ class SerialDevice extends Device {
                 this.modifiers.r.length
             );
             const counter = getMaskedValue(adcValue, MEAS_COUNTER);
-            if (this.payloadCounter !== null) {
-                const expectedCounter =
-                    (this.payloadCounter + 1) & MAX_PAYLOAD_COUNTER;
-                if (expectedCounter !== counter) {
-                    const diff = counter - expectedCounter;
-                    const missingSamples =
-                        diff >= 0 ? diff : diff + MAX_PAYLOAD_COUNTER + 1;
-                    this.dataLossReport();
-                    for (let i = 0; i < missingSamples; i += 1) {
-                        this.onSampleCallback({});
-                    }
+            const expectedCounter =
+                (this.payloadCounter + 1) & MAX_PAYLOAD_COUNTER;
+            if (expectedCounter !== counter && this.payloadCounter !== null) {
+                const diff = counter - expectedCounter;
+                const missingSamples =
+                    diff >= 0 ? diff : diff + MAX_PAYLOAD_COUNTER + 1;
+                this.dataLossReport();
+                for (let i = 0; i < missingSamples; i += 1) {
+                    this.onSampleCallback({});
                 }
             }
             this.payloadCounter = counter;
