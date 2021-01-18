@@ -94,8 +94,7 @@ class SerialDevice extends Device {
             path.resolve(getAppDir(), 'worker', 'serialDevice.js')
         );
         this.parser = null;
-        this.payloadCounter = null;
-        this.dataLossReported = false;
+        this.resetDataLossCounter();
 
         this.child.on('message', m => {
             if (!this.parser) {
@@ -115,6 +114,11 @@ class SerialDevice extends Device {
                 console.log('Child process cleanly exited');
             }
         });
+    }
+
+    resetDataLossCounter() {
+        this.payloadCounter = null;
+        this.dataLossReported = false;
     }
 
     getAdcResult(range, adcVal) {
@@ -319,14 +323,12 @@ class SerialDevice extends Device {
     }
 
     ppkAverageStart() {
-        this.payloadCounter = null;
-        this.dataLossReported = false;
+        this.resetDataLossCounter();
         return super.ppkAverageStart();
     }
 
     ppkTriggerSet() {
-        this.payloadCounter = null;
-        this.dataLossReported = false;
+        this.resetDataLossCounter();
         return super.ppkAverageStart();
     }
 
@@ -335,8 +337,7 @@ class SerialDevice extends Device {
     }
 
     ppkTriggerSingleSet() {
-        this.payloadCounter = null;
-        this.dataLossReported = false;
+        this.resetDataLossCounter();
         return super.ppkAverageStart();
     }
 }
