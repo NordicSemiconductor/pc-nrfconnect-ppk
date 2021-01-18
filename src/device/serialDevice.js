@@ -49,6 +49,8 @@ const MEAS_RANGE = generateMask(3, 14);
 const MEAS_COUNTER = generateMask(6, 18);
 const MEAS_LOGIC = generateMask(8, 24);
 
+const MAX_PAYLOAD_COUNTER = 0b111111; // 0x3f, 64 - 1
+
 const getMaskedValue = (value, { mask, pos }) => (value & mask) >> pos;
 
 class SerialDevice extends Device {
@@ -231,10 +233,12 @@ class SerialDevice extends Device {
             );
             const counter = getMaskedValue(adcValue, MEAS_COUNTER);
             if (this.payloadCounter !== null) {
-                const expectedCounter = (this.payloadCounter + 1) & 0x3f;
+                const expectedCounter =
+                    (this.payloadCounter + 1) & MAX_PAYLOAD_COUNTER;
                 if (expectedCounter !== counter) {
                     const diff = counter - expectedCounter;
-                    const missingSamples = diff + 0x40 * (diff > 0);
+                    const missingSamples =
+                        diff >= 0 ? diff : diff + MAX_PAYLOAD_COUNTER + 1;
                     this.dataLossReport();
                     for (let i = 0; i < missingSamples; i += 1) {
                         this.onSampleCallback({});
