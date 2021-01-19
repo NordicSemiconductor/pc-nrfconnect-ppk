@@ -55,6 +55,7 @@ export default () => {
         timestampsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
+    const isDataLogger = isDataLoggerPane();
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
@@ -64,7 +65,7 @@ export default () => {
                 label="Timestamps"
                 variant="secondary"
             />
-            {hasDigitalChannels && isDataLoggerPane() && (
+            {hasDigitalChannels && isDataLogger && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(toggleDigitalChannels())}

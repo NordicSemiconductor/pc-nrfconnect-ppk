@@ -68,6 +68,6 @@ const getCurrentPane = (pane, currentPane = null) => {
     } catch (err) {
         const errorMessage = `The current pane (number) should be passed in as argument when used outside a React component.\n${err}`;
         console.error(errorMessage);
-        throw new Error(errorMessage);
+        return -1;
     }
 };
