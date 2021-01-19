@@ -37,6 +37,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
+import { useHotKey } from 'pc-nrfconnect-shared';
 
 import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
 import ExportDialog from '../SaveExport/ExportDialog';
@@ -47,6 +48,7 @@ import { triggerState } from '../../reducers/triggerReducer';
 
 export const Load = () => {
     const dispatch = useDispatch();
+    useHotKey(['command+o', 'ctrl-o'], () => dispatch(load()));
 
     return (
         <Button
@@ -63,6 +65,10 @@ export const Save = () => {
     const dispatch = useDispatch();
     const { samplingRunning } = useSelector(appState);
     const { triggerSingleWaiting, triggerRunning } = useSelector(triggerState);
+
+    useHotKey(['command+s', 'ctrl-s'], () =>
+        dispatch(toggleSaveChoiceDialog())
+    );
 
     const disabled = samplingRunning || triggerSingleWaiting || triggerRunning;
 
