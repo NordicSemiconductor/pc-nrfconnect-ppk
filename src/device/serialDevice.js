@@ -35,7 +35,7 @@
  */
 
 import { fork } from 'child_process';
-import { getAppDir } from 'nrfconnect/core';
+import { getAppDir, logger } from 'nrfconnect/core';
 import path from 'path';
 
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
@@ -46,7 +46,11 @@ import PPKCmd from '../constants';
 const generateMask = (bits, pos) => ({ pos, mask: (2 ** bits - 1) << pos });
 const MEAS_ADC = generateMask(14, 0);
 const MEAS_RANGE = generateMask(3, 14);
+const MEAS_COUNTER = generateMask(6, 18);
 const MEAS_LOGIC = generateMask(8, 24);
+
+const MAX_PAYLOAD_COUNTER = 0b111111; // 0x3f, 64 - 1
+const DATALOSS_THRESHOLD = 500; // 500 * 10us = 5ms: allowed loss
 
 const getMaskedValue = (value, { mask, pos }) => (value & mask) >> pos;
 
@@ -93,6 +97,7 @@ class SerialDevice extends Device {
             path.resolve(getAppDir(), 'worker', 'serialDevice.js')
         );
         this.parser = null;
+        this.resetDataLossCounter();
 
         this.child.on('message', m => {
             if (!this.parser) {
@@ -112,6 +117,11 @@ class SerialDevice extends Device {
                 console.log('Child process cleanly exited');
             }
         });
+    }
+
+    resetDataLossCounter() {
+        this.payloadCounter = null;
+        this.dataLossCounter = 0;
     }
 
     getAdcResult(range, adcVal) {
@@ -208,12 +218,37 @@ class SerialDevice extends Device {
         return Promise.resolve(cmd.length);
     }
 
+    dataLossReport(missingSamples) {
+        if (
+            this.dataLossCounter < DATALOSS_THRESHOLD &&
+            this.dataLossCounter + missingSamples >= DATALOSS_THRESHOLD
+        ) {
+            logger.error(
+                'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/master/doc/troubleshooting.md#data-loss-with-ppk2'
+            );
+        }
+        this.dataLossCounter += missingSamples;
+    }
+
     handleRawDataSet(adcValue) {
         try {
             const currentMeasurementRange = Math.min(
                 getMaskedValue(adcValue, MEAS_RANGE),
                 this.modifiers.r.length
             );
+            const counter = getMaskedValue(adcValue, MEAS_COUNTER);
+            const expectedCounter =
+                (this.payloadCounter + 1) & MAX_PAYLOAD_COUNTER;
+            if (expectedCounter !== counter && this.payloadCounter !== null) {
+                const diff = counter - expectedCounter;
+                const missingSamples =
+                    diff >= 0 ? diff : diff + MAX_PAYLOAD_COUNTER + 1;
+                this.dataLossReport(missingSamples);
+                for (let i = 0; i < missingSamples; i += 1) {
+                    this.onSampleCallback({});
+                }
+            }
+            this.payloadCounter = counter;
             const adcResult = getMaskedValue(adcValue, MEAS_ADC) * 4;
             const bits = getMaskedValue(adcValue, MEAS_LOGIC);
             const value =
@@ -224,7 +259,6 @@ class SerialDevice extends Device {
             console.log(err.message, 'original value', adcValue);
             // to keep timestamp consistent, undefined must be emitted
             this.onSampleCallback({});
-            this.emit('warning', 'Data error2, restart application', err);
         }
     }
 
@@ -297,7 +331,13 @@ class SerialDevice extends Device {
         };
     }
 
+    ppkAverageStart() {
+        this.resetDataLossCounter();
+        return super.ppkAverageStart();
+    }
+
     ppkTriggerSet() {
+        this.resetDataLossCounter();
         return super.ppkAverageStart();
     }
 
@@ -306,7 +346,13 @@ class SerialDevice extends Device {
     }
 
     ppkTriggerSingleSet() {
+        this.resetDataLossCounter();
         return super.ppkAverageStart();
+    }
+
+    ppkDeviceRunning(...args) {
+        this.resetDataLossCounter();
+        return super.ppkDeviceRunning(...args);
     }
 }
 

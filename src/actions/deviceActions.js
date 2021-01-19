@@ -267,17 +267,20 @@ export function open(deviceInfo) {
             let zeroCappedValue = zeroCap(value);
             const b16 = convertBits16(bits);
 
-            if (samplingRunning) {
+            if (samplingRunning && sampleFreq < maxSampleFreq) {
+                const samplesPerAverage = maxSampleFreq / sampleFreq;
                 nbSamples += 1;
                 nbSamplesTotal += 1;
-                const f = Math.min(nbSamplesTotal, maxSampleFreq / sampleFreq);
-                if (prevValue !== undefined) {
+                const f = Math.min(nbSamplesTotal, samplesPerAverage);
+                if (prevValue !== undefined && value !== undefined) {
                     zeroCappedValue =
                         prevValue + (zeroCappedValue - prevValue) / f;
                 }
-                if (nbSamples < maxSampleFreq / sampleFreq) {
-                    prevValue = zeroCappedValue;
-                    prevBits |= b16;
+                if (nbSamples < samplesPerAverage) {
+                    if (value !== undefined) {
+                        prevValue = zeroCappedValue;
+                        prevBits |= b16;
+                    }
                     return;
                 }
                 nbSamples = 0;
