@@ -41,7 +41,7 @@ import { Writable, pipeline } from 'stream';
 import { promisify } from 'util';
 
 const setupBuffer = async filename => {
-    const buffer = Buffer.alloc(370 * 1e6);
+    let buffer = Buffer.alloc(370 * 1e6);
     let size = 0;
     const content = new Writable({
         write(chunk, _encoding, callback) {
@@ -56,8 +56,7 @@ const setupBuffer = async filename => {
         createInflateRaw(),
         content
     );
-
-    buffer.slice(0, size);
+    buffer = buffer.slice(0, size);
 
     let pos = 0;
 
@@ -78,7 +77,7 @@ const setupBuffer = async filename => {
             return chunk;
         },
         isDepleted() {
-            pos < buffer.length;
+            return pos >= buffer.length;
         },
     };
 };
