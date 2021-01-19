@@ -46,7 +46,7 @@ const write = deflateRaw => data => {
 };
 
 const writeBuffer = async (data, fileWriter) => {
-    if (!data) return;
+    if (!data || data.buffer == null) return;
     const { buffer } = data;
     const buf = Buffer.alloc(4);
     const objbuf = Buffer.from(buffer);
