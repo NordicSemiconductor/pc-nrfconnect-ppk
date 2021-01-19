@@ -295,6 +295,9 @@ export function open(deviceInfo) {
             options.timestamp += options.samplingTime;
 
             if (options.index === options.data.length) {
+                if (samplingRunning) {
+                    dispatch(samplingStop());
+                }
                 options.index = 0;
             }
             if (triggerRunning || triggerSingleWaiting) {
