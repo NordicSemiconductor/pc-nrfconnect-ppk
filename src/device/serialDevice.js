@@ -50,6 +50,7 @@ const MEAS_COUNTER = generateMask(6, 18);
 const MEAS_LOGIC = generateMask(8, 24);
 
 const MAX_PAYLOAD_COUNTER = 0b111111; // 0x3f, 64 - 1
+const DATALOSS_THRESHOLD = 500; // 500 * 10us = 5ms: allowed loss
 
 const getMaskedValue = (value, { mask, pos }) => (value & mask) >> pos;
 
@@ -120,7 +121,7 @@ class SerialDevice extends Device {
 
     resetDataLossCounter() {
         this.payloadCounter = null;
-        this.dataLossReported = false;
+        this.dataLossCounter = 0;
     }
 
     getAdcResult(range, adcVal) {
@@ -217,12 +218,16 @@ class SerialDevice extends Device {
         return Promise.resolve(cmd.length);
     }
 
-    dataLossReport() {
-        if (this.dataLossReported) return;
-        this.dataLossReported = true;
-        logger.error(
-            'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/master/doc/troubleshooting.md#data-loss-with-ppk2'
-        );
+    dataLossReport(missingSamples) {
+        if (
+            this.dataLossCounter < DATALOSS_THRESHOLD &&
+            this.dataLossCounter + missingSamples >= DATALOSS_THRESHOLD
+        ) {
+            logger.error(
+                'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/master/doc/troubleshooting.md#data-loss-with-ppk2'
+            );
+        }
+        this.dataLossCounter += missingSamples;
     }
 
     handleRawDataSet(adcValue) {
@@ -238,7 +243,7 @@ class SerialDevice extends Device {
                 const diff = counter - expectedCounter;
                 const missingSamples =
                     diff >= 0 ? diff : diff + MAX_PAYLOAD_COUNTER + 1;
-                this.dataLossReport();
+                this.dataLossReport(missingSamples);
                 for (let i = 0; i < missingSamples; i += 1) {
                     this.onSampleCallback({});
                 }
@@ -343,6 +348,11 @@ class SerialDevice extends Device {
     ppkTriggerSingleSet() {
         this.resetDataLossCounter();
         return super.ppkAverageStart();
+    }
+
+    ppkDeviceRunning(...args) {
+        this.resetDataLossCounter();
+        return super.ppkDeviceRunning(...args);
     }
 }
 
