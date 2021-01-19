@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2021, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,48 +34,56 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
+import fs from 'fs';
+import { createDeflateRaw } from 'zlib';
+import { serialize } from 'bson';
+import { logger } from 'nrfconnect/core';
 
-import DigitalChannels from './DigitalChannels';
+const CURRENT_VERSION = 1;
 
-import {
-    chartState,
-    toggleDigitalChannels,
-    toggleTimestamps,
-} from '../../reducers/chartReducer';
-import { isDataLoggerPane } from '../../utils/panes';
+const write = deflateRaw => data => {
+    return new Promise(resolve => deflateRaw.write(data, 'binary', resolve));
+};
 
-export default () => {
-    const dispatch = useDispatch();
-    const {
-        digitalChannelsVisible,
-        timestampsVisible,
-        hasDigitalChannels,
-    } = useSelector(chartState);
-    const isDataLogger = isDataLoggerPane();
+const writeBuffer = async (data, fileWriter) => {
+    if (!data || data.buffer == null) return;
+    const { buffer } = data;
+    const buf = Buffer.alloc(4);
+    const objbuf = Buffer.from(buffer);
+    buf.writeUInt32LE(objbuf.byteLength);
+    await fileWriter(buf);
+    await fileWriter(objbuf);
+};
 
-    return (
-        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="secondary"
-            />
-            {hasDigitalChannels && isDataLogger && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleDigitalChannels())}
-                        isToggled={digitalChannelsVisible}
-                        label="Digital channels"
-                        variant="secondary"
-                    />
-                    <DigitalChannels />
-                </>
-            )}
-        </CollapsibleGroup>
-    );
+const initialise = filename => {
+    const file = fs.createWriteStream(filename);
+    file.on('error', err => console.log(err.stack));
+    const deflateRaw = createDeflateRaw();
+    deflateRaw.pipe(file);
+    return deflateRaw;
+};
+
+const save = async (saveData, fileWriter) => {
+    fileWriter(serialize({ ...saveData.metadata, version: CURRENT_VERSION }));
+
+    await writeBuffer(saveData.data, fileWriter);
+    if (saveData.bits) {
+        await writeBuffer(saveData.bits, fileWriter);
+    }
+};
+
+export default async (filename, saveData) => {
+    const deflateRaw = initialise(filename);
+    const fileWriter = write(deflateRaw);
+
+    if (!saveData) return false;
+    try {
+        await save(saveData, fileWriter);
+    } catch (err) {
+        logger.error(`Error saving state to ${filename}`);
+        return false;
+    } finally {
+        deflateRaw.end();
+    }
+    return true;
 };

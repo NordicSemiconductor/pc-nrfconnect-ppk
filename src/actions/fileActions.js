@@ -35,64 +35,51 @@
  */
 
 import fs from 'fs';
-import { serialize, deserialize } from 'bson';
-import { createInflateRaw, createDeflateRaw } from 'zlib';
-import { Writable } from 'stream';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
 import { logger } from 'nrfconnect/core';
 import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
+import { setTriggerState } from '../reducers/triggerReducer';
 import { setCurrentPane, setFileLoadedAction } from '../reducers/appReducer';
+import saveData from '../utils/saveFileHandler';
+import loadData from '../utils/loadFileHandler';
+import { paneName } from '../utils/panes';
 
 import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 
 const { dialog } = remote;
 
+const getTimestamp = () =>
+    new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
+
 export const save = () => async (_, getState) => {
-    const timestamp = new Date()
-        .toISOString()
-        .replace(/[-:.]/g, '')
-        .slice(0, 15);
+    const timestamp = getTimestamp();
+    const { currentPane } = getState().appLayout;
+    const saveFileName = `ppk-${timestamp}-${paneName(currentPane)}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(lastSaveDir(), `ppk-${timestamp}.ppk`),
+        defaultPath: join(lastSaveDir(), saveFileName),
     });
     if (!filename) {
         return;
     }
-
     setLastSaveDir(dirname(filename));
 
-    const file = fs.createWriteStream(filename);
-    file.on('error', err => console.log(err.stack));
-
-    const deflateRaw = createDeflateRaw();
-    deflateRaw.pipe(file);
-
-    const write = bf =>
-        new Promise(resolve => deflateRaw.write(bf, 'binary', resolve));
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, bits, ...opts } = options;
-    const { currentPane } = getState().appLayout;
-    await write(serialize({ ...opts, currentPane }));
-    await write(serialize(getState().app.chart));
+    const dataToBeSaved = {
+        data,
+        bits,
+        metadata: {
+            options: { ...opts, currentPane },
+            chartState: getState().app.chart,
+            triggerState: getState().app.trigger,
+        },
+    };
 
-    const buf = Buffer.alloc(4);
-    let objbuf = Buffer.from(options.data.buffer);
-    buf.writeUInt32LE(objbuf.byteLength);
-    await write(buf);
-    await write(objbuf);
-
-    if (options.bits) {
-        objbuf = Buffer.from(options.bits.buffer);
-        buf.writeUInt32LE(objbuf.byteLength);
-        await write(buf);
-        await write(objbuf);
+    const saved = await saveData(filename, dataToBeSaved);
+    if (saved) {
+        logger.info(`State saved to: ${filename}`);
     }
-    deflateRaw.end();
-
-    logger.info(`State saved to: ${filename}`);
 };
 
 export const load = () => async dispatch => {
@@ -107,57 +94,28 @@ export const load = () => async dispatch => {
     }
 
     updateTitle(filename);
-
-    let buffer = Buffer.alloc(370 * 1e6);
-    let size = 0;
-    const content = new Writable({
-        write(chunk, _encoding, callback) {
-            chunk.copy(buffer, size, 0);
-            size += chunk.length;
-            callback();
-        },
-    });
-
-    await new Promise(resolve =>
-        fs
-            .createReadStream(filename)
-            .pipe(createInflateRaw())
-            .pipe(content)
-            .on('finish', resolve)
-    );
-    buffer = buffer.slice(0, size);
-
-    let pos = 0;
-    let len = buffer.slice(pos, pos + 4).readUInt32LE();
-    const { currentPane, ...loadedOptions } = deserialize(
-        buffer.slice(pos, pos + len)
-    );
-    Object.assign(options, loadedOptions);
-    pos += len;
-
-    len = buffer.slice(pos, pos + 4).readUInt32LE();
-    const chartState = deserialize(buffer.slice(pos, pos + len));
-    pos += len;
-
-    len = buffer.slice(pos, pos + 4).readUInt32LE();
-    pos += 4;
-    options.data = new Float32Array(
-        new Uint8Array(buffer.slice(pos, pos + len)).buffer
-    );
-    pos += len;
-
-    if (pos < buffer.length) {
-        len = buffer.slice(pos, pos + 4).readUInt32LE();
-        pos += 4;
-        options.bits = new Uint16Array(
-            new Uint8Array(buffer.slice(pos, pos + len)).buffer
-        );
-    } else {
-        options.bits = null;
+    const result = await loadData(filename);
+    if (!result) {
+        logger.error(`Error loading from ${filename}`);
+        return;
     }
+    const { dataBuffer, bits, metadata } = result;
+
+    const {
+        chartState,
+        triggerState,
+        options: { currentPane, ...loadedOptions },
+    } = metadata;
+
+    Object.assign(options, loadedOptions);
+    options.data = dataBuffer;
+    options.bits = bits;
 
     dispatch(setChartState(chartState));
     dispatch(setFileLoadedAction(true));
+    if (triggerState !== null) {
+        dispatch(setTriggerState(triggerState));
+    }
     if (currentPane !== null) dispatch(setCurrentPane(currentPane));
     logger.info(`State restored from: ${filename}`);
 };
@@ -176,10 +134,7 @@ export const screenshot = () => async () => {
         height: height - chopOff,
     });
 
-    const timestamp = new Date()
-        .toISOString()
-        .replace(/[-:.]/g, '')
-        .slice(0, 15);
+    const timestamp = getTimestamp();
     const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), `ppk-${timestamp}.png`),
     });

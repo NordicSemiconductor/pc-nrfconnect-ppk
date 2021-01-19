@@ -55,6 +55,9 @@ export const isRealTimePane = (currentPane = null) =>
 export const isDataLoggerPane = (currentPane = null) =>
     getCurrentPane(DATA_LOGGER, currentPane);
 
+export const paneName = currentPane =>
+    currentPane === REAL_TIME ? 'real-time' : 'data-logger';
+
 const getCurrentPane = (pane, currentPane = null) => {
     if (currentPane !== null) {
         return currentPane === pane;
@@ -65,6 +68,6 @@ const getCurrentPane = (pane, currentPane = null) => {
     } catch (err) {
         const errorMessage = `The current pane (number) should be passed in as argument when used outside a React component.\n${err}`;
         console.error(errorMessage);
-        throw new Error(errorMessage);
+        return -1;
     }
 };
