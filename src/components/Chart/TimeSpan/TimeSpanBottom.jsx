@@ -76,6 +76,10 @@ const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
         target.releasePointerCapture(pointerId);
         setDrag(null);
     };
+    const timeDelta =
+        cursorBegin && cursorEnd
+            ? Math.abs(cursorEnd - cursorBegin)
+            : windowDuration;
     return (
         <div className="timespan selection" style={{ width }}>
             {showHandles && (
@@ -103,7 +107,12 @@ const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
                     </svg>
                 </div>
             )}
-            <TimeSpanLabel duration={windowDuration} />
+            <TimeSpanLabel
+                duration={timeDelta}
+                begin={cursorBegin ? cursorBegin - w0 : null}
+                end={cursorEnd ? cursorEnd - w0 : null}
+                totalDuration={windowDuration}
+            />
             {showHandles && (
                 <div
                     className="cursor end"
