@@ -77,8 +77,6 @@ class SerialDevice extends Device {
 
     isRunningInitially = false;
 
-    numberOfSamplesIn5Ms = 500;
-
     constructor(deviceInfo) {
         super();
 

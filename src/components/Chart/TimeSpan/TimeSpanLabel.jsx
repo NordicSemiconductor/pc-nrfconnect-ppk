@@ -48,10 +48,11 @@ const formatTime = duration => {
 };
 
 const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {
-    const start = begin !== undefined ? (100 * begin) / totalDuration : 0;
+    const [nBegin, nEnd] = begin > end ? [end, begin] : [begin, end];
+    const start = nBegin != null ? (100 * nBegin) / totalDuration : 0;
     const width =
-        begin !== undefined && end !== undefined
-            ? (100 * (end - begin)) / totalDuration
+        nBegin != null && nEnd !== null
+            ? (100 * (nEnd - nBegin)) / totalDuration
             : 100;
 
     const [valStr, unitStr] = formatTime(duration);
