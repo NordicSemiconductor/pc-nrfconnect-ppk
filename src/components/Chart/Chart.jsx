@@ -179,6 +179,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             ? digitalChannelsToDisplay
             : [];
 
+    if (options.timestamp === undefined) options.timestamp = 0;
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
 
