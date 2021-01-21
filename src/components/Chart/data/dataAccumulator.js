@@ -58,7 +58,8 @@ export default () => ({
 
         const originalIndexBegin = timestampToIndex(begin, index);
         const originalIndexEnd = timestampToIndex(end, index);
-        const step = (originalIndexEnd - originalIndexBegin) / len;
+        const step =
+            len === 0 ? 0 : (originalIndexEnd - originalIndexBegin) / len;
 
         let mappedIndex = 0;
 

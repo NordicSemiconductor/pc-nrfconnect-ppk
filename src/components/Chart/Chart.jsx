@@ -179,7 +179,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             ? digitalChannelsToDisplay
             : [];
 
-    const end = windowEnd || options.timestamp - options.samplingTime;
+    const end =
+        windowEnd || options.timestamp
+            ? options.timestamp - options.samplingTime
+            : 0;
     const begin = windowBegin || end - windowDuration;
 
     const cursorData = {
@@ -267,8 +270,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const originalIndexBegin = timestampToIndex(begin, index);
     const originalIndexEnd = timestampToIndex(end, index);
-    const step = (originalIndexEnd - originalIndexBegin) / len;
-
+    const step = len === 0 ? 2 : (originalIndexEnd - originalIndexBegin) / len;
     const { ampereLineData, bitsLineData } = useMemo(() => {
         const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
 
