@@ -37,9 +37,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import Form from 'react-bootstrap/Form';
 import BootstrapCollapse from 'react-bootstrap/Collapse';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
+import Form from 'react-bootstrap/Form';
 import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
@@ -62,33 +61,28 @@ const VoltageRegulator = () => {
 
     return (
         <BootstrapCollapse in={isVoltageSettable}>
-            <div>
-                <CollapsibleGroup heading="Voltage adjustment">
-                    <Form.Label htmlFor="slider-vdd">
-                        <span className="flex-fill">Supply</span>
-                        <NumberInlineInput
-                            value={vdd}
-                            range={{ min, max }}
-                            onChange={value =>
-                                dispatch(moveVoltageRegulatorVddAction(value))
-                            }
-                            onChangeComplete={() =>
-                                dispatch(updateRegulator(vdd))
-                            }
-                        />{' '}
-                        mV
-                    </Form.Label>
-                    <Slider
-                        id="slider-vdd"
-                        values={[vdd]}
+            <div className="voltage-regulator">
+                <Form.Label htmlFor="slider-vdd">
+                    <span className="flex-fill">Set supply voltage to</span>
+                    <NumberInlineInput
+                        value={vdd}
                         range={{ min, max }}
-                        onChange={[
-                            value =>
-                                dispatch(moveVoltageRegulatorVddAction(value)),
-                        ]}
+                        onChange={value =>
+                            dispatch(moveVoltageRegulatorVddAction(value))
+                        }
                         onChangeComplete={() => dispatch(updateRegulator(vdd))}
-                    />
-                </CollapsibleGroup>
+                    />{' '}
+                    mV
+                </Form.Label>
+                <Slider
+                    id="slider-vdd"
+                    values={[vdd]}
+                    range={{ min, max }}
+                    onChange={[
+                        value => dispatch(moveVoltageRegulatorVddAction(value)),
+                    ]}
+                    onChangeComplete={() => dispatch(updateRegulator(vdd))}
+                />
             </div>
         </BootstrapCollapse>
     );

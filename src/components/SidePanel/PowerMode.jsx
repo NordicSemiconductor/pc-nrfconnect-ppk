@@ -40,6 +40,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Group } from 'pc-nrfconnect-shared';
 import { Toggle } from '../../from_pc-nrfconnect-shared';
+import VoltageRegulator from './VoltageRegulator';
 
 import { setPowerMode, setDeviceRunning } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
@@ -73,6 +74,7 @@ export default () => {
                     </Button>
                 </ButtonGroup>
             )}
+            <VoltageRegulator />
             {capabilities.ppkDeviceRunning && (
                 <Toggle
                     title="Turn power on/off for device under test"
