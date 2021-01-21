@@ -42,7 +42,6 @@ import PowerMode from './PowerMode';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
 import Trigger from './Trigger/Trigger';
-import VoltageRegulator from './VoltageRegulator';
 import SwitchPoints from './SwitchPoints';
 import ResistorCalibration from './ResistorCalibration';
 import Gains from './Gains';
@@ -112,7 +111,6 @@ export default () => {
             <PowerMode />
             {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}
-            <VoltageRegulator />
             {options.timestamp === null || (
                 <>
                     <DisplayOptions />
