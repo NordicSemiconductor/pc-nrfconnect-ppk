@@ -48,6 +48,10 @@ import {
 } from '../../reducers/chartReducer';
 import { isDataLoggerPane } from '../../utils/panes';
 
+import colors from '../colors.scss';
+
+const { gray700, nordicBlue } = colors;
+
 export default () => {
     const dispatch = useDispatch();
     const {
@@ -64,6 +68,8 @@ export default () => {
                 isToggled={timestampsVisible}
                 label="Timestamps"
                 variant="secondary"
+                barColor={gray700}
+                barColorToggled={nordicBlue}
             />
             {hasDigitalChannels && isDataLogger && (
                 <>
@@ -72,6 +78,8 @@ export default () => {
                         isToggled={digitalChannelsVisible}
                         label="Digital channels"
                         variant="secondary"
+                        barColor={gray700}
+                        barColorToggled={nordicBlue}
                     />
                     <DigitalChannels />
                 </>

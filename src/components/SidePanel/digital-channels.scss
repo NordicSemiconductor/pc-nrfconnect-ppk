@@ -1,4 +1,4 @@
-@import "~pc-nrfconnect-shared/src/variables";
+@import '~pc-nrfconnect-shared/src/variables';
 
 .side-panel {
     .digital-channels {
@@ -9,6 +9,10 @@
             height: 1.6rem;
             margin: 1px;
             line-height: 1rem;
+
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
 }

@@ -53,6 +53,10 @@ import { isDataLoggerPane } from '../../utils/panes';
 import './charttop.scss';
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 
+import colors from '../colors.scss';
+
+const { gray700, nordicBlue } = colors;
+
 const TimeWindowButton = ({ label, zoomToWindow }) => {
     return (
         <Button
@@ -108,6 +112,8 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                 isToggled={yAxisLock}
                 variant="secondary"
                 labelRight
+                barColor={gray700}
+                barColorToggled={nordicBlue}
             />
             {isDataLoggerPane() && (
                 <ButtonGroup>
@@ -128,6 +134,8 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     }
                     isToggled={live}
                     variant="secondary"
+                    barColor={gray700}
+                    barColorToggled={nordicBlue}
                 />
             )}
         </div>
