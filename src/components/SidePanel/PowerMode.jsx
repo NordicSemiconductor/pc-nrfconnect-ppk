@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -49,6 +49,15 @@ export default () => {
     const dispatch = useDispatch();
     const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
+
+    useEffect(() => {
+        const shouldBePoweredOn = !isSmuMode && !deviceRunning;
+        if (shouldBePoweredOn) {
+            setTimeout(() => {
+                dispatch(setDeviceRunning(true));
+            }, 10);
+        }
+    }, [isSmuMode, deviceRunning, dispatch]);
 
     return (
         <Group heading="Mode">
@@ -75,7 +84,7 @@ export default () => {
                 </ButtonGroup>
             )}
             <VoltageRegulator />
-            {capabilities.ppkDeviceRunning && (
+            {capabilities.ppkDeviceRunning && isSmuMode && (
                 <Toggle
                     title="Turn power on/off for device under test"
                     onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
@@ -83,6 +92,15 @@ export default () => {
                     label="Enable power output"
                     variant="secondary"
                 />
+            )}
+            {capabilities.ppkDeviceRunning && !isSmuMode && (
+                <Button
+                    variant="set"
+                    className="w-100 power-cycle-btn"
+                    onClick={() => dispatch(setDeviceRunning(false))}
+                >
+                    Power cycle DUT
+                </Button>
             )}
         </Group>
     );
