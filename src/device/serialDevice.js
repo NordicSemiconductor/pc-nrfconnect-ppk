@@ -247,9 +247,6 @@ class SerialDevice extends Device {
                 this.corruptedSamples.length > 0 &&
                 counter === this.expectedCounter
             ) {
-                console.log(
-                    `Counter is stable after ${this.corruptedSamples.length} samples`
-                );
                 while (this.corruptedSamples.length > 0) {
                     this.onSampleCallback(this.corruptedSamples.shift());
                 }
@@ -259,7 +256,6 @@ class SerialDevice extends Device {
                     (counter - this.expectedCounter + MAX_PAYLOAD_COUNTER) &
                     MAX_PAYLOAD_COUNTER;
                 this.dataLossReport(missingSamples);
-                console.log(`Lost ${missingSamples} samples`);
                 for (let i = 0; i < missingSamples; i += 1) {
                     this.onSampleCallback({});
                 }
