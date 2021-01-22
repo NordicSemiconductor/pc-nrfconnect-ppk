@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
@@ -48,16 +48,19 @@ import { appState } from '../../reducers/appReducer';
 export default () => {
     const dispatch = useDispatch();
     const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
-    const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
-    useEffect(() => {
-        const shouldBePoweredOn = !isSmuMode && !deviceRunning;
-        if (shouldBePoweredOn) {
-            setTimeout(() => {
-                dispatch(setDeviceRunning(true));
-            }, 10);
-        }
-    }, [isSmuMode, deviceRunning, dispatch]);
+    const togglePowerMode = () => {
+        const toggledSmuMode = !isSmuMode;
+        dispatch(setPowerMode(toggledSmuMode));
+        if (!toggledSmuMode) dispatch(setDeviceRunning(true));
+    };
+
+    const powerCycle = () => {
+        dispatch(setDeviceRunning(false));
+        setTimeout(() => {
+            dispatch(setDeviceRunning(true));
+        }, 20);
+    };
 
     return (
         <Group heading="Mode">
@@ -97,7 +100,7 @@ export default () => {
                 <Button
                     variant="set"
                     className="w-100 power-cycle-btn"
-                    onClick={() => dispatch(setDeviceRunning(false))}
+                    onClick={powerCycle}
                 >
                     Power cycle DUT
                 </Button>

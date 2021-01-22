@@ -348,9 +348,11 @@ export function open(deviceInfo) {
                 dispatch(updateSpikeFilter());
             }
             if (device.capabilities.ppkSetPowerMode) {
+                const isSmuMode = metadata.mode === 2;
                 // 1 = Ampere
                 // 2 = SMU
-                dispatch(setPowerModeAction(metadata.mode === 2));
+                dispatch(setPowerModeAction(isSmuMode));
+                if (!isSmuMode) dispatch(setDeviceRunning(true));
             }
 
             dispatch(rttStartAction());
