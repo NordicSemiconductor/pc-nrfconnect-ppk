@@ -44,7 +44,7 @@
 // }, [isScope])
 
 import { useSelector } from 'react-redux';
-import { currentPane as currentPaneSelector } from '../reducers/appReducer';
+import { currentPane as currentPaneSelector } from '../from_pc-nrfconnect-shared';
 
 export const REAL_TIME = 1;
 export const DATA_LOGGER = 0;

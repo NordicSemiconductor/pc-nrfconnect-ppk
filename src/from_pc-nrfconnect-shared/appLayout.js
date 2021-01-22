@@ -34,14 +34,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// The following components below can be removed if this app can rely on a
-// launcher being used that provides shared v4.17.0
-import './shared.scss';
+const SET_CURRENT_PANE = 'SET_CURRENT_PANE';
 
-export { default as Slider } from './Slider/Slider';
-export { default as Toggle } from './Toggle/Toggle';
+export const setCurrentPane = currentPane => ({
+    type: SET_CURRENT_PANE,
+    currentPane,
+});
 
-export { default as InlineInput } from './InlineInput/InlineInput';
-export { default as NumberInlineInput } from './InlineInput/NumberInlineInput';
-
-export { currentPane, setCurrentPane } from './appLayout';
+export const currentPane = state => state.appLayout.currentPane;

@@ -38,10 +38,14 @@ import fs from 'fs';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
 import { logger } from 'nrfconnect/core';
+import {
+    setCurrentPane,
+    currentPane as currentPaneSelector,
+} from '../from_pc-nrfconnect-shared';
 import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 import { setTriggerState } from '../reducers/triggerReducer';
-import { setCurrentPane, setFileLoadedAction } from '../reducers/appReducer';
+import { setFileLoadedAction } from '../reducers/appReducer';
 import saveData from '../utils/saveFileHandler';
 import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
@@ -55,7 +59,7 @@ const getTimestamp = () =>
 
 export const save = () => async (_, getState) => {
     const timestamp = getTimestamp();
-    const { currentPane } = getState().appLayout;
+    const currentPane = currentPaneSelector(getState());
     const saveFileName = `ppk-${timestamp}-${paneName(currentPane)}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), saveFileName),

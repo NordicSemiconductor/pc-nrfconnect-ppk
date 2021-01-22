@@ -38,6 +38,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
+import { setCurrentPane } from '../../from_pc-nrfconnect-shared';
 import PowerMode from './PowerMode';
 import DisplayOptions from './DisplayOptions';
 import StartStop from './StartStop';
@@ -52,7 +53,6 @@ import {
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
     appState,
-    setCurrentPane,
 } from '../../reducers/appReducer';
 
 import { options } from '../../globals';
