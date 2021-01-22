@@ -48,7 +48,15 @@ import { appState } from '../../reducers/appReducer';
 export default () => {
     const dispatch = useDispatch();
     const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
+
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
+
+    const powerCycle = () => {
+        dispatch(setDeviceRunning(false));
+        setTimeout(() => {
+            dispatch(setDeviceRunning(true));
+        }, 20);
+    };
 
     return (
         <Group heading="Mode">
@@ -75,7 +83,7 @@ export default () => {
                 </ButtonGroup>
             )}
             <VoltageRegulator />
-            {capabilities.ppkDeviceRunning && (
+            {capabilities.ppkDeviceRunning && isSmuMode && (
                 <Toggle
                     title="Turn power on/off for device under test"
                     onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
@@ -83,6 +91,15 @@ export default () => {
                     label="Enable power output"
                     variant="secondary"
                 />
+            )}
+            {capabilities.ppkDeviceRunning && !isSmuMode && (
+                <Button
+                    variant="set"
+                    className="w-100 power-cycle-btn"
+                    onClick={powerCycle}
+                >
+                    Power cycle DUT
+                </Button>
             )}
         </Group>
     );
