@@ -46,6 +46,10 @@ import { setPowerMode, setDeviceRunning } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 
+import colors from '../colors.scss';
+
+const { gray700, nordicBlue } = colors;
+
 export default () => {
     const dispatch = useDispatch();
     const {
@@ -102,6 +106,8 @@ export default () => {
                     onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
                     isToggled={deviceRunning}
                     label="Enable power output"
+                    barColor={gray700}
+                    barColorToggled={nordicBlue}
                     variant="secondary"
                 />
             )}
