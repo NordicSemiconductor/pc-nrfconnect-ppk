@@ -49,11 +49,7 @@ export default () => {
     const dispatch = useDispatch();
     const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
 
-    const togglePowerMode = () => {
-        const toggledSmuMode = !isSmuMode;
-        dispatch(setPowerMode(toggledSmuMode));
-        if (!toggledSmuMode) dispatch(setDeviceRunning(true));
-    };
+    const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
     const powerCycle = () => {
         dispatch(setDeviceRunning(false));

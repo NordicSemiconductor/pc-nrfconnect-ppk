@@ -475,6 +475,7 @@ export function setPowerMode(isSmuMode) {
         await device.ppkSetPowerMode(isSmuMode ? 2 : 1);
         logger.info(`Mode: ${isSmuMode ? 'Source meter' : 'Ampere meter'}`);
         dispatch(setPowerModeAction(isSmuMode));
+        if (!isSmuMode) dispatch(setDeviceRunning(true));
     };
 }
 
