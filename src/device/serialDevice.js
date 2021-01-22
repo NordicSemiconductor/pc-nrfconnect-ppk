@@ -118,8 +118,9 @@ class SerialDevice extends Device {
     }
 
     resetDataLossCounter() {
-        this.payloadCounter = null;
+        this.expectedCounter = null;
         this.dataLossCounter = 0;
+        this.corruptedSamples = [];
     }
 
     getAdcResult(range, adcVal) {
@@ -235,22 +236,37 @@ class SerialDevice extends Device {
                 this.modifiers.r.length
             );
             const counter = getMaskedValue(adcValue, MEAS_COUNTER);
-            const expectedCounter =
-                (this.payloadCounter + 1) & MAX_PAYLOAD_COUNTER;
-            if (expectedCounter !== counter && this.payloadCounter !== null) {
-                const diff = counter - expectedCounter;
-                const missingSamples =
-                    diff >= 0 ? diff : diff + MAX_PAYLOAD_COUNTER + 1;
-                this.dataLossReport(missingSamples);
-                for (let i = 0; i < missingSamples; i += 1) {
-                    this.onSampleCallback({});
-                }
-            }
-            this.payloadCounter = counter;
             const adcResult = getMaskedValue(adcValue, MEAS_ADC) * 4;
             const bits = getMaskedValue(adcValue, MEAS_LOGIC);
             const value =
                 this.getAdcResult(currentMeasurementRange, adcResult) * 1e6;
+
+            if (this.expectedCounter === null) {
+                this.expectedCounter = counter;
+            } else if (
+                this.corruptedSamples.length > 0 &&
+                counter === this.expectedCounter
+            ) {
+                while (this.corruptedSamples.length > 0) {
+                    this.onSampleCallback(this.corruptedSamples.shift());
+                }
+                this.corruptedSamples = [];
+            } else if (this.corruptedSamples.length > 4) {
+                const missingSamples =
+                    (counter - this.expectedCounter + MAX_PAYLOAD_COUNTER) &
+                    MAX_PAYLOAD_COUNTER;
+                this.dataLossReport(missingSamples);
+                for (let i = 0; i < missingSamples; i += 1) {
+                    this.onSampleCallback({});
+                }
+                this.expectedCounter = counter;
+                this.corruptedSamples = [];
+            } else if (this.expectedCounter !== counter) {
+                this.corruptedSamples.push({ value, bits });
+            }
+
+            this.expectedCounter += 1;
+            this.expectedCounter &= MAX_PAYLOAD_COUNTER;
             // Only fire the event, if the buffer data is valid
             this.onSampleCallback({ value, bits });
         } catch (err) {
@@ -335,22 +351,15 @@ class SerialDevice extends Device {
     }
 
     ppkTriggerSet() {
-        this.resetDataLossCounter();
-        return super.ppkAverageStart();
+        return this.ppkAverageStart();
     }
 
     ppkTriggerStop() {
-        return super.ppkAverageStop();
+        return this.ppkAverageStop();
     }
 
     ppkTriggerSingleSet() {
-        this.resetDataLossCounter();
-        return super.ppkAverageStart();
-    }
-
-    ppkDeviceRunning(...args) {
-        this.resetDataLossCounter();
-        return super.ppkDeviceRunning(...args);
+        return this.ppkAverageStart();
     }
 }
 
