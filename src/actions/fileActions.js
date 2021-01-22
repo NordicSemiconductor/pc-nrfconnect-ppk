@@ -135,8 +135,14 @@ export const screenshot = () => async () => {
     });
 
     const timestamp = getTimestamp();
+    const filters = [
+        { name: 'PNG', extensions: ['png'] },
+        { name: 'All Files', extensions: ['*'] },
+    ];
+
     const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), `ppk-${timestamp}.png`),
+        filters,
     });
     if (!filename) {
         return;
