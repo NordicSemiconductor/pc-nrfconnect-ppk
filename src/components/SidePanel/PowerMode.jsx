@@ -44,10 +44,17 @@ import VoltageRegulator from './VoltageRegulator';
 
 import { setPowerMode, setDeviceRunning } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
+import { triggerState } from '../../reducers/triggerReducer';
 
 export default () => {
     const dispatch = useDispatch();
-    const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
+    const {
+        capabilities,
+        isSmuMode,
+        deviceRunning,
+        samplingRunning,
+    } = useSelector(appState);
+    const { triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
 
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
@@ -58,14 +65,20 @@ export default () => {
         }, 20);
     };
 
+    const isRunning = samplingRunning || triggerRunning || triggerSingleWaiting;
+
     return (
         <Group heading="Mode">
             {capabilities.ppkSetPowerMode && (
-                <ButtonGroup className="power-mode w-100">
+                <ButtonGroup
+                    className={`power-mode w-100 ${
+                        isRunning ? 'disabled' : ''
+                    }`}
+                >
                     <Button
                         title="Measure current on device under test powered by PPK2"
                         variant={isSmuMode ? 'set' : 'unset'}
-                        disabled={isSmuMode}
+                        disabled={isSmuMode || isRunning}
                         onClick={togglePowerMode}
                     >
                         Source meter
@@ -74,7 +87,7 @@ export default () => {
                     <Button
                         title="Measure current on device under test powered externally"
                         variant={isSmuMode ? 'unset' : 'set'}
-                        disabled={!isSmuMode}
+                        disabled={!isSmuMode || isRunning}
                         onClick={togglePowerMode}
                     >
                         Ampere meter
