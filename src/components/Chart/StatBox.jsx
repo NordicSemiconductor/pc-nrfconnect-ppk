@@ -37,6 +37,7 @@
 import React from 'react';
 import { string, instanceOf, number, node } from 'prop-types';
 import { unit, Unit } from 'mathjs';
+import { formatDurationHTML } from '../../utils/duration';
 
 import './statbox.scss';
 
@@ -64,14 +65,6 @@ Value.propTypes = {
     u: instanceOf(Unit).isRequired,
 };
 
-const time = delta => {
-    let ret = unit(delta, 'us');
-    if (delta > 60 * 1e6) {
-        ret = ret.to('min');
-    }
-    return ret;
-};
-
 const StatBox = ({
     average = null,
     max = null,
@@ -94,7 +87,9 @@ const StatBox = ({
                 <>
                     <Value label="average" u={unit(average, 'uA')} />
                     <Value label="max" u={unit(max || 0, 'uA')} />
-                    <Value label="time" u={time(delta)} />
+                    <div className="value-box">
+                        {formatDurationHTML(delta)}time
+                    </div>
                     <Value
                         label="charge"
                         u={unit(average * ((delta || 1) / 1e6), 'uC')}
