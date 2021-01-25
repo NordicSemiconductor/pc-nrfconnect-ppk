@@ -38,11 +38,9 @@ import React from 'react';
 import { render, screen } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 
-jest.mock('nrfconnect/core', () => {
-    return {
-        getAppDataDir: () => '',
-    };
-});
+jest.mock('pc-nrfconnect-shared', () => ({
+    getAppDataDir: () => '',
+}));
 
 const initialState = {
     app: {

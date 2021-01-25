@@ -35,7 +35,7 @@
  */
 
 import Store from 'electron-store';
-import { getAppDataDir } from 'nrfconnect/core';
+import { getAppDataDir } from 'pc-nrfconnect-shared';
 
 const persistentStore = new Store({ name: 'pc-nrfconnect-ppk' });
 

@@ -37,7 +37,7 @@
 import fs from 'fs';
 import { createDeflateRaw } from 'zlib';
 import { serialize } from 'bson';
-import { logger } from 'nrfconnect/core';
+import { logger } from 'pc-nrfconnect-shared';
 
 const CURRENT_VERSION = 1;
 

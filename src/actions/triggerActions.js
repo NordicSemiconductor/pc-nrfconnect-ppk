@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from 'nrfconnect/core';
+import { logger } from 'pc-nrfconnect-shared';
 import { indexToTimestamp } from '../globals';
 import {
     chartWindowAction,

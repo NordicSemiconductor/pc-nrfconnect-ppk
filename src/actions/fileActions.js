@@ -37,7 +37,7 @@
 import fs from 'fs';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
-import { logger } from 'nrfconnect/core';
+import { logger } from 'pc-nrfconnect-shared';
 import {
     setCurrentPane,
     currentPane as currentPaneSelector,

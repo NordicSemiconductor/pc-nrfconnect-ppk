@@ -36,7 +36,7 @@
 
 /* eslint-disable no-bitwise */
 
-import { logger } from 'nrfconnect/core';
+import { logger } from 'pc-nrfconnect-shared';
 import isDev from 'electron-is-dev';
 import Device from '../device';
 import persistentStore from '../utils/persistentStore';
