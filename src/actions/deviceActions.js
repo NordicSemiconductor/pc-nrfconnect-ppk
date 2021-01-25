@@ -38,7 +38,6 @@
 
 import { logger } from 'nrfconnect/core';
 import isDev from 'electron-is-dev';
-import { currentPane } from '../from_pc-nrfconnect-shared';
 import Device from '../device';
 import persistentStore from '../utils/persistentStore';
 
@@ -91,7 +90,7 @@ const zeroCap = isDev ? n => n : n => Math.max(0, n);
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
     let d = 300; // buffer length in seconds for real-time
-    if (isRealTimePane(currentPane(getState()))) {
+    if (isRealTimePane(getState())) {
         // in real-time
         options.samplingTime = device.adcSamplingTimeUs;
         options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
@@ -358,7 +357,7 @@ export function open(deviceInfo) {
             dispatch(rttStartAction());
             dispatch(setFileLoadedAction(false));
 
-            if (isRealTimePane(currentPane(getState()))) {
+            if (isRealTimePane(getState())) {
                 initializeChartForRealTime();
             }
 

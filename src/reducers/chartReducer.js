@@ -34,7 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { currentPane } from '../from_pc-nrfconnect-shared';
 import { options } from '../globals';
 import { isRealTimePane } from '../utils/panes';
 
@@ -155,9 +154,7 @@ export const chartWindowAction = (
     yMax
 ) => (dispatch, getState) => {
     const { sampleFreq, maxSampleFreq } = getState().app.dataLogger;
-    const sf = isRealTimePane(currentPane(getState()))
-        ? maxSampleFreq
-        : sampleFreq;
+    const sf = isRealTimePane(getState()) ? maxSampleFreq : sampleFreq;
     const duration =
         windowDuration === null
             ? null

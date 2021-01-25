@@ -55,7 +55,7 @@ import { chartState } from '../../reducers/chartReducer';
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { yAxisWidthPx, rightMarginPx } from './chart.scss';
 import colors from '../colors.scss';
-import { isRealTimePane } from '../../utils/panes';
+import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
 import { indexToTimestamp } from '../../globals';
 
 const valueRange = { min: 0, max: undefined };
@@ -95,6 +95,7 @@ const AmpereChart = ({
         timestampsVisible,
     } = useSelector(chartState);
     const { samplingRunning } = useSelector(appState);
+    const isRealTimePane = useSelector(isRealTimePaneSelector);
     const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
     const updateTriggerLevel = level => dispatch(triggerLevelSetAction(level));
 
@@ -224,7 +225,7 @@ const AmpereChart = ({
         updateTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible: isRealTimePane() && !externalTrigger,
+        triggerHandleVisible: isRealTimePane && !externalTrigger,
         triggerOrigin,
         windowDuration,
     };

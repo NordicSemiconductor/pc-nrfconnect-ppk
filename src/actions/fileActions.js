@@ -58,9 +58,7 @@ const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
 export const save = () => async (_, getState) => {
-    const timestamp = getTimestamp();
-    const currentPane = currentPaneSelector(getState());
-    const saveFileName = `ppk-${timestamp}-${paneName(currentPane)}.ppk`;
+    const saveFileName = `ppk-${getTimestamp()}-${paneName(getState())}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), saveFileName),
     });
@@ -74,7 +72,7 @@ export const save = () => async (_, getState) => {
         data,
         bits,
         metadata: {
-            options: { ...opts, currentPane },
+            options: { ...opts, currentPane: currentPaneSelector(getState()) },
             chartState: getState().app.chart,
             triggerState: getState().app.trigger,
         },

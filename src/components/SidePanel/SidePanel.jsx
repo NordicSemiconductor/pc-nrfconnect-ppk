@@ -80,8 +80,8 @@ export default () => {
     const deviceOpen = useSelector(deviceOpenSelector);
     const { fileLoaded } = useSelector(appState);
 
-    const realTimePane = isRealTimePane();
-    const dataLoggerPane = isDataLoggerPane();
+    const realTimePane = useSelector(isRealTimePane);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
 
     if (fileLoaded) {
         return (

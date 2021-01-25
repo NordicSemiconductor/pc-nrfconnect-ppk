@@ -48,7 +48,7 @@ import {
     toggleYAxisLock,
     chartState,
 } from '../../reducers/chartReducer';
-import { isDataLoggerPane } from '../../utils/panes';
+import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 
 import './charttop.scss';
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
@@ -78,6 +78,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
     const dispatch = useDispatch();
     const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
+    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const live = windowBegin === 0 && windowEnd === 0;
 
     const timeWindowLabels = [
@@ -115,7 +116,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                 barColor={gray700}
                 barColorToggled={nordicBlue}
             />
-            {isDataLoggerPane() && (
+            {isDataLoggerPane && (
                 <ButtonGroup>
                     {timeWindowLabels.map(label => (
                         <TimeWindowButton
@@ -126,7 +127,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     ))}
                 </ButtonGroup>
             )}
-            {isDataLoggerPane() && (
+            {isDataLoggerPane && (
                 <Toggle
                     label="LIVE VIEW"
                     onToggle={() =>
