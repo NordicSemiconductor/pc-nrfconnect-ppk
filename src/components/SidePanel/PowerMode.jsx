@@ -81,7 +81,7 @@ export default () => {
         !isSmuMode;
 
     return (
-        <Group heading="Mode">
+        <Group heading={`${capabilities.ppkSetPowerMode ? 'Mode' : ''}`}>
             {capabilities.ppkSetPowerMode && (
                 <ButtonGroup
                     className={`power-mode w-100 ${
