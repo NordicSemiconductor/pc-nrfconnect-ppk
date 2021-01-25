@@ -38,6 +38,7 @@ import { logger } from 'nrfconnect/core';
 import fs from 'fs';
 import { options, indexToTimestamp } from '../globals';
 import { hideExportDialog } from '../reducers/appReducer';
+import { averagedBitState } from '../utils/bitConversion';
 
 // create and array of [index, length] to split longer range
 const indexer = (i, j, d) => {
@@ -64,21 +65,33 @@ export const formatDataForExport = (
     selection
 ) => {
     let content = '';
+    const dc = Array(8).fill(0);
     for (let n = start; n <= start + length; n += 1) {
         const k = (n + bufferData.length) % bufferData.length;
         const value = bufferData[k];
         if (!Number.isNaN(value)) {
-            // TODO: 16-bit binary for channel data
-            const b = bitsData ? bitsData[k].toString(2).padStart(8, '0') : '';
-            content += selectivePrint(
-                [
-                    indexToTimestamp(n) / 1000,
-                    value.toFixed(3),
-                    b,
-                    b.split('').join(','),
-                ],
-                selection
-            );
+            if (bitsData) {
+                const bitstring = dc.map(
+                    (_, i) =>
+                        ['-', '0', '1', 'X'][
+                            averagedBitState(bitsData[k], 7 - i)
+                        ]
+                );
+                content += selectivePrint(
+                    [
+                        indexToTimestamp(n) / 1000,
+                        value.toFixed(3),
+                        bitstring.join(''),
+                        bitstring.join(','),
+                    ],
+                    selection
+                );
+            } else {
+                content += selectivePrint(
+                    [indexToTimestamp(n) / 1000, value.toFixed(3), '', ''],
+                    selection
+                );
+            }
         }
     }
     return content;
