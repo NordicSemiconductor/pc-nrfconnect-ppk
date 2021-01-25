@@ -73,7 +73,9 @@ export const formatDataForExport = (
             if (bitsData) {
                 const bitstring = dc.map(
                     (_, i) =>
-                        ['-', '0', '1', 'X'][averagedBitState(bitsData[k], i)]
+                        ['-', '0', '1', 'X'][
+                            averagedBitState(bitsData[k], 7 - i)
+                        ]
                 );
                 content += selectivePrint(
                     [

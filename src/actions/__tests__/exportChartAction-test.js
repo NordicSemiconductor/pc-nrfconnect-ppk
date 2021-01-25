@@ -37,7 +37,7 @@
 import { formatDataForExport } from '../exportChartAction';
 
 const buffer = [5, 6, 7, 8, 9, 10];
-const bitsData = [255, 255, 255, 0, 69, 255];
+const bitsData = [0xaaaa, 0xaaaa, 0xaaaa, 0x5555, 0x6566, 0xaaaa];
 const startingPoint = 2;
 const numberOfDataPoints = 2;
 
