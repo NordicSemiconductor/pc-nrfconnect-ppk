@@ -179,10 +179,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             ? digitalChannelsToDisplay
             : [];
 
-    const end =
-        windowEnd || options.timestamp
-            ? options.timestamp - options.samplingTime
-            : 0;
+    const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
 
     const cursorData = {
