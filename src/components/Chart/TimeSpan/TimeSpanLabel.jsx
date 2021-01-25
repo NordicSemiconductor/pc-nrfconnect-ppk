@@ -35,17 +35,8 @@
  */
 
 import React from 'react';
-import { unit } from 'mathjs';
 import { number } from 'prop-types';
-
-const formatTime = duration => {
-    let time = unit(duration, 'us');
-    if (duration > 60 * 1e6) {
-        time = time.to('min');
-    }
-    const v = time.format({ notation: 'fixed', precision: 2 });
-    return v.split(' ');
-};
+import { formatDuration } from '../../../utils/duration';
 
 const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {
     const [nBegin, nEnd] = begin > end ? [end, begin] : [begin, end];
@@ -55,8 +46,7 @@ const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {
             ? (100 * (nEnd - nBegin)) / totalDuration
             : 100;
 
-    const [valStr, unitStr] = formatTime(duration);
-    const label = `\u0394${valStr}${unitStr.replace('u', '\u00B5')}`;
+    const label = `\u0394${formatDuration(duration)}`;
 
     return (
         <div
