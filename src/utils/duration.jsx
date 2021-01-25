@@ -54,15 +54,15 @@ export const formatDuration = microseconds => {
 
     const m = `${t.getUTCMinutes()}`;
     if (usec < 600000000)
-        return `${m}:${s.padStart(2, '0')}.${z.padStart(3, '0').substr(0, 1)}s`;
-    if (usec < 3600000000) return `${m}:${s.padStart(2, '0')}s`;
+        return `${m}:${s.padStart(2, '0')}.${z.padStart(3, '0').substr(0, 1)}m`;
+    if (usec < 3600000000) return `${m}:${s.padStart(2, '0')}m`;
 
     const h = `${t.getUTCHours()}`;
     if (usec < 86400000000)
-        return `${h}:${m.padStart(2, '0')}:${s.padStart(2, '0')}s`;
+        return `${h}:${m.padStart(2, '0')}:${s.padStart(2, '0')}h`;
 
     const d = Math.floor(usec / 86400000000);
-    return `${d}d ${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+    return `${d}d ${h.padStart(2, '0')}:${m.padStart(2, '0')}h`;
 };
 
 export const formatDurationHTML = microseconds => {
@@ -125,14 +125,14 @@ export const formatDurationHTML = microseconds => {
                 {`${m}:${s.padStart(2, '0')}.${z
                     .padStart(3, '0')
                     .substr(0, 1)}`}
-                <span className="unit">s</span>
+                <span className="unit">m</span>
             </div>
         );
     if (usec < 3600000000)
         return (
             <div className="value">
                 {`${m}:${s.padStart(2, '0')}`}
-                <span className="unit">s</span>
+                <span className="unit">m</span>
             </div>
         );
 
@@ -141,7 +141,7 @@ export const formatDurationHTML = microseconds => {
         return (
             <div className="value">
                 {`${h}:${m.padStart(2, '0')}:${s.padStart(2, '0')}`}
-                <span className="unit">s</span>
+                <span className="unit">h</span>
             </div>
         );
 
@@ -151,6 +151,7 @@ export const formatDurationHTML = microseconds => {
             {d}
             <span className="unit">d</span>
             {` ${h.padStart(2, '0')}:${m.padStart(2, '0')}`}
+            <span className="unit">h</span>
         </div>
     );
 };
