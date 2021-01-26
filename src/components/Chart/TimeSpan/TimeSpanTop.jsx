@@ -64,7 +64,7 @@ const TimeSpanTop = ({ width }) => {
 
     const showHandle = isRealTimePane && prePostTriggering && !isZoomed;
     const distanceFromOriginToTriggerHandle = showHandle
-        ? triggerWindowOffset + windowDuration / 2
+        ? Math.ceil(triggerWindowOffset + windowDuration / 2)
         : null;
 
     return (
