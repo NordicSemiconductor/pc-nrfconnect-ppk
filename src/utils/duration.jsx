@@ -36,122 +36,61 @@
 
 import React from 'react';
 
-export const formatDuration = microseconds => {
-    const usec = Math.floor(microseconds);
-    const u = `${usec % 1000}`;
+const toString = (value, unit, value2 = null, unit2 = null) =>
+    value2 === null ? `${value}${unit}` : `${value}${unit} ${value2}${unit2}`;
 
-    if (usec < 1000) return `${u}\u00B5s`;
+const toHTML = (value, unit, value2 = null, unit2 = null) => (
+    <div className="value">
+        {value}
+        <span className="unit">{unit}</span>
+        {value2 !== null && (
+            <>
+                {' '}
+                {value2}
+                <span className="unit">{unit2}</span>
+            </>
+        )}
+    </div>
+);
 
-    const t = new Date(Math.floor(usec / 1000));
-    const z = `${t.getUTCMilliseconds()}`;
-    if (usec < 10000) return `${z}.${u.padStart(3, '0')}ms`;
-    if (usec < 100000) return `${z}.${u.padStart(3, '0').substr(0, 2)}ms`;
-    if (usec < 1000000) return `${z}.${u.padStart(3, '0').substr(0, 1)}ms`;
-
-    const s = `${t.getUTCSeconds()}`;
-    if (usec < 10000000) return `${s}.${z.padStart(3, '0')}s`;
-    if (usec < 60000000) return `${s}.${z.padStart(3, '0').substr(0, 2)}s`;
-
-    const m = `${t.getUTCMinutes()}`;
-    if (usec < 600000000)
-        return `${m}:${s.padStart(2, '0')}.${z.padStart(3, '0').substr(0, 1)}m`;
-    if (usec < 3600000000) return `${m}:${s.padStart(2, '0')}m`;
-
-    const h = `${t.getUTCHours()}`;
-    if (usec < 86400000000)
-        return `${h}:${m.padStart(2, '0')}:${s.padStart(2, '0')}h`;
-
-    const d = Math.floor(usec / 86400000000);
-    return `${d}d ${h.padStart(2, '0')}:${m.padStart(2, '0')}h`;
-};
-
-export const formatDurationHTML = microseconds => {
+const format = (microseconds, formatter) => {
     if (Number.isNaN(microseconds)) return null;
     const usec = Math.floor(microseconds);
     const u = `${usec % 1000}`;
 
-    if (usec < 1000)
-        return (
-            <div className="value">
-                {u}
-                <span className="unit">{'\u00B5s'}</span>
-            </div>
-        );
+    if (usec < 1000) return formatter(u, '\u00B5s');
     const t = new Date(Math.floor(usec / 1000));
     const z = `${t.getUTCMilliseconds()}`;
 
-    if (usec < 10000)
-        return (
-            <div className="value">
-                {`${z}.${u.padStart(3, '0')}`}
-                <span className="unit">ms</span>
-            </div>
-        );
+    if (usec < 10000) return formatter(`${z}.${u.padStart(3, '0')}`, 'ms');
     if (usec < 100000)
-        return (
-            <div className="value">
-                {`${z}.${u.padStart(3, '0').substr(0, 2)}`}
-                <span className="unit">ms</span>
-            </div>
-        );
+        return formatter(`${z}.${u.padStart(3, '0').substr(0, 2)}`, 'ms');
     if (usec < 1000000)
-        return (
-            <div className="value">
-                {`${z}.${u.padStart(3, '0').substr(0, 1)}`}
-                <span className="unit">ms</span>
-            </div>
-        );
+        return formatter(`${z}.${u.padStart(3, '0').substr(0, 1)}`, 'ms');
 
     const s = `${t.getUTCSeconds()}`;
-    if (usec < 10000000)
-        return (
-            <div className="value">
-                {`${s}.${z.padStart(3, '0')}`}
-                <span className="unit">s</span>
-            </div>
-        );
+    if (usec < 10000000) return formatter(`${s}.${z.padStart(3, '0')}`, 's');
     if (usec < 60000000)
-        return (
-            <div className="value">
-                {`${s}.${z.padStart(3, '0').substr(0, 2)}`}
-                <span className="unit">s</span>
-            </div>
-        );
+        return formatter(`${s}.${z.padStart(3, '0').substr(0, 2)}`, 's');
 
     const m = `${t.getUTCMinutes()}`;
     if (usec < 600000000)
-        return (
-            <div className="value">
-                {`${m}:${s.padStart(2, '0')}.${z
-                    .padStart(3, '0')
-                    .substr(0, 1)}`}
-                <span className="unit">m</span>
-            </div>
+        return formatter(
+            `${m}:${s.padStart(2, '0')}.${z.padStart(3, '0').substr(0, 1)}`,
+            'm'
         );
-    if (usec < 3600000000)
-        return (
-            <div className="value">
-                {`${m}:${s.padStart(2, '0')}`}
-                <span className="unit">m</span>
-            </div>
-        );
+    if (usec < 3600000000) return formatter(`${m}:${s.padStart(2, '0')}`, 'm');
 
     const h = `${t.getUTCHours()}`;
     if (usec < 86400000000)
-        return (
-            <div className="value">
-                {`${h}:${m.padStart(2, '0')}:${s.padStart(2, '0')}`}
-                <span className="unit">h</span>
-            </div>
+        return formatter(
+            `${h}:${m.padStart(2, '0')}:${s.padStart(2, '0')}`,
+            'h'
         );
 
     const d = Math.floor(usec / 86400000000);
-    return (
-        <div className="value">
-            {d}
-            <span className="unit">d</span>
-            {` ${h.padStart(2, '0')}:${m.padStart(2, '0')}`}
-            <span className="unit">h</span>
-        </div>
-    );
+    return formatter(d, 'd', `${h}:${m.padStart(2, '0')}`, 'h');
 };
+
+export const formatDuration = microseconds => format(microseconds, toString);
+export const formatDurationHTML = microseconds => format(microseconds, toHTML);
