@@ -103,6 +103,7 @@ export default (
     indexEnd,
     contentSelection,
     setProgress,
+    setExporting,
     cancel
 ) => dispatch => {
     if (!filename) {
@@ -147,10 +148,13 @@ export default (
             })
         )
         .reduce((prev, task) => prev.then(task), Promise.resolve())
-        .catch(() => logger.info('Exported cancelled'))
+        .catch(() => logger.info('Export cancelled'))
         .then(() => {
             dispatch(hideExportDialog());
             logger.info(`Exported CSV to: ${filename}`);
         })
-        .finally(() => fs.closeSync(fd));
+        .finally(() => {
+            fs.closeSync(fd);
+            setExporting(false);
+        });
 };
