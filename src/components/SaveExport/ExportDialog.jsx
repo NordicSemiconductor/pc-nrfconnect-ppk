@@ -127,6 +127,7 @@ export default () => {
     ];
 
     const cancel = useRef(false);
+    const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
     useEffect(() => {
         setProgress(0);
@@ -167,6 +168,7 @@ export default () => {
         });
         if (!fn) return;
         setLastSaveDir(dirname(fn));
+        setExporting(true);
         dispatch(
             exportChart(
                 fn,
@@ -174,6 +176,7 @@ export default () => {
                 indexEnd,
                 contentSelection,
                 setProgress,
+                setExporting,
                 cancel
             )
         );
@@ -221,7 +224,11 @@ export default () => {
                 <ProgressBar now={progress} animated className="mt-4" />
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="primary" onClick={saveFile}>
+                <Button
+                    variant="primary"
+                    onClick={saveFile}
+                    disabled={exporting}
+                >
                     Save
                 </Button>
                 <Button variant="secondary" onClick={close}>
