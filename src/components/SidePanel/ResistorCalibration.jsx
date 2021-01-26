@@ -111,20 +111,23 @@ const ResistorCalibration = () => {
                 value={userResHi}
                 range={{ min: 1, max: 3, decimals: 3 }}
                 actionOnChange={updateHighResistorAction}
+                chars={7}
             />
             <ResistorSlider
                 id="slider-res-mid"
                 label="Mid"
                 value={userResMid}
-                range={{ min: 25, max: 35, decimals: 1 }}
+                range={{ min: 25, max: 35, decimals: 3 }}
                 actionOnChange={updateMidResistorAction}
+                chars={7}
             />
             <ResistorSlider
                 id="slider-res-low"
                 label="Low"
                 value={userResLo}
-                range={{ min: 450, max: 550 }}
+                range={{ min: 450, max: 550, decimals: 3 }}
                 actionOnChange={updateLowResistorAction}
+                chars={7}
             />
             <ButtonGroup className="mt-2 w-100">
                 <Button

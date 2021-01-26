@@ -71,8 +71,17 @@ export default () => {
 
     const isRunning = samplingRunning || triggerRunning || triggerSingleWaiting;
 
+    const powerToggleVisible =
+        capabilities.ppkDeviceRunning &&
+        (isSmuMode || !capabilities.ppkSetPowerMode);
+
+    const powerCycleButtonVisible =
+        capabilities.ppkDeviceRunning &&
+        capabilities.ppkSetPowerMode &&
+        !isSmuMode;
+
     return (
-        <Group heading="Mode">
+        <Group heading={`${capabilities.ppkSetPowerMode ? 'Mode' : ''}`}>
             {capabilities.ppkSetPowerMode && (
                 <ButtonGroup
                     className={`power-mode w-100 ${
@@ -100,7 +109,7 @@ export default () => {
                 </ButtonGroup>
             )}
             <VoltageRegulator />
-            {capabilities.ppkDeviceRunning && isSmuMode && (
+            {powerToggleVisible && (
                 <Toggle
                     title="Turn power on/off for device under test"
                     onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
@@ -111,7 +120,7 @@ export default () => {
                     variant="secondary"
                 />
             )}
-            {capabilities.ppkDeviceRunning && !isSmuMode && (
+            {powerCycleButtonVisible && (
                 <Button
                     variant="set"
                     className="w-100 power-cycle-btn"
