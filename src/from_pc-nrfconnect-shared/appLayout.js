@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,13 +34,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import Store from 'electron-store';
-import { getAppDataDir } from 'pc-nrfconnect-shared';
+const SET_CURRENT_PANE = 'SET_CURRENT_PANE';
 
-const persistentStore = new Store({ name: 'pc-nrfconnect-ppk' });
+export const setCurrentPane = currentPane => ({
+    type: SET_CURRENT_PANE,
+    currentPane,
+});
 
-export default persistentStore;
-
-export const lastSaveDir = () =>
-    persistentStore.get('lastSaveDir', getAppDataDir());
-export const setLastSaveDir = dir => persistentStore.set('lastSaveDir', dir);
+export const currentPane = state => state.appLayout.currentPane;

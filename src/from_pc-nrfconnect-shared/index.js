@@ -35,11 +35,13 @@
  */
 
 // The following components below can be removed if this app can rely on a
-// launcher being used that provides shared v4.16.0
-import './shared.scss'; // eslint-disable-line import/first
+// launcher being used that provides shared v4.17.0
+import './shared.scss';
 
 export { default as Slider } from './Slider/Slider';
 export { default as Toggle } from './Toggle/Toggle';
 
 export { default as InlineInput } from './InlineInput/InlineInput';
 export { default as NumberInlineInput } from './InlineInput/NumberInlineInput';
+
+export { currentPane, setCurrentPane } from './appLayout';

@@ -35,9 +35,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { number, string, func, bool } from 'prop-types';
+import { number, string, func, bool, shape } from 'prop-types';
 import Form from 'react-bootstrap/Form';
-import rangeShape from 'pc-nrfconnect-shared/src/Slider/rangeShape';
 import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
 
 const NumberWithUnit = ({
@@ -100,7 +99,11 @@ NumberWithUnit.propTypes = {
     value: number.isRequired,
     unit: string.isRequired,
     multiplier: number.isRequired,
-    range: rangeShape.isRequired,
+    range: shape({
+        min: number.isRequired,
+        max: number.isRequired,
+        decimals: number,
+    }).isRequired,
     onChange: func.isRequired,
     onChangeComplete: func.isRequired,
     disabled: bool,

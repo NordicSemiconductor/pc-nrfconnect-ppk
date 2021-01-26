@@ -35,7 +35,7 @@
  */
 
 import { fork } from 'child_process';
-import { getAppDir, logger } from 'nrfconnect/core';
+import { getAppDir, logger } from 'pc-nrfconnect-shared';
 import path from 'path';
 
 import Device, { convertFloatToByteBuffer } from './abstractDevice';

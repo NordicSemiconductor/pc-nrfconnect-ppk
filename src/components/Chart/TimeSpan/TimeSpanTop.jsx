@@ -43,7 +43,7 @@ import { appState } from '../../../reducers/appReducer';
 
 import WindowOffsetSlider from './WindowOffsetSlider';
 import TimeSpanLabel from './TimeSpanLabel';
-import { isRealTimePane } from '../../../utils/panes';
+import { isRealTimePane as isRealTimePaneSelector } from '../../../utils/panes';
 
 import './timespan.scss';
 
@@ -52,6 +52,7 @@ const TimeSpanTop = ({ width }) => {
 
     const { windowDuration } = useSelector(chartState);
     const { triggerWindowOffset, triggerLength } = useSelector(triggerState);
+    const isRealTimePane = useSelector(isRealTimePaneSelector);
 
     const {
         capabilities: { prePostTriggering },
@@ -61,7 +62,7 @@ const TimeSpanTop = ({ width }) => {
         setIsZoomed(triggerLength * 1000 > windowDuration);
     }, [windowDuration, triggerLength]);
 
-    const showHandle = isRealTimePane() && prePostTriggering && !isZoomed;
+    const showHandle = isRealTimePane && prePostTriggering && !isZoomed;
     const distanceFromOriginToTriggerHandle = showHandle
         ? triggerWindowOffset + windowDuration / 2
         : null;

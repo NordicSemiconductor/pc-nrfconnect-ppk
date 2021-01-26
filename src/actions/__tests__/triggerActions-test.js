@@ -39,14 +39,6 @@ import thunk from 'redux-thunk';
 import { processTriggerSample, calculateWindowSize } from '../triggerActions';
 import { indexToTimestamp } from '../../globals';
 
-jest.mock('nrfconnect/core', () => {
-    return {
-        logger: {
-            info: jest.fn(),
-        },
-    };
-});
-
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 

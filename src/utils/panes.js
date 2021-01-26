@@ -34,40 +34,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// This utility cannot be used within other hooks (e.g. useEffect and useCallback), nor within loops,
-// conditiions or nested functions. If you want to check  the current pane inside useEffect you should
-// create a variable first and check that:
-//
-// const isScope = getScopePane();
-// useEffect(() => {
-//   if (isScope) ...
-// }, [isScope])
-
-import { useSelector } from 'react-redux';
-import { currentPane as currentPaneSelector } from '../reducers/appReducer';
+import { currentPane } from '../from_pc-nrfconnect-shared';
 
 export const REAL_TIME = 1;
 export const DATA_LOGGER = 0;
 
-export const isRealTimePane = (currentPane = null) =>
-    getCurrentPane(REAL_TIME, currentPane);
+export const isRealTimePane = state => currentPane(state) === REAL_TIME;
+export const isDataLoggerPane = state => currentPane(state) === DATA_LOGGER;
 
-export const isDataLoggerPane = (currentPane = null) =>
-    getCurrentPane(DATA_LOGGER, currentPane);
-
-export const paneName = currentPane =>
-    currentPane === REAL_TIME ? 'real-time' : 'data-logger';
-
-const getCurrentPane = (pane, currentPane = null) => {
-    if (currentPane !== null) {
-        return currentPane === pane;
-    }
-    try {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        return useSelector(currentPaneSelector) === pane;
-    } catch (err) {
-        const errorMessage = `The current pane (number) should be passed in as argument when used outside a React component.\n${err}`;
-        console.error(errorMessage);
-        return -1;
-    }
-};
+export const paneName = state =>
+    isRealTimePane(state) ? 'real-time' : 'data-logger';

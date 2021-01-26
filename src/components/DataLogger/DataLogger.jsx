@@ -35,7 +35,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Chart from '../Chart/Chart';
 
 import { samplingStop, setupOptions } from '../../actions/deviceActions';
@@ -43,7 +43,7 @@ import { isDataLoggerPane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
-    const active = isDataLoggerPane();
+    const active = useSelector(isDataLoggerPane);
     useEffect(() => {
         dispatch(setupOptions());
         return active ? () => dispatch(samplingStop()) : undefined;

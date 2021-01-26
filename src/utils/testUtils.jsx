@@ -34,14 +34,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import { render as rtlRender } from '@testing-library/react';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 import reducer from '../reducers';
-import ResizeObserver from '../../__mocks__/resizeObserver';
+
+window.ResizeObserver = function ResizeObserverStub() {
+    this.observe = () => {};
+    this.disconnect = () => {};
+};
 
 function render(
     ui,
@@ -51,9 +53,8 @@ function render(
         ...renderOptions
     } = {}
 ) {
-    // eslint-disable-next-line react/prop-types
-    function Wrapper({ children }) {
-        return <Provider store={store}>{children}</Provider>;
+    function Wrapper(props) {
+        return <Provider store={store} {...props} />;
     }
     return rtlRender(ui, { wrapper: Wrapper, ...renderOptions });
 }
