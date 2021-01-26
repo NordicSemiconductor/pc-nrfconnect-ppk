@@ -37,7 +37,7 @@
 /* eslint-disable no-bitwise */
 
 import nRFjprogjs from 'pc-nrfjprog-js';
-import { logger } from 'nrfconnect/core';
+import { logger } from 'pc-nrfconnect-shared';
 
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
 

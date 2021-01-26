@@ -154,8 +154,7 @@ export const chartWindowAction = (
     yMax
 ) => (dispatch, getState) => {
     const { sampleFreq, maxSampleFreq } = getState().app.dataLogger;
-    const { currentPane } = getState().appLayout;
-    const sf = isRealTimePane(currentPane) ? maxSampleFreq : sampleFreq;
+    const sf = isRealTimePane(getState()) ? maxSampleFreq : sampleFreq;
     const duration =
         windowDuration === null
             ? null

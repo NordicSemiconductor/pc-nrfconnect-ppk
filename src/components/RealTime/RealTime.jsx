@@ -35,7 +35,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Chart from '../Chart/Chart';
 
 import { setupOptions, triggerStop } from '../../actions/deviceActions';
@@ -43,7 +43,7 @@ import { isRealTimePane } from '../../utils/panes';
 
 export default () => {
     const dispatch = useDispatch();
-    const active = isRealTimePane();
+    const active = useSelector(isRealTimePane);
     useEffect(() => {
         dispatch(setupOptions());
         return active ? () => dispatch(triggerStop()) : undefined;

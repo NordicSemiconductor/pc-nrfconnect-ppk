@@ -37,11 +37,15 @@
 import fs from 'fs';
 import { remote } from 'electron';
 import { join, dirname } from 'path';
-import { logger } from 'nrfconnect/core';
+import { logger } from 'pc-nrfconnect-shared';
+import {
+    setCurrentPane,
+    currentPane as currentPaneSelector,
+} from '../from_pc-nrfconnect-shared';
 import { options, updateTitle } from '../globals';
 import { setChartState } from '../reducers/chartReducer';
 import { setTriggerState } from '../reducers/triggerReducer';
-import { setCurrentPane, setFileLoadedAction } from '../reducers/appReducer';
+import { setFileLoadedAction } from '../reducers/appReducer';
 import saveData from '../utils/saveFileHandler';
 import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
@@ -54,9 +58,7 @@ const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
 export const save = () => async (_, getState) => {
-    const timestamp = getTimestamp();
-    const { currentPane } = getState().appLayout;
-    const saveFileName = `ppk-${timestamp}-${paneName(currentPane)}.ppk`;
+    const saveFileName = `ppk-${getTimestamp()}-${paneName(getState())}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(lastSaveDir(), saveFileName),
     });
@@ -70,7 +72,7 @@ export const save = () => async (_, getState) => {
         data,
         bits,
         metadata: {
-            options: { ...opts, currentPane },
+            options: { ...opts, currentPane: currentPaneSelector(getState()) },
             chartState: getState().app.chart,
             triggerState: getState().app.trigger,
         },

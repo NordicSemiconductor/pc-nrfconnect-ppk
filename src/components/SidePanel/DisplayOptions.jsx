@@ -59,7 +59,7 @@ export default () => {
         timestampsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
-    const isDataLogger = isDataLoggerPane();
+    const isDataLogger = useSelector(isDataLoggerPane);
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
