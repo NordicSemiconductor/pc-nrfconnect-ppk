@@ -4,13 +4,13 @@
 
 -   Split the primary view in two, a **data logger** and a **real-time** view.
     With the data logger view the user can examine the power continuously over a
-    period of time. In the real-time view, which has similar functionality to an oscilloscope, the user can specify a trigger level, and when the consumed power reaches this threshold, the power consumption signature can be viewed in more detail.
+    period of time. In the real-time view, which has similar functionality to an oscilloscope, the user can specify a trigger level, and when the consumed power reaches this threshold, the power consumption signature in the surrounding period of time can be inspected in detail.
 -   **Trigger**: Previously only available when using the
     [older, first version of the Power Profiler Kit hardware](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit)
     now triggers can also be set when using the new
     [Power Profiler Kit II (PPK 2) hardware](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit-2).
 -   Only with the PPK2: Set a **pre- or post trigger** by moving the slider above the
-    graph, to define how much time before and after the trigger you want to see.
+    graph, to shift the charted area, thus deciding how much time before and after the trigger that is relevant.
 -   Average sampling with a lower resolution: When interested in **examining
     power over a longer time span** you can lower the samples per second.
     Sampling is still done at the full resolution, but they are automatically
