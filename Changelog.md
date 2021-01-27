@@ -8,7 +8,7 @@
 -   **Trigger**: Previously only available when using the
     [older, first version of the Power Profiler Kit hardware](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit)
     now triggers can also be set when using the new
-    [Power Profiler Kit II (PPK 2) hardware](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit-2).
+    [Power Profiler Kit II (PPK2) hardware](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit-2).
 -   Only with the PPK2: Set a **pre- or post trigger** by moving the slider above the
     graph, to shift the charted area, thus deciding how much time before and after the trigger that is relevant.
 -   Average sampling with a lower resolution: When interested in **examining
