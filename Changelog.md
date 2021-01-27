@@ -2,16 +2,15 @@
 
 ### Added
 
--   For the different needs, created a **data logger** and a **real-time** tab.
-    With the data logger view you can examine the power continuously over a
-    short or long time. With the real-time view, you can view the power around a
-    defined trigger.
--   **Trigger**: Previously only available when using the old
+-   Split the primary view in two, a **data logger** and a **real-time** view.
+    With the data logger view the user can examine the power continuously over a
+    period of time. In the real-time view, which has similar functionality to an oscilloscope, the user can specify a trigger level, and when the consumed power reaches this threshold, the power consumption signature in the surrounding period of time can be inspected in detail.
+-   **Trigger**: Previously only available when using the
     [older, first version of the Power Profiler Kit hardware](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit)
     now triggers can also be set when using the new
     [Power Profiler Kit II (PPK 2) hardware](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit-2).
--   Only with the PPK2: Set a **pre trigger** by moving the slider above the
-    graph, to define how much time before and after the trigger you want to see.
+-   Only with the PPK2: Set a **pre- or post trigger** by moving the slider above the
+    graph, to shift the charted area, thus deciding how much time before and after the trigger that is relevant.
 -   Average sampling with a lower resolution: When interested in **examining
     power over a longer time span** you can lower the samples per second.
     Sampling is still done at the full resolution, but they are automatically
@@ -20,7 +19,7 @@
 -   Besides the existing CSV export: **Save** the current data in a format to
     **Load** it again later within the app, enabling sharing data and examining
     it at a later time.
--   Create easy **screenshots** of the current graph.
+-   Easily create **screenshots** of the current graph.
 
 ### Updates
 
@@ -28,6 +27,7 @@
     they were previously only shown for a time range of up to 3 seconds, now
     they are shown for up to 30 seconds).
 -   **Enhanced performance** to make the UI more responsive.
+-   Several minor UI changes to improve the user experience
 
 ## Version 3.0.2
 
