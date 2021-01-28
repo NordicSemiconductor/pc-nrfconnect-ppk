@@ -122,11 +122,12 @@ export default () => {
             )}
             {powerCycleButtonVisible && (
                 <Button
+                    title="Turn power off and on again for device under test"
                     variant="set"
-                    className="w-100 power-cycle-btn"
+                    className="w-100 secondary-btn"
                     onClick={powerCycle}
                 >
-                    Power cycle DUT
+                    Power cycle
                 </Button>
             )}
         </Group>

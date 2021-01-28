@@ -97,12 +97,13 @@
         margin-bottom: 16px;
     }
 
-    .power-cycle-btn {
+    .secondary-btn {
         height: 28px;
         font-size: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0;
+        padding-top: 1px;
+        padding-bottom: 0;
     }
 }
