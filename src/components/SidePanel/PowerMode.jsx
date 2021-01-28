@@ -123,7 +123,7 @@ export default () => {
             {powerCycleButtonVisible && (
                 <Button
                     variant="set"
-                    className="w-100 power-cycle-btn"
+                    className="w-100 secondary-btn"
                     onClick={powerCycle}
                 >
                     Power cycle DUT

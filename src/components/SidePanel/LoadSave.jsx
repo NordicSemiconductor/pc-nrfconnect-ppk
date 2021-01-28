@@ -50,7 +50,7 @@ export const Load = () => {
 
     return (
         <Button
-            className="w-100"
+            className="w-100 secondary-btn"
             variant="set"
             onClick={() => dispatch(load())}
         >
@@ -70,7 +70,7 @@ export const Save = () => {
         <>
             <div className="save-load-btn-group">
                 <Button
-                    className="w-100"
+                    className="w-100 secondary-btn"
                     title={
                         disabled ? 'Stop sampling to save or export' : undefined
                     }
@@ -81,7 +81,7 @@ export const Save = () => {
                     Save / Export
                 </Button>
                 <Button
-                    className="w-100 screenshot-btn"
+                    className="w-100 screenshot-btn secondary-btn"
                     variant="set"
                     disabled={disabled}
                     onClick={() => dispatch(screenshot())}
