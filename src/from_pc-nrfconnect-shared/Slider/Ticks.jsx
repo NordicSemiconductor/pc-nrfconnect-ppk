@@ -35,10 +35,10 @@
  */
 
 import React from 'react';
-import { exact, number } from 'prop-types';
 import lodashRange from 'lodash.range';
-import classNames from '../utils/classNames';
+import { exact, number } from 'prop-types';
 
+import classNames from '../utils/classNames';
 import rangeShape from './rangeShape';
 
 import './ticks.scss';

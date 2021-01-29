@@ -37,8 +37,8 @@
 import React from 'react';
 import { bool, func, number } from 'prop-types';
 
-import InlineInput from './InlineInput';
 import rangeShape from '../Slider/rangeShape';
+import InlineInput from './InlineInput';
 
 import './number-inline-input.scss';
 

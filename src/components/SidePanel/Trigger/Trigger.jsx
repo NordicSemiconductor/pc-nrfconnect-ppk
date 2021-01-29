@@ -40,13 +40,11 @@ import { Group } from 'pc-nrfconnect-shared';
 
 import { appState } from '../../../reducers/appReducer';
 import { triggerState } from '../../../reducers/triggerReducer';
-
+import { CONTINUOUS } from './triggerConstants';
 import TriggerLength from './TriggerLength';
 import TriggerLevel from './TriggerLevel';
 import TriggerModeGroup from './TriggerModeGroup';
 import TriggerStart from './TriggerStart';
-
-import { CONTINUOUS } from './triggerConstants';
 
 import './trigger.scss';
 

@@ -39,33 +39,31 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
 import { setCurrentPane } from '../../from_pc-nrfconnect-shared';
-import PowerMode from './PowerMode';
-import DisplayOptions from './DisplayOptions';
-import StartStop from './StartStop';
-import Trigger from './Trigger/Trigger';
-import SwitchPoints from './SwitchPoints';
-import ResistorCalibration from './ResistorCalibration';
-import Gains from './Gains';
-import SpikeFilter from './SpikeFilter';
-
-import {
-    toggleAdvancedModeAction,
-    advancedMode as advancedModeSelector,
-    deviceOpen as deviceOpenSelector,
-    appState,
-} from '../../reducers/appReducer';
-
 import { options } from '../../globals';
+import {
+    advancedMode as advancedModeSelector,
+    appState,
+    deviceOpen as deviceOpenSelector,
+    toggleAdvancedModeAction,
+} from '../../reducers/appReducer';
+import {
+    DATA_LOGGER,
+    isDataLoggerPane,
+    isRealTimePane,
+} from '../../utils/panes';
+import persistentStore from '../../utils/persistentStore';
+import DisplayOptions from './DisplayOptions';
+import Gains from './Gains';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
-import {
-    isRealTimePane,
-    isDataLoggerPane,
-    DATA_LOGGER,
-} from '../../utils/panes';
+import PowerMode from './PowerMode';
+import ResistorCalibration from './ResistorCalibration';
+import SpikeFilter from './SpikeFilter';
+import StartStop from './StartStop';
+import SwitchPoints from './SwitchPoints';
+import Trigger from './Trigger/Trigger';
 
 import './sidepanel.scss';
-import persistentStore from '../../utils/persistentStore';
 
 export default () => {
     const dispatch = useDispatch();

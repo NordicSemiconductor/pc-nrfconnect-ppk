@@ -35,25 +35,25 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row';
+import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Slider, Toggle } from '../../from_pc-nrfconnect-shared';
 
 import {
     spikeFilteringToggle,
-    switchingPointsReset,
     switchingPointsDownSet,
+    switchingPointsReset,
     switchingPointsUpSet,
 } from '../../actions/deviceActions';
+import { Slider, Toggle } from '../../from_pc-nrfconnect-shared';
+import { appState } from '../../reducers/appReducer';
 import {
-    switchingPointUpMoved,
     switchingPointDownMovedAction,
     switchingPointsState,
+    switchingPointUpMoved,
 } from '../../reducers/switchingPointsReducer';
-import { appState } from '../../reducers/appReducer';
 
 const SwitchPoints = () => {
     const dispatch = useDispatch();

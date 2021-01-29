@@ -35,10 +35,9 @@
  */
 /* eslint no-plusplus: off */
 
+import { nbDigitalChannels, options, timestampToIndex } from '../../../globals';
 import bitDataAccumulator from './bitDataAccumulator';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
-
-import { options, timestampToIndex, nbDigitalChannels } from '../../../globals';
 
 const emptyArray = () =>
     [...Array(4000)].map(() => ({ x: undefined, y: undefined }));

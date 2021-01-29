@@ -34,8 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { bool, func, node, oneOf, string } from 'prop-types';
 import React, { useState } from 'react';
+import { bool, func, node, oneOf, string } from 'prop-types';
+
 import classNames from '../utils/classNames';
 
 import './toggle.scss';

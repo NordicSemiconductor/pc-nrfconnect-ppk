@@ -36,12 +36,11 @@
 
 /* eslint-disable no-bitwise */
 
-import nRFjprogjs from 'pc-nrfjprog-js';
 import { logger } from 'pc-nrfconnect-shared';
-
-import Device, { convertFloatToByteBuffer } from './abstractDevice';
+import nRFjprogjs from 'pc-nrfjprog-js';
 
 import PPKCmd from '../constants';
+import Device, { convertFloatToByteBuffer } from './abstractDevice';
 
 export const SAMPLES_PER_AVERAGE = 10;
 

@@ -36,27 +36,27 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
-import { useSelector, useDispatch } from 'react-redux';
-import { func, number, shape, arrayOf } from 'prop-types';
-import {
-    triggerState,
-    triggerLevelSetAction,
-} from '../../reducers/triggerReducer';
+import { arrayOf, func, number, shape } from 'prop-types';
 
-import dragSelectPlugin from './plugins/chart.dragSelect';
-import zoomPanPlugin from './plugins/chart.zoomPan';
-import crossHairPlugin from './plugins/chart.crossHair';
-import triggerLevelPlugin from './plugins/chart.triggerLevel';
-import triggerOriginPlugin from './plugins/chart.triggerOrigin';
-
+import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
+import { indexToTimestamp } from '../../globals';
 import { appState } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
-import { yAxisWidthPx, rightMarginPx } from './chart.scss';
-import colors from '../colors.scss';
+import {
+    triggerLevelSetAction,
+    triggerState,
+} from '../../reducers/triggerReducer';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
-import { indexToTimestamp } from '../../globals';
+import crossHairPlugin from './plugins/chart.crossHair';
+import dragSelectPlugin from './plugins/chart.dragSelect';
+import triggerLevelPlugin from './plugins/chart.triggerLevel';
+import triggerOriginPlugin from './plugins/chart.triggerOrigin';
+import zoomPanPlugin from './plugins/chart.zoomPan';
+
+import colors from '../colors.scss';
+import { rightMarginPx, yAxisWidthPx } from './chart.scss';
 
 const valueRange = { min: 0, max: undefined };
 const yAxisWidth = parseInt(yAxisWidthPx, 10);

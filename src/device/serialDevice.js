@@ -35,11 +35,11 @@
  */
 
 import { fork } from 'child_process';
-import { getAppDir, logger } from 'pc-nrfconnect-shared';
 import path from 'path';
+import { getAppDir, logger } from 'pc-nrfconnect-shared';
 
-import Device, { convertFloatToByteBuffer } from './abstractDevice';
 import PPKCmd from '../constants';
+import Device, { convertFloatToByteBuffer } from './abstractDevice';
 
 /* eslint-disable no-bitwise */
 

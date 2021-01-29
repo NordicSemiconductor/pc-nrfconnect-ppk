@@ -36,10 +36,10 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Chart from '../Chart/Chart';
 
 import { samplingStop, setupOptions } from '../../actions/deviceActions';
 import { isDataLoggerPane } from '../../utils/panes';
+import Chart from '../Chart/Chart';
 
 export default () => {
     const dispatch = useDispatch();

@@ -36,6 +36,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { bool, func, string } from 'prop-types';
+
 import classNames from '../utils/classNames';
 
 import './inline-input.scss';

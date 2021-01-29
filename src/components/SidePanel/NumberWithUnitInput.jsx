@@ -34,9 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useEffect } from 'react';
-import { number, string, func, bool, shape } from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import Form from 'react-bootstrap/Form';
+import { bool, func, number, shape, string } from 'prop-types';
+
 import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
 
 const NumberWithUnit = ({

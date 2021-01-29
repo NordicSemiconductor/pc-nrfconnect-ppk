@@ -35,7 +35,6 @@
  */
 /* eslint no-plusplus: off */
 
-import bitDataStorage from './bitDataStorage';
 import { nbDigitalChannels, options } from '../../../globals';
 import {
     always0,
@@ -43,6 +42,7 @@ import {
     averagedBitState,
     sometimes0And1,
 } from '../../../utils/bitConversion';
+import bitDataStorage from './bitDataStorage';
 
 export default () => ({
     bitDataStorage: bitDataStorage(),

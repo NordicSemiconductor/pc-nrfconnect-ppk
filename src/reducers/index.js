@@ -38,13 +38,13 @@ import { combineReducers } from 'redux';
 
 import app from './appReducer';
 import chart from './chartReducer';
-import trigger from './triggerReducer';
-import switchingPoints from './switchingPointsReducer';
-import voltageRegulator from './voltageRegulatorReducer';
-import resistorCalibration from './resistorCalibrationReducer';
-import gains from './gainsReducer';
-import spikeFilter from './spikeFilterReducer';
 import dataLogger from './dataLoggerReducer';
+import gains from './gainsReducer';
+import resistorCalibration from './resistorCalibrationReducer';
+import spikeFilter from './spikeFilterReducer';
+import switchingPoints from './switchingPointsReducer';
+import trigger from './triggerReducer';
+import voltageRegulator from './voltageRegulatorReducer';
 
 export default combineReducers({
     app,

@@ -36,14 +36,14 @@
 
 import React, { useRef, useState } from 'react';
 import { bool, func, number } from 'prop-types';
-import classNames from '../utils/classNames';
 
-import rangeShape from './rangeShape';
+import classNames from '../utils/classNames';
 import {
     constrainedToPercentage,
     fromPercentage,
     toPercentage,
 } from './percentage';
+import rangeShape from './rangeShape';
 
 import './handle.scss';
 

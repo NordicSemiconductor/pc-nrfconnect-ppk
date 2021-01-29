@@ -35,19 +35,18 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup } from 'pc-nrfconnect-shared';
-import { Slider } from '../../from_pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
+import { Slider } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import {
-    updateSpikeFilterAction,
-    spikeFilterState,
     resetSpikeFilterToDefaults,
+    spikeFilterState,
+    updateSpikeFilterAction,
 } from '../../reducers/spikeFilterReducer';
 
 const SpikeFilter = () => {

@@ -34,12 +34,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { number } from 'prop-types';
-import { useSelector, useDispatch } from 'react-redux';
-import { chartState, chartCursorAction } from '../../../reducers/chartReducer';
 
 import { options } from '../../../globals';
+import { chartCursorAction, chartState } from '../../../reducers/chartReducer';
 import TimeSpanLabel from './TimeSpanLabel';
 
 import './timespan.scss';

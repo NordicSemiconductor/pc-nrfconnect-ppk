@@ -35,27 +35,25 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
 import { Group } from 'pc-nrfconnect-shared';
-import { Slider } from '../../from_pc-nrfconnect-shared';
-
-import NumberWithUnit from './NumberWithUnitInput';
 
 import {
     samplingStart,
     samplingStop,
     setupOptions,
 } from '../../actions/deviceActions';
+import { Slider } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
-
 import {
-    updateSampleFreqLog10,
-    updateDurationSeconds,
     dataLoggerState,
+    updateDurationSeconds,
+    updateSampleFreqLog10,
 } from '../../reducers/dataLoggerReducer';
+import NumberWithUnit from './NumberWithUnitInput';
 
 const fmtOpts = { notation: 'fixed', precision: 1 };
 

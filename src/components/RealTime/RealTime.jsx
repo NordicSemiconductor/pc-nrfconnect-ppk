@@ -36,10 +36,10 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Chart from '../Chart/Chart';
 
 import { setupOptions, triggerStop } from '../../actions/deviceActions';
 import { isRealTimePane } from '../../utils/panes';
+import Chart from '../Chart/Chart';
 
 export default () => {
     const dispatch = useDispatch();

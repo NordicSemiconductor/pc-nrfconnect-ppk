@@ -34,10 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import fs from 'fs';
-import { createDeflateRaw } from 'zlib';
 import { serialize } from 'bson';
+import fs from 'fs';
 import { logger } from 'pc-nrfconnect-shared';
+import { createDeflateRaw } from 'zlib';
 
 const CURRENT_VERSION = 1;
 

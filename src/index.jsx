@@ -36,11 +36,13 @@
 
 import React from 'react';
 import { App } from 'pc-nrfconnect-shared';
-import RealTime from './components/RealTime/RealTime';
+
 import DataLogger from './components/DataLogger/DataLogger';
-import SidePanel from './components/SidePanel/SidePanel';
 import DeviceSelector from './components/DeviceSelector';
+import RealTime from './components/RealTime/RealTime';
+import SidePanel from './components/SidePanel/SidePanel';
 import reducers from './reducers';
+
 import './index.scss';
 
 export default () => (

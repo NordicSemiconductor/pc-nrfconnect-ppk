@@ -35,8 +35,9 @@
  */
 
 import React from 'react';
-import { string, instanceOf, number, node } from 'prop-types';
-import { unit, Unit } from 'mathjs';
+import { Unit, unit } from 'mathjs';
+import { instanceOf, node, number, string } from 'prop-types';
+
 import { formatDurationHTML } from '../../utils/duration';
 
 import './statbox.scss';

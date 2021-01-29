@@ -34,16 +34,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { number } from 'prop-types';
+
+import { appState } from '../../../reducers/appReducer';
 import { chartState } from '../../../reducers/chartReducer';
 import { triggerState } from '../../../reducers/triggerReducer';
-import { appState } from '../../../reducers/appReducer';
-
-import WindowOffsetSlider from './WindowOffsetSlider';
-import TimeSpanLabel from './TimeSpanLabel';
 import { isRealTimePane as isRealTimePaneSelector } from '../../../utils/panes';
+import TimeSpanLabel from './TimeSpanLabel';
+import WindowOffsetSlider from './WindowOffsetSlider';
 
 import './timespan.scss';
 

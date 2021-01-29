@@ -34,14 +34,15 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import SelectableContext from 'react-bootstrap/SelectableContext';
-import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
-import { NumberInlineInput } from '../../../from_pc-nrfconnect-shared';
+import PropTypes from 'prop-types';
+
 import { updateTriggerLevel } from '../../../actions/deviceActions';
+import { NumberInlineInput } from '../../../from_pc-nrfconnect-shared';
 
 const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
     const dispatch = useDispatch();

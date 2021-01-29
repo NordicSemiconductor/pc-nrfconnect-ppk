@@ -35,9 +35,10 @@
  */
 
 import React from 'react';
+import { Provider } from 'react-redux';
 import { render as rtlRender } from '@testing-library/react';
 import { createStore } from 'redux';
-import { Provider } from 'react-redux';
+
 import reducer from '../reducers';
 
 window.ResizeObserver = function ResizeObserverStub() {
