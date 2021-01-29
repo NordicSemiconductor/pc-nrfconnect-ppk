@@ -325,8 +325,8 @@ class SerialDevice extends Device {
 
     // Capability methods
 
-    ppkSetPowerMode(...args) {
-        return this.sendCommand([PPKCmd.SetPowerMode, ...args]);
+    ppkSetPowerMode(isSmuMode) {
+        return this.sendCommand([PPKCmd.SetPowerMode, isSmuMode ? 2 : 1]);
     }
 
     ppkSetUserGains(range, gain) {
