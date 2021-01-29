@@ -82,27 +82,14 @@ import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
 import { calculateWindowSize, processTriggerSample } from './triggerActions';
 
-let device = null;
-let updateRequestInterval;
-
 const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
-export const setupOptions = () => (dispatch, getState) => {
-    if (!device) return;
-    let d = 300; // buffer length in seconds for real-time
-    if (isRealTimePane(getState())) {
-        // in real-time
-        options.samplingTime = device.adcSamplingTimeUs;
-        options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
-    } else {
-        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-        d = durationSeconds;
-        options.samplingTime = 1e6 / sampleFreq;
-        options.samplesPerSecond = sampleFreq;
-    }
-    const bufferLength = Math.trunc(d * options.samplesPerSecond);
+const initialiseGlobalOptions = (isPPK2, bufferLengthInSeconds) => {
+    const bufferLength = Math.trunc(
+        bufferLengthInSeconds * options.samplesPerSecond
+    );
     try {
-        if (device.capabilities.ppkSetPowerMode) {
+        if (isPPK2) {
             if (!options.bits || options.bits.length !== bufferLength) {
                 options.bits = new Uint16Array(bufferLength);
             }
@@ -119,6 +106,35 @@ export const setupOptions = () => (dispatch, getState) => {
     } catch (err) {
         logger.error(err);
     }
+};
+
+const initialiseRealTimePane = device => {
+    options.samplingTime = device.adcSamplingTimeUs;
+    options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
+    const bufferLengthInSeconds = 300;
+    return bufferLengthInSeconds;
+};
+
+const initialiseDataLoggerPane = state => {
+    const { durationSeconds, sampleFreq } = state.app.dataLogger;
+
+    options.samplingTime = 1e6 / sampleFreq;
+    options.samplesPerSecond = sampleFreq;
+    return durationSeconds;
+};
+
+let device = null;
+let updateRequestInterval;
+
+export const setupOptions = () => (dispatch, getState) => {
+    if (!device) return;
+    const bufferLengthInSeconds = isRealTimePane(getState())
+        ? initialiseRealTimePane(device)
+        : initialiseDataLoggerPane(getState());
+    initialiseGlobalOptions(
+        device.capabilities.ppkSetPowerMode,
+        bufferLengthInSeconds
+    );
     dispatch(chartWindowUnLockAction());
     dispatch(setTriggerOriginAction(null));
     dispatch(updateHasDigitalChannels());
