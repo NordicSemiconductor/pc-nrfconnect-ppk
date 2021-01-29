@@ -34,11 +34,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import fs from 'fs';
 import { deserialize } from 'bson';
-import { createInflateRaw } from 'zlib';
-import { Writable, pipeline } from 'stream';
+import fs from 'fs';
+import { pipeline, Writable } from 'stream';
 import { promisify } from 'util';
+import { createInflateRaw } from 'zlib';
 
 const setupBuffer = async filename => {
     let buffer = Buffer.alloc(370 * 1e6);

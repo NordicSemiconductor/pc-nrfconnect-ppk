@@ -35,18 +35,16 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
 import BootstrapCollapse from 'react-bootstrap/Collapse';
 import Form from 'react-bootstrap/Form';
-import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { updateRegulator } from '../../actions/deviceActions';
-
+import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import {
-    voltageRegulatorState,
     moveVoltageRegulatorVddAction,
+    voltageRegulatorState,
 } from '../../reducers/voltageRegulatorReducer';
 
 const VoltageRegulator = () => {

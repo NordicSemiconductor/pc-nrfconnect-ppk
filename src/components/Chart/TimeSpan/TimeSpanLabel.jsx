@@ -36,6 +36,7 @@
 
 import React from 'react';
 import { number } from 'prop-types';
+
 import { formatDuration } from '../../../utils/duration';
 
 const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {

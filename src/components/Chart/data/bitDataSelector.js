@@ -35,9 +35,9 @@
  */
 /* eslint no-plusplus: off */
 
-import bitDataStorage from './bitDataStorage';
 import { options } from '../../../globals';
 import { averagedBitState } from '../../../utils/bitConversion';
+import bitDataStorage from './bitDataStorage';
 
 export default () => ({
     bitDataStorage: bitDataStorage(),

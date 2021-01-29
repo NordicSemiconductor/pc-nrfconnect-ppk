@@ -35,20 +35,19 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
-import Modal from 'react-bootstrap/Modal';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Modal from 'react-bootstrap/Modal';
+import Row from 'react-bootstrap/Row';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { save } from '../../actions/fileActions';
 import {
     appState,
-    toggleSaveChoiceDialog,
     showExportDialog,
+    toggleSaveChoiceDialog,
 } from '../../reducers/appReducer';
-import { save } from '../../actions/fileActions';
 
 import './saveexport.scss';
 

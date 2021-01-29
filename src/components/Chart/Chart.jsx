@@ -38,37 +38,34 @@
 /* eslint operator-assignment: off */
 
 import React, {
-    useState,
-    useRef,
-    useEffect,
     useCallback,
+    useEffect,
     useMemo,
+    useRef,
+    useState,
 } from 'react';
-import { bool } from 'prop-types';
-import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-
-import ChartTop from './ChartTop';
-import StatBox from './StatBox';
-import TimeSpanTop from './TimeSpan/TimeSpanTop';
-import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
-import DigitalChannels from './DigitalChannels';
-import AmpereChart from './AmpereChart';
-
-import {
-    chartWindowAction,
-    chartCursorAction,
-    chartState,
-} from '../../reducers/chartReducer';
+import { useDispatch, useSelector } from 'react-redux';
+import { bool } from 'prop-types';
 
 import { options, timestampToIndex } from '../../globals';
-
-import { rightMarginPx } from './chart.scss';
 import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
-
+import {
+    chartCursorAction,
+    chartState,
+    chartWindowAction,
+} from '../../reducers/chartReducer';
+import { dataLoggerState } from '../../reducers/dataLoggerReducer';
+import AmpereChart from './AmpereChart';
+import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser from './data/dataAccumulator';
 import dataSelectorInitialiser from './data/dataSelector';
-import { dataLoggerState } from '../../reducers/dataLoggerReducer';
+import DigitalChannels from './DigitalChannels';
+import StatBox from './StatBox';
+import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
+import TimeSpanTop from './TimeSpan/TimeSpanTop';
+
+import { rightMarginPx } from './chart.scss';
 
 const rightMargin = parseInt(rightMarginPx, 10);
 

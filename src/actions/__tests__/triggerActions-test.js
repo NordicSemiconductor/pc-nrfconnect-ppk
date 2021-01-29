@@ -36,8 +36,9 @@
 
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import { processTriggerSample, calculateWindowSize } from '../triggerActions';
+
 import { indexToTimestamp } from '../../globals';
+import { calculateWindowSize, processTriggerSample } from '../triggerActions';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);

@@ -35,15 +35,14 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
+import { useDispatch, useSelector } from 'react-redux';
 
-import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
-import ExportDialog from '../SaveExport/ExportDialog';
-
-import { appState, toggleSaveChoiceDialog } from '../../reducers/appReducer';
 import { load, screenshot } from '../../actions/fileActions';
+import { appState, toggleSaveChoiceDialog } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
+import ExportDialog from '../SaveExport/ExportDialog';
+import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
 
 export const Load = () => {
     const dispatch = useDispatch();

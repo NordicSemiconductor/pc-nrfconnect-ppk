@@ -35,6 +35,7 @@
  */
 
 import EventEmitter from 'events';
+
 import PPKCmd from '../constants';
 
 /* eslint-disable class-methods-use-this */

@@ -34,23 +34,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import fs from 'fs';
 import { remote } from 'electron';
-import { join, dirname } from 'path';
+import fs from 'fs';
+import { dirname, join } from 'path';
 import { logger } from 'pc-nrfconnect-shared';
+
 import {
-    setCurrentPane,
     currentPane as currentPaneSelector,
+    setCurrentPane,
 } from '../from_pc-nrfconnect-shared';
 import { options, updateTitle } from '../globals';
+import { setFileLoadedAction } from '../reducers/appReducer';
 import { setChartState } from '../reducers/chartReducer';
 import { setTriggerState } from '../reducers/triggerReducer';
-import { setFileLoadedAction } from '../reducers/appReducer';
-import saveData from '../utils/saveFileHandler';
 import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
-
 import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
+import saveData from '../utils/saveFileHandler';
 
 const { dialog } = remote;
 

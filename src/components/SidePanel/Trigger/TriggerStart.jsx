@@ -35,18 +35,19 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
-import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
-import { triggerState } from '../../../reducers/triggerReducer';
+import PropTypes from 'prop-types';
+
 import {
+    triggerSingleSet,
     triggerStart,
     triggerStop,
-    triggerSingleSet,
 } from '../../../actions/deviceActions';
-import { SINGLE } from './triggerConstants';
 import { appState } from '../../../reducers/appReducer';
+import { triggerState } from '../../../reducers/triggerReducer';
+import { SINGLE } from './triggerConstants';
 
 function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {
     if (externalTrigger) {

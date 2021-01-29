@@ -35,16 +35,16 @@
  */
 
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { useDispatch, useSelector } from 'react-redux';
 import { Group } from 'pc-nrfconnect-shared';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
-import VoltageRegulator from './VoltageRegulator';
 
-import { setPowerMode, setDeviceRunning } from '../../actions/deviceActions';
+import { setDeviceRunning, setPowerMode } from '../../actions/deviceActions';
+import { Toggle } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
+import VoltageRegulator from './VoltageRegulator';
 
 import colors from '../colors.scss';
 

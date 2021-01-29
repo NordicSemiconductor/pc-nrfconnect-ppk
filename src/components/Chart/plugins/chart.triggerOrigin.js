@@ -36,8 +36,9 @@
 
 /* eslint no-param-reassign: off */
 
-import colors from '../../colors.scss';
 import { indexToTimestamp } from '../../../globals';
+
+import colors from '../../colors.scss';
 
 const { gray700: color } = colors;
 

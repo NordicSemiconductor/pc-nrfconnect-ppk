@@ -35,16 +35,16 @@
  */
 
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
+
 import {
     externalTriggerToggled,
     triggerStop,
 } from '../../../actions/deviceActions';
-import { SINGLE, CONTINUOUS, EXTERNAL } from './triggerConstants';
+import { CONTINUOUS, EXTERNAL, SINGLE } from './triggerConstants';
 
 const TriggerModeGroup = ({
     triggerMode,

@@ -36,7 +36,7 @@
 
 import React from 'react';
 import Button from 'react-bootstrap/Button';
-import { openUrl, Group } from 'pc-nrfconnect-shared';
+import { Group, openUrl } from 'pc-nrfconnect-shared';
 
 import './instructions.scss';
 

@@ -36,7 +36,6 @@
 
 import { options } from '../globals';
 import { isRealTimePane } from '../utils/panes';
-
 import persistentStore from '../utils/persistentStore';
 
 const initialWindowDuration = 7 * 1e6;

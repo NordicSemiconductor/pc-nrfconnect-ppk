@@ -36,51 +36,51 @@
 
 /* eslint-disable no-bitwise */
 
-import { logger } from 'pc-nrfconnect-shared';
 import isDev from 'electron-is-dev';
-import Device from '../device';
-import persistentStore from '../utils/persistentStore';
+import { logger } from 'pc-nrfconnect-shared';
 
+import Device from '../device';
+import { indexToTimestamp, options, updateTitle } from '../globals';
 import {
-    deviceOpenedAction,
     deviceClosedAction,
+    deviceOpenedAction,
     rttStartAction,
-    setDeviceRunningAction,
-    setPowerModeAction,
     samplingStartAction,
     samplingStoppedAction,
+    setDeviceRunningAction,
     setFileLoadedAction,
+    setPowerModeAction,
 } from '../reducers/appReducer';
 import {
-    switchingPointsResetAction,
-    switchingPointsDownSetAction,
-    spikeFilteringToggleAction,
-} from '../reducers/switchingPointsReducer';
-import {
-    toggleTriggerAction,
-    clearSingleTriggerWaitingAction,
-    triggerLevelSetAction,
-    triggerSingleSetAction,
-    externalTriggerToggledAction,
-    triggerLengthSetAction,
-    triggerWindowRangeAction,
-    setTriggerOriginAction,
-} from '../reducers/triggerReducer';
-import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
-import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
-import {
     animationAction,
-    updateHasDigitalChannels,
-    resetCursorAndChart,
     chartWindowAction,
     chartWindowUnLockAction,
+    resetCursorAndChart,
+    updateHasDigitalChannels,
 } from '../reducers/chartReducer';
 import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
-import { options, updateTitle, indexToTimestamp } from '../globals';
 import { updateGainsAction } from '../reducers/gainsReducer';
-import { isRealTimePane } from '../utils/panes';
-import { processTriggerSample, calculateWindowSize } from './triggerActions';
+import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
+import {
+    spikeFilteringToggleAction,
+    switchingPointsDownSetAction,
+    switchingPointsResetAction,
+} from '../reducers/switchingPointsReducer';
+import {
+    clearSingleTriggerWaitingAction,
+    externalTriggerToggledAction,
+    setTriggerOriginAction,
+    toggleTriggerAction,
+    triggerLengthSetAction,
+    triggerLevelSetAction,
+    triggerSingleSetAction,
+    triggerWindowRangeAction,
+} from '../reducers/triggerReducer';
+import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { convertBits16 } from '../utils/bitConversion';
+import { isRealTimePane } from '../utils/panes';
+import persistentStore from '../utils/persistentStore';
+import { calculateWindowSize, processTriggerSample } from './triggerActions';
 
 let device = null;
 let updateRequestInterval;

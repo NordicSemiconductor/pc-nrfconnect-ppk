@@ -35,9 +35,9 @@
  */
 
 import { connect } from 'react-redux';
-import { getAppFile, logger, DeviceSelector } from 'pc-nrfconnect-shared';
+import { DeviceSelector, getAppFile, logger } from 'pc-nrfconnect-shared';
 
-import { open, close } from '../actions/deviceActions';
+import { close, open } from '../actions/deviceActions';
 
 const deviceListing = {
     nordicUsb: true,

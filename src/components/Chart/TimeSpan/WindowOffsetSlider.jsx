@@ -34,9 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { number } from 'prop-types';
+
 import { setWindowOffsetAction } from '../../../reducers/triggerReducer';
 
 import './timespan.scss';

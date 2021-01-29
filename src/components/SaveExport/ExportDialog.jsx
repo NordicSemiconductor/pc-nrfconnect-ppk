@@ -34,26 +34,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Modal from 'react-bootstrap/Modal';
+import ProgressBar from 'react-bootstrap/ProgressBar';
+import Row from 'react-bootstrap/Row';
 import { useDispatch, useSelector } from 'react-redux';
 import { remote } from 'electron';
-import { join, dirname } from 'path';
 import * as mathjs from 'mathjs';
+import { dirname, join } from 'path';
 
-import Modal from 'react-bootstrap/Modal';
-import Card from 'react-bootstrap/Card';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Button from 'react-bootstrap/Button';
-import ProgressBar from 'react-bootstrap/ProgressBar';
-
+import exportChart from '../../actions/exportChartAction';
 import { Toggle } from '../../from_pc-nrfconnect-shared';
+import { options, timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { options, timestampToIndex } from '../../globals';
-
 import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
-import exportChart from '../../actions/exportChartAction';
 
 import './saveexport.scss';
 

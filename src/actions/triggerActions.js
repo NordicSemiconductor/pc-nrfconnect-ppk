@@ -35,6 +35,7 @@
  */
 
 import { logger } from 'pc-nrfconnect-shared';
+
 import { indexToTimestamp } from '../globals';
 import {
     chartWindowAction,
@@ -43,8 +44,8 @@ import {
 } from '../reducers/chartReducer';
 import {
     clearSingleTriggerWaitingAction,
-    setTriggerStartAction,
     setTriggerOriginAction,
+    setTriggerStartAction,
 } from '../reducers/triggerReducer';
 
 // PPK2 trigger point should by default be shifted to middle of window

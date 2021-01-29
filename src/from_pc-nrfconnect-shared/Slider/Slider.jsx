@@ -36,14 +36,14 @@
 
 import React from 'react';
 import { arrayOf, bool, func, number, string } from 'prop-types';
-import classNames from '../utils/classNames';
 
+import classNames from '../utils/classNames';
 import Bar from './Bar';
 import Handle from './Handle';
-import useWidthObserver from './useWidthObserver';
-import rangeShape from './rangeShape';
 import { toPercentage } from './percentage';
+import rangeShape from './rangeShape';
 import Ticks from './Ticks';
+import useWidthObserver from './useWidthObserver';
 
 import './slider.scss';
 

@@ -34,9 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { logger } from 'pc-nrfconnect-shared';
 import fs from 'fs';
-import { options, indexToTimestamp } from '../globals';
+import { logger } from 'pc-nrfconnect-shared';
+
+import { indexToTimestamp, options } from '../globals';
 import { hideExportDialog } from '../reducers/appReducer';
 import { averagedBitState } from '../utils/bitConversion';
 
