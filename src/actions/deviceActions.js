@@ -108,9 +108,9 @@ const initialiseGlobalOptions = (isPPK2, bufferLengthInSeconds) => {
     }
 };
 
-const initialiseRealTimePane = (device, dispatch, getState) => {
-    options.samplingTime = device.adcSamplingTimeUs;
-    options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
+const initialiseRealTimePane = samplingTime => (dispatch, getState) => {
+    options.samplingTime = samplingTime;
+    options.samplesPerSecond = 1e6 / samplingTime;
 
     const { triggerLength } = getState().app.trigger;
     const windowSize = calculateWindowSize(triggerLength, options.samplingTime);
@@ -121,7 +121,7 @@ const initialiseRealTimePane = (device, dispatch, getState) => {
     return bufferLengthInSeconds;
 };
 
-const initialiseDataLoggerPane = getState => {
+const initialiseDataLoggerPane = () => (_, getState) => {
     const { durationSeconds, sampleFreq } = getState().app.dataLogger;
 
     options.samplingTime = 1e6 / sampleFreq;
@@ -135,8 +135,8 @@ let updateRequestInterval;
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
     const bufferLengthInSeconds = isRealTimePane(getState())
-        ? initialiseRealTimePane(device, dispatch, getState)
-        : initialiseDataLoggerPane(getState);
+        ? dispatch(initialiseRealTimePane(device.adcSamplingTimeUs))
+        : dispatch(initialiseDataLoggerPane());
     initialiseGlobalOptions(
         device.capabilities.ppkSetPowerMode,
         bufferLengthInSeconds
