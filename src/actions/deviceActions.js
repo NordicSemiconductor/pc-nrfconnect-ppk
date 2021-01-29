@@ -235,16 +235,88 @@ const initGains = () => async dispatch => {
     [0, 1, 2, 3, 4].forEach(n => dispatch(updateGainsAction(ug[n] * 100, n)));
 };
 
+const onSample = (dispatch, getState) => {
+    let prevValue = 0;
+    let prevBits = 0;
+    let nbSamples = 0;
+    let nbSamplesTotal = 0;
+
+    return ({ value, bits, endOfTrigger }) => {
+        if (options.timestamp === undefined) {
+            options.timestamp = 0;
+        }
+
+        const {
+            app: { samplingRunning },
+            dataLogger: { maxSampleFreq, sampleFreq },
+            trigger: {
+                triggerRunning,
+                triggerStartIndex,
+                triggerSingleWaiting,
+            },
+        } = getState().app;
+        if (
+            !triggerRunning &&
+            !samplingRunning &&
+            !triggerStartIndex &&
+            !triggerSingleWaiting
+        ) {
+            return;
+        }
+
+        let zeroCappedValue = zeroCap(value);
+        const b16 = convertBits16(bits);
+
+        if (samplingRunning && sampleFreq < maxSampleFreq) {
+            const samplesPerAverage = maxSampleFreq / sampleFreq;
+            nbSamples += 1;
+            nbSamplesTotal += 1;
+            const f = Math.min(nbSamplesTotal, samplesPerAverage);
+            if (prevValue !== undefined && value !== undefined) {
+                zeroCappedValue = prevValue + (zeroCappedValue - prevValue) / f;
+            }
+            if (nbSamples < samplesPerAverage) {
+                if (value !== undefined) {
+                    prevValue = zeroCappedValue;
+                    prevBits |= b16;
+                }
+                return;
+            }
+            nbSamples = 0;
+        }
+
+        options.data[options.index] = zeroCappedValue;
+        if (options.bits) {
+            options.bits[options.index] = b16 | prevBits;
+            prevBits = 0;
+        }
+        options.index += 1;
+        options.timestamp += options.samplingTime;
+
+        if (options.index === options.data.length) {
+            if (samplingRunning) {
+                dispatch(samplingStop());
+            }
+            options.index = 0;
+        }
+        if (triggerRunning || triggerSingleWaiting) {
+            dispatch(
+                processTriggerSample(value, device, {
+                    samplingTime: options.samplingTime,
+                    dataIndex: options.index,
+                    dataBuffer: options.data,
+                    endOfTrigger,
+                })
+            );
+        }
+    };
+};
+
 export function open(deviceInfo) {
     return async (dispatch, getState) => {
         if (getState().app.portName) {
             await dispatch(close());
         }
-
-        let prevValue = 0;
-        let prevBits = 0;
-        let nbSamples = 0;
-        let nbSamplesTotal = 0;
 
         const initializeChartForRealTime = () => {
             const { triggerLength } = getState().app.trigger;
@@ -256,79 +328,8 @@ export function open(deviceInfo) {
             dispatch(chartWindowAction(0, end, end));
         };
 
-        const onSample = ({ value, bits, endOfTrigger }) => {
-            if (options.timestamp === undefined) {
-                options.timestamp = 0;
-            }
-
-            const {
-                app: { samplingRunning },
-                dataLogger: { maxSampleFreq, sampleFreq },
-                trigger: {
-                    triggerRunning,
-                    triggerStartIndex,
-                    triggerSingleWaiting,
-                },
-            } = getState().app;
-            if (
-                !triggerRunning &&
-                !samplingRunning &&
-                !triggerStartIndex &&
-                !triggerSingleWaiting
-            ) {
-                return;
-            }
-
-            let zeroCappedValue = zeroCap(value);
-            const b16 = convertBits16(bits);
-
-            if (samplingRunning && sampleFreq < maxSampleFreq) {
-                const samplesPerAverage = maxSampleFreq / sampleFreq;
-                nbSamples += 1;
-                nbSamplesTotal += 1;
-                const f = Math.min(nbSamplesTotal, samplesPerAverage);
-                if (prevValue !== undefined && value !== undefined) {
-                    zeroCappedValue =
-                        prevValue + (zeroCappedValue - prevValue) / f;
-                }
-                if (nbSamples < samplesPerAverage) {
-                    if (value !== undefined) {
-                        prevValue = zeroCappedValue;
-                        prevBits |= b16;
-                    }
-                    return;
-                }
-                nbSamples = 0;
-            }
-
-            options.data[options.index] = zeroCappedValue;
-            if (options.bits) {
-                options.bits[options.index] = b16 | prevBits;
-                prevBits = 0;
-            }
-            options.index += 1;
-            options.timestamp += options.samplingTime;
-
-            if (options.index === options.data.length) {
-                if (samplingRunning) {
-                    dispatch(samplingStop());
-                }
-                options.index = 0;
-            }
-            if (triggerRunning || triggerSingleWaiting) {
-                dispatch(
-                    processTriggerSample(value, device, {
-                        samplingTime: options.samplingTime,
-                        dataIndex: options.index,
-                        dataBuffer: options.data,
-                        endOfTrigger,
-                    })
-                );
-            }
-        };
-
         try {
-            device = new Device(deviceInfo, onSample);
+            device = new Device(deviceInfo, onSample(dispatch, getState));
             dispatch(
                 setSamplingAttrsAction(
                     device.capabilities.maxContinuousSamplingTimeUs
