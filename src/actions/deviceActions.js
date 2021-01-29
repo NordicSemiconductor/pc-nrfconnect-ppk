@@ -40,7 +40,7 @@ import isDev from 'electron-is-dev';
 import { logger } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
-import { indexToTimestamp, options, updateTitle } from '../globals';
+import { options, updateTitle } from '../globals';
 import {
     deviceClosedAction,
     deviceOpenedAction,
@@ -53,7 +53,6 @@ import {
 } from '../reducers/appReducer';
 import {
     animationAction,
-    chartWindowAction,
     chartWindowUnLockAction,
     resetCursorAndChart,
     updateHasDigitalChannels,
@@ -80,54 +79,9 @@ import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
-import { calculateWindowSize, processTriggerSample } from './triggerActions';
+import { processTriggerSample } from './triggerActions';
 
 const zeroCap = isDev ? n => n : n => Math.max(0, n);
-
-const initialiseGlobalOptions = (isPPK2, bufferLengthInSeconds) => {
-    const bufferLength = Math.trunc(
-        bufferLengthInSeconds * options.samplesPerSecond
-    );
-    try {
-        if (isPPK2) {
-            if (!options.bits || options.bits.length !== bufferLength) {
-                options.bits = new Uint16Array(bufferLength);
-            }
-            options.bits.fill(0);
-        } else {
-            options.bits = null;
-        }
-        if (options.data.length !== bufferLength) {
-            options.data = new Float32Array(bufferLength);
-        }
-        options.data.fill(NaN);
-        options.index = 0;
-        options.timestamp = 0;
-    } catch (err) {
-        logger.error(err);
-    }
-};
-
-const initialiseRealTimePane = samplingTime => (dispatch, getState) => {
-    options.samplingTime = samplingTime;
-    options.samplesPerSecond = 1e6 / samplingTime;
-
-    const { triggerLength } = getState().app.trigger;
-    const windowSize = calculateWindowSize(triggerLength, options.samplingTime);
-    const end = indexToTimestamp(windowSize);
-
-    const bufferLengthInSeconds = 300;
-    dispatch(chartWindowAction(0, end, end));
-    return bufferLengthInSeconds;
-};
-
-const initialiseDataLoggerPane = () => (_, getState) => {
-    const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-
-    options.samplingTime = 1e6 / sampleFreq;
-    options.samplesPerSecond = sampleFreq;
-    return durationSeconds;
-};
 
 let device = null;
 let updateRequestInterval;
