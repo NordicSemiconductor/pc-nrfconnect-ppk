@@ -108,15 +108,21 @@ const initialiseGlobalOptions = (isPPK2, bufferLengthInSeconds) => {
     }
 };
 
-const initialiseRealTimePane = device => {
+const initialiseRealTimePane = (device, dispatch, getState) => {
     options.samplingTime = device.adcSamplingTimeUs;
     options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
+
+    const { triggerLength } = getState().app.trigger;
+    const windowSize = calculateWindowSize(triggerLength, options.samplingTime);
+    const end = indexToTimestamp(windowSize);
+
     const bufferLengthInSeconds = 300;
+    dispatch(chartWindowAction(0, end, end));
     return bufferLengthInSeconds;
 };
 
-const initialiseDataLoggerPane = state => {
-    const { durationSeconds, sampleFreq } = state.app.dataLogger;
+const initialiseDataLoggerPane = getState => {
+    const { durationSeconds, sampleFreq } = getState().app.dataLogger;
 
     options.samplingTime = 1e6 / sampleFreq;
     options.samplesPerSecond = sampleFreq;
@@ -129,8 +135,8 @@ let updateRequestInterval;
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
     const bufferLengthInSeconds = isRealTimePane(getState())
-        ? initialiseRealTimePane(device)
-        : initialiseDataLoggerPane(getState());
+        ? initialiseRealTimePane(device, dispatch, getState)
+        : initialiseDataLoggerPane(getState);
     initialiseGlobalOptions(
         device.capabilities.ppkSetPowerMode,
         bufferLengthInSeconds
@@ -318,16 +324,6 @@ export function open(deviceInfo) {
             await dispatch(close());
         }
 
-        const initializeChartForRealTime = () => {
-            const { triggerLength } = getState().app.trigger;
-            const windowSize = calculateWindowSize(
-                triggerLength,
-                options.samplingTime
-            );
-            const end = indexToTimestamp(windowSize);
-            dispatch(chartWindowAction(0, end, end));
-        };
-
         try {
             device = new Device(deviceInfo, onSample(dispatch, getState));
             dispatch(
@@ -373,10 +369,6 @@ export function open(deviceInfo) {
 
             dispatch(rttStartAction());
             dispatch(setFileLoadedAction(false));
-
-            if (isRealTimePane(getState())) {
-                initializeChartForRealTime();
-            }
 
             logger.info('PPK started');
         } catch (err) {
