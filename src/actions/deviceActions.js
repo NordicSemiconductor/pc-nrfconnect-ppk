@@ -80,6 +80,11 @@ import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
 import { processTriggerSample } from './triggerActions';
+import {
+    initialiseDataLoggerPane,
+    initialiseRealTimePane,
+    initialiseGlobalOptions,
+} from './setupActions';
 
 const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
