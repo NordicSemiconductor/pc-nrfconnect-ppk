@@ -35,7 +35,6 @@
  */
 
 import { options } from '../globals';
-import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
 
 const initialWindowDuration = 7 * 1e6;
@@ -74,6 +73,7 @@ const initialState = {
 const ANIMATION = 'ANIMATION';
 const CHART_CURSOR = 'CHART_CURSOR';
 const CHART_WINDOW = 'CHART_WINDOW';
+const CHART_TRIGGER_WINDOW = 'CHART_TRIGGER_WINDOW';
 const LOAD_CHART_STATE = 'LOAD_CHART_STATE';
 const DIGITAL_CHANNELS = 'DIGITAL_CHANNELS';
 const TOGGLE_DIGITAL_CHANNELS = 'TOGGLE_DIGITAL_CHANNELS';
@@ -96,22 +96,21 @@ export const chartCursorAction = (cursorBegin, cursorEnd) => ({
     cursorEnd,
 });
 
-const chartWindowAction2 = (
-    windowBegin,
-    windowEnd,
-    windowDuration,
-    yMin,
-    yMax
-) => {
+const calculateDuration = (sampleFrequency, windowDuration) =>
+    windowDuration === null
+        ? null
+        : Math.min(
+              MAX_WINDOW_DURATION / sampleFrequency,
+              Math.max(MIN_WINDOW_DURATION / sampleFrequency, windowDuration)
+          );
+
+const getCenter = (begin, end, duration) => [duration / 2, (begin + end) / 2];
+
+const chartWindow = (windowBegin, windowEnd, windowDuration, yMin, yMax) => {
     let y0 = yMin;
     let y1 = yMax;
 
-    if (
-        yMin !== null &&
-        yMin !== undefined &&
-        yMax !== null &&
-        yMax !== undefined
-    ) {
+    if (yMin != null && yMax != null) {
         const p0 = Math.max(0, Y_MIN - yMin);
         const p1 = Math.max(0, yMax - Y_MAX);
         if (p0 * p1 === 0) {
@@ -133,8 +132,7 @@ const chartWindowAction2 = (
             yMax: y1,
         };
     }
-    const half = windowDuration / 2;
-    const center = (windowBegin + windowEnd) / 2;
+    const [half, center] = getCenter(windowBegin, windowEnd, windowDuration);
     return {
         type: CHART_WINDOW,
         windowBegin: center - half,
@@ -152,16 +150,31 @@ export const chartWindowAction = (
     yMin,
     yMax
 ) => (dispatch, getState) => {
-    const { sampleFreq, maxSampleFreq } = getState().app.dataLogger;
-    const sf = isRealTimePane(getState()) ? maxSampleFreq : sampleFreq;
-    const duration =
-        windowDuration === null
-            ? null
-            : Math.min(
-                  MAX_WINDOW_DURATION / sf,
-                  Math.max(MIN_WINDOW_DURATION / sf, windowDuration)
-              );
-    dispatch(chartWindowAction2(windowBegin, windowEnd, duration, yMin, yMax));
+    const { sampleFreq } = getState().app.dataLogger;
+    const duration = calculateDuration(sampleFreq, windowDuration);
+
+    dispatch(chartWindow(windowBegin, windowEnd, duration, yMin, yMax));
+};
+
+const chartTrigger = (windowBegin, windowEnd, windowDuration) => {
+    const [half, center] = getCenter(windowBegin, windowEnd, windowDuration);
+    return {
+        type: CHART_TRIGGER_WINDOW,
+        windowBegin: center - half,
+        windowEnd: center + half,
+        windowDuration,
+    };
+};
+
+export const chartTriggerWindowAction = (
+    windowBegin,
+    windowEnd,
+    windowDuration
+) => (dispatch, getState) => {
+    const { maxSampleFreq } = getState().app.dataLogger;
+    const duration = calculateDuration(maxSampleFreq, windowDuration);
+
+    dispatch(chartTrigger(windowBegin, windowEnd, duration));
 };
 
 export const chartWindowLockAction = () => ({ type: CHART_WINDOW_LOCK });
@@ -240,6 +253,22 @@ export default (state = initialState, { type, ...action }) => {
                 windowBegin,
                 windowEnd,
                 windowDuration,
+                ...calcBuffer(windowDuration, windowEnd),
+                yMin: yMin === null || yAxisLock ? state.yMin : yMin,
+                yMax: yMax === null || yAxisLock ? state.yMax : yMax,
+            };
+        }
+        case CHART_TRIGGER_WINDOW: {
+            const { windowBegin, windowEnd, windowDuration } = action;
+            const { yMin, yMax } = action;
+            const { yAxisLock } = state;
+            return {
+                ...state,
+                windowBegin,
+                windowEnd,
+                windowDuration,
+                windowBeginLock: windowBegin,
+                windowEndLock: windowEnd,
                 ...calcBuffer(windowDuration, windowEnd),
                 yMin: yMin === null || yAxisLock ? state.yMin : yMin,
                 yMax: yMax === null || yAxisLock ? state.yMax : yMax,

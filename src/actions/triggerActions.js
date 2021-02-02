@@ -37,11 +37,7 @@
 import { logger } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp } from '../globals';
-import {
-    chartWindowAction,
-    chartWindowLockAction,
-    chartWindowUnLockAction,
-} from '../reducers/chartReducer';
+import { chartTriggerWindowAction } from '../reducers/chartReducer';
 import {
     clearSingleTriggerWaitingAction,
     setTriggerOriginAction,
@@ -81,7 +77,7 @@ export function processTriggerSample(currentValue, device, samplingData) {
             },
         } = getState().app;
 
-        const isPPK1 = !device.capabilities.prePostTriggering;
+        const isPPK1 = !device.capabilities.prePostTriggering; // hwTrigger
 
         if (!triggerStartIndex) {
             if (currentValue >= triggerLevel || isPPK1) {
@@ -96,7 +92,6 @@ export function processTriggerSample(currentValue, device, samplingData) {
             ? endOfTrigger
             : (triggerStartIndex + windowSize) % dataBuffer.length <=
               currentIndex;
-
         if (!enoughSamplesCollected) return;
 
         if (triggerSingleWaiting) {
@@ -113,9 +108,7 @@ export function processTriggerSample(currentValue, device, samplingData) {
         );
         const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
         const to = indexToTimestamp(currentIndex - shiftedIndex);
-        dispatch(chartWindowUnLockAction());
-        dispatch(chartWindowAction(from, to, to - from));
-        dispatch(chartWindowLockAction());
+        dispatch(chartTriggerWindowAction(from, to, to - from));
         if (!isPPK1) {
             dispatch(setTriggerOriginAction(triggerStartIndex));
         }
