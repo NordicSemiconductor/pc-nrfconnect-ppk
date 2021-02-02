@@ -561,18 +561,16 @@ export function switchingPointsReset() {
 export function updateTriggerLevel(triggerLevel) {
     return async (dispatch, getState) => {
         dispatch(triggerLevelSetAction(triggerLevel));
+        if (!device.capabilities.hwTrigger) return;
 
         const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
-        const high = (triggerLevel >> 16) & 0xff;
-        const mid = (triggerLevel >> 8) & 0xff;
-        const low = triggerLevel & 0xff;
 
         if (triggerSingleWaiting) {
             logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
-            await device.ppkTriggerSingleSet(high, mid, low);
+            await device.ppkTriggerSingleSet(triggerLevel);
         } else if (triggerRunning) {
             logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
-            await device.ppkTriggerSet(high, mid, low);
+            await device.ppkTriggerSet(triggerLevel);
         }
     };
 }

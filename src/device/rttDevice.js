@@ -139,6 +139,7 @@ class RTTDevice extends Device {
 
         this.capabilities.maxContinuousSamplingTimeUs = 130;
         this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
+        this.capabilities.hwTrigger = true;
         this.serialNumber = parseInt(device.serialNumber, 10);
         this.isRttOpen = false;
 
