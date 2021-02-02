@@ -40,7 +40,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
 import { arrayOf, func, number, shape } from 'prop-types';
 
-import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
+import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/triggerActions';
 import { indexToTimestamp } from '../../globals';
 import { appState } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';

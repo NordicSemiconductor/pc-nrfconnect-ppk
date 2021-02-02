@@ -41,11 +41,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
 import { Group } from 'pc-nrfconnect-shared';
 
-import {
-    samplingStart,
-    samplingStop,
-    setupOptions,
-} from '../../actions/deviceActions';
+import { setupOptions } from '../../actions/deviceActions';
+import { samplingStart, samplingStop } from '../../actions/samplingActions';
 import { Slider } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import {

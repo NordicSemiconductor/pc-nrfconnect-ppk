@@ -37,7 +37,8 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { samplingStop, setupOptions } from '../../actions/deviceActions';
+import { setupOptions } from '../../actions/deviceActions';
+import { samplingStop } from '../../actions/samplingActions';
 import { isDataLoggerPane } from '../../utils/panes';
 import Chart from '../Chart/Chart';
 

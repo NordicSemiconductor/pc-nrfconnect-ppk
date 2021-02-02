@@ -36,17 +36,14 @@
 
 /* eslint-disable no-bitwise */
 
-import isDev from 'electron-is-dev';
 import { logger } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
-import { options, updateTitle } from '../globals';
+import { device, setDevice, options, updateTitle } from '../globals';
 import {
     deviceClosedAction,
     deviceOpenedAction,
     rttStartAction,
-    samplingStartAction,
-    samplingStoppedAction,
     setDeviceRunningAction,
     setFileLoadedAction,
     setPowerModeAction,
@@ -54,7 +51,6 @@ import {
 import {
     animationAction,
     chartWindowUnLockAction,
-    resetCursorAndChart,
     updateHasDigitalChannels,
 } from '../reducers/chartReducer';
 import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
@@ -66,29 +62,21 @@ import {
     switchingPointsResetAction,
 } from '../reducers/switchingPointsReducer';
 import {
-    clearSingleTriggerWaitingAction,
-    externalTriggerToggledAction,
     setTriggerOriginAction,
-    toggleTriggerAction,
-    triggerLengthSetAction,
     triggerLevelSetAction,
-    triggerSingleSetAction,
     triggerWindowRangeAction,
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
-import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
-import { processTriggerSample } from './triggerActions';
 import {
     initialiseDataLoggerPane,
     initialiseRealTimePane,
     initialiseGlobalOptions,
 } from './setupActions';
+import { onSample, samplingStop } from './samplingActions';
+import { triggerLengthUpdate, triggerStop } from './triggerActions';
 
-const zeroCap = isDev ? n => n : n => Math.max(0, n);
-
-let device = null;
 let updateRequestInterval;
 
 export const setupOptions = () => (dispatch, getState) => {
@@ -105,41 +93,6 @@ export const setupOptions = () => (dispatch, getState) => {
     dispatch(updateHasDigitalChannels());
     dispatch(animationAction());
 };
-
-/* Start reading current measurements */
-export function samplingStart() {
-    return async dispatch => {
-        options.data.fill(NaN);
-        if (options.bits) {
-            options.bits.fill(0);
-        }
-        options.index = 0;
-        options.timestamp = undefined;
-        dispatch(resetCursorAndChart());
-        dispatch(samplingStartAction());
-        await device.ppkAverageStart();
-        logger.info('Sampling started');
-    };
-}
-
-export function samplingStop() {
-    return async dispatch => {
-        if (!device) return;
-        dispatch(samplingStoppedAction());
-        await device.ppkAverageStop();
-        logger.info('Sampling stopped');
-    };
-}
-
-export function triggerStop() {
-    return async dispatch => {
-        if (!device) return;
-        logger.info('Stopping trigger');
-        await device.ppkTriggerStop();
-        dispatch(toggleTriggerAction(false));
-        dispatch(clearSingleTriggerWaitingAction());
-    };
-}
 
 export const updateSpikeFilter = () => async (_, getState) => {
     if (!device.ppkSetSpikeFilter) {
@@ -200,83 +153,6 @@ const initGains = () => async dispatch => {
     [0, 1, 2, 3, 4].forEach(n => dispatch(updateGainsAction(ug[n] * 100, n)));
 };
 
-const onSample = (dispatch, getState) => {
-    let prevValue = 0;
-    let prevBits = 0;
-    let nbSamples = 0;
-    let nbSamplesTotal = 0;
-
-    return ({ value, bits, endOfTrigger }) => {
-        if (options.timestamp === undefined) {
-            options.timestamp = 0;
-        }
-
-        const {
-            app: { samplingRunning },
-            dataLogger: { maxSampleFreq, sampleFreq },
-            trigger: {
-                triggerRunning,
-                triggerStartIndex,
-                triggerSingleWaiting,
-            },
-        } = getState().app;
-        if (
-            !triggerRunning &&
-            !samplingRunning &&
-            !triggerStartIndex &&
-            !triggerSingleWaiting
-        ) {
-            return;
-        }
-
-        let zeroCappedValue = zeroCap(value);
-        const b16 = convertBits16(bits);
-
-        if (samplingRunning && sampleFreq < maxSampleFreq) {
-            const samplesPerAverage = maxSampleFreq / sampleFreq;
-            nbSamples += 1;
-            nbSamplesTotal += 1;
-            const f = Math.min(nbSamplesTotal, samplesPerAverage);
-            if (prevValue !== undefined && value !== undefined) {
-                zeroCappedValue = prevValue + (zeroCappedValue - prevValue) / f;
-            }
-            if (nbSamples < samplesPerAverage) {
-                if (value !== undefined) {
-                    prevValue = zeroCappedValue;
-                    prevBits |= b16;
-                }
-                return;
-            }
-            nbSamples = 0;
-        }
-
-        options.data[options.index] = zeroCappedValue;
-        if (options.bits) {
-            options.bits[options.index] = b16 | prevBits;
-            prevBits = 0;
-        }
-        options.index += 1;
-        options.timestamp += options.samplingTime;
-
-        if (options.index === options.data.length) {
-            if (samplingRunning) {
-                dispatch(samplingStop());
-            }
-            options.index = 0;
-        }
-        if (triggerRunning || triggerSingleWaiting) {
-            dispatch(
-                processTriggerSample(value, device, {
-                    samplingTime: options.samplingTime,
-                    dataIndex: options.index,
-                    dataBuffer: options.data,
-                    endOfTrigger,
-                })
-            );
-        }
-    };
-};
-
 export function open(deviceInfo) {
     return async (dispatch, getState) => {
         if (getState().app.portName) {
@@ -284,7 +160,7 @@ export function open(deviceInfo) {
         }
 
         try {
-            device = new Device(deviceInfo, onSample(dispatch, getState));
+            setDevice(new Device(deviceInfo, onSample(dispatch, getState)));
             dispatch(
                 setSamplingAttrsAction(
                     device.capabilities.maxContinuousSamplingTimeUs
@@ -331,6 +207,7 @@ export function open(deviceInfo) {
 
             logger.info('PPK started');
         } catch (err) {
+            console.log(err);
             logger.error('Failed to start PPK');
             logger.debug(err);
             dispatch({ type: 'DEVICE_DESELECTED' });
@@ -386,48 +263,6 @@ export const updateGains = index => async (_, getState) => {
     logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
 };
 
-/**
- * Takes the window value in milliseconds, adjusts for microsecs
- * and resolves the number of bytes we need for this size of window.
- * @param {number} value  Value received in milliseconds
- * @returns {null} Nothing
- */
-export function triggerLengthUpdate(value) {
-    return async dispatch => {
-        dispatch(triggerLengthSetAction(value));
-        // If division returns a decimal, round downward to nearest integer
-        if (device.capabilities.ppkTriggerWindowSet) {
-            await device.ppkTriggerWindowSet(value);
-        }
-        logger.info(`Trigger length updated to ${value} ms`);
-    };
-}
-
-export function triggerStart() {
-    return async (dispatch, getState) => {
-        dispatch(resetCursorAndChart());
-        dispatch(toggleTriggerAction(true));
-        dispatch(clearSingleTriggerWaitingAction());
-
-        const { triggerLevel } = getState().app.trigger;
-        logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
-
-        await device.ppkTriggerSet(triggerLevel);
-    };
-}
-
-export function triggerSingleSet() {
-    return async (dispatch, getState) => {
-        dispatch(resetCursorAndChart());
-        dispatch(triggerSingleSetAction());
-
-        const { triggerLevel } = getState().app.trigger;
-        logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
-
-        await device.ppkTriggerSingleSet(triggerLevel);
-    };
-}
-
 export function setDeviceRunning(isRunning) {
     return async dispatch => {
         await device.ppkDeviceRunning(isRunning ? 1 : 0);
@@ -472,19 +307,6 @@ export function resetResistors() {
     };
 }
 
-export function externalTriggerToggled(chbState) {
-    return async dispatch => {
-        if (chbState) {
-            await device.ppkTriggerStop();
-            logger.info('Starting external trigger');
-        } else {
-            logger.info('Stopping external trigger');
-        }
-        await device.ppkTriggerExtToggle();
-        dispatch(externalTriggerToggledAction());
-    };
-}
-
 export function spikeFilteringToggle() {
     return async (dispatch, getState) => {
         if (getState().app.switchingPoints.spikeFiltering === false) {
@@ -523,22 +345,5 @@ export function switchingPointsReset() {
         // Set these initial values in hardware
         await dispatch(switchingPointsUpSet());
         await dispatch(switchingPointsDownSet());
-    };
-}
-
-export function updateTriggerLevel(triggerLevel) {
-    return async (dispatch, getState) => {
-        dispatch(triggerLevelSetAction(triggerLevel));
-        if (!device.capabilities.hwTrigger) return;
-
-        const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
-
-        if (triggerSingleWaiting) {
-            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
-            await device.ppkTriggerSingleSet(triggerLevel);
-        } else if (triggerRunning) {
-            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
-            await device.ppkTriggerSet(triggerLevel);
-        }
     };
 }
