@@ -561,6 +561,7 @@ export function switchingPointsReset() {
 export function updateTriggerLevel(triggerLevel) {
     return async (dispatch, getState) => {
         dispatch(triggerLevelSetAction(triggerLevel));
+        if (!device.capabilities.hwTrigger) return;
 
         const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
         const high = (triggerLevel >> 16) & 0xff;
