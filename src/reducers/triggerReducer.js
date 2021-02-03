@@ -60,6 +60,7 @@ export const SET_TRIGGER_START = 'SET_TRIGGER_START';
 export const SET_WINDOW_OFFSET = 'SET_WINDOW_OFFSET';
 export const SET_TRIGGER_ORIGIN = 'SET_TRIGGER_ORIGIN';
 export const LOAD_TRIGGER_STATE = 'LOAD_TRIGGER_STATE';
+export const TRIGGER_COMPLETE = 'TRIGGER_COMPLETE';
 
 export const triggerLevelSetAction = triggerLevel => ({
     type: TRIGGER_LEVEL_SET,
@@ -107,6 +108,12 @@ export const setTriggerOriginAction = origin => ({
 export const setTriggerState = state => ({
     type: LOAD_TRIGGER_STATE,
     ...state,
+});
+
+export const completeTriggerAction = origin => ({
+    type: TRIGGER_COMPLETE,
+    origin,
+    triggerStartIndex: null,
 });
 
 export default (state = initialState, { type, ...action }) => {
@@ -166,6 +173,13 @@ export default (state = initialState, { type, ...action }) => {
         }
         case SET_TRIGGER_ORIGIN: {
             return { ...state, triggerOrigin: action.origin };
+        }
+        case TRIGGER_COMPLETE: {
+            return {
+                ...state,
+                triggerOrigin: action.origin,
+                triggerStartIndex: action.triggerStartIndex,
+            };
         }
         case LOAD_TRIGGER_STATE: {
             return { ...state, ...action };
