@@ -77,7 +77,7 @@ export function processTriggerSample(currentValue, device, samplingData) {
             },
         } = getState().app;
 
-        const isPPK1 = !device.capabilities.prePostTriggering; // hwTrigger
+        const isPPK1 = !!device.capabilities.hwTrigger;
 
         if (!triggerStartIndex) {
             if (currentValue >= triggerLevel || isPPK1) {

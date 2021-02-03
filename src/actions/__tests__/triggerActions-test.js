@@ -46,7 +46,7 @@ const mockStore = configureMockStore(middlewares);
 const mockDevicePPK1 = {
     ppkTriggerStop: jest.fn(),
     capabilities: {
-        prePostTriggering: false,
+        hwTrigger: true,
     },
 };
 
