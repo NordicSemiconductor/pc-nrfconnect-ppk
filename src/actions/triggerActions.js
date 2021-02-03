@@ -40,8 +40,8 @@ import { indexToTimestamp } from '../globals';
 import { chartTriggerWindowAction } from '../reducers/chartReducer';
 import {
     clearSingleTriggerWaitingAction,
-    setTriggerStartAction,
     completeTriggerAction,
+    setTriggerStartAction,
 } from '../reducers/triggerReducer';
 
 // PPK2 trigger point should by default be shifted to middle of window
