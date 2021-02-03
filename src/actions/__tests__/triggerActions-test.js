@@ -46,7 +46,7 @@ const mockStore = configureMockStore(middlewares);
 const mockDevicePPK1 = {
     ppkTriggerStop: jest.fn(),
     capabilities: {
-        prePostTriggering: false,
+        hwTrigger: true,
     },
 };
 
@@ -276,18 +276,17 @@ const getExpectedChartActionsPPK2 = (fromIndex, toIndex, shift = 0) => {
     const from = indexToTimestamp(fromIndex - shift);
     const to = indexToTimestamp(toIndex - shift);
     return [
-        { type: 'CHART_WINDOW_UNLOCK' },
         {
-            type: 'CHART_WINDOW',
+            type: 'CHART_TRIGGER_WINDOW',
             windowBegin: from,
             windowEnd: to,
             windowDuration: to - from,
-            yMax: undefined,
-            yMin: undefined,
         },
-        { type: 'CHART_WINDOW_LOCK' },
-        { type: 'SET_TRIGGER_ORIGIN', origin: fromIndex },
-        { type: 'SET_TRIGGER_START', triggerStartIndex: null },
+        {
+            type: 'TRIGGER_COMPLETE',
+            origin: fromIndex,
+            triggerStartIndex: null,
+        },
     ];
 };
 
@@ -295,16 +294,12 @@ const getExpectedChartActionsPPK1 = (fromIndex, toIndex) => {
     const from = indexToTimestamp(fromIndex);
     const to = indexToTimestamp(toIndex);
     return [
-        { type: 'CHART_WINDOW_UNLOCK' },
         {
-            type: 'CHART_WINDOW',
+            type: 'CHART_TRIGGER_WINDOW',
             windowBegin: from,
             windowEnd: to,
             windowDuration: to - from,
-            yMax: undefined,
-            yMin: undefined,
         },
-        { type: 'CHART_WINDOW_LOCK' },
         { type: 'SET_TRIGGER_START', triggerStartIndex: null },
     ];
 };
