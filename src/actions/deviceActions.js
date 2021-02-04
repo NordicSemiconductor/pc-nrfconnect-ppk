@@ -65,7 +65,6 @@ import {
 import {
     setTriggerOriginAction,
     triggerLevelSetAction,
-    triggerWindowRangeAction,
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { convertBits16 } from '../utils/bitConversion';
@@ -78,8 +77,8 @@ import {
     initialiseRealTimePane,
 } from './setupActions';
 import {
+    initialiseTriggerSettings,
     processTriggerSample,
-    triggerLengthUpdate,
     triggerStop,
 } from './triggerActions';
 
@@ -257,16 +256,7 @@ export function open(deviceInfo) {
             dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
 
-            const {
-                triggerLength,
-                triggerLevel,
-                triggerWindowRange,
-            } = getState().app.trigger;
-            if (!triggerLength) await dispatch(triggerLengthUpdate(10));
-            if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
-            if (!triggerWindowRange)
-                dispatch(triggerWindowRangeAction(device.triggerWindowRange));
-
+            dispatch(initialiseTriggerSettings());
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
             await device.ppkUpdateRegulator(metadata.vdd);
