@@ -101,65 +101,6 @@ export const setupOptions = () => (dispatch, getState) => {
     dispatch(animationAction());
 };
 
-export const updateSpikeFilter = () => async (_, getState) => {
-    if (!device.ppkSetSpikeFilter) {
-        return;
-    }
-    const { spikeFilter } = getState().app;
-    const { samples, alpha, alpha5 } = spikeFilter;
-    persistentStore.set('spikeFilter.samples', samples);
-    persistentStore.set('spikeFilter.alpha', alpha);
-    persistentStore.set('spikeFilter.alpha5', alpha5);
-    await device.ppkSetSpikeFilter(spikeFilter);
-    if (getState().app.app.advancedMode) {
-        logger.info(
-            `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
-        );
-    }
-};
-
-export function close() {
-    return async (dispatch, getState) => {
-        clearInterval(updateRequestInterval);
-        if (!device) {
-            return;
-        }
-        if (getState().app.app.samplingRunning) {
-            await dispatch(samplingStop());
-        }
-        if (getState().app.trigger.triggerRunning) {
-            await dispatch(triggerStop());
-        }
-        await device.stop();
-        device.removeAllListeners();
-        device = null;
-        dispatch(deviceClosedAction());
-        dispatch(triggerLevelSetAction(null));
-        logger.info('PPK closed');
-        updateTitle();
-    };
-}
-
-const initGains = () => async dispatch => {
-    if (!device.capabilities.ppkSetUserGains) {
-        return;
-    }
-    const { ug } = device.modifiers;
-    // if any value is ug is outside of [0.9..1.1] range:
-    if (ug.reduce((p, c) => Math.abs(c - 1) > 0.1 || p, false)) {
-        logger.info(
-            'Found out-of-range user gain, setting all gains back to 1.0'
-        );
-        ug.splice(0, 5, 1, 1, 1, 1, 1);
-        await device.ppkSetUserGains(0, ug[0]);
-        await device.ppkSetUserGains(1, ug[1]);
-        await device.ppkSetUserGains(2, ug[2]);
-        await device.ppkSetUserGains(3, ug[3]);
-        await device.ppkSetUserGains(4, ug[4]);
-    }
-    [0, 1, 2, 3, 4].forEach(n => dispatch(updateGainsAction(ug[n] * 100, n)));
-};
-
 const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
 const onSample = (dispatch, getState) => {
@@ -167,6 +108,15 @@ const onSample = (dispatch, getState) => {
     let prevBits = 0;
     let nbSamples = 0;
     let nbSamplesTotal = 0;
+
+    const handleFullBuffer = samplingRunning => {
+        if (options.index === options.data.length) {
+            if (samplingRunning) {
+                dispatch(samplingStop());
+            }
+            options.index = 0;
+        }
+    };
 
     return ({ value, bits, endOfTrigger }) => {
         if (options.timestamp === undefined) {
@@ -220,12 +170,7 @@ const onSample = (dispatch, getState) => {
         options.index += 1;
         options.timestamp += options.samplingTime;
 
-        if (options.index === options.data.length) {
-            if (samplingRunning) {
-                dispatch(samplingStop());
-            }
-            options.index = 0;
-        }
+        handleFullBuffer(samplingRunning);
         if (triggerRunning || triggerSingleWaiting) {
             dispatch(
                 processTriggerSample(value, {
@@ -321,24 +266,27 @@ export function open(deviceInfo) {
     };
 }
 
-export function updateRegulator() {
+export function close() {
     return async (dispatch, getState) => {
-        const { vdd } = getState().app.voltageRegulator;
-        await device.ppkUpdateRegulator(vdd);
-        logger.info(`Voltage regulator updated to ${vdd} mV`);
-        dispatch(updateRegulatorAction({ currentVdd: vdd }));
+        clearInterval(updateRequestInterval);
+        if (!device) {
+            return;
+        }
+        if (getState().app.app.samplingRunning) {
+            await dispatch(samplingStop());
+        }
+        if (getState().app.trigger.triggerRunning) {
+            await dispatch(triggerStop());
+        }
+        await device.stop();
+        device.removeAllListeners();
+        device = null;
+        dispatch(deviceClosedAction());
+        dispatch(triggerLevelSetAction(null));
+        logger.info('PPK closed');
+        updateTitle();
     };
 }
-
-export const updateGains = index => async (_, getState) => {
-    if (!device.ppkSetUserGains) {
-        return;
-    }
-    const { gains } = getState().app;
-    const gain = gains[index] / 100;
-    await device.ppkSetUserGains(index, gain);
-    logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
-};
 
 export function setDeviceRunning(isRunning) {
     return async dispatch => {
@@ -362,6 +310,45 @@ export function setPowerMode(isSmuMode) {
         }
     };
 }
+
+export function updateRegulator() {
+    return async (dispatch, getState) => {
+        const { vdd } = getState().app.voltageRegulator;
+        await device.ppkUpdateRegulator(vdd);
+        logger.info(`Voltage regulator updated to ${vdd} mV`);
+        dispatch(updateRegulatorAction({ currentVdd: vdd }));
+    };
+}
+
+const initGains = () => async dispatch => {
+    if (!device.capabilities.ppkSetUserGains) {
+        return;
+    }
+    const { ug } = device.modifiers;
+    // if any value is ug is outside of [0.9..1.1] range:
+    if (ug.reduce((p, c) => Math.abs(c - 1) > 0.1 || p, false)) {
+        logger.info(
+            'Found out-of-range user gain, setting all gains back to 1.0'
+        );
+        ug.splice(0, 5, 1, 1, 1, 1, 1);
+        await device.ppkSetUserGains(0, ug[0]);
+        await device.ppkSetUserGains(1, ug[1]);
+        await device.ppkSetUserGains(2, ug[2]);
+        await device.ppkSetUserGains(3, ug[3]);
+        await device.ppkSetUserGains(4, ug[4]);
+    }
+    [0, 1, 2, 3, 4].forEach(n => dispatch(updateGainsAction(ug[n] * 100, n)));
+};
+
+export const updateGains = index => async (_, getState) => {
+    if (!device.ppkSetUserGains) {
+        return;
+    }
+    const { gains } = getState().app;
+    const gain = gains[index] / 100;
+    await device.ppkSetUserGains(index, gain);
+    logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
+};
 
 export function updateResistors() {
     return async (_, getState) => {
@@ -394,6 +381,23 @@ export function spikeFilteringToggle() {
         dispatch(spikeFilteringToggleAction());
     };
 }
+
+export const updateSpikeFilter = () => async (_, getState) => {
+    if (!device.ppkSetSpikeFilter) {
+        return;
+    }
+    const { spikeFilter } = getState().app;
+    const { samples, alpha, alpha5 } = spikeFilter;
+    persistentStore.set('spikeFilter.samples', samples);
+    persistentStore.set('spikeFilter.alpha', alpha);
+    persistentStore.set('spikeFilter.alpha5', alpha5);
+    await device.ppkSetSpikeFilter(spikeFilter);
+    if (getState().app.app.advancedMode) {
+        logger.info(
+            `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
+        );
+    }
+};
 
 export function switchingPointsUpSet() {
     return async (_, getState) => {
