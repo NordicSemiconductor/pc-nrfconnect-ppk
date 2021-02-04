@@ -125,7 +125,7 @@ const processWheelEvents = () => {
             return;
         }
         const p = xScale.getValueForPixel(clientX - xOffset);
-        zoomAtOrigin(callback, p, z, xMin, xMax);
+        zoomAtOrigin(callback, p, z, xMin, Math.ceil(xMax));
     }
 };
 
