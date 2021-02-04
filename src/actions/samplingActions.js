@@ -36,95 +36,13 @@
 
 /* eslint-disable no-bitwise */
 
-import isDev from 'electron-is-dev';
 import { logger } from 'pc-nrfconnect-shared';
 import { options, device } from '../globals';
-import { convertBits16 } from '../utils/bitConversion';
-import { processTriggerSample } from './triggerActions';
 import { resetCursorAndChart } from '../reducers/chartReducer';
 import {
     samplingStartAction,
     samplingStoppedAction,
 } from '../reducers/appReducer';
-
-const zeroCap = isDev ? n => n : n => Math.max(0, n);
-
-const onSample = (dispatch, getState) => {
-    let prevValue = 0;
-    let prevBits = 0;
-    let nbSamples = 0;
-    let nbSamplesTotal = 0;
-
-    return ({ value, bits, endOfTrigger }) => {
-        if (options.timestamp === undefined) {
-            options.timestamp = 0;
-        }
-
-        const {
-            app: { samplingRunning },
-            dataLogger: { maxSampleFreq, sampleFreq },
-            trigger: {
-                triggerRunning,
-                triggerStartIndex,
-                triggerSingleWaiting,
-            },
-        } = getState().app;
-        if (
-            !triggerRunning &&
-            !samplingRunning &&
-            !triggerStartIndex &&
-            !triggerSingleWaiting
-        ) {
-            return;
-        }
-
-        let zeroCappedValue = zeroCap(value);
-        const b16 = convertBits16(bits);
-
-        if (samplingRunning && sampleFreq < maxSampleFreq) {
-            const samplesPerAverage = maxSampleFreq / sampleFreq;
-            nbSamples += 1;
-            nbSamplesTotal += 1;
-            const f = Math.min(nbSamplesTotal, samplesPerAverage);
-            if (prevValue !== undefined && value !== undefined) {
-                zeroCappedValue = prevValue + (zeroCappedValue - prevValue) / f;
-            }
-            if (nbSamples < samplesPerAverage) {
-                if (value !== undefined) {
-                    prevValue = zeroCappedValue;
-                    prevBits |= b16;
-                }
-                return;
-            }
-            nbSamples = 0;
-        }
-
-        options.data[options.index] = zeroCappedValue;
-        if (options.bits) {
-            options.bits[options.index] = b16 | prevBits;
-            prevBits = 0;
-        }
-        options.index += 1;
-        options.timestamp += options.samplingTime;
-
-        if (options.index === options.data.length) {
-            if (samplingRunning) {
-                dispatch(samplingStop());
-            }
-            options.index = 0;
-        }
-        if (triggerRunning || triggerSingleWaiting) {
-            dispatch(
-                processTriggerSample(value, {
-                    samplingTime: options.samplingTime,
-                    dataIndex: options.index,
-                    dataBuffer: options.data,
-                    endOfTrigger,
-                })
-            );
-        }
-    };
-};
 
 /* Start reading current measurements */
 function samplingStart() {
@@ -151,4 +69,4 @@ function samplingStop() {
     };
 }
 
-export { onSample, samplingStart, samplingStop };
+export { samplingStart, samplingStop };

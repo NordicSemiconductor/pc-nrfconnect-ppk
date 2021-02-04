@@ -36,6 +36,7 @@
 
 /* eslint-disable no-bitwise */
 
+import isDev from 'electron-is-dev';
 import { logger } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
@@ -67,23 +68,30 @@ import {
     triggerWindowRangeAction,
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
+import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
-import { onSample, samplingStop } from './samplingActions';
+import { samplingStop } from './samplingActions';
 import {
     initialiseDataLoggerPane,
     initialiseGlobalOptions,
     initialiseRealTimePane,
 } from './setupActions';
-import { triggerLengthUpdate, triggerStop } from './triggerActions';
+import {
+    processTriggerSample,
+    triggerLengthUpdate,
+    triggerStop,
+} from './triggerActions';
 
 let updateRequestInterval;
 
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
-    const bufferLengthInSeconds = isRealTimePane(getState())
-        ? dispatch(initialiseRealTimePane(device.adcSamplingTimeUs))
-        : dispatch(initialiseDataLoggerPane());
+    const bufferLengthInSeconds = dispatch(
+        isRealTimePane(getState())
+            ? initialiseRealTimePane(device.adcSamplingTimeUs)
+            : initialiseDataLoggerPane()
+    );
     initialiseGlobalOptions(
         device.capabilities.ppkSetPowerMode,
         bufferLengthInSeconds
@@ -151,6 +159,85 @@ const initGains = () => async dispatch => {
         await device.ppkSetUserGains(4, ug[4]);
     }
     [0, 1, 2, 3, 4].forEach(n => dispatch(updateGainsAction(ug[n] * 100, n)));
+};
+
+const zeroCap = isDev ? n => n : n => Math.max(0, n);
+
+const onSample = (dispatch, getState) => {
+    let prevValue = 0;
+    let prevBits = 0;
+    let nbSamples = 0;
+    let nbSamplesTotal = 0;
+
+    return ({ value, bits, endOfTrigger }) => {
+        if (options.timestamp === undefined) {
+            options.timestamp = 0;
+        }
+
+        const {
+            app: { samplingRunning },
+            dataLogger: { maxSampleFreq, sampleFreq },
+            trigger: {
+                triggerRunning,
+                triggerStartIndex,
+                triggerSingleWaiting,
+            },
+        } = getState().app;
+        if (
+            !triggerRunning &&
+            !samplingRunning &&
+            !triggerStartIndex &&
+            !triggerSingleWaiting
+        ) {
+            return;
+        }
+
+        let zeroCappedValue = zeroCap(value);
+        const b16 = convertBits16(bits);
+
+        if (samplingRunning && sampleFreq < maxSampleFreq) {
+            const samplesPerAverage = maxSampleFreq / sampleFreq;
+            nbSamples += 1;
+            nbSamplesTotal += 1;
+            const f = Math.min(nbSamplesTotal, samplesPerAverage);
+            if (prevValue !== undefined && value !== undefined) {
+                zeroCappedValue = prevValue + (zeroCappedValue - prevValue) / f;
+            }
+            if (nbSamples < samplesPerAverage) {
+                if (value !== undefined) {
+                    prevValue = zeroCappedValue;
+                    prevBits |= b16;
+                }
+                return;
+            }
+            nbSamples = 0;
+        }
+
+        options.data[options.index] = zeroCappedValue;
+        if (options.bits) {
+            options.bits[options.index] = b16 | prevBits;
+            prevBits = 0;
+        }
+        options.index += 1;
+        options.timestamp += options.samplingTime;
+
+        if (options.index === options.data.length) {
+            if (samplingRunning) {
+                dispatch(samplingStop());
+            }
+            options.index = 0;
+        }
+        if (triggerRunning || triggerSingleWaiting) {
+            dispatch(
+                processTriggerSample(value, {
+                    samplingTime: options.samplingTime,
+                    dataIndex: options.index,
+                    dataBuffer: options.data,
+                    endOfTrigger,
+                })
+            );
+        }
+    };
 };
 
 export function open(deviceInfo) {
