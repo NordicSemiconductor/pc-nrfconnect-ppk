@@ -39,7 +39,7 @@
 import { logger } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
-import { device, setDevice, options, updateTitle } from '../globals';
+import { device, options, setDevice, updateTitle } from '../globals';
 import {
     deviceClosedAction,
     deviceOpenedAction,
@@ -69,12 +69,12 @@ import {
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
+import { onSample, samplingStop } from './samplingActions';
 import {
     initialiseDataLoggerPane,
-    initialiseRealTimePane,
     initialiseGlobalOptions,
+    initialiseRealTimePane,
 } from './setupActions';
-import { onSample, samplingStop } from './samplingActions';
 import { triggerLengthUpdate, triggerStop } from './triggerActions';
 
 let updateRequestInterval;
