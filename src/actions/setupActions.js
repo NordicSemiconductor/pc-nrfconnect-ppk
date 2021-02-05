@@ -35,32 +35,33 @@
  */
 
 import { logger } from 'pc-nrfconnect-shared';
-import { chartWindowAction } from '../reducers/chartReducer';
-import { calculateWindowSize } from './triggerActions';
-import { options, indexToTimestamp } from '../globals';
 
-const initialiseGlobalOptions = (isPPK2, bufferLengthInSeconds) => {
-    const bufferLength = Math.trunc(
-        bufferLengthInSeconds * options.samplesPerSecond
+import { device, indexToTimestamp, options } from '../globals';
+import {
+    animationAction,
+    chartWindowAction,
+    chartWindowUnLockAction,
+    updateHasDigitalChannels,
+} from '../reducers/chartReducer';
+import { setTriggerOriginAction } from '../reducers/triggerReducer';
+import { isRealTimePane } from '../utils/panes';
+import { calculateWindowSize } from './triggerActions';
+
+export default () => (dispatch, getState) => {
+    if (!device) return;
+    const bufferLengthInSeconds = dispatch(
+        isRealTimePane(getState())
+            ? initialiseRealTimePane(device.adcSamplingTimeUs)
+            : initialiseDataLoggerPane()
     );
-    try {
-        if (isPPK2) {
-            if (!options.bits || options.bits.length !== bufferLength) {
-                options.bits = new Uint16Array(bufferLength);
-            }
-            options.bits.fill(0);
-        } else {
-            options.bits = null;
-        }
-        if (options.data.length !== bufferLength) {
-            options.data = new Float32Array(bufferLength);
-        }
-        options.data.fill(NaN);
-        options.index = 0;
-        options.timestamp = 0;
-    } catch (err) {
-        logger.error(err);
-    }
+    initialiseGlobalOptions(
+        device.capabilities.ppkSetPowerMode,
+        bufferLengthInSeconds
+    );
+    dispatch(chartWindowUnLockAction());
+    dispatch(setTriggerOriginAction(null));
+    dispatch(updateHasDigitalChannels());
+    dispatch(animationAction());
 };
 
 const initialiseRealTimePane = samplingTime => (dispatch, getState) => {
@@ -84,8 +85,26 @@ const initialiseDataLoggerPane = () => (_, getState) => {
     return durationSeconds;
 };
 
-export {
-    initialiseDataLoggerPane,
-    initialiseRealTimePane,
-    initialiseGlobalOptions,
+const initialiseGlobalOptions = (isPPK2, bufferLengthInSeconds) => {
+    const bufferLength = Math.trunc(
+        bufferLengthInSeconds * options.samplesPerSecond
+    );
+    try {
+        if (isPPK2) {
+            if (!options.bits || options.bits.length !== bufferLength) {
+                options.bits = new Uint16Array(bufferLength);
+            }
+            options.bits.fill(0);
+        } else {
+            options.bits = null;
+        }
+        if (options.data.length !== bufferLength) {
+            options.data = new Float32Array(bufferLength);
+        }
+        options.data.fill(NaN);
+        options.index = 0;
+        options.timestamp = 0;
+    } catch (err) {
+        logger.error(err);
+    }
 };

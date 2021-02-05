@@ -37,12 +37,13 @@
 /* eslint-disable no-bitwise */
 
 import { logger } from 'pc-nrfconnect-shared';
-import { options, device } from '../globals';
-import { resetCursorAndChart } from '../reducers/chartReducer';
+
+import { device, options } from '../globals';
 import {
     samplingStartAction,
     samplingStoppedAction,
 } from '../reducers/appReducer';
+import { resetCursorAndChart } from '../reducers/chartReducer';
 
 /* Start reading current measurements */
 function samplingStart() {

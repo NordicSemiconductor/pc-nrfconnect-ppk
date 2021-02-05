@@ -49,11 +49,7 @@ import {
     setFileLoadedAction,
     setPowerModeAction,
 } from '../reducers/appReducer';
-import {
-    animationAction,
-    chartWindowUnLockAction,
-    updateHasDigitalChannels,
-} from '../reducers/chartReducer';
+import { animationAction } from '../reducers/chartReducer';
 import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
 import { updateGainsAction } from '../reducers/gainsReducer';
 import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
@@ -62,20 +58,12 @@ import {
     switchingPointsDownSetAction,
     switchingPointsResetAction,
 } from '../reducers/switchingPointsReducer';
-import {
-    setTriggerOriginAction,
-    triggerLevelSetAction,
-} from '../reducers/triggerReducer';
+import { triggerLevelSetAction } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { convertBits16 } from '../utils/bitConversion';
-import { isRealTimePane } from '../utils/panes';
 import persistentStore from '../utils/persistentStore';
 import { samplingStop } from './samplingActions';
-import {
-    initialiseDataLoggerPane,
-    initialiseGlobalOptions,
-    initialiseRealTimePane,
-} from './setupActions';
+import setupOptions from './setupActions';
 import {
     initialiseTriggerSettings,
     processTriggerSample,
@@ -83,23 +71,6 @@ import {
 } from './triggerActions';
 
 let updateRequestInterval;
-
-export const setupOptions = () => (dispatch, getState) => {
-    if (!device) return;
-    const bufferLengthInSeconds = dispatch(
-        isRealTimePane(getState())
-            ? initialiseRealTimePane(device.adcSamplingTimeUs)
-            : initialiseDataLoggerPane()
-    );
-    initialiseGlobalOptions(
-        device.capabilities.ppkSetPowerMode,
-        bufferLengthInSeconds
-    );
-    dispatch(chartWindowUnLockAction());
-    dispatch(setTriggerOriginAction(null));
-    dispatch(updateHasDigitalChannels());
-    dispatch(animationAction());
-};
 
 const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
