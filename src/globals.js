@@ -50,7 +50,6 @@ export const options = {
     timestamp: null,
 };
 
-/* eslint-disable prefer-const */
 // eslint-disable-next-line import/no-mutable-exports
 export let device = null;
 export function setDevice(d) {
