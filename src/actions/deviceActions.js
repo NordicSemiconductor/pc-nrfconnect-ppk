@@ -192,6 +192,9 @@ export function open(deviceInfo) {
 
         try {
             setDevice(new Device(deviceInfo, onSample(dispatch, getState)));
+            if (!device) {
+                return;
+            }
             dispatch(
                 setSamplingAttrsAction(
                     device.capabilities.maxContinuousSamplingTimeUs
@@ -199,9 +202,9 @@ export function open(deviceInfo) {
             );
             dispatch(setupOptions());
             dispatch(setDeviceRunningAction(device.isRunningInitially));
-            const metadata = device.parseMeta(await device.start());
-
             dispatch(initialiseTriggerSettings());
+
+            const metadata = device.parseMeta(await device.start());
             dispatch(resistorsResetAction(metadata));
             dispatch(switchingPointsResetAction(metadata));
             await device.ppkUpdateRegulator(metadata.vdd);
@@ -216,20 +219,12 @@ export function open(deviceInfo) {
             if (device.capabilities.ppkSetSpikeFilter) {
                 dispatch(updateSpikeFilter());
             }
-            if (device.capabilities.ppkSetPowerMode) {
-                const isSmuMode = metadata.mode === 2;
-                // 1 = Ampere
-                // 2 = SMU
-                dispatch(setPowerModeAction(isSmuMode));
-                if (!isSmuMode) dispatch(setDeviceRunning(true));
-            }
-
+            dispatch(initialisePowerMode(metadata.mode));
             dispatch(rttStartAction());
             dispatch(setFileLoadedAction(false));
 
             logger.info('PPK started');
         } catch (err) {
-            console.log(err);
             logger.error('Failed to start PPK');
             logger.debug(err);
             dispatch({ type: 'DEVICE_DESELECTED' });
@@ -280,7 +275,7 @@ export function close() {
         }
         await device.stop();
         device.removeAllListeners();
-        device = null;
+        setDevice(null);
         dispatch(deviceClosedAction());
         dispatch(triggerLevelSetAction(null));
         logger.info('PPK closed');
@@ -428,3 +423,13 @@ export function switchingPointsReset() {
         await dispatch(switchingPointsDownSet());
     };
 }
+
+const initialisePowerMode = powerMode => dispatch => {
+    if (device.capabilities.ppkSetPowerMode) {
+        const isSmuMode = powerMode === 2;
+        // 1 = Ampere
+        // 2 = SMU
+        dispatch(setPowerModeAction(isSmuMode));
+        if (!isSmuMode) dispatch(setDeviceRunning(true));
+    }
+};
