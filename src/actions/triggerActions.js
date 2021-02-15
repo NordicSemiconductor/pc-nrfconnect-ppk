@@ -36,12 +36,21 @@
 
 import { logger } from 'pc-nrfconnect-shared';
 
-import { indexToTimestamp } from '../globals';
-import { chartTriggerWindowAction } from '../reducers/chartReducer';
+import { device, indexToTimestamp } from '../globals';
+import {
+    chartTriggerWindowAction,
+    resetCursorAndChart,
+} from '../reducers/chartReducer';
 import {
     clearSingleTriggerWaitingAction,
     completeTriggerAction,
+    externalTriggerToggledAction,
     setTriggerStartAction,
+    toggleTriggerAction,
+    triggerLengthSetAction,
+    triggerLevelSetAction,
+    triggerSingleSetAction,
+    triggerWindowRangeAction,
 } from '../reducers/triggerReducer';
 
 // PPK2 trigger point should by default be shifted to middle of window
@@ -59,7 +68,7 @@ const getShiftedIndex = (
 export const calculateWindowSize = (triggerLength, samplingTime) =>
     Math.floor((triggerLength * 1000) / samplingTime);
 
-export function processTriggerSample(currentValue, device, samplingData) {
+export function processTriggerSample(currentValue, samplingData) {
     return (dispatch, getState) => {
         const {
             samplingTime,
@@ -114,3 +123,97 @@ export function processTriggerSample(currentValue, device, samplingData) {
             : dispatch(completeTriggerAction(triggerStartIndex));
     };
 }
+
+export function triggerStop() {
+    return async dispatch => {
+        if (!device) return;
+        logger.info('Stopping trigger');
+        await device.ppkTriggerStop();
+        dispatch(toggleTriggerAction(false));
+        dispatch(clearSingleTriggerWaitingAction());
+    };
+}
+
+/**
+ * Takes the window value in milliseconds, adjusts for microsecs
+ * and resolves the number of bytes we need for this size of window.
+ * @param {number} value  Value received in milliseconds
+ * @returns {null} Nothing
+ */
+export function triggerLengthUpdate(value) {
+    return async dispatch => {
+        dispatch(triggerLengthSetAction(value));
+        // If division returns a decimal, round downward to nearest integer
+        if (device.capabilities.ppkTriggerWindowSet) {
+            await device.ppkTriggerWindowSet(value);
+        }
+        logger.info(`Trigger length updated to ${value} ms`);
+    };
+}
+
+export function triggerStart() {
+    return async (dispatch, getState) => {
+        dispatch(resetCursorAndChart());
+        dispatch(toggleTriggerAction(true));
+        dispatch(clearSingleTriggerWaitingAction());
+
+        const { triggerLevel } = getState().app.trigger;
+        logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
+
+        await device.ppkTriggerSet(triggerLevel);
+    };
+}
+
+export function triggerSingleSet() {
+    return async (dispatch, getState) => {
+        dispatch(resetCursorAndChart());
+        dispatch(triggerSingleSetAction());
+
+        const { triggerLevel } = getState().app.trigger;
+        logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
+
+        await device.ppkTriggerSingleSet(triggerLevel);
+    };
+}
+
+export function externalTriggerToggled(chbState) {
+    return async dispatch => {
+        if (chbState) {
+            await device.ppkTriggerStop();
+            logger.info('Starting external trigger');
+        } else {
+            logger.info('Stopping external trigger');
+        }
+        await device.ppkTriggerExtToggle();
+        dispatch(externalTriggerToggledAction());
+    };
+}
+
+export function updateTriggerLevel(triggerLevel) {
+    return async (dispatch, getState) => {
+        dispatch(triggerLevelSetAction(triggerLevel));
+        if (!device.capabilities.hwTrigger) return;
+
+        const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
+
+        if (triggerSingleWaiting) {
+            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
+            await device.ppkTriggerSingleSet(triggerLevel);
+        } else if (triggerRunning) {
+            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
+            await device.ppkTriggerSet(triggerLevel);
+        }
+    };
+}
+
+export const initialiseTriggerSettings = () => async (dispatch, getState) => {
+    const {
+        triggerLength,
+        triggerLevel,
+        triggerWindowRange,
+    } = getState().app.trigger;
+    if (!triggerLength) await dispatch(triggerLengthUpdate(10));
+    if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
+    if (!triggerWindowRange)
+        dispatch(triggerWindowRangeAction(device.triggerWindowRange));
+};

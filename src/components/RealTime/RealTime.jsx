@@ -37,7 +37,8 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { setupOptions, triggerStop } from '../../actions/deviceActions';
+import setupOptions from '../../actions/setupActions';
+import { triggerStop } from '../../actions/triggerActions';
 import { isRealTimePane } from '../../utils/panes';
 import Chart from '../Chart/Chart';
 

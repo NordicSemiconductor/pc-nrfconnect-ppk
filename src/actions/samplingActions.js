@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2021, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -34,50 +34,40 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import { useDispatch, useSelector } from 'react-redux';
+/* eslint-disable no-bitwise */
 
-import { triggerLengthUpdate } from '../../../actions/triggerActions';
-import { NumberInlineInput, Slider } from '../../../from_pc-nrfconnect-shared';
-import { triggerState } from '../../../reducers/triggerReducer';
+import { logger } from 'pc-nrfconnect-shared';
 
-const TriggerLength = () => {
-    const dispatch = useDispatch();
-    const { triggerWindowRange, triggerLength } = useSelector(triggerState);
-    const range = { ...triggerWindowRange, decimals: 2 };
+import { device, options } from '../globals';
+import {
+    samplingStartAction,
+    samplingStoppedAction,
+} from '../reducers/appReducer';
+import { resetCursorAndChart } from '../reducers/chartReducer';
 
-    const [triggerLen, setTriggerLen] = useState(triggerLength);
+/* Start reading current measurements */
+function samplingStart() {
+    return async dispatch => {
+        options.data.fill(NaN);
+        if (options.bits) {
+            options.bits.fill(0);
+        }
+        options.index = 0;
+        options.timestamp = undefined;
+        dispatch(resetCursorAndChart());
+        dispatch(samplingStartAction());
+        await device.ppkAverageStart();
+        logger.info('Sampling started');
+    };
+}
 
-    return (
-        <>
-            <Form.Label
-                title="Duration of trigger window"
-                htmlFor="slider-trigger-window"
-            >
-                <span className="flex-fill">Length</span>
-                <NumberInlineInput
-                    value={triggerLen}
-                    range={range}
-                    onChange={setTriggerLen}
-                    onChangeComplete={() =>
-                        dispatch(triggerLengthUpdate(triggerLen))
-                    }
-                />{' '}
-                ms
-            </Form.Label>
-            <Slider
-                title="Duration of trigger window"
-                id="slider-trigger-window"
-                values={[triggerLen]}
-                range={range}
-                onChange={[value => setTriggerLen(value)]}
-                onChangeComplete={() =>
-                    dispatch(triggerLengthUpdate(triggerLen))
-                }
-            />
-        </>
-    );
-};
+function samplingStop() {
+    return async dispatch => {
+        if (!device) return;
+        dispatch(samplingStoppedAction());
+        await device.ppkAverageStop();
+        logger.info('Sampling stopped');
+    };
+}
 
-export default TriggerLength;
+export { samplingStart, samplingStop };

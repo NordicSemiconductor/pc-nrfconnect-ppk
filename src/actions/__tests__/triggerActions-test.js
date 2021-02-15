@@ -37,7 +37,7 @@
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 
-import { indexToTimestamp } from '../../globals';
+import { indexToTimestamp, setDevice } from '../../globals';
 import { calculateWindowSize, processTriggerSample } from '../triggerActions';
 
 const middlewares = [thunk];
@@ -96,8 +96,9 @@ describe('Handle trigger', () => {
     });
 
     it('should set triggerStart if value is higher than trigger level', () => {
+        setDevice(mockDevicePPK1);
         const store = mockStore(initialState);
-        store.dispatch(processTriggerSample(15, mockDevicePPK1, samplingData));
+        store.dispatch(processTriggerSample(15, samplingData));
         const expectedActions = [
             { type: 'SET_TRIGGER_START', triggerStartIndex: beginIndex },
         ];
@@ -105,6 +106,7 @@ describe('Handle trigger', () => {
     });
 
     it('should chart window if enough samples have been processed', () => {
+        setDevice(mockDevicePPK1);
         const newIndex = 1005;
         const store = mockStore({
             ...initialState,
@@ -117,7 +119,7 @@ describe('Handle trigger', () => {
             },
         });
         store.dispatch(
-            processTriggerSample(5, mockDevicePPK1, {
+            processTriggerSample(5, {
                 ...samplingData,
                 dataIndex: newIndex,
                 endOfTrigger: true,
@@ -129,6 +131,10 @@ describe('Handle trigger', () => {
     });
 
     describe('Single trigger', () => {
+        beforeEach(() => {
+            setDevice(mockDevicePPK1);
+        });
+
         const newIndex = 1005;
         const store = mockStore({
             ...initialState,
@@ -144,7 +150,7 @@ describe('Handle trigger', () => {
 
         it('should reset single trigger and issue device stop samping command', () => {
             store.dispatch(
-                processTriggerSample(5, mockDevicePPK1, {
+                processTriggerSample(5, {
                     ...samplingData,
                     dataIndex: newIndex,
                     endOfTrigger: true,
@@ -175,7 +181,7 @@ describe('Handle trigger', () => {
         it('Should handle the buffer wrapping around', () => {
             // window size here will be 1000, so it should start drawing at index 500
             store.dispatch(
-                processTriggerSample(5, mockDevicePPK1, {
+                processTriggerSample(5, {
                     ...samplingData,
                     dataIndex: 499,
                     endOfTrigger: false,
@@ -183,7 +189,7 @@ describe('Handle trigger', () => {
             );
             expect(store.getActions().length).toBe(0);
             store.dispatch(
-                processTriggerSample(5, mockDevicePPK1, {
+                processTriggerSample(5, {
                     ...samplingData,
                     dataIndex: 500,
                     endOfTrigger: true,
@@ -196,6 +202,10 @@ describe('Handle trigger', () => {
     });
 
     describe('Window offset', () => {
+        beforeEach(() => {
+            setDevice(mockDevicePPK2);
+        });
+
         const endIndex = beginIndex + 1000;
         const windowSize = calculateWindowSize(
             defaultTriggerLength,
@@ -214,7 +224,7 @@ describe('Handle trigger', () => {
                 },
             });
             store.dispatch(
-                processTriggerSample(5, mockDevicePPK2, {
+                processTriggerSample(5, {
                     ...samplingData,
                     dataIndex: endIndex,
                 })
@@ -231,6 +241,7 @@ describe('Handle trigger', () => {
         });
 
         it('should shift window according to given offset', () => {
+            setDevice(mockDevicePPK2);
             const triggerWindowOffset = 500;
             const store = mockStore({
                 ...initialState,
@@ -244,7 +255,7 @@ describe('Handle trigger', () => {
                 },
             });
             store.dispatch(
-                processTriggerSample(5, mockDevicePPK2, {
+                processTriggerSample(5, {
                     ...samplingData,
                     dataIndex: endIndex,
                 })

@@ -43,7 +43,7 @@ import PropTypes from 'prop-types';
 import {
     externalTriggerToggled,
     triggerStop,
-} from '../../../actions/deviceActions';
+} from '../../../actions/triggerActions';
 import { CONTINUOUS, EXTERNAL, SINGLE } from './triggerConstants';
 
 const TriggerModeGroup = ({

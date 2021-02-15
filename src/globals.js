@@ -50,6 +50,12 @@ export const options = {
     timestamp: null,
 };
 
+// eslint-disable-next-line import/no-mutable-exports
+export let device = null;
+export function setDevice(d) {
+    device = d;
+}
+
 export const nbDigitalChannels = 8;
 
 export const timestampToIndex = (ts, index = options.index) =>

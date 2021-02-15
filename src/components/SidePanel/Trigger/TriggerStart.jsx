@@ -44,7 +44,7 @@ import {
     triggerSingleSet,
     triggerStart,
     triggerStop,
-} from '../../../actions/deviceActions';
+} from '../../../actions/triggerActions';
 import { appState } from '../../../reducers/appReducer';
 import { triggerState } from '../../../reducers/triggerReducer';
 import { SINGLE } from './triggerConstants';

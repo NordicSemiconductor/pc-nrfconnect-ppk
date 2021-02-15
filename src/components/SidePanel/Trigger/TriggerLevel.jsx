@@ -41,7 +41,7 @@ import SelectableContext from 'react-bootstrap/SelectableContext';
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { updateTriggerLevel } from '../../../actions/deviceActions';
+import { updateTriggerLevel } from '../../../actions/triggerActions';
 import { NumberInlineInput } from '../../../from_pc-nrfconnect-shared';
 
 const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
