@@ -91,7 +91,6 @@ describe('formatData', () => {
         // Test that we only get timestamp and current
         expect(content).toMatch(/0\.02,7\.000,11111111,1,1,1,1,1,1,1,1/);
         expect(content).toMatch(/0\.03,8\.000,00000000,0,0,0,0,0,0,0,0\s/);
-        // 69 to binary = 01000101
-        expect(content).toMatch(/0\.04,9\.000,01000101,0,1,0,0,0,1,0,1\s/);
+        expect(content).toMatch(/0\.04,9\.000,10100010,1,0,1,0,0,0,1,0\s/);
     });
 });
