@@ -2,7 +2,7 @@
 
 ## Fixed
 
--   Fix issue where the bit sequence of the exported CSV data was inverted
+-   CSV export had an inverted bit sequence #192
 
 ## Version 3.1.0
 
@@ -43,15 +43,15 @@
 
 ## Fixed
 
--   The CSV export was exporting the wrong portion of data #123
+-   CSV export contained the wrong portion of data #123
 
 ## Version 3.0.1
 
 ## Fixed
 
--   Fix connecting PPK via J-Link Lite #122
--   Fix issue where moving the right handle past the left handle in the chart
-    selection would break the values displayed in the selection window #119
+-   Connecting a PPK via J-Link Lite failed #122
+-   Moving the right handle past the left handle in the chart selection would
+    break the values displayed in the selection window #119
 
 ## Version 3.0.0
 
