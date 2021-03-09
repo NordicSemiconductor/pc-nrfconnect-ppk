@@ -1,3 +1,9 @@
+## Version 3.1.1
+
+## Fixed
+
+-   Fix issue where the bit sequence of the exported CSV data was inverted
+
 ## Version 3.1.0
 
 ### Added
