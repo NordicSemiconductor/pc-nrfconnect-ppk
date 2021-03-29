@@ -51,8 +51,8 @@ export default () => (
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
         panes={[
-            ['Data Logger', DataLogger],
-            ['Real-time', RealTime],
+            { name: 'Data Logger', Main: DataLogger },
+            { name: 'Real-time', Main: RealTime },
         ]}
     />
 );
