@@ -36,9 +36,9 @@
 
 /* eslint no-param-reassign: off */
 
-import { indexToTimestamp } from '../../../globals';
+import { colors } from 'pc-nrfconnect-shared';
 
-import colors from '../../colors.scss';
+import { indexToTimestamp } from '../../../globals';
 
 const { gray700: color } = colors;
 

@@ -36,7 +36,7 @@
 
 /* eslint no-param-reassign: off */
 
-import colors from '../../colors.scss';
+import { colors } from 'pc-nrfconnect-shared';
 
 const { gray700: color, white } = colors;
 

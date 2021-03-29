@@ -36,11 +36,11 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, bool, exact, number, shape } from 'prop-types';
 
 import crossHairPlugin from './plugins/chart.crossHair';
 
-import colors from '../colors.scss';
 import { rightMarginPx } from './chart.scss';
 
 const rightMargin = parseInt(rightMarginPx, 10);
