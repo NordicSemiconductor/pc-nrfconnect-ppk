@@ -38,8 +38,6 @@ import { getSpikeFilter } from '../utils/persistentStore';
 
 const defaults = { samples: 3, alpha: 0.18, alpha5: 0.06 };
 
-const initialState = getSpikeFilter(defaults);
-
 const SPIKE_FILTER_UPDATE = 'SPIKE_FILTER_UPDATE';
 
 export const updateSpikeFilterAction = spikeFilter => ({
@@ -52,7 +50,7 @@ export const resetSpikeFilterToDefaults = () => ({
     ...defaults,
 });
 
-export default (state = initialState, { type, ...action }) => {
+export default (state = getSpikeFilter(defaults), { type, ...action }) => {
     switch (type) {
         case SPIKE_FILTER_UPDATE:
             return { ...state, ...action };

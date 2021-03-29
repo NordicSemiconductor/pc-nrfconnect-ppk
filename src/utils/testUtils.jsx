@@ -41,6 +41,19 @@ import { createStore } from 'redux';
 
 import reducer from '../reducers';
 
+jest.mock('pc-nrfconnect-shared', () => {
+    const storeAlwaysReturningDefaultValues = {
+        get: (_key, defaultValue) => defaultValue,
+        set: jest.fn(),
+    };
+
+    return {
+        ...jest.requireActual('pc-nrfconnect-shared'),
+        getPersistentStore: () => storeAlwaysReturningDefaultValues,
+        getAppDataDir: () => '/mocked/data/dir',
+    };
+});
+
 window.ResizeObserver = function ResizeObserverStub() {
     this.observe = () => {};
     this.disconnect = () => {};
