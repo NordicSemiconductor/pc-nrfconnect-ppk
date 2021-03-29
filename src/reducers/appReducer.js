@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import persistentStore from '../utils/persistentStore';
-
 const initialState = {
     portName: null,
     metadata: [],
@@ -32,9 +30,6 @@ const TOGGLE_SAVE_CHOICE_DIALOG = 'TOGGLE_SAVE_CHOICE_DIALOG';
 const SHOW_EXPORT_DIALOG = 'SHOW_EXPORT_DIALOG';
 const HIDE_EXPORT_DIALOG = 'HIDE_EXPORT_DIALOG';
 const SET_FILE_LOADED = 'SET_FILE_LOADED';
-
-// This action is defined in pc-nrfconnect-launcher:
-const SET_CURRENT_PANE = 'SET_CURRENT_PANE';
 
 export const toggleAdvancedModeAction = () => ({ type: TOGGLE_ADVANCED_MODE });
 export const samplingStartAction = () => ({ type: SAMPLING_STARTED });
@@ -107,9 +102,6 @@ export default (state = initialState, { type, ...action }) => {
             return { ...state, samplingRunning: true };
         case SAMPLING_STOPPED:
             return { ...state, samplingRunning: false };
-        case SET_CURRENT_PANE:
-            persistentStore.set('currentPane', action.currentPane);
-            return state;
         default:
     }
     return state;
