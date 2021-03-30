@@ -36,9 +36,8 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup, colors } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup, colors, Toggle } from 'pc-nrfconnect-shared';
 
-import { Toggle } from '../../from_pc-nrfconnect-shared';
 import {
     chartState,
     toggleDigitalChannels,

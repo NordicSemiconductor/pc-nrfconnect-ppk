@@ -37,10 +37,9 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
-import { Slider } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import { gainsState, updateGainsAction } from '../../reducers/gainsReducer';
 

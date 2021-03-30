@@ -45,9 +45,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { remote } from 'electron';
 import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
+import { Toggle } from 'pc-nrfconnect-shared';
 
 import exportChart from '../../actions/exportChartAction';
-import { Toggle } from '../../from_pc-nrfconnect-shared';
 import { options, timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
