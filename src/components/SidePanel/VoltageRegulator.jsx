@@ -38,9 +38,9 @@ import React from 'react';
 import BootstrapCollapse from 'react-bootstrap/Collapse';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
-import { NumberInlineInput, Slider } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import {
     moveVoltageRegulatorVddAction,

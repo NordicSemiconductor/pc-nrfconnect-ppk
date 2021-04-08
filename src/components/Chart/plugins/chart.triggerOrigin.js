@@ -34,11 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint no-param-reassign: off */
+import { colors } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp } from '../../../globals';
-
-import colors from '../../colors.scss';
 
 const { gray700: color } = colors;
 

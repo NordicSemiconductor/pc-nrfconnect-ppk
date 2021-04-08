@@ -38,6 +38,7 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
+import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, func, number, shape } from 'prop-types';
 
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/triggerActions';
@@ -55,7 +56,6 @@ import triggerLevelPlugin from './plugins/chart.triggerLevel';
 import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 
-import colors from '../colors.scss';
 import { rightMarginPx, yAxisWidthPx } from './chart.scss';
 
 const valueRange = { min: 0, max: undefined };

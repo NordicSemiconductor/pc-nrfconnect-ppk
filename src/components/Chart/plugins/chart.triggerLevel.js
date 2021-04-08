@@ -34,9 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint no-param-reassign: off */
-
-import colors from '../../colors.scss';
+import { colors } from 'pc-nrfconnect-shared';
 
 const { gray700: color, nordicBlue } = colors;
 

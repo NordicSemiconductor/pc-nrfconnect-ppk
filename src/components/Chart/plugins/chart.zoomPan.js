@@ -34,8 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint no-param-reassign: off */
-
 const wheelZoomFactor = 1.25;
 
 const isTrackPad = evt => {

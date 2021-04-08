@@ -34,15 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import persistentStore from '../utils/persistentStore';
+import { getSpikeFilter } from '../utils/persistentStore';
 
 const defaults = { samples: 3, alpha: 0.18, alpha5: 0.06 };
-
-const initialState = {
-    samples: persistentStore.get('spikeFilter.samples', defaults.samples),
-    alpha: persistentStore.get('spikeFilter.alpha', defaults.alpha),
-    alpha5: persistentStore.get('spikeFilter.alpha5', defaults.alpha5),
-};
 
 const SPIKE_FILTER_UPDATE = 'SPIKE_FILTER_UPDATE';
 
@@ -56,7 +50,7 @@ export const resetSpikeFilterToDefaults = () => ({
     ...defaults,
 });
 
-export default (state = initialState, { type, ...action }) => {
+export default (state = getSpikeFilter(defaults), { type, ...action }) => {
     switch (type) {
         case SPIKE_FILTER_UPDATE:
             return { ...state, ...action };

@@ -34,7 +34,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import persistentStore from '../utils/persistentStore';
+import {
+    getDuration,
+    getSampleFreq,
+    setDuration as persistDuration,
+    setSampleFreq as persistSampleFreq,
+} from '../utils/persistentStore';
 
 const ranges = [
     { name: 'days', multiplier: 24 * 60 * 60, min: 7, max: 500 }, // 1Hz
@@ -83,15 +88,12 @@ export default (state = initialState, { type, ...action }) => {
             const samplingTime = action.maxContinuousSamplingTimeUs;
             const maxSampleFreq = Math.round(10000 / samplingTime) * 100;
             const maxFreqLog10 = Math.ceil(Math.log10(maxSampleFreq));
-            const sampleFreq = persistentStore.get(
-                `sampleFreq-${maxSampleFreq}`,
-                maxSampleFreq
-            );
+            const sampleFreq = getSampleFreq(maxSampleFreq);
             const sampleFreqLog10 = Math.ceil(Math.log10(sampleFreq));
             const range = ranges[sampleFreqLog10];
             const { min, max, multiplier } = range;
-            const savedDuration = persistentStore.get(
-                `durationSeconds-${maxSampleFreq}`,
+            const savedDuration = getDuration(
+                maxSampleFreq,
                 state.durationSeconds
             );
             const durationSeconds = Math.min(
@@ -118,15 +120,12 @@ export default (state = initialState, { type, ...action }) => {
                 10 ** action.sampleFreqLog10,
                 state.maxSampleFreq
             );
-            persistentStore.set(`sampleFreq-${maxSampleFreq}`, sampleFreq);
+            persistSampleFreq(maxSampleFreq, sampleFreq);
             const durationSeconds = Math.min(
                 Math.max(min * multiplier, state.durationSeconds),
                 max * multiplier
             );
-            persistentStore.set(
-                `durationSeconds-${maxSampleFreq}`,
-                durationSeconds
-            );
+            persistDuration(maxSampleFreq, durationSeconds);
             return {
                 ...state,
                 ...action,
@@ -135,10 +134,7 @@ export default (state = initialState, { type, ...action }) => {
             };
         }
         case DL_DURATION_SECONDS: {
-            persistentStore.set(
-                `durationSeconds-${state.maxSampleFreq}`,
-                action.durationSeconds
-            );
+            persistDuration(state.maxSampleFreq, action.durationSeconds);
             return { ...state, ...action };
         }
         default:
