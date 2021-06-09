@@ -65,6 +65,7 @@ const initialState = {
 const DL_SAMPLE_FREQ_LOG_10 = 'DL_SAMPLE_FREQ_LOG_10';
 const DL_DURATION_SECONDS = 'DL_DURATION_SECONDS';
 const SET_SAMPLING_ATTRS = 'SET_SAMPLING_ATTRS';
+const SET_DATA_LOGGER_STATE = 'SET_DATA_LOGGER_STATE';
 
 export const updateSampleFreqLog10 = sampleFreqLog10 => ({
     type: DL_SAMPLE_FREQ_LOG_10,
@@ -80,6 +81,11 @@ export const updateDurationSeconds = durationSeconds => ({
 export const setSamplingAttrsAction = maxContinuousSamplingTimeUs => ({
     type: SET_SAMPLING_ATTRS,
     maxContinuousSamplingTimeUs,
+});
+
+export const setDataLoggerState = state => ({
+    type: SET_DATA_LOGGER_STATE,
+    ...state,
 });
 
 export default (state = initialState, { type, ...action }) => {
@@ -135,6 +141,9 @@ export default (state = initialState, { type, ...action }) => {
         }
         case DL_DURATION_SECONDS: {
             persistDuration(state.maxSampleFreq, action.durationSeconds);
+            return { ...state, ...action };
+        }
+        case SET_DATA_LOGGER_STATE: {
             return { ...state, ...action };
         }
         default:
