@@ -189,8 +189,8 @@ export const resetCursorAndChart = () => (dispatch, getState) => {
 export const setChartState = state => ({
     type: LOAD_CHART_STATE,
     ...state,
-    yMin: null,
-    yMax: null,
+    yMin: state.yAxisLock ? state.yMin : null,
+    yMax: state.yAxisLock ? state.yMax : null,
     hasDigitalChannels: options.bits !== null,
 });
 

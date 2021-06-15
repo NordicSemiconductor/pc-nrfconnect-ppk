@@ -46,6 +46,7 @@ import {
 import { options, updateTitle } from '../globals';
 import { setFileLoadedAction } from '../reducers/appReducer';
 import { setChartState } from '../reducers/chartReducer';
+import { setDataLoggerState } from '../reducers/dataLoggerReducer';
 import { setTriggerState } from '../reducers/triggerReducer';
 import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
@@ -75,6 +76,7 @@ export const save = () => async (_, getState) => {
             options: { ...opts, currentPane: currentPaneSelector(getState()) },
             chartState: getState().app.chart,
             triggerState: getState().app.trigger,
+            dataLoggerState: getState().app.dataLogger,
         },
     };
 
@@ -106,6 +108,7 @@ export const load = () => async dispatch => {
     const {
         chartState,
         triggerState,
+        dataLoggerState,
         options: { currentPane, ...loadedOptions },
     } = metadata;
 
@@ -115,6 +118,9 @@ export const load = () => async dispatch => {
 
     dispatch(setChartState(chartState));
     dispatch(setFileLoadedAction(true));
+    if (dataLoggerState !== null) {
+        dispatch(setDataLoggerState(dataLoggerState));
+    }
     if (triggerState !== null) {
         dispatch(setTriggerState(triggerState));
     }
