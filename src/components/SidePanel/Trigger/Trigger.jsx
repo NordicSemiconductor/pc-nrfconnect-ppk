@@ -50,9 +50,8 @@ import './trigger.scss';
 
 const Trigger = () => {
     const { rttRunning, capabilities } = useSelector(appState);
-    const { externalTrigger, triggerLevel, triggerRunning } = useSelector(
-        triggerState
-    );
+    const { externalTrigger, triggerLevel, triggerRunning } =
+        useSelector(triggerState);
 
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 

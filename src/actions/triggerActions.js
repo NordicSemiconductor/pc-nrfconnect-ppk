@@ -207,11 +207,8 @@ export function updateTriggerLevel(triggerLevel) {
 }
 
 export const initialiseTriggerSettings = () => async (dispatch, getState) => {
-    const {
-        triggerLength,
-        triggerLevel,
-        triggerWindowRange,
-    } = getState().app.trigger;
+    const { triggerLength, triggerLevel, triggerWindowRange } =
+        getState().app.trigger;
     if (!triggerLength) await dispatch(triggerLengthUpdate(10));
     if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
     if (!triggerWindowRange)

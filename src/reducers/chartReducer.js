@@ -141,18 +141,14 @@ const chartWindow = (windowBegin, windowEnd, windowDuration, yMin, yMax) => {
     };
 };
 
-export const chartWindowAction = (
-    windowBegin,
-    windowEnd,
-    windowDuration,
-    yMin,
-    yMax
-) => (dispatch, getState) => {
-    const { sampleFreq } = getState().app.dataLogger;
-    const duration = calculateDuration(sampleFreq, windowDuration);
+export const chartWindowAction =
+    (windowBegin, windowEnd, windowDuration, yMin, yMax) =>
+    (dispatch, getState) => {
+        const { sampleFreq } = getState().app.dataLogger;
+        const duration = calculateDuration(sampleFreq, windowDuration);
 
-    dispatch(chartWindow(windowBegin, windowEnd, duration, yMin, yMax));
-};
+        dispatch(chartWindow(windowBegin, windowEnd, duration, yMin, yMax));
+    };
 
 const chartTrigger = (windowBegin, windowEnd, windowDuration) => {
     const [half, center] = getCenter(windowBegin, windowEnd, windowDuration);
@@ -164,16 +160,13 @@ const chartTrigger = (windowBegin, windowEnd, windowDuration) => {
     };
 };
 
-export const chartTriggerWindowAction = (
-    windowBegin,
-    windowEnd,
-    windowDuration
-) => (dispatch, getState) => {
-    const { maxSampleFreq } = getState().app.dataLogger;
-    const duration = calculateDuration(maxSampleFreq, windowDuration);
+export const chartTriggerWindowAction =
+    (windowBegin, windowEnd, windowDuration) => (dispatch, getState) => {
+        const { maxSampleFreq } = getState().app.dataLogger;
+        const duration = calculateDuration(maxSampleFreq, windowDuration);
 
-    dispatch(chartTrigger(windowBegin, windowEnd, duration));
-};
+        dispatch(chartTrigger(windowBegin, windowEnd, duration));
+    };
 
 export const chartWindowLockAction = () => ({ type: CHART_WINDOW_LOCK });
 export const chartWindowUnLockAction = () => ({ type: CHART_WINDOW_UNLOCK });
