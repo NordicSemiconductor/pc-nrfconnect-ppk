@@ -56,7 +56,7 @@ import triggerLevelPlugin from './plugins/chart.triggerLevel';
 import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 
-import { rightMarginPx, yAxisWidthPx } from './chart.scss';
+import { rightMarginPx, yAxisWidthPx } from './chart-variables.icss.scss';
 
 const valueRange = { min: 0, max: undefined };
 const yAxisWidth = parseInt(yAxisWidthPx, 10);

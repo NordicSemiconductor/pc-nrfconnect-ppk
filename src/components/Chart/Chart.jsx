@@ -65,7 +65,8 @@ import StatBox from './StatBox';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
 
-import { rightMarginPx } from './chart.scss';
+import './chart.scss';
+import { rightMarginPx } from './chart-variables.icss.scss';
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
