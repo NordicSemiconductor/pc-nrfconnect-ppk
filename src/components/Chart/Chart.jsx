@@ -66,9 +66,9 @@ import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
 
 import './chart.scss';
-import { rightMarginPx } from './chart-variables.icss.scss';
+import style from './chart-variables.icss.scss';
 
-const rightMargin = parseInt(rightMarginPx, 10);
+const rightMargin = parseInt(style.rightMarginPx, 10);
 
 const calcStats = (_begin, _end) => {
     if (_begin === null || _end === null) {

@@ -41,9 +41,9 @@ import { arrayOf, bool, exact, number, shape } from 'prop-types';
 
 import crossHairPlugin from './plugins/chart.crossHair';
 
-import { rightMarginPx } from './chart-variables.icss.scss';
+import style from './chart-variables.icss.scss';
 
-const rightMargin = parseInt(rightMarginPx, 10);
+const rightMargin = parseInt(style.rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
 
 const DigitalChannels = ({
