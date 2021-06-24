@@ -318,11 +318,8 @@ export const updateGains = index => async (_, getState) => {
 
 export function updateResistors() {
     return async (_, getState) => {
-        const {
-            userResLo,
-            userResMid,
-            userResHi,
-        } = getState().app.resistorCalibration;
+        const { userResLo, userResMid, userResHi } =
+            getState().app.resistorCalibration;
         logger.info(`Resistors set to ${userResLo}/${userResMid}/${userResHi}`);
         await device.ppkUpdateResistors(userResLo, userResMid, userResHi);
     };

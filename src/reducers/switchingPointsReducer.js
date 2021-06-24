@@ -125,14 +125,12 @@ export default (state = initialState, action) => {
             };
         }
         case SWITCHING_POINTS_DOWN_MOVE: {
-            const {
-                switchDownHigh,
-                switchDownLow,
-            } = calculateSwitchingPointsDown(
-                action.sliderVal,
-                state.switchUpHigh,
-                state.switchUpSliderPosition
-            );
+            const { switchDownHigh, switchDownLow } =
+                calculateSwitchingPointsDown(
+                    action.sliderVal,
+                    state.switchUpHigh,
+                    state.switchUpSliderPosition
+                );
             return {
                 ...state,
                 switchDownHigh,
@@ -141,14 +139,12 @@ export default (state = initialState, action) => {
             };
         }
         case SWITCHING_POINTS_DOWN_SET: {
-            const {
-                switchDownHigh,
-                switchDownLow,
-            } = calculateSwitchingPointsDown(
-                action.sliderVal,
-                state.switchUpHigh,
-                state.switchUpSliderPosition
-            );
+            const { switchDownHigh, switchDownLow } =
+                calculateSwitchingPointsDown(
+                    action.sliderVal,
+                    state.switchUpHigh,
+                    state.switchUpSliderPosition
+                );
             return {
                 ...state,
                 switchDownHigh,
@@ -169,14 +165,12 @@ export default (state = initialState, action) => {
             const { switchUpLow, switchUpHigh } = calculateSwitchingPointsUp(
                 switchUpSliderPosition
             );
-            const {
-                switchDownHigh,
-                switchDownLow,
-            } = calculateSwitchingPointsDown(
-                switchDownSliderPosition,
-                switchUpHigh,
-                state.switchUpSliderPosition
-            );
+            const { switchDownHigh, switchDownLow } =
+                calculateSwitchingPointsDown(
+                    switchDownSliderPosition,
+                    switchUpHigh,
+                    state.switchUpSliderPosition
+                );
 
             return {
                 ...state,

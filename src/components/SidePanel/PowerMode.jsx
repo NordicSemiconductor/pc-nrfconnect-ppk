@@ -49,12 +49,8 @@ const { gray700, nordicBlue } = colors;
 
 export default () => {
     const dispatch = useDispatch();
-    const {
-        capabilities,
-        isSmuMode,
-        deviceRunning,
-        samplingRunning,
-    } = useSelector(appState);
+    const { capabilities, isSmuMode, deviceRunning, samplingRunning } =
+        useSelector(appState);
     const { triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
 
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));

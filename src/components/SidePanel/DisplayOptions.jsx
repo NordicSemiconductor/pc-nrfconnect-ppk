@@ -50,11 +50,8 @@ const { gray700, nordicBlue } = colors;
 
 export default () => {
     const dispatch = useDispatch();
-    const {
-        digitalChannelsVisible,
-        timestampsVisible,
-        hasDigitalChannels,
-    } = useSelector(chartState);
+    const { digitalChannelsVisible, timestampsVisible, hasDigitalChannels } =
+        useSelector(chartState);
     const isDataLogger = useSelector(isDataLoggerPane);
 
     return (

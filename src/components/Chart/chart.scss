@@ -1,7 +1,5 @@
 @import "~pc-nrfconnect-shared/styles";
-
-$yAxisWidthPx: 70px;  // must be in pixels, imported in JS
-$rightMarginPx: 30px;
+@import "./chart-variables.icss.scss";
 
 .chart-outer {
     flex: 1;
@@ -82,9 +80,4 @@ $rightMarginPx: 30px;
         margin-left: $yAxisWidthPx;
         margin-right: $rightMarginPx;
     }
-}
-
-:export {
-    yAxisWidthPx: $yAxisWidthPx;
-    rightMarginPx: $rightMarginPx;
 }

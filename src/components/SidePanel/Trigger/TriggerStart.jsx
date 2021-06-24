@@ -63,11 +63,8 @@ function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {
 
 const TriggerStart = ({ triggerMode, rttRunning }) => {
     const dispatch = useDispatch();
-    const {
-        externalTrigger,
-        triggerSingleWaiting,
-        triggerRunning,
-    } = useSelector(triggerState);
+    const { externalTrigger, triggerSingleWaiting, triggerRunning } =
+        useSelector(triggerState);
 
     const { capabilities } = useSelector(appState);
 
