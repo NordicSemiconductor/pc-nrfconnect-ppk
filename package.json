@@ -39,7 +39,7 @@
     "chart.js": "2.9.3",
     "electron-is-dev": "1.2.0",
     "electron-store": "5.1.1",
-    "mathjs": "6.6.1",
+    "mathjs": "7.5.1",
     "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v4.27.3",
     "react": "16.13.1",
     "react-chartjs-2": "2.9.0",
