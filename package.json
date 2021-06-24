@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "bson": "4.0.4",
-    "chart.js": "2.9.3",
+    "chart.js": "2.9.4",
     "electron-is-dev": "1.2.0",
     "electron-store": "5.1.1",
     "mathjs": "6.6.1",
