@@ -37,7 +37,7 @@
     it at a later time.
 - Easily create **screenshots** of the current graph.
 
-### Updates
+### Changed
 
 - Raise **limit for displaying digital channels** (on the highest resolution
     they were previously only shown for a time range of up to 3 seconds, now
