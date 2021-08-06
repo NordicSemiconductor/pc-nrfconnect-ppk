@@ -2,13 +2,13 @@
 
 ### Fixed
 
-- Chart issues when loading from saved capture file
+- Chart issues when loading from saved capture file.
 
 ## 3.1.1 - 2021-03-10
 
 ### Fixed
 
-- CSV export had an inverted bit sequence
+- CSV export had an inverted bit sequence.
 
 ## 3.1.0 - 2021-02-15
 
@@ -50,21 +50,21 @@
 ### Fixed
 
 - Small visual glitch when used with nRF Connect for Desktop 3.6.1:
-    The top margin in the side panel was shrunken
+    The top margin in the side panel was shrunken.
 
 ## 3.0.2 - 2020-12-11
 
 ### Fixed
 
-- CSV export contained the wrong portion of data
+- CSV export contained the wrong portion of data.
 
 ## 3.0.1 - 2020-12-03
 
 ### Fixed
 
-- Connecting a PPK via J-Link Lite failed
+- Connecting a PPK via J-Link Lite failed.
 - Moving the right handle past the left handle in the chart selection would
-    break the values displayed in the selection window
+    break the values displayed in the selection window.
 
 ## 3.0.0 - 2020-12-01
 
