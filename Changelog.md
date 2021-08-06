@@ -1,16 +1,16 @@
-## Version 3.1.2
+## 3.1.2
 
 ## Fixed
 
 - Chart issues when loading from saved capture file #198
 
-## Version 3.1.1
+## 3.1.1
 
 ## Fixed
 
 - CSV export had an inverted bit sequence #192
 
-## Version 3.1.0
+## 3.1.0
 
 ### Added
 
@@ -45,13 +45,13 @@
 - **Enhanced performance** to make the UI more responsive.
 - Several **minor UI changes** to improve the user experience.
 
-## Version 3.0.2
+## 3.0.2
 
 ## Fixed
 
 - CSV export contained the wrong portion of data #123
 
-## Version 3.0.1
+## 3.0.1
 
 ## Fixed
 
@@ -59,7 +59,7 @@
 - Moving the right handle past the left handle in the chart selection would
     break the values displayed in the selection window #119
 
-## Version 3.0.0
+## 3.0.0
 
 ### Changed
 
