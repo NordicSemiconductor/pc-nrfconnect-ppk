@@ -2,13 +2,13 @@
 
 ### Fixed
 
-- Chart issues when loading from saved capture file #198
+- Chart issues when loading from saved capture file
 
 ## 3.1.1 - 2021-03-10
 
 ### Fixed
 
-- CSV export had an inverted bit sequence #192
+- CSV export had an inverted bit sequence
 
 ## 3.1.0 - 2021-02-15
 
@@ -56,15 +56,15 @@
 
 ### Fixed
 
-- CSV export contained the wrong portion of data #123
+- CSV export contained the wrong portion of data
 
 ## 3.0.1 - 2020-12-03
 
 ### Fixed
 
-- Connecting a PPK via J-Link Lite failed #122
+- Connecting a PPK via J-Link Lite failed
 - Moving the right handle past the left handle in the chart selection would
-    break the values displayed in the selection window #119
+    break the values displayed in the selection window
 
 ## 3.0.0 - 2020-12-01
 
