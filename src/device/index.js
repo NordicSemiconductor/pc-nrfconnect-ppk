@@ -39,7 +39,7 @@ import SerialDevice from './serialDevice';
 
 export default class {
     constructor(device, onSampleCallback) {
-        const instance = device.traits.includes('jlink')
+        const instance = device.traits.jlink
             ? new RTTDevice(device)
             : new SerialDevice(device);
         instance.onSampleCallback = onSampleCallback;

@@ -69,6 +69,9 @@ export default () => ({
             n <= originalIndexEndCeiled;
             ++mappedIndex, ++n
         ) {
+            if (!this.ampereLineData[mappedIndex]) {
+                continue;
+            }
             const k = (n + data.length) % data.length;
             const v = data[k];
             const timestamp =

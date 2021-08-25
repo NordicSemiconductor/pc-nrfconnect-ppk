@@ -40,14 +40,16 @@
     "electron-is-dev": "1.2.0",
     "electron-store": "5.1.1",
     "mathjs": "6.6.1",
-    "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v4.17.1",
+    "pc-nrfconnect-shared": "git://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#feature/nrf-device-lib-js",
     "react": "16.13.1",
     "react-chartjs-2": "2.9.0",
     "react-dom": "^17.0.1",
     "react-redux": "7.2.0",
     "redux-mock-store": "^1.5.4"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@nordicsemiconductor/nrf-device-lib-js": "^0.3.12"
+  },
   "eslintConfig": {
     "extends": "./node_modules/pc-nrfconnect-shared/config/eslintrc.json"
   },

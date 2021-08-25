@@ -241,6 +241,7 @@ export function open(deviceInfo) {
         };
 
         const onSample = ({ value, bits, endOfTrigger }) => {
+            console.log('got sample', value);
             if (options.timestamp === undefined) {
                 options.timestamp = 0;
             }
@@ -313,6 +314,7 @@ export function open(deviceInfo) {
 
         try {
             device = new Device(deviceInfo, onSample);
+            console.log('PPK: Device created', device);
             dispatch(
                 setSamplingAttrsAction(
                     device.capabilities.maxContinuousSamplingTimeUs
@@ -321,7 +323,6 @@ export function open(deviceInfo) {
             dispatch(setupOptions());
             dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
-
             const {
                 triggerLength,
                 triggerLevel,
@@ -364,16 +365,16 @@ export function open(deviceInfo) {
             logger.info('PPK started');
         } catch (err) {
             logger.error('Failed to start PPK');
-            logger.debug(err);
+            logger.error(err);
             dispatch({ type: 'DEVICE_DESELECTED' });
         }
 
         dispatch(
-            deviceOpenedAction(deviceInfo.serialNumber, device.capabilities)
+            deviceOpenedAction(deviceInfo.serialnumber, device.capabilities)
         );
 
         logger.info('PPK opened');
-        updateTitle(deviceInfo.serialNumber);
+        updateTitle(deviceInfo.serialnumber);
 
         device.on('error', (message, error) => {
             logger.error(message);
