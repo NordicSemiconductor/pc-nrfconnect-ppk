@@ -97,63 +97,67 @@ export const formatDataForExport = (
 };
 
 export default (
-    filename,
-    indexBegin,
-    indexEnd,
-    contentSelection,
-    setProgress,
-    setExporting,
-    cancel
-) => dispatch => {
-    if (!filename) {
-        return Promise.resolve();
-    }
-    const fd = fs.openSync(filename, 'w');
-    fs.writeSync(
-        fd,
-        selectivePrint(
-            [
-                'Timestamp(ms)',
-                'Current(uA)',
-                'D0-D7',
-                'D0,D1,D2,D3,D4,D5,D6,D7',
-            ],
-            contentSelection
-        )
-    );
+        filename,
+        indexBegin,
+        indexEnd,
+        contentSelection,
+        setProgress,
+        setExporting,
+        cancel
+    ) =>
+    dispatch => {
+        if (!filename) {
+            return Promise.resolve();
+        }
+        const fd = fs.openSync(filename, 'w');
+        fs.writeSync(
+            fd,
+            selectivePrint(
+                [
+                    'Timestamp(ms)',
+                    'Current(uA)',
+                    'D0-D7',
+                    'D0,D1,D2,D3,D4,D5,D6,D7',
+                ],
+                contentSelection
+            )
+        );
 
-    return indexer(indexBegin, indexEnd, 10000)
-        .map(([start, len]) => () =>
-            new Promise((resolve, reject) => {
-                if (cancel.current) {
-                    reject();
-                }
-                const content = formatDataForExport(
-                    start,
-                    len,
-                    options.data,
-                    options.bits,
-                    contentSelection
-                );
-                fs.write(fd, content, () => {
-                    setProgress(
-                        Math.round(
-                            ((start - indexBegin) / (indexEnd - indexBegin)) *
-                                100
-                        )
-                    );
-                    resolve();
-                });
+        return indexer(indexBegin, indexEnd, 10000)
+            .map(
+                ([start, len]) =>
+                    () =>
+                        new Promise((resolve, reject) => {
+                            if (cancel.current) {
+                                reject();
+                            }
+                            const content = formatDataForExport(
+                                start,
+                                len,
+                                options.data,
+                                options.bits,
+                                contentSelection
+                            );
+                            fs.write(fd, content, () => {
+                                setProgress(
+                                    Math.round(
+                                        ((start - indexBegin) /
+                                            (indexEnd - indexBegin)) *
+                                            100
+                                    )
+                                );
+                                resolve();
+                            });
+                        })
+            )
+            .reduce((prev, task) => prev.then(task), Promise.resolve())
+            .catch(() => logger.info('Export cancelled'))
+            .then(() => {
+                dispatch(hideExportDialog());
+                logger.info(`Exported CSV to: ${filename}`);
             })
-        )
-        .reduce((prev, task) => prev.then(task), Promise.resolve())
-        .catch(() => logger.info('Export cancelled'))
-        .then(() => {
-            dispatch(hideExportDialog());
-            logger.info(`Exported CSV to: ${filename}`);
-        })
-        .finally(() => {
-            fs.closeSync(fd);
-            setExporting(false);
-        });
-};
+            .finally(() => {
+                fs.closeSync(fd);
+                setExporting(false);
+            });
+    };

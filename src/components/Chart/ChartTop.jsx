@@ -101,10 +101,8 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     if (yAxisLock) {
                         dispatch(toggleYAxisLock());
                     } else {
-                        const {
-                            min,
-                            max,
-                        } = chartRef.current.chartInstance.scales.yScale;
+                        const { min, max } =
+                            chartRef.current.chartInstance.scales.yScale;
                         dispatch(toggleYAxisLock(min, max));
                     }
                 }}

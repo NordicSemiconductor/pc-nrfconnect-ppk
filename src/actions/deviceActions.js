@@ -323,11 +323,8 @@ export function open(deviceInfo) {
             dispatch(setupOptions());
             dispatch(setDeviceRunningAction(device.isRunningInitially));
             const metadata = device.parseMeta(await device.start());
-            const {
-                triggerLength,
-                triggerLevel,
-                triggerWindowRange,
-            } = getState().app.trigger;
+            const { triggerLength, triggerLevel, triggerWindowRange } =
+                getState().app.trigger;
             if (!triggerLength) await dispatch(triggerLengthUpdate(10));
             if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
             if (!triggerWindowRange)
@@ -486,11 +483,8 @@ export function setPowerMode(isSmuMode) {
 
 export function updateResistors() {
     return async (_, getState) => {
-        const {
-            userResLo,
-            userResMid,
-            userResHi,
-        } = getState().app.resistorCalibration;
+        const { userResLo, userResMid, userResHi } =
+            getState().app.resistorCalibration;
         logger.info(`Resistors set to ${userResLo}/${userResMid}/${userResHi}`);
         await device.ppkUpdateResistors(userResLo, userResMid, userResHi);
     };

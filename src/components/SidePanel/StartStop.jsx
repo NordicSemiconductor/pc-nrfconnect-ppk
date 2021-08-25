@@ -79,9 +79,10 @@ export default () => {
 
     const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
 
-    const completeChange = useCallback(() => dispatch(setupOptions()), [
-        dispatch,
-    ]);
+    const completeChange = useCallback(
+        () => dispatch(setupOptions()),
+        [dispatch]
+    );
 
     return (
         <Group heading="Sampling parameters">

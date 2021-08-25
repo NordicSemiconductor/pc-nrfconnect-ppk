@@ -157,8 +157,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const chartRef = useRef(null);
 
-    const dataAccumulator = useLazyInitializedRef(dataAccumulatorInitialiser)
-        .current;
+    const dataAccumulator = useLazyInitializedRef(
+        dataAccumulatorInitialiser
+    ).current;
     const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
     const { sampleFreq } = useSelector(dataLoggerState);
@@ -190,14 +191,15 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
     const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
-    const selectionStats = useMemo(() => calcStats(cursorBegin, cursorEnd), [
-        cursorBegin,
-        cursorEnd,
-    ]);
+    const selectionStats = useMemo(
+        () => calcStats(cursorBegin, cursorEnd),
+        [cursorBegin, cursorEnd]
+    );
 
-    const resetCursor = useCallback(() => chartCursor(null, null), [
-        chartCursor,
-    ]);
+    const resetCursor = useCallback(
+        () => chartCursor(null, null),
+        [chartCursor]
+    );
 
     const zoomPanCallback = useCallback(
         (beginX, endX, beginY, endY) => {

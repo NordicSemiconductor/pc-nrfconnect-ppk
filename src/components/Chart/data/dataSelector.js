@@ -69,7 +69,9 @@ export default () => ({
             n <= originalIndexEndCeiled;
             ++mappedIndex, ++n
         ) {
+            // temporary
             if (!this.ampereLineData[mappedIndex]) {
+                // eslint-disable-next-line no-continue
                 continue;
             }
             const k = (n + data.length) % data.length;

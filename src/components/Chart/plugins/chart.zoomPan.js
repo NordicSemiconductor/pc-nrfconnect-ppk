@@ -88,10 +88,8 @@ const processWheelEvents = () => {
 
     const { clientX, clientY, deltaX, deltaY } = event;
 
-    const {
-        left: xOffset,
-        top: yOffset,
-    } = event.target.getBoundingClientRect();
+    const { left: xOffset, top: yOffset } =
+        event.target.getBoundingClientRect();
 
     const isTrackPadEvent = isTrackPad(event);
     const isTrackpadPan = isTrackPadEvent && !event.shiftKey;
@@ -142,10 +140,8 @@ const processPointerMoveEvents = () => {
     }
 
     const { clientX, clientY } = event;
-    const {
-        left: xOffset,
-        top: yOffset,
-    } = event.target.getBoundingClientRect();
+    const { left: xOffset, top: yOffset } =
+        event.target.getBoundingClientRect();
 
     const { xMin, xMax, yMin, yMax, pX, pY } = dragStart;
     const { xScale, yScale } = scales;
@@ -206,10 +202,8 @@ export default {
                 const { xScale, yScale } = chartInstance.scales;
                 const { min: xMin, max: xMax } = xScale;
                 const { max: yMin, min: yMax } = yScale;
-                const {
-                    left: xOffset,
-                    top: yOffset,
-                } = event.target.getBoundingClientRect();
+                const { left: xOffset, top: yOffset } =
+                    event.target.getBoundingClientRect();
                 const pX =
                     xMin +
                     (xMax - xMin) *
