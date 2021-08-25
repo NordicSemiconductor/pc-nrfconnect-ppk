@@ -47,7 +47,7 @@ import {
 import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
 
-import colors from '../colors.scss';
+import colors from '../colors.icss.scss';
 
 const { gray700, nordicBlue } = colors;
 

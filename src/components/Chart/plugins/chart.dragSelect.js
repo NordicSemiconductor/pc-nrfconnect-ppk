@@ -36,7 +36,7 @@
 
 /* eslint no-param-reassign: off */
 
-import colors from '../../colors.scss';
+import colors from '../../colors.icss.scss';
 
 const CHART_SELECTION_COLOR = colors.gray100;
 const CHART_DRAG_COLOR = colors.gray100;

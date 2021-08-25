@@ -55,7 +55,7 @@ import triggerLevelPlugin from './plugins/chart.triggerLevel';
 import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 
-import colors from '../colors.scss';
+import colors from '../colors.icss.scss';
 import { rightMarginPx, yAxisWidthPx } from './chart.scss';
 
 const valueRange = { min: 0, max: undefined };

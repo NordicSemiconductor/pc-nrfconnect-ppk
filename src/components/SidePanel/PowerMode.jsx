@@ -46,7 +46,7 @@ import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 import VoltageRegulator from './VoltageRegulator';
 
-import colors from '../colors.scss';
+import colors from '../colors.icss.scss';
 
 const { gray700, nordicBlue } = colors;
 

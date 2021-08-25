@@ -40,7 +40,7 @@ import { arrayOf, bool, exact, number, shape } from 'prop-types';
 
 import crossHairPlugin from './plugins/chart.crossHair';
 
-import colors from '../colors.scss';
+import colors from '../colors.icss.scss';
 import { rightMarginPx } from './chart.scss';
 
 const rightMargin = parseInt(rightMarginPx, 10);

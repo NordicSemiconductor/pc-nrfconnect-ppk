@@ -36,7 +36,7 @@
 
 /* eslint no-param-reassign: off */
 
-import colors from '../../colors.scss';
+import colors from '../../colors.icss.scss';
 
 const { gray700: color, white } = colors;
 
