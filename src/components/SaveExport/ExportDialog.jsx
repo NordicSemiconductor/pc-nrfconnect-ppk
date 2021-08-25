@@ -53,7 +53,7 @@ import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 
-import './saveexport.scss';
+import './saveexport.icss.scss';
 
 const { unit } = mathjs;
 

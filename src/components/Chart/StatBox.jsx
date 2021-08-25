@@ -40,7 +40,7 @@ import { instanceOf, node, number, string } from 'prop-types';
 
 import { formatDurationHTML } from '../../utils/duration';
 
-import './statbox.scss';
+import './statbox.icss.scss';
 
 const Value = ({ label, u }) => {
     const v = u.format({ notation: 'fixed', precision: 2 });
