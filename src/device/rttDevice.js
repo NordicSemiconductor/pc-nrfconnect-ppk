@@ -241,8 +241,7 @@ class RTTDevice extends Device {
         return new Promise((resolve, reject) => {
             nRFDeviceLib
                 .rttRead(deviceLibContext, deviceId, 0, length)
-                .then(({ rtt_read_buffer: rawbytes }) => {
-                    console.log('return value from read', rawbytes);
+                .then(({ rttReadBuffer: rawbytes }) => {
                     return resolve({
                         rawbytes,
                     });
@@ -258,7 +257,6 @@ class RTTDevice extends Device {
                 this.deviceId,
                 MAX_RTT_READ_LENGTH
             );
-            console.log('got rawbytes?', rawbytes);
             if (rawbytes && rawbytes.length) {
                 process.nextTick(
                     this.parseMeasurementData.bind(this, rawbytes)
@@ -275,7 +273,6 @@ class RTTDevice extends Device {
             }
         } catch (err) {
             this.isRttOpen = false;
-            console.log('ERR!', err);
             throw new Error('PPK connection failure');
         }
     }
@@ -290,7 +287,7 @@ class RTTDevice extends Device {
                 hwStates = await new Promise((resolve, reject) => {
                     nRFDeviceLib
                         .rttRead(deviceLibContext, deviceId, 0, 255)
-                        .then(({ rtt_read_buffer: rawbytes }) => {
+                        .then(({ rttReadBuffer: rawbytes }) => {
                             if (rawbytes.length) {
                                 return resolve({
                                     rawbytes,

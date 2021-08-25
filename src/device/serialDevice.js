@@ -115,15 +115,6 @@ class SerialDevice extends Device {
                 console.log('Child process cleanly exited');
             }
         });
-        this.child.on('error', error => {
-            console.log('=== ERROR');
-            console.log(error);
-        });
-        this.child.on('exit', (code, signal) => {
-            console.log('=== EXIT');
-            console.log('code', code);
-            console.log('signal', signal);
-        });
     }
 
     resetDataLossCounter() {

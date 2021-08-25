@@ -241,7 +241,6 @@ export function open(deviceInfo) {
         };
 
         const onSample = ({ value, bits, endOfTrigger }) => {
-            console.log('got sample', value);
             if (options.timestamp === undefined) {
                 options.timestamp = 0;
             }
