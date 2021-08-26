@@ -142,7 +142,6 @@ class RTTDevice extends Device {
         this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
         this.capabilities.hwTrigger = true;
         this.device = device;
-        this.isRttOpen = false;
 
         this.timestamp = 0;
         this.dataPayload = [];
@@ -244,7 +243,8 @@ class RTTDevice extends Device {
     }
 
     async readloop() {
-        if (!this.isRttOpen) return;
+        if (!nRFDeviceLib.rttIsStarted(deviceLibContext, this.device.id))
+            return;
         try {
             const { rawbytes } = await RTTDevice.readRTT(
                 this.device.id,
@@ -302,9 +302,6 @@ class RTTDevice extends Device {
         logger.info('Initializing the PPK');
         return this.logProbeInfo()
             .then(() => this.startRTT())
-            .then(() => {
-                this.isRttOpen = true;
-            })
             .then(() => RTTDevice.getHardwareStates(this.device.id))
             .then(({ string, iteration }) => {
                 console.log(`it took ${iteration} iteration to read hw states`);
@@ -323,10 +320,9 @@ class RTTDevice extends Device {
     }
 
     stop() {
-        if (!this.isRttOpen) {
+        if (!nRFDeviceLib.rttIsStarted(deviceLibContext, this.device.id)) {
             return Promise.resolve();
         }
-        this.isRttOpen = false;
         return new Promise(resolve => {
             nRFDeviceLib
                 .rttStop(deviceLibContext, this.device.id)
