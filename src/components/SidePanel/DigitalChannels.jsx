@@ -41,7 +41,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { chartState, setDigitalChannels } from '../../reducers/chartReducer';
 
-import './digital-channels.icss.scss';
+import './digital-channels.scss';
 
 export default () => {
     const dispatch = useDispatch();

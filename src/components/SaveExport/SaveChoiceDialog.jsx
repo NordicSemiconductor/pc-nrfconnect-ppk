@@ -49,7 +49,7 @@ import {
     toggleSaveChoiceDialog,
 } from '../../reducers/appReducer';
 
-import './saveexport.icss.scss';
+import './saveexport.scss';
 
 export default () => {
     const dispatch = useDispatch();

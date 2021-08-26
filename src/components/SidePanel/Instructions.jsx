@@ -38,7 +38,7 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import { Group, openUrl } from 'pc-nrfconnect-shared';
 
-import './instructions.icss.scss';
+import './instructions.scss';
 
 const urls = {
     ppkUserGuide:

@@ -50,7 +50,7 @@ import {
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 
-import './charttop.icss.scss';
+import './charttop.scss';
 import colors from '../colors.icss.scss';
 
 const { gray700, nordicBlue } = colors;

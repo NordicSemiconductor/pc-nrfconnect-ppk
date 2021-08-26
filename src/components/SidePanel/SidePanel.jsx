@@ -63,7 +63,7 @@ import StartStop from './StartStop';
 import SwitchPoints from './SwitchPoints';
 import Trigger from './Trigger/Trigger';
 
-import './sidepanel.icss.scss';
+import './sidepanel.scss';
 
 export default () => {
     const dispatch = useDispatch();
