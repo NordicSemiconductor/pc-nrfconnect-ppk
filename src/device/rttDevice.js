@@ -141,8 +141,7 @@ class RTTDevice extends Device {
         this.capabilities.maxContinuousSamplingTimeUs = 130;
         this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
         this.capabilities.hwTrigger = true;
-        this.serialnumber = parseInt(device.serialnumber, 10);
-        this.deviceId = device.id;
+        this.device = device;
         this.isRttOpen = false;
 
         this.timestamp = 0;
@@ -210,18 +209,12 @@ class RTTDevice extends Device {
 
     logProbeInfo() {
         return new Promise(resolve => {
-            const info = {
-                serialNumber: this.serialnumber,
-                clockSpeedkHz: '123',
-                firmwareString: 'firmware',
-            };
-            logger.info('SEGGER serial number: ', info.serialNumber);
-            logger.info('SEGGER speed: ', info.clockSpeedkHz, ' kHz');
-            logger.info('SEGGER version: ', info.firmwareString);
+            logger.info('SEGGER serial number: ', this.device.serialNumber);
+            logger.info(
+                'SEGGER version: ',
+                this.device.jlink.jlinkObFirmwareVersion
+            );
             resolve();
-            // nRFjprogjs.getProbeInfo(this.serialNumber, (err, info) => {
-
-            // });
         });
     }
 
@@ -230,7 +223,7 @@ class RTTDevice extends Device {
             WAIT_FOR_START,
             new Promise((resolve, reject) => {
                 nRFDeviceLib
-                    .rttStart(deviceLibContext, this.deviceId, 1000)
+                    .rttStart(deviceLibContext, this.device.id, 1000)
                     .then(() => resolve())
                     .catch(err => reject(err));
             })
@@ -254,7 +247,7 @@ class RTTDevice extends Device {
         if (!this.isRttOpen) return;
         try {
             const { rawbytes } = await RTTDevice.readRTT(
-                this.deviceId,
+                this.device.id,
                 MAX_RTT_READ_LENGTH
             );
             if (rawbytes && rawbytes.length) {
@@ -312,7 +305,7 @@ class RTTDevice extends Device {
             .then(() => {
                 this.isRttOpen = true;
             })
-            .then(() => RTTDevice.getHardwareStates(this.deviceId))
+            .then(() => RTTDevice.getHardwareStates(this.device.id))
             .then(({ string, iteration }) => {
                 console.log(`it took ${iteration} iteration to read hw states`);
                 if (!string) {
@@ -336,7 +329,7 @@ class RTTDevice extends Device {
         this.isRttOpen = false;
         return new Promise(resolve => {
             nRFDeviceLib
-                .rttStop(deviceLibContext, this.deviceId)
+                .rttStop(deviceLibContext, this.device.id)
                 .then(() => resolve())
                 .catch(() => {
                     this.emit(
@@ -354,7 +347,7 @@ class RTTDevice extends Device {
             nRFDeviceLib
                 .rttWrite(
                     deviceLibContext,
-                    this.deviceId,
+                    this.device.id,
                     0,
                     Buffer.from(slipPackage)
                 )

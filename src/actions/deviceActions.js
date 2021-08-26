@@ -313,7 +313,6 @@ export function open(deviceInfo) {
 
         try {
             device = new Device(deviceInfo, onSample);
-            console.log('PPK: Device created', device);
             dispatch(
                 setSamplingAttrsAction(
                     device.capabilities.maxContinuousSamplingTimeUs
