@@ -89,8 +89,7 @@ class SerialDevice extends Device {
             alpha5: 0.06,
             samples: 3,
         };
-
-        this.path = deviceInfo.serialport.path;
+        this.path = deviceInfo.serialport.comName;
         this.child = fork(
             path.resolve(getAppDir(), 'worker', 'serialDevice.js')
         );
