@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { currentPane } from '../from_pc-nrfconnect-shared';
+import { currentPane } from 'pc-nrfconnect-shared';
 
 export const REAL_TIME = 1;
 export const DATA_LOGGER = 0;

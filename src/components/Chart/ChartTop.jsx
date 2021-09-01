@@ -39,9 +39,9 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
+import { Toggle } from 'pc-nrfconnect-shared';
 import { func, shape, string } from 'prop-types';
 
-import { Toggle } from '../../from_pc-nrfconnect-shared';
 import {
     chartState,
     resetCursorAndChart,

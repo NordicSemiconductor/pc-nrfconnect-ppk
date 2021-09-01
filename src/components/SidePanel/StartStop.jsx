@@ -39,14 +39,13 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
-import { Group } from 'pc-nrfconnect-shared';
+import { Group, Slider } from 'pc-nrfconnect-shared';
 
 import {
     samplingStart,
     samplingStop,
     setupOptions,
 } from '../../actions/deviceActions';
-import { Slider } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import {
     dataLoggerState,

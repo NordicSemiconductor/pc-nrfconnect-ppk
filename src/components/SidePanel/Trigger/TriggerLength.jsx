@@ -37,9 +37,9 @@
 import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
+import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import { triggerLengthUpdate } from '../../../actions/deviceActions';
-import { NumberInlineInput, Slider } from '../../../from_pc-nrfconnect-shared';
 import { triggerState } from '../../../reducers/triggerReducer';
 
 const TriggerLength = () => {

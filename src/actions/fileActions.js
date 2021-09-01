@@ -37,12 +37,12 @@
 import { remote } from 'electron';
 import fs from 'fs';
 import { dirname, join } from 'path';
-import { logger } from 'pc-nrfconnect-shared';
-
 import {
     currentPane as currentPaneSelector,
+    logger,
     setCurrentPane,
-} from '../from_pc-nrfconnect-shared';
+} from 'pc-nrfconnect-shared';
+
 import { options, updateTitle } from '../globals';
 import { setFileLoadedAction } from '../reducers/appReducer';
 import { setChartState } from '../reducers/chartReducer';

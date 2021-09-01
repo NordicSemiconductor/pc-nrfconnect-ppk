@@ -39,7 +39,7 @@ import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup, Slider, Toggle } from 'pc-nrfconnect-shared';
 
 import {
     spikeFilteringToggle,
@@ -47,7 +47,6 @@ import {
     switchingPointsReset,
     switchingPointsUpSet,
 } from '../../actions/deviceActions';
-import { Slider, Toggle } from '../../from_pc-nrfconnect-shared';
 import { appState } from '../../reducers/appReducer';
 import {
     switchingPointDownMovedAction,

@@ -36,9 +36,8 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
+import { setCurrentPane, SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
-import { setCurrentPane } from '../../from_pc-nrfconnect-shared';
 import { options } from '../../globals';
 import {
     advancedMode as advancedModeSelector,

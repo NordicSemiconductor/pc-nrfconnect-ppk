@@ -41,6 +41,7 @@ import ExportDialog from '../SaveExport/ExportDialog';
 
 jest.mock('pc-nrfconnect-shared', () => ({
     getAppDataDir: () => '',
+    Toggle: () => <></>,
 }));
 
 const initialState = {
