@@ -1,3 +1,9 @@
+## 3.1.3 - 2021-09-14
+
+### Fixed
+
+- Bug when two corrupted samples in a row caused all future samples to be corrupt
+
 ## 3.1.2 - 2021-06-14
 
 ### Fixed
