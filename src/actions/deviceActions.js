@@ -271,12 +271,7 @@ export function open(deviceInfo) {
                 nbSamples += 1;
                 nbSamplesTotal += 1;
                 const f = Math.min(nbSamplesTotal, samplesPerAverage);
-                if (
-                    prevValue !== undefined &&
-                    value !== undefined &&
-                    !Number.isNaN(prevValue) &&
-                    !Number.isNaN(value)
-                ) {
+                if (Number.isFinite(value) && Number.isFinite(prevValue)) {
                     zeroCappedValue =
                         prevValue + (zeroCappedValue - prevValue) / f;
                 }
