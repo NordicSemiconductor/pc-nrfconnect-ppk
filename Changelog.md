@@ -1,8 +1,8 @@
-## 3.1.3 - 2021-09-14
+## 3.1.3 - 2021-09-21
 
 ### Fixed
 
-- Bug when two corrupted samples in a row caused all future samples to be corrupt
+- Two corrupted samples in a row caused all future samples to be corrupt. This would be especially likely to happen in long running sessions.
 
 ## 3.1.2 - 2021-06-14
 
