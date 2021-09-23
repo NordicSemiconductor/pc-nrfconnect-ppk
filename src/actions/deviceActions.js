@@ -330,16 +330,16 @@ export function open(deviceInfo) {
             logger.info('PPK started');
         } catch (err) {
             logger.error('Failed to start PPK');
-            logger.error(err);
+            logger.debug(err);
             dispatch({ type: 'DEVICE_DESELECTED' });
         }
 
         dispatch(
-            deviceOpenedAction(deviceInfo.serialnumber, device.capabilities)
+            deviceOpenedAction(deviceInfo.serialNumber, device.capabilities)
         );
 
         logger.info('PPK opened');
-        updateTitle(deviceInfo.serialnumber);
+        updateTitle(deviceInfo.serialNumber);
 
         device.on('error', (message, error) => {
             logger.error(message);
