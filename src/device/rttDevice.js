@@ -269,41 +269,34 @@ class RTTDevice extends Device {
         }
     }
 
-    stop() {
+    stop = async () => {
         if (!nRFDeviceLib.rttIsStarted(deviceLibContext, this.device.id)) {
-            return Promise.resolve();
+            return;
         }
-        return new Promise(resolve => {
-            nRFDeviceLib
-                .rttStop(deviceLibContext, this.device.id)
-                .then(() => resolve())
-                .catch(() => {
-                    this.emit(
-                        'error',
-                        'PPK connection failure',
-                        'Failed to stop RTT'
-                    );
-                    resolve();
-                });
-        });
-    }
+        try {
+            await nRFDeviceLib.rttStop(deviceLibContext, this.device.id);
+        } catch (err) {
+            this.emit(
+                'error',
+                'PPK connection failure',
+                `Failed to stop RTT: ${err}`
+            );
+        }
+    };
 
-    write(slipPackage) {
-        return new Promise(resolve => {
-            nRFDeviceLib
-                .rttWrite(
-                    deviceLibContext,
-                    this.device.id,
-                    0,
-                    Buffer.from(slipPackage)
-                )
-                .then(writtenLength => resolve(writtenLength))
-                .catch(err => {
-                    this.emit('error', `PPK command failed: ${err}`);
-                    resolve();
-                });
-        });
-    }
+    write = async slipPackage => {
+        try {
+            return await nRFDeviceLib.rttWrite(
+                deviceLibContext,
+                this.device.id,
+                0,
+                Buffer.from(slipPackage)
+            );
+        } catch (err) {
+            this.emit('error', `PPK command failed: ${err}`);
+            return undefined;
+        }
+    };
 
     async sendCommand(cmd) {
         const slipPackage = [];
