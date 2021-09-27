@@ -187,9 +187,13 @@ class RTTDevice extends Device {
         });
     }
 
-    startRTT = () =>
-        nRFDeviceLib.rttStart(deviceLibContext, this.device.id, WAIT_FOR_START);
-
+    startRTT() {
+        return nRFDeviceLib.rttStart(
+            deviceLibContext,
+            this.device.id,
+            WAIT_FOR_START
+        );
+    }
     static readRTT = async (deviceId, length) => {
         const { rttReadBuffer } = await nRFDeviceLib.rttRead(
             deviceLibContext,
@@ -269,7 +273,7 @@ class RTTDevice extends Device {
         }
     }
 
-    stop = async () => {
+    async stop() {
         if (!nRFDeviceLib.rttIsStarted(deviceLibContext, this.device.id)) {
             return;
         }
@@ -282,9 +286,9 @@ class RTTDevice extends Device {
                 `Failed to stop RTT: ${err}`
             );
         }
-    };
+    }
 
-    write = async slipPackage => {
+    async write(slipPackage) {
         try {
             return await nRFDeviceLib.rttWrite(
                 deviceLibContext,
@@ -296,7 +300,7 @@ class RTTDevice extends Device {
             this.emit('error', `PPK command failed: ${err}`);
             return undefined;
         }
-    };
+    }
 
     async sendCommand(cmd) {
         const slipPackage = [];
