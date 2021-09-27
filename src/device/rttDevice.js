@@ -167,8 +167,8 @@ class RTTDevice extends Device {
         this.byteHandlerFn = this.byteHandlerReceiveMode;
     }
 
-    parseMeasurementData(rawbytes) {
-        rawbytes.forEach(byte => this.byteHandlerFn(byte));
+    parseMeasurementData(rttReadBuffer) {
+        rttReadBuffer.forEach(byte => this.byteHandlerFn(byte));
     }
 
     convertSysTick2MicroSeconds(data) {
@@ -187,42 +187,30 @@ class RTTDevice extends Device {
         });
     }
 
-    startRTT() {
-        return promiseTimeout(
-            WAIT_FOR_START,
-            new Promise((resolve, reject) => {
-                nRFDeviceLib
-                    .rttStart(deviceLibContext, this.device.id, 1000)
-                    .then(() => resolve())
-                    .catch(err => reject(err));
-            })
-        );
-    }
+    startRTT = () =>
+        nRFDeviceLib.rttStart(deviceLibContext, this.device.id, WAIT_FOR_START);
 
-    static readRTT(deviceId, length) {
-        return new Promise((resolve, reject) => {
-            nRFDeviceLib
-                .rttRead(deviceLibContext, deviceId, 0, length)
-                .then(({ rttReadBuffer: rawbytes }) => {
-                    return resolve({
-                        rawbytes,
-                    });
-                })
-                .catch(err => reject(new Error(err)));
-        });
-    }
+    static readRTT = async (deviceId, length) => {
+        const { rttReadBuffer } = await nRFDeviceLib.rttRead(
+            deviceLibContext,
+            deviceId,
+            0,
+            length
+        );
+        return rttReadBuffer;
+    };
 
     async readloop() {
         if (!nRFDeviceLib.rttIsStarted(deviceLibContext, this.device.id))
             return;
         try {
-            const { rawbytes } = await RTTDevice.readRTT(
+            const rttReadBuffer = await RTTDevice.readRTT(
                 this.device.id,
                 MAX_RTT_READ_LENGTH
             );
-            if (rawbytes && rawbytes.length) {
+            if (rttReadBuffer && rttReadBuffer.length) {
                 process.nextTick(
-                    this.parseMeasurementData.bind(this, rawbytes)
+                    this.parseMeasurementData.bind(this, rttReadBuffer)
                 );
             }
             if (
@@ -235,7 +223,6 @@ class RTTDevice extends Device {
                 this.readloopRunning = false;
             }
         } catch (err) {
-            this.isRttOpen = false;
             throw new Error('PPK connection failure');
         }
     }
@@ -246,22 +233,15 @@ class RTTDevice extends Device {
             let hwStates;
             while (!hwStates && iteration < 250) {
                 iteration += 1;
-                // eslint-disable-next-line
-                hwStates = await new Promise((resolve, reject) => {
-                    nRFDeviceLib
-                        .rttRead(deviceLibContext, deviceId, 0, 255)
-                        .then(({ rttReadBuffer: rawbytes }) => {
-                            if (rawbytes.length) {
-                                return resolve({
-                                    rawbytes,
-                                    iteration,
-                                    string: rawbytes.toString(),
-                                });
-                            }
-                            return resolve();
-                        })
-                        .catch(err => reject(new Error(err)));
-                });
+                // eslint-disable-next-line no-await-in-loop
+                const rttReadBuffer = await RTTDevice.readRTT(deviceId, 255);
+                if (rttReadBuffer.length) {
+                    hwStates = {
+                        rttReadBuffer,
+                        iteration,
+                        string: rttReadBuffer.toString(),
+                    };
+                }
             }
             return hwStates || { iteration };
         }
