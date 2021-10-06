@@ -1,48 +1,19 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/*
+ * Copyright (c) 2015 Nordic Semiconductor ASA
  *
- * All rights reserved.
- *
- * Use in source and binary forms, redistribution in binary form only, with
- * or without modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 2. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 3. This software, with or without modification, must only be used with a Nordic
- *    Semiconductor ASA integrated circuit.
- *
- * 4. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 /* eslint-disable no-bitwise */
 
-import { logger } from 'pc-nrfconnect-shared';
-import nRFjprogjs from 'pc-nrfjprog-js';
+import nRFDeviceLib from '@nordicsemiconductor/nrf-device-lib-js';
+import { getDeviceLibContext, logger } from 'pc-nrfconnect-shared';
 
 import PPKCmd from '../constants';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
 
 export const SAMPLES_PER_AVERAGE = 10;
+const deviceLibContext = getDeviceLibContext();
 
 const MAX_RTT_READ_LENGTH = 1000; // anything up to SEGGER buffer size
 const WAIT_FOR_START = 6000; // milliseconds
@@ -140,8 +111,7 @@ class RTTDevice extends Device {
         this.capabilities.maxContinuousSamplingTimeUs = 130;
         this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
         this.capabilities.hwTrigger = true;
-        this.serialNumber = parseInt(device.serialNumber, 10);
-        this.isRttOpen = false;
+        this.device = device;
 
         this.timestamp = 0;
         this.dataPayload = [];
@@ -197,8 +167,8 @@ class RTTDevice extends Device {
         this.byteHandlerFn = this.byteHandlerReceiveMode;
     }
 
-    parseMeasurementData(rawbytes) {
-        rawbytes.forEach(byte => this.byteHandlerFn(byte));
+    parseMeasurementData(rttReadBuffer) {
+        rttReadBuffer.forEach(byte => this.byteHandlerFn(byte));
     }
 
     convertSysTick2MicroSeconds(data) {
@@ -208,52 +178,43 @@ class RTTDevice extends Device {
 
     logProbeInfo() {
         return new Promise(resolve => {
-            nRFjprogjs.getProbeInfo(this.serialNumber, (err, info) => {
-                logger.info('SEGGER serial number: ', info.serialNumber);
-                logger.info('SEGGER speed: ', info.clockSpeedkHz, ' kHz');
-                logger.info('SEGGER version: ', info.firmwareString);
-                resolve();
-            });
+            logger.info('SEGGER serial number: ', this.device.serialNumber);
+            logger.info(
+                'SEGGER version: ',
+                this.device.jlink.jlinkObFirmwareVersion
+            );
+            resolve();
         });
     }
 
     startRTT() {
-        return promiseTimeout(
-            WAIT_FOR_START,
-            new Promise((resolve, reject) => {
-                nRFjprogjs.rttStart(this.serialNumber, {}, err =>
-                    err ? reject(err) : resolve()
-                );
-            })
+        return nRFDeviceLib.rttStart(
+            deviceLibContext,
+            this.device.id,
+            WAIT_FOR_START
         );
     }
-
-    static readRTT(serialNumber, length) {
-        return new Promise((resolve, reject) => {
-            nRFjprogjs.rttRead(
-                serialNumber,
-                0,
-                length,
-                (err, string, rawbytes, time) => {
-                    if (err) {
-                        return reject(new Error(err));
-                    }
-                    return resolve({ string, rawbytes, time });
-                }
-            );
-        });
-    }
+    static readRTT = async (deviceId, length) => {
+        const { rttReadBuffer } = await nRFDeviceLib.rttRead(
+            deviceLibContext,
+            deviceId,
+            0,
+            length
+        );
+        return rttReadBuffer;
+    };
 
     async readloop() {
-        if (!this.isRttOpen) return;
+        if (!nRFDeviceLib.rttIsStarted(deviceLibContext, this.device.id))
+            return;
         try {
-            const { rawbytes } = await RTTDevice.readRTT(
-                this.serialNumber,
+            const rttReadBuffer = await RTTDevice.readRTT(
+                this.device.id,
                 MAX_RTT_READ_LENGTH
             );
-            if (rawbytes && rawbytes.length) {
+            if (rttReadBuffer && rttReadBuffer.length) {
                 process.nextTick(
-                    this.parseMeasurementData.bind(this, rawbytes)
+                    this.parseMeasurementData.bind(this, rttReadBuffer)
                 );
             }
             if (
@@ -266,39 +227,25 @@ class RTTDevice extends Device {
                 this.readloopRunning = false;
             }
         } catch (err) {
-            this.isRttOpen = false;
             throw new Error('PPK connection failure');
         }
     }
 
-    static getHardwareStates(serialNumber) {
+    static getHardwareStates(deviceId) {
         let iteration = 0;
         async function readUntil() {
             let hwStates;
             while (!hwStates && iteration < 250) {
                 iteration += 1;
-                // eslint-disable-next-line
-                hwStates = await new Promise((resolve, reject) => {
-                    nRFjprogjs.rttRead(
-                        serialNumber,
-                        0,
-                        255,
-                        (err, string, rawbytes, time) => {
-                            if (err) {
-                                return reject(new Error(err));
-                            }
-                            if (rawbytes.length) {
-                                return resolve({
-                                    string,
-                                    rawbytes,
-                                    time,
-                                    iteration,
-                                });
-                            }
-                            return resolve();
-                        }
-                    );
-                });
+                // eslint-disable-next-line no-await-in-loop
+                const rttReadBuffer = await RTTDevice.readRTT(deviceId, 255);
+                if (rttReadBuffer.length) {
+                    hwStates = {
+                        rttReadBuffer,
+                        iteration,
+                        string: rttReadBuffer.toString(),
+                    };
+                }
             }
             return hwStates || { iteration };
         }
@@ -309,10 +256,7 @@ class RTTDevice extends Device {
         logger.info('Initializing the PPK');
         return this.logProbeInfo()
             .then(() => this.startRTT())
-            .then(() => {
-                this.isRttOpen = true;
-            })
-            .then(() => RTTDevice.getHardwareStates(this.serialNumber))
+            .then(() => RTTDevice.getHardwareStates(this.device.id))
             .then(({ string, iteration }) => {
                 console.log(`it took ${iteration} iteration to read hw states`);
                 if (!string) {
@@ -329,40 +273,33 @@ class RTTDevice extends Device {
         }
     }
 
-    stop() {
-        if (!this.isRttOpen) {
-            return Promise.resolve();
+    async stop() {
+        if (!nRFDeviceLib.rttIsStarted(deviceLibContext, this.device.id)) {
+            return;
         }
-        this.isRttOpen = false;
-        return new Promise(resolve => {
-            nRFjprogjs.rttStop(this.serialNumber, err => {
-                if (err) {
-                    this.emit(
-                        'error',
-                        'PPK connection failure',
-                        'Failed to stop RTT'
-                    );
-                }
-                resolve();
-            });
-        });
+        try {
+            await nRFDeviceLib.rttStop(deviceLibContext, this.device.id);
+        } catch (err) {
+            this.emit(
+                'error',
+                'PPK connection failure',
+                `Failed to stop RTT: ${err}`
+            );
+        }
     }
 
-    write(slipPackage) {
-        return new Promise(resolve => {
-            nRFjprogjs.rttWrite(
-                this.serialNumber,
+    async write(slipPackage) {
+        try {
+            return await nRFDeviceLib.rttWrite(
+                deviceLibContext,
+                this.device.id,
                 0,
-                slipPackage,
-                (err, writtenLength) => {
-                    if (err) {
-                        this.emit('error', 'PPK command failed');
-                        return resolve();
-                    }
-                    return resolve(writtenLength);
-                }
+                Buffer.from(slipPackage)
             );
-        });
+        } catch (err) {
+            this.emit('error', `PPK command failed: ${err}`);
+            return undefined;
+        }
     }
 
     async sendCommand(cmd) {

@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ */
+
 @import '~pc-nrfconnect-shared/src/variables';
-@import './../chart.scss';
+@import './../chart.icss.scss';
 
 .timespan {
     margin-left: $yAxisWidthPx;
