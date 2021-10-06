@@ -1,3 +1,9 @@
+## 3.2.0
+
+### Changed
+
+- Establish compatibility with nRF Connect for Desktop 3.8
+
 ## 3.1.3 - 2021-09-21
 
 ### Fixed
