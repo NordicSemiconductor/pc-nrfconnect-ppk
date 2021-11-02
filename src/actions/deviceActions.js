@@ -331,7 +331,7 @@ export function open(deviceInfo) {
         } catch (err) {
             logger.error('Failed to start PPK');
             logger.debug(err);
-            dispatch({ type: 'DEVICE_DESELECTED' });
+            dispatch({ type: 'device/deselectDevice' });
         }
 
         dispatch(
