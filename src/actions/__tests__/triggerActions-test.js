@@ -1,43 +1,13 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/*
+ * Copyright (c) 2015 Nordic Semiconductor ASA
  *
- * All rights reserved.
- *
- * Use in source and binary forms, redistribution in binary form only, with
- * or without modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 2. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 3. This software, with or without modification, must only be used with a Nordic
- *    Semiconductor ASA integrated circuit.
- *
- * 4. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 
-import { indexToTimestamp, setDevice } from '../../globals';
+import { indexToTimestamp } from '../../globals';
 import { calculateWindowSize, processTriggerSample } from '../triggerActions';
 
 const middlewares = [thunk];
@@ -96,9 +66,8 @@ describe('Handle trigger', () => {
     });
 
     it('should set triggerStart if value is higher than trigger level', () => {
-        setDevice(mockDevicePPK1);
         const store = mockStore(initialState);
-        store.dispatch(processTriggerSample(15, samplingData));
+        store.dispatch(processTriggerSample(15, mockDevicePPK1, samplingData));
         const expectedActions = [
             { type: 'SET_TRIGGER_START', triggerStartIndex: beginIndex },
         ];
@@ -106,7 +75,6 @@ describe('Handle trigger', () => {
     });
 
     it('should chart window if enough samples have been processed', () => {
-        setDevice(mockDevicePPK1);
         const newIndex = 1005;
         const store = mockStore({
             ...initialState,
@@ -119,7 +87,7 @@ describe('Handle trigger', () => {
             },
         });
         store.dispatch(
-            processTriggerSample(5, {
+            processTriggerSample(5, mockDevicePPK1, {
                 ...samplingData,
                 dataIndex: newIndex,
                 endOfTrigger: true,
@@ -131,10 +99,6 @@ describe('Handle trigger', () => {
     });
 
     describe('Single trigger', () => {
-        beforeEach(() => {
-            setDevice(mockDevicePPK1);
-        });
-
         const newIndex = 1005;
         const store = mockStore({
             ...initialState,
@@ -150,7 +114,7 @@ describe('Handle trigger', () => {
 
         it('should reset single trigger and issue device stop samping command', () => {
             store.dispatch(
-                processTriggerSample(5, {
+                processTriggerSample(5, mockDevicePPK1, {
                     ...samplingData,
                     dataIndex: newIndex,
                     endOfTrigger: true,
@@ -181,7 +145,7 @@ describe('Handle trigger', () => {
         it('Should handle the buffer wrapping around', () => {
             // window size here will be 1000, so it should start drawing at index 500
             store.dispatch(
-                processTriggerSample(5, {
+                processTriggerSample(5, mockDevicePPK1, {
                     ...samplingData,
                     dataIndex: 499,
                     endOfTrigger: false,
@@ -189,7 +153,7 @@ describe('Handle trigger', () => {
             );
             expect(store.getActions().length).toBe(0);
             store.dispatch(
-                processTriggerSample(5, {
+                processTriggerSample(5, mockDevicePPK1, {
                     ...samplingData,
                     dataIndex: 500,
                     endOfTrigger: true,
@@ -202,10 +166,6 @@ describe('Handle trigger', () => {
     });
 
     describe('Window offset', () => {
-        beforeEach(() => {
-            setDevice(mockDevicePPK2);
-        });
-
         const endIndex = beginIndex + 1000;
         const windowSize = calculateWindowSize(
             defaultTriggerLength,
@@ -224,7 +184,7 @@ describe('Handle trigger', () => {
                 },
             });
             store.dispatch(
-                processTriggerSample(5, {
+                processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: endIndex,
                 })
@@ -241,7 +201,6 @@ describe('Handle trigger', () => {
         });
 
         it('should shift window according to given offset', () => {
-            setDevice(mockDevicePPK2);
             const triggerWindowOffset = 500;
             const store = mockStore({
                 ...initialState,
@@ -255,7 +214,7 @@ describe('Handle trigger', () => {
                 },
             });
             store.dispatch(
-                processTriggerSample(5, {
+                processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: endIndex,
                 })

@@ -1,3 +1,15 @@
+## 3.2.0 - 2021-11-01
+
+### Changed
+
+- Establish compatibility with nRF Connect for Desktop 3.8
+
+## 3.1.3 - 2021-09-21
+
+### Fixed
+
+- Two corrupted samples in a row caused all future samples to be corrupt. This would be especially likely to happen in long running sessions.
+
 ## 3.1.2 - 2021-06-14
 
 ### Fixed
