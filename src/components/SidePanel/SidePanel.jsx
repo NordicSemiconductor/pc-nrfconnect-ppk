@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentPane, SidePanel, useHotKey } from 'pc-nrfconnect-shared';
+import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
 import { options } from '../../globals';
 import {

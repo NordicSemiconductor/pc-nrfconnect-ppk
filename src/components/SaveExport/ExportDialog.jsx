@@ -21,7 +21,7 @@ import exportChart from '../../actions/exportChartAction';
 import { options, timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
-import { lastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
+import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 
 import './saveexport.scss';
 
@@ -59,7 +59,7 @@ const calculateTotalSize = (
 
 const createFileName = () => {
     const now = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
-    return join(lastSaveDir(), `ppk-${now}.csv`);
+    return join(getLastSaveDir(), `ppk-${now}.csv`);
 };
 
 export default () => {

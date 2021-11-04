@@ -20,7 +20,7 @@ import { setDataLoggerState } from '../reducers/dataLoggerReducer';
 import { setTriggerState } from '../reducers/triggerReducer';
 import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
-import { lastSaveDir, setLastSaveDir } from '../utils/persistentStore';
+import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData from '../utils/saveFileHandler';
 
 const { dialog } = remote;
@@ -31,7 +31,7 @@ const getTimestamp = () =>
 export const save = () => async (_, getState) => {
     const saveFileName = `ppk-${getTimestamp()}-${paneName(getState())}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(lastSaveDir(), saveFileName),
+        defaultPath: join(getLastSaveDir(), saveFileName),
     });
     if (!filename) {
         return;
@@ -61,7 +61,7 @@ export const load = () => async dispatch => {
         filePaths: [filename],
     } =
         (await dialog.showOpenDialog({
-            defaultPath: lastSaveDir(),
+            defaultPath: getLastSaveDir(),
         })) || [];
     if (!filename) {
         return;
@@ -119,7 +119,7 @@ export const screenshot = () => async () => {
     ];
 
     const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(lastSaveDir(), `ppk-${timestamp}.png`),
+        defaultPath: join(getLastSaveDir(), `ppk-${timestamp}.png`),
         filters,
     });
     if (!filename) {

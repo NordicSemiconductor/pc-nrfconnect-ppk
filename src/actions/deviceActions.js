@@ -49,7 +49,7 @@ import {
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
-import persistentStore from '../utils/persistentStore';
+import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 import { calculateWindowSize, processTriggerSample } from './triggerActions';
 
 let device = null;
@@ -135,12 +135,10 @@ export const updateSpikeFilter = () => async (_, getState) => {
         return;
     }
     const { spikeFilter } = getState().app;
-    const { samples, alpha, alpha5 } = spikeFilter;
-    persistentStore.set('spikeFilter.samples', samples);
-    persistentStore.set('spikeFilter.alpha', alpha);
-    persistentStore.set('spikeFilter.alpha5', alpha5);
+    persistSpikeFilter(spikeFilter);
     await device.ppkSetSpikeFilter(spikeFilter);
     if (getState().app.app.advancedMode) {
+        const { samples, alpha, alpha5 } = spikeFilter;
         logger.info(
             `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
         );
