@@ -18,7 +18,7 @@ const initialWindowDuration = 7 * 1e6;
 const initialBufferLength =
     (options.data.length / options.samplesPerSecond) * 1e6 -
     initialWindowDuration;
-const initialState = {
+const initialState = () => ({
     cursorBegin: null, // [microseconds]
     cursorEnd: null, // [microseconds]
     windowBegin: 0, // [microseconds]
@@ -36,7 +36,7 @@ const initialState = {
     yAxisLock: false,
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
-};
+});
 
 const ANIMATION = 'ANIMATION';
 const CHART_CURSOR = 'CHART_CURSOR';
@@ -187,7 +187,7 @@ function calcBuffer(windowDuration, windowEnd) {
     };
 }
 
-export default (state = initialState, { type, ...action }) => {
+export default (state = initialState(), { type, ...action }) => {
     switch (type) {
         case CHART_CURSOR: {
             const { cursorBegin, cursorEnd } = action;
