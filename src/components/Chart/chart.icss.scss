@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-@import "~pc-nrfconnect-shared/src/variables";
+@import '~pc-nrfconnect-shared/styles';
 
-$yAxisWidthPx: 70px;  // must be in pixels, imported in JS
+$yAxisWidthPx: 70px; // must be in pixels, imported in JS
 $rightMarginPx: 30px;
 
 .chart-outer {
@@ -26,7 +26,8 @@ $rightMarginPx: 30px;
         flex-direction: column;
         height: inherit;
     }
-    .chart-current, .chart-bits {
+    .chart-current,
+    .chart-bits {
         background: $white;
     }
 
