@@ -9,7 +9,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
-import { Toggle } from 'pc-nrfconnect-shared';
+import { colors, Toggle } from 'pc-nrfconnect-shared';
 import { func, shape, string } from 'prop-types';
 
 import {
@@ -21,7 +21,6 @@ import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 
 import './charttop.scss';
-import colors from '../colors.icss.scss';
 
 const { gray700, nordicBlue } = colors;
 

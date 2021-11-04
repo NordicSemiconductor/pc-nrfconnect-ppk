@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-param-reassign: off */
+import { colors } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp } from '../../../globals';
-
-import colors from '../../colors.icss.scss';
 
 const { gray700: color } = colors;
 

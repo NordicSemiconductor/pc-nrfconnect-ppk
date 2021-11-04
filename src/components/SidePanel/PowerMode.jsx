@@ -8,14 +8,12 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
-import { Group, Toggle } from 'pc-nrfconnect-shared';
+import { colors, Group, Toggle } from 'pc-nrfconnect-shared';
 
 import { setDeviceRunning, setPowerMode } from '../../actions/deviceActions';
 import { appState } from '../../reducers/appReducer';
 import { triggerState } from '../../reducers/triggerReducer';
 import VoltageRegulator from './VoltageRegulator';
-
-import colors from '../colors.icss.scss';
 
 const { gray700, nordicBlue } = colors;
 

@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-param-reassign: off */
-
 const wheelZoomFactor = 1.25;
 
 const isTrackPad = evt => {

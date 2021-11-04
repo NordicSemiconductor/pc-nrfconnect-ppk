@@ -8,6 +8,7 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
+import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, func, number, shape } from 'prop-types';
 
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
@@ -25,7 +26,6 @@ import triggerLevelPlugin from './plugins/chart.triggerLevel';
 import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 
-import colors from '../colors.icss.scss';
 import chartCss from './chart.icss.scss';
 
 const { rightMarginPx, yAxisWidthPx } = chartCss;

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup, Toggle } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup, colors, Toggle } from 'pc-nrfconnect-shared';
 
 import {
     chartState,
@@ -15,8 +15,6 @@ import {
 } from '../../reducers/chartReducer';
 import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
-
-import colors from '../colors.icss.scss';
 
 const { gray700, nordicBlue } = colors;
 
