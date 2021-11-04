@@ -1,5 +1,13 @@
-@import "~pc-nrfconnect-shared/styles";
-@import "./chart-variables.icss.scss";
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ */
+
+@import '~pc-nrfconnect-shared/styles';
+
+$yAxisWidthPx: 70px; // must be in pixels, imported in JS
+$rightMarginPx: 30px;
 
 .chart-outer {
     flex: 1;
@@ -18,7 +26,8 @@
         flex-direction: column;
         height: inherit;
     }
-    .chart-current, .chart-bits {
+    .chart-current,
+    .chart-bits {
         background: $white;
     }
 
@@ -80,4 +89,9 @@
         margin-left: $yAxisWidthPx;
         margin-right: $rightMarginPx;
     }
+}
+
+:export {
+    yAxisWidthPx: $yAxisWidthPx;
+    rightMarginPx: $rightMarginPx;
 }
