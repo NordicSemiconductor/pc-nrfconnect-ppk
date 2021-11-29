@@ -1,3 +1,8 @@
+## Unreleased
+### Changed
+- Advanced option to adjust buffer size is now available, which enables longer sampling time.
+    - Enter advanced options by pressing `ctrl+alt+shift+a`.
+
 ## 3.2.1 - 2021-11-30
 
 ### Fixed

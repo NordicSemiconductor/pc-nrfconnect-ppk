@@ -16,6 +16,7 @@ import {
     toggleAdvancedModeAction,
 } from '../../reducers/appReducer';
 import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import { BufferSettings } from './BufferSettings';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
 import Instructions from './Instructions';
@@ -80,6 +81,7 @@ export default () => {
                     <ResistorCalibration />
                     <Gains />
                     <SpikeFilter />
+                    <BufferSettings />
                 </>
             )}
         </SidePanel>
