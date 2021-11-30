@@ -13,6 +13,7 @@ import { createInflateRaw } from 'zlib';
 const setupBuffer = async filename => {
     let buffer = Buffer.alloc(370 * 1e6);
     let size = 0;
+
     const content = new Writable({
         write(chunk, _encoding, callback) {
             chunk.copy(buffer, size, 0);
@@ -21,11 +22,15 @@ const setupBuffer = async filename => {
         },
     });
 
-    await promisify(pipeline)(
-        fs.createReadStream(filename),
-        createInflateRaw(),
-        content
-    );
+    try {
+        await promisify(pipeline)(
+            fs.createReadStream(filename),
+            createInflateRaw(),
+            content
+        );
+    } catch (err) {
+        console.error('Error while loading file', err);
+    }
     buffer = buffer.slice(0, size);
 
     let pos = 0;
