@@ -1,8 +1,14 @@
+## 3.2.1 - 2021-11-30
+
+### Fixed
+
+- Issue where certain `.ppk` files could not be loaded.
+
 ## 3.2.0 - 2021-11-01
 
 ### Changed
 
-- Establish compatibility with nRF Connect for Desktop 3.8
+- Establish compatibility with nRF Connect for Desktop 3.8.
 
 ## 3.1.3 - 2021-09-21
 
