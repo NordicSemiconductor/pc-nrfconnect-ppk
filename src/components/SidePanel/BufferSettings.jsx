@@ -22,12 +22,12 @@ export const BufferSettings = () => {
     return (
         <>
             <CollapsibleGroup
-                heading="Buffer Settings"
-                title="Increase size of buffer to increase the memory usage for sampling."
+                heading="Sampling Buffer"
+                title="Adjust max buffer size for sampling."
             >
                 <Form.Label
                     htmlFor="slider-ram-size"
-                    title="Increase max size of buffer to sample for longer."
+                    title="Increase to sample for longer, decrease to solve performance issues."
                 >
                     <span className="flex-fill">Max size of buffer</span>
                     <NumberInlineInput
