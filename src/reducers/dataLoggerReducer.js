@@ -15,7 +15,31 @@ import {
     setSampleFreq as persistSampleFreq,
 } from '../utils/persistentStore';
 
-const initialRanges = [
+/**
+ * [Get ranges with max field adjusted for the current maxBufferSize]
+ * @param {Number} maxBufferSize []
+ * @param {Object} ranges []
+ * @returns {Object} [with max field adjusted for max sampling buffer size]
+ */
+const getAdjustedRanges = (maxBufferSize, ranges) => {
+    // Maximum number of elements that the current maxBufferSize could initialize.
+    const bytesPerElement = 4;
+    const maxNumberOfElements = Math.floor(
+        unit(maxBufferSize, 'MB').to('byte').toNumber() / bytesPerElement
+    );
+
+    ranges.forEach((_range, index) => {
+        // Find out how many seconds, minutes, hours or days is required to fill the array with any given frequency.
+        const { multiplier, frequency } = _range;
+        ranges[index].max = Math.floor(
+            maxNumberOfElements / (multiplier * frequency)
+        );
+    });
+    return ranges;
+};
+
+const initialMaxBufferSize = getMaxBufferSize(173);
+const initialRanges = getAdjustedRanges(initialMaxBufferSize, [
     { name: 'days', multiplier: 24 * 60 * 60, min: 7, max: 500, frequency: 1 }, // 1Hz
     { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 50, frequency: 10 }, // 10Hz
     { name: 'hours', multiplier: 60 * 60, min: 6, max: 120, frequency: 100 }, // 100Hz
@@ -28,7 +52,7 @@ const initialRanges = [
         max: 432,
         frequency: 100 * 1000,
     }, // 100kHz
-];
+]);
 
 const initialFreqLog10 = 5;
 
@@ -41,7 +65,7 @@ const initialState = {
     durationSeconds: 300,
     ranges: initialRanges,
     range: initialRanges[initialFreqLog10],
-    maxBufferSize: getMaxBufferSize(173),
+    maxBufferSize: initialMaxBufferSize,
 };
 
 const DL_SAMPLE_FREQ_LOG_10 = 'DL_SAMPLE_FREQ_LOG_10';
@@ -49,11 +73,6 @@ const DL_DURATION_SECONDS = 'DL_DURATION_SECONDS';
 const SET_SAMPLING_ATTRS = 'SET_SAMPLING_ATTRS';
 const SET_DATA_LOGGER_STATE = 'SET_DATA_LOGGER_STATE';
 const MAX_BUFFER_SIZE = 'MAX_SAMPLE_ARRAY_SIZE_CHANGED';
-
-export const changeMaxBufferSizeAction = maxBufferSize => ({
-    type: MAX_BUFFER_SIZE,
-    maxBufferSize,
-});
 
 export const updateSampleFreqLog10 = sampleFreqLog10 => ({
     type: DL_SAMPLE_FREQ_LOG_10,
@@ -73,6 +92,11 @@ export const setSamplingAttrsAction = maxContinuousSamplingTimeUs => ({
 export const setDataLoggerState = state => ({
     type: SET_DATA_LOGGER_STATE,
     ...state,
+});
+
+export const changeMaxBufferSizeAction = maxBufferSize => ({
+    type: MAX_BUFFER_SIZE,
+    maxBufferSize,
 });
 
 export default (state = initialState, { type, ...action }) => {
@@ -134,26 +158,17 @@ export default (state = initialState, { type, ...action }) => {
             return { ...state, ...action };
         }
         case MAX_BUFFER_SIZE: {
-            const { ranges } = state;
+            const { range } = state;
             const { maxBufferSize } = action;
+            let { ranges, durationSeconds } = state;
 
-            // Calculated the number of elements:
-            // Each element is 32bits = 4 bytes
-            const numberOfElements = Math.floor(
-                unit(maxBufferSize, 'MB').to('byte').toNumber() / 4
-            );
-            console.log('maxBufferSize:', maxBufferSize);
-            console.log('numberOfElements:', numberOfElements);
+            ranges = getAdjustedRanges(maxBufferSize, ranges);
+            durationSeconds =
+                durationSeconds < range.max ? durationSeconds : range.max;
 
-            ranges.forEach((_range, index) => {
-                // Find out how many seconds, minutes, hours or days is required to fill the array with any given frequency.
-                const { multiplier, frequency } = _range;
-                ranges[index].max = Math.floor(
-                    numberOfElements / (multiplier * frequency)
-                );
-            });
+            persistDuration(state.maxSampleFreq, durationSeconds);
             persistMaxBufferSize(maxBufferSize);
-            return { ...state, ranges, maxBufferSize };
+            return { ...state, ranges, maxBufferSize, durationSeconds };
         }
         default:
             return state;
