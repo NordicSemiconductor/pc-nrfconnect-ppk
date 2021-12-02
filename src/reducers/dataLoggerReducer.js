@@ -8,8 +8,10 @@ import { unit } from 'mathjs';
 
 import {
     getDuration,
+    getMaxBufferSize,
     getSampleFreq,
     setDuration as persistDuration,
+    setMaxBufferSize as persistMaxBufferSize,
     setSampleFreq as persistSampleFreq,
 } from '../utils/persistentStore';
 
@@ -39,7 +41,7 @@ const initialState = {
     durationSeconds: 300,
     ranges: initialRanges,
     range: initialRanges[initialFreqLog10],
-    maxBufferSize: 173,
+    maxBufferSize: getMaxBufferSize(173),
 };
 
 const DL_SAMPLE_FREQ_LOG_10 = 'DL_SAMPLE_FREQ_LOG_10';
@@ -150,7 +152,7 @@ export default (state = initialState, { type, ...action }) => {
                     numberOfElements / (multiplier * frequency)
                 );
             });
-
+            persistMaxBufferSize(maxBufferSize);
             return { ...state, ranges, maxBufferSize };
         }
         default:
