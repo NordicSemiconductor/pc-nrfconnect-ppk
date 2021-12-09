@@ -38,7 +38,8 @@ const getAdjustedRanges = (maxBufferSize, ranges) => {
     });
 };
 
-const initialMaxBufferSize = getMaxBufferSize(173);
+// Default max buffer size 200MB
+const initialMaxBufferSize = getMaxBufferSize(200);
 const initialRanges = getAdjustedRanges(initialMaxBufferSize, [
     { name: 'days', multiplier: 24 * 60 * 60, min: 7, max: 500, frequency: 1 }, // 1Hz
     { name: 'days', multiplier: 24 * 60 * 60, min: 1, max: 50, frequency: 10 }, // 10Hz
