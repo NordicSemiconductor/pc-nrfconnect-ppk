@@ -19,13 +19,13 @@ import {
  * [Get ranges with max field adjusted for the current maxBufferSize]
  * @param {Number} maxBufferSize []
  * @param {Object} ranges []
- * @returns {Object} [with max field adjusted for max sampling buffer size]
+ * @returns {Array} [with max field adjusted for max sampling buffer size]
  */
 const getAdjustedRanges = (maxBufferSize, ranges) => {
     // Maximum number of elements that the current maxBufferSize could initialize.
-    const bytesPerElement = 4;
+    const BYTES_PER_ELEMENT = 4;
     const maxNumberOfElements = Math.floor(
-        unit(maxBufferSize, 'MB').to('byte').toNumber() / bytesPerElement
+        unit(maxBufferSize, 'MB').to('byte').toNumber() / BYTES_PER_ELEMENT
     );
 
     return ranges.map(range => {
@@ -160,15 +160,14 @@ export default (state = initialState, { type, ...action }) => {
         case MAX_BUFFER_SIZE: {
             const { range } = state;
             const { maxBufferSize } = action;
-            let { ranges, durationSeconds } = state;
+            const { ranges, durationSeconds } = state;
 
-            ranges = getAdjustedRanges(maxBufferSize, ranges);
-            durationSeconds =
-                durationSeconds < range.max ? durationSeconds : range.max;
+            const newRanges = getAdjustedRanges(maxBufferSize, ranges);
+            const newDurationSeconds = Math.min(range.max, durationSeconds);
 
             persistDuration(state.maxSampleFreq, durationSeconds);
             persistMaxBufferSize(maxBufferSize);
-            return { ...state, ranges, maxBufferSize, durationSeconds };
+            return { ...state, newRanges, maxBufferSize, newDurationSeconds };
         }
         default:
             return state;

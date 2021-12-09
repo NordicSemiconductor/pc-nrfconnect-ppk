@@ -17,29 +17,27 @@ import {
 export const BufferSettings = () => {
     const maxBufferSize = useSelector(maxBufferSizeSelector);
     const dispatch = useDispatch();
-    const range = { min: 173, max: Infinity };
+    const range = { min: 1, max: Infinity };
 
     return (
-        <>
-            <CollapsibleGroup
-                heading="Sampling Buffer"
-                title="Adjust max buffer size for sampling."
+        <CollapsibleGroup
+            heading="Sampling Buffer"
+            title="Adjust max buffer size for sampling."
+        >
+            <Form.Label
+                htmlFor="slider-ram-size"
+                title="Increase to sample for longer, decrease to solve performance issues."
             >
-                <Form.Label
-                    htmlFor="slider-ram-size"
-                    title="Increase to sample for longer, decrease to solve performance issues."
-                >
-                    <span className="flex-fill">Max size of buffer</span>
-                    <NumberInlineInput
-                        value={maxBufferSize}
-                        range={range}
-                        onChange={newValue =>
-                            dispatch(changeMaxBufferSizeAction(newValue))
-                        }
-                    />
-                    <span> MB</span>
-                </Form.Label>
-            </CollapsibleGroup>
-        </>
+                <span className="flex-fill">Max size of buffer</span>
+                <NumberInlineInput
+                    value={maxBufferSize}
+                    range={range}
+                    onChange={newValue =>
+                        dispatch(changeMaxBufferSizeAction(newValue))
+                    }
+                />
+                <span> MB</span>
+            </Form.Label>
+        </CollapsibleGroup>
     );
 };
