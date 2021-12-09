@@ -30,7 +30,10 @@ const NumberWithUnit = ({
         onChange(n * multiplier);
     };
 
-    useEffect(() => setInternalValue(value / multiplier), [multiplier, value]);
+    useEffect(
+        () => setInternalValue(Math.round(value / multiplier)),
+        [multiplier, value]
+    );
 
     return (
         <div
