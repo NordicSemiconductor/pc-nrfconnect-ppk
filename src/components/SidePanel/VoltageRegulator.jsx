@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import BootstrapCollapse from 'react-bootstrap/Collapse';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
