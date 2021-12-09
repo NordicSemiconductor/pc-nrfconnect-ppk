@@ -28,14 +28,14 @@ const getAdjustedRanges = (maxBufferSize, ranges) => {
         unit(maxBufferSize, 'MB').to('byte').toNumber() / bytesPerElement
     );
 
-    ranges.forEach((_range, index) => {
+    return ranges.map(range => {
         // Find out how many seconds, minutes, hours or days is required to fill the array with any given frequency.
-        const { multiplier, frequency } = _range;
-        ranges[index].max = Math.floor(
-            maxNumberOfElements / (multiplier * frequency)
-        );
+        const { multiplier, frequency } = range;
+        return {
+            ...range,
+            max: Math.floor(maxNumberOfElements / (multiplier * frequency)),
+        };
     });
-    return ranges;
 };
 
 const initialMaxBufferSize = getMaxBufferSize(173);
