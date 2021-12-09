@@ -56,3 +56,8 @@ export const getDuration = (maxSampleFreq, defaultValue) =>
     store().get(`durationSeconds-${maxSampleFreq}`, defaultValue);
 export const setDuration = (maxSampleFreq, durationSeconds) =>
     store().set(`durationSeconds-${maxSampleFreq}`, durationSeconds);
+
+export const getMaxBufferSize = defaultMaxBufferSize =>
+    store().get('maxBufferSize', defaultMaxBufferSize);
+export const setMaxBufferSize = maxBufferSize =>
+    store().set('maxBufferSize', maxBufferSize);
