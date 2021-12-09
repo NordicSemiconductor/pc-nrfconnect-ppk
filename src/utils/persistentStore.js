@@ -61,3 +61,8 @@ export const getMaxBufferSize = defaultMaxBufferSize =>
     store().get('maxBufferSize', defaultMaxBufferSize);
 export const setMaxBufferSize = maxBufferSize =>
     store().set('maxBufferSize', maxBufferSize);
+
+export const getVoltageRegulatorMaxCap = defaultMaxCap =>
+    store().get('voltageRegulatorMaxCap', defaultMaxCap);
+export const setVoltageRegulatorMaxCap = maxCap =>
+    store().set('voltageRegulatorMaxCap', maxCap);

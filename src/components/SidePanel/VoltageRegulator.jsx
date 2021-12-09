@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import BootstrapCollapse from 'react-bootstrap/Collapse';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,13 +19,19 @@ import {
 
 const VoltageRegulator = () => {
     const dispatch = useDispatch();
-    const { vdd, min, max } = useSelector(voltageRegulatorState);
+    const { vdd, min, maxCap: max } = useSelector(voltageRegulatorState);
     const {
         isSmuMode,
         capabilities: { ppkSetPowerMode },
     } = useSelector(appState);
 
     const isVoltageSettable = !ppkSetPowerMode || isSmuMode;
+
+    useEffect(() => {
+        if (vdd > max) {
+            dispatch(moveVoltageRegulatorVddAction(max));
+        }
+    }, [vdd, max, dispatch]);
 
     return (
         <BootstrapCollapse in={isVoltageSettable}>

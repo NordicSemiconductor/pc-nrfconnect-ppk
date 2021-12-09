@@ -27,6 +27,7 @@ import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
 import SwitchPoints from './SwitchPoints';
 import Trigger from './Trigger/Trigger';
+import { VoltageSettings } from './VoltageSettings';
 
 import './sidepanel.scss';
 
@@ -82,6 +83,7 @@ export default () => {
                     <Gains />
                     <SpikeFilter />
                     <BufferSettings />
+                    <VoltageSettings />
                 </>
             )}
         </SidePanel>
