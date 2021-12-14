@@ -112,4 +112,19 @@
         padding-top: 1px;
         padding-bottom: 0;
     }
+
+    .start-stop {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 24px;
+        padding: 0;
+        height: 34px;
+
+        span {
+            color: $gray-700;
+            font-size: 20px;
+            margin-right: 8px;
+        }
+    }
 }

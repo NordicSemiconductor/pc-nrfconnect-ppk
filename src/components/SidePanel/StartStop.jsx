@@ -87,19 +87,29 @@ export default () => {
                 <br />
                 {formattedPeriod} period
             </div>
-            <Button
-                title={startStopTitle}
-                className={`w-100 start-btn ${
-                    samplingRunning ? 'active-anim' : ''
-                }`}
-                variant="set"
-                disabled={!rttRunning}
-                onClick={() =>
-                    dispatch(samplingRunning ? samplingStop() : samplingStart())
-                }
-            >
-                {samplingRunning ? 'Stop' : 'Start'}
-            </Button>
+            {samplingRunning ? (
+                <Button
+                    title={startStopTitle}
+                    className="w-100 secondary-btn start-stop active-animation"
+                    variant="secondary"
+                    disabled={!rttRunning}
+                    onClick={() => dispatch(samplingStop())}
+                >
+                    <span className="mdi mdi-stop-circle" />
+                    Stop
+                </Button>
+            ) : (
+                <Button
+                    title={startStopTitle}
+                    className="w-100 secondary-btn start-stop"
+                    variant="secondary"
+                    disabled={!rttRunning}
+                    onClick={() => dispatch(samplingStart())}
+                >
+                    <span className="mdi mdi-play-circle" />
+                    Start
+                </Button>
+            )}
         </Group>
     );
 };
