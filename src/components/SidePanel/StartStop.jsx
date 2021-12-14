@@ -92,7 +92,6 @@ export default () => {
                     title={startStopTitle}
                     className="w-100 secondary-btn start-stop active-animation"
                     variant="secondary"
-                    disabled={!rttRunning}
                     onClick={() => dispatch(samplingStop())}
                 >
                     <span className="mdi mdi-stop-circle" />
