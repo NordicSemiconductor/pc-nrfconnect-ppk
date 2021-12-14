@@ -11,12 +11,14 @@ import {
     CollapsibleGroup,
     NumberInlineInput,
     Slider,
+    usageData,
 } from 'pc-nrfconnect-shared';
 
 import {
     updateVoltageRegulatorMaxCapAction,
     voltageRegulatorState,
 } from '../../reducers/voltageRegulatorReducer';
+import EventAction from '../../usageDataActions';
 
 export const VoltageSettings = () => {
     const { min, max, maxCap } = useSelector(voltageRegulatorState);
@@ -39,9 +41,15 @@ export const VoltageSettings = () => {
                         onChange={value =>
                             dispatch(updateVoltageRegulatorMaxCapAction(value))
                         }
-                        onChangeComplete={() =>
-                            dispatch(updateVoltageRegulatorMaxCapAction(maxCap))
-                        }
+                        onChangeComplete={() => {
+                            dispatch(
+                                updateVoltageRegulatorMaxCapAction(maxCap)
+                            );
+                            usageData.sendUsageData(
+                                EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
+                                maxCap
+                            );
+                        }}
                     />{' '}
                     mV
                 </Form.Label>
@@ -53,9 +61,13 @@ export const VoltageSettings = () => {
                         value =>
                             dispatch(updateVoltageRegulatorMaxCapAction(value)),
                     ]}
-                    onChangeComplete={() =>
-                        dispatch(updateVoltageRegulatorMaxCapAction(maxCap))
-                    }
+                    onChangeComplete={() => {
+                        dispatch(updateVoltageRegulatorMaxCapAction(maxCap));
+                        usageData.sendUsageData(
+                            EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
+                            maxCap
+                        );
+                    }}
                 />
             </div>
         </CollapsibleGroup>
