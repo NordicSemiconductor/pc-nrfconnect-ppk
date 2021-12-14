@@ -7,12 +7,17 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup, NumberInlineInput } from 'pc-nrfconnect-shared';
+import {
+    CollapsibleGroup,
+    NumberInlineInput,
+    usageData,
+} from 'pc-nrfconnect-shared';
 
 import {
     changeMaxBufferSizeAction,
     maxBufferSize as maxBufferSizeSelector,
 } from '../../reducers/dataLoggerReducer';
+import EventAction from '../../usageDataActions';
 
 export const BufferSettings = () => {
     const maxBufferSize = useSelector(maxBufferSizeSelector);
@@ -32,9 +37,13 @@ export const BufferSettings = () => {
                 <NumberInlineInput
                     value={maxBufferSize}
                     range={range}
-                    onChange={newValue =>
-                        dispatch(changeMaxBufferSizeAction(newValue))
-                    }
+                    onChange={newValue => {
+                        dispatch(changeMaxBufferSizeAction(newValue));
+                        usageData.sendUsageData(
+                            EventAction.BUFFER_SIZE_CHANGED,
+                            newValue
+                        );
+                    }}
                 />
                 <span> MB</span>
             </Form.Label>
