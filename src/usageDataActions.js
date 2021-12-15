@@ -7,7 +7,8 @@
 const EventAction = {
     BUFFER_SIZE_CHANGED: 'Sampling buffer size changed',
     VOLTAGE_MAX_LIMIT_CHANGED: 'Max voltage limit changed',
-    PPK_1_SELECTED: 'PPK1 device selected',
+    PPK_1_SELECTED: 'PPK1 selected',
+    PPK_2_SELECTED: 'PPK2 selected',
 };
 
 export default EventAction;

@@ -5,15 +5,9 @@
  */
 
 import { connect } from 'react-redux';
-import {
-    DeviceSelector,
-    getAppFile,
-    logger,
-    usageData,
-} from 'pc-nrfconnect-shared';
+import { DeviceSelector, getAppFile, logger } from 'pc-nrfconnect-shared';
 
 import { close, open } from '../actions/deviceActions';
-import EventAction from '../usageDataActions';
 
 const deviceListing = {
     nordicUsb: true,
@@ -56,10 +50,6 @@ const mapDispatch = dispatch => ({
     onDeviceIsReady: device => {
         logger.info(`Opening device with s/n ${device.serialNumber}`);
         dispatch(open(device));
-        console.log(device);
-        if (device.capabilities.hwTrigger) {
-            usageData.sendUsageData(EventAction.PPK_1_SELECTED);
-        }
     },
 });
 
