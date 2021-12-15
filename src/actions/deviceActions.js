@@ -7,7 +7,7 @@
 /* eslint-disable no-bitwise */
 
 import isDev from 'electron-is-dev';
-import { logger } from 'pc-nrfconnect-shared';
+import { logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
 import { indexToTimestamp, options, updateTitle } from '../globals';
@@ -47,6 +47,7 @@ import {
     triggerWindowRangeAction,
 } from '../reducers/triggerReducer';
 import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
+import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
@@ -281,6 +282,12 @@ export function open(deviceInfo) {
 
         try {
             device = new Device(deviceInfo, onSample);
+            usageData.sendUsageData(
+                device.capabilities.hwTrigger
+                    ? EventAction.PPK_1_SELECTED
+                    : EventAction.PPK_2_SELECTED
+            );
+
             dispatch(
                 setSamplingAttrsAction(
                     device.capabilities.maxContinuousSamplingTimeUs
