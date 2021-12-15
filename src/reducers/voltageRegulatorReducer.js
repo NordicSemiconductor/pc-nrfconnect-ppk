@@ -14,7 +14,7 @@ const initialState = {
     currentVDD: 3000,
     min: 1850,
     max: 3600,
-    maxCap: getVoltageRegulatorMaxCap(3600),
+    maxCap: getVoltageRegulatorMaxCap(5000),
 };
 
 const VOLTAGE_REGULATOR_UPDATED = 'VOLTAGE_REGULATOR_UPDATED';
