@@ -1,3 +1,9 @@
+## Unreleased
+
+### Changed
+
+- Added icons to Start/Stop buttons in `Real Time` pane.
+
 ## 3.3.0 - 2021-12-15
 
 ### Changed
@@ -5,7 +11,8 @@
 - Advanced option to adjust buffer size is now available, which enables longer sampling time.
   - To display advanced options in the sidebar press `ctrl+alt+shift+a`.
 - Advanced option to limit supply voltage under *Source Meter* now available.  
-- Updated icon.
+- Updated app icon.
+- Added icons to Start/Stop buttons in `Data Logger` pane.
 
 ## 3.2.1 - 2021-11-30
 
