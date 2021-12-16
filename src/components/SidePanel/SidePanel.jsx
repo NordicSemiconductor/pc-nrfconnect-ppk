@@ -17,6 +17,7 @@ import {
 } from '../../reducers/appReducer';
 import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
 import { BufferSettings } from './BufferSettings';
+import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
 import Instructions from './Instructions';
@@ -27,7 +28,6 @@ import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
 import SwitchPoints from './SwitchPoints';
 import Trigger from './Trigger/Trigger';
-import { VoltageSettings } from './VoltageSettings';
 
 import './sidepanel.scss';
 
@@ -83,7 +83,7 @@ export default () => {
                     <Gains />
                     <SpikeFilter />
                     <BufferSettings />
-                    <VoltageSettings />
+                    <CapVoltageSettings />
                 </>
             )}
         </SidePanel>

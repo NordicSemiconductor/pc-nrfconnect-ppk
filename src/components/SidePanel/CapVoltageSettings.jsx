@@ -20,7 +20,7 @@ import {
 } from '../../reducers/voltageRegulatorReducer';
 import EventAction from '../../usageDataActions';
 
-export const VoltageSettings = () => {
+export const CapVoltageSettings = () => {
     const { min, max, maxCap } = useSelector(voltageRegulatorState);
     const dispatch = useDispatch();
 
@@ -28,12 +28,13 @@ export const VoltageSettings = () => {
         <CollapsibleGroup
             heading="Voltage Limit"
             title="Adjust to limit voltage supply"
+            className="cap-voltage-regulator-container"
         >
             <div
                 className="voltage-regulator"
-                title="Supply voltage above will be capped to the value set here"
+                title="Supply voltage to the device will be capped to this value"
             >
-                <Form.Label htmlFor="slider-vdd">
+                <Form.Label htmlFor="cap-slider-vdd">
                     <span className="flex-fill">Set max supply voltage to</span>
                     <NumberInlineInput
                         value={maxCap}
@@ -54,7 +55,7 @@ export const VoltageSettings = () => {
                     mV
                 </Form.Label>
                 <Slider
-                    id="slider-vdd"
+                    id="cap-slider-vdd"
                     values={[maxCap]}
                     range={{ min, max }}
                     onChange={[
