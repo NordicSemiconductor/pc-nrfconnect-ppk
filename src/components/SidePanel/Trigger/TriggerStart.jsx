@@ -81,11 +81,18 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
     return (
         <Button
             title={title}
-            className={`w-100 trigger-btn ${isRunning ? 'active-anim' : ''}`}
+            className={`w-100 start-stop trigger-btn ${
+                isRunning ? 'active-anim' : ''
+            }`}
             disabled={!rttRunning || externalTrigger}
             variant="set"
             onClick={onClick}
         >
+            <span
+                className={`mdi ${
+                    isRunning ? 'mdi-stop-circle' : 'mdi-play-circle'
+                }`}
+            />
             {label}
         </Button>
     );
