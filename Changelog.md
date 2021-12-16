@@ -3,8 +3,8 @@
 ### Changed
 
 - Advanced option to adjust buffer size is now available, which enables longer sampling time.
-- Advanced option to limit supply voltage under *Source Meter* now available.
   - To display advanced options in the sidebar press `ctrl+alt+shift+a`.
+- Advanced option to limit supply voltage under *Source Meter* now available.  
 - Updated icon.
 
 ## 3.2.1 - 2021-11-30

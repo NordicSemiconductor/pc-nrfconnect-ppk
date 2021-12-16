@@ -117,6 +117,10 @@
         padding-bottom: 0;
     }
 
+    .restart-app-btn {
+        margin-top: 8px;
+    }
+
     .start-stop {
         display: flex;
         align-items: center;
@@ -124,6 +128,7 @@
         margin-top: 24px;
         padding: 0;
         height: 34px;
+        border-color: $gray-700;
 
         span {
             color: $gray-700;

@@ -29,6 +29,7 @@ export const CapVoltageSettings = () => {
             heading="Voltage Limit"
             title="Adjust to limit voltage supply"
             className="cap-voltage-regulator-container"
+            defaultCollapsed={false}
         >
             <div
                 className="voltage-regulator"
@@ -51,8 +52,8 @@ export const CapVoltageSettings = () => {
                                 maxCap
                             );
                         }}
-                    />{' '}
-                    mV
+                    />
+                    &nbsp;mV
                 </Form.Label>
                 <Slider
                     id="cap-slider-vdd"
