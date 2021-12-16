@@ -90,7 +90,7 @@ export default () => {
             {samplingRunning ? (
                 <Button
                     title={startStopTitle}
-                    className="w-100 secondary-btn start-stop active-animation"
+                    className="w-100 secondary-btn start-stop active-anim"
                     variant="secondary"
                     onClick={() => dispatch(samplingStop())}
                 >
