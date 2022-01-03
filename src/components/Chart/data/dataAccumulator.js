@@ -20,14 +20,14 @@ export default () => ({
     bitStateAccumulator: new Array(nbDigitalChannels),
 
     process(begin, end, digitalChannelsToCompute, len, windowDuration) {
-        const { data, index } = options;
+        const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
                 ? this.bitDataAccumulator
                 : this.noOpBitDataProcessor;
 
-        const originalIndexBegin = timestampToIndex(begin, index);
-        const originalIndexEnd = timestampToIndex(end, index);
+        const originalIndexBegin = timestampToIndex(begin);
+        const originalIndexEnd = timestampToIndex(end);
         const step =
             len === 0 ? 0 : (originalIndexEnd - originalIndexBegin) / len;
 
