@@ -260,7 +260,11 @@ export default () => {
                                                 key={radio.id}
                                                 value={radio.value}
                                                 type="radio"
-                                                variant="secondary"
+                                                variant={
+                                                    radioValue === radio.value
+                                                        ? 'set'
+                                                        : 'unset'
+                                                }
                                                 checked={
                                                     radioValue === radio.value
                                                 }
