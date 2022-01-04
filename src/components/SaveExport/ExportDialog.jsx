@@ -11,14 +11,16 @@ import Col from 'react-bootstrap/Col';
 import Modal from 'react-bootstrap/Modal';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import Row from 'react-bootstrap/Row';
+import ToggleButton from 'react-bootstrap/ToggleButton';
+import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { remote } from 'electron';
 import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
-import { Toggle } from 'pc-nrfconnect-shared';
+import { logger, Toggle } from 'pc-nrfconnect-shared';
 
 import exportChart from '../../actions/exportChartAction';
-import { options, timestampToIndex } from '../../globals';
+import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
@@ -74,6 +76,13 @@ export default () => {
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
 
+    const [indexBegin, setIndexBegin] = useState(null);
+    const [indexEnd, setIndexEnd] = useState(null);
+    const [numberOfRecords, setNumberOfRecords] = useState(null);
+    const [fileSize, setFileSize] = useState(null);
+    const [duration, setDuration] = useState(0);
+    const [formattedDuration, setFormattedDuration] = useState('');
+
     const [timestampToggled, TimestampToggle] = useToggledSetting(
         true,
         'Timestamp'
@@ -94,6 +103,71 @@ export default () => {
         bitsSeparatedToggled,
     ];
 
+    const setExportIndexes = (begin, end) => {
+        setIndexBegin(begin);
+        setIndexEnd(end);
+    };
+
+    const [radioValue, setRadioValue] = useState(0);
+    const radios = [
+        {
+            name: 'All',
+            value: 0,
+            id: 'radio-export-all',
+            onSelect: () => {
+                setExportIndexes(0, options.index);
+            },
+        },
+        {
+            name: 'Window',
+            value: 1,
+            id: 'radio-export-window',
+            onSelect: () => {
+                /* If no windowEnd is provided, then assume you want the last timestamp recorded.
+                If no windowBegin, take calculate beginning of window by subtracting the "size" of
+                the window from the end.
+                At last, if the starting point is less than zero, start at index zero instead.
+                */
+                const end = windowEnd || options.timestamp;
+                const start = windowBegin || end - windowDuration;
+                setExportIndexes(
+                    Math.ceil(timestampToIndex(start < 0 ? 0 : start)),
+                    Math.floor(timestampToIndex(end))
+                );
+            },
+        },
+        {
+            name: 'Selected',
+            value: 2,
+            id: 'radio-export-selected',
+            onSelect: () => {
+                setExportIndexes(
+                    Math.ceil(timestampToIndex(cursorBegin)),
+                    Math.floor(timestampToIndex(cursorEnd))
+                );
+            },
+        },
+    ];
+
+    const updateRadioSelected = value => {
+        switch (value) {
+            case 0:
+                setRadioValue(0);
+                radios[0].onSelect();
+                break;
+            case 1:
+                setRadioValue(1);
+                radios[1].onSelect();
+                break;
+            case 2:
+                setRadioValue(2);
+                radios[2].onSelect();
+                break;
+            default:
+                logger.error(`Unexpected radio selected: ${value}`);
+        }
+    };
+
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -102,34 +176,38 @@ export default () => {
         if (isExportDialogVisible) {
             cancel.current = false;
         }
+
+        if (cursorBegin !== null) {
+            updateRadioSelected(2);
+        } else {
+            updateRadioSelected(0);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExportDialogVisible]);
 
-    const end = windowEnd || options.timestamp;
-    const begin = windowBegin || end - windowDuration;
+    useEffect(() => {
+        const records = indexEnd - indexBegin + 1;
+        setNumberOfRecords(records);
+        setFileSize(calculateTotalSize(contentSelection, records));
+        setDuration(indexToTimestamp(indexEnd) - indexToTimestamp(indexBegin));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [indexBegin, indexEnd]);
 
-    const [from, to] =
-        cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
-
-    const indexBegin = Math.ceil(timestampToIndex(from));
-    const indexEnd = Math.floor(timestampToIndex(to));
-    const numberOfRecords = indexEnd - indexBegin + 1;
-    const filesize = calculateTotalSize(contentSelection, numberOfRecords);
-
+    useEffect(() => {
+        setFormattedDuration(
+            unit(duration, 'us')
+                .format({
+                    notation: 'auto',
+                    precision: 4,
+                })
+                .replace('u', '\u00B5')
+        );
+    }, [duration]);
     const filename = createFileName();
-
-    const duration = to - from;
-    const formattedDuration = unit(duration, 'us')
-        .format({
-            notation: 'auto',
-            precision: 4,
-        })
-        .replace('u', '\u00B5');
-
     const close = () => {
         cancel.current = true;
         dispatch(hideExportDialog());
     };
-
     const saveFile = async () => {
         const { filePath: fn } = await remote.dialog.showSaveDialog({
             defaultPath: filename,
@@ -149,7 +227,6 @@ export default () => {
             )
         );
     };
-
     return (
         <Modal
             show={isExportDialogVisible}
@@ -164,6 +241,39 @@ export default () => {
                     <Col sm={8}>
                         <Card className="h-100">
                             <Card.Body>
+                                <h2>Area to export</h2>
+                                <ToggleButtonGroup
+                                    type="radio"
+                                    name="radio-export"
+                                    className="radio-export"
+                                    value={radioValue}
+                                >
+                                    {radios
+                                        .filter(
+                                            radio =>
+                                                radio.value !== 2 ||
+                                                cursorBegin !== null
+                                        )
+                                        .map(radio => (
+                                            <ToggleButton
+                                                id={radio.id}
+                                                key={radio.id}
+                                                value={radio.value}
+                                                type="radio"
+                                                variant="secondary"
+                                                checked={
+                                                    radioValue === radio.value
+                                                }
+                                                onChange={() =>
+                                                    updateRadioSelected(
+                                                        radio.value
+                                                    )
+                                                }
+                                            >
+                                                {radio.name}
+                                            </ToggleButton>
+                                        ))}
+                                </ToggleButtonGroup>
                                 <h2>Export fields</h2>
                                 <div className="w-fit-content">
                                     <TimestampToggle />
@@ -183,7 +293,7 @@ export default () => {
                             <Card.Body>
                                 <h2>Estimation</h2>
                                 <p>{numberOfRecords} records</p>
-                                <p>{filesize}</p>
+                                <p>{fileSize}</p>
                                 <p>{formattedDuration}</p>
                             </Card.Body>
                         </Card>
