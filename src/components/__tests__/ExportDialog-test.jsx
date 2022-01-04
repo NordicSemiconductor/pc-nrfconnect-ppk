@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { fireEvent } from '@testing-library/react';
 
 import { render, screen } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
@@ -35,6 +36,9 @@ describe('ExportDialog', () => {
     const durationLargerThanZeroPattern = /[1-9][0-9]*\ss/;
 
     it('should show the number of records', () => {
+        const radioWindow = screen.getByText('Window');
+        fireEvent.click(radioWindow);
+
         const numberOfRecords = screen.getByText(numberOfRecordsText);
         expect(numberOfRecords).not.toBe(undefined);
         const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
