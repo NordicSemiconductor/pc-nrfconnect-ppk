@@ -5,79 +5,60 @@
  */
 
 import React from 'react';
+import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
 
-import { render, screen } from '../../utils/testUtils';
+import { setDataLoggerState } from '../../reducers/dataLoggerReducer';
+import { render } from '../../utils/testUtils';
 import StartStop from '../SidePanel/StartStop';
 
-const initialStatePpk2 = {
-    app: {
-        app: {
-            rttRunning: true,
-            samplingRunning: false,
-            capabilities: {
-                ppkTriggerSet: true,
-            },
-        },
-        dataLogger: {
-            sampleFreqLog10: 5,
-            sampleFreq: 100000,
-            durationSeconds: 300,
-            maxFreqLog10: 5,
-            samplesPerAverage: null,
-            range: { name: 'minutes', multiplier: 60, min: 1, max: 72 },
-        },
-    },
+const dataLoggerStatePPK1 = {
+    samplingTime: 10,
+    maxFreqLog10: 5,
+    sampleFreqLog10: 5,
+    sampleFreq: 7700,
+    durationSeconds: 300,
+    range: { name: 'minutes', multiplier: 60, min: 1, max: 72 },
+    maxBufferSize: 200,
 };
 
-const initialStatePpk1 = {
-    app: {
-        app: {
-            rttRunning: true,
-            samplingRunning: false,
-            capabilities: {
-                ppkTriggerSet: true,
-            },
-        },
-        dataLogger: {
-            sampleFreqLog10: 5,
-            sampleFreq: 7700,
-            durationSeconds: 300,
-            maxFreqLog10: 5,
-            samplesPerAverage: null,
-            range: { name: 'minutes', multiplier: 60, min: 1, max: 72 },
-        },
-    },
+const dataLoggerStatePPK2 = {
+    maxFreqLog10: 5,
+    sampleFreqLog10: 10,
+    sampleFreq: 100_000,
+    durationSeconds: 300,
+    range: { name: 'minutes', multiplier: 60, min: 1, max: 72 },
+    maxBufferSize: 200,
 };
+
+const initialStatePPK1Actions = [
+    rttStartAction(),
+    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false}),
+    setDataLoggerState(dataLoggerStatePPK1)
+];
+
+const initialStatePPK2Actions = [
+    rttStartAction(),
+    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false}),
+    setDataLoggerState(dataLoggerStatePPK2)
+];
 
 const ppk2Tooltip = 'Start sampling at 100 kHz';
 const ppk1Tooltip = 'Start sampling at 7.7 kHz';
 
 describe('StartStop', () => {
-    describe('ppk2', () => {
-        beforeEach(() => {
-            render(<StartStop />, {
-                initialState: initialStatePpk2,
-            });
-        });
+    it('start button should have correct tooltip for PPK2', () => {
+        const screen = render(<StartStop />, initialStatePPK2Actions);
 
-        it('start button should have correct tooltip for PPK2', () => {
-            const startButton = screen.getByRole('button');
-            expect(startButton.textContent).toBe('Start');
-            expect(startButton.title).toBe(ppk2Tooltip);
-        });
+        const startButton = screen.getByText('Start');
+        expect(startButton.textContent).toBe('Start');
+        expect(startButton.title).toBe(ppk2Tooltip);
     });
 
-    describe('ppk1', () => {
-        beforeEach(() => {
-            render(<StartStop />, {
-                initialState: initialStatePpk1,
-            });
-        });
-
-        it('start button should have correct tooltip for PPK1', () => {
-            const startButton = screen.getByRole('button');
-            expect(startButton.textContent).toBe('Start');
-            expect(startButton.title).toBe(ppk1Tooltip);
-        });
+    it('start button should have correct tooltip for PPK1', () => {
+        const screen = render(<StartStop />, initialStatePPK1Actions);
+        
+        const startButton = screen.getByText('Start');
+        expect(startButton.textContent).toBe('Start');
+        expect(startButton.title).toBe(ppk1Tooltip);
     });
 });

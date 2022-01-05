@@ -177,7 +177,7 @@ export default () => {
             cancel.current = false;
         }
 
-        if (cursorBegin !== null) {
+        if (cursorBegin != null) {
             updateRadioSelected(2);
         } else {
             updateRadioSelected(0);
@@ -252,7 +252,7 @@ export default () => {
                                         .filter(
                                             radio =>
                                                 radio.value !== 2 ||
-                                                cursorBegin !== null
+                                                cursorBegin != null
                                         )
                                         .map(radio => (
                                             <ToggleButton
