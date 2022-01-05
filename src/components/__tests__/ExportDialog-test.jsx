@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
+
 import { options } from '../../globals';
 import { showExportDialog } from '../../reducers/appReducer';
-
 import {
     chartCursorAction,
     chartWindowAction,
@@ -19,16 +19,25 @@ jest.mock('../../utils/persistentStore', () => ({
     getLastSaveDir: () => 'mocked/save/dir',
     getMaxBufferSize: () => 200,
     getVoltageRegulatorMaxCap: () => 5000,
-    getDigitalChannels: () => [true,true,false,false,false,false,false,false],
+    getDigitalChannels: () => [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+    ],
     getDigitalChannelsVisible: () => true,
-    getTimestampsVisible: () =>  false,
-    getSpikeFilter: () => ({ samples: 3, alpha: 0.18, alpha5: 0.06 })
+    getTimestampsVisible: () => false,
+    getSpikeFilter: () => ({ samples: 3, alpha: 0.18, alpha5: 0.06 }),
 }));
 
 const initialStateActions = [
     chartWindowAction(1, 1_000_000, 1_000_000),
     showExportDialog(),
-]
+];
 
 describe('ExportDialog', () => {
     const totalSizeLargerThanZeroPattern = /[1-9][0-9]*\sMB/;
@@ -40,18 +49,18 @@ describe('ExportDialog', () => {
 
         options.index = expectedNumberOfRecords - 1; // Header + all samples
         const screen = render(<ExportDialog />, initialStateActions);
-        
+
         const numberOfRecords = screen.getByText(numberOfRecordsText);
         expect(numberOfRecords).not.toBe(undefined);
         const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
         expect(totalSize).not.toBe(undefined);
         const duration = screen.getByText(durationLargerThanZeroPattern);
         expect(duration).not.toBe(undefined);
-    })
+    });
 
     it('should show the number of records only inside the window', () => {
         const numberOfRecordsText = '100000 records';
-        
+
         const screen = render(<ExportDialog />, initialStateActions);
         const radioWindow = screen.getByText('Window');
         fireEvent.click(radioWindow);
@@ -66,7 +75,7 @@ describe('ExportDialog', () => {
 
     it('should open with the last option to export the selected area when area has been selected', () => {
         const numberOfRecordsText = '80000 records';
-        
+
         const screen = render(<ExportDialog />, [
             chartCursorAction(1, 800000),
             ...initialStateActions,
@@ -81,6 +90,4 @@ describe('ExportDialog', () => {
         const duration = screen.getByText(durationLargerThanZeroPattern);
         expect(duration).not.toBe(undefined);
     });
-
-
 });

@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
 
+import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
 import { setDataLoggerState } from '../../reducers/dataLoggerReducer';
 import { render } from '../../utils/testUtils';
 import StartStop from '../SidePanel/StartStop';
@@ -32,14 +32,14 @@ const dataLoggerStatePPK2 = {
 
 const initialStatePPK1Actions = [
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false}),
-    setDataLoggerState(dataLoggerStatePPK1)
+    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
+    setDataLoggerState(dataLoggerStatePPK1),
 ];
 
 const initialStatePPK2Actions = [
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false}),
-    setDataLoggerState(dataLoggerStatePPK2)
+    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
+    setDataLoggerState(dataLoggerStatePPK2),
 ];
 
 const ppk2Tooltip = 'Start sampling at 100 kHz';
@@ -56,7 +56,7 @@ describe('StartStop', () => {
 
     it('start button should have correct tooltip for PPK1', () => {
         const screen = render(<StartStop />, initialStatePPK1Actions);
-        
+
         const startButton = screen.getByText('Start');
         expect(startButton.textContent).toBe('Start');
         expect(startButton.title).toBe(ppk1Tooltip);
