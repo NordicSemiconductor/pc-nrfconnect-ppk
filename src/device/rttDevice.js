@@ -302,7 +302,7 @@ class RTTDevice extends Device {
         }
     }
 
-    async sendCommand(cmd) {
+    sendCommand(cmd) {
         const slipPackage = [];
         if (cmd.constructor !== Array) {
             this.emit(

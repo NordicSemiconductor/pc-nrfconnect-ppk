@@ -36,19 +36,19 @@ export default class Device extends EventEmitter {
             .forEach(k => Object.assign(this.capabilities, { [k]: true }));
     }
 
-    async open() {
+    open() {
         throw new Error('not implemented');
     }
 
-    async sendCommand() {
+    sendCommand() {
         throw new Error('not implemented');
     }
 
-    async stop() {
+    stop() {
         throw new Error('not implemented');
     }
 
-    async start() {
+    start() {
         throw new Error('not implemented');
     }
 
