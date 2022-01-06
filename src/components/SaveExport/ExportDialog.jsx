@@ -112,7 +112,7 @@ export default () => {
     }, [isExportDialogVisible]);
 
     useEffect(() => {
-        const records = indexEnd - indexBegin + 1;
+        const records = indexEnd - indexBegin + 1 || 0;
         setNumberOfRecords(records);
         setFileSize(calculateTotalSize(contentSelection, records));
         setDuration(indexToTimestamp(indexEnd) - indexToTimestamp(indexBegin));
@@ -171,10 +171,8 @@ export default () => {
                                     isExportDialogVisible={
                                         isExportDialogVisible
                                     }
-                                    setIndexBegin={index =>
-                                        setIndexBegin(index)
-                                    }
-                                    setIndexEnd={index => setIndexEnd(index)}
+                                    setIndexBegin={setIndexBegin}
+                                    setIndexEnd={setIndexEnd}
                                     windowBegin={windowBegin}
                                     windowEnd={windowEnd}
                                     cursorBegin={cursorBegin}
