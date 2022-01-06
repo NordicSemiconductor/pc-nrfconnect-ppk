@@ -9,6 +9,8 @@
 ### Changed
 
 - Added icons to Start/Stop buttons in `Real Time` pane.
+- Save / Export is now available after deselecting device
+  - Be aware that if you select device again the unsaved samples will be wiped
 
 ## 3.3.0 - 2021-12-15
 
