@@ -11,19 +11,18 @@ import Col from 'react-bootstrap/Col';
 import Modal from 'react-bootstrap/Modal';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import Row from 'react-bootstrap/Row';
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { remote } from 'electron';
 import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
-import { logger, Toggle } from 'pc-nrfconnect-shared';
+import { Toggle } from 'pc-nrfconnect-shared';
 
 import exportChart from '../../actions/exportChartAction';
-import { indexToTimestamp, options, timestampToIndex } from '../../globals';
+import { indexToTimestamp } from '../../globals';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
+import ExportSelection from './ExportSelection';
 
 import './saveexport.scss';
 
@@ -102,72 +101,6 @@ export default () => {
         bitsToggled,
         bitsSeparatedToggled,
     ];
-
-    const setExportIndexes = (begin, end) => {
-        setIndexBegin(begin);
-        setIndexEnd(end);
-    };
-
-    const [radioValue, setRadioValue] = useState(0);
-    const radios = [
-        {
-            name: 'All',
-            value: 0,
-            id: 'radio-export-all',
-            onSelect: () => {
-                setExportIndexes(0, options.index);
-            },
-        },
-        {
-            name: 'Window',
-            value: 1,
-            id: 'radio-export-window',
-            onSelect: () => {
-                /* If no windowEnd is provided, then assume you want the last timestamp recorded.
-                If no windowBegin, take calculate beginning of window by subtracting the "size" of
-                the window from the end.
-                At last, if the starting point is less than zero, start at index zero instead.
-                */
-                const end = windowEnd || options.timestamp;
-                const start = windowBegin || end - windowDuration;
-                setExportIndexes(
-                    Math.ceil(timestampToIndex(start < 0 ? 0 : start)),
-                    Math.floor(timestampToIndex(end))
-                );
-            },
-        },
-        {
-            name: 'Selected',
-            value: 2,
-            id: 'radio-export-selected',
-            onSelect: () => {
-                setExportIndexes(
-                    Math.ceil(timestampToIndex(cursorBegin)),
-                    Math.floor(timestampToIndex(cursorEnd))
-                );
-            },
-        },
-    ];
-
-    const updateRadioSelected = value => {
-        switch (value) {
-            case 0:
-                setRadioValue(0);
-                radios[0].onSelect();
-                break;
-            case 1:
-                setRadioValue(1);
-                radios[1].onSelect();
-                break;
-            case 2:
-                setRadioValue(2);
-                radios[2].onSelect();
-                break;
-            default:
-                logger.error(`Unexpected radio selected: ${value}`);
-        }
-    };
-
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -176,13 +109,6 @@ export default () => {
         if (isExportDialogVisible) {
             cancel.current = false;
         }
-
-        if (cursorBegin != null) {
-            updateRadioSelected(2);
-        } else {
-            updateRadioSelected(0);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExportDialogVisible]);
 
     useEffect(() => {
@@ -241,43 +167,20 @@ export default () => {
                     <Col sm={8}>
                         <Card className="h-100">
                             <Card.Body>
-                                <h2>Area to export</h2>
-                                <ToggleButtonGroup
-                                    type="radio"
-                                    name="radio-export"
-                                    className="radio-export"
-                                    value={radioValue}
-                                >
-                                    {radios
-                                        .filter(
-                                            radio =>
-                                                radio.value !== 2 ||
-                                                cursorBegin != null
-                                        )
-                                        .map(radio => (
-                                            <ToggleButton
-                                                id={radio.id}
-                                                key={radio.id}
-                                                value={radio.value}
-                                                type="radio"
-                                                variant={
-                                                    radioValue === radio.value
-                                                        ? 'set'
-                                                        : 'unset'
-                                                }
-                                                checked={
-                                                    radioValue === radio.value
-                                                }
-                                                onChange={() =>
-                                                    updateRadioSelected(
-                                                        radio.value
-                                                    )
-                                                }
-                                            >
-                                                {radio.name}
-                                            </ToggleButton>
-                                        ))}
-                                </ToggleButtonGroup>
+                                <ExportSelection
+                                    isExportDialogVisible={
+                                        isExportDialogVisible
+                                    }
+                                    setIndexBegin={index =>
+                                        setIndexBegin(index)
+                                    }
+                                    setIndexEnd={index => setIndexEnd(index)}
+                                    windowBegin={windowBegin}
+                                    windowEnd={windowEnd}
+                                    cursorBegin={cursorBegin}
+                                    cursorEnd={cursorEnd}
+                                    windowDuration={windowDuration}
+                                />
                                 <h2>Export fields</h2>
                                 <div className="w-fit-content">
                                     <TimestampToggle />
