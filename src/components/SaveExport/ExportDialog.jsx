@@ -18,10 +18,11 @@ import { dirname, join } from 'path';
 import { Toggle } from 'pc-nrfconnect-shared';
 
 import exportChart from '../../actions/exportChartAction';
-import { options, timestampToIndex } from '../../globals';
+import { indexToTimestamp } from '../../globals';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
+import ExportSelection from './ExportSelection';
 
 import './saveexport.scss';
 
@@ -74,6 +75,13 @@ export default () => {
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
 
+    const [indexBegin, setIndexBegin] = useState(null);
+    const [indexEnd, setIndexEnd] = useState(null);
+    const [numberOfRecords, setNumberOfRecords] = useState(null);
+    const [fileSize, setFileSize] = useState(null);
+    const [duration, setDuration] = useState(0);
+    const [formattedDuration, setFormattedDuration] = useState('');
+
     const [timestampToggled, TimestampToggle] = useToggledSetting(
         true,
         'Timestamp'
@@ -93,7 +101,6 @@ export default () => {
         bitsToggled,
         bitsSeparatedToggled,
     ];
-
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -104,32 +111,29 @@ export default () => {
         }
     }, [isExportDialogVisible]);
 
-    const end = windowEnd || options.timestamp;
-    const begin = windowBegin || end - windowDuration;
+    useEffect(() => {
+        const records = indexEnd - indexBegin + 1 || 0;
+        setNumberOfRecords(records);
+        setFileSize(calculateTotalSize(contentSelection, records));
+        setDuration(indexToTimestamp(indexEnd) - indexToTimestamp(indexBegin));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [indexBegin, indexEnd]);
 
-    const [from, to] =
-        cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
-
-    const indexBegin = Math.ceil(timestampToIndex(from));
-    const indexEnd = Math.floor(timestampToIndex(to));
-    const numberOfRecords = indexEnd - indexBegin + 1;
-    const filesize = calculateTotalSize(contentSelection, numberOfRecords);
-
+    useEffect(() => {
+        setFormattedDuration(
+            unit(duration, 'us')
+                .format({
+                    notation: 'auto',
+                    precision: 4,
+                })
+                .replace('u', '\u00B5')
+        );
+    }, [duration]);
     const filename = createFileName();
-
-    const duration = to - from;
-    const formattedDuration = unit(duration, 'us')
-        .format({
-            notation: 'auto',
-            precision: 4,
-        })
-        .replace('u', '\u00B5');
-
     const close = () => {
         cancel.current = true;
         dispatch(hideExportDialog());
     };
-
     const saveFile = async () => {
         const { filePath: fn } = await remote.dialog.showSaveDialog({
             defaultPath: filename,
@@ -149,7 +153,6 @@ export default () => {
             )
         );
     };
-
     return (
         <Modal
             show={isExportDialogVisible}
@@ -164,6 +167,18 @@ export default () => {
                     <Col sm={8}>
                         <Card className="h-100">
                             <Card.Body>
+                                <ExportSelection
+                                    isExportDialogVisible={
+                                        isExportDialogVisible
+                                    }
+                                    setIndexBegin={setIndexBegin}
+                                    setIndexEnd={setIndexEnd}
+                                    windowBegin={windowBegin}
+                                    windowEnd={windowEnd}
+                                    cursorBegin={cursorBegin}
+                                    cursorEnd={cursorEnd}
+                                    windowDuration={windowDuration}
+                                />
                                 <h2>Export fields</h2>
                                 <div className="w-fit-content">
                                     <TimestampToggle />
@@ -183,7 +198,7 @@ export default () => {
                             <Card.Body>
                                 <h2>Estimation</h2>
                                 <p>{numberOfRecords} records</p>
-                                <p>{filesize}</p>
+                                <p>{fileSize}</p>
                                 <p>{formattedDuration}</p>
                             </Card.Body>
                         </Card>

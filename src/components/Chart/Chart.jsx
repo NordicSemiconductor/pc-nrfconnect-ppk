@@ -51,9 +51,9 @@ const calcStats = (_begin, _end) => {
         [begin, end] = [end, begin];
     }
 
-    const { data, index } = options;
-    const indexBegin = Math.ceil(timestampToIndex(begin, index));
-    const indexEnd = Math.floor(timestampToIndex(end, index));
+    const { data } = options;
+    const indexBegin = Math.ceil(timestampToIndex(begin));
+    const indexEnd = Math.floor(timestampToIndex(end));
 
     let sum = 0;
     let len = 0;
@@ -125,7 +125,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
-    const { bits, data, index } = options;
+    const { bits, data } = options;
 
     const chartRef = useRef(null);
 
@@ -236,8 +236,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const chartPause = () =>
         chartWindow(options.timestamp - windowDuration, options.timestamp);
 
-    const originalIndexBegin = timestampToIndex(begin, index);
-    const originalIndexEnd = timestampToIndex(end, index);
+    const originalIndexBegin = timestampToIndex(begin);
+    const originalIndexEnd = timestampToIndex(end);
     const step = len === 0 ? 2 : (originalIndexEnd - originalIndexBegin) / len;
     const { ampereLineData, bitsLineData } = useMemo(() => {
         const dataProcessor = step > 1 ? dataAccumulator : dataSelector;

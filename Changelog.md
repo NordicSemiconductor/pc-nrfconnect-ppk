@@ -1,5 +1,11 @@
 ## Unreleased
 
+### Added
+
+- Export dialog now have a section to choose what selection to export to CSV.
+  - The different options are to export 'All' samples, the samples within the 'Window', or a 'Selection'.
+  - The option for 'Selection' is only present if an area of the profile is selected.
+
 ### Changed
 
 - Added icons to Start/Stop buttons in `Real Time` pane.

@@ -22,11 +22,23 @@ export const options = {
 
 export const nbDigitalChannels = 8;
 
-export const timestampToIndex = (ts, index = options.index) =>
-    index - ((options.timestamp - ts) * options.samplesPerSecond) / 1e6;
+/**
+ * Translate timestamp to index of sample array
+ * @param {Number} timestamp timestamp to translate to index
+ * @returns {Number} index of sample at provided timestamp
+ */
+export const timestampToIndex = timestamp =>
+    options.index -
+    ((options.timestamp - timestamp) * options.samplesPerSecond) / 1e6;
 
-export const indexToTimestamp = (i, index = options.index) =>
-    options.timestamp - ((index - i) * 1e6) / options.samplesPerSecond;
+/**
+ * Translate index of sample array to timestamp
+ * @param {Number} index index to translate to timestamp
+ * @returns {Number} timestamp of sample at provided index
+ */
+export const indexToTimestamp = index =>
+    options.timestamp -
+    ((options.index - index) * 1e6) / options.samplesPerSecond;
 
 export const updateTitle = info => {
     const title = remote.getCurrentWindow().getTitle().split(':')[0].trim();

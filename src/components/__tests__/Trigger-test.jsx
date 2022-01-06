@@ -6,41 +6,31 @@
 
 import React from 'react';
 
-import { fireEvent, render, screen } from '../../utils/testUtils';
+import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
+import {
+    triggerLengthSetAction,
+    triggerLevelSetAction,
+    triggerWindowRangeAction,
+} from '../../reducers/triggerReducer';
+import { fireEvent, render } from '../../utils/testUtils';
 import Trigger from '../SidePanel/Trigger/Trigger';
 
 const TRIGGER_LENGTH = 10;
 
-const initialState = {
-    app: {
-        app: {
-            rttRunning: true,
-            capabilities: {
-                ppkTriggerExtToggle: false,
-            },
-        },
-        trigger: {
-            externalTrigger: false,
-            triggerWindowRange: {
-                min: 1,
-                max: 100,
-            },
-            triggerLength: TRIGGER_LENGTH,
-            triggerLevel: 1000,
-            triggerSingleWaiting: false,
-            triggerRunning: false,
-        },
-    },
-};
+const initialStateActions = [
+    // Set app State (app.app):
+    rttStartAction(),
+    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
+    // Set trigger State (app.trigger):
+    triggerWindowRangeAction({ min: 1, max: 100 }),
+    triggerLengthSetAction(TRIGGER_LENGTH),
+    triggerLevelSetAction(1_000),
+];
 
 describe('Trigger', () => {
-    beforeEach(() => {
-        render(<Trigger />, {
-            initialState,
-        });
-    });
-
     it('should be possible to switch modes', () => {
+        const screen = render(<Trigger />, initialStateActions);
+
         const singleButton = screen.getByText(/single/i);
         const continuousButton = screen.getByText(/continuous/i);
         expect(singleButton).toBeInTheDocument();
@@ -53,6 +43,8 @@ describe('Trigger', () => {
     });
 
     it('should update slider value if input field is changed, but only if the input is valid', () => {
+        const screen = render(<Trigger />, initialStateActions);
+
         const triggerLengthInput = screen.getByText(/length/i).nextSibling;
         const sliderValue = screen.getByRole('slider');
         expect(sliderValue.getAttribute('aria-valuenow')).toBe(

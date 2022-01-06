@@ -3,45 +3,27 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
+import { testUtils } from 'pc-nrfconnect-shared';
 
-import React from 'react';
-import { Provider } from 'react-redux';
-import { render as rtlRender } from '@testing-library/react';
-import { createStore } from 'redux';
+import appReducer from '../reducers';
 
-import reducer from '../reducers';
-
-jest.mock('pc-nrfconnect-shared', () => {
-    const storeAlwaysReturningDefaultValues = {
-        get: (_key, defaultValue) => defaultValue,
+jest.mock('pc-nrfconnect-shared', () => ({
+    ...jest.requireActual('pc-nrfconnect-shared'),
+    getAppDir: () => '/mocked/data/dir',
+    getAppDataDir: () => 'mocked/data/dir',
+    getLastSaveDir: () => 'mocked/data/dir',
+    getPersistentStore: jest.fn().mockImplementation(() => ({
+        get: (_, defaultVal) => defaultVal,
         set: jest.fn(),
-    };
-
-    return {
-        ...jest.requireActual('pc-nrfconnect-shared'),
-        getPersistentStore: () => storeAlwaysReturningDefaultValues,
-        getAppDataDir: () => '/mocked/data/dir',
-    };
-});
+    })),
+}));
 
 window.ResizeObserver = function ResizeObserverStub() {
     this.observe = () => {};
     this.disconnect = () => {};
 };
 
-function render(
-    ui,
-    {
-        initialState,
-        store = createStore(reducer, initialState),
-        ...renderOptions
-    } = {}
-) {
-    function Wrapper(props) {
-        return <Provider store={store} {...props} />;
-    }
-    return rtlRender(ui, { wrapper: Wrapper, ...renderOptions });
-}
+const render = testUtils.render(appReducer);
 
 export * from '@testing-library/react';
 export { render };

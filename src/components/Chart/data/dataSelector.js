@@ -19,14 +19,14 @@ export default () => ({
     noOpBitDataProcessor: noOpBitDataProcessor(),
 
     process(begin, end, digitalChannelsToCompute) {
-        const { data, index } = options;
+        const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
                 ? this.bitDataSelector
                 : this.noOpBitDataProcessor;
 
-        const originalIndexBegin = timestampToIndex(begin, index);
-        const originalIndexEnd = timestampToIndex(end, index);
+        const originalIndexBegin = timestampToIndex(begin);
+        const originalIndexEnd = timestampToIndex(end);
 
         let mappedIndex = 0;
 
