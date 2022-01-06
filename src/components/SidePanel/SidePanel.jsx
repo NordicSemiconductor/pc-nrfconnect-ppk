@@ -56,6 +56,7 @@ export default () => {
         return (
             <SidePanel className="side-panel">
                 <Load />
+                {options.index !== 0 && <Save />}
                 <Instructions />
             </SidePanel>
         );
