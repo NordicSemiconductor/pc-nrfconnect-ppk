@@ -16,12 +16,12 @@ describe('SidePanel', () => {
         expect(screen.getByText('Load')).toBeDefined();
     });
 
-    it('should not have LoadSave present at startup', () => {
+    it('should not have LoadSave present at if the number of samples is zero', () => {
         const screen = render(<SidePanel />);
         expect(screen.queryByText('Save / Export')).toBeNull();
     });
 
-    it('should have LoadSave present if options.index is not zero', () => {
+    it('should have LoadSave present if the number of samples is non-zero', () => {
         options.index = 1;
         const screen = render(<SidePanel />);
         expect(screen.getByText('Save / Export')).toBeDefined();

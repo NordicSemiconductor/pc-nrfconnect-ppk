@@ -55,8 +55,8 @@ export default () => {
     if (!deviceOpen) {
         return (
             <SidePanel className="side-panel">
-                {options.index !== 0 && <Save />}
                 <Load />
+                {options.index !== 0 && <Save />}
                 <Instructions />
             </SidePanel>
         );
