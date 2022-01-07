@@ -18,6 +18,7 @@ import {
 import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
 import { BufferSettings } from './BufferSettings';
 import { CapVoltageSettings } from './CapVoltageSettings';
+import ChartOptions from './ChartOptions';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
 import Instructions from './Instructions';
@@ -58,6 +59,7 @@ export default () => {
                 <Load />
                 {options.index !== 0 && <Save />}
                 <Instructions />
+                <ChartOptions />
             </SidePanel>
         );
     }
@@ -77,6 +79,7 @@ export default () => {
                     <Save />
                 </>
             )}
+            <ChartOptions />
             {deviceOpen && advancedMode && (
                 <>
                     <SwitchPoints />
