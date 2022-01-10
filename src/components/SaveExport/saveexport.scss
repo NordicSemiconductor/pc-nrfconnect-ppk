@@ -1,10 +1,17 @@
-@import "~pc-nrfconnect-shared/styles";
+/*
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ */
+
+@import '~pc-nrfconnect-shared/styles';
 
 .modal-body {
     padding: 2rem;
 }
 
-.export-dialog, .choice-dialog {
+.export-dialog,
+.choice-dialog {
     color: $gray-600;
 
     h2 {
@@ -35,4 +42,26 @@
 .card-header {
     background-color: unset;
     border-bottom: none;
+}
+
+.radio-export {
+    width: 100%;
+    background-color: #455a64;
+    padding: 4px;
+
+    .btn {
+        border-radius: 4px !important;
+    }
+
+    .btn-set {
+        color: #455a64;
+        background-color: white;
+        border-color: #455a64;
+    }
+
+    .btn-unset {
+        color: white;
+        background-color: #455a64;
+        border-color: #455a64;
+    }
 }

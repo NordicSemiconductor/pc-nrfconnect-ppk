@@ -1,37 +1,7 @@
-/* Copyright (c) 2015 - 2020, Nordic Semiconductor ASA
+/*
+ * Copyright (c) 2015 Nordic Semiconductor ASA
  *
- * All rights reserved.
- *
- * Use in source and binary forms, redistribution in binary form only, with
- * or without modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 2. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 3. This software, with or without modification, must only be used with a Nordic
- *    Semiconductor ASA integrated circuit.
- *
- * 4. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -48,10 +18,11 @@ import { dirname, join } from 'path';
 import { Toggle } from 'pc-nrfconnect-shared';
 
 import exportChart from '../../actions/exportChartAction';
-import { options, timestampToIndex } from '../../globals';
+import { indexToTimestamp } from '../../globals';
 import { appState, hideExportDialog } from '../../reducers/appReducer';
 import { chartState } from '../../reducers/chartReducer';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
+import ExportSelection from './ExportSelection';
 
 import './saveexport.scss';
 
@@ -104,6 +75,13 @@ export default () => {
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
 
+    const [indexBegin, setIndexBegin] = useState(null);
+    const [indexEnd, setIndexEnd] = useState(null);
+    const [numberOfRecords, setNumberOfRecords] = useState(null);
+    const [fileSize, setFileSize] = useState(null);
+    const [duration, setDuration] = useState(0);
+    const [formattedDuration, setFormattedDuration] = useState('');
+
     const [timestampToggled, TimestampToggle] = useToggledSetting(
         true,
         'Timestamp'
@@ -123,7 +101,6 @@ export default () => {
         bitsToggled,
         bitsSeparatedToggled,
     ];
-
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -134,32 +111,29 @@ export default () => {
         }
     }, [isExportDialogVisible]);
 
-    const end = windowEnd || options.timestamp;
-    const begin = windowBegin || end - windowDuration;
+    useEffect(() => {
+        const records = indexEnd - indexBegin + 1 || 0;
+        setNumberOfRecords(records);
+        setFileSize(calculateTotalSize(contentSelection, records));
+        setDuration(indexToTimestamp(indexEnd) - indexToTimestamp(indexBegin));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [indexBegin, indexEnd]);
 
-    const [from, to] =
-        cursorBegin === null ? [begin, end] : [cursorBegin, cursorEnd];
-
-    const indexBegin = Math.ceil(timestampToIndex(from));
-    const indexEnd = Math.floor(timestampToIndex(to));
-    const numberOfRecords = indexEnd - indexBegin + 1;
-    const filesize = calculateTotalSize(contentSelection, numberOfRecords);
-
+    useEffect(() => {
+        setFormattedDuration(
+            unit(duration, 'us')
+                .format({
+                    notation: 'auto',
+                    precision: 4,
+                })
+                .replace('u', '\u00B5')
+        );
+    }, [duration]);
     const filename = createFileName();
-
-    const duration = to - from;
-    const formattedDuration = unit(duration, 'us')
-        .format({
-            notation: 'auto',
-            precision: 4,
-        })
-        .replace('u', '\u00B5');
-
     const close = () => {
         cancel.current = true;
         dispatch(hideExportDialog());
     };
-
     const saveFile = async () => {
         const { filePath: fn } = await remote.dialog.showSaveDialog({
             defaultPath: filename,
@@ -179,7 +153,6 @@ export default () => {
             )
         );
     };
-
     return (
         <Modal
             show={isExportDialogVisible}
@@ -194,6 +167,18 @@ export default () => {
                     <Col sm={8}>
                         <Card className="h-100">
                             <Card.Body>
+                                <ExportSelection
+                                    isExportDialogVisible={
+                                        isExportDialogVisible
+                                    }
+                                    setIndexBegin={setIndexBegin}
+                                    setIndexEnd={setIndexEnd}
+                                    windowBegin={windowBegin}
+                                    windowEnd={windowEnd}
+                                    cursorBegin={cursorBegin}
+                                    cursorEnd={cursorEnd}
+                                    windowDuration={windowDuration}
+                                />
                                 <h2>Export fields</h2>
                                 <div className="w-fit-content">
                                     <TimestampToggle />
@@ -213,7 +198,7 @@ export default () => {
                             <Card.Body>
                                 <h2>Estimation</h2>
                                 <p>{numberOfRecords} records</p>
-                                <p>{filesize}</p>
+                                <p>{fileSize}</p>
                                 <p>{formattedDuration}</p>
                             </Card.Body>
                         </Card>

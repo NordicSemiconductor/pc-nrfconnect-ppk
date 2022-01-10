@@ -1,37 +1,7 @@
-/* Copyright (c) 2015 - 2018, Nordic Semiconductor ASA
+/*
+ * Copyright (c) 2015 Nordic Semiconductor ASA
  *
- * All rights reserved.
- *
- * Use in source and binary forms, redistribution in binary form only, with
- * or without modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 2. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 3. This software, with or without modification, must only be used with a Nordic
- *    Semiconductor ASA integrated circuit.
- *
- * 4. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
- * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
 /* eslint no-plusplus: off */
@@ -65,7 +35,9 @@ import StatBox from './StatBox';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
 
-import { rightMarginPx } from './chart.scss';
+import chartCss from './chart.icss.scss';
+
+const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
@@ -79,9 +51,9 @@ const calcStats = (_begin, _end) => {
         [begin, end] = [end, begin];
     }
 
-    const { data, index } = options;
-    const indexBegin = Math.ceil(timestampToIndex(begin, index));
-    const indexEnd = Math.floor(timestampToIndex(end, index));
+    const { data } = options;
+    const indexBegin = Math.ceil(timestampToIndex(begin));
+    const indexEnd = Math.floor(timestampToIndex(end));
 
     let sum = 0;
     let len = 0;
@@ -153,12 +125,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
-    const { bits, data, index } = options;
+    const { bits, data } = options;
 
     const chartRef = useRef(null);
 
-    const dataAccumulator = useLazyInitializedRef(dataAccumulatorInitialiser)
-        .current;
+    const dataAccumulator = useLazyInitializedRef(
+        dataAccumulatorInitialiser
+    ).current;
     const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
     const { sampleFreq } = useSelector(dataLoggerState);
@@ -190,14 +163,15 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
     const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
-    const selectionStats = useMemo(() => calcStats(cursorBegin, cursorEnd), [
-        cursorBegin,
-        cursorEnd,
-    ]);
+    const selectionStats = useMemo(
+        () => calcStats(cursorBegin, cursorEnd),
+        [cursorBegin, cursorEnd]
+    );
 
-    const resetCursor = useCallback(() => chartCursor(null, null), [
-        chartCursor,
-    ]);
+    const resetCursor = useCallback(
+        () => chartCursor(null, null),
+        [chartCursor]
+    );
 
     const zoomPanCallback = useCallback(
         (beginX, endX, beginY, endY) => {
@@ -262,8 +236,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const chartPause = () =>
         chartWindow(options.timestamp - windowDuration, options.timestamp);
 
-    const originalIndexBegin = timestampToIndex(begin, index);
-    const originalIndexEnd = timestampToIndex(end, index);
+    const originalIndexBegin = timestampToIndex(begin);
+    const originalIndexEnd = timestampToIndex(end);
     const step = len === 0 ? 2 : (originalIndexEnd - originalIndexBegin) / len;
     const { ampereLineData, bitsLineData } = useMemo(() => {
         const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
