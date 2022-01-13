@@ -158,8 +158,6 @@ export const resetCursorAndChart = () => (dispatch, getState) => {
 export const setChartState = state => ({
     type: LOAD_CHART_STATE,
     ...state,
-    // yMin: state.yAxisLock ? state.yMin : null,
-    // yMax: state.yAxisLock ? state.yMax : null,
     hasDigitalChannels: options.bits !== null,
 });
 
@@ -205,9 +203,7 @@ export default (state = initialState(), { type, ...action }) => {
         }
         case CHART_WINDOW: {
             let { windowBegin, windowEnd, windowDuration } = action;
-            // const { yMin, yMax } = action;
-            const yMin = Math.min(action.yMin, action.yMax) || null;
-            const yMax = Math.max(action.yMin, action.yMax) || null;
+            const { yMin, yMax } = action;
             const { yAxisLock, windowBeginLock, windowEndLock } = state;
             if (windowBeginLock !== null) {
                 windowBegin = Math.max(windowBeginLock, windowBegin);
@@ -307,5 +303,4 @@ export default (state = initialState(), { type, ...action }) => {
     }
 };
 
-export const getYValueState = ({ app }) => [app.chart.yMin, app.chart.yMax];
 export const chartState = ({ app }) => app.chart;
