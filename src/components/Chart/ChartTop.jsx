@@ -19,6 +19,7 @@ import {
 } from '../../reducers/chartReducer';
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
+import ChartOptions from './ChartOptions';
 
 import './charttop.scss';
 
@@ -64,23 +65,26 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
 
     return (
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
-            <Toggle
-                label="LOCK Y-AXIS"
-                onToggle={() => {
-                    if (yAxisLock) {
-                        dispatch(toggleYAxisLock());
-                    } else {
-                        const { min, max } =
-                            chartRef.current.chartInstance.scales.yScale;
-                        dispatch(toggleYAxisLock(min, max));
-                    }
-                }}
-                isToggled={yAxisLock}
-                variant="secondary"
-                labelRight
-                barColor={gray700}
-                barColorToggled={nordicBlue}
-            />
+            <div className="settings-y-axis">
+                <Toggle
+                    label="LOCK Y-AXIS AT"
+                    onToggle={() => {
+                        if (yAxisLock) {
+                            dispatch(toggleYAxisLock(null, null));
+                        } else {
+                            const { min, max } =
+                                chartRef.current.chartInstance.scales.yScale;
+                            dispatch(toggleYAxisLock(min, max));
+                        }
+                    }}
+                    isToggled={yAxisLock}
+                    variant="secondary"
+                    labelRight
+                    barColor={gray700}
+                    barColorToggled={nordicBlue}
+                />
+                <ChartOptions chartRef={chartRef} />
+            </div>
             {isDataLoggerPane && (
                 <ButtonGroup>
                     {timeWindowLabels.map(label => (

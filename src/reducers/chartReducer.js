@@ -24,8 +24,8 @@ const initialState = () => ({
     windowBegin: 0, // [microseconds]
     windowEnd: 0, // [microseconds]
     windowDuration: initialWindowDuration, // [microseconds]
-    yMin: 0, // 0 uA
-    yMax: 10, // 10 uA
+    yMin: null,
+    yMax: null,
     bufferLength: initialBufferLength,
     bufferRemaining: initialBufferLength,
     index: 0,
@@ -59,9 +59,8 @@ const Y_MAX = 1200000;
 
 export const animationAction = () => ({ type: ANIMATION });
 
-export const yAxisChangedAction = (yMin, yMax) => ({
+export const scaleChartYAxisAction = yMax => ({
     type: Y_AXIS_ACTION,
-    yMin,
     yMax,
 });
 
@@ -283,11 +282,9 @@ export default (state = initialState(), { type, ...action }) => {
             return { ...state, ...action };
         }
         case TOGGLE_Y_AXIS_LOCK: {
-            const { yMin, yMax } = action;
             return {
                 ...state,
-                yMin: yMin == null ? state.yMin : yMin,
-                yMax: yMax == null ? state.yMax : yMax,
+                ...action,
                 yAxisLock: !state.yAxisLock,
             };
         }

@@ -7,14 +7,38 @@
 @import '~pc-nrfconnect-shared/styles';
 
 .chart-top {
+    font-size: 12px !important;
+
     .btn-group > .btn {
         width: 4rem;
         margin-right: 0.5rem;
         padding: 0;
         color: $gray-600;
     }
+
     .toggle label {
         margin-bottom: 0 !important;
+    }
+
+    .settings-y-axis {
+        display: flex;
+        height: 100%;
+        align-items: center;
+
+    }
+
+    .label-with-dropdown {
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    .inline-dropdown {
+        margin-left: -10px;
+    }
+
+    .dropdown-current-unit {
+        font-size: 12px !important;
     }
 }
 
