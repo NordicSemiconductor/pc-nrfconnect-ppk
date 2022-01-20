@@ -67,7 +67,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
             <div className="settings-y-axis">
                 <Toggle
-                    label="LOCK Y-AXIS AT"
+                    label="LOCK Y-AXIS"
                     onToggle={() => {
                         if (yAxisLock) {
                             dispatch(toggleYAxisLock(null, null));
@@ -83,7 +83,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     barColor={gray700}
                     barColorToggled={nordicBlue}
                 />
-                <ChartOptions chartRef={chartRef} />
+                {yAxisLock && <ChartOptions chartRef={chartRef} />}
             </div>
             {isDataLoggerPane && (
                 <ButtonGroup>

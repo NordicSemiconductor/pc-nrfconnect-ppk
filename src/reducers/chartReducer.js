@@ -59,9 +59,24 @@ const Y_MAX = 1200000;
 
 export const animationAction = () => ({ type: ANIMATION });
 
-export const scaleChartYAxisAction = yMax => ({
+/**
+ * Set new YMax value
+ * @param {*} yMax new value
+ * @returns {void}
+ */
+export const setYMax = yMax => ({
     type: Y_AXIS_ACTION,
     yMax,
+});
+
+/**
+ * Set new YMin value
+ * @param {*} yMin new value
+ * @returns {void}
+ */
+export const setYMin = yMin => ({
+    type: Y_AXIS_ACTION,
+    yMin,
 });
 
 export const chartCursorAction = (cursorBegin, cursorEnd) => ({

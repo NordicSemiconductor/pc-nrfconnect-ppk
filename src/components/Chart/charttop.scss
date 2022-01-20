@@ -7,6 +7,10 @@
 @import '~pc-nrfconnect-shared/styles';
 
 .chart-top {
+    > div {
+        width: 430px;
+    }
+
     font-size: 12px !important;
 
     .btn-group > .btn {
@@ -18,20 +22,30 @@
 
     .toggle label {
         margin-bottom: 0 !important;
+        justify-content: flex-end;
     }
-
+    
     .settings-y-axis {
         display: flex;
-        height: 100%;
+        height: 16px;
         align-items: center;
+        
+        .toggle {
+            margin-right: 4px;
+        }
 
+        .label-with-dropdown {
+            display: flex;
+            align-items: center;
+            margin: 0;
+        }
+
+        .dropdown-current-unit {
+            padding-right: 0;
+            margin-right: 4px;
+        }
     }
 
-    .label-with-dropdown {
-        display: flex;
-        align-items: center;
-        margin: 0;
-    }
 
     .inline-dropdown {
         margin-left: -10px;
