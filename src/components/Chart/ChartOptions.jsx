@@ -43,11 +43,6 @@ const ChartOptions = () => {
         return 0;
     };
 
-    /**
-     * Dispatch the new yMax value and update unit
-     * @param {bool} unit true if value is given in mA
-     * @returns {void}
-     */
     const dispatchYMax = unit => {
         dispatch(setYMax(localYMax * 1000 ** unit));
         setUnitPowerYMax(unit);
@@ -84,12 +79,12 @@ const ChartOptions = () => {
 
     return (
         <Form.Label className="label-with-dropdown">
-            FROM
+            <span>FROM</span>
             <NumberInlineInput
                 value={localYMin}
                 range={{
-                    min: 0,
-                    max: yMax,
+                    min: -Infinity,
+                    max: (yMax * 1000 ** unitPowerYMax) / 1000 ** unitPowerYMin,
                     decimals: 15,
                 }}
                 onChange={value => setLocalYMin(value)}
@@ -100,11 +95,11 @@ const ChartOptions = () => {
                 unit={unitPowerYMin}
                 dispatchFunc={unit => dispatchYMin(unit)}
             />
-            TO
+            <span>TO</span>
             <NumberInlineInput
                 value={localYMax}
                 range={{
-                    min: yMin || 0,
+                    min: (yMin * 1000 ** unitPowerYMax) / 1000 ** unitPowerYMax,
                     max: Infinity,
                     decimals: 15,
                 }}

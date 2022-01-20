@@ -234,8 +234,8 @@ export default (state = initialState(), { type, ...action }) => {
                 windowEnd,
                 windowDuration,
                 ...calcBuffer(windowDuration, windowEnd),
-                yMin: yMin == null || yAxisLock ? state.yMin : yMin,
-                yMax: yMax == null || yAxisLock ? state.yMax : yMax,
+                yMin: yMin === null || yAxisLock ? state.yMin : yMin,
+                yMax: yMax === null || yAxisLock ? state.yMax : yMax,
             };
         }
         case CHART_TRIGGER_WINDOW: {
@@ -250,8 +250,8 @@ export default (state = initialState(), { type, ...action }) => {
                 windowBeginLock: windowBegin,
                 windowEndLock: windowEnd,
                 ...calcBuffer(windowDuration, windowEnd),
-                yMin: yMin == null || yAxisLock ? state.yMin : yMin,
-                yMax: yMax == null || yAxisLock ? state.yMax : yMax,
+                yMin: yMin === null || yAxisLock ? state.yMin : yMin,
+                yMax: yMax === null || yAxisLock ? state.yMax : yMax,
             };
         }
         case ANIMATION: {

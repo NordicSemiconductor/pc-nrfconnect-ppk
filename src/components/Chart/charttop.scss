@@ -13,6 +13,10 @@
 
     font-size: 12px !important;
 
+    .btn {
+        color: #546e7a;
+    }
+
     .btn-group > .btn {
         width: 4rem;
         margin-right: 0.5rem;
@@ -38,6 +42,10 @@
             display: flex;
             align-items: center;
             margin: 0;
+
+            span {
+                font-weight: 600;
+            }
         }
 
         .dropdown-current-unit {
