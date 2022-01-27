@@ -19,63 +19,64 @@ const unitLabels = ['\u00B5A', 'mA', 'A'];
 const ChartOptions = () => {
     const { yMin, yMax, yAxisLock } = useSelector(chartState);
     const dispatch = useDispatch();
+
     const [localYMin, setLocalYMin] = useState(1);
     const [localYMax, setLocalYMax] = useState(1);
 
     /** Mapping to the power to get correct value of uA
      * 0=uA, 1=mA, 2=A
      */
-    const [unitPowerYMax, setUnitPowerYMax] = useState(0);
     const [unitPowerYMin, setUnitPowerYMin] = useState(0);
+    const [unitPowerYMax, setUnitPowerYMax] = useState(0);
 
-    /**
-     *
-     * @param {number} uA the top value of the y axis
+    /** Get the unit power
+     * @param {number} uA number av microAmpere
      * @returns {0 | 1 | 2} the power in which it is preferred to scale the y value
      */
     const getUnitPower = uA => {
-        if (uA >= 1e6) {
+        const absoluteValue = Math.abs(uA);
+        if (absoluteValue >= 1e6) {
             return 2;
         }
-        if (uA > 1000) {
+        if (absoluteValue > 1000) {
             return 1;
         }
         return 0;
     };
 
-    const dispatchYMax = unit => {
-        dispatch(setYMax(localYMax * 1000 ** unit));
-        setUnitPowerYMax(unit);
+    const dispatchYMin = powerUnit => {
+        dispatch(setYMin(localYMin * 1000 ** powerUnit));
+        setUnitPowerYMin(powerUnit);
     };
 
-    const dispatchYMin = unit => {
-        dispatch(setYMin(localYMin * 1000 ** unit));
-        setUnitPowerYMin(unit);
+    const dispatchYMax = powerUnit => {
+        dispatch(setYMax(localYMax * 1000 ** powerUnit));
+        setUnitPowerYMax(powerUnit);
     };
 
     useEffect(() => {
-        const power = getUnitPower(yMax);
-        setUnitPowerYMax(power);
-        const precisionResult = Number(yMax / 1000 ** power).toPrecision(4);
-        const rawResult = Number(yMax / 1000 ** power);
-        setLocalYMax(
-            precisionResult.toString().length < rawResult.toString().length
-                ? precisionResult
-                : rawResult
-        );
-    }, [yMax]);
-
-    useEffect(() => {
-        const power = getUnitPower(yMin);
-        setUnitPowerYMin(power);
-        const precisionResult = Number(yMin / 1000 ** power).toPrecision(4);
-        const rawResult = Number(yMin / 1000 ** power);
+        const unitPower = getUnitPower(yMin);
+        setUnitPowerYMin(unitPower);
+        const precisionResult = Number(yMin / 1000 ** unitPower).toPrecision(4);
+        const rawResult = Number(yMin / 1000 ** unitPower);
         setLocalYMin(
             precisionResult.toString().length < rawResult.toString().length
                 ? precisionResult
                 : rawResult
         );
     }, [yMin]);
+
+    useEffect(() => {
+        const unitPower = getUnitPower(yMax);
+        setUnitPowerYMax(unitPower);
+        const precisionResult = Number(yMax / 1000 ** unitPower).toPrecision(4);
+        const rawResult = Number(yMax / 1000 ** unitPower);
+        setLocalYMax(
+            precisionResult.toString().length < rawResult.toString().length
+                ? precisionResult
+                : rawResult
+        );
+    }, [yMax]);
 
     return (
         <Form.Label className="label-with-dropdown">
@@ -88,7 +89,7 @@ const ChartOptions = () => {
                     decimals: 15,
                 }}
                 onChange={value => setLocalYMin(value)}
-                onChangeComplete={() => dispatchYMin(unitPowerYMax)}
+                onChangeComplete={() => dispatchYMin(unitPowerYMin)}
                 disabled={!yAxisLock}
             />
             <UnitDropdown
@@ -99,7 +100,7 @@ const ChartOptions = () => {
             <NumberInlineInput
                 value={localYMax}
                 range={{
-                    min: (yMin * 1000 ** unitPowerYMax) / 1000 ** unitPowerYMax,
+                    min: (yMin * 1000 ** unitPowerYMin) / 1000 ** unitPowerYMax,
                     max: Infinity,
                     decimals: 15,
                 }}

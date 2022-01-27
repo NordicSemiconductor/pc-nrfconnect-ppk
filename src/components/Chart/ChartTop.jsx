@@ -10,7 +10,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
 import { colors, Toggle } from 'pc-nrfconnect-shared';
-import { func, shape, string } from 'prop-types';
+import { func, number, shape, string } from 'prop-types';
 
 import {
     chartState,
@@ -42,7 +42,7 @@ TimeWindowButton.propTypes = {
     zoomToWindow: func.isRequired,
 };
 
-const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
+const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
     const dispatch = useDispatch();
     const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
@@ -71,6 +71,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
                     onToggle={() => {
                         if (yAxisLock) {
                             dispatch(toggleYAxisLock(null, null));
+                            zoomToWindow(windowDuration);
                         } else {
                             const { min, max } =
                                 chartRef.current.chartInstance.scales.yScale;
@@ -116,6 +117,7 @@ ChartTop.propTypes = {
     chartPause: func.isRequired,
     zoomToWindow: func.isRequired,
     chartRef: shape({}).isRequired,
+    windowDuration: number.isRequired,
 };
 
 export default ChartTop;

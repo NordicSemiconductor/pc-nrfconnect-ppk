@@ -274,6 +274,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
+                    windowDuration={windowDuration}
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
                 <AmpereChart
