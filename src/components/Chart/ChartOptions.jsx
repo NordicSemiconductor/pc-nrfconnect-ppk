@@ -14,7 +14,7 @@ import { func, number } from 'prop-types';
 
 import { chartState, setYMax, setYMin } from '../../reducers/chartReducer';
 
-const unitLabels = ['\u00B5A', 'mA', 'A'];
+const UNIT_LABELS = ['\u00B5A', 'mA', 'A'];
 
 const ChartOptions = () => {
     const { yMin, yMax, yAxisLock } = useSelector(chartState);
