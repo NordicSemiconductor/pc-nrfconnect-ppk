@@ -205,20 +205,24 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         ]
     );
 
+    /** Center the graph inside the window
+     * @param {number} localWindowDuration
+     */
     const zoomToWindow = useCallback(
-        usec => {
+        localWindowDuration => {
             if (windowEnd) {
-                const mid = (windowBegin + windowEnd) / 2;
-                let a = mid - usec / 2;
-                let b = mid + usec / 2;
-                if (b > windowEnd) {
-                    a = a - (b - windowEnd);
-                    b = windowEnd;
+                const center = (windowBegin + windowEnd) / 2;
+                let localWindowBegin = center - localWindowDuration / 2;
+                let localWindowEnd = center + localWindowDuration / 2;
+                if (localWindowEnd > windowEnd) {
+                    localWindowBegin =
+                        localWindowBegin - (localWindowEnd - windowEnd);
+                    localWindowEnd = windowEnd;
                 }
-                chartWindow(a, b);
+                chartWindow(localWindowBegin, localWindowEnd);
                 return;
             }
-            chartReset(usec);
+            chartReset(localWindowDuration);
         },
         [chartWindow, chartReset, windowBegin, windowEnd]
     );
