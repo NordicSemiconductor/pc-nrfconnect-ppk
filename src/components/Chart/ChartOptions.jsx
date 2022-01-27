@@ -54,28 +54,33 @@ const ChartOptions = () => {
         setUnitPowerYMax(powerUnit);
     };
 
+    /** Get calculated value depending on unit
+     * @param {number} initialNumber yMin or yMax to make more readable
+     * @param {number} power the power to reduce depending on unit
+     * @param {number} precision maximal number of decimals to display
+     * @returns {number} initialNumber/1000**power with precision number of decimals
+     */
+    const getPrettyValue = (initialNumber, power, precision = 4) => {
+        const rawResult = Number(initialNumber / 1000 ** power);
+        const precisionResult = rawResult.toPrecision(precision);
+
+        if (precisionResult.toString().length < rawResult.toString().length) {
+            return precisionResult;
+        }
+        return rawResult;
+    };
+
     useEffect(() => {
         const unitPower = getUnitPower(yMin);
         setUnitPowerYMin(unitPower);
-        const precisionResult = Number(yMin / 1000 ** unitPower).toPrecision(4);
-        const rawResult = Number(yMin / 1000 ** unitPower);
-        setLocalYMin(
-            precisionResult.toString().length < rawResult.toString().length
-                ? precisionResult
-                : rawResult
-        );
+
+        setLocalYMin(getPrettyValue(yMin, unitPower));
     }, [yMin]);
 
     useEffect(() => {
         const unitPower = getUnitPower(yMax);
         setUnitPowerYMax(unitPower);
-        const precisionResult = Number(yMax / 1000 ** unitPower).toPrecision(4);
-        const rawResult = Number(yMax / 1000 ** unitPower);
-        setLocalYMax(
-            precisionResult.toString().length < rawResult.toString().length
-                ? precisionResult
-                : rawResult
-        );
+        setLocalYMax(getPrettyValue(yMax, unitPower));
     }, [yMax]);
 
     return (
