@@ -10,7 +10,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
 import { colors, Toggle } from 'pc-nrfconnect-shared';
-import { func, shape, string } from 'prop-types';
+import { func, number, shape, string } from 'prop-types';
 
 import {
     chartState,
@@ -19,6 +19,7 @@ import {
 } from '../../reducers/chartReducer';
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
+import ChartOptions from './ChartOptions';
 
 import './charttop.scss';
 
@@ -41,7 +42,7 @@ TimeWindowButton.propTypes = {
     zoomToWindow: func.isRequired,
 };
 
-const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
+const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
     const dispatch = useDispatch();
     const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
@@ -64,23 +65,27 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef }) => {
 
     return (
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
-            <Toggle
-                label="LOCK Y-AXIS"
-                onToggle={() => {
-                    if (yAxisLock) {
-                        dispatch(toggleYAxisLock());
-                    } else {
-                        const { min, max } =
-                            chartRef.current.chartInstance.scales.yScale;
-                        dispatch(toggleYAxisLock(min, max));
-                    }
-                }}
-                isToggled={yAxisLock}
-                variant="secondary"
-                labelRight
-                barColor={gray700}
-                barColorToggled={nordicBlue}
-            />
+            <div className="settings-y-axis">
+                <Toggle
+                    label="LOCK Y-AXIS"
+                    onToggle={() => {
+                        if (yAxisLock) {
+                            dispatch(toggleYAxisLock(null, null));
+                            zoomToWindow(windowDuration);
+                        } else {
+                            const { min, max } =
+                                chartRef.current.chartInstance.scales.yScale;
+                            dispatch(toggleYAxisLock(min, max));
+                        }
+                    }}
+                    isToggled={yAxisLock}
+                    variant="secondary"
+                    labelRight
+                    barColor={gray700}
+                    barColorToggled={nordicBlue}
+                />
+                {yAxisLock && <ChartOptions chartRef={chartRef} />}
+            </div>
             {isDataLoggerPane && (
                 <ButtonGroup>
                     {timeWindowLabels.map(label => (
@@ -112,6 +117,7 @@ ChartTop.propTypes = {
     chartPause: func.isRequired,
     zoomToWindow: func.isRequired,
     chartRef: shape({}).isRequired,
+    windowDuration: number.isRequired,
 };
 
 export default ChartTop;

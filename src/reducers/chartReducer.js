@@ -50,6 +50,7 @@ const UPDATE_HAS_DIGITAL_CHANNELS = 'UPDATE_HAS_DIGITAL_CHANNELS';
 const TOGGLE_Y_AXIS_LOCK = 'TOGGLE_Y_AXIS_LOCK';
 const CHART_WINDOW_LOCK = 'CHART_WINDOW_LOCK';
 const CHART_WINDOW_UNLOCK = 'CHART_WINDOW_UNLOCK';
+const Y_AXIS_ACTION = 'Y_AXIS_ACTION';
 
 const MIN_WINDOW_DURATION = 5e7;
 const MAX_WINDOW_DURATION = 1.2e13;
@@ -57,6 +58,26 @@ const Y_MIN = -100;
 const Y_MAX = 1200000;
 
 export const animationAction = () => ({ type: ANIMATION });
+
+/**
+ * Set new YMax value
+ * @param {*} yMax new value
+ * @returns {void}
+ */
+export const setYMax = yMax => ({
+    type: Y_AXIS_ACTION,
+    yMax,
+});
+
+/**
+ * Set new YMin value
+ * @param {*} yMin new value
+ * @returns {void}
+ */
+export const setYMin = yMin => ({
+    type: Y_AXIS_ACTION,
+    yMin,
+});
 
 export const chartCursorAction = (cursorBegin, cursorEnd) => ({
     type: CHART_CURSOR,
@@ -152,8 +173,6 @@ export const resetCursorAndChart = () => (dispatch, getState) => {
 export const setChartState = state => ({
     type: LOAD_CHART_STATE,
     ...state,
-    yMin: state.yAxisLock ? state.yMin : null,
-    yMax: state.yAxisLock ? state.yMax : null,
     hasDigitalChannels: options.bits !== null,
 });
 
@@ -270,10 +289,15 @@ export default (state = initialState(), { type, ...action }) => {
                 timestampsVisible: !state.timestampsVisible,
             };
         }
+        case Y_AXIS_ACTION: {
+            return { ...state, ...action };
+        }
         case TOGGLE_Y_AXIS_LOCK: {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { yMin, yMax, ...s } = state;
-            return { ...s, ...action, yAxisLock: !state.yAxisLock };
+            return {
+                ...state,
+                ...action,
+                yAxisLock: !state.yAxisLock,
+            };
         }
         case UPDATE_HAS_DIGITAL_CHANNELS:
             return { ...state, ...action };
