@@ -9,7 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import SelectableContext from 'react-bootstrap/SelectableContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { NumberInlineInput } from 'pc-nrfconnect-shared';
+import { NumberInlineInput, usageData } from 'pc-nrfconnect-shared';
 import { func, number } from 'prop-types';
 
 import {
@@ -17,6 +17,7 @@ import {
     setYMax as storeYMax,
     setYMin as storeYMin,
 } from '../../reducers/chartReducer';
+import EventAction from '../../usageDataActions';
 
 /** The power, p, to satisfy the mathematical expression:
  *  uA = x * 1000^p,
@@ -64,23 +65,25 @@ const ChartOptions = () => {
     };
 
     /**
-     * Transform the input yMin to uA
+     * Transform and store the input yMin to uA
      * @param {UNIT_EXPONENT} exponent to use in transformation
      * @returns {void} dispatches new yMin to storage
      */
     const dispatchYMin = exponent => {
         dispatch(storeYMin(yMin * 1000 ** exponent));
         setYMinExponent(exponent);
+        usageData.sendUsageData(EventAction.Y_MIN_SET_EXPLICITLY);
     };
 
     /**
-     * Transform the input yMax to uA
+     * Transform and store the input yMax to uA
      * @param {UNIT_EXPONENT} exponent to use in transformation
      * @returns {void} dispatches new yMax to storage
      */
     const dispatchYMax = exponent => {
         dispatch(storeYMax(yMax * 1000 ** exponent));
         setYMaxExponent(exponent);
+        usageData.sendUsageData(EventAction.Y_MAX_SET_EXPLICITLY);
     };
 
     /** Get calculated value depending on unit

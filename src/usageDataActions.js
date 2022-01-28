@@ -9,6 +9,8 @@ const EventAction = {
     VOLTAGE_MAX_LIMIT_CHANGED: 'Max voltage limit changed',
     PPK_1_SELECTED: 'PPK1 selected',
     PPK_2_SELECTED: 'PPK2 selected',
+    Y_MIN_SET_EXPLICITLY: 'YMin was explicitly changed',
+    Y_MAX_SET_EXPLICITLY: 'YMax was explicitly changed',
 };
 
 export default EventAction;
