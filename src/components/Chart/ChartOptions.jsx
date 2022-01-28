@@ -12,26 +12,45 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NumberInlineInput } from 'pc-nrfconnect-shared';
 import { func, number } from 'prop-types';
 
-import { chartState, setYMax, setYMin } from '../../reducers/chartReducer';
+import {
+    chartState,
+    setYMax as storeYMax,
+    setYMin as storeYMin,
+} from '../../reducers/chartReducer';
 
+/** The power, p, to satisfy the mathematical expression:
+ *  uA = x * 1000^p,
+ *  where x is an arbitrary amount of ampere in one of the units.
+ */
+const UNIT_EXPONENT = {
+    MICRO_AMPERE: 0,
+    MILLI_AMPERE: 1,
+    AMPERE: 2,
+};
 const UNIT_LABELS = ['\u00B5A', 'mA', 'A'];
 
 const ChartOptions = () => {
-    const { yMin, yMax, yAxisLock } = useSelector(chartState);
+    const {
+        yMin: storedYMin,
+        yMax: storedYMax,
+        yAxisLock,
+    } = useSelector(chartState);
     const dispatch = useDispatch();
 
-    const [localYMin, setLocalYMin] = useState(1);
-    const [localYMax, setLocalYMax] = useState(1);
+    const [yMin, setYMin] = useState(1);
+    const [yMax, setYMax] = useState(1);
 
-    /** Mapping to the power to get correct value of uA
-     * 0=uA, 1=mA, 2=A
-     */
-    const [unitPowerYMin, setUnitPowerYMin] = useState(0);
-    const [unitPowerYMax, setUnitPowerYMax] = useState(0);
+    /** Mapping to the {UNIT_POWER} to satisfy transformation to and from uA */
+    const [yMinExponent, setYMinExponent] = useState(
+        UNIT_EXPONENT.MICRO_AMPERE
+    );
+    const [yMaxExponent, setYMaxExponent] = useState(
+        UNIT_EXPONENT.MICRO_AMPERE
+    );
 
-    /** Get the unit power
+    /** Get the appropriate exponent to decide what unit to use given the number of microAmpere, uA
      * @param {number} uA number av microAmpere
-     * @returns {0 | 1 | 2} the power in which it is preferred to scale the y value
+     * @returns {UNIT_EXPONENT} exponent to use for transforming to and from microAmpere
      */
     const getUnitPower = uA => {
         const absoluteValue = Math.abs(uA);
@@ -44,19 +63,29 @@ const ChartOptions = () => {
         return 0;
     };
 
-    const dispatchYMin = powerUnit => {
-        dispatch(setYMin(localYMin * 1000 ** powerUnit));
-        setUnitPowerYMin(powerUnit);
+    /**
+     * Transform the input yMin to uA
+     * @param {UNIT_EXPONENT} exponent to use in transformation
+     * @returns {void} dispatches new yMin to storage
+     */
+    const dispatchYMin = exponent => {
+        dispatch(storeYMin(yMin * 1000 ** exponent));
+        setYMinExponent(exponent);
     };
 
-    const dispatchYMax = powerUnit => {
-        dispatch(setYMax(localYMax * 1000 ** powerUnit));
-        setUnitPowerYMax(powerUnit);
+    /**
+     * Transform the input yMax to uA
+     * @param {UNIT_EXPONENT} exponent to use in transformation
+     * @returns {void} dispatches new yMax to storage
+     */
+    const dispatchYMax = exponent => {
+        dispatch(storeYMax(yMax * 1000 ** exponent));
+        setYMaxExponent(exponent);
     };
 
     /** Get calculated value depending on unit
-     * @param {number} initialNumber yMin or yMax to make more readable
-     * @param {number} power the power to reduce depending on unit
+     * @param {number} initialNumber from storage in uA
+     * @param {UNIT_EXPONENT} power, p, to satisfy: x = uA / 1000^p
      * @param {number} precision maximal number of decimals to display
      * @returns {number} initialNumber/1000**power with precision number of decimals
      */
@@ -71,61 +100,55 @@ const ChartOptions = () => {
     };
 
     useEffect(() => {
-        const unitPower = getUnitPower(yMin);
-        setUnitPowerYMin(unitPower);
+        const unitPower = getUnitPower(storedYMin);
+        setYMinExponent(unitPower);
 
-        setLocalYMin(getPrettyValue(yMin, unitPower));
-    }, [yMin]);
+        setYMin(getPrettyValue(storedYMin, unitPower));
+    }, [storedYMin]);
 
     useEffect(() => {
-        const unitPower = getUnitPower(yMax);
-        setUnitPowerYMax(unitPower);
-        setLocalYMax(getPrettyValue(yMax, unitPower));
-    }, [yMax]);
+        const unitPower = getUnitPower(storedYMax);
+        setYMaxExponent(unitPower);
+        setYMax(getPrettyValue(storedYMax, unitPower));
+    }, [storedYMax]);
 
     return (
         <Form.Label className="label-with-dropdown">
             <span>FROM</span>
             <NumberInlineInput
-                value={localYMin}
+                value={yMin}
                 range={{
                     min: -Infinity,
-                    max: (yMax * 1000 ** unitPowerYMax) / 1000 ** unitPowerYMin,
+                    max: storedYMax / 1000 ** yMinExponent,
                     decimals: 15,
                 }}
-                onChange={value => setLocalYMin(value)}
-                onChangeComplete={() => dispatchYMin(unitPowerYMin)}
+                onChange={setYMin}
+                onChangeComplete={() => dispatchYMin(yMinExponent)}
                 disabled={!yAxisLock}
             />
-            <UnitDropdown
-                unit={unitPowerYMin}
-                dispatchFunc={unit => dispatchYMin(unit)}
-            />
+            <UnitDropdown unit={yMinExponent} dispatchFunc={dispatchYMin} />
             <span>TO</span>
             <NumberInlineInput
-                value={localYMax}
+                value={yMax}
                 range={{
-                    min: (yMin * 1000 ** unitPowerYMin) / 1000 ** unitPowerYMax,
+                    min: storedYMin / 1000 ** yMaxExponent,
                     max: Infinity,
                     decimals: 15,
                 }}
-                onChange={value => setLocalYMax(value)}
-                onChangeComplete={() => dispatchYMax(unitPowerYMax)}
+                onChange={setYMax}
+                onChangeComplete={() => dispatchYMax(yMaxExponent)}
                 disabled={!yAxisLock}
             />
-            <UnitDropdown
-                unit={unitPowerYMax}
-                dispatchFunc={unit => dispatchYMax(unit)}
-            />
+            <UnitDropdown unit={yMaxExponent} dispatchFunc={dispatchYMax} />
         </Form.Label>
     );
 };
 
 /**
  * Dropdown menu to select unit to input field.
- * @param {number} unit which is currently selected.
- * @param {func} dispatchFunc function to dispatch new selected unit.
- * @returns {component} Dropdown component
+ * @param {number} unit currently selected unit
+ * @param {func} dispatchFunc function to dispatch new selected unit
+ * @returns {component} Dropdown Component to select unit
  */
 const UnitDropdown = ({ unit, dispatchFunc }) => {
     return (
@@ -135,26 +158,26 @@ const UnitDropdown = ({ unit, dispatchFunc }) => {
                     className="dropdown-current-unit"
                     variant="plain"
                 >
-                    {unitLabels[unit]}
+                    {UNIT_LABELS[unit]}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                     <Dropdown.Item
                         eventKey="1"
                         onSelect={() => dispatchFunc(0)}
                     >
-                        {unitLabels[0]}
+                        {UNIT_LABELS[0]}
                     </Dropdown.Item>
                     <Dropdown.Item
                         eventKey="2"
                         onSelect={() => dispatchFunc(1)}
                     >
-                        {unitLabels[1]}
+                        {UNIT_LABELS[1]}
                     </Dropdown.Item>
                     <Dropdown.Item
                         eventKey="3"
                         onSelect={() => dispatchFunc(2)}
                     >
-                        {unitLabels[2]}
+                        {UNIT_LABELS[2]}
                     </Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
