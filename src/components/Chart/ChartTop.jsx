@@ -15,7 +15,6 @@ import { func, number, shape, string } from 'prop-types';
 import {
     chartState,
     resetChart,
-    resetCursorAndChart,
     toggleYAxisLock,
 } from '../../reducers/chartReducer';
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
