@@ -192,7 +192,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         (beginX, endX, beginY, endY) => {
             if (typeof beginX === 'undefined') {
                 chartReset(windowDuration);
-                resetCursor();
                 return;
             }
 
@@ -215,7 +214,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             windowEndLock,
             chartReset,
             windowDuration,
-            resetCursor,
             chartWindow,
         ]
     );

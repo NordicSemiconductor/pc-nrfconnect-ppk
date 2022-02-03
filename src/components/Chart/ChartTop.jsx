@@ -14,6 +14,7 @@ import { func, number, shape, string } from 'prop-types';
 
 import {
     chartState,
+    resetChart,
     resetCursorAndChart,
     toggleYAxisLock,
 } from '../../reducers/chartReducer';
@@ -101,7 +102,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                 <Toggle
                     label="LIVE VIEW"
                     onToggle={() =>
-                        live ? chartPause() : dispatch(resetCursorAndChart())
+                        live ? chartPause() : dispatch(resetChart())
                     }
                     isToggled={live}
                     variant="secondary"
