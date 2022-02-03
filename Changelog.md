@@ -1,4 +1,4 @@
-## Unreleased
+## 3.4.0 - 2022-02-03
 
 ### Added
 - Manually setting y-axis range is now available when `LOCK Y-AXIS` is toggled.
