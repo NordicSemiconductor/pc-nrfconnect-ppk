@@ -67,7 +67,6 @@ export default () => {
                         range={{ min: 0, max: maxFreqLog10 }}
                         onChange={[v => dispatch(updateSampleFreqLog10(v))]}
                         onChangeComplete={completeChange}
-                        disabled={samplingRunning}
                     />
                 </div>
                 <NumberWithUnit
@@ -78,7 +77,6 @@ export default () => {
                     value={durationSeconds}
                     onChange={v => dispatch(updateDurationSeconds(v))}
                     onChangeComplete={completeChange}
-                    disabled={samplingRunning}
                     slider
                 />
             </div>
