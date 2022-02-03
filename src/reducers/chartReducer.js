@@ -163,6 +163,10 @@ export const chartWindowLockAction = () => ({ type: CHART_WINDOW_LOCK });
 export const chartWindowUnLockAction = () => ({ type: CHART_WINDOW_UNLOCK });
 
 export const resetCursor = () => chartCursorAction(null, null);
+export const resetChart = () => (dispatch, getState) =>
+    dispatch(
+        chartWindowAction(null, null, getState().app.chart.windowDuration)
+    );
 export const resetCursorAndChart = () => (dispatch, getState) => {
     dispatch(
         chartWindowAction(null, null, getState().app.chart.windowDuration)
