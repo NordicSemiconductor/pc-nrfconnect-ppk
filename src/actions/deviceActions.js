@@ -98,6 +98,12 @@ export const setupOptions = () => (dispatch, getState) => {
 
 /* Start reading current measurements */
 export function samplingStart() {
+    usageData.sendUsageData(
+        isRealTimePane
+            ? EventAction.START_REAL_TIME_SAMPLE
+            : EventAction.START_DATA_LOGGER_SAMPLE
+    );
+
     return async dispatch => {
         options.data.fill(NaN);
         if (options.bits) {
