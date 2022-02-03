@@ -20,6 +20,7 @@ export default () => (
         appReducer={reducers}
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
+        reportUsageData
         panes={[
             { name: 'Data Logger', Main: DataLogger },
             { name: 'Real-time', Main: RealTime },
