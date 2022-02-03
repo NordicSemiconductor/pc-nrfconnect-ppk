@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Unit, unit } from 'mathjs';
-import { instanceOf, node, number, string } from 'prop-types';
+import { arrayOf, instanceOf, node, number, string } from 'prop-types';
 
 import { formatDurationHTML } from '../../utils/duration';
 
@@ -41,12 +41,12 @@ const StatBox = ({
     max = null,
     delta = null,
     label,
-    action = null,
+    actionButtons = [],
 }) => (
     <div className="statbox d-flex flex-column mb-1">
         <div className="statbox-header">
             <h2 className="d-inline my-0">{label}</h2>
-            {action}
+            {actionButtons.length > 0 && actionButtons.map(button => button)}
         </div>
         <div className="d-flex flex-row flex-fill">
             {delta === null && (
@@ -76,7 +76,7 @@ StatBox.propTypes = {
     max: number,
     delta: number,
     label: string.isRequired,
-    action: node,
+    actionButtons: arrayOf(node),
 };
 
 export default StatBox;

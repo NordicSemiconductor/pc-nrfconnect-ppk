@@ -16,9 +16,10 @@ import React, {
 } from 'react';
 import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHotKey } from 'pc-nrfconnect-shared';
 import { bool } from 'prop-types';
 
-import { options, timestampToIndex } from '../../globals';
+import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
 import {
     chartCursorAction,
@@ -26,6 +27,7 @@ import {
     chartWindowAction,
 } from '../../reducers/chartReducer';
 import { dataLoggerState } from '../../reducers/dataLoggerReducer';
+import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser from './data/dataAccumulator';
@@ -110,6 +112,18 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             dispatch(chartCursorAction(cursorBegin, cursorEnd)),
         [dispatch]
     );
+    // Shortcut to select all samples
+    useHotKey('alt+a', () => {
+        if (options.index > 0) {
+            return chartCursor(0, indexToTimestamp(options.index));
+        }
+        return false;
+    });
+    // Deselect selection
+    useHotKey('esc', () => {
+        resetCursor();
+    });
+
     const {
         windowBegin,
         windowEnd,
@@ -122,6 +136,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         digitalChannelsVisible,
         hasDigitalChannels,
     } = useSelector(chartState);
+    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
@@ -266,6 +281,38 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
+    const selectionButtons = () => {
+        const buttons = [
+            <Button
+                key="clear-selection-btn"
+                variant="secondary"
+                disabled={!chartCursorActive}
+                size="sm"
+                onClick={resetCursor}
+            >
+                CLEAR
+            </Button>,
+        ];
+
+        if (isDataLoggerPane) {
+            buttons.push(
+                <Button
+                    key="select-all-btn"
+                    variant="secondary"
+                    disabled={options.index <= 0}
+                    size="sm"
+                    onClick={() =>
+                        chartCursor(0, indexToTimestamp(options.index))
+                    }
+                >
+                    SELECT ALL
+                </Button>
+            );
+        }
+
+        return buttons;
+    };
+
     return (
         <div className="chart-outer">
             <div className="chart-current">
@@ -298,16 +345,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     <StatBox
                         {...selectionStats}
                         label="Selection"
-                        action={
-                            <Button
-                                variant="secondary"
-                                disabled={!chartCursorActive}
-                                size="sm"
-                                onClick={resetCursor}
-                            >
-                                CLEAR
-                            </Button>
-                        }
+                        actionButtons={selectionButtons()}
                     />
                 </div>
             </div>
