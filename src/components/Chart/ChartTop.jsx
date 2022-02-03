@@ -25,12 +25,14 @@ import './charttop.scss';
 
 const { gray700, nordicBlue } = colors;
 
-const TimeWindowButton = ({ label, zoomToWindow }) => {
+const TimeWindowButton = ({ label, zoomToWindow, currentWindowDuration }) => {
+    const toDuration = unit(label).to('us').toNumeric();
     return (
         <Button
             variant="secondary"
             size="sm"
-            onClick={() => zoomToWindow(unit(label).to('us').toNumeric())}
+            onClick={() => zoomToWindow(toDuration)}
+            active={currentWindowDuration === toDuration}
         >
             {label}
         </Button>
@@ -40,6 +42,7 @@ const TimeWindowButton = ({ label, zoomToWindow }) => {
 TimeWindowButton.propTypes = {
     label: string.isRequired,
     zoomToWindow: func.isRequired,
+    currentWindowDuration: number.isRequired,
 };
 
 const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
@@ -93,6 +96,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                             label={label}
                             key={label}
                             zoomToWindow={zoomToWindow}
+                            currentWindowDuration={windowDuration}
                         />
                     ))}
                 </ButtonGroup>
