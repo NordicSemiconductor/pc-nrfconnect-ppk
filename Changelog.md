@@ -6,7 +6,7 @@
 ### Fixed
 - Selection is not removed when returning to Live View.
 - Export all now works for all new samples.
-  - If you are not able to export all on an old sample, but you may use `select all` and `export selection` instead.
+  - If you are not able to use export `All` with an older set of samples (loaded from a .ppk file), you may use `SELECT ALL` and export selection instead.
 
 ## 3.4.0 - 2022-02-03
 
