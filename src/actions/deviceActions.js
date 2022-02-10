@@ -272,7 +272,6 @@ export function open(deviceInfo) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
                 }
-                options.index = 0;
             }
             if (triggerRunning || triggerSingleWaiting) {
                 dispatch(
