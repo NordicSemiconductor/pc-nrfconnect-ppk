@@ -1,7 +1,7 @@
 ## 3.4.1 - 2022-02-10
 
 ### Added
-- Option to select all by pressing `alt + a` or `select all` button in bottom right corner.
+- Option to select entire set of samples by pressing `ALT + a` or clicking the `SELECT ALL` button in bottom right corner.
 
 ### Fixed
 - Selection is not removed when returning to Live View.
