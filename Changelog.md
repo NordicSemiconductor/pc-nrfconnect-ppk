@@ -1,3 +1,13 @@
+## 3.4.1 - 2022-02-10
+
+### Added
+- Option to select all by pressing `alt + a` or `select all` button in bottom right corner.
+
+### Fixed
+- Selection is not removed when returning to Live View.
+- Export all now works for all new samples.
+  - If you are not able to export all on an old sample, but you may use `select all` and `export selection` instead.
+
 ## 3.4.0 - 2022-02-03
 
 ### Added
