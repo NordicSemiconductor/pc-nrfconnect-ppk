@@ -1,3 +1,13 @@
+## 3.4.1 - 2022-02-10
+
+### Added
+- Option to select entire set of samples by pressing `ALT + a` or clicking the `SELECT ALL` button in bottom right corner.
+
+### Fixed
+- Selection is not removed when returning to Live View.
+- Export all now works for all new samples.
+  - If you are not able to use export `All` with an older set of samples (loaded from a .ppk file), you may use `SELECT ALL` and export selection instead.
+
 ## 3.4.0 - 2022-02-03
 
 ### Added
