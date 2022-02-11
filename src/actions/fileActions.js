@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { remote } from 'electron';
+import { dialog, getCurrentWindow } from '@electron/remote';
 import fs from 'fs';
 import { dirname, join } from 'path';
 import {
@@ -22,8 +22,6 @@ import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData from '../utils/saveFileHandler';
-
-const { dialog } = remote;
 
 const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
@@ -103,7 +101,7 @@ export const load = setLoading => async dispatch => {
 };
 
 export const screenshot = () => async () => {
-    const win = remote.getCurrentWindow();
+    const win = getCurrentWindow();
     const mainElement = document.querySelector('.core19-main-container');
     const { x, y, width, height } = mainElement.getBoundingClientRect();
     const image = await win.capturePage({
