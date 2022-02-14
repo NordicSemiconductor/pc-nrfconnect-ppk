@@ -102,14 +102,11 @@ export const screenshot = () => async () => {
     const win = remote.getCurrentWindow();
     const mainElement = document.querySelector('.core19-main-container');
     const { x, y, width, height } = mainElement.getBoundingClientRect();
-    const chartTop = mainElement.querySelector('.chart-top');
-    const { marginTop, height: h } = getComputedStyle(chartTop);
-    const chopOff = parseInt(marginTop, 10) + parseInt(h, 10);
     const image = await win.capturePage({
         x,
-        y: y + chopOff,
+        y,
         width,
-        height: height - chopOff,
+        height,
     });
 
     const timestamp = getTimestamp();
