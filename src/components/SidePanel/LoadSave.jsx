@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -17,11 +17,15 @@ import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
 export const Load = () => {
     const dispatch = useDispatch();
 
+    const [loading, setLoading] = useState(false);
+
     return (
         <Button
-            className="w-100 secondary-btn"
+            title="Large files may take a while to process"
+            className={`w-100 secondary-btn ${loading && 'active-anim'}`}
             variant="set"
-            onClick={() => dispatch(load())}
+            onClick={() => dispatch(load(setLoading))}
+            disabled={loading}
         >
             Load
         </Button>

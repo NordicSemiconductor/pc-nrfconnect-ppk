@@ -10,10 +10,37 @@ import { pipeline, Writable } from 'stream';
 import { promisify } from 'util';
 import { createInflateRaw } from 'zlib';
 
-const setupBuffer = async filename => {
-    let buffer = Buffer.alloc(370 * 1e6);
-    let size = 0;
+/*
+        File outline .ppk v1
+     _______________________
+    |        4 bytes        |   <-- This section should ALWAYS be included
+    |  Length of metadata   |
+    |-----------------------|
+    |  X bytes of metadata  |   <-- This section should ALWAYS be included
+    |                       |
+    |-----------------------|
+    |        4 bytes        |   <-- This section should ALWAYS be included
+    | Length of data buffer |
+    |-----------------------|
+    | Y bytes of data buffer|   <-- This section should ALWAYS be included
+    |                       |
+    |-----------------------|
+    |        4 bytes        |   <-- This section is not always included.
+    |  Length of bit data   |
+    |-----------------------|
+    |  Y bytes of bit data  |   <-- This section is not always included.
+    |                       |
+    |-----------------------|
+*/
 
+/**
+ * Read and decompress .ppk file
+ * @param {Buffer} buffer to hold the decompressed content of file.
+ * @param {string} filename of file containing the power profile.
+ * @returns {[int, Buffer]} size of decompressed file in bytes and the buffer with the content.
+ */
+const getContentFromFile = async (buffer, filename) => {
+    let size = 0;
     const content = new Writable({
         write(chunk, _encoding, callback) {
             chunk.copy(buffer, size, 0);
@@ -31,10 +58,24 @@ const setupBuffer = async filename => {
     } catch (err) {
         console.error('Error while loading file', err);
     }
-    buffer = buffer.slice(0, size);
+    return [size, buffer.slice(0, size)];
+};
+
+/**
+ * @brief Setup buffer with decompressed data from .ppk file.
+ * @param {string} filename .ppk file to load data from.
+ * @returns {Buffer} three functions that returns copies of buffers.
+ */
+const setupBuffer = async filename => {
+    let buffer = Buffer.alloc(1);
+    let requiredBufferSize = 0;
+    // First call to get required buffer size of decompressed file.
+    [requiredBufferSize, buffer] = await getContentFromFile(buffer, filename);
+    buffer = Buffer.alloc(requiredBufferSize);
+    // Second call to copy all decompressed data into buffer.
+    [requiredBufferSize, buffer] = await getContentFromFile(buffer, filename);
 
     let pos = 0;
-
     return {
         readInitialChunk() {
             const len = buffer.slice(pos, pos + 4).readUInt32LE();
@@ -51,7 +92,7 @@ const setupBuffer = async filename => {
 
             return chunk;
         },
-        isDepleted() {
+        hasBitsData() {
             return pos >= buffer.length;
         },
     };
@@ -82,7 +123,7 @@ const loadData = buffer =>
     new Float32Array(new Uint8Array(buffer.readChunk()).buffer);
 
 const loadBits = buffer =>
-    buffer.isDepleted()
+    buffer.hasBitsData()
         ? null
         : new Uint16Array(new Uint8Array(buffer.readChunk()).buffer);
 

@@ -56,7 +56,7 @@ export const save = () => async (_, getState) => {
     }
 };
 
-export const load = () => async dispatch => {
+export const load = setLoading => async dispatch => {
     const {
         filePaths: [filename],
     } =
@@ -67,10 +67,13 @@ export const load = () => async dispatch => {
         return;
     }
 
+    setLoading(true);
+    logger.info(`Restoring state from ${filename}`);
     updateTitle(filename);
     const result = await loadData(filename);
     if (!result) {
         logger.error(`Error loading from ${filename}`);
+        setLoading(false);
         return;
     }
     const { dataBuffer, bits, metadata } = result;
@@ -95,7 +98,8 @@ export const load = () => async dispatch => {
         dispatch(setTriggerState(triggerState));
     }
     if (currentPane !== null) dispatch(setCurrentPane(currentPane));
-    logger.info(`State restored from: ${filename}`);
+    logger.info(`State successfully restored`);
+    setLoading(false);
 };
 
 export const screenshot = () => async () => {
