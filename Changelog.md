@@ -1,3 +1,8 @@
+## 3.4.2 - 2022-02-17
+
+### Fixed
+- Loading larger files are now supported.
+
 ## 3.4.1 - 2022-02-10
 
 ### Added
