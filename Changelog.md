@@ -1,3 +1,8 @@
+## Unreleased
+
+### Changed
+- Update device traits to show PPK devices, but not all serialport capable devices.
+
 ## 3.4.2 - 2022-02-17
 
 ### Fixed

@@ -11,8 +11,9 @@ import { close, open } from '../actions/deviceActions';
 
 const deviceListing = {
     nordicUsb: true,
-    serialport: true,
     jlink: true,
+    seggerUsb: true,
+    nordicDfu: true,
 };
 
 const deviceSetup = {
