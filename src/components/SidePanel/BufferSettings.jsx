@@ -32,7 +32,6 @@ export const BufferSettings = () => {
         max: unit(maxBufferSizeForSystem, 'bytes').toNumber('MB'),
     };
     const [changed, setChanged] = React.useState(false);
-    console.log(range.max);
     return (
         <CollapsibleGroup
             heading="Sampling Buffer Size"
