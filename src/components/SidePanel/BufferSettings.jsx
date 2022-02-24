@@ -8,6 +8,8 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
+import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
+import { unit } from 'mathjs';
 import {
     CollapsibleGroup,
     NumberInlineInput,
@@ -25,9 +27,12 @@ const { getCurrentWindow } = require('electron').remote;
 export const BufferSettings = () => {
     const maxBufferSize = useSelector(maxBufferSizeSelector);
     const dispatch = useDispatch();
-    const range = { min: 1, max: Infinity };
+    const range = {
+        min: 1,
+        max: unit(maxBufferSizeForSystem, 'bytes').toNumber('MB'),
+    };
     const [changed, setChanged] = React.useState(false);
-
+    console.log(range.max);
     return (
         <CollapsibleGroup
             heading="Sampling Buffer Size"
