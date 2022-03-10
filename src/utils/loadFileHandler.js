@@ -5,7 +5,10 @@
  */
 
 import { deserialize } from 'bson';
+import { kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
+import { unit } from 'mathjs';
+import { logger } from 'pc-nrfconnect-shared';
 import { pipeline, Writable } from 'stream';
 import { promisify } from 'util';
 import { createInflateRaw } from 'zlib';
@@ -71,6 +74,20 @@ const setupBuffer = async filename => {
     let requiredBufferSize = 0;
     // First call to get required buffer size of decompressed file.
     [requiredBufferSize, buffer] = await getContentFromFile(buffer, filename);
+
+    if (requiredBufferSize > maxBufferLengthForSystem) {
+        logger.error(
+            `The file: ${filename} requires ${unit(
+                requiredBufferSize,
+                'bytes'
+            )}, but the application you are using is limited to ${unit(
+                maxBufferLengthForSystem,
+                'bytes'
+            )}`
+        );
+        return null;
+    }
+
     buffer = Buffer.alloc(requiredBufferSize);
     // Second call to copy all decompressed data into buffer.
     [requiredBufferSize, buffer] = await getContentFromFile(buffer, filename);

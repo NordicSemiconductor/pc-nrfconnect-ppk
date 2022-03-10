@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
+import { unit } from 'mathjs';
 import {
     getAppDataDir,
     getPersistentStore as store,
@@ -57,8 +59,12 @@ export const getDuration = (maxSampleFreq, defaultValue) =>
 export const setDuration = (maxSampleFreq, durationSeconds) =>
     store().set(`durationSeconds-${maxSampleFreq}`, durationSeconds);
 
-export const getMaxBufferSize = defaultMaxBufferSize =>
-    store().get('maxBufferSize', defaultMaxBufferSize);
+export const getMaxBufferSize = defaultMaxBufferSize => {
+    const storedValue = store().get('maxBufferSize', defaultMaxBufferSize);
+    return storedValue > unit(maxBufferSizeForSystem, 'bytes').toNumber('MB')
+        ? defaultMaxBufferSize
+        : storedValue;
+};
 export const setMaxBufferSize = maxBufferSize =>
     store().set('maxBufferSize', maxBufferSize);
 
