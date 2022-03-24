@@ -366,8 +366,15 @@ export function open(deviceInfo) {
                 renderIndex !== options.index &&
                 getState().app.app.samplingRunning
             ) {
+                const timestamp = Date.now();
                 requestAnimationFrame(() => {
-                    dispatch(animationAction());
+                    /* 
+                        requestAnimationFrame pauses when app is in the background.
+                        If timestamp is more than 10ms ago, do not dispatch animationAction.
+                    */
+                    if (Date.now() - timestamp < 100) {
+                        dispatch(animationAction());
+                    }
                 });
                 renderIndex = options.index;
             }
