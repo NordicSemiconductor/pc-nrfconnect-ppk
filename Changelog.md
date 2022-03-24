@@ -1,3 +1,9 @@
+## 3.4.3 - 2022-03-24
+
+### Fixed
+- App no longer freezes for a long time after it has been sampling in the background for a longer period of time.
+- Loading csv files is now restricted depending on the application's architecture.
+
 ## 3.4.2 - 2022-02-17
 
 ### Fixed
