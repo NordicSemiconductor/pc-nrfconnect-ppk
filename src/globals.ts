@@ -37,13 +37,11 @@ export const nbDigitalChannels = 8;
  * @returns {Number} index of sample at provided timestamp
  */
 export const timestampToIndex = (timestamp: number): number => {
-    if (options?.timestamp) {
-        return (
-            options.index -
-            ((options.timestamp - timestamp) * options.samplesPerSecond) / 1e6
-        );
-    }
-    return -1;
+    const timestampHead = options?.timestamp ? options.timestamp : 0;
+    return (
+        options.index -
+        ((timestampHead - timestamp) * options.samplesPerSecond) / 1e6
+    );
 };
 
 /**
@@ -52,13 +50,11 @@ export const timestampToIndex = (timestamp: number): number => {
  * @returns {Number} timestamp of sample at provided index
  */
 export const indexToTimestamp = (index: number): number => {
-    if (options?.timestamp) {
-        return (
-            options.timestamp -
-            ((options.index - index) * 1e6) / options.samplesPerSecond
-        );
-    }
-    return -1;
+    const timestampHead = options?.timestamp ? options.timestamp : 0;
+    return (
+        timestampHead -
+        ((options.index - index) * 1e6) / options.samplesPerSecond
+    );
 };
 
 export const updateTitle = (info: string | undefined) => {
