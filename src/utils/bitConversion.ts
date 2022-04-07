@@ -13,7 +13,7 @@
  * - convertBits16(0b11111111) => 0b1010101010101010
  * - (convertBits16(0b00000000) | convertBits16(0b11111111)) => 0b1111111111111111
  */
-export const convertBits16 = b8 =>
+export const convertBits16 = (b8: number): number =>
     (((b8 & 128) + 128) << 7) |
     (((b8 & 64) + 64) << 6) |
     (((b8 & 32) + 32) << 5) |
@@ -35,7 +35,8 @@ export const convertBits16 = b8 =>
  * - 2 (b10): was always 1
  * - 3 (b11): was sometimes 0 and sometimes 1
  */
-export const averagedBitState = (b16, n) => 3 & (b16 >> (n + n));
+export const averagedBitState = (b16: number, n: number): number =>
+    3 & (b16 >> (n + n));
 
 export const always0 = 1;
 export const always1 = 2;
