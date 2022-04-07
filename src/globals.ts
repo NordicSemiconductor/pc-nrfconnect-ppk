@@ -11,7 +11,16 @@ export const bufferLengthInSeconds = 60 * 5;
 const samplingTime = 10;
 const samplesPerSecond = 1e6 / samplingTime;
 
-export const options = {
+type Options = {
+    samplingTime: number;
+    samplesPerSecond: number;
+    data: Float32Array;
+    bits: Uint16Array | null;
+    index: number;
+    timestamp: number | undefined;
+};
+
+export const options: Options = {
     samplingTime,
     samplesPerSecond,
     data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
