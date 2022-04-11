@@ -12,7 +12,7 @@ import Modal from 'react-bootstrap/Modal';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import Row from 'react-bootstrap/Row';
 import { useDispatch, useSelector } from 'react-redux';
-import { remote } from 'electron';
+import { dialog } from '@electron/remote';
 import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
 import { Toggle } from 'pc-nrfconnect-shared';
@@ -135,7 +135,7 @@ export default () => {
         dispatch(hideExportDialog());
     };
     const saveFile = async () => {
-        const { filePath: fn } = await remote.dialog.showSaveDialog({
+        const { filePath: fn } = await dialog.showSaveDialog({
             defaultPath: filename,
         });
         if (!fn) return;

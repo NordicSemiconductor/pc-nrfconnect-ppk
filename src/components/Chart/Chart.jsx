@@ -159,10 +159,18 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         .map((isVisible, channelNumber) => (isVisible ? channelNumber : null))
         .filter(channelNumber => channelNumber != null);
 
-    const digitalChannelsToCompute =
-        !zoomedOutTooFarForDigitalChannels && showDigitalChannels && bits
-            ? digitalChannelsToDisplay
-            : [];
+    const digitalChannelsToCompute = useMemo(
+        () =>
+            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && bits
+                ? digitalChannelsToDisplay
+                : [],
+        [
+            bits,
+            zoomedOutTooFarForDigitalChannels,
+            showDigitalChannels,
+            digitalChannelsToDisplay,
+        ]
+    );
 
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;

@@ -22,7 +22,7 @@ import {
 } from '../../reducers/dataLoggerReducer';
 import EventAction from '../../usageDataActions';
 
-const { getCurrentWindow } = require('electron').remote;
+const { getCurrentWindow } = require('@electron/remote');
 
 export const BufferSettings = () => {
     const maxBufferSize = useSelector(maxBufferSizeSelector);

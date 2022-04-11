@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { remote } from 'electron';
+import { getCurrentWindow } from '@electron/remote';
 
 export const bufferLengthInSeconds = 60 * 5;
 
@@ -41,8 +41,7 @@ export const indexToTimestamp = index =>
     ((options.index - index) * 1e6) / options.samplesPerSecond;
 
 export const updateTitle = info => {
-    const title = remote.getCurrentWindow().getTitle().split(':')[0].trim();
-    remote
-        .getCurrentWindow()
-        .setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
+    const title = getCurrentWindow().getTitle().split(':')[0].trim();
+
+    getCurrentWindow().setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
 };
