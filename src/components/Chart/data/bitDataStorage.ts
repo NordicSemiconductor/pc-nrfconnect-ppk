@@ -7,47 +7,45 @@
 /* eslint no-plusplus: off */
 
 import { numberOfDigitalChannels } from '../../../globals';
+import { lineDataForBitState } from '../../../utils/bitConversion';
+import { createEmptyArrayWithDigitalChannelStates } from './commonBitDataFunctions';
 import {
-    BitStateIndex,
-    lineDataForBitState,
-} from '../../../utils/bitConversion';
-import { emptyArray } from './commonBitDataFunctions';
-import {
-    BitNumber,
-    DigitalChannels,
+    BitNumberType,
+    BitStateIndexType,
     DigitalChannelStates,
-    Timestamp,
+    DigitalChannelsType,
+    TimestampType,
 } from './dataTypes';
 
 export default () => ({
     lineData: [...Array(numberOfDigitalChannels)].map(
         () =>
             ({
-                mainLine: emptyArray(),
-                uncertaintyLine: emptyArray(),
+                mainLine: createEmptyArrayWithDigitalChannelStates(),
+                uncertaintyLine: createEmptyArrayWithDigitalChannelStates(),
             } as DigitalChannelStates)
     ),
     bitIndexes: new Array(numberOfDigitalChannels),
     previousBitStates: new Array(numberOfDigitalChannels),
     // TODO: Verify if this does not change behavior. Introduced declaration/initialization in outer body.
     digitalChannelsToCompute: new Array(numberOfDigitalChannels),
-    latestTimestamp: undefined as Timestamp,
+    latestTimestamp: undefined as TimestampType,
 
     /**
      *
-     * @param {DigitalChannels} digitalChannelsToCompute array of the digital channels to compute
+     * @param {DigitalChannelsType} digitalChannelsToCompute array of the digital channels to compute
      * @returns {void} initialised bitDataStorage
      */
-    initialise(digitalChannelsToCompute: DigitalChannels) {
+    initialise(digitalChannelsToCompute: DigitalChannelsType) {
         this.bitIndexes.fill(0);
         this.previousBitStates.fill(null);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
     storeEntry(
-        timestamp: Timestamp,
-        bitNumber: BitNumber,
-        bitState: BitStateIndex
+        timestamp: TimestampType,
+        bitNumber: BitNumberType,
+        bitState: BitStateIndexType
     ) {
         const current = this.lineData[bitNumber];
         const bitIndex = this.bitIndexes[bitNumber];
@@ -63,9 +61,9 @@ export default () => ({
     },
 
     storeBit(
-        timestamp: Timestamp,
-        bitNumber: BitNumber,
-        bitState: BitStateIndex
+        timestamp: TimestampType,
+        bitNumber: BitNumberType,
+        bitState: BitStateIndexType
     ) {
         this.latestTimestamp = timestamp;
 

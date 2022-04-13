@@ -1,7 +1,9 @@
-export type DigitalChannels = boolean[];
-export type BitState = undefined | 0.4 | -0.4;
-export type BitNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export type Timestamp = undefined | number;
+export type DigitalChannelsType = boolean[];
+export type BitStateType = undefined | 0.4 | -0.4;
+export type BitStateIndexType = 0 | 1 | 2 | 3;
+export type BitNumberType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type TimestampType = undefined | number;
+export type AmpereStateType = undefined | number;
 
 /**
  * Represents a given state for a given digital channel
@@ -9,8 +11,8 @@ export type Timestamp = undefined | number;
  * @var {BitState} bitState: the state of the digital channel in the given time stamp: y-value in the Chart.
  */
 export interface DigitalChannelState {
-    timestamp: Timestamp;
-    bitState: BitState;
+    timestamp: TimestampType;
+    bitState: BitStateType;
 }
 
 /**
@@ -21,4 +23,9 @@ export interface DigitalChannelState {
 export interface DigitalChannelStates {
     mainLine: DigitalChannelState[];
     uncertaintyLine: DigitalChannelState[];
+}
+
+export interface AmpereState {
+    timestamp: TimestampType;
+    ampereState: AmpereStateType;
 }

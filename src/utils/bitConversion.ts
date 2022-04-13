@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { BitState } from '../components/Chart/data/dataTypes';
+import {
+    BitStateIndexType,
+    BitStateType,
+} from '../components/Chart/data/dataTypes';
 
 /* eslint-disable no-bitwise */
 
@@ -37,22 +40,20 @@ export const convertBits16 = (b8: number): number =>
  * - 2 (b10): was always 1
  * - 3 (b11): was sometimes 0 and sometimes 1
  */
-export const averagedBitState = (b16: number, n: number): BitStateIndex =>
-    (3 & (b16 >> (n + n))) as BitStateIndex;
+export const averagedBitState = (b16: number, n: number): BitStateIndexType =>
+    (3 & (b16 >> (n + n))) as BitStateIndexType;
 
-export type BitStateIndex = 0 | 1 | 2 | 3;
-
-export const always0: BitStateIndex = 1;
-export const always1: BitStateIndex = 2;
-export const sometimes0And1: BitStateIndex = 3;
+export const always0: BitStateIndexType = 1;
+export const always1: BitStateIndexType = 2;
+export const sometimes0And1: BitStateIndexType = 3;
 
 // TODO: Verify is this is legit?
-const lineDataFor1: BitState = 0.4;
-const lineDataFor0 = -lineDataFor1 as BitState;
+const lineDataFor1: BitStateType = 0.4;
+const lineDataFor0 = -lineDataFor1 as BitStateType;
 
 export interface LineDataBitState {
-    mainLine: BitState;
-    uncertaintyLine: BitState;
+    mainLine: BitStateType;
+    uncertaintyLine: BitStateType;
 }
 
 // TODO: Consider rename
