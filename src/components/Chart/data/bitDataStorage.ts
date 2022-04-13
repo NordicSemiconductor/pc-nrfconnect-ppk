@@ -51,11 +51,11 @@ export default () => ({
         const bitIndex = this.bitIndexes[bitNumber];
         const lineData = lineDataForBitState[bitState];
 
-        current.mainLine[bitIndex].timestamp = timestamp;
-        current.mainLine[bitIndex].bitState = lineData.mainLine;
+        current.mainLine[bitIndex].x = timestamp;
+        current.mainLine[bitIndex].y = lineData.mainLine;
 
-        current.uncertaintyLine[bitIndex].timestamp = timestamp;
-        current.uncertaintyLine[bitIndex].bitState = lineData.uncertaintyLine;
+        current.uncertaintyLine[bitIndex].x = timestamp;
+        current.uncertaintyLine[bitIndex].y = lineData.uncertaintyLine;
 
         ++this.bitIndexes[bitNumber];
     },
@@ -80,7 +80,7 @@ export default () => ({
             const hasEntry = this.bitIndexes[i] > 0;
             const lastEntryIsNotForLastTimestamp =
                 this.latestTimestamp !==
-                this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.timestamp;
+                this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.x;
 
             if (hasEntry && lastEntryIsNotForLastTimestamp) {
                 this.storeEntry(
