@@ -6,7 +6,11 @@
 
 /* eslint no-plusplus: off */
 
-import { nbDigitalChannels, options, timestampToIndex } from '../../../globals';
+import {
+    numberOfDigitalChannels,
+    options,
+    timestampToIndex,
+} from '../../../globals';
 import bitDataAccumulator from './bitDataAccumulator';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
@@ -17,7 +21,7 @@ export default () => ({
     ampereLineData: emptyArray(),
     bitDataAccumulator: bitDataAccumulator(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
-    bitStateAccumulator: new Array(nbDigitalChannels),
+    bitStateAccumulator: new Array(numberOfDigitalChannels),
 
     process(begin, end, digitalChannelsToCompute, len, windowDuration) {
         const { data } = options;

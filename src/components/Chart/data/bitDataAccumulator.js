@@ -6,7 +6,7 @@
 
 /* eslint no-plusplus: off */
 
-import { nbDigitalChannels, options } from '../../../globals';
+import { numberOfDigitalChannels, options } from '../../../globals';
 import {
     always0,
     always1,
@@ -17,7 +17,7 @@ import bitDataStorage from './bitDataStorage';
 
 export default () => ({
     bitDataStorage: bitDataStorage(),
-    accumulator: new Array(nbDigitalChannels),
+    accumulator: new Array(numberOfDigitalChannels),
 
     initialise(digitalChannelsToCompute) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
