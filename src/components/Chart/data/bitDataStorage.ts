@@ -8,41 +8,25 @@
 
 import { numberOfDigitalChannels } from '../../../globals';
 import {
-    BitState,
     BitStateIndex,
     lineDataForBitState,
 } from '../../../utils/bitConversion';
-
-type BitNumber = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-type Timestamp = undefined | number;
-
-type LineData = {
-    timestamp: undefined | number;
-    bitState: BitState;
-};
-
-/**
- * Returns array with length 4000
- * TODO: Describe why 4000 has been chosen
- * @returns {any} Something...
- */
-const emptyArray = () =>
-    [...Array(4000)].map(
-        () =>
-            ({
-                timestamp: undefined,
-                bitState: undefined,
-            } as LineData)
-    );
+import { emptyArray } from './commonBitDataFunctions';
+import {
+    BitNumber,
+    DigitalChannels,
+    DigitalChannelStates,
+    Timestamp,
+} from './dataTypes';
 
 export default () => ({
-    /**
-     * LineData has
-     */
-    lineData: [...Array(numberOfDigitalChannels)].map(() => ({
-        mainLine: emptyArray(),
-        uncertaintyLine: emptyArray(),
-    })),
+    lineData: [...Array(numberOfDigitalChannels)].map(
+        () =>
+            ({
+                mainLine: emptyArray(),
+                uncertaintyLine: emptyArray(),
+            } as DigitalChannelStates)
+    ),
     bitIndexes: new Array(numberOfDigitalChannels),
     previousBitStates: new Array(numberOfDigitalChannels),
     // TODO: Verify if this does not change behavior. Introduced declaration/initialization in outer body.
@@ -51,10 +35,10 @@ export default () => ({
 
     /**
      *
-     * @param {boolean[]} digitalChannelsToCompute array of the digital channels to compute
+     * @param {DigitalChannels} digitalChannelsToCompute array of the digital channels to compute
      * @returns {void} initialised bitDataStorage
      */
-    initialise(digitalChannelsToCompute: boolean[]) {
+    initialise(digitalChannelsToCompute: DigitalChannels) {
         this.bitIndexes.fill(0);
         this.previousBitStates.fill(null);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
