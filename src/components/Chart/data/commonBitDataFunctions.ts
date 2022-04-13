@@ -11,8 +11,8 @@ export const createEmptyArrayWithDigitalChannelStates = () =>
     [...Array(4000)].map(
         () =>
             ({
-                timestamp: undefined,
-                bitState: undefined,
+                x: undefined,
+                y: undefined,
             } as DigitalChannelState)
     );
 
@@ -27,7 +27,7 @@ export const createEmptyArrayWithAmpereState = () =>
     [...Array(4000)].map(
         () =>
             ({
-                timestamp: undefined,
-                ampereState: undefined,
+                x: undefined,
+                y: undefined,
             } as AmpereState)
     );
