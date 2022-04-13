@@ -38,14 +38,25 @@ export const convertBits16 = (b8: number): number =>
 export const averagedBitState = (b16: number, n: number): number =>
     3 & (b16 >> (n + n));
 
-export const always0 = 1;
-export const always1 = 2;
-export const sometimes0And1 = 3;
+export type BitStateIndex = 0 | 1 | 2 | 3;
 
-const lineDataFor1 = 0.4;
-const lineDataFor0 = -lineDataFor1;
+export const always0: BitStateIndex = 1;
+export const always1: BitStateIndex = 2;
+export const sometimes0And1: BitStateIndex = 3;
 
-export const lineDataForBitState = [
+// TODO: Verify is this is legit?
+const lineDataFor1: BitState = 0.4;
+const lineDataFor0 = -lineDataFor1 as BitState;
+
+export type BitState = undefined | 0.4 | -0.4;
+
+export type LineDataBitState = {
+    mainLine: BitState;
+    uncertaintyLine: BitState;
+};
+
+// TODO: Consider rename
+export const lineDataForBitState: LineDataBitState[] = [
     /* 0: invalid */ {
         mainLine: undefined,
         uncertaintyLine: undefined,
