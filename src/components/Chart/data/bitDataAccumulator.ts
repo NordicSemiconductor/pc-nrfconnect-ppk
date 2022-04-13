@@ -14,35 +14,39 @@ import {
     sometimes0And1,
 } from '../../../utils/bitConversion';
 import bitDataStorage from './bitDataStorage';
+import { DigitalChannelsType, TimestampType } from './dataTypes';
 
 export default () => ({
     bitDataStorage: bitDataStorage(),
     accumulator: new Array(numberOfDigitalChannels),
+    digitalChannelsToCompute: new Array(numberOfDigitalChannels),
 
-    initialise(digitalChannelsToCompute) {
+    initialise(digitalChannelsToCompute: DigitalChannelsType) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
         this.accumulator.fill(null);
     },
 
-    processBits(bitIndex) {
-        const bits = options.bits[bitIndex];
+    processBits(bitIndex: number) {
+        const bits = options.bits ? options.bits[bitIndex] : null;
 
-        this.digitalChannelsToCompute.forEach(i => {
-            const bitState = averagedBitState(bits, i);
+        if (bits) {
+            this.digitalChannelsToCompute.forEach(i => {
+                const bitState = averagedBitState(bits, i);
 
-            if (this.accumulator[i] === null) {
-                this.accumulator[i] = bitState;
-            } else if (
-                (this.accumulator[i] === always1 && bitState !== always1) ||
-                (this.accumulator[i] === always0 && bitState !== always0)
-            ) {
-                this.accumulator[i] = sometimes0And1;
-            }
-        });
+                if (this.accumulator[i] === null) {
+                    this.accumulator[i] = bitState;
+                } else if (
+                    (this.accumulator[i] === always1 && bitState !== always1) ||
+                    (this.accumulator[i] === always0 && bitState !== always0)
+                ) {
+                    this.accumulator[i] = sometimes0And1;
+                }
+            });
+        }
     },
 
-    processAccumulatedBits(timestamp) {
+    processAccumulatedBits(timestamp: TimestampType) {
         this.digitalChannelsToCompute.forEach(i => {
             this.bitDataStorage.storeBit(timestamp, i, this.accumulator[i]);
         });
