@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { nbDigitalChannels } from '../../../globals';
+import { numberOfDigitalChannels } from '../../../globals';
 
-const emptyResult = [...Array(nbDigitalChannels)].map(() => ({
+const emptyResult = [...Array(numberOfDigitalChannels)].map(() => ({
     mainLine: [],
     uncertaintyLine: [],
 }));

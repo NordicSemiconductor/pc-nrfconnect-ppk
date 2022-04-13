@@ -29,7 +29,7 @@ export const options: Options = {
     timestamp: null,
 };
 
-export const nbDigitalChannels = 8;
+export const numberOfDigitalChannels = 8;
 
 /**
  * Translate timestamp to index of sample array
