@@ -7,20 +7,20 @@
 /* eslint no-plusplus: off */
 
 import { numberOfDigitalChannels, options } from '../../../globals';
-import { averagedBitState, BitStateIndex } from '../../../utils/bitConversion';
+import { averagedBitState } from '../../../utils/bitConversion';
 import bitDataStorage from './bitDataStorage';
-import { DigitalChannels, Timestamp } from './dataTypes';
+import { DigitalChannelsType, TimestampType } from './dataTypes';
 
 export default () => ({
     bitDataStorage: bitDataStorage(),
     digitalChannelsToCompute: new Array(numberOfDigitalChannels),
 
-    initialise(digitalChannelsToCompute: DigitalChannels) {
+    initialise(digitalChannelsToCompute: DigitalChannelsType) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
-    processBits(bitIndex: number, timestamp: Timestamp) {
+    processBits(bitIndex: number, timestamp: TimestampType) {
         const bits = options.bits ? options.bits[bitIndex] : null;
 
         if (bits) {

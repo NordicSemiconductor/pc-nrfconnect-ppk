@@ -12,13 +12,11 @@ import {
     timestampToIndex,
 } from '../../../globals';
 import bitDataAccumulator from './bitDataAccumulator';
+import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
-const emptyArray = () =>
-    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
-
 export default () => ({
-    ampereLineData: emptyArray(),
+    ampereLineData: createEmptyArrayWithAmpereState(),
     bitDataAccumulator: bitDataAccumulator(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
     bitStateAccumulator: new Array(numberOfDigitalChannels),
