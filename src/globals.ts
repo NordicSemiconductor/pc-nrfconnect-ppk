@@ -40,6 +40,12 @@ export const options: GlobalOptions = {
     timestamp: null,
 };
 
+export const setSamplingRate = (samplingFrequencyPerSecond: number): void => {
+    const microSecondsPerSecond = 1e6;
+    options.samplesPerSecond = samplingFrequencyPerSecond;
+    options.samplingTime = microSecondsPerSecond / samplingFrequencyPerSecond;
+};
+
 /**
  * Translate timestamp to index of sample array
  * @param {TimestampType} timestamp timestamp to translate to index
@@ -47,10 +53,11 @@ export const options: GlobalOptions = {
  */
 export const timestampToIndex = (timestamp: TimestampType = 0): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
-    const microHertz = 1e6;
+    const microSecondsPerSecond = 1e6;
     return (
         options.index -
-        ((lastTimestamp - timestamp) * options.samplesPerSecond) / microHertz
+        ((lastTimestamp - timestamp) * options.samplesPerSecond) /
+            microSecondsPerSecond
     );
 };
 
@@ -64,10 +71,11 @@ export const timestampToIndex = (timestamp: TimestampType = 0): number => {
  */
 export const indexToTimestamp = (index: number): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
-    const microHertz = 1e6;
+    const microSecondsPerSecond = 1e6;
     return (
         lastTimestamp -
-        ((options.index - index) * microHertz) / options.samplesPerSecond
+        ((options.index - index) * microSecondsPerSecond) /
+            options.samplesPerSecond
     );
 };
 
