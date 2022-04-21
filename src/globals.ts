@@ -48,10 +48,10 @@ export const setSamplingRate = (samplingFrequencyPerSecond: number): void => {
 
 /**
  * Translate timestamp to index of sample array
- * @param {TimestampType} timestamp timestamp to translate to index
+ * @param {number} timestamp timestamp to translate to index
  * @returns {Number} index of sample at provided timestamp
  */
-export const timestampToIndex = (timestamp: TimestampType = 0): number => {
+export const timestampToIndex = (timestamp: number): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
     const microSecondsPerSecond = 1e6;
     return (
