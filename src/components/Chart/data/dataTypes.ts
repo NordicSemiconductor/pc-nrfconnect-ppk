@@ -11,8 +11,8 @@ export type AmpereStateType = undefined | number;
  * @var {BitState} bitState: the state of the digital channel in the given time stamp: y-value in the Chart.
  */
 export interface DigitalChannelState {
-    timestamp: TimestampType;
-    bitState: BitStateType;
+    x: TimestampType;
+    y: BitStateType;
 }
 
 /**
@@ -26,6 +26,6 @@ export interface DigitalChannelStates {
 }
 
 export interface AmpereState {
-    timestamp: TimestampType;
-    ampereState: AmpereStateType;
+    x: TimestampType;
+    y: AmpereStateType;
 }
