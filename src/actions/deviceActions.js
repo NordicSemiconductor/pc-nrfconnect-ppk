@@ -11,9 +11,10 @@ import { logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
 import {
+    adjustDataBufferSize,
     indexToTimestamp,
     options,
-    setSamplingRate,
+    setSamplingRates,
     updateTitle,
 } from '../globals';
 import {
@@ -68,12 +69,16 @@ export const setupOptions = () => (dispatch, getState) => {
     let d = 300; // buffer length in seconds for real-time
     if (isRealTimePane(getState())) {
         // in real-time
+        const realtimeWindowDuration = 300;
         const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
-        setSamplingRate(newSamplesPerSecond);
+
+        setSamplingRates(newSamplesPerSecond);
+        adjustDataBufferSize(realtimeWindowDuration);
     } else {
         const { durationSeconds, sampleFreq } = getState().app.dataLogger;
         d = durationSeconds;
-        setSamplingRate(sampleFreq);
+        setSamplingRates(sampleFreq);
+        adjustDataBufferSize(durationSeconds);
     }
     const bufferLength = Math.trunc(d * options.samplesPerSecond);
     try {
@@ -84,9 +89,6 @@ export const setupOptions = () => (dispatch, getState) => {
             options.bits.fill(0);
         } else {
             options.bits = null;
-        }
-        if (options.data.length !== bufferLength) {
-            options.data = new Float32Array(bufferLength);
         }
         options.data.fill(NaN);
         options.index = 0;

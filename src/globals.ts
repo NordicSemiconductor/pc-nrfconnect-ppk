@@ -11,8 +11,8 @@ import { TimestampType } from './components/Chart/data/dataTypes';
 export const bufferLengthInSeconds = 60 * 5;
 export const numberOfDigitalChannels = 8;
 
-const samplingTime = 10;
-const samplesPerSecond = 1e6 / samplingTime;
+const initialSamplingTime = 10;
+const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 
 interface GlobalOptions {
     /** Time between each sample denoted in microseconds, which is equal to 1e-6 seconds \
@@ -32,18 +32,46 @@ interface GlobalOptions {
 }
 
 export const options: GlobalOptions = {
-    samplingTime,
-    samplesPerSecond,
-    data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
+    samplingTime: initialSamplingTime,
+    samplesPerSecond: initialSamplesPerSecond,
+    data: new Float32Array(initialSamplesPerSecond * bufferLengthInSeconds),
     bits: null,
     index: 0,
     timestamp: null,
 };
 
-export const setSamplingRate = (samplingFrequencyPerSecond: number): void => {
+/**
+ * Get the sampling time derived from samplesPerSecond
+ * @param {number} samplesPerSecond number of samples per second
+ * @returns {number} samplingTime which is the time in microseconds between samples
+ */
+export const getSamplingTime = (samplesPerSecond: number): number => {
     const microSecondsPerSecond = 1e6;
-    options.samplesPerSecond = samplingFrequencyPerSecond;
-    options.samplingTime = microSecondsPerSecond / samplingFrequencyPerSecond;
+    return microSecondsPerSecond / samplesPerSecond;
+};
+
+/**
+ * Set the new global samplesPerSecond and samplingTime frequency.
+ * @param {number} samplesPerSecond the new samplesPerSecond
+ * @returns {void} derives samplingTime from samplesPerSecond
+ */
+export const setSamplingRates = (samplesPerSecond: number): void => {
+    options.samplesPerSecond = samplesPerSecond;
+    options.samplingTime = getSamplingTime(samplesPerSecond);
+};
+
+/**
+ * Initiates new sample array if new buffer size is not equal to the present one.
+ * @param {number} samplingDuration maximum number of seconds with sampling
+ * @returns {void} derives new buffer size from samplingDuration and samplesPerSecond
+ */
+export const adjustDataBufferSize = (samplingDuration: number) => {
+    const newBufferSize = Math.trunc(
+        samplingDuration * initialSamplesPerSecond
+    );
+    if (options.data.length !== newBufferSize) {
+        options.data = new Float32Array(newBufferSize);
+    }
 };
 
 /**
