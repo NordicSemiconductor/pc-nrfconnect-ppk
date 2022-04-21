@@ -6,6 +6,9 @@
 
 import { numberOfDigitalChannels } from '../../../globals';
 
+/**
+ * Initialise an empty result object with mainLine and uncertaintyLine.
+ */
 const emptyResult = [...Array(numberOfDigitalChannels)].map(() => ({
     mainLine: [],
     uncertaintyLine: [],
