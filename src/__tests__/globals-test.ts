@@ -17,8 +17,9 @@ const synchronise_index_and_timestamp = (
     samplesPerSecond = 1e5
 ): void => {
     options.index = index;
+    options.samplingTime = 1e6 / samplesPerSecond;
     options.samplesPerSecond = samplesPerSecond;
-    options.timestamp = index * samplesPerSecond;
+    options.timestamp = index * options.samplingTime;
 };
 
 beforeEach(() => {
@@ -29,9 +30,14 @@ beforeEach(() => {
 });
 
 describe('timestampToIndex', () => {
-    it('should return zero if timestamps are undefined', () => {
-        expect(timestampToIndex(undefined)).toBe(0);
+    it('should return zero if timestamps are zero', () => {
+        expect(timestampToIndex(0)).toBe(0);
     });
 
-    it('should return index equal to options.index if argument is undefined', () => {});
+    it('should return index equal to options.index if argument is options.timestamp', () => {
+        synchronise_index_and_timestamp(1e4);
+        expect(timestampToIndex(options.timestamp as number)).toBe(
+            options.index
+        );
+    });
 });
