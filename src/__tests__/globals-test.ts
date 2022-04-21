@@ -1,7 +1,7 @@
 import {
-    adjustDataBufferSize,
     getSamplingTime,
     initializeBitsBuffer,
+    initializeDataBuffer,
     options,
     removeBitsBuffer,
     setSamplingRates,
@@ -79,13 +79,13 @@ describe('setSamplingRates', () => {
     });
 });
 
-describe('adjustDataBufferSize', () => {
+describe('initializeDataBuffer', () => {
     it('does nothing if buffer size has not changed', () => {
         setSamplingRates(10);
-        adjustDataBufferSize(10);
+        initializeDataBuffer(10);
         const oldDataReference = options.data;
 
-        adjustDataBufferSize(10);
+        initializeDataBuffer(10);
         const newDataReference = options.data;
 
         expect(oldDataReference === newDataReference).toBeTruthy();
@@ -93,11 +93,11 @@ describe('adjustDataBufferSize', () => {
 
     it('creates a new data buffer if buffer size has changed because of samplingRates are changed', () => {
         setSamplingRates(10);
-        adjustDataBufferSize(10);
+        initializeDataBuffer(10);
         const oldDataReference = options.data;
 
         setSamplingRates(100);
-        adjustDataBufferSize(10);
+        initializeDataBuffer(10);
         const newDataReference = options.data;
 
         expect(oldDataReference === newDataReference).toBeFalsy();
@@ -105,10 +105,10 @@ describe('adjustDataBufferSize', () => {
 
     it('creates a new data buffer if buffer size has changed because of sampling duration is changed', () => {
         setSamplingRates(10);
-        adjustDataBufferSize(10);
+        initializeDataBuffer(10);
         const oldDataReference = options.data;
 
-        adjustDataBufferSize(100);
+        initializeDataBuffer(100);
         const newDataReference = options.data;
 
         expect(oldDataReference === newDataReference).toBeFalsy();
