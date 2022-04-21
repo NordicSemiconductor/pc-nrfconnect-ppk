@@ -68,25 +68,28 @@ const zeroCap = isDev ? n => n : n => Math.max(0, n);
 
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
-    let d = 300; // buffer length in seconds for real-time
-    if (isRealTimePane(getState())) {
-        // in real-time
-        const realtimeWindowDuration = 300;
-        const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
-
-        setSamplingRates(newSamplesPerSecond);
-        initializeDataBuffer(realtimeWindowDuration);
-    } else {
-        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-        d = durationSeconds;
-        setSamplingRates(sampleFreq);
-        initializeDataBuffer(durationSeconds);
-    }
     try {
-        if (device.capabilities.ppkSetPowerMode) {
-            initializeBitsBuffer(d);
+        if (isRealTimePane(getState())) {
+            // in real-time
+            const realtimeWindowDuration = 300;
+            const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
+
+            setSamplingRates(newSamplesPerSecond);
+            initializeDataBuffer(realtimeWindowDuration);
+            if (device.capabilities.ppkSetPowerMode) {
+                initializeBitsBuffer(realtimeWindowDuration);
+            } else {
+                removeBitsBuffer();
+            }
         } else {
-            removeBitsBuffer();
+            const { durationSeconds, sampleFreq } = getState().app.dataLogger;
+            setSamplingRates(sampleFreq);
+            initializeDataBuffer(durationSeconds);
+            if (device.capabilities.ppkSetPowerMode) {
+                initializeBitsBuffer(durationSeconds);
+            } else {
+                removeBitsBuffer();
+            }
         }
         options.index = 0;
         options.timestamp = 0;
