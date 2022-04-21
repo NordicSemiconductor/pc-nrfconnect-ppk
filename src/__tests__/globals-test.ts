@@ -1,7 +1,9 @@
 import {
     adjustDataBufferSize,
     getSamplingTime,
+    initializeBitsBuffer,
     options,
+    removeBitsBuffer,
     setSamplingRates,
     timestampToIndex,
 } from '../globals';
@@ -86,7 +88,7 @@ describe('adjustDataBufferSize', () => {
         adjustDataBufferSize(10);
         const newDataReference = options.data;
 
-        expect(oldDataReference === newDataReference).toBeTruthy;
+        expect(oldDataReference === newDataReference).toBeTruthy();
     });
 
     it('creates a new data buffer if buffer size has changed because of samplingRates are changed', () => {
@@ -98,7 +100,7 @@ describe('adjustDataBufferSize', () => {
         adjustDataBufferSize(10);
         const newDataReference = options.data;
 
-        expect(oldDataReference === newDataReference).toBeFalsy;
+        expect(oldDataReference === newDataReference).toBeFalsy();
     });
 
     it('creates a new data buffer if buffer size has changed because of sampling duration is changed', () => {
@@ -109,6 +111,61 @@ describe('adjustDataBufferSize', () => {
         adjustDataBufferSize(100);
         const newDataReference = options.data;
 
-        expect(oldDataReference === newDataReference).toBeFalsy;
+        expect(oldDataReference === newDataReference).toBeFalsy();
+    });
+});
+
+describe('initializeBitsBuffer', () => {
+    it('initialises the bits buffer', () => {
+        setSamplingRates(10);
+        initializeBitsBuffer(10);
+
+        expect(options.bits?.length).toBe(10 * 10);
+    });
+
+    it('does not create a new bits buffer if the new buffer size is equal to the old', () => {
+        setSamplingRates(10);
+        initializeBitsBuffer(10);
+        const oldBitsBufferReference = options.bits;
+
+        initializeBitsBuffer(10);
+        const newBitsBufferReference = options.bits;
+
+        expect(oldBitsBufferReference === newBitsBufferReference).toBeTruthy();
+    });
+
+    it('creates a new bits buffer if the new buffer size is not equal to the old', () => {
+        setSamplingRates(10);
+        initializeBitsBuffer(10);
+        const oldBitsBufferReference = options.bits;
+
+        initializeBitsBuffer(100);
+        const newBitsBufferReference = options.bits;
+
+        expect(oldBitsBufferReference === newBitsBufferReference).toBeFalsy();
+    });
+
+    it('creates a new bits buffer if the bits buffer is null', () => {
+        setSamplingRates(10);
+        removeBitsBuffer();
+
+        expect(options.bits).toBeNull();
+
+        initializeBitsBuffer(10);
+
+        expect(options.bits?.length).toBe(10 * 10);
+    });
+});
+
+describe('removeBitsBuffer', () => {
+    it('sets the bits buffer to null', () => {
+        setSamplingRates(1);
+        initializeBitsBuffer(1);
+
+        expect(options.bits).not.toBeNull();
+
+        removeBitsBuffer();
+
+        expect(options.bits).toBeNull();
     });
 });
