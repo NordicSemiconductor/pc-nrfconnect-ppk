@@ -47,13 +47,9 @@ export const always0: BitStateIndexType = 1;
 export const always1: BitStateIndexType = 2;
 export const sometimes0And1: BitStateIndexType = 3;
 
-// TODO: Verify is this is legit?
-const lineDataFor1: BitStateType = 0.4;
-const lineDataFor0 = -lineDataFor1 as BitStateType;
-
 export interface LineDataBitState {
-    mainLine: BitStateType;
-    uncertaintyLine: BitStateType;
+    mainLine: BitStateType | undefined;
+    uncertaintyLine: BitStateType | undefined;
 }
 
 // TODO: Consider rename
@@ -65,15 +61,15 @@ export const lineDataForBitState: LineDataBitState[] = [
         uncertaintyLine: undefined,
     },
     /* 1: always 0 */ {
-        mainLine: lineDataFor0,
-        uncertaintyLine: lineDataFor0,
+        mainLine: BitStateType.zero,
+        uncertaintyLine: BitStateType.zero,
     },
     /* 2: always 1 */ {
-        mainLine: lineDataFor1,
-        uncertaintyLine: lineDataFor1,
+        mainLine: BitStateType.one,
+        uncertaintyLine: BitStateType.one,
     },
     /* sometimes 0 and sometimes 1 */ {
-        mainLine: lineDataFor0,
-        uncertaintyLine: lineDataFor1,
+        mainLine: BitStateType.zero,
+        uncertaintyLine: BitStateType.one,
     },
 ];

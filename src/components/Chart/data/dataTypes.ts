@@ -5,11 +5,15 @@
  */
 
 export type DigitalChannelsType = boolean[];
-export type BitStateType = undefined | 0.4 | -0.4;
 export type BitStateIndexType = 0 | 1 | 2 | 3;
 export type BitNumberType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type TimestampType = undefined | number;
 export type AmpereStateType = undefined | number;
+
+export enum BitStateType {
+    zero = -0.4,
+    one = 0.4,
+}
 
 /**
  * Represents a given state for a given digital channel
@@ -18,7 +22,7 @@ export type AmpereStateType = undefined | number;
  */
 export interface DigitalChannelState {
     x: TimestampType;
-    y: BitStateType;
+    y: BitStateType | undefined;
 }
 
 /**

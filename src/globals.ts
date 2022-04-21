@@ -6,13 +6,20 @@
 
 import { remote } from 'electron';
 
+import { TimestampType } from './components/Chart/data/dataTypes';
+
 export const bufferLengthInSeconds = 60 * 5;
+export const numberOfDigitalChannels = 8;
 
 const samplingTime = 10;
 const samplesPerSecond = 1e6 / samplingTime;
 
 interface GlobalOptions {
+    /** Time between each sample denoted in microseconds, which is equal to 1e-6 seconds \
+     *  e.g. if samplesPerSecond is 100_000, then a sample is taken every 10th microsecond
+     */
     samplingTime: number;
+    /** The number of samples per second */
     samplesPerSecond: number;
     /** @var data: contains all samples of current denoted in uA (microAmpere). */
     data: Float32Array;
@@ -20,6 +27,7 @@ interface GlobalOptions {
     bits: Uint16Array | null;
     /** @var index: pointer to the index of the last sample in data array */
     index: number;
+    /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
     timestamp: number | undefined | null;
 }
 
@@ -32,31 +40,34 @@ export const options: GlobalOptions = {
     timestamp: null,
 };
 
-export const numberOfDigitalChannels = 8;
-
 /**
  * Translate timestamp to index of sample array
- * @param {Number} timestamp timestamp to translate to index
+ * @param {TimestampType} timestamp timestamp to translate to index
  * @returns {Number} index of sample at provided timestamp
  */
-export const timestampToIndex = (timestamp: number): number => {
-    const timestampHead = options?.timestamp ? options.timestamp : 0;
+export const timestampToIndex = (timestamp: TimestampType = 0): number => {
+    const lastTimestamp = options?.timestamp ? options.timestamp : 0;
+    const microHertz = 1e6;
     return (
         options.index -
-        ((timestampHead - timestamp) * options.samplesPerSecond) / 1e6
+        ((lastTimestamp - timestamp) * options.samplesPerSecond) / microHertz
     );
 };
 
 /**
  * Translate index of sample array to timestamp
  * @param {Number} index index to translate to timestamp
- * @returns {Number} timestamp of sample at provided index
+ * @returns {TimestampType} timestamp of sample at provided index
+ * ## Conversion Details
+ * lastTimestamp should be the timestamp at the time of options.index \
+ * To get the timestamp at some index subtract the difference in time between globals.index and index from the lastTimestamp.
  */
 export const indexToTimestamp = (index: number): number => {
-    const timestampHead = options?.timestamp ? options.timestamp : 0;
+    const lastTimestamp = options?.timestamp ? options.timestamp : 0;
+    const microHertz = 1e6;
     return (
-        timestampHead -
-        ((options.index - index) * 1e6) / options.samplesPerSecond
+        lastTimestamp -
+        ((options.index - index) * microHertz) / options.samplesPerSecond
     );
 };
 
