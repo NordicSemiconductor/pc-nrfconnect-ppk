@@ -11,16 +11,19 @@ export const bufferLengthInSeconds = 60 * 5;
 const samplingTime = 10;
 const samplesPerSecond = 1e6 / samplingTime;
 
-type Options = {
+interface GlobalOptions {
     samplingTime: number;
     samplesPerSecond: number;
+    /** @var data: contains all samples of current denoted in uA (microAmpere). */
     data: Float32Array;
+    /** @var [bits]: contains the bit state for each sample, variable may be null */
     bits: Uint16Array | null;
+    /** @var index: pointer to the index of the last sample in data array */
     index: number;
     timestamp: number | undefined | null;
-};
+}
 
-export const options: Options = {
+export const options: GlobalOptions = {
     samplingTime,
     samplesPerSecond,
     data: new Float32Array(samplesPerSecond * bufferLengthInSeconds),
