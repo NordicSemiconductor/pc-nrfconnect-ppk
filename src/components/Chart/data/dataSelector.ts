@@ -9,6 +9,7 @@
 import { options, timestampToIndex } from '../../../globals';
 import bitDataSelector from './bitDataSelector';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
+import { DigitalChannelsType } from './dataTypes';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
 export default () => ({
@@ -16,7 +17,11 @@ export default () => ({
     bitDataSelector: bitDataSelector(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
 
-    process(begin, end, digitalChannelsToCompute) {
+    process(
+        begin: number,
+        end: number,
+        digitalChannelsToCompute: DigitalChannelsType
+    ) {
         const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
