@@ -61,15 +61,17 @@ export const setSamplingRates = (samplesPerSecond: number): void => {
 /**
  * Initiates new sample array if new buffer size is not equal to the present one.
  * @param {number} samplingDuration maximum number of seconds with sampling
- * @returns {void} derives new buffer size from samplingDuration and samplesPerSecond
+ * @returns {void} derives buffer size and initiates new buffer for data samples if the current length of the buffer is not equal to the new buffer size.
+ * Also fills the buffer with NaN to make sure the buffer is cleared.
  */
-export const adjustDataBufferSize = (samplingDuration: number) => {
+export const initializeDataBuffer = (samplingDuration: number) => {
     const newBufferSize = Math.trunc(
         samplingDuration * options.samplesPerSecond
     );
     if (options.data.length !== newBufferSize) {
         options.data = new Float32Array(newBufferSize);
     }
+    options.data.fill(NaN);
 };
 
 /**

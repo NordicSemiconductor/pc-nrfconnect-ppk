@@ -10,9 +10,9 @@ import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
 import {
-    adjustDataBufferSize,
     indexToTimestamp,
     initializeBitsBuffer,
+    initializeDataBuffer,
     options,
     removeBitsBuffer,
     setSamplingRates,
@@ -74,12 +74,12 @@ export const setupOptions = () => (dispatch, getState) => {
         const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
 
         setSamplingRates(newSamplesPerSecond);
-        adjustDataBufferSize(realtimeWindowDuration);
+        initializeDataBuffer(realtimeWindowDuration);
     } else {
         const { durationSeconds, sampleFreq } = getState().app.dataLogger;
         d = durationSeconds;
         setSamplingRates(sampleFreq);
-        adjustDataBufferSize(durationSeconds);
+        initializeDataBuffer(durationSeconds);
     }
     try {
         if (device.capabilities.ppkSetPowerMode) {
@@ -87,7 +87,6 @@ export const setupOptions = () => (dispatch, getState) => {
         } else {
             removeBitsBuffer();
         }
-        options.data.fill(NaN);
         options.index = 0;
         options.timestamp = 0;
     } catch (err) {
