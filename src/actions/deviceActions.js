@@ -9,7 +9,12 @@
 import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
-import { indexToTimestamp, options, updateTitle } from '../globals';
+import {
+    indexToTimestamp,
+    options,
+    setSamplingRate,
+    updateTitle,
+} from '../globals';
 import {
     deviceClosedAction,
     deviceOpenedAction,
@@ -62,13 +67,12 @@ export const setupOptions = () => (dispatch, getState) => {
     let d = 300; // buffer length in seconds for real-time
     if (isRealTimePane(getState())) {
         // in real-time
-        options.samplingTime = device.adcSamplingTimeUs;
-        options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
+        const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
+        setSamplingRate(newSamplesPerSecond);
     } else {
         const { durationSeconds, sampleFreq } = getState().app.dataLogger;
         d = durationSeconds;
-        options.samplingTime = 1e6 / sampleFreq;
-        options.samplesPerSecond = sampleFreq;
+        setSamplingRate(sampleFreq);
     }
     const bufferLength = Math.trunc(d * options.samplesPerSecond);
     try {
