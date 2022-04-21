@@ -13,6 +13,7 @@ import {
 } from '../../../globals';
 import bitDataAccumulator from './bitDataAccumulator';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
+import { DigitalChannelsType } from './dataTypes';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
 export default () => ({
@@ -21,7 +22,13 @@ export default () => ({
     noOpBitDataProcessor: noOpBitDataProcessor(),
     bitStateAccumulator: new Array(numberOfDigitalChannels),
 
-    process(begin, end, digitalChannelsToCompute, len, windowDuration) {
+    process(
+        begin: number,
+        end: number,
+        digitalChannelsToCompute: DigitalChannelsType,
+        len: number,
+        windowDuration: number
+    ) {
         const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
@@ -60,6 +67,7 @@ export default () => ({
                 }
             }
 
+            // TODO: WHAT??
             if (min > max) {
                 min = undefined;
                 max = undefined;
