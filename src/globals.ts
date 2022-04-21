@@ -6,8 +6,6 @@
 
 import { getCurrentWindow } from '@electron/remote';
 
-import { TimestampType } from './components/Chart/data/dataTypes';
-
 export const bufferLengthInSeconds = 60 * 5;
 export const numberOfDigitalChannels = 8;
 
@@ -67,11 +65,34 @@ export const setSamplingRates = (samplesPerSecond: number): void => {
  */
 export const adjustDataBufferSize = (samplingDuration: number) => {
     const newBufferSize = Math.trunc(
-        samplingDuration * initialSamplesPerSecond
+        samplingDuration * options.samplesPerSecond
     );
     if (options.data.length !== newBufferSize) {
         options.data = new Float32Array(newBufferSize);
     }
+};
+
+/**
+ *
+ * @param {number} samplingDuration maximum number of seconds with sampling
+ * @returns {void} derives buffer size and initiates new buffer for bits if there is no buffer from before or if the current length of buffer
+ * is not equal to the new buffer size. Fills the buffer with zeroes to make sure it is empty.
+ */
+export const initializeBitsBuffer = (samplingDuration: number) => {
+    const newBufferSize = Math.trunc(
+        samplingDuration * options.samplesPerSecond
+    );
+    if (!options.bits || options.bits.length !== newBufferSize) {
+        options.bits = new Uint16Array(newBufferSize);
+    }
+    options.bits.fill(0);
+};
+
+/**
+ * @returns {void} Removes the bits buffer by settings its value to null in the global options object
+ */
+export const removeBitsBuffer = () => {
+    options.bits = null;
 };
 
 /**

@@ -12,7 +12,9 @@ import Device from '../device';
 import {
     adjustDataBufferSize,
     indexToTimestamp,
+    initializeBitsBuffer,
     options,
+    removeBitsBuffer,
     setSamplingRates,
     updateTitle,
 } from '../globals';
@@ -79,15 +81,11 @@ export const setupOptions = () => (dispatch, getState) => {
         setSamplingRates(sampleFreq);
         adjustDataBufferSize(durationSeconds);
     }
-    const bufferLength = Math.trunc(d * options.samplesPerSecond);
     try {
         if (device.capabilities.ppkSetPowerMode) {
-            if (!options.bits || options.bits.length !== bufferLength) {
-                options.bits = new Uint16Array(bufferLength);
-            }
-            options.bits.fill(0);
+            initializeBitsBuffer(d);
         } else {
-            options.bits = null;
+            removeBitsBuffer();
         }
         options.data.fill(NaN);
         options.index = 0;
