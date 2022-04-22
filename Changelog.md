@@ -1,3 +1,8 @@
+## Unreleased
+
+### Fixed
+- Did not display all serialport devices.
+
 ## 3.4.3 - 2022-03-24
 
 ### Fixed
