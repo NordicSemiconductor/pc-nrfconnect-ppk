@@ -192,7 +192,7 @@ class SerialDevice extends Device {
             this.dataLossCounter + missingSamples >= DATALOSS_THRESHOLD
         ) {
             logger.error(
-                'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/master/doc/troubleshooting.md#data-loss-with-ppk2'
+                'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/main/doc/troubleshooting.md#data-loss-with-ppk2'
             );
         }
         this.dataLossCounter += missingSamples;
