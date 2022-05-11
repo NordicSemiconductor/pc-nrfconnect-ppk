@@ -7,12 +7,10 @@
 import RTTDevice from './rttDevice';
 import SerialDevice from './serialDevice';
 
-export default class {
-    constructor(device, onSampleCallback) {
-        const instance = device.traits.jlink
-            ? new RTTDevice(device)
-            : new SerialDevice(device);
-        instance.onSampleCallback = onSampleCallback;
-        return instance;
-    }
-}
+export default (device, onSampleCallback) => {
+    const instance = device.traits.jlink
+        ? new RTTDevice(device)
+        : new SerialDevice(device);
+    instance.onSampleCallback = onSampleCallback;
+    return instance;
+};

@@ -49,6 +49,7 @@ export const updateLowResistorAction = userResLo =>
 
 const defined = (a, b) => (a !== undefined ? a : b);
 
+// eslint-disable-next-line default-param-last
 export default (state = initialState, action) => {
     switch (action.type) {
         case USER_RESISTOR_UPDATED: {

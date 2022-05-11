@@ -14,6 +14,7 @@ export const updateGainsAction = (value, range) => ({
     range,
 });
 
+// eslint-disable-next-line default-param-last
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case GAINS_UPDATE: {

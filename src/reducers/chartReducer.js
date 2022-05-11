@@ -210,6 +210,7 @@ function calcBuffer(windowDuration, windowEnd) {
     };
 }
 
+// eslint-disable-next-line default-param-last
 export default (state = initialState(), { type, ...action }) => {
     switch (type) {
         case CHART_CURSOR: {

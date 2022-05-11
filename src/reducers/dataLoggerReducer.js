@@ -100,6 +100,7 @@ export const changeMaxBufferSizeAction = maxBufferSize => ({
     maxBufferSize,
 });
 
+// eslint-disable-next-line default-param-last
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case SET_SAMPLING_ATTRS: {

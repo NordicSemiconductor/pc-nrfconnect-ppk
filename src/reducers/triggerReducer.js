@@ -86,6 +86,7 @@ export const completeTriggerAction = origin => ({
     triggerStartIndex: null,
 });
 
+// eslint-disable-next-line default-param-last
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case TRIGGER_SINGLE_SET: {
