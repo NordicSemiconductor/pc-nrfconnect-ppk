@@ -20,6 +20,7 @@ export const resetSpikeFilterToDefaults = () => ({
     ...defaults,
 });
 
+// eslint-disable-next-line default-param-last
 export default (state = getSpikeFilter(defaults), { type, ...action }) => {
     switch (type) {
         case SPIKE_FILTER_UPDATE:

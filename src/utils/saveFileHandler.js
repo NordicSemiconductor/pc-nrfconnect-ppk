@@ -11,9 +11,10 @@ import { createDeflateRaw } from 'zlib';
 
 const CURRENT_VERSION = 1;
 
-const write = deflateRaw => data => {
-    return new Promise(resolve => deflateRaw.write(data, 'binary', resolve));
-};
+const write = deflateRaw => data =>
+    new Promise(resolve => {
+        deflateRaw.write(data, 'binary', resolve);
+    });
 
 const writeBuffer = async (data, fileWriter) => {
     if (!data || data.buffer == null) return;

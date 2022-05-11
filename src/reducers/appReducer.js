@@ -64,6 +64,7 @@ export const setFileLoadedAction = loaded => ({
     loaded,
 });
 
+// eslint-disable-next-line default-param-last
 export default (state = initialState, { type, ...action }) => {
     switch (type) {
         case DEVICE_OPENED: {

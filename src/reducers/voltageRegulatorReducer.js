@@ -36,6 +36,7 @@ export const updateVoltageRegulatorMaxCapAction = maxCap => ({
     maxCap,
 });
 
+// eslint-disable-next-line default-param-last
 export default (state = initialState, action) => {
     switch (action.type) {
         case VOLTAGE_REGULATOR_UPDATED: {

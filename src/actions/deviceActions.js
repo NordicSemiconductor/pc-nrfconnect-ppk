@@ -6,8 +6,7 @@
 
 /* eslint-disable no-bitwise */
 
-import isDev from 'electron-is-dev';
-import { logger, usageData } from 'pc-nrfconnect-shared';
+import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
 import { indexToTimestamp, options, updateTitle } from '../globals';
@@ -56,7 +55,7 @@ import { calculateWindowSize, processTriggerSample } from './triggerActions';
 let device = null;
 let updateRequestInterval;
 
-const zeroCap = isDev ? n => n : n => Math.max(0, n);
+const zeroCap = isDevelopment ? n => n : n => Math.max(0, n);
 
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
@@ -286,7 +285,7 @@ export function open(deviceInfo) {
         };
 
         try {
-            device = new Device(deviceInfo, onSample);
+            device = Device(deviceInfo, onSample);
             usageData.sendUsageData(
                 device.capabilities.hwTrigger
                     ? EventAction.PPK_1_SELECTED
