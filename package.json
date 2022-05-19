@@ -38,7 +38,7 @@
         "chart.js": "2.9.4",
         "electron-store": "^8.0.1",
         "mathjs": "7.5.1",
-        "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v6.2.2",
+        "pc-nrfconnect-shared": "https://github.com/NordicSemiconductor/pc-nrfconnect-shared#v6.2.2",
         "react": "16.13.1",
         "react-chartjs-2": "2.9.0",
         "react-dom": "^17.0.1",
