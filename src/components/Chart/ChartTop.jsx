@@ -75,7 +75,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                         }
                     }}
                     isToggled={yAxisLock}
-                    variant="secondary"
+                    variant="primary"
                     labelRight
                 />
                 {yAxisLock && <ChartOptions chartRef={chartRef} />}
