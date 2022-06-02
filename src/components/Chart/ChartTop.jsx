@@ -9,7 +9,7 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
-import { colors, Toggle } from 'pc-nrfconnect-shared';
+import { Toggle } from 'pc-nrfconnect-shared';
 import { func, number, shape, string } from 'prop-types';
 
 import {
@@ -23,19 +23,15 @@ import ChartOptions from './ChartOptions';
 
 import './charttop.scss';
 
-const { gray700, nordicBlue } = colors;
-
-const TimeWindowButton = ({ label, zoomToWindow }) => {
-    return (
-        <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => zoomToWindow(unit(label).to('us').toNumeric())}
-        >
-            {label}
-        </Button>
-    );
-};
+const TimeWindowButton = ({ label, zoomToWindow }) => (
+    <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => zoomToWindow(unit(label).to('us').toNumeric())}
+    >
+        {label}
+    </Button>
+);
 
 TimeWindowButton.propTypes = {
     label: string.isRequired,
@@ -81,8 +77,6 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                     isToggled={yAxisLock}
                     variant="secondary"
                     labelRight
-                    barColor={gray700}
-                    barColorToggled={nordicBlue}
                 />
                 {yAxisLock && <ChartOptions chartRef={chartRef} />}
             </div>
@@ -104,9 +98,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                         live ? chartPause() : dispatch(resetChart())
                     }
                     isToggled={live}
-                    variant="secondary"
-                    barColor={gray700}
-                    barColorToggled={nordicBlue}
+                    variant="primary"
                 />
             )}
         </div>

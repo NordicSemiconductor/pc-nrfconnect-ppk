@@ -96,7 +96,7 @@ const SwitchPoints = () => {
                     onToggle={() => dispatch(spikeFilteringToggle())}
                     isToggled={spikeFiltering}
                     label="Spike filtering"
-                    variant="secondary"
+                    variant="primary"
                 />
             )}
         </CollapsibleGroup>

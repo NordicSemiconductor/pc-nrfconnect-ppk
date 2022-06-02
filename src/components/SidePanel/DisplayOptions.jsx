@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup, colors, Toggle } from 'pc-nrfconnect-shared';
+import { CollapsibleGroup, Toggle } from 'pc-nrfconnect-shared';
 
 import {
     chartState,
@@ -15,8 +15,6 @@ import {
 } from '../../reducers/chartReducer';
 import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
-
-const { gray700, nordicBlue } = colors;
 
 export default () => {
     const dispatch = useDispatch();
@@ -30,9 +28,7 @@ export default () => {
                 onToggle={() => dispatch(toggleTimestamps())}
                 isToggled={timestampsVisible}
                 label="Timestamps"
-                variant="secondary"
-                barColor={gray700}
-                barColorToggled={nordicBlue}
+                variant="primary"
             />
             {hasDigitalChannels && isDataLogger && (
                 <>
@@ -40,9 +36,7 @@ export default () => {
                         onToggle={() => dispatch(toggleDigitalChannels())}
                         isToggled={digitalChannelsVisible}
                         label="Digital channels"
-                        variant="secondary"
-                        barColor={gray700}
-                        barColorToggled={nordicBlue}
+                        variant="primary"
                     />
                     <DigitalChannels />
                 </>
