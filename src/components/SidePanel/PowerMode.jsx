@@ -62,9 +62,7 @@ export default () => {
                     onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
                     isToggled={deviceRunning}
                     label="Enable power output"
-                    barColor={gray700}
-                    barColorToggled={nordicBlue}
-                    variant="secondary"
+                    variant="primary"
                 />
             )}
         </Group>
