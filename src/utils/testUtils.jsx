@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
-import { testUtils } from 'pc-nrfconnect-shared';
+import { testUtils } from 'pc-nrfconnect-shared/test';
 
 import appReducer from '../reducers';
 
