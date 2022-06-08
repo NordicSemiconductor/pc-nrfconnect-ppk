@@ -58,8 +58,6 @@ export const indexToTimestamp = (index: number): number => {
 };
 
 export const updateTitle = (info: string | undefined) => {
-    const title = remote.getCurrentWindow().getTitle().split(':')[0].trim();
-    remote
-        .getCurrentWindow()
-        .setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
+    const title = getCurrentWindow().getTitle().split(':')[0].trim();
+    getCurrentWindow().setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
 };
