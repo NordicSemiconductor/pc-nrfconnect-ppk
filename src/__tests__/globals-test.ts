@@ -20,7 +20,7 @@ import {
  * @param {number} [samplesPerSecond] what sample rate to use to synchronise the timestamp
  * @returns {void}: writes silently to the options object
  */
-const synchronise_index_and_timestamp = (
+const synchronizeIndexAndTimestamp = (
     index: number,
     samplesPerSecond = 1e5
 ): void => {
@@ -43,7 +43,7 @@ describe('timestampToIndex', () => {
     });
 
     it('should return index equal to options.index if argument is options.timestamp', () => {
-        synchronise_index_and_timestamp(1e4);
+        synchronizeIndexAndTimestamp(1e4);
         expect(timestampToIndex(options.timestamp as number)).toBe(
             options.index
         );

@@ -52,9 +52,6 @@ export interface LineDataBitState {
     uncertaintyLine: BitStateType | undefined;
 }
 
-// TODO: Consider rename
-// TODO: Document what mainLine is used for
-// TODO: DOcument what uncertaintyLine is used for
 export const lineDataForBitState: LineDataBitState[] = [
     /* 0: invalid */ {
         mainLine: undefined,

@@ -25,11 +25,6 @@ export interface DigitalChannelState {
     y: BitStateType | undefined;
 }
 
-/**
- * Represents all States for a given digital channel
- * @var {DigitalChannelState[]} mainLine: is the dominating state of the digital channel in a given time interval
- * @var {DigitalChannelState[]} uncertaintyLine: is the ...TODO:
- */
 export interface DigitalChannelStates {
     mainLine: DigitalChannelState[];
     uncertaintyLine: DigitalChannelState[];
