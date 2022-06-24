@@ -49,22 +49,17 @@ export const options: GlobalOptions = {
 
 /**
  * Get the sampling time derived from samplesPerSecond
- * @param {number} samplesPerSecond number of samples per second
+ * @param {number} samplingRate number of samples per second
  * @returns {number} samplingTime which is the time in microseconds between samples
  */
-export const getSamplingTime = (samplesPerSecond: number): number => {
+export const getSamplingTime = (samplingRate: number): number => {
     const microSecondsPerSecond = 1e6;
-    return microSecondsPerSecond / samplesPerSecond;
+    return microSecondsPerSecond / samplingRate;
 };
 
-/**
- * Set the new global samplesPerSecond and samplingTime frequency.
- * @param {number} samplesPerSecond the new samplesPerSecond
- * @returns {void} derives samplingTime from samplesPerSecond
- */
-export const setSamplingRates = (samplesPerSecond: number): void => {
-    options.samplesPerSecond = samplesPerSecond;
-    options.samplingTime = getSamplingTime(samplesPerSecond);
+export const setSamplingRate = (rate: number): void => {
+    options.samplesPerSecond = rate;
+    options.samplingTime = getSamplingTime(rate);
 };
 
 /**

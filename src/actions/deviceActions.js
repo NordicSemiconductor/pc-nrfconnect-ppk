@@ -15,7 +15,7 @@ import {
     initializeDataBuffer,
     options,
     removeBitsBuffer,
-    setSamplingRates,
+    setSamplingRate,
     updateTitle,
 } from '../globals';
 import {
@@ -73,7 +73,7 @@ export const setupOptions = () => (dispatch, getState) => {
             const realtimeWindowDuration = 300;
             const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
 
-            setSamplingRates(newSamplesPerSecond);
+            setSamplingRate(newSamplesPerSecond);
             initializeDataBuffer(realtimeWindowDuration);
             if (device.capabilities.ppkSetPowerMode) {
                 initializeBitsBuffer(realtimeWindowDuration);
@@ -82,7 +82,7 @@ export const setupOptions = () => (dispatch, getState) => {
             }
         } else {
             const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-            setSamplingRates(sampleFreq);
+            setSamplingRate(sampleFreq);
             initializeDataBuffer(durationSeconds);
             if (device.capabilities.ppkSetPowerMode) {
                 initializeBitsBuffer(durationSeconds);

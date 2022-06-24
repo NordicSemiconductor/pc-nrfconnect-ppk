@@ -10,7 +10,7 @@ import {
     initializeDataBuffer,
     options,
     removeBitsBuffer,
-    setSamplingRates,
+    setSamplingRate,
     timestampToIndex,
 } from '../globals';
 
@@ -76,9 +76,9 @@ describe('getSamplingTime', () => {
     });
 });
 
-describe('setSamplingRates', () => {
+describe('setSamplingRate', () => {
     it('to have correct values', () => {
-        setSamplingRates(1e3);
+        setSamplingRate(1e3);
 
         expect(options.samplesPerSecond).toBe(1e3);
         expect(options.samplingTime).toBe(getSamplingTime(1e3));
@@ -87,7 +87,7 @@ describe('setSamplingRates', () => {
 
 describe('initializeDataBuffer', () => {
     it('does nothing if buffer size has not changed', () => {
-        setSamplingRates(10);
+        setSamplingRate(10);
         initializeDataBuffer(10);
         const oldDataReference = options.data;
 
@@ -97,12 +97,12 @@ describe('initializeDataBuffer', () => {
         expect(oldDataReference === newDataReference).toBeTruthy();
     });
 
-    it('creates a new data buffer if buffer size has changed because of samplingRates are changed', () => {
-        setSamplingRates(10);
+    it('creates a new data buffer if buffer size has changed because of samplingRate are changed', () => {
+        setSamplingRate(10);
         initializeDataBuffer(10);
         const oldDataReference = options.data;
 
-        setSamplingRates(100);
+        setSamplingRate(100);
         initializeDataBuffer(10);
         const newDataReference = options.data;
 
@@ -110,7 +110,7 @@ describe('initializeDataBuffer', () => {
     });
 
     it('creates a new data buffer if buffer size has changed because of sampling duration is changed', () => {
-        setSamplingRates(10);
+        setSamplingRate(10);
         initializeDataBuffer(10);
         const oldDataReference = options.data;
 
@@ -123,14 +123,14 @@ describe('initializeDataBuffer', () => {
 
 describe('initializeBitsBuffer', () => {
     it('initialises the bits buffer', () => {
-        setSamplingRates(10);
+        setSamplingRate(10);
         initializeBitsBuffer(10);
 
         expect(options.bits?.length).toBe(10 * 10);
     });
 
     it('does not create a new bits buffer if the new buffer size is equal to the old', () => {
-        setSamplingRates(10);
+        setSamplingRate(10);
         initializeBitsBuffer(10);
         const oldBitsBufferReference = options.bits;
 
@@ -141,7 +141,7 @@ describe('initializeBitsBuffer', () => {
     });
 
     it('creates a new bits buffer if the new buffer size is not equal to the old', () => {
-        setSamplingRates(10);
+        setSamplingRate(10);
         initializeBitsBuffer(10);
         const oldBitsBufferReference = options.bits;
 
@@ -152,7 +152,7 @@ describe('initializeBitsBuffer', () => {
     });
 
     it('creates a new bits buffer if the bits buffer is null', () => {
-        setSamplingRates(10);
+        setSamplingRate(10);
         removeBitsBuffer();
 
         expect(options.bits).toBeNull();
@@ -165,7 +165,7 @@ describe('initializeBitsBuffer', () => {
 
 describe('removeBitsBuffer', () => {
     it('sets the bits buffer to null', () => {
-        setSamplingRates(1);
+        setSamplingRate(1);
         initializeBitsBuffer(1);
 
         expect(options.bits).not.toBeNull();
