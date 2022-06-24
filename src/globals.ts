@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+// FIXME: Will ned to remove the line under at some point.
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- Temporary included to make a conservative conversion to typescript */
+
 import { getCurrentWindow } from '@electron/remote';
 
 export const bufferLengthInSeconds = 60 * 5;
@@ -12,21 +15,27 @@ export const numberOfDigitalChannels = 8;
 const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 
+export type rate = number;
+export type microseconds = number;
+export type sampleArray = Float32Array;
+export type sampleIndex = number;
+export type sampleTimestamp = number | undefined | null;
+
 interface GlobalOptions {
     /** Time between each sample denoted in microseconds, which is equal to 1e-6 seconds \
      *  e.g. if samplesPerSecond is 100_000, then a sample is taken every 10th microsecond
      */
-    samplingTime: number;
+    samplingTime: microseconds;
     /** The number of samples per second */
-    samplesPerSecond: number;
+    samplesPerSecond: rate;
     /** @var data: contains all samples of current denoted in uA (microAmpere). */
-    data: Float32Array;
+    data: sampleArray;
     /** @var [bits]: contains the bit state for each sample, variable may be null */
     bits: Uint16Array | null;
     /** @var index: pointer to the index of the last sample in data array */
-    index: number;
+    index: sampleIndex;
     /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
-    timestamp: number | undefined | null;
+    timestamp: sampleTimestamp;
 }
 
 export const options: GlobalOptions = {
@@ -90,37 +99,22 @@ export const initializeBitsBuffer = (samplingDuration: number) => {
     options.bits.fill(0);
 };
 
-/**
- * @returns {void} Removes the bits buffer by settings its value to null in the global options object
- */
-export const removeBitsBuffer = () => {
+export const removeBitsBuffer = (): void => {
     options.bits = null;
 };
 
-/**
- * Translate timestamp to index of sample array
- * @param {number} timestamp timestamp to translate to index
- * @returns {Number} index of sample at provided timestamp
- */
-export const timestampToIndex = (timestamp: number): number => {
+export const timestampToIndex = (timestamp: sampleTimestamp): sampleIndex => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
     const microSecondsPerSecond = 1e6;
+
     return (
         options.index -
-        ((lastTimestamp - timestamp) * options.samplesPerSecond) /
+        ((lastTimestamp - timestamp!) * options.samplesPerSecond) /
             microSecondsPerSecond
     );
 };
 
-/**
- * Translate index of sample array to timestamp
- * @param {Number} index index to translate to timestamp
- * @returns {TimestampType} timestamp of sample at provided index
- * ## Conversion Details
- * lastTimestamp should be the timestamp at the time of options.index \
- * To get the timestamp at some index subtract the difference in time between globals.index and index from the lastTimestamp.
- */
-export const indexToTimestamp = (index: number): number => {
+export const indexToTimestamp = (index: sampleIndex): sampleTimestamp => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
     const microSecondsPerSecond = 1e6;
     return (
