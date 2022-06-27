@@ -35,13 +35,7 @@ import zoomPanPlugin from './plugins/chart.zoomPan';
 
 import chartCss from './chart.icss.scss';
 
-ChartJS.register(
-    LineElement,
-    PointElement,
-    LinearScale,
-    Title
-    // crossHairPlugin
-);
+ChartJS.register(LineElement, PointElement, LinearScale, Title);
 
 const { rightMarginPx, yAxisWidthPx } = chartCss;
 
@@ -214,10 +208,10 @@ const AmpereChart = ({
     };
 
     const plugins = [
-        // dragSelectPlugin,
-        // zoomPanPlugin,
-        // triggerLevelPlugin,
-        // triggerOriginPlugin,
+        dragSelectPlugin,
+        zoomPanPlugin,
+        triggerLevelPlugin,
+        triggerOriginPlugin,
         crossHairPlugin,
         {
             id: 'notifier',
@@ -238,7 +232,7 @@ const AmpereChart = ({
                 ref={chartRef}
                 data={chartData}
                 options={chartOptions}
-                // plugins={plugins}
+                plugins={plugins}
             />
         </div>
     );

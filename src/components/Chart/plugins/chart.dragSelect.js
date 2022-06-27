@@ -16,7 +16,7 @@ export default {
         const dragSelect = {};
         chartInstance.dragSelect = dragSelect;
 
-        const { canvas } = chartInstance.chart.ctx;
+        const { canvas } = chartInstance.$context.chart.ctx;
 
         dragSelect.pointerDownHandler = event => {
             if (event.button === 0 && event.shiftKey) {
@@ -62,11 +62,12 @@ export default {
     beforeDraw(chartInstance) {
         const {
             chartArea: { left, right, top, bottom: areaBottom },
-            chart: { ctx },
-            scales: { xScale: scale },
+            // chart: { ctx },
+            scales: { xAxes: scale },
             dragSelect: { dragStart, dragEnd },
             canvas: { height: bottom },
         } = chartInstance;
+        const { ctx } = chartInstance.$context.chart;
         const { cursor } = scale.options;
 
         if (typeof cursor.cursorBegin !== 'number' && !(dragStart && dragEnd)) {

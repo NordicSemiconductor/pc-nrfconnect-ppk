@@ -137,7 +137,7 @@ export default {
         const zoomPan = {};
         chartInstance.zoomPan = zoomPan;
 
-        const { canvas } = chartInstance.chart.ctx;
+        const { canvas } = chartInstance.$context.chart.ctx;
 
         zoomPan.wheelHandler = event => {
             wheelEventToProcess = {

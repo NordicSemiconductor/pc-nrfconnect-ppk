@@ -16,15 +16,18 @@ const plugin = {
     afterDraw(chartInstance) {
         const {
             chartArea: { top, bottom },
-            scales: { xScale },
-            chart: { ctx },
+            scales: { xAxes },
+            $context: {
+                chart: { ctx },
+            },
             options: { triggerOrigin },
         } = chartInstance;
+        // const { ctx }
         if (!triggerOrigin) return;
         const x = Math.ceil(
-            xScale.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
+            xAxes.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
         );
-        if (x < xScale.left || x > xScale.right) return;
+        if (x < xAxes.left || x > xAxes.right) return;
 
         ctx.save();
 
