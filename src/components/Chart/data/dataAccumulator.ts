@@ -13,7 +13,6 @@ import {
 } from '../../../globals';
 import bitDataAccumulator from './bitDataAccumulator';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
-import { DigitalChannelsType } from './dataTypes';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
 export default () => ({
@@ -25,7 +24,7 @@ export default () => ({
     process(
         begin: number,
         end: number,
-        digitalChannelsToCompute: DigitalChannelsType,
+        digitalChannelsToCompute: number[],
         len: number,
         windowDuration: number
     ) {

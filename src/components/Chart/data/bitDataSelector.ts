@@ -9,13 +9,13 @@
 import { numberOfDigitalChannels, options } from '../../../globals';
 import { averagedBitState } from '../../../utils/bitConversion';
 import bitDataStorage from './bitDataStorage';
-import { DigitalChannelsType, TimestampType } from './dataTypes';
+import { TimestampType } from './dataTypes';
 
 export default () => ({
     bitDataStorage: bitDataStorage(),
     digitalChannelsToCompute: new Array(numberOfDigitalChannels),
 
-    initialise(digitalChannelsToCompute: DigitalChannelsType) {
+    initialise(digitalChannelsToCompute: number[]) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },

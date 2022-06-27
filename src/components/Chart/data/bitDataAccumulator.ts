@@ -5,6 +5,7 @@
  */
 
 /* eslint no-plusplus: off */
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- added temporarily to be conservative while converting to typescript */
 
 import { numberOfDigitalChannels, options } from '../../../globals';
 import {
@@ -14,24 +15,24 @@ import {
     sometimes0And1,
 } from '../../../utils/bitConversion';
 import bitDataStorage from './bitDataStorage';
-import { DigitalChannelsType, TimestampType } from './dataTypes';
+import { TimestampType } from './dataTypes';
 
 export default () => ({
     bitDataStorage: bitDataStorage(),
     accumulator: new Array(numberOfDigitalChannels),
-    digitalChannelsToCompute: new Array(numberOfDigitalChannels),
+    digitalChannelsToCompute: undefined as number[] | undefined,
 
-    initialise(digitalChannelsToCompute: DigitalChannelsType) {
+    initialise(digitalChannelsToCompute: number[]) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
         this.accumulator.fill(null);
     },
 
     processBits(bitIndex: number) {
-        const bits = options.bits ? options.bits[bitIndex] : null;
+        const bits = options.bits![bitIndex];
 
         if (bits) {
-            this.digitalChannelsToCompute.forEach(i => {
+            this.digitalChannelsToCompute!.forEach(i => {
                 const bitState = averagedBitState(bits, i);
 
                 if (this.accumulator[i] === null) {
@@ -47,7 +48,7 @@ export default () => ({
     },
 
     processAccumulatedBits(timestamp: TimestampType) {
-        this.digitalChannelsToCompute.forEach(i => {
+        this.digitalChannelsToCompute!.forEach(i => {
             this.bitDataStorage.storeBit(timestamp, i, this.accumulator[i]);
         });
 
