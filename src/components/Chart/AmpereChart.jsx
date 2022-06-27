@@ -7,6 +7,13 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+    Chart as ChartJS,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+} from 'chart.js';
 import { unit } from 'mathjs';
 import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, func, number, shape } from 'prop-types';
@@ -27,6 +34,14 @@ import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 
 import chartCss from './chart.icss.scss';
+
+ChartJS.register(
+    LineElement,
+    PointElement,
+    LinearScale,
+    Title
+    // crossHairPlugin
+);
 
 const { rightMarginPx, yAxisWidthPx } = chartCss;
 
@@ -139,49 +154,45 @@ const AmpereChart = ({
 
     const chartOptions = {
         scales: {
-            xAxes: [
-                {
-                    id: 'xScale',
-                    type: 'linear',
-                    display: true,
-                    ticks: {
-                        display: timestampsVisible,
-                        minRotation: 0,
-                        maxRotation: 0,
-                        autoSkipPadding: 25,
-                        min: begin,
-                        max: end,
-                        callback: timestampToLabel,
-                        maxTicksLimit: 7,
-                    },
-                    gridLines: {
-                        drawBorder: true,
-                        drawOnChartArea: true,
-                    },
-                    cursor: { cursorBegin, cursorEnd },
+            xAxes: {
+                scaleId: 'xScale',
+                type: 'linear',
+                display: true,
+                ticks: {
+                    display: timestampsVisible,
+                    minRotation: 0,
+                    maxRotation: 0,
+                    autoSkipPadding: 25,
+                    min: begin,
+                    max: end,
+                    callback: timestampToLabel,
+                    maxTicksLimit: 7,
+                },
+                grid: {
+                    drawBorder: true,
+                    drawOnChartArea: true,
+                },
+                cursor: { cursorBegin, cursorEnd },
                 afterFit: scale => { scale.paddingRight = rightMargin; }, // eslint-disable-line
+            },
+            yAxes: {
+                scaleId: 'yScale',
+                type: 'linear',
+                ticks: {
+                    minRotation: 0,
+                    maxRotation: 0,
+                    min: yMin === null ? valueRange.min : yMin,
+                    max: yMax === null ? valueRange.max : yMax,
+                    maxTicksLimit: 7,
+                    padding: 0,
+                    callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
                 },
-            ],
-            yAxes: [
-                {
-                    id: 'yScale',
-                    type: 'linear',
-                    ticks: {
-                        minRotation: 0,
-                        maxRotation: 0,
-                        min: yMin === null ? valueRange.min : yMin,
-                        max: yMax === null ? valueRange.max : yMax,
-                        maxTicksLimit: 7,
-                        padding: 0,
-                        callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
-                    },
-                    gridLines: {
-                        drawBorder: true,
-                        drawOnChartArea: true,
-                    },
+                grid: {
+                    drawBorder: true,
+                    drawOnChartArea: true,
+                },
                     afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
-                },
-            ],
+            },
         },
         maintainAspectRatio: false,
         animation: { duration: 0 },
@@ -203,10 +214,10 @@ const AmpereChart = ({
     };
 
     const plugins = [
-        dragSelectPlugin,
-        zoomPanPlugin,
-        triggerLevelPlugin,
-        triggerOriginPlugin,
+        // dragSelectPlugin,
+        // zoomPanPlugin,
+        // triggerLevelPlugin,
+        // triggerOriginPlugin,
         crossHairPlugin,
         {
             id: 'notifier',
@@ -227,7 +238,7 @@ const AmpereChart = ({
                 ref={chartRef}
                 data={chartData}
                 options={chartOptions}
-                plugins={plugins}
+                // plugins={plugins}
             />
         </div>
     );

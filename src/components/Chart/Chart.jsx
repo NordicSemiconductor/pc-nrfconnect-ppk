@@ -21,7 +21,7 @@ import { bool } from 'prop-types';
 
 import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
-import {
+import chartReducer, {
     chartCursorAction,
     chartState,
     chartWindowAction,
@@ -249,7 +249,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     );
 
     useEffect(() => {
-        if (!chartRef.current.chartInstance) {
+        if (!chartReducer.current || !chartRef.current.chartInstance) {
             return;
         }
         const { dragSelect, zoomPan } = chartRef.current.chartInstance;
@@ -355,14 +355,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     />
                 </div>
             </div>
-            {hasDigitalChannels && showDigitalChannels && (
+            {/* {hasDigitalChannels && showDigitalChannels && (
                 <DigitalChannels
                     lineData={bitsLineData}
                     digitalChannels={digitalChannels}
                     zoomedOutTooFar={zoomedOutTooFarForDigitalChannels}
                     cursorData={cursorData}
                 />
-            )}
+            )} */}
         </div>
     );
 };
