@@ -5,28 +5,41 @@
  */
 
 /* eslint no-plusplus: off */
+/* eslint-disable @typescript-eslint/no-non-null-assertion  -- temporarily added to be conservative while converting to typescript */
 
-import { nbDigitalChannels } from '../../../globals';
+import { numberOfDigitalChannels, sampleTimestamp } from '../../../globals';
 import { lineDataForBitState } from '../../../utils/bitConversion';
-
-const emptyArray = () =>
-    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
+import { createEmptyArrayWithDigitalChannelStates } from './commonBitDataFunctions';
+import {
+    BitStateIndexType,
+    DigitalChannelStates,
+    TimestampType,
+} from './dataTypes';
 
 export default () => ({
-    lineData: [...Array(nbDigitalChannels)].map(() => ({
-        mainLine: emptyArray(),
-        uncertaintyLine: emptyArray(),
-    })),
-    bitIndexes: new Array(nbDigitalChannels),
-    previousBitStates: new Array(nbDigitalChannels),
+    lineData: [...Array(numberOfDigitalChannels)].map(
+        () =>
+            ({
+                mainLine: createEmptyArrayWithDigitalChannelStates(),
+                uncertaintyLine: createEmptyArrayWithDigitalChannelStates(),
+            } as DigitalChannelStates)
+    ),
+    bitIndexes: new Array(numberOfDigitalChannels),
+    previousBitStates: new Array(numberOfDigitalChannels),
+    digitalChannelsToCompute: undefined as number[] | undefined,
+    latestTimestamp: undefined as sampleTimestamp,
 
-    initialise(digitalChannelsToCompute) {
+    initialise(digitalChannelsToCompute: number[]) {
         this.bitIndexes.fill(0);
         this.previousBitStates.fill(null);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
-    storeEntry(timestamp, bitNumber, bitState) {
+    storeEntry(
+        timestamp: TimestampType,
+        bitNumber: number,
+        bitState: BitStateIndexType
+    ) {
         const current = this.lineData[bitNumber];
         const bitIndex = this.bitIndexes[bitNumber];
         const lineData = lineDataForBitState[bitState];
@@ -40,7 +53,11 @@ export default () => ({
         ++this.bitIndexes[bitNumber];
     },
 
-    storeBit(timestamp, bitNumber, bitState) {
+    storeBit(
+        timestamp: TimestampType,
+        bitNumber: number,
+        bitState: BitStateIndexType
+    ) {
         this.latestTimestamp = timestamp;
 
         const bitChanged = this.previousBitStates[bitNumber] !== bitState;
@@ -52,15 +69,15 @@ export default () => ({
     },
 
     addFinalEntries() {
-        this.digitalChannelsToCompute.forEach(i => {
+        this.digitalChannelsToCompute!.forEach(i => {
             const hasEntry = this.bitIndexes[i] > 0;
             const lastEntryIsNotForLastTimestamp =
                 this.latestTimestamp !==
-                this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.timestamp;
+                this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.x;
 
             if (hasEntry && lastEntryIsNotForLastTimestamp) {
                 this.storeEntry(
-                    this.latestTimestamp,
+                    this.latestTimestamp!,
                     i,
                     this.previousBitStates[i]
                 );

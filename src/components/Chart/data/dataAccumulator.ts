@@ -6,20 +6,28 @@
 
 /* eslint no-plusplus: off */
 
-import { nbDigitalChannels, options, timestampToIndex } from '../../../globals';
+import {
+    numberOfDigitalChannels,
+    options,
+    timestampToIndex,
+} from '../../../globals';
 import bitDataAccumulator from './bitDataAccumulator';
+import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
-const emptyArray = () =>
-    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
-
 export default () => ({
-    ampereLineData: emptyArray(),
+    ampereLineData: createEmptyArrayWithAmpereState(),
     bitDataAccumulator: bitDataAccumulator(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
-    bitStateAccumulator: new Array(nbDigitalChannels),
+    bitStateAccumulator: new Array(numberOfDigitalChannels),
 
-    process(begin, end, digitalChannelsToCompute, len, windowDuration) {
+    process(
+        begin: number,
+        end: number,
+        digitalChannelsToCompute: number[],
+        len: number,
+        windowDuration: number
+    ) {
         const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
@@ -44,8 +52,8 @@ export default () => ({
                 begin + windowDuration * (mappedIndex / (len + len));
             const k = Math.floor(originalIndex);
             const l = Math.floor(originalIndex + step);
-            let min = Number.MAX_VALUE;
-            let max = -Number.MAX_VALUE;
+            let min: number | undefined = Number.MAX_VALUE;
+            let max: number | undefined = -Number.MAX_VALUE;
 
             for (let n = k; n < l; ++n) {
                 const ni = (n + data.length) % data.length;

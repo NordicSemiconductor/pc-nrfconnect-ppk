@@ -8,17 +8,15 @@
 
 import { options, timestampToIndex } from '../../../globals';
 import bitDataSelector from './bitDataSelector';
+import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
-const emptyArray = () =>
-    [...Array(4000)].map(() => ({ x: undefined, y: undefined }));
-
 export default () => ({
-    ampereLineData: emptyArray(),
+    ampereLineData: createEmptyArrayWithAmpereState(),
     bitDataSelector: bitDataSelector(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
 
-    process(begin, end, digitalChannelsToCompute) {
+    process(begin: number, end: number, digitalChannelsToCompute: number[]) {
         const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0

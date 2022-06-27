@@ -9,7 +9,15 @@
 import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
-import { indexToTimestamp, options, updateTitle } from '../globals';
+import {
+    indexToTimestamp,
+    initializeBitsBuffer,
+    initializeDataBuffer,
+    options,
+    removeBitsBuffer,
+    setSamplingRate,
+    updateTitle,
+} from '../globals';
 import {
     deviceClosedAction,
     deviceOpenedAction,
@@ -59,31 +67,29 @@ const zeroCap = isDevelopment ? n => n : n => Math.max(0, n);
 
 export const setupOptions = () => (dispatch, getState) => {
     if (!device) return;
-    let d = 300; // buffer length in seconds for real-time
-    if (isRealTimePane(getState())) {
-        // in real-time
-        options.samplingTime = device.adcSamplingTimeUs;
-        options.samplesPerSecond = 1e6 / device.adcSamplingTimeUs;
-    } else {
-        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-        d = durationSeconds;
-        options.samplingTime = 1e6 / sampleFreq;
-        options.samplesPerSecond = sampleFreq;
-    }
-    const bufferLength = Math.trunc(d * options.samplesPerSecond);
     try {
-        if (device.capabilities.ppkSetPowerMode) {
-            if (!options.bits || options.bits.length !== bufferLength) {
-                options.bits = new Uint16Array(bufferLength);
+        if (isRealTimePane(getState())) {
+            // in real-time
+            const realtimeWindowDuration = 300;
+            const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
+
+            setSamplingRate(newSamplesPerSecond);
+            initializeDataBuffer(realtimeWindowDuration);
+            if (device.capabilities.ppkSetPowerMode) {
+                initializeBitsBuffer(realtimeWindowDuration);
+            } else {
+                removeBitsBuffer();
             }
-            options.bits.fill(0);
         } else {
-            options.bits = null;
+            const { durationSeconds, sampleFreq } = getState().app.dataLogger;
+            setSamplingRate(sampleFreq);
+            initializeDataBuffer(durationSeconds);
+            if (device.capabilities.ppkSetPowerMode) {
+                initializeBitsBuffer(durationSeconds);
+            } else {
+                removeBitsBuffer();
+            }
         }
-        if (options.data.length !== bufferLength) {
-            options.data = new Float32Array(bufferLength);
-        }
-        options.data.fill(NaN);
         options.index = 0;
         options.timestamp = 0;
     } catch (err) {
