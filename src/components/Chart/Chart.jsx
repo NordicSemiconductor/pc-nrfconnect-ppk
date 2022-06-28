@@ -355,14 +355,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     />
                 </div>
             </div>
-            {/* {hasDigitalChannels && showDigitalChannels && (
+            {hasDigitalChannels && showDigitalChannels && (
                 <DigitalChannels
                     lineData={bitsLineData}
                     digitalChannels={digitalChannels}
                     zoomedOutTooFar={zoomedOutTooFarForDigitalChannels}
                     cursorData={cursorData}
                 />
-            )} */}
+            )}
         </div>
     );
 };
