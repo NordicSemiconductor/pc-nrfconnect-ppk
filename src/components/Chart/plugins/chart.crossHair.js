@@ -56,7 +56,7 @@ const plugin = {
     afterDraw(chartInstance) {
         const {
             chartArea: { left, right, top, bottom },
-            scales: { xAxes, yScale },
+            scales: { xScale, yScale },
             config: {
                 options: { formatX, formatY },
             },
@@ -85,7 +85,7 @@ const plugin = {
 
             if (chartInstance.height > 32) {
                 const [time, subsecond] = formatX(
-                    xAxes.getValueForPixel(left + layerX),
+                    xScale.getValueForPixel(left + layerX),
                     0,
                     []
                 );

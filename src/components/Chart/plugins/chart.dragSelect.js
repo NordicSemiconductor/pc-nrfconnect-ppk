@@ -63,7 +63,7 @@ export default {
         const {
             chartArea: { left, right, top, bottom: areaBottom },
             // chart: { ctx },
-            scales: { xAxes: scale },
+            scales: { xScale: scale }, // TODO: Remove unused?
             dragSelect: { dragStart, dragEnd },
             canvas: { height: bottom },
         } = chartInstance;

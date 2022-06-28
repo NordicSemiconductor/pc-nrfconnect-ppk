@@ -16,7 +16,7 @@ const plugin = {
     afterDraw(chartInstance) {
         const {
             chartArea: { top, bottom },
-            scales: { xAxes },
+            scales: { xScale },
             $context: {
                 chart: { ctx },
             },
@@ -25,9 +25,9 @@ const plugin = {
         // const { ctx }
         if (!triggerOrigin) return;
         const x = Math.ceil(
-            xAxes.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
+            xScale.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
         );
-        if (x < xAxes.left || x > xAxes.right) return;
+        if (x < xScale.left || x > xScale.right) return;
 
         ctx.save();
 

@@ -148,8 +148,7 @@ const AmpereChart = ({
 
     const chartOptions = {
         scales: {
-            xAxes: {
-                scaleId: 'xScale',
+            xScale: {
                 type: 'linear',
                 display: true,
                 ticks: {
@@ -169,8 +168,7 @@ const AmpereChart = ({
                 cursor: { cursorBegin, cursorEnd },
                 afterFit: scale => { scale.paddingRight = rightMargin; }, // eslint-disable-line
             },
-            yAxes: {
-                scaleId: 'yScale',
+            yScale: {
                 type: 'linear',
                 ticks: {
                     minRotation: 0,
