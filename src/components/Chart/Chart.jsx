@@ -249,10 +249,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     );
 
     useEffect(() => {
-        if (!chartReducer.current || !chartRef.current.chartInstance) {
+        if (!chartRef.current) {
             return;
         }
-        const { dragSelect, zoomPan } = chartRef.current.chartInstance;
+        const { dragSelect, zoomPan } = chartRef.current;
         dragSelect.callback = chartCursor;
         zoomPan.callback = zoomPanCallback;
     }, [chartCursor, zoomPanCallback]);
