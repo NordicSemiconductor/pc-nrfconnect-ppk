@@ -7,13 +7,6 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    Chart as ChartJS,
-    LinearScale,
-    LineElement,
-    PointElement,
-    Title,
-} from 'chart.js';
 import { unit } from 'mathjs';
 import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, func, number, shape } from 'prop-types';
@@ -34,8 +27,6 @@ import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin from './plugins/chart.zoomPan';
 
 import chartCss from './chart.icss.scss';
-
-ChartJS.register(LineElement, PointElement, LinearScale, Title);
 
 const { rightMarginPx, yAxisWidthPx } = chartCss;
 

@@ -62,8 +62,7 @@ export default {
     beforeDraw(chartInstance) {
         const {
             chartArea: { left, right, top, bottom: areaBottom },
-            // chart: { ctx },
-            scales: { xScale: scale }, // TODO: Remove unused?
+            scales: { xScale: scale },
             dragSelect: { dragStart, dragEnd },
             canvas: { height: bottom },
         } = chartInstance;

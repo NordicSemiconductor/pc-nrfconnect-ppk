@@ -6,21 +6,12 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    LinearScale,
-    LineElement,
-    PointElement,
-    Title,
-} from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, bool, exact, number, shape } from 'prop-types';
 
 import crossHairPlugin from './plugins/chart.crossHair';
 
 import chartCss from './chart.icss.scss';
-
-ChartJS.register(LineElement, PointElement, LinearScale, Title);
 
 const { rightMarginPx } = chartCss;
 
