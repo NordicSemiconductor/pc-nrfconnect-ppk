@@ -16,6 +16,13 @@ import React, {
 } from 'react';
 import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+    Chart as ChartJS,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+} from 'chart.js';
 import { useHotKey } from 'pc-nrfconnect-shared';
 import { bool } from 'prop-types';
 
@@ -38,6 +45,10 @@ import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
 
 import chartCss from './chart.icss.scss';
+
+// chart.js way of doing tree-shaking, meaning that components that will be included in the bundle
+// must be imported and registered. The registered components are used in both AmpereChart and DigitalChannels.
+ChartJS.register(LineElement, PointElement, LinearScale, Title);
 
 const { rightMarginPx } = chartCss;
 
@@ -249,10 +260,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     );
 
     useEffect(() => {
-        if (!chartRef.current.chartInstance) {
+        if (!chartRef.current) {
             return;
         }
-        const { dragSelect, zoomPan } = chartRef.current.chartInstance;
+        const { dragSelect, zoomPan } = chartRef.current;
         dragSelect.callback = chartCursor;
         zoomPan.callback = zoomPanCallback;
     }, [chartCursor, zoomPanCallback]);

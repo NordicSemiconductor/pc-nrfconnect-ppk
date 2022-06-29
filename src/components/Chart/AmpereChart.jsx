@@ -139,56 +139,45 @@ const AmpereChart = ({
 
     const chartOptions = {
         scales: {
-            xAxes: [
-                {
-                    id: 'xScale',
-                    type: 'linear',
-                    display: true,
-                    ticks: {
-                        display: timestampsVisible,
-                        minRotation: 0,
-                        maxRotation: 0,
-                        autoSkipPadding: 25,
-                        min: begin,
-                        max: end,
-                        callback: timestampToLabel,
-                        maxTicksLimit: 7,
-                    },
-                    gridLines: {
-                        drawBorder: true,
-                        drawOnChartArea: true,
-                    },
-                    cursor: { cursorBegin, cursorEnd },
+            xScale: {
+                type: 'linear',
+                display: true,
+                min: begin,
+                max: end,
+                ticks: {
+                    display: timestampsVisible,
+                    autoSkipPadding: 25,
+                    callback: timestampToLabel,
+                    maxTicksLimit: 7,
+                },
+                grid: {
+                    drawBorder: true,
+                    drawOnChartArea: true,
+                },
+                cursor: { cursorBegin, cursorEnd },
                 afterFit: scale => { scale.paddingRight = rightMargin; }, // eslint-disable-line
+            },
+            yScale: {
+                type: 'linear',
+                min: yMin === null ? valueRange.min : yMin,
+                max: yMax === null ? valueRange.max : yMax,
+                ticks: {
+                    maxTicksLimit: 7,
+                    callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
                 },
-            ],
-            yAxes: [
-                {
-                    id: 'yScale',
-                    type: 'linear',
-                    ticks: {
-                        minRotation: 0,
-                        maxRotation: 0,
-                        min: yMin === null ? valueRange.min : yMin,
-                        max: yMax === null ? valueRange.max : yMax,
-                        maxTicksLimit: 7,
-                        padding: 0,
-                        callback: uA => (uA < 0 ? '' : formatCurrent(uA)),
-                    },
-                    gridLines: {
-                        drawBorder: true,
-                        drawOnChartArea: true,
-                    },
-                    afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
+                grid: {
+                    drawBorder: true,
+                    drawOnChartArea: true,
                 },
-            ],
+                afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
+            },
         },
         maintainAspectRatio: false,
-        animation: { duration: 0 },
-        hover: { animationDuration: 0 },
-        responsiveAnimationDuration: 0,
-        tooltips: { enabled: false },
-        legend: { display: false },
+        animation: {
+            duration: 0,
+            resize: { duration: 0 },
+            active: { duration: 0 },
+        },
         formatX: timestampToLabel,
         formatY: formatCurrent,
         triggerLevel,

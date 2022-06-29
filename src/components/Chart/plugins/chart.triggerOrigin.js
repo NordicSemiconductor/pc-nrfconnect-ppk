@@ -17,9 +17,12 @@ const plugin = {
         const {
             chartArea: { top, bottom },
             scales: { xScale },
-            chart: { ctx },
+            $context: {
+                chart: { ctx },
+            },
             options: { triggerOrigin },
         } = chartInstance;
+        // const { ctx }
         if (!triggerOrigin) return;
         const x = Math.ceil(
             xScale.getPixelForValue(indexToTimestamp(triggerOrigin - 1))

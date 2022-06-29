@@ -43,7 +43,7 @@ const plugin = {
 
     beforeInit(chartInstance) {
         plugin.instances.push(chartInstance);
-        const { canvas } = chartInstance.chart.ctx;
+        const { canvas } = chartInstance.$context.chart.ctx;
         canvas.addEventListener('pointermove', evt =>
             plugin.pointerMoveHandler(evt, chartInstance)
         );
@@ -56,10 +56,12 @@ const plugin = {
     afterDraw(chartInstance) {
         const {
             chartArea: { left, right, top, bottom },
-            chart: { ctx },
             scales: { xScale, yScale },
-            options: { formatX, formatY },
+            config: {
+                options: { formatX, formatY },
+            },
         } = chartInstance;
+        const { ctx } = chartInstance.$context.chart;
         const { canvas } = ctx;
 
         if (!plugin.moveEvent) {

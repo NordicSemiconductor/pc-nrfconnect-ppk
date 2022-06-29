@@ -85,7 +85,7 @@ const plugin = {
 
     beforeInit(chartInstance) {
         chartInstance.triggerLine = { y: null };
-        const { canvas } = chartInstance.chart.ctx;
+        const { canvas } = chartInstance.$context.chart.ctx;
         canvas.addEventListener('pointerdown', evt =>
             plugin.pointerDownHandler(evt, chartInstance)
         );
@@ -103,8 +103,9 @@ const plugin = {
     afterDraw(chartInstance) {
         const {
             chartArea: { left, right, top, bottom },
-            chart: { ctx },
+            // chart: { ctx },
         } = chartInstance;
+        const { ctx } = chartInstance.$context.chart;
 
         const coords = this.getCoords(chartInstance);
 

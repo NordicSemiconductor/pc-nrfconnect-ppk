@@ -26,39 +26,31 @@ const DigitalChannels = ({
 }) => {
     const bitsChartOptions = {
         scales: {
-            xAxes: [
-                {
-                    id: 'xScale',
-                    display: false,
-                    type: 'linear',
-                    ticks: {
-                        min: begin,
-                        max: end,
-                    },
-                    tickMarkLength: 0,
-                    drawTicks: false,
-                    cursor: {
-                        cursorBegin,
-                        cursorEnd,
-                    },
+            xScale: {
+                display: false,
+                type: 'linear',
+                min: begin,
+                max: end,
+                tickMarkLength: 0,
+                drawTicks: false,
+                cursor: {
+                    cursorBegin,
+                    cursorEnd,
                 },
-            ],
-            yAxes: [
-                {
-                    type: 'linear',
-                    display: false,
-                    ticks: {
-                        min: -0.5,
-                        max: 0.5,
-                    },
-                },
-            ],
+            },
+            yScale: {
+                type: 'linear',
+                display: false,
+                min: -0.5,
+                max: 0.5,
+            },
         },
         maintainAspectRatio: false,
-        animation: { duration: 0 },
-        hover: { animationDuration: 0 },
-        responsiveAnimationDuration: 0,
-        legend: { display: false },
+        animation: {
+            duration: 0,
+            active: { duration: 0 },
+            resize: { duration: 0 },
+        },
     };
 
     const commonLineData = {
