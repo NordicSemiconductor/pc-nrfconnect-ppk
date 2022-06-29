@@ -3,13 +3,24 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
+/* eslint-disable @typescript-eslint/no-explicit-any -- conservative refactoring, TODO: remove this line */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 
-const toString = (value, unit, value2 = null, unit2 = null) =>
+const toString = (
+    value: any,
+    unit: any,
+    value2: any = null,
+    unit2: any = null
+): string =>
     value2 === null ? `${value}${unit}` : `${value}${unit} ${value2}${unit2}`;
 
-const toHTML = (value, unit, value2 = null, unit2 = null) => (
+const toHTML = (
+    value: any,
+    unit: any,
+    value2: any = null,
+    unit2: any = null
+): ReactElement<any, any> => (
     <div className="value">
         {value}
         <span className="unit">{unit}</span>
@@ -23,7 +34,10 @@ const toHTML = (value, unit, value2 = null, unit2 = null) => (
     </div>
 );
 
-const format = (microseconds, formatter) => {
+const format = (
+    microseconds: number,
+    formatter: any
+): ReactElement<any, any> | string | null => {
     if (Number.isNaN(microseconds)) return null;
     const usec = Math.floor(microseconds);
     const u = `${usec % 1000}`;
@@ -62,5 +76,7 @@ const format = (microseconds, formatter) => {
     return formatter(d, 'd', `${h}:${m.padStart(2, '0')}`, 'h');
 };
 
-export const formatDuration = microseconds => format(microseconds, toString);
-export const formatDurationHTML = microseconds => format(microseconds, toHTML);
+export const formatDuration = (microseconds: number) =>
+    format(microseconds, toString);
+export const formatDurationHTML = (microseconds: number) =>
+    format(microseconds, toHTML);
