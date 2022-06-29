@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { NrfConnectState } from 'pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
 import app from './appReducer';
@@ -16,7 +17,11 @@ import switchingPoints from './switchingPointsReducer';
 import trigger from './triggerReducer';
 import voltageRegulator from './voltageRegulatorReducer';
 
-export default combineReducers({
+type AppState = ReturnType<typeof appReducer>;
+
+export type RootState = NrfConnectState<AppState>;
+
+const appReducer = combineReducers({
     app,
     chart,
     trigger,
@@ -27,3 +32,5 @@ export default combineReducers({
     spikeFilter,
     dataLogger,
 });
+
+export default appReducer;

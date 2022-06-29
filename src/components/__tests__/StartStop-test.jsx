@@ -32,13 +32,19 @@ const dataLoggerStatePPK2 = {
 
 const initialStatePPK1Actions = [
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
+    deviceOpenedAction({
+        portName: 'testPort',
+        capabilities: { ppkTriggerExtToggle: false },
+    }),
     setDataLoggerState(dataLoggerStatePPK1),
 ];
 
 const initialStatePPK2Actions = [
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
+    deviceOpenedAction({
+        portName: 'testPort',
+        capabilities: { ppkTriggerExtToggle: false },
+    }),
     setDataLoggerState(dataLoggerStatePPK2),
 ];
 

@@ -304,7 +304,9 @@ export function open(deviceInfo) {
                 )
             );
             dispatch(setupOptions());
-            dispatch(setDeviceRunningAction(device.isRunningInitially));
+            dispatch(
+                setDeviceRunningAction({ isRunning: device.isRunningInitially })
+            );
             const metadata = device.parseMeta(await device.start());
             const { triggerLength, triggerLevel, triggerWindowRange } =
                 getState().app.trigger;
@@ -331,12 +333,12 @@ export function open(deviceInfo) {
                 const isSmuMode = metadata.mode === 2;
                 // 1 = Ampere
                 // 2 = SMU
-                dispatch(setPowerModeAction(isSmuMode));
+                dispatch(setPowerModeAction({ isSmuMode }));
                 if (!isSmuMode) dispatch(setDeviceRunning(true));
             }
 
             dispatch(rttStartAction());
-            dispatch(setFileLoadedAction(false));
+            dispatch(setFileLoadedAction({ loaded: false }));
 
             if (isRealTimePane(getState())) {
                 initializeChartForRealTime();
@@ -350,7 +352,10 @@ export function open(deviceInfo) {
         }
 
         dispatch(
-            deviceOpenedAction(deviceInfo.serialNumber, device.capabilities)
+            deviceOpenedAction({
+                portName: deviceInfo.serialNumber,
+                capabilities: device.capabilities,
+            })
         );
 
         logger.info('PPK opened');
@@ -452,7 +457,7 @@ export function setDeviceRunning(isRunning) {
     return async dispatch => {
         await device.ppkDeviceRunning(isRunning ? 1 : 0);
         logger.info(`DUT ${isRunning ? 'ON' : 'OFF'}`);
-        dispatch(setDeviceRunningAction(isRunning));
+        dispatch(setDeviceRunningAction({ isRunning }));
     };
 }
 
@@ -462,10 +467,10 @@ export function setPowerMode(isSmuMode) {
         if (isSmuMode) {
             await dispatch(setDeviceRunning(false));
             await device.ppkSetPowerMode(true); // set to source mode
-            dispatch(setPowerModeAction(true));
+            dispatch(setPowerModeAction({ isSmuMode: true }));
         } else {
             await device.ppkSetPowerMode(false); // set to ampere mode
-            dispatch(setPowerModeAction(false));
+            dispatch(setPowerModeAction({ isSmuMode: false }));
             await dispatch(setDeviceRunning(true));
         }
     };

@@ -20,7 +20,10 @@ const TRIGGER_LENGTH = 10;
 const initialStateActions = [
     // Set app State (app.app):
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
+    deviceOpenedAction({
+        portName: 'testPort',
+        capabilities: { ppkTriggerExtToggle: false },
+    }),
     // Set trigger State (app.trigger):
     triggerWindowRangeAction({ min: 1, max: 100 }),
     triggerLengthSetAction(TRIGGER_LENGTH),

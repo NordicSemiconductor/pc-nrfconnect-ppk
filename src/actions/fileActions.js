@@ -88,7 +88,7 @@ export const load = setLoading => async dispatch => {
     options.bits = bits;
 
     dispatch(setChartState(chartState));
-    dispatch(setFileLoadedAction(true));
+    dispatch(setFileLoadedAction({ loaded: true }));
     if (dataLoggerState !== null) {
         dispatch(setDataLoggerState(dataLoggerState));
     }
