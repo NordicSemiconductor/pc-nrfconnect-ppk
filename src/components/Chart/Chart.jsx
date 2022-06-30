@@ -120,7 +120,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     );
     const chartCursor = useCallback(
         (cursorBegin, cursorEnd) =>
-            dispatch(chartCursorAction(cursorBegin, cursorEnd)),
+            dispatch(chartCursorAction({ cursorBegin, cursorEnd })),
         [dispatch]
     );
     // Shortcut to select all samples

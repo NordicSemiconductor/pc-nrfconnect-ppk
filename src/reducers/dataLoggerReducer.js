@@ -178,3 +178,6 @@ export default (state = initialState, { type, ...action }) => {
 
 export const dataLoggerState = ({ app }) => app.dataLogger;
 export const maxBufferSize = state => state.app.dataLogger.maxBufferSize;
+export const getSampleFrequency = state => state.app.dataLogger.sampleFreq;
+export const getMaxSampleFrequency = state =>
+    state.app.dataLogger.maxSampleFreq;

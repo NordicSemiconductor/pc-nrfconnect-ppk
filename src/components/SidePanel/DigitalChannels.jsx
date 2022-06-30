@@ -29,7 +29,7 @@ export default () => {
     const toggle = i => {
         const channels = [...digitalChannels];
         channels[i] = !channels[i];
-        dispatch(setDigitalChannels(channels));
+        dispatch(setDigitalChannels({ digitalChannels: channels }));
     };
 
     return (

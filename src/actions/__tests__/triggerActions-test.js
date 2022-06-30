@@ -247,10 +247,12 @@ const getExpectedChartActionsPPK2 = (fromIndex, toIndex, shift = 0) => {
     const to = indexToTimestamp(toIndex - shift);
     return [
         {
-            type: 'CHART_TRIGGER_WINDOW',
-            windowBegin: from,
-            windowEnd: to,
-            windowDuration: to - from,
+            type: 'chart/chartTrigger',
+            payload: {
+                windowBegin: from,
+                windowEnd: to,
+                windowDuration: to - from,
+            },
         },
         {
             type: 'TRIGGER_COMPLETE',
@@ -265,10 +267,12 @@ const getExpectedChartActionsPPK1 = (fromIndex, toIndex) => {
     const to = indexToTimestamp(toIndex);
     return [
         {
-            type: 'CHART_TRIGGER_WINDOW',
-            windowBegin: from,
-            windowEnd: to,
-            windowDuration: to - from,
+            type: 'chart/chartTrigger',
+            payload: {
+                windowBegin: from,
+                windowEnd: to,
+                windowDuration: to - from,
+            },
         },
         { type: 'SET_TRIGGER_START', triggerStartIndex: null },
     ];

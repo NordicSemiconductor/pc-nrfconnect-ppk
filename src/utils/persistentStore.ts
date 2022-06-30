@@ -30,7 +30,7 @@ interface SpikeFilter {
     alpha5: number;
 }
 
-type booleanTupleOf8 = [
+export type booleanTupleOf8 = [
     boolean,
     boolean,
     boolean,
