@@ -47,7 +47,11 @@ export const BufferSettings = () => {
                     value={maxBufferSize}
                     range={range}
                     onChange={newValue => {
-                        dispatch(changeMaxBufferSizeAction(newValue));
+                        dispatch(
+                            changeMaxBufferSizeAction({
+                                maxBufferSize: newValue,
+                            })
+                        );
                         usageData.sendUsageData(
                             EventAction.BUFFER_SIZE_CHANGED,
                             newValue

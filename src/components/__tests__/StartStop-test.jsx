@@ -36,7 +36,7 @@ const initialStatePPK1Actions = [
         portName: 'testPort',
         capabilities: { ppkTriggerExtToggle: false },
     }),
-    setDataLoggerState(dataLoggerStatePPK1),
+    setDataLoggerState({ state: dataLoggerStatePPK1 }),
 ];
 
 const initialStatePPK2Actions = [
@@ -45,7 +45,7 @@ const initialStatePPK2Actions = [
         portName: 'testPort',
         capabilities: { ppkTriggerExtToggle: false },
     }),
-    setDataLoggerState(dataLoggerStatePPK2),
+    setDataLoggerState({ state: dataLoggerStatePPK2 }),
 ];
 
 const ppk2Tooltip = 'Start sampling at 100 kHz';

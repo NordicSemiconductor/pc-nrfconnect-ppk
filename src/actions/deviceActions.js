@@ -299,9 +299,10 @@ export function open(deviceInfo) {
             );
 
             dispatch(
-                setSamplingAttrsAction(
-                    device.capabilities.maxContinuousSamplingTimeUs
-                )
+                setSamplingAttrsAction({
+                    maxContiniousSamplingTimeUs:
+                        device.capabilities.maxContinuousSamplingTimeUs,
+                })
             );
             dispatch(setupOptions());
             dispatch(

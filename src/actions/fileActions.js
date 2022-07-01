@@ -90,7 +90,7 @@ export const load = setLoading => async dispatch => {
     dispatch(setChartState(chartState));
     dispatch(setFileLoadedAction({ loaded: true }));
     if (dataLoggerState !== null) {
-        dispatch(setDataLoggerState(dataLoggerState));
+        dispatch(setDataLoggerState({ state: dataLoggerState }));
     }
     if (triggerState !== null) {
         dispatch(setTriggerState(triggerState));

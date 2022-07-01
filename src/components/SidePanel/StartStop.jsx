@@ -65,7 +65,14 @@ export default () => {
                         id="data-logger-sampling-frequency"
                         values={[sampleFreqLog10]}
                         range={{ min: 0, max: maxFreqLog10 }}
-                        onChange={[v => dispatch(updateSampleFreqLog10(v))]}
+                        onChange={[
+                            v =>
+                                dispatch(
+                                    updateSampleFreqLog10({
+                                        sampleFreqLog10: v,
+                                    })
+                                ),
+                        ]}
                         onChangeComplete={completeChange}
                     />
                 </div>
@@ -75,7 +82,9 @@ export default () => {
                     multiplier={range.multiplier}
                     range={range}
                     value={durationSeconds}
-                    onChange={v => dispatch(updateDurationSeconds(v))}
+                    onChange={v =>
+                        dispatch(updateDurationSeconds({ durationSeconds: v }))
+                    }
                     onChangeComplete={completeChange}
                     slider
                 />
