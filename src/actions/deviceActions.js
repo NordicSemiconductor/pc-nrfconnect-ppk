@@ -196,7 +196,9 @@ const initGains = () => async dispatch => {
         await device.ppkSetUserGains(3, ug[3]);
         await device.ppkSetUserGains(4, ug[4]);
     }
-    [0, 1, 2, 3, 4].forEach(n => dispatch(updateGainsAction(ug[n] * 100, n)));
+    [0, 1, 2, 3, 4].forEach(n =>
+        dispatch(updateGainsAction({ value: ug[n] * 100, range: n }))
+    );
 };
 
 export function open(deviceInfo) {

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
@@ -50,7 +50,10 @@ const Gains = () => {
                         values={[gain]}
                         range={range}
                         onChange={[
-                            value => dispatch(updateGainsAction(value, index)),
+                            value =>
+                                dispatch(
+                                    updateGainsAction({ value, range: index })
+                                ),
                         ]}
                         onChangeComplete={() => dispatch(updateGains(index))}
                     />
