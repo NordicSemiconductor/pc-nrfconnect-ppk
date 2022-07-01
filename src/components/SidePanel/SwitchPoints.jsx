@@ -69,7 +69,12 @@ const SwitchPoints = () => {
                         values={[switchDownSliderPosition]}
                         range={{ min: 100, max: 400 }}
                         onChange={[
-                            val => dispatch(switchingPointDownMovedAction(val)),
+                            val =>
+                                dispatch(
+                                    switchingPointDownMovedAction({
+                                        sliderValue: val,
+                                    })
+                                ),
                         ]}
                         onChangeComplete={() =>
                             dispatch(switchingPointsDownSet())

@@ -537,7 +537,11 @@ export function switchingPointsDownSet() {
             2000.0 * ((16.3 * (500 - switchDownSliderPosition)) / 100.0 - 1) -
             30000.0;
         await device.ppkSwitchPointDown(parseInt(pot / 2, 10));
-        dispatch(switchingPointsDownSetAction(switchDownSliderPosition));
+        dispatch(
+            switchingPointsDownSetAction({
+                sliderValue: switchDownSliderPosition,
+            })
+        );
     };
 }
 
