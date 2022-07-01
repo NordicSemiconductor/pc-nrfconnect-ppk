@@ -318,7 +318,7 @@ export function open(deviceInfo) {
             if (!triggerWindowRange)
                 dispatch(triggerWindowRangeAction(device.triggerWindowRange));
 
-            dispatch(resistorsResetAction(metadata));
+            dispatch(resistorsResetAction({ ...metadata }));
             dispatch(switchingPointsResetAction(metadata));
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
@@ -493,7 +493,7 @@ export function resetResistors() {
         const { resLo, resMid, resHi } = getState().app.resistorCalibration;
         logger.info(`Resistors reset to ${resLo}/${resMid}/${resHi}`);
         await device.ppkUpdateResistors(resLo, resMid, resHi);
-        dispatch(resistorsResetAction());
+        dispatch(resistorsResetAction({}));
     };
 }
 
