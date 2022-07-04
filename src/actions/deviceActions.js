@@ -96,7 +96,7 @@ export const setupOptions = () => (dispatch, getState) => {
         logger.error(err);
     }
     dispatch(chartWindowUnLockAction());
-    dispatch(setTriggerOriginAction(null));
+    dispatch(setTriggerOriginAction({ origin: null }));
     dispatch(updateHasDigitalChannels());
     dispatch(animationAction());
 };
@@ -137,7 +137,7 @@ export function triggerStop() {
         if (!device) return;
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
-        dispatch(toggleTriggerAction(false));
+        dispatch(toggleTriggerAction({ triggerRunning: false }));
         dispatch(clearSingleTriggerWaitingAction());
     };
 }
@@ -173,7 +173,7 @@ export function close() {
         device.removeAllListeners();
         device = null;
         dispatch(deviceClosedAction());
-        dispatch(triggerLevelSetAction(null));
+        dispatch(triggerLevelSetAction({ triggerLevel: null }));
         logger.info('PPK closed');
         updateTitle();
     };
@@ -314,9 +314,12 @@ export function open(deviceInfo) {
             const { triggerLength, triggerLevel, triggerWindowRange } =
                 getState().app.trigger;
             if (!triggerLength) await dispatch(triggerLengthUpdate(10));
-            if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
+            if (!triggerLevel)
+                dispatch(triggerLevelSetAction({ triggerLevel: 1000 }));
             if (!triggerWindowRange)
-                dispatch(triggerWindowRangeAction(device.triggerWindowRange));
+                dispatch(
+                    triggerWindowRangeAction({ ...device.triggerWindowRange })
+                );
 
             dispatch(resistorsResetAction({ ...metadata }));
             dispatch(switchingPointsResetAction(metadata));
@@ -422,7 +425,7 @@ export const updateGains = index => async (_, getState) => {
  */
 export function triggerLengthUpdate(value) {
     return async dispatch => {
-        dispatch(triggerLengthSetAction(value));
+        dispatch(triggerLengthSetAction({ triggerLength: value }));
         // If division returns a decimal, round downward to nearest integer
         if (device.capabilities.ppkTriggerWindowSet) {
             await device.ppkTriggerWindowSet(value);
@@ -434,7 +437,7 @@ export function triggerLengthUpdate(value) {
 export function triggerStart() {
     return async (dispatch, getState) => {
         dispatch(resetCursorAndChart());
-        dispatch(toggleTriggerAction(true));
+        dispatch(toggleTriggerAction({ triggerRunning: true }));
         dispatch(clearSingleTriggerWaitingAction());
 
         const { triggerLevel } = getState().app.trigger;
@@ -557,7 +560,7 @@ export function switchingPointsReset() {
 
 export function updateTriggerLevel(triggerLevel) {
     return async (dispatch, getState) => {
-        dispatch(triggerLevelSetAction(triggerLevel));
+        dispatch(triggerLevelSetAction({ triggerLevel }));
         if (!device.capabilities.hwTrigger) return;
 
         const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;

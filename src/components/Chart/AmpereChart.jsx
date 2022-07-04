@@ -69,7 +69,8 @@ const AmpereChart = ({
     const { samplingRunning } = useSelector(appState);
     const isRealTimePane = useSelector(isRealTimePaneSelector);
     const sendTriggerLevel = level => dispatch(updateTriggerLevelAction(level));
-    const updateTriggerLevel = level => dispatch(triggerLevelSetAction(level));
+    const updateTriggerLevel = level =>
+        dispatch(triggerLevelSetAction({ triggerLevel: level }));
 
     const timestampToLabel = React.useCallback(
         (_usecs, index, array) => {
@@ -155,7 +156,9 @@ const AmpereChart = ({
                     drawOnChartArea: true,
                 },
                 cursor: { cursorBegin, cursorEnd },
-                afterFit: scale => { scale.paddingRight = rightMargin; }, // eslint-disable-line
+                afterFit: scale => {
+                    scale.paddingRight = rightMargin;
+                }, // eslint-disable-line
             },
             yScale: {
                 type: 'linear',
@@ -169,7 +172,9 @@ const AmpereChart = ({
                     drawBorder: true,
                     drawOnChartArea: true,
                 },
-                afterFit: scale => { scale.width = yAxisWidth; }, // eslint-disable-line
+                afterFit: scale => {
+                    scale.width = yAxisWidth;
+                }, // eslint-disable-line
             },
         },
         maintainAspectRatio: false,

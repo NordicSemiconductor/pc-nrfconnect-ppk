@@ -51,7 +51,9 @@ export function processTriggerSample(currentValue, device, samplingData) {
 
         if (!triggerStartIndex) {
             if (currentValue >= triggerLevel || isPPK1) {
-                dispatch(setTriggerStartAction(currentIndex));
+                dispatch(
+                    setTriggerStartAction({ triggerStartIndex: currentIndex })
+                );
             }
             return;
         }
@@ -80,7 +82,7 @@ export function processTriggerSample(currentValue, device, samplingData) {
         const to = indexToTimestamp(currentIndex - shiftedIndex);
         dispatch(chartTriggerWindowAction(from, to, to - from));
         isPPK1
-            ? dispatch(setTriggerStartAction(null))
-            : dispatch(completeTriggerAction(triggerStartIndex));
+            ? dispatch(setTriggerStartAction({ triggerStartIndex: null }))
+            : dispatch(completeTriggerAction({ triggerStartIndex }));
     };
 }

@@ -12,24 +12,28 @@ describe('triggerReducer', () => {
     describe('modify attributes', () => {
         it('should set trigger level', () => {
             const state = reducer(initialState, {
-                type: triggerActions.TRIGGER_LEVEL_SET,
-                triggerLevel: 5,
+                type: triggerActions.triggerLevelSetAction,
+                payload: {
+                    triggerLevel: 5,
+                },
             });
             expect(state.triggerLevel).toEqual(5);
         });
 
         it('should set trigger length', () => {
             const state = reducer(initialState, {
-                type: triggerActions.TRIGGER_LENGTH_SET,
-                triggerLength: 37.85,
+                type: triggerActions.triggerLengthSetAction,
+                payload: {
+                    triggerLength: 37.85,
+                },
             });
             expect(state.triggerLength).toEqual(37.85);
         });
 
         it('should set window ranges', () => {
             const state = reducer(initialState, {
-                type: triggerActions.TRIGGER_WINDOW_RANGE,
-                triggerWindowRange: {
+                type: triggerActions.triggerWindowRangeAction,
+                payload: {
                     min: 5,
                     max: 50,
                 },
@@ -41,7 +45,7 @@ describe('triggerReducer', () => {
 
     describe('trigger single set', () => {
         const waitingState = reducer(initialState, {
-            type: triggerActions.TRIGGER_SINGLE_SET,
+            type: triggerActions.triggerSingleSetAction,
         });
 
         it('should start trigger', () => {
@@ -51,7 +55,7 @@ describe('triggerReducer', () => {
 
         it('should clear trigger', () => {
             const clearedState = reducer(waitingState, {
-                type: triggerActions.TRIGGER_SINGLE_CLEAR,
+                type: triggerActions.clearSingleTriggerWaitingAction,
             });
             expect(clearedState.triggerSingleWaiting).toBe(false);
         });

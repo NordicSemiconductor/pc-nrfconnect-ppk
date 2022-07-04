@@ -69,7 +69,12 @@ describe('Handle trigger', () => {
         const store = mockStore(initialState);
         store.dispatch(processTriggerSample(15, mockDevicePPK1, samplingData));
         const expectedActions = [
-            { type: 'SET_TRIGGER_START', triggerStartIndex: beginIndex },
+            {
+                type: 'trigger/setTriggerStartAction',
+                payload: {
+                    triggerStartIndex: beginIndex,
+                },
+            },
         ];
         expect(store.getActions()).toEqual(expectedActions);
     });
@@ -122,7 +127,8 @@ describe('Handle trigger', () => {
             );
             expect(store.getActions()).toEqual([
                 {
-                    type: 'TRIGGER_SINGLE_CLEAR',
+                    type: 'trigger/clearSingleTriggerWaitingAction',
+                    payload: undefined,
                 },
                 ...getExpectedChartActionsPPK1(beginIndex, newIndex),
             ]);
@@ -255,9 +261,10 @@ const getExpectedChartActionsPPK2 = (fromIndex, toIndex, shift = 0) => {
             },
         },
         {
-            type: 'TRIGGER_COMPLETE',
-            origin: fromIndex,
-            triggerStartIndex: null,
+            type: 'trigger/completeTriggerAction',
+            payload: {
+                triggerStartIndex: fromIndex,
+            },
         },
     ];
 };
@@ -274,6 +281,11 @@ const getExpectedChartActionsPPK1 = (fromIndex, toIndex) => {
                 windowDuration: to - from,
             },
         },
-        { type: 'SET_TRIGGER_START', triggerStartIndex: null },
+        {
+            type: 'trigger/setTriggerStartAction',
+            payload: {
+                triggerStartIndex: null,
+            },
+        },
     ];
 };
