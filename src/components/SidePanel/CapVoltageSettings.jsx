@@ -41,11 +41,15 @@ export const CapVoltageSettings = () => {
                         value={maxCap}
                         range={{ min, max }}
                         onChange={value =>
-                            dispatch(updateVoltageRegulatorMaxCapAction(value))
+                            dispatch(
+                                updateVoltageRegulatorMaxCapAction({
+                                    maxCap: value,
+                                })
+                            )
                         }
                         onChangeComplete={() => {
                             dispatch(
-                                updateVoltageRegulatorMaxCapAction(maxCap)
+                                updateVoltageRegulatorMaxCapAction({ maxCap })
                             );
                             usageData.sendUsageData(
                                 EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
@@ -61,10 +65,16 @@ export const CapVoltageSettings = () => {
                     range={{ min, max }}
                     onChange={[
                         value =>
-                            dispatch(updateVoltageRegulatorMaxCapAction(value)),
+                            dispatch(
+                                updateVoltageRegulatorMaxCapAction({
+                                    maxCap: value,
+                                })
+                            ),
                     ]}
                     onChangeComplete={() => {
-                        dispatch(updateVoltageRegulatorMaxCapAction(maxCap));
+                        dispatch(
+                            updateVoltageRegulatorMaxCapAction({ maxCap })
+                        );
                         usageData.sendUsageData(
                             EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
                             maxCap

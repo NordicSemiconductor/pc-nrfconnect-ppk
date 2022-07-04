@@ -29,7 +29,7 @@ const VoltageRegulator = () => {
 
     useEffect(() => {
         if (vdd > max) {
-            dispatch(moveVoltageRegulatorVddAction(max));
+            dispatch(moveVoltageRegulatorVddAction({ vdd: max }));
         }
     }, [vdd, max, dispatch]);
 
@@ -42,7 +42,9 @@ const VoltageRegulator = () => {
                         value={vdd}
                         range={{ min, max }}
                         onChange={value =>
-                            dispatch(moveVoltageRegulatorVddAction(value))
+                            dispatch(
+                                moveVoltageRegulatorVddAction({ vdd: value })
+                            )
                         }
                         onChangeComplete={() => dispatch(updateRegulator(vdd))}
                     />{' '}
@@ -53,7 +55,10 @@ const VoltageRegulator = () => {
                     values={[vdd]}
                     range={{ min, max }}
                     onChange={[
-                        value => dispatch(moveVoltageRegulatorVddAction(value)),
+                        value =>
+                            dispatch(
+                                moveVoltageRegulatorVddAction({ vdd: value })
+                            ),
                     ]}
                     onChangeComplete={() => dispatch(updateRegulator(vdd))}
                 />
