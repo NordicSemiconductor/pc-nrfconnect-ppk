@@ -17,12 +17,12 @@ import {
     switchingPointsReset,
     switchingPointsUpSet,
 } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     switchingPointDownMovedAction,
     switchingPointsState,
     switchingPointUpMoved,
-} from '../../reducers/switchingPointsReducer';
+} from '../../slices/switchingPointsSlice';
 
 const SwitchPoints = () => {
     const dispatch = useDispatch();
@@ -69,7 +69,12 @@ const SwitchPoints = () => {
                         values={[switchDownSliderPosition]}
                         range={{ min: 100, max: 400 }}
                         onChange={[
-                            val => dispatch(switchingPointDownMovedAction(val)),
+                            val =>
+                                dispatch(
+                                    switchingPointDownMovedAction({
+                                        sliderValue: val,
+                                    })
+                                ),
                         ]}
                         onChangeComplete={() =>
                             dispatch(switchingPointsDownSet())

@@ -19,8 +19,8 @@ import { Toggle } from 'pc-nrfconnect-shared';
 
 import exportChart from '../../actions/exportChartAction';
 import { indexToTimestamp } from '../../globals';
-import { appState, hideExportDialog } from '../../reducers/appReducer';
-import { chartState } from '../../reducers/chartReducer';
+import { appState, hideExportDialog } from '../../slices/appSlice';
+import { chartState } from '../../slices/chartSlice';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 import ExportSelection from './ExportSelection';
 

@@ -16,12 +16,12 @@ import {
     samplingStop,
     setupOptions,
 } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     dataLoggerState,
     updateDurationSeconds,
     updateSampleFreqLog10,
-} from '../../reducers/dataLoggerReducer';
+} from '../../slices/dataLoggerSlice';
 import NumberWithUnit from './NumberWithUnitInput';
 
 const fmtOpts = { notation: 'fixed', precision: 1 };
@@ -65,7 +65,14 @@ export default () => {
                         id="data-logger-sampling-frequency"
                         values={[sampleFreqLog10]}
                         range={{ min: 0, max: maxFreqLog10 }}
-                        onChange={[v => dispatch(updateSampleFreqLog10(v))]}
+                        onChange={[
+                            v =>
+                                dispatch(
+                                    updateSampleFreqLog10({
+                                        sampleFreqLog10: v,
+                                    })
+                                ),
+                        ]}
                         onChangeComplete={completeChange}
                     />
                 </div>
@@ -75,7 +82,9 @@ export default () => {
                     multiplier={range.multiplier}
                     range={range}
                     value={durationSeconds}
-                    onChange={v => dispatch(updateDurationSeconds(v))}
+                    onChange={v =>
+                        dispatch(updateDurationSeconds({ durationSeconds: v }))
+                    }
                     onChangeComplete={completeChange}
                     slider
                 />

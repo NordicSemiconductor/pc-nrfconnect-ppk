@@ -27,22 +27,22 @@ import {
     setDeviceRunningAction,
     setFileLoadedAction,
     setPowerModeAction,
-} from '../reducers/appReducer';
+} from '../slices/appSlice';
 import {
     animationAction,
     chartWindowAction,
     chartWindowUnLockAction,
     resetCursorAndChart,
     updateHasDigitalChannels,
-} from '../reducers/chartReducer';
-import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
-import { updateGainsAction } from '../reducers/gainsReducer';
-import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
+} from '../slices/chartSlice';
+import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
+import { updateGainsAction } from '../slices/gainsSlice';
+import { resistorsResetAction } from '../slices/resistorCalibrationSlice';
 import {
     spikeFilteringToggleAction,
     switchingPointsDownSetAction,
     switchingPointsResetAction,
-} from '../reducers/switchingPointsReducer';
+} from '../slices/switchingPointsSlice';
 import {
     clearSingleTriggerWaitingAction,
     externalTriggerToggledAction,
@@ -52,8 +52,8 @@ import {
     triggerLevelSetAction,
     triggerSingleSetAction,
     triggerWindowRangeAction,
-} from '../reducers/triggerReducer';
-import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
+} from '../slices/triggerSlice';
+import { updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
@@ -96,7 +96,7 @@ export const setupOptions = () => (dispatch, getState) => {
         logger.error(err);
     }
     dispatch(chartWindowUnLockAction());
-    dispatch(setTriggerOriginAction(null));
+    dispatch(setTriggerOriginAction({ origin: null }));
     dispatch(updateHasDigitalChannels());
     dispatch(animationAction());
 };
@@ -137,7 +137,7 @@ export function triggerStop() {
         if (!device) return;
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
-        dispatch(toggleTriggerAction(false));
+        dispatch(toggleTriggerAction({ triggerRunning: false }));
         dispatch(clearSingleTriggerWaitingAction());
     };
 }
@@ -173,7 +173,7 @@ export function close() {
         device.removeAllListeners();
         device = null;
         dispatch(deviceClosedAction());
-        dispatch(triggerLevelSetAction(null));
+        dispatch(triggerLevelSetAction({ triggerLevel: null }));
         logger.info('PPK closed');
         updateTitle();
     };
@@ -196,7 +196,9 @@ const initGains = () => async dispatch => {
         await device.ppkSetUserGains(3, ug[3]);
         await device.ppkSetUserGains(4, ug[4]);
     }
-    [0, 1, 2, 3, 4].forEach(n => dispatch(updateGainsAction(ug[n] * 100, n)));
+    [0, 1, 2, 3, 4].forEach(n =>
+        dispatch(updateGainsAction({ value: ug[n] * 100, range: n }))
+    );
 };
 
 export function open(deviceInfo) {
@@ -299,21 +301,27 @@ export function open(deviceInfo) {
             );
 
             dispatch(
-                setSamplingAttrsAction(
-                    device.capabilities.maxContinuousSamplingTimeUs
-                )
+                setSamplingAttrsAction({
+                    maxContiniousSamplingTimeUs:
+                        device.capabilities.maxContinuousSamplingTimeUs,
+                })
             );
             dispatch(setupOptions());
-            dispatch(setDeviceRunningAction(device.isRunningInitially));
+            dispatch(
+                setDeviceRunningAction({ isRunning: device.isRunningInitially })
+            );
             const metadata = device.parseMeta(await device.start());
             const { triggerLength, triggerLevel, triggerWindowRange } =
                 getState().app.trigger;
             if (!triggerLength) await dispatch(triggerLengthUpdate(10));
-            if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
+            if (!triggerLevel)
+                dispatch(triggerLevelSetAction({ triggerLevel: 1000 }));
             if (!triggerWindowRange)
-                dispatch(triggerWindowRangeAction(device.triggerWindowRange));
+                dispatch(
+                    triggerWindowRangeAction({ ...device.triggerWindowRange })
+                );
 
-            dispatch(resistorsResetAction(metadata));
+            dispatch(resistorsResetAction({ ...metadata }));
             dispatch(switchingPointsResetAction(metadata));
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
@@ -331,12 +339,12 @@ export function open(deviceInfo) {
                 const isSmuMode = metadata.mode === 2;
                 // 1 = Ampere
                 // 2 = SMU
-                dispatch(setPowerModeAction(isSmuMode));
+                dispatch(setPowerModeAction({ isSmuMode }));
                 if (!isSmuMode) dispatch(setDeviceRunning(true));
             }
 
             dispatch(rttStartAction());
-            dispatch(setFileLoadedAction(false));
+            dispatch(setFileLoadedAction({ loaded: false }));
 
             if (isRealTimePane(getState())) {
                 initializeChartForRealTime();
@@ -350,7 +358,10 @@ export function open(deviceInfo) {
         }
 
         dispatch(
-            deviceOpenedAction(deviceInfo.serialNumber, device.capabilities)
+            deviceOpenedAction({
+                portName: deviceInfo.serialNumber,
+                capabilities: device.capabilities,
+            })
         );
 
         logger.info('PPK opened');
@@ -414,7 +425,7 @@ export const updateGains = index => async (_, getState) => {
  */
 export function triggerLengthUpdate(value) {
     return async dispatch => {
-        dispatch(triggerLengthSetAction(value));
+        dispatch(triggerLengthSetAction({ triggerLength: value }));
         // If division returns a decimal, round downward to nearest integer
         if (device.capabilities.ppkTriggerWindowSet) {
             await device.ppkTriggerWindowSet(value);
@@ -426,7 +437,7 @@ export function triggerLengthUpdate(value) {
 export function triggerStart() {
     return async (dispatch, getState) => {
         dispatch(resetCursorAndChart());
-        dispatch(toggleTriggerAction(true));
+        dispatch(toggleTriggerAction({ triggerRunning: true }));
         dispatch(clearSingleTriggerWaitingAction());
 
         const { triggerLevel } = getState().app.trigger;
@@ -452,7 +463,7 @@ export function setDeviceRunning(isRunning) {
     return async dispatch => {
         await device.ppkDeviceRunning(isRunning ? 1 : 0);
         logger.info(`DUT ${isRunning ? 'ON' : 'OFF'}`);
-        dispatch(setDeviceRunningAction(isRunning));
+        dispatch(setDeviceRunningAction({ isRunning }));
     };
 }
 
@@ -462,10 +473,10 @@ export function setPowerMode(isSmuMode) {
         if (isSmuMode) {
             await dispatch(setDeviceRunning(false));
             await device.ppkSetPowerMode(true); // set to source mode
-            dispatch(setPowerModeAction(true));
+            dispatch(setPowerModeAction({ isSmuMode: true }));
         } else {
             await device.ppkSetPowerMode(false); // set to ampere mode
-            dispatch(setPowerModeAction(false));
+            dispatch(setPowerModeAction({ isSmuMode: false }));
             await dispatch(setDeviceRunning(true));
         }
     };
@@ -485,7 +496,7 @@ export function resetResistors() {
         const { resLo, resMid, resHi } = getState().app.resistorCalibration;
         logger.info(`Resistors reset to ${resLo}/${resMid}/${resHi}`);
         await device.ppkUpdateResistors(resLo, resMid, resHi);
-        dispatch(resistorsResetAction());
+        dispatch(resistorsResetAction({}));
     };
 }
 
@@ -529,7 +540,11 @@ export function switchingPointsDownSet() {
             2000.0 * ((16.3 * (500 - switchDownSliderPosition)) / 100.0 - 1) -
             30000.0;
         await device.ppkSwitchPointDown(parseInt(pot / 2, 10));
-        dispatch(switchingPointsDownSetAction(switchDownSliderPosition));
+        dispatch(
+            switchingPointsDownSetAction({
+                sliderValue: switchDownSliderPosition,
+            })
+        );
     };
 }
 
@@ -545,7 +560,7 @@ export function switchingPointsReset() {
 
 export function updateTriggerLevel(triggerLevel) {
     return async (dispatch, getState) => {
-        dispatch(triggerLevelSetAction(triggerLevel));
+        dispatch(triggerLevelSetAction({ triggerLevel }));
         if (!device.capabilities.hwTrigger) return;
 
         const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;

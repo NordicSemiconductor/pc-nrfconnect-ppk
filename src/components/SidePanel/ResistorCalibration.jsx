@@ -17,13 +17,13 @@ import {
 import { exact, func, number, string } from 'prop-types';
 
 import { resetResistors, updateResistors } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     resistorCalibrationState,
     updateHighResistorAction,
     updateLowResistorAction,
     updateMidResistorAction,
-} from '../../reducers/resistorCalibrationReducer';
+} from '../../slices/resistorCalibrationSlice';
 
 const ResistorSlider = ({ id, label, value, range, actionOnChange }) => {
     const dispatch = useDispatch();
@@ -83,7 +83,9 @@ const ResistorCalibration = () => {
                 label="High"
                 value={userResHi}
                 range={{ min: 1, max: 3, decimals: 3 }}
-                actionOnChange={updateHighResistorAction}
+                actionOnChange={value =>
+                    updateHighResistorAction({ userResHi: value })
+                }
                 chars={7}
             />
             <ResistorSlider
@@ -91,7 +93,9 @@ const ResistorCalibration = () => {
                 label="Mid"
                 value={userResMid}
                 range={{ min: 25, max: 35, decimals: 3 }}
-                actionOnChange={updateMidResistorAction}
+                actionOnChange={value =>
+                    updateMidResistorAction({ userResMid: value })
+                }
                 chars={7}
             />
             <ResistorSlider
@@ -99,7 +103,9 @@ const ResistorCalibration = () => {
                 label="Low"
                 value={userResLo}
                 range={{ min: 450, max: 550, decimals: 3 }}
-                actionOnChange={updateLowResistorAction}
+                actionOnChange={value =>
+                    updateLowResistorAction({ userResLo: value })
+                }
                 chars={7}
             />
             <ButtonGroup className="mt-2 w-100">

@@ -19,7 +19,7 @@ import {
 import {
     changeMaxBufferSizeAction,
     maxBufferSize as maxBufferSizeSelector,
-} from '../../reducers/dataLoggerReducer';
+} from '../../slices/dataLoggerSlice';
 import EventAction from '../../usageDataActions';
 
 const { getCurrentWindow } = require('@electron/remote');
@@ -47,7 +47,11 @@ export const BufferSettings = () => {
                     value={maxBufferSize}
                     range={range}
                     onChange={newValue => {
-                        dispatch(changeMaxBufferSizeAction(newValue));
+                        dispatch(
+                            changeMaxBufferSizeAction({
+                                maxBufferSize: newValue,
+                            })
+                        );
                         usageData.sendUsageData(
                             EventAction.BUFFER_SIZE_CHANGED,
                             newValue

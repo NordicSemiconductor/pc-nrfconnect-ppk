@@ -6,8 +6,8 @@
 
 import React from 'react';
 
-import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
-import { setDataLoggerState } from '../../reducers/dataLoggerReducer';
+import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
+import { setDataLoggerState } from '../../slices/dataLoggerSlice';
 import { render } from '../../utils/testUtils';
 import StartStop from '../SidePanel/StartStop';
 
@@ -32,14 +32,20 @@ const dataLoggerStatePPK2 = {
 
 const initialStatePPK1Actions = [
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
-    setDataLoggerState(dataLoggerStatePPK1),
+    deviceOpenedAction({
+        portName: 'testPort',
+        capabilities: { ppkTriggerExtToggle: false },
+    }),
+    setDataLoggerState({ state: dataLoggerStatePPK1 }),
 ];
 
 const initialStatePPK2Actions = [
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
-    setDataLoggerState(dataLoggerStatePPK2),
+    deviceOpenedAction({
+        portName: 'testPort',
+        capabilities: { ppkTriggerExtToggle: false },
+    }),
+    setDataLoggerState({ state: dataLoggerStatePPK2 }),
 ];
 
 const ppk2Tooltip = 'Start sampling at 100 kHz';

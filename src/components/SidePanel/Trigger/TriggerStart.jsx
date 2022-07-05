@@ -15,8 +15,8 @@ import {
     triggerStart,
     triggerStop,
 } from '../../../actions/deviceActions';
-import { appState } from '../../../reducers/appReducer';
-import { triggerState } from '../../../reducers/triggerReducer';
+import { appState } from '../../../slices/appSlice';
+import { triggerState } from '../../../slices/triggerSlice';
 import { SINGLE } from './triggerConstants';
 
 function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {

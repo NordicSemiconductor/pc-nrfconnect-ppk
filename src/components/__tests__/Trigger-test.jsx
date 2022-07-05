@@ -6,12 +6,12 @@
 
 import React from 'react';
 
-import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
+import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
 import {
     triggerLengthSetAction,
     triggerLevelSetAction,
     triggerWindowRangeAction,
-} from '../../reducers/triggerReducer';
+} from '../../slices/triggerSlice';
 import { fireEvent, render } from '../../utils/testUtils';
 import Trigger from '../SidePanel/Trigger/Trigger';
 
@@ -20,11 +20,14 @@ const TRIGGER_LENGTH = 10;
 const initialStateActions = [
     // Set app State (app.app):
     rttStartAction(),
-    deviceOpenedAction('testPort', { ppkTriggerExtToggle: false }),
+    deviceOpenedAction({
+        portName: 'testPort',
+        capabilities: { ppkTriggerExtToggle: false },
+    }),
     // Set trigger State (app.trigger):
     triggerWindowRangeAction({ min: 1, max: 100 }),
-    triggerLengthSetAction(TRIGGER_LENGTH),
-    triggerLevelSetAction(1_000),
+    triggerLengthSetAction({ triggerLength: TRIGGER_LENGTH }),
+    triggerLevelSetAction({ triggerLevel: 1000 }),
 ];
 
 describe('Trigger', () => {

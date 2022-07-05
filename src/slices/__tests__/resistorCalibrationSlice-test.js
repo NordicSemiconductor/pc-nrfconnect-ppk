@@ -11,7 +11,7 @@ jest.mock('../../actions/deviceActions', () => ({
     RESISTORS_RESET: 'RESISTORS_RESET',
 }));
 
-import reducer from '../resistorCalibrationReducer';
+import reducer from '../resistorCalibrationSlice';
 
 const initialState = reducer(undefined, {});
 

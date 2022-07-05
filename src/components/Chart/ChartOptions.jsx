@@ -16,7 +16,7 @@ import {
     chartState,
     setYMax as storeYMax,
     setYMin as storeYMin,
-} from '../../reducers/chartReducer';
+} from '../../slices/chartSlice';
 import EventAction from '../../usageDataActions';
 
 /** The power, p, to satisfy the mathematical expression:
@@ -70,7 +70,7 @@ const ChartOptions = () => {
      * @returns {void} dispatches new yMin to storage
      */
     const dispatchYMin = exponent => {
-        dispatch(storeYMin(yMin * 1000 ** exponent));
+        dispatch({ yMin: storeYMin(yMin * 1000 ** exponent) });
         setYMinExponent(exponent);
         usageData.sendUsageData(EventAction.Y_MIN_SET_EXPLICITLY);
     };
@@ -81,7 +81,7 @@ const ChartOptions = () => {
      * @returns {void} dispatches new yMax to storage
      */
     const dispatchYMax = exponent => {
-        dispatch(storeYMax(yMax * 1000 ** exponent));
+        dispatch({ yMax: storeYMax(yMax * 1000 ** exponent) });
         setYMaxExponent(exponent);
         usageData.sendUsageData(EventAction.Y_MAX_SET_EXPLICITLY);
     };
@@ -153,40 +153,26 @@ const ChartOptions = () => {
  * @param {func} dispatchFunc function to dispatch new selected unit
  * @returns {component} Dropdown Component to select unit
  */
-const UnitDropdown = ({ unit, dispatchFunc }) => {
-    return (
-        <SelectableContext.Provider value={false}>
-            <Dropdown className="inline-dropdown">
-                <Dropdown.Toggle
-                    className="dropdown-current-unit"
-                    variant="plain"
-                >
-                    {UNIT_LABELS[unit]}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                    <Dropdown.Item
-                        eventKey="1"
-                        onSelect={() => dispatchFunc(0)}
-                    >
-                        {UNIT_LABELS[0]}
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                        eventKey="2"
-                        onSelect={() => dispatchFunc(1)}
-                    >
-                        {UNIT_LABELS[1]}
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                        eventKey="3"
-                        onSelect={() => dispatchFunc(2)}
-                    >
-                        {UNIT_LABELS[2]}
-                    </Dropdown.Item>
-                </Dropdown.Menu>
-            </Dropdown>
-        </SelectableContext.Provider>
-    );
-};
+const UnitDropdown = ({ unit, dispatchFunc }) => (
+    <SelectableContext.Provider value={false}>
+        <Dropdown className="inline-dropdown">
+            <Dropdown.Toggle className="dropdown-current-unit" variant="plain">
+                {UNIT_LABELS[unit]}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+                <Dropdown.Item eventKey="1" onSelect={() => dispatchFunc(0)}>
+                    {UNIT_LABELS[0]}
+                </Dropdown.Item>
+                <Dropdown.Item eventKey="2" onSelect={() => dispatchFunc(1)}>
+                    {UNIT_LABELS[1]}
+                </Dropdown.Item>
+                <Dropdown.Item eventKey="3" onSelect={() => dispatchFunc(2)}>
+                    {UNIT_LABELS[2]}
+                </Dropdown.Item>
+            </Dropdown.Menu>
+        </Dropdown>
+    </SelectableContext.Provider>
+);
 
 UnitDropdown.propTypes = {
     unit: number.isRequired,

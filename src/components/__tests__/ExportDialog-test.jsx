@@ -7,11 +7,8 @@
 import React from 'react';
 
 import { options } from '../../globals';
-import { showExportDialog } from '../../reducers/appReducer';
-import {
-    chartCursorAction,
-    chartWindowAction,
-} from '../../reducers/chartReducer';
+import { showExportDialog } from '../../slices/appSlice';
+import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
 import { fireEvent, render } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 
@@ -77,7 +74,7 @@ describe('ExportDialog', () => {
         const numberOfRecordsText = '80000 records';
 
         const screen = render(<ExportDialog />, [
-            chartCursorAction(1, 800000),
+            chartCursorAction({ cursorBegin: 1, cursorEnd: 800000 }),
             ...initialStateActions,
             // Chart cursor uses timestamps, and the default sampling rate is 100_000 samples/sec
             // which means that there will be (0.8 - 0.000001) * 100_000 = 7999 samples + 1 header => 400 Records

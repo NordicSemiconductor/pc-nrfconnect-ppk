@@ -8,9 +8,9 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { number } from 'prop-types';
 
-import { appState } from '../../../reducers/appReducer';
-import { chartState } from '../../../reducers/chartReducer';
-import { triggerState } from '../../../reducers/triggerReducer';
+import { appState } from '../../../slices/appSlice';
+import { chartState } from '../../../slices/chartSlice';
+import { triggerState } from '../../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../../utils/panes';
 import TimeSpanLabel from './TimeSpanLabel';
 import WindowOffsetSlider from './WindowOffsetSlider';

@@ -14,10 +14,10 @@ import {
 } from 'pc-nrfconnect-shared';
 
 import { options, updateTitle } from '../globals';
-import { setFileLoadedAction } from '../reducers/appReducer';
-import { setChartState } from '../reducers/chartReducer';
-import { setDataLoggerState } from '../reducers/dataLoggerReducer';
-import { setTriggerState } from '../reducers/triggerReducer';
+import { setFileLoadedAction } from '../slices/appSlice';
+import { setChartState } from '../slices/chartSlice';
+import { setDataLoggerState } from '../slices/dataLoggerSlice';
+import { setTriggerState } from '../slices/triggerSlice';
 import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
@@ -88,9 +88,9 @@ export const load = setLoading => async dispatch => {
     options.bits = bits;
 
     dispatch(setChartState(chartState));
-    dispatch(setFileLoadedAction(true));
+    dispatch(setFileLoadedAction({ loaded: true }));
     if (dataLoggerState !== null) {
-        dispatch(setDataLoggerState(dataLoggerState));
+        dispatch(setDataLoggerState({ state: dataLoggerState }));
     }
     if (triggerState !== null) {
         dispatch(setTriggerState(triggerState));

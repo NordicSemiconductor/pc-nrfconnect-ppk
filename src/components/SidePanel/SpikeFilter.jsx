@@ -11,12 +11,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     resetSpikeFilterToDefaults,
     spikeFilterState,
     updateSpikeFilterAction,
-} from '../../reducers/spikeFilterReducer';
+} from '../../slices/spikeFilterSlice';
 
 const SpikeFilter = () => {
     const dispatch = useDispatch();
@@ -44,7 +44,11 @@ const SpikeFilter = () => {
                 range={{ min: 1, max: 10 }}
                 onChange={[
                     value =>
-                        dispatch(updateSpikeFilterAction({ samples: value })),
+                        dispatch(
+                            updateSpikeFilterAction({
+                                spikeFilter: { samples: value },
+                            })
+                        ),
                 ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
@@ -62,7 +66,11 @@ const SpikeFilter = () => {
                 range={{ min: 0, max: 0.5, decimals: 2 }}
                 onChange={[
                     value =>
-                        dispatch(updateSpikeFilterAction({ alpha: value })),
+                        dispatch(
+                            updateSpikeFilterAction({
+                                spikeFilter: { alpha: value },
+                            })
+                        ),
                 ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
@@ -80,7 +88,11 @@ const SpikeFilter = () => {
                 range={{ min: 0, max: 0.5, decimals: 2 }}
                 onChange={[
                     value =>
-                        dispatch(updateSpikeFilterAction({ alpha5: value })),
+                        dispatch(
+                            updateSpikeFilterAction({
+                                spikeFilter: { alpha5: value },
+                            })
+                        ),
                 ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />

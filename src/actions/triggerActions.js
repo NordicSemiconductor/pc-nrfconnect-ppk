@@ -7,12 +7,12 @@
 import { logger } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp } from '../globals';
-import { chartTriggerWindowAction } from '../reducers/chartReducer';
+import { chartTriggerWindowAction } from '../slices/chartSlice';
 import {
     clearSingleTriggerWaitingAction,
     completeTriggerAction,
     setTriggerStartAction,
-} from '../reducers/triggerReducer';
+} from '../slices/triggerSlice';
 
 // PPK2 trigger point should by default be shifted to middle of window
 const getShiftedIndex = (
@@ -51,7 +51,9 @@ export function processTriggerSample(currentValue, device, samplingData) {
 
         if (!triggerStartIndex) {
             if (currentValue >= triggerLevel || isPPK1) {
-                dispatch(setTriggerStartAction(currentIndex));
+                dispatch(
+                    setTriggerStartAction({ triggerStartIndex: currentIndex })
+                );
             }
             return;
         }
@@ -80,7 +82,7 @@ export function processTriggerSample(currentValue, device, samplingData) {
         const to = indexToTimestamp(currentIndex - shiftedIndex);
         dispatch(chartTriggerWindowAction(from, to, to - from));
         isPPK1
-            ? dispatch(setTriggerStartAction(null))
-            : dispatch(completeTriggerAction(triggerStartIndex));
+            ? dispatch(setTriggerStartAction({ triggerStartIndex: null }))
+            : dispatch(completeTriggerAction({ triggerStartIndex }));
     };
 }

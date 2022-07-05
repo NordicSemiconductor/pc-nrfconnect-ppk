@@ -16,8 +16,8 @@ import {
     chartState,
     resetChart,
     toggleYAxisLock,
-} from '../../reducers/chartReducer';
-import { dataLoggerState } from '../../reducers/dataLoggerReducer';
+} from '../../slices/chartSlice';
+import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 import ChartOptions from './ChartOptions';
 

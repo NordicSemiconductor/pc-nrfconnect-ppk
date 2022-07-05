@@ -8,7 +8,7 @@ import fs from 'fs';
 import { logger } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp, options } from '../globals';
-import { hideExportDialog } from '../reducers/appReducer';
+import { hideExportDialog } from '../slices/appSlice';
 import { averagedBitState } from '../utils/bitConversion';
 
 // create and array of [index, length] to split longer range

@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { number } from 'prop-types';
 
 import { options } from '../../../globals';
-import { chartCursorAction, chartState } from '../../../reducers/chartReducer';
+import { chartCursorAction, chartState } from '../../../slices/chartSlice';
 import TimeSpanLabel from './TimeSpanLabel';
 
 import './timespan.scss';
@@ -26,7 +26,7 @@ const handleSvg = (
 const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
     const dispatch = useDispatch();
     const chartCursor = useCallback(
-        (...args) => dispatch(chartCursorAction(...args)),
+        (...args) => dispatch(chartCursorAction({ ...args })),
         [dispatch]
     );
 

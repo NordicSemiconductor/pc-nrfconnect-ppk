@@ -12,7 +12,7 @@ import {
     chartState,
     toggleDigitalChannels,
     toggleTimestamps,
-} from '../../reducers/chartReducer';
+} from '../../slices/chartSlice';
 import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
 

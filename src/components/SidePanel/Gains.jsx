@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
-import { gainsState, updateGainsAction } from '../../reducers/gainsReducer';
+import { appState } from '../../slices/appSlice';
+import { gainsState, updateGainsAction } from '../../slices/gainsSlice';
 
 const gainTitles = [
     '~100nA - 50µA',
@@ -50,7 +50,10 @@ const Gains = () => {
                         values={[gain]}
                         range={range}
                         onChange={[
-                            value => dispatch(updateGainsAction(value, index)),
+                            value =>
+                                dispatch(
+                                    updateGainsAction({ value, range: index })
+                                ),
                         ]}
                         onChangeComplete={() => dispatch(updateGains(index))}
                     />
