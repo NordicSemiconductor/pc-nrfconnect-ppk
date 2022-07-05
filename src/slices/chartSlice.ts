@@ -18,7 +18,7 @@ import {
     setTimestampsVisible as persistTimestampsVisible,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
-import { getMaxSampleFrequency, getSampleFrequency } from './dataLoggerReducer';
+import { getMaxSampleFrequency, getSampleFrequency } from './dataLoggerSlice';
 import { TAction } from './thunk';
 
 interface ChartState {

@@ -17,13 +17,13 @@ import {
 import { exact, func, number, string } from 'prop-types';
 
 import { resetResistors, updateResistors } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     resistorCalibrationState,
     updateHighResistorAction,
     updateLowResistorAction,
     updateMidResistorAction,
-} from '../../reducers/resistorCalibrationReducer';
+} from '../../slices/resistorCalibrationSlice';
 
 const ResistorSlider = ({ id, label, value, range, actionOnChange }) => {
     const dispatch = useDispatch();

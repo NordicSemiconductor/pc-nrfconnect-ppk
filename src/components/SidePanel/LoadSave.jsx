@@ -9,8 +9,8 @@ import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { load, screenshot } from '../../actions/fileActions';
-import { appState, toggleSaveChoiceDialog } from '../../reducers/appReducer';
-import { triggerState } from '../../reducers/triggerReducer';
+import { appState, toggleSaveChoiceDialog } from '../../slices/appSlice';
+import { triggerState } from '../../slices/triggerSlice';
 import ExportDialog from '../SaveExport/ExportDialog';
 import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
 

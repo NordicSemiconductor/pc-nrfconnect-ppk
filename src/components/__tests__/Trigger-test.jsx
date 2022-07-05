@@ -6,12 +6,12 @@
 
 import React from 'react';
 
-import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
+import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
 import {
     triggerLengthSetAction,
     triggerLevelSetAction,
     triggerWindowRangeAction,
-} from '../../reducers/triggerReducer';
+} from '../../slices/triggerSlice';
 import { fireEvent, render } from '../../utils/testUtils';
 import Trigger from '../SidePanel/Trigger/Trigger';
 

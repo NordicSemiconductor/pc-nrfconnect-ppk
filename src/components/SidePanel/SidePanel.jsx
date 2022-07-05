@@ -14,7 +14,7 @@ import {
     appState,
     deviceOpen as deviceOpenSelector,
     toggleAdvancedModeAction,
-} from '../../reducers/appReducer';
+} from '../../slices/appSlice';
 import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
 import { BufferSettings } from './BufferSettings';
 import { CapVoltageSettings } from './CapVoltageSettings';

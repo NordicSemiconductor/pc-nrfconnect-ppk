@@ -5,7 +5,7 @@
  */
 import { testUtils } from 'pc-nrfconnect-shared/test';
 
-import appReducer from '../reducers';
+import appReducer from '../slices';
 
 jest.mock('pc-nrfconnect-shared', () => ({
     ...jest.requireActual('pc-nrfconnect-shared'),

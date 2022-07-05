@@ -16,7 +16,7 @@ import {
     chartState,
     setYMax as storeYMax,
     setYMin as storeYMin,
-} from '../../reducers/chartReducer';
+} from '../../slices/chartSlice';
 import EventAction from '../../usageDataActions';
 
 /** The power, p, to satisfy the mathematical expression:

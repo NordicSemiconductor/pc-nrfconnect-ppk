@@ -32,8 +32,8 @@ import {
     chartCursorAction,
     chartState,
     chartWindowAction,
-} from '../../reducers/chartReducer';
-import { dataLoggerState } from '../../reducers/dataLoggerReducer';
+} from '../../slices/chartSlice';
+import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';

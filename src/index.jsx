@@ -11,7 +11,7 @@ import DataLogger from './components/DataLogger/DataLogger';
 import DeviceSelector from './components/DeviceSelector';
 import RealTime from './components/RealTime/RealTime';
 import SidePanel from './components/SidePanel/SidePanel';
-import reducers from './reducers';
+import reducers from './slices';
 
 import './index.scss';
 

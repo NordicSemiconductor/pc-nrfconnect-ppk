@@ -27,22 +27,22 @@ import {
     setDeviceRunningAction,
     setFileLoadedAction,
     setPowerModeAction,
-} from '../reducers/appReducer';
+} from '../slices/appSlice';
 import {
     animationAction,
     chartWindowAction,
     chartWindowUnLockAction,
     resetCursorAndChart,
     updateHasDigitalChannels,
-} from '../reducers/chartReducer';
-import { setSamplingAttrsAction } from '../reducers/dataLoggerReducer';
-import { updateGainsAction } from '../reducers/gainsReducer';
-import { resistorsResetAction } from '../reducers/resistorCalibrationReducer';
+} from '../slices/chartSlice';
+import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
+import { updateGainsAction } from '../slices/gainsSlice';
+import { resistorsResetAction } from '../slices/resistorCalibrationSlice';
 import {
     spikeFilteringToggleAction,
     switchingPointsDownSetAction,
     switchingPointsResetAction,
-} from '../reducers/switchingPointsReducer';
+} from '../slices/switchingPointsSlice';
 import {
     clearSingleTriggerWaitingAction,
     externalTriggerToggledAction,
@@ -52,8 +52,8 @@ import {
     triggerLevelSetAction,
     triggerSingleSetAction,
     triggerWindowRangeAction,
-} from '../reducers/triggerReducer';
-import { updateRegulatorAction } from '../reducers/voltageRegulatorReducer';
+} from '../slices/triggerSlice';
+import { updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';

@@ -17,7 +17,7 @@ import {
 import {
     updateVoltageRegulatorMaxCapAction,
     voltageRegulatorState,
-} from '../../reducers/voltageRegulatorReducer';
+} from '../../slices/voltageRegulatorSlice';
 import EventAction from '../../usageDataActions';
 
 export const CapVoltageSettings = () => {

@@ -11,12 +11,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     resetSpikeFilterToDefaults,
     spikeFilterState,
     updateSpikeFilterAction,
-} from '../../reducers/spikeFilterReducer';
+} from '../../slices/spikeFilterSlice';
 
 const SpikeFilter = () => {
     const dispatch = useDispatch();

@@ -9,7 +9,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { chartState, setDigitalChannels } from '../../reducers/chartReducer';
+import { chartState, setDigitalChannels } from '../../slices/chartSlice';
 
 import './digital-channels.scss';
 

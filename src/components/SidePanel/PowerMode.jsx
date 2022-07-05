@@ -11,8 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { colors, Group, Toggle } from 'pc-nrfconnect-shared';
 
 import { setDeviceRunning, setPowerMode } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
-import { triggerState } from '../../reducers/triggerReducer';
+import { appState } from '../../slices/appSlice';
+import { triggerState } from '../../slices/triggerSlice';
 import VoltageRegulator from './VoltageRegulator';
 
 const { gray700, nordicBlue } = colors;

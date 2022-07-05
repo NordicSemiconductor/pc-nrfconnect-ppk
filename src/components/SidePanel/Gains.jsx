@@ -10,8 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
-import { gainsState, updateGainsAction } from '../../reducers/gainsReducer';
+import { appState } from '../../slices/appSlice';
+import { gainsState, updateGainsAction } from '../../slices/gainsSlice';
 
 const gainTitles = [
     '~100nA - 50µA',

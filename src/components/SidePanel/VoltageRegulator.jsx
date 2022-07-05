@@ -11,11 +11,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     moveVoltageRegulatorVddAction,
     voltageRegulatorState,
-} from '../../reducers/voltageRegulatorReducer';
+} from '../../slices/voltageRegulatorSlice';
 
 const VoltageRegulator = () => {
     const dispatch = useDispatch();

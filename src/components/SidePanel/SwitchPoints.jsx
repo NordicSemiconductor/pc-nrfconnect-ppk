@@ -17,12 +17,12 @@ import {
     switchingPointsReset,
     switchingPointsUpSet,
 } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     switchingPointDownMovedAction,
     switchingPointsState,
     switchingPointUpMoved,
-} from '../../reducers/switchingPointsReducer';
+} from '../../slices/switchingPointsSlice';
 
 const SwitchPoints = () => {
     const dispatch = useDispatch();

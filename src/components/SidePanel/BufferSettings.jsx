@@ -19,7 +19,7 @@ import {
 import {
     changeMaxBufferSizeAction,
     maxBufferSize as maxBufferSizeSelector,
-} from '../../reducers/dataLoggerReducer';
+} from '../../slices/dataLoggerSlice';
 import EventAction from '../../usageDataActions';
 
 const { getCurrentWindow } = require('@electron/remote');

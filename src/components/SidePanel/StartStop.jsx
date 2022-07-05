@@ -16,12 +16,12 @@ import {
     samplingStop,
     setupOptions,
 } from '../../actions/deviceActions';
-import { appState } from '../../reducers/appReducer';
+import { appState } from '../../slices/appSlice';
 import {
     dataLoggerState,
     updateDurationSeconds,
     updateSampleFreqLog10,
-} from '../../reducers/dataLoggerReducer';
+} from '../../slices/dataLoggerSlice';
 import NumberWithUnit from './NumberWithUnitInput';
 
 const fmtOpts = { notation: 'fixed', precision: 1 };

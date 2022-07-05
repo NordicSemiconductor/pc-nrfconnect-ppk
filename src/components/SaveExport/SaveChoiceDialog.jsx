@@ -17,7 +17,7 @@ import {
     appState,
     showExportDialog,
     toggleSaveChoiceDialog,
-} from '../../reducers/appReducer';
+} from '../../slices/appSlice';
 
 import './saveexport.scss';
 

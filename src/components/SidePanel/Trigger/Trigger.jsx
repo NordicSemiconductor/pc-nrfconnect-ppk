@@ -8,8 +8,8 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Group } from 'pc-nrfconnect-shared';
 
-import { appState } from '../../../reducers/appReducer';
-import { triggerState } from '../../../reducers/triggerReducer';
+import { appState } from '../../../slices/appSlice';
+import { triggerState } from '../../../slices/triggerSlice';
 import { CONTINUOUS } from './triggerConstants';
 import TriggerLength from './TriggerLength';
 import TriggerLevel from './TriggerLevel';

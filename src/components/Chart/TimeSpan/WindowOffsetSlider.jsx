@@ -8,7 +8,7 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { number } from 'prop-types';
 
-import { setWindowOffsetAction } from '../../../reducers/triggerReducer';
+import { setWindowOffsetAction } from '../../../slices/triggerSlice';
 
 import './timespan.scss';
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import reducer, * as triggerActions from '../triggerReducer';
+import reducer, * as triggerActions from '../triggerSlice';
 
 const initialState = reducer(undefined, {});
 

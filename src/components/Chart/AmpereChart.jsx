@@ -13,12 +13,9 @@ import { arrayOf, func, number, shape } from 'prop-types';
 
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { indexToTimestamp } from '../../globals';
-import { appState } from '../../reducers/appReducer';
-import { chartState } from '../../reducers/chartReducer';
-import {
-    triggerLevelSetAction,
-    triggerState,
-} from '../../reducers/triggerReducer';
+import { appState } from '../../slices/appSlice';
+import { chartState } from '../../slices/chartSlice';
+import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
 import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin from './plugins/chart.dragSelect';
@@ -158,7 +155,7 @@ const AmpereChart = ({
                 cursor: { cursorBegin, cursorEnd },
                 afterFit: scale => {
                     scale.paddingRight = rightMargin;
-                }, // eslint-disable-line
+                },
             },
             yScale: {
                 type: 'linear',
@@ -174,7 +171,7 @@ const AmpereChart = ({
                 },
                 afterFit: scale => {
                     scale.width = yAxisWidth;
-                }, // eslint-disable-line
+                },
             },
         },
         maintainAspectRatio: false,

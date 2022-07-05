@@ -7,11 +7,8 @@
 import React from 'react';
 
 import { options } from '../../globals';
-import { showExportDialog } from '../../reducers/appReducer';
-import {
-    chartCursorAction,
-    chartWindowAction,
-} from '../../reducers/chartReducer';
+import { showExportDialog } from '../../slices/appSlice';
+import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
 import { fireEvent, render } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 

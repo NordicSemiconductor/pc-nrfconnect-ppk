@@ -6,8 +6,8 @@
 
 import React from 'react';
 
-import { deviceOpenedAction, rttStartAction } from '../../reducers/appReducer';
-import { setDataLoggerState } from '../../reducers/dataLoggerReducer';
+import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
+import { setDataLoggerState } from '../../slices/dataLoggerSlice';
 import { render } from '../../utils/testUtils';
 import StartStop from '../SidePanel/StartStop';
 

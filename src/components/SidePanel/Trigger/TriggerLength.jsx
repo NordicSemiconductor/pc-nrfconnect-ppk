@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 
 import { triggerLengthUpdate } from '../../../actions/deviceActions';
-import { triggerState } from '../../../reducers/triggerReducer';
+import { triggerState } from '../../../slices/triggerSlice';
 
 const TriggerLength = () => {
     const dispatch = useDispatch();

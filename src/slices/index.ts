@@ -7,15 +7,15 @@
 import { NrfConnectState } from 'pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
-import app from './appReducer';
-import chart from './chartReducer';
-import dataLogger from './dataLoggerReducer';
-import gains from './gainsReducer';
-import resistorCalibration from './resistorCalibrationReducer';
-import spikeFilter from './spikeFilterReducer';
-import switchingPoints from './switchingPointsReducer';
-import trigger from './triggerReducer';
-import voltageRegulator from './voltageRegulatorReducer';
+import app from './appSlice';
+import chart from './chartSlice';
+import dataLogger from './dataLoggerSlice';
+import gains from './gainsSlice';
+import resistorCalibration from './resistorCalibrationSlice';
+import spikeFilter from './spikeFilterSlice';
+import switchingPoints from './switchingPointsSlice';
+import trigger from './triggerSlice';
+import voltageRegulator from './voltageRegulatorSlice';
 
 type AppState = ReturnType<typeof appReducer>;
 
