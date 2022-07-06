@@ -3,17 +3,28 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
+/* eslint-disable @typescript-eslint/no-explicit-any -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import { fork } from 'child_process';
 import path from 'path';
 import { getAppDir, logger } from 'pc-nrfconnect-shared';
 
 import PPKCmd from '../constants';
+import { SpikeFilter } from '../utils/persistentStore';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
 
 /* eslint-disable no-bitwise */
 
-const generateMask = (bits, pos) => ({ pos, mask: (2 ** bits - 1) << pos });
+interface Mask {
+    pos: number;
+    mask: number;
+}
+
+const generateMask = (bits: number, pos: number): Mask => ({
+    pos,
+    mask: (2 ** bits - 1) << pos,
+});
 const MEAS_ADC = generateMask(14, 0);
 const MEAS_RANGE = generateMask(3, 14);
 const MEAS_COUNTER = generateMask(6, 18);
@@ -22,12 +33,84 @@ const MEAS_LOGIC = generateMask(8, 24);
 const MAX_PAYLOAD_COUNTER = 0b111111; // 0x3f, 64 - 1
 const DATALOSS_THRESHOLD = 500; // 500 * 10us = 5ms: allowed loss
 
-const getMaskedValue = (value, { mask, pos }) => (value & mask) >> pos;
+const getMaskedValue = (value: number, { mask, pos }: Mask): number =>
+    (value & mask) >> pos;
 
+interface serialport {
+    comName: string;
+    manufacturer: string;
+    path: string;
+    productId: string;
+    serialNumber: string;
+}
+
+interface PPK2 {
+    id: number;
+    boardVersion?: undefined;
+    dfuTriggerInfo: any;
+    dfuTriggerVersion: { semVer: string };
+    favorite: boolean;
+    nickname: string;
+    serialNumber: string;
+    serialPorts: serialport[];
+    serialport: serialport;
+    traits: {
+        broken: boolean;
+        jlink: boolean;
+        mcuBoot: boolean;
+        nordicDfu: boolean;
+        nordicUsb: boolean;
+        seggerUsb: boolean;
+        serialPorts: boolean;
+        usb: boolean;
+    };
+    usb: {
+        device: {
+            address: number;
+            busNumber: number;
+            configList: any;
+            descriptor: any;
+        };
+        manufacturer: string;
+        product: string;
+        serialNumber: string;
+    };
+}
+
+interface Modifiers {
+    r: modifier;
+    gs: modifier;
+    gi: modifier;
+    o: modifier;
+    s: modifier;
+    i: modifier;
+    ug: modifier;
+}
+type modifier = [number, number, number, number, number];
+type modifiers = {
+    [Property in keyof Modifiers]: modifier;
+};
+
+interface openingMessage {
+    opening: string;
+}
+
+interface startedMessage {
+    started: string;
+}
+
+interface bufferMessage {
+    type: string;
+    data: Array<number>;
+}
+
+type serialDeviceMessage = openingMessage | startedMessage | bufferMessage;
+
+// TODO: How to implement onSampleCallback and open, they are defined in the deviceActions file
 class SerialDevice extends Device {
     adcMult = 1.8 / 163840;
 
-    modifiers = {
+    modifiers: modifiers = {
         r: [1031.64, 101.65, 10.15, 0.94, 0.043],
         gs: [1, 1, 1, 1, 1],
         gi: [1, 1, 1, 1, 1],
@@ -47,8 +130,25 @@ class SerialDevice extends Device {
 
     isRunningInitially = false;
 
-    constructor(deviceInfo) {
-        super();
+    spikeFilter;
+    path;
+    child;
+    parser: any;
+    expectedCounter: null | number;
+    dataLossCounter: number;
+    corruptedSamples: { value: number; bits: number }[];
+    rollingAvg: undefined | number;
+    rollingAvg4: undefined | number;
+    prevRange: undefined | number;
+
+    afterSpike: undefined | number;
+    consecutiveRangeSample: undefined | number;
+
+    constructor(
+        deviceInfo: PPK2,
+        onSampleCallback: (values: unknown) => unknown
+    ) {
+        super(onSampleCallback);
 
         this.capabilities.maxContinuousSamplingTimeUs = this.adcSamplingTimeUs;
         this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
@@ -66,16 +166,17 @@ class SerialDevice extends Device {
         this.parser = null;
         this.resetDataLossCounter();
 
-        this.child.on('message', m => {
+        this.child.on('message', (message: serialDeviceMessage) => {
             if (!this.parser) {
                 console.error('Program logic error, parser is not set.');
                 return;
             }
-            if (m.data) {
-                this.parser(Buffer.from(m.data));
+
+            if ('data' in message && message.data) {
+                this.parser(Buffer.from(message.data));
                 return;
             }
-            console.log(`message: ${JSON.stringify(m)}`);
+            console.log(`message: ${JSON.stringify(message)}`);
         });
         this.child.on('close', code => {
             if (code) {
@@ -84,6 +185,9 @@ class SerialDevice extends Device {
                 console.log('Child process cleanly exited');
             }
         });
+        this.expectedCounter = null;
+        this.dataLossCounter = 0;
+        this.corruptedSamples = [];
     }
 
     resetDataLossCounter() {
@@ -92,7 +196,7 @@ class SerialDevice extends Device {
         this.corruptedSamples = [];
     }
 
-    getAdcResult(range, adcVal) {
+    getAdcResult(range: number, adcVal: number): number {
         const resultWithoutGain =
             (adcVal - this.modifiers.o[range]) *
             (this.adcMult / this.modifiers.r[range]);
@@ -122,26 +226,26 @@ class SerialDevice extends Device {
             this.prevRange = range;
         }
 
-        if (this.prevRange !== range || this.afterSpike > 0) {
+        if (this.prevRange !== range || this.afterSpike! > 0) {
             if (this.prevRange !== range) {
                 // number of measurements after the spike which still to be averaged
                 this.consecutiveRangeSample = 0;
                 this.afterSpike = this.spikeFilter.samples;
             } else {
-                this.consecutiveRangeSample += 1;
+                this.consecutiveRangeSample! += 1;
             }
             // Use previous rolling average if within first two samples of range 4
             if (range === 4) {
-                if (this.consecutiveRangeSample < 2) {
+                if (this.consecutiveRangeSample! < 2) {
                     this.rollingAvg4 = prevRollingAvg4;
                     this.rollingAvg = prevRollingAvg;
                 }
-                adc = this.rollingAvg4;
+                adc = this.rollingAvg4!;
             } else {
                 adc = this.rollingAvg;
             }
             // adc = range === 4 ? this.rollingAvg4 : this.rollingAvg;
-            this.afterSpike -= 1;
+            this.afterSpike! -= 1;
         }
         this.prevRange = range;
 
@@ -153,27 +257,31 @@ class SerialDevice extends Device {
         return this.getMetadata();
     }
 
-    parseMeta(m) {
-        Object.keys(this.modifiers).forEach(k => {
-            for (let i = 0; i < 5; i += 1) {
-                this.modifiers[k][i] = m[`${k}${i}`] || this.modifiers[k][i];
+    parseMeta(meta: any) {
+        console.log(meta);
+        Object.entries(this.modifiers).forEach(
+            ([modifierKey, modifierArray]) => {
+                Array.from(modifierArray).forEach((modifier, index) => {
+                    modifierArray[index] =
+                        meta[`${modifierKey}${index}`] || modifier;
+                });
             }
-        });
-        return m;
+        );
+        return meta;
     }
 
     stop() {
         this.child.kill();
     }
 
-    sendCommand(cmd) {
+    sendCommand(cmd: PPKCmd): Promise<any> {
         if (cmd.constructor !== Array) {
             this.emit(
                 'error',
                 'Unable to issue command',
                 'Command is not an array'
             );
-            return undefined;
+            return undefined!;
         }
         if (cmd[0] === PPKCmd.AverageStart) {
             this.rollingAvg = undefined;
@@ -186,7 +294,7 @@ class SerialDevice extends Device {
         return Promise.resolve(cmd.length);
     }
 
-    dataLossReport(missingSamples) {
+    dataLossReport(missingSamples: number) {
         if (
             this.dataLossCounter < DATALOSS_THRESHOLD &&
             this.dataLossCounter + missingSamples >= DATALOSS_THRESHOLD
@@ -198,7 +306,7 @@ class SerialDevice extends Device {
         this.dataLossCounter += missingSamples;
     }
 
-    handleRawDataSet(adcValue) {
+    handleRawDataSet(adcValue: number) {
         try {
             const currentMeasurementRange = Math.min(
                 getMaskedValue(adcValue, MEAS_RANGE),
@@ -238,8 +346,14 @@ class SerialDevice extends Device {
             this.expectedCounter &= MAX_PAYLOAD_COUNTER;
             // Only fire the event, if the buffer data is valid
             this.onSampleCallback({ value, bits });
-        } catch (err) {
-            console.log(err.message, 'original value', adcValue);
+        } catch (err: unknown) {
+            // TODO: This does not consistently handle all possibilites
+            // Even though we expect all err to be instance of Error we should
+            // probably also include an else and potentially log it to ensure all
+            // branches are considered.
+            if (err instanceof Error) {
+                console.log(err.message, 'original value', adcValue);
+            }
             // to keep timestamp consistent, undefined must be emitted
             this.onSampleCallback({});
         }
@@ -247,7 +361,7 @@ class SerialDevice extends Device {
 
     remainder = Buffer.alloc(0);
 
-    parseMeasurementData(buf) {
+    parseMeasurementData(buf: Buffer) {
         const sampleSize = 4;
         let ofs = this.remainder.length;
         const first = Buffer.concat(
@@ -266,7 +380,7 @@ class SerialDevice extends Device {
         let metadata = '';
         return (
             new Promise(resolve => {
-                this.parser = data => {
+                this.parser = (data: Buffer) => {
                     metadata = `${metadata}${data}`;
                     if (metadata.includes('END')) {
                         // hopefully we have the complete string, HW is the last line
@@ -277,16 +391,21 @@ class SerialDevice extends Device {
                 this.sendCommand([PPKCmd.GetMetadata]);
             })
                 // convert output string json:
-                .then(m =>
-                    m
-                        .replace('END', '')
-                        .trim()
-                        .toLowerCase()
-                        .replace(/-nan/g, 'null')
-                        .replace(/\n/g, ',\n"')
-                        .replace(/: /g, '": ')
-                )
-                .then(m => `{"${m}}`)
+                .then(meta => {
+                    // TODO: Is this the best way to handle this?
+                    // What if typeof meta is not 'string', even though we never expect it,
+                    // shouldn't we handle it anyway. And how should then handle it?
+                    if (typeof meta === 'string') {
+                        return meta
+                            .replace('END', '')
+                            .trim()
+                            .toLowerCase()
+                            .replace(/-nan/g, 'null')
+                            .replace(/\n/g, ',\n"')
+                            .replace(/: /g, '": ');
+                    }
+                })
+                .then(meta => `{"${meta}}`)
                 // resolve with parsed object:
                 .then(JSON.parse)
         );
@@ -294,11 +413,11 @@ class SerialDevice extends Device {
 
     // Capability methods
 
-    ppkSetPowerMode(isSmuMode) {
+    ppkSetPowerMode(isSmuMode: boolean): Promise<unknown> {
         return this.sendCommand([PPKCmd.SetPowerMode, isSmuMode ? 2 : 1]);
     }
 
-    ppkSetUserGains(range, gain) {
+    ppkSetUserGains(range: number, gain: number): Promise<unknown> {
         this.modifiers.ug[range] = gain;
         return this.sendCommand([
             PPKCmd.SetUserGains,
@@ -307,7 +426,7 @@ class SerialDevice extends Device {
         ]);
     }
 
-    ppkSetSpikeFilter(spikeFilter) {
+    ppkSetSpikeFilter(spikeFilter: SpikeFilter): void {
         this.spikeFilter = {
             ...this.spikeFilter,
             ...spikeFilter,

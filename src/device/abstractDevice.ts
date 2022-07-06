@@ -3,8 +3,7 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable @typescript-eslint/no-unused-vars -- TODO: only temporary whilst refactoring from javascript */
+
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: only temporary whilst refactoring from javascript */
 
 import EventEmitter from 'events';
@@ -24,12 +23,29 @@ export function convertFloatToByteBuffer(floatnum: number): Uint8Array {
     return bytes;
 }
 
-export default class Device extends EventEmitter {
+interface capabilities {
+    digitalChannels?: boolean;
+    ppkAverageStart?: boolean;
+    ppkAverageStop?: boolean;
+    ppkDeviceRunning?: boolean;
+    ppkSetPowerMode?: boolean;
+    ppkSetSpikeFilter?: boolean;
+    ppkSetUserGains?: boolean;
+    ppkTriggerSet?: boolean;
+    ppkTriggerSingleSet?: boolean;
+    ppkTriggerStop?: boolean;
+    ppkUpdateRegulator?: boolean;
+    prePostTriggering?: boolean;
+    samplingTimeUs?: number;
+    maxContinuousSamplingTimeUs?: number;
+}
+
+export default abstract class Device extends EventEmitter {
     currentVdd = 0;
     triggerWindowRange = { min: 1, max: 10 };
-    capabilities = {};
+    capabilities: capabilities;
 
-    constructor() {
+    constructor(onSampleCallback: (values: unknown) => unknown) {
         super();
         this.capabilities = {};
         getAllPropertyNames(this)
@@ -37,49 +53,40 @@ export default class Device extends EventEmitter {
             .forEach((k: any) =>
                 Object.assign(this.capabilities, { [k]: true })
             );
-        console.log('PPK2 capabilities: ');
-        console.log(this.capabilities);
+        this.onSampleCallback = onSampleCallback;
     }
 
-    open() {
-        throw new Error('not implemented');
-    }
+    // Method initiated in the constructor
+    onSampleCallback;
 
-    sendCommand(...args: PPKCmd[]) {
-        throw new Error('not implemented');
-    }
+    // TODO: Is this function ever initialized on any device instance?
+    // Looks like the function does not reside on the instance, but rather outside it.
+    // Hence, I question if this should be removed from the class entirely.
+    // abstract open(): void;
 
-    stop() {
-        throw new Error('not implemented');
-    }
+    abstract sendCommand(...args: PPKCmd[]): Promise<unknown>;
 
-    start() {
-        throw new Error('not implemented');
-    }
+    abstract stop(): void;
 
-    onSampleCallback() {
-        throw new Error('not implemented');
-    }
+    abstract start(): Promise<unknown>;
 
-    parseMeta() {
-        throw new Error('not implemented');
-    }
+    abstract parseMeta(meta: any): any;
 
     // Capability methods
 
-    ppkAverageStart() {
+    ppkAverageStart(): Promise<unknown> {
         return this.sendCommand([PPKCmd.AverageStart]);
     }
 
-    ppkAverageStop() {
+    ppkAverageStop(): Promise<unknown> {
         return this.sendCommand([PPKCmd.AverageStop]);
     }
 
-    ppkDeviceRunning(...args: PPKCmd) {
+    ppkDeviceRunning(...args: PPKCmd): Promise<unknown> {
         return this.sendCommand([PPKCmd.DeviceRunningSet, ...args]);
     }
 
-    ppkUpdateRegulator(vdd: number) {
+    ppkUpdateRegulator(vdd: number): Promise<unknown> {
         this.currentVdd = vdd;
         // eslint-disable-next-line no-bitwise
         return this.sendCommand([PPKCmd.RegulatorSet, vdd >> 8, vdd & 0xff]);

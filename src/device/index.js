@@ -9,8 +9,7 @@ import SerialDevice from './serialDevice';
 
 export default (device, onSampleCallback) => {
     const instance = device.traits.jlink
-        ? new RTTDevice(device)
-        : new SerialDevice(device);
-    instance.onSampleCallback = onSampleCallback;
+        ? new RTTDevice(device, onSampleCallback)
+        : new SerialDevice(device, onSampleCallback);
     return instance;
 };

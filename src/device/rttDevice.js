@@ -105,8 +105,8 @@ class RTTDevice extends Device {
 
     isRunningInitially = true;
 
-    constructor(device) {
-        super();
+    constructor(device, onSampleCallback) {
+        super(onSampleCallback);
 
         this.capabilities.maxContinuousSamplingTimeUs = 130;
         this.capabilities.samplingTimeUs = this.adcSamplingTimeUs;
