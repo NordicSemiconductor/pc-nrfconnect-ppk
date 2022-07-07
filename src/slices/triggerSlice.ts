@@ -73,7 +73,7 @@ const triggerSlice = createSlice({
         },
         setTriggerStartAction(
             state,
-            action: PayloadAction<{ triggerStartIndex: number }>
+            action: PayloadAction<{ triggerStartIndex: number | null }>
         ) {
             const { triggerStartIndex } = action.payload;
             return { ...state, triggerStartIndex };

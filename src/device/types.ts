@@ -21,6 +21,8 @@ export function isSerialDevice(
     return !isRTTDevice(deviceToTest);
 }
 
+export type SupportedDevice = RTTDevice | SerialDevice;
+
 export interface serialport {
     comName: string;
     manufacturer: string;

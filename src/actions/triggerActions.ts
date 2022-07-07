@@ -4,10 +4,15 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
+
 import { logger } from 'pc-nrfconnect-shared';
 
+import { SupportedDevice } from '../device/types';
 import { indexToTimestamp } from '../globals';
+import { RootState } from '../slices';
 import { chartTriggerWindowAction } from '../slices/chartSlice';
+import { TDispatch } from '../slices/thunk';
 import {
     clearSingleTriggerWaitingAction,
     completeTriggerAction,
@@ -16,21 +21,32 @@ import {
 
 // PPK2 trigger point should by default be shifted to middle of window
 const getShiftedIndex = (
-    windowSize,
-    samplingTime,
+    windowSize: number,
+    samplingTime: number,
     triggerOffset = 0,
     supportsPrePostTriggering = false
-) => {
+): number => {
     if (!supportsPrePostTriggering) return 0;
     const offsetToSamples = Math.ceil(triggerOffset / samplingTime);
     return windowSize / 2 + offsetToSamples;
 };
 
-export const calculateWindowSize = (triggerLength, samplingTime) =>
-    Math.floor((triggerLength * 1000) / samplingTime);
+export const calculateWindowSize = (
+    triggerLength: number,
+    samplingTime: number
+): number => Math.floor((triggerLength * 1000) / samplingTime);
 
-export function processTriggerSample(currentValue, device, samplingData) {
-    return (dispatch, getState) => {
+export function processTriggerSample(
+    currentValue: number,
+    device: SupportedDevice,
+    samplingData: {
+        samplingTime: number;
+        dataIndex: number;
+        dataBuffer: Float32Array;
+        endOfTrigger: number;
+    }
+) {
+    return (dispatch: TDispatch, getState: () => RootState) => {
         const {
             samplingTime,
             dataIndex: currentIndex,
@@ -50,7 +66,7 @@ export function processTriggerSample(currentValue, device, samplingData) {
         const isPPK1 = !!device.capabilities.hwTrigger;
 
         if (!triggerStartIndex) {
-            if (currentValue >= triggerLevel || isPPK1) {
+            if (currentValue >= triggerLevel! || isPPK1) {
                 dispatch(
                     setTriggerStartAction({ triggerStartIndex: currentIndex })
                 );
@@ -80,9 +96,9 @@ export function processTriggerSample(currentValue, device, samplingData) {
         );
         const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
         const to = indexToTimestamp(currentIndex - shiftedIndex);
-        dispatch(chartTriggerWindowAction(from, to, to - from));
+        dispatch(chartTriggerWindowAction(from!, to!, to! - from!));
         isPPK1
             ? dispatch(setTriggerStartAction({ triggerStartIndex: null }))
-            : dispatch(completeTriggerAction({ triggerStartIndex }));
+            : dispatch(completeTriggerAction({ origin: triggerStartIndex }));
     };
 }
