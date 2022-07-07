@@ -5,6 +5,7 @@
  */
 
 /* eslint-disable no-bitwise */
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import nRFDeviceLib from '@nordicsemiconductor/nrf-device-lib-js';
 import { getDeviceLibContext, logger } from 'pc-nrfconnect-shared';
@@ -32,6 +33,14 @@ const MEAS_RANGE_POS = 14;
 
 const MEAS_RANGE_MSK = 3 << 14;
 
+interface hwState {
+    rttReadBuffer?: Buffer;
+    iteration: number;
+    string?: string;
+}
+
+type hwStates = hwState | undefined;
+
 /**
     Metadata expected from the PPK firmware is a multiline string
     in the following format, where the parts in brackets are optional:
@@ -49,7 +58,7 @@ const MetadataParser = new RegExp(
     ].join('')
 );
 
-const promiseTimeout = (ms, promise) =>
+const promiseTimeout = (ms: number, promise: Promise<hwStates>) =>
     Promise.race([
         promise,
         new Promise((_, reject) => {
@@ -57,7 +66,7 @@ const promiseTimeout = (ms, promise) =>
         }),
     ]);
 
-const triggerLevelConv = triggerLevel => {
+const triggerLevelConv = (triggerLevel: number) => {
     const high = (triggerLevel >> 16) & 0xff;
     const mid = (triggerLevel >> 8) & 0xff;
     const low = triggerLevel & 0xff;
@@ -105,7 +114,13 @@ class RTTDevice extends Device {
 
     isRunningInitially = true;
 
-    constructor(device, onSampleCallback) {
+    private device;
+    private dataPayload: number[];
+    private byteHandlerFn: (byte: number) => void;
+
+    public timestamp: number;
+
+    constructor(device, onSampleCallback: (values: unknown) => unknown) {
         super(onSampleCallback);
 
         this.capabilities.maxContinuousSamplingTimeUs = 130;
@@ -119,7 +134,7 @@ class RTTDevice extends Device {
         this.byteHandlerFn = this.byteHandlerReceiveMode;
     }
 
-    byteHandlerReceiveMode(byte) {
+    byteHandlerReceiveMode(byte: number) {
         /* ESC received means that a valid data byte was either
          * ETX or ESC. Two bytes are sent, ESC and then valid ^ 0x20
          */
@@ -158,7 +173,7 @@ class RTTDevice extends Device {
         }
     }
 
-    byteHandlerEscapeMode(byte) {
+    byteHandlerEscapeMode(byte: number) {
         // XOR the byte after the ESC-character
         // Remove these two bytes, the ESC and the valid one
 
@@ -167,12 +182,14 @@ class RTTDevice extends Device {
         this.byteHandlerFn = this.byteHandlerReceiveMode;
     }
 
-    parseMeasurementData(rttReadBuffer) {
+    parseMeasurementData(rttReadBuffer: Buffer) {
         rttReadBuffer.forEach(byte => this.byteHandlerFn(byte));
     }
 
-    convertSysTick2MicroSeconds(data) {
+    convertSysTick2MicroSeconds(data: number[]) {
         this.sysTickViewUint8.set(data);
+        // FIXME: Does this look wrong?
+        // data is sent in as an array of numbers but getUint32 expects a single number
         return this.sysTickView.getUint32(data, true) * this.adcSamplingTimeUs;
     }
 
@@ -183,7 +200,7 @@ class RTTDevice extends Device {
                 'SEGGER version: ',
                 this.device.jlink.jlinkObFirmwareVersion
             );
-            resolve();
+            resolve(null);
         });
     }
 
@@ -194,7 +211,7 @@ class RTTDevice extends Device {
             WAIT_FOR_START
         );
     }
-    static readRTT = async (deviceId, length) => {
+    static readRTT = async (deviceId: number, length: number) => {
         const { rttReadBuffer } = await nRFDeviceLib.rttRead(
             deviceLibContext,
             deviceId,
@@ -231,10 +248,10 @@ class RTTDevice extends Device {
         }
     }
 
-    static getHardwareStates(deviceId) {
+    static getHardwareStates(deviceId: number) {
         let iteration = 0;
         async function readUntil() {
-            let hwStates;
+            let hwStates: hwStates;
             while (!hwStates && iteration < 250) {
                 iteration += 1;
                 // eslint-disable-next-line no-await-in-loop
@@ -247,7 +264,7 @@ class RTTDevice extends Device {
                     };
                 }
             }
-            return hwStates || { iteration };
+            return { ...hwStates, iteration };
         }
         return promiseTimeout(WAIT_FOR_HW_STATES, readUntil());
     }
@@ -257,7 +274,9 @@ class RTTDevice extends Device {
         return this.logProbeInfo()
             .then(() => this.startRTT())
             .then(() => RTTDevice.getHardwareStates(this.device.id))
-            .then(({ string, iteration }) => {
+            .then(hwState => {
+                const state = hwState as hwStates;
+                const { string, iteration } = state!;
                 console.log(`it took ${iteration} iteration to read hw states`);
                 if (!string) {
                     throw new Error('Couldn`t read hardware states.');
@@ -288,7 +307,7 @@ class RTTDevice extends Device {
         }
     }
 
-    async write(slipPackage) {
+    async write(slipPackage: number[]) {
         try {
             return await nRFDeviceLib.rttWrite(
                 deviceLibContext,
@@ -302,7 +321,12 @@ class RTTDevice extends Device {
         }
     }
 
-    sendCommand(cmd) {
+    // TODO: how to handle an abstract method that is ultimately different in different
+    // implementations. Makes me think that serialDevice and rttDevice could have been two
+    // separate classes.
+    sendCommand(
+        cmd: PPKCmd
+    ): Promise<nRFDeviceLib.RTTWriteResult | undefined> | undefined {
         const slipPackage = [];
         if (cmd.constructor !== Array) {
             this.emit(
@@ -384,7 +408,7 @@ class RTTDevice extends Device {
         }
     }
 
-    parseMeta(hardwareStates) {
+    parseMeta(hardwareStates: string) {
         const match = MetadataParser.exec(hardwareStates);
         if (!match) {
             this.emit('error', 'Failed to read PPK metadata');
@@ -441,7 +465,7 @@ class RTTDevice extends Device {
         return this.sendCommand([PPKCmd.TriggerStop]);
     }
 
-    ppkTriggerSet(triggerLevel) {
+    ppkTriggerSet(triggerLevel: number) {
         this.triggerRunning = true;
         this.startReadLoop();
         return this.sendCommand([
@@ -450,7 +474,7 @@ class RTTDevice extends Device {
         ]);
     }
 
-    ppkTriggerSingleSet(triggerLevel) {
+    ppkTriggerSingleSet(triggerLevel: number) {
         this.triggerWaiting = true;
         this.startReadLoop();
         return this.sendCommand([
@@ -463,7 +487,7 @@ class RTTDevice extends Device {
         return this.sendCommand([PPKCmd.TriggerExtToggle]);
     }
 
-    ppkTriggerWindowSet(value) {
+    ppkTriggerWindowSet(value: number) {
         const wnd = Math.ceil((value * 1000) / this.adcSamplingTimeUs);
         return this.sendCommand([
             PPKCmd.TriggerWindowSet,
@@ -472,11 +496,11 @@ class RTTDevice extends Device {
         ]);
     }
 
-    ppkSwitchPointUp(vref) {
+    ppkSwitchPointUp(vref: number) {
         return this.sendCommand([PPKCmd.SwitchPointUp, vref >> 8, vref & 0xff]);
     }
 
-    ppkSwitchPointDown(vref) {
+    ppkSwitchPointDown(vref: number) {
         return this.sendCommand([
             PPKCmd.SwitchPointDown,
             vref >> 8,
@@ -484,7 +508,7 @@ class RTTDevice extends Device {
         ]);
     }
 
-    ppkUpdateResistors(low, mid, high) {
+    ppkUpdateResistors(low: number, mid: number, high: number) {
         const lowbytes = convertFloatToByteBuffer(low);
         const midbytes = convertFloatToByteBuffer(mid);
         const highbytes = convertFloatToByteBuffer(high);

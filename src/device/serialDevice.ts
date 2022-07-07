@@ -13,13 +13,9 @@ import { getAppDir, logger } from 'pc-nrfconnect-shared';
 import PPKCmd from '../constants';
 import { SpikeFilter } from '../utils/persistentStore';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
+import { Mask, modifiers, PPK2, serialDeviceMessage } from './types';
 
 /* eslint-disable no-bitwise */
-
-interface Mask {
-    pos: number;
-    mask: number;
-}
 
 const generateMask = (bits: number, pos: number): Mask => ({
     pos,
@@ -36,81 +32,9 @@ const DATALOSS_THRESHOLD = 500; // 500 * 10us = 5ms: allowed loss
 const getMaskedValue = (value: number, { mask, pos }: Mask): number =>
     (value & mask) >> pos;
 
-interface serialport {
-    comName: string;
-    manufacturer: string;
-    path: string;
-    productId: string;
-    serialNumber: string;
-}
-
-interface PPK2 {
-    id: number;
-    boardVersion?: undefined;
-    dfuTriggerInfo: any;
-    dfuTriggerVersion: { semVer: string };
-    favorite: boolean;
-    nickname: string;
-    serialNumber: string;
-    serialPorts: serialport[];
-    serialport: serialport;
-    traits: {
-        broken: boolean;
-        jlink: boolean;
-        mcuBoot: boolean;
-        nordicDfu: boolean;
-        nordicUsb: boolean;
-        seggerUsb: boolean;
-        serialPorts: boolean;
-        usb: boolean;
-    };
-    usb: {
-        device: {
-            address: number;
-            busNumber: number;
-            configList: any;
-            descriptor: any;
-        };
-        manufacturer: string;
-        product: string;
-        serialNumber: string;
-    };
-}
-
-interface Modifiers {
-    r: modifier;
-    gs: modifier;
-    gi: modifier;
-    o: modifier;
-    s: modifier;
-    i: modifier;
-    ug: modifier;
-}
-type modifier = [number, number, number, number, number];
-type modifiers = {
-    [Property in keyof Modifiers]: modifier;
-};
-
-interface openingMessage {
-    opening: string;
-}
-
-interface startedMessage {
-    started: string;
-}
-
-interface bufferMessage {
-    type: string;
-    data: Array<number>;
-}
-
-type serialDeviceMessage = openingMessage | startedMessage | bufferMessage;
-
 // TODO: How to implement onSampleCallback and open, they are defined in the deviceActions file
 class SerialDevice extends Device {
-    adcMult = 1.8 / 163840;
-
-    modifiers: modifiers = {
+    private modifiers: modifiers = {
         r: [1031.64, 101.65, 10.15, 0.94, 0.043],
         gs: [1, 1, 1, 1, 1],
         gi: [1, 1, 1, 1, 1],
@@ -120,29 +44,27 @@ class SerialDevice extends Device {
         ug: [1, 1, 1, 1, 1],
     };
 
-    adcSamplingTimeUs = 10;
+    public resistors = { hi: 1.8, mid: 28, lo: 500 };
+    public vddRange = { min: 800, max: 5000 };
+    public triggerWindowRange = { min: 1, max: 100 };
+    public isRunningInitially = false;
 
-    resistors = { hi: 1.8, mid: 28, lo: 500 };
+    private adcMult = 1.8 / 163840;
+    private adcSamplingTimeUs = 10;
 
-    vddRange = { min: 800, max: 5000 };
-
-    triggerWindowRange = { min: 1, max: 100 };
-
-    isRunningInitially = false;
-
-    spikeFilter;
-    path;
-    child;
-    parser: any;
-    expectedCounter: null | number;
-    dataLossCounter: number;
-    corruptedSamples: { value: number; bits: number }[];
-    rollingAvg: undefined | number;
-    rollingAvg4: undefined | number;
-    prevRange: undefined | number;
-
-    afterSpike: undefined | number;
-    consecutiveRangeSample: undefined | number;
+    // This are all declared to make typescript aware of their existence.
+    private spikeFilter;
+    private path;
+    private child;
+    private parser: any;
+    private expectedCounter: null | number;
+    private dataLossCounter: number;
+    private corruptedSamples: { value: number; bits: number }[];
+    private rollingAvg: undefined | number;
+    private rollingAvg4: undefined | number;
+    private prevRange: undefined | number;
+    private afterSpike: undefined | number;
+    private consecutiveRangeSample: undefined | number;
 
     constructor(
         deviceInfo: PPK2,

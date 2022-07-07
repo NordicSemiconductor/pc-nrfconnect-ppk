@@ -9,6 +9,7 @@
 import EventEmitter from 'events';
 
 import PPKCmd from '../constants';
+import { deviceTraits } from './types';
 
 const getAllPropertyNames = (obj: any): any => {
     const proto = Object.getPrototypeOf(obj);
@@ -38,12 +39,18 @@ interface capabilities {
     prePostTriggering?: boolean;
     samplingTimeUs?: number;
     maxContinuousSamplingTimeUs?: number;
+
+    // PPK1
+    hwTrigger?: boolean;
 }
 
+// Device is implemented by rttDevice and serialDevice
+// This abstract class should reflect all that is common between the two specific implementations
 export default abstract class Device extends EventEmitter {
     currentVdd = 0;
     triggerWindowRange = { min: 1, max: 10 };
     capabilities: capabilities;
+    public traits!: deviceTraits;
 
     constructor(onSampleCallback: (values: unknown) => unknown) {
         super();
@@ -62,6 +69,7 @@ export default abstract class Device extends EventEmitter {
     // TODO: Is this function ever initialized on any device instance?
     // Looks like the function does not reside on the instance, but rather outside it.
     // Hence, I question if this should be removed from the class entirely.
+
     // abstract open(): void;
 
     abstract sendCommand(...args: PPKCmd[]): Promise<unknown>;
