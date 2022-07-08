@@ -43,7 +43,7 @@ export function processTriggerSample(
         samplingTime: number;
         dataIndex: number;
         dataBuffer: Float32Array;
-        endOfTrigger: number;
+        endOfTrigger: boolean;
     }
 ) {
     return (dispatch: TDispatch, getState: () => RootState) => {

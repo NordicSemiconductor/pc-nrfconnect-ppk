@@ -119,7 +119,7 @@ export const indexToTimestamp = (index: sampleIndex): sampleTimestamp => {
     );
 };
 
-export const updateTitle = (info: string | undefined) => {
+export const updateTitle = (info?: string) => {
     const title = getCurrentWindow().getTitle().split(':')[0].trim();
     getCurrentWindow().setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
 };

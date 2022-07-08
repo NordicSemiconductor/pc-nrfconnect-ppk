@@ -13,7 +13,13 @@ import { getAppDir, logger } from 'pc-nrfconnect-shared';
 import PPKCmd from '../constants';
 import { SpikeFilter } from '../utils/persistentStore';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
-import { Mask, modifiers, PPK2, serialDeviceMessage } from './types';
+import {
+    Mask,
+    modifiers,
+    PPK2,
+    SampleValues,
+    serialDeviceMessage,
+} from './types';
 
 /* eslint-disable no-bitwise */
 
@@ -34,7 +40,7 @@ const getMaskedValue = (value: number, { mask, pos }: Mask): number =>
 
 // TODO: How to implement onSampleCallback and open, they are defined in the deviceActions file
 class SerialDevice extends Device {
-    private modifiers: modifiers = {
+    public modifiers: modifiers = {
         r: [1031.64, 101.65, 10.15, 0.94, 0.043],
         gs: [1, 1, 1, 1, 1],
         gi: [1, 1, 1, 1, 1],
@@ -44,13 +50,13 @@ class SerialDevice extends Device {
         ug: [1, 1, 1, 1, 1],
     };
 
+    public adcSamplingTimeUs = 10;
     public resistors = { hi: 1.8, mid: 28, lo: 500 };
     public vddRange = { min: 800, max: 5000 };
     public triggerWindowRange = { min: 1, max: 100 };
     public isRunningInitially = false;
 
     private adcMult = 1.8 / 163840;
-    private adcSamplingTimeUs = 10;
 
     // This are all declared to make typescript aware of their existence.
     private spikeFilter;
@@ -68,7 +74,7 @@ class SerialDevice extends Device {
 
     constructor(
         deviceInfo: PPK2,
-        onSampleCallback: (values: unknown) => unknown
+        onSampleCallback: (values: SampleValues) => unknown
     ) {
         super(onSampleCallback);
 
@@ -196,14 +202,14 @@ class SerialDevice extends Device {
         this.child.kill();
     }
 
-    sendCommand(cmd: PPKCmd): Promise<any> {
+    sendCommand(cmd: PPKCmd) {
         if (cmd.constructor !== Array) {
             this.emit(
                 'error',
                 'Unable to issue command',
                 'Command is not an array'
             );
-            return undefined!;
+            return undefined;
         }
         if (cmd[0] === PPKCmd.AverageStart) {
             this.rollingAvg = undefined;
@@ -247,7 +253,7 @@ class SerialDevice extends Device {
                 counter === this.expectedCounter
             ) {
                 while (this.corruptedSamples.length > 0) {
-                    this.onSampleCallback(this.corruptedSamples.shift());
+                    this.onSampleCallback(this.corruptedSamples.shift()!);
                 }
                 this.corruptedSamples = [];
             } else if (this.corruptedSamples.length > 4) {
@@ -336,7 +342,7 @@ class SerialDevice extends Device {
     // Capability methods
 
     ppkSetPowerMode(isSmuMode: boolean): Promise<unknown> {
-        return this.sendCommand([PPKCmd.SetPowerMode, isSmuMode ? 2 : 1]);
+        return this.sendCommand([PPKCmd.SetPowerMode, isSmuMode ? 2 : 1])!;
     }
 
     ppkSetUserGains(range: number, gain: number): Promise<unknown> {
@@ -345,7 +351,7 @@ class SerialDevice extends Device {
             PPKCmd.SetUserGains,
             range,
             ...convertFloatToByteBuffer(gain),
-        ]);
+        ])!;
     }
 
     ppkSetSpikeFilter(spikeFilter: SpikeFilter): void {

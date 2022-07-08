@@ -6,12 +6,14 @@
 
 /* eslint-disable no-bitwise */
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
+/* eslint-disable @typescript-eslint/no-explicit-any  -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import nRFDeviceLib from '@nordicsemiconductor/nrf-device-lib-js';
 import { getDeviceLibContext, logger } from 'pc-nrfconnect-shared';
 
 import PPKCmd from '../constants';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
+import { SampleValues } from './types';
 
 export const SAMPLES_PER_AVERAGE = 10;
 const deviceLibContext = getDeviceLibContext();
@@ -30,6 +32,13 @@ const MEAS_RANGE_HI = 3;
 const MEAS_RANGE_INVALID = 4;
 const MEAS_ADC_MSK = 0x3fff;
 const MEAS_RANGE_POS = 14;
+
+type MEAS_INDEX =
+    | typeof MEAS_RANGE_NONE
+    | typeof MEAS_RANGE_LO
+    | typeof MEAS_RANGE_MID
+    | typeof MEAS_RANGE_HI
+    | typeof MEAS_RANGE_INVALID;
 
 const MEAS_RANGE_MSK = 3 << 14;
 
@@ -120,7 +129,10 @@ class RTTDevice extends Device {
 
     public timestamp: number;
 
-    constructor(device, onSampleCallback: (values: unknown) => unknown) {
+    constructor(
+        device: any,
+        onSampleCallback: (values: SampleValues) => unknown
+    ) {
         super(onSampleCallback);
 
         this.capabilities.maxContinuousSamplingTimeUs = 130;
@@ -190,7 +202,10 @@ class RTTDevice extends Device {
         this.sysTickViewUint8.set(data);
         // FIXME: Does this look wrong?
         // data is sent in as an array of numbers but getUint32 expects a single number
-        return this.sysTickView.getUint32(data, true) * this.adcSamplingTimeUs;
+        // Corrected: sysTickViewUint8.set(data) places 4 byte value into the DataView,
+        // And sysTickView will retrieve the Uint32 value from those 4 bytes.
+        // Since it's 4 bytes, an offset of 0 will always be the correct offset.
+        return this.sysTickView.getUint32(0, true) * this.adcSamplingTimeUs;
     }
 
     logProbeInfo() {
@@ -321,12 +336,7 @@ class RTTDevice extends Device {
         }
     }
 
-    // TODO: how to handle an abstract method that is ultimately different in different
-    // implementations. Makes me think that serialDevice and rttDevice could have been two
-    // separate classes.
-    sendCommand(
-        cmd: PPKCmd
-    ): Promise<nRFDeviceLib.RTTWriteResult | undefined> | undefined {
+    sendCommand(cmd: PPKCmd) {
         const slipPackage = [];
         if (cmd.constructor !== Array) {
             this.emit(
@@ -351,18 +361,21 @@ class RTTDevice extends Device {
         return this.write(slipPackage);
     }
 
-    getAdcResult = {
-        [MEAS_RANGE_LO]: adcVal => adcVal * (this.adcMult / this.resistors.lo),
-        [MEAS_RANGE_MID]: adcVal =>
-            adcVal * (this.adcMult / this.resistors.mid),
-        [MEAS_RANGE_HI]: adcVal => adcVal * (this.adcMult / this.resistors.hi),
-        [MEAS_RANGE_NONE]: () => {
-            throw new Error('Measurement range not detected');
-        },
-        [MEAS_RANGE_INVALID]: () => {
-            throw new Error('Invalid range');
-        },
-    };
+    getAdcResult: { [key in MEAS_INDEX]: (adcVal: number) => number | never } =
+        {
+            [MEAS_RANGE_LO]: (adcVal: number) =>
+                adcVal * (this.adcMult / this.resistors.lo),
+            [MEAS_RANGE_MID]: (adcVal: number) =>
+                adcVal * (this.adcMult / this.resistors.mid),
+            [MEAS_RANGE_HI]: (adcVal: number) =>
+                adcVal * (this.adcMult / this.resistors.hi),
+            [MEAS_RANGE_NONE]: () => {
+                throw new Error('Measurement range not detected');
+            },
+            [MEAS_RANGE_INVALID]: () => {
+                throw new Error('Invalid range');
+            },
+        };
 
     handleAverageDataSet() {
         try {
@@ -398,7 +411,9 @@ class RTTDevice extends Device {
 
             const adcResult = adcValue & MEAS_ADC_MSK;
             const value =
-                this.getAdcResult[currentMeasurementRange](adcResult) * 1e6;
+                this.getAdcResult[currentMeasurementRange as MEAS_INDEX](
+                    adcResult
+                ) * 1e6;
 
             this.onSampleCallback({
                 value,
@@ -487,7 +502,9 @@ class RTTDevice extends Device {
         return this.sendCommand([PPKCmd.TriggerExtToggle]);
     }
 
-    ppkTriggerWindowSet(value: number) {
+    ppkTriggerWindowSet(
+        value: number
+    ): Promise<nRFDeviceLib.RTTWriteResult | undefined> | undefined {
         const wnd = Math.ceil((value * 1000) / this.adcSamplingTimeUs);
         return this.sendCommand([
             PPKCmd.TriggerWindowSet,

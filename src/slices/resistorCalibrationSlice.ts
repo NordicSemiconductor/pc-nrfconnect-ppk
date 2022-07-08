@@ -49,12 +49,12 @@ const resistorCalibrationSlice = createSlice({
         resistorsResetAction: (
             state,
             action: PayloadAction<{
-                resHi: number;
-                resMid: number;
-                resLo: number;
-                userResHi: number;
-                userResMid: number;
-                userResLo: number;
+                resHi?: number;
+                resMid?: number;
+                resLo?: number;
+                userResHi?: number;
+                userResMid?: number;
+                userResLo?: number;
             }>
         ) => ({
             ...state,

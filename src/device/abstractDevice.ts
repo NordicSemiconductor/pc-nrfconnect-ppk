@@ -5,11 +5,12 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: only temporary whilst refactoring from javascript */
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
 import EventEmitter from 'events';
 
 import PPKCmd from '../constants';
-import { deviceTraits } from './types';
+import { deviceTraits, SampleValues } from './types';
 
 const getAllPropertyNames = (obj: any): any => {
     const proto = Object.getPrototypeOf(obj);
@@ -42,6 +43,7 @@ interface capabilities {
 
     // PPK1
     hwTrigger?: boolean;
+    ppkTriggerWindowSet?: undefined | (() => Promise<unknown> | undefined);
 }
 
 // Device is implemented by rttDevice and serialDevice
@@ -51,8 +53,9 @@ export default abstract class Device extends EventEmitter {
     triggerWindowRange = { min: 1, max: 10 };
     capabilities: capabilities;
     public traits!: deviceTraits;
+    public adcSamplingTimeUs!: number;
 
-    constructor(onSampleCallback: (values: unknown) => unknown) {
+    constructor(onSampleCallback: (values: SampleValues) => unknown) {
         super();
         this.capabilities = {};
         getAllPropertyNames(this)
@@ -72,7 +75,7 @@ export default abstract class Device extends EventEmitter {
 
     // abstract open(): void;
 
-    abstract sendCommand(...args: PPKCmd[]): Promise<unknown>;
+    abstract sendCommand(...args: PPKCmd[]): Promise<unknown> | undefined;
 
     abstract stop(): void;
 
@@ -83,20 +86,20 @@ export default abstract class Device extends EventEmitter {
     // Capability methods
 
     ppkAverageStart(): Promise<unknown> {
-        return this.sendCommand([PPKCmd.AverageStart]);
+        return this.sendCommand([PPKCmd.AverageStart])!;
     }
 
     ppkAverageStop(): Promise<unknown> {
-        return this.sendCommand([PPKCmd.AverageStop]);
+        return this.sendCommand([PPKCmd.AverageStop])!;
     }
 
     ppkDeviceRunning(...args: PPKCmd): Promise<unknown> {
-        return this.sendCommand([PPKCmd.DeviceRunningSet, ...args]);
+        return this.sendCommand([PPKCmd.DeviceRunningSet, ...args])!;
     }
 
     ppkUpdateRegulator(vdd: number): Promise<unknown> {
         this.currentVdd = vdd;
         // eslint-disable-next-line no-bitwise
-        return this.sendCommand([PPKCmd.RegulatorSet, vdd >> 8, vdd & 0xff]);
+        return this.sendCommand([PPKCmd.RegulatorSet, vdd >> 8, vdd & 0xff])!;
     }
 }

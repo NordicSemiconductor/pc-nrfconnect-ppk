@@ -42,8 +42,8 @@ const switchingPointsSlice = createSlice({
         switchingPointsResetAction(
             state,
             action: PayloadAction<{
-                vrefHigh: number;
-                vrefLow: number;
+                vrefHigh?: number;
+                vrefLow?: number;
             }>
         ) {
             const vrefHigh = action.payload.vrefHigh || state.vrefHigh;
