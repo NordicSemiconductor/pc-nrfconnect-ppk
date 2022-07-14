@@ -36,14 +36,9 @@
     "devDependencies": {
         "bson": "4.0.4",
         "chart.js": "^3.8.0",
-        "electron": "^13.5.1",
-        "electron-store": "^8.0.1",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.3.1",
-        "react": "16.13.1",
+        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.5.2",
         "react-chartjs-2": "^4.2.0",
-        "react-dom": "^17.0.1",
-        "react-redux": "7.2.0",
         "redux-mock-store": "^1.5.4"
     },
     "eslintConfig": {

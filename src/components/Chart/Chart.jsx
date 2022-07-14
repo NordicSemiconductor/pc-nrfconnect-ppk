@@ -123,16 +123,25 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             dispatch(chartCursorAction({ cursorBegin, cursorEnd })),
         [dispatch]
     );
-    // Shortcut to select all samples
-    useHotKey('alt+a', () => {
-        if (options.index > 0) {
-            return chartCursor(0, indexToTimestamp(options.index));
-        }
-        return false;
+
+    useHotKey({
+        hotKey: 'alt+a',
+        title: 'Select all',
+        isGlobal: false,
+        action: () => {
+            if (options.index > 0) {
+                return chartCursor(0, indexToTimestamp(options.index));
+            }
+            return false;
+        },
     });
-    // Deselect selection
-    useHotKey('esc', () => {
-        resetCursor();
+    useHotKey({
+        hotKey: 'esc',
+        title: 'Select none',
+        isGlobal: false,
+        action: () => {
+            resetCursor();
+        },
     });
 
     const {
