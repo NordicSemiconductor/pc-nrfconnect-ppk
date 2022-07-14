@@ -33,7 +33,13 @@ import './sidepanel.scss';
 
 export default () => {
     const dispatch = useDispatch();
-    useHotKey('alt+ctrl+shift+a', () => dispatch(toggleAdvancedModeAction()));
+
+    useHotKey({
+        hotKey: 'alt+ctrl+shift+a',
+        title: 'Show advanced config',
+        isGlobal: false,
+        action: () => dispatch(toggleAdvancedModeAction()),
+    });
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
