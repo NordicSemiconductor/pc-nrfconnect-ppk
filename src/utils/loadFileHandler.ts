@@ -4,8 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
+
 import { deserialize } from 'bson';
-import { kMaxLength as maxBufferLengthForSystem } from 'buffer';
+import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
 import { unit } from 'mathjs';
 import { logger } from 'pc-nrfconnect-shared';
@@ -40,9 +42,9 @@ import { createInflateRaw } from 'zlib';
  * Read and decompress .ppk file
  * @param {Buffer} buffer to hold the decompressed content of file.
  * @param {string} filename of file containing the power profile.
- * @returns {[int, Buffer]} size of decompressed file in bytes and the buffer with the content.
+ * @returns {[number, Buffer]} size of decompressed file in bytes and the buffer with the content.
  */
-const getContentFromFile = async (buffer, filename) => {
+const getContentFromFile = async (buffer: Buffer, filename: string) => {
     let size = 0;
     const content = new Writable({
         write(chunk, _encoding, callback) {
@@ -61,7 +63,7 @@ const getContentFromFile = async (buffer, filename) => {
     } catch (err) {
         console.error('Error while loading file', err);
     }
-    return [size, buffer.slice(0, size)];
+    return [size, buffer.slice(0, size)] as const;
 };
 
 /**
@@ -69,7 +71,7 @@ const getContentFromFile = async (buffer, filename) => {
  * @param {string} filename .ppk file to load data from.
  * @returns {Buffer} three functions that returns copies of buffers.
  */
-const setupBuffer = async filename => {
+const setupBuffer = async (filename: string) => {
     let buffer = Buffer.alloc(1);
     let requiredBufferSize = 0;
     // First call to get required buffer size of decompressed file.
@@ -115,19 +117,21 @@ const setupBuffer = async filename => {
     };
 };
 
+type BufferReader = Awaited<ReturnType<typeof setupBuffer>>;
+
 /* Old save file format had two subsequent objects containing the global
 options object and the chartState respectively, so we call loadMetadata
 once more to get the remaining data */
-const handleLegacyFiles = (buffer, metadata) => {
-    const additionalData = deserialize(buffer.readInitialChunk());
+const handleLegacyFiles = (buffer: BufferReader, metadata: any) => {
+    const additionalData = deserialize(buffer!.readInitialChunk());
     return {
         options: { ...metadata, currentPane: metadata.currentPane },
         chartState: { ...additionalData },
     };
 };
 
-const loadMetadata = buffer => {
-    const metadata = deserialize(buffer.readInitialChunk());
+const loadMetadata = (buffer: BufferReader) => {
+    const metadata = deserialize(buffer!.readInitialChunk());
     if (metadata.version == null) {
         // no version property means that it's a legacy save file
         return handleLegacyFiles(buffer, metadata);
@@ -136,21 +140,21 @@ const loadMetadata = buffer => {
     return metadata;
 };
 
-const loadData = buffer =>
-    new Float32Array(new Uint8Array(buffer.readChunk()).buffer);
+const loadData = (buffer: BufferReader) =>
+    new Float32Array(new Uint8Array(buffer!.readChunk()).buffer);
 
-const loadBits = buffer =>
-    buffer.hasBitsData()
+const loadBits = (buffer: BufferReader) =>
+    buffer!.hasBitsData()
         ? null
-        : new Uint16Array(new Uint8Array(buffer.readChunk()).buffer);
+        : new Uint16Array(new Uint8Array(buffer!.readChunk()).buffer);
 
-export default async filename => {
+export default async (filename: string) => {
     try {
         const buffer = await setupBuffer(filename);
         return {
-            metadata: loadMetadata(buffer),
-            dataBuffer: loadData(buffer),
-            bits: loadBits(buffer),
+            metadata: loadMetadata(buffer!),
+            dataBuffer: loadData(buffer!),
+            bits: loadBits(buffer!),
         };
     } catch (err) {
         return false;

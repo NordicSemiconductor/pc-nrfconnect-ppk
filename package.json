@@ -34,7 +34,7 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "bson": "4.0.4",
+        "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",
         "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.5.2",

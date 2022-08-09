@@ -21,7 +21,7 @@ export type sampleArray = Float32Array;
 export type sampleIndex = number;
 export type sampleTimestamp = number | undefined | null;
 
-interface GlobalOptions {
+export interface GlobalOptions {
     /** Time between each sample denoted in microseconds, which is equal to 1e-6 seconds \
      *  e.g. if samplesPerSecond is 100_000, then a sample is taken every 10th microsecond
      */
