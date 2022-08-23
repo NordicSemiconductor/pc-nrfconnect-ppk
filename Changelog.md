@@ -1,3 +1,8 @@
+## 3.4.4 - 2022-08-xx
+
+### Added
+- API support for nRF Connect for Desktop v3.12.0
+
 ## 3.4.3 - 2022-03-24
 
 ### Fixed
