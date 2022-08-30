@@ -1,55 +1,55 @@
 {
-  "name": "pc-nrfconnect-ppk",
-  "version": "3.4.4",
-  "description": "Power Profiler",
-  "displayName": "Power Profiler",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk.git"
-  },
-  "author": "Nordic Semiconductor ASA",
-  "license": "SEE LICENSE IN LICENSE",
-  "engines": {
-    "nrfconnect": "^3.9.2"
-  },
-  "main": "dist/bundle.js",
-  "files": [
-    "dist/",
-    "resources/icon.*",
-    "firmware/*",
-    "worker/*",
-    "icon.png",
-    "LICENSE"
-  ],
-  "scripts": {
-    "dev": "nrfconnect-scripts build-watch",
-    "webpack": "nrfconnect-scripts build-dev",
-    "build": "nrfconnect-scripts build-prod",
-    "nordic-publish": "nrfconnect-scripts nordic-publish",
-    "lint": "nrfconnect-scripts lint src",
-    "lintfix": "nrfconnect-scripts lint --fix src",
-    "test": "nrfconnect-scripts test",
-    "test-watch": "nrfconnect-scripts test --watch",
-    "clean": "npm run clean-dist && npm run clean-modules",
-    "clean-dist": "rimraf dist",
-    "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "bson": "4.0.4",
-    "chart.js": "2.9.4",
-    "electron-is-dev": "1.2.0",
-    "electron-store": "5.1.1",
-    "mathjs": "7.5.1",
-    "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v5.12.2",
-    "react": "16.13.1",
-    "react-chartjs-2": "2.9.0",
-    "react-dom": "^17.0.1",
-    "react-redux": "7.2.0",
-    "redux-mock-store": "^1.5.4"
-  },
-  "eslintConfig": {
-    "extends": "./node_modules/pc-nrfconnect-shared/config/eslintrc.json"
-  },
-  "prettier": "./node_modules/pc-nrfconnect-shared/config/prettier.config.js"
+    "name": "pc-nrfconnect-ppk",
+    "version": "3.4.4",
+    "description": "Power Profiler",
+    "displayName": "Power Profiler",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk.git"
+    },
+    "author": "Nordic Semiconductor ASA",
+    "license": "SEE LICENSE IN LICENSE",
+    "engines": {
+        "nrfconnect": "^3.12.0"
+    },
+    "main": "dist/bundle.js",
+    "files": [
+        "dist/",
+        "resources/icon.*",
+        "firmware/*",
+        "worker/*",
+        "icon.png",
+        "LICENSE"
+    ],
+    "scripts": {
+        "dev": "nrfconnect-scripts build-watch",
+        "webpack": "nrfconnect-scripts build-dev",
+        "build": "nrfconnect-scripts build-prod",
+        "nordic-publish": "nrfconnect-scripts nordic-publish",
+        "lint": "nrfconnect-scripts lint src",
+        "lintfix": "nrfconnect-scripts lint --fix src",
+        "test": "nrfconnect-scripts test",
+        "test-watch": "nrfconnect-scripts test --watch",
+        "clean": "npm run clean-dist && npm run clean-modules",
+        "clean-dist": "rimraf dist",
+        "clean-modules": "rimraf \"node_modules/!(rimraf|.bin)\""
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "bson": "4.0.4",
+        "chart.js": "2.9.4",
+        "electron-is-dev": "1.2.0",
+        "electron-store": "5.1.1",
+        "mathjs": "7.5.1",
+        "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v5.12.2",
+        "react": "16.13.1",
+        "react-chartjs-2": "2.9.0",
+        "react-dom": "^17.0.1",
+        "react-redux": "7.2.0",
+        "redux-mock-store": "^1.5.4"
+    },
+    "eslintConfig": {
+        "extends": "./node_modules/pc-nrfconnect-shared/config/eslintrc.json"
+    },
+    "prettier": "./node_modules/pc-nrfconnect-shared/config/prettier.config.js"
 }

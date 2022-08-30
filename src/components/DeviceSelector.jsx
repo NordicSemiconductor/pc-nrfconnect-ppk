@@ -23,11 +23,6 @@ const deviceSetup = {
         },
     },
     jprog: {
-        nrf52: {
-            fw: getAppFile('firmware/ppk_nrfconnect.hex'),
-            fwVersion: 'ppk-fw-2.1.0',
-            fwIdAddress: 0x10000,
-        },
         nrf52_family: {
             fw: getAppFile('firmware/ppk_nrfconnect.hex'),
             fwVersion: 'ppk-fw-2.1.0',
