@@ -124,9 +124,6 @@ export function samplingStart() {
                 ? EventAction.START_REAL_TIME_SAMPLE
                 : EventAction.START_DATA_LOGGER_SAMPLE
         );
-        console.log('SAMPLING START: isRealTime?');
-        console.log(isRealTimePane(getState()));
-
         options.data.fill(NaN);
         if (options.bits) {
             options.bits.fill(0);

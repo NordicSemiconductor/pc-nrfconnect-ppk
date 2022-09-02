@@ -18,7 +18,6 @@ export interface SampleValues {
 // Should test the capabilities from either deviceInfo or a device instance to
 // see if device is instance of RTTDevice
 export function isRTTDevice(deviceToTest: any): deviceToTest is RTTDevice {
-    console.log(deviceToTest);
     return deviceToTest.capabilities.jlink;
 }
 
