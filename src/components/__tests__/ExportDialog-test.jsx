@@ -9,7 +9,7 @@ import React from 'react';
 import { options } from '../../globals';
 import { showExportDialog } from '../../slices/appSlice';
 import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
-import { fireEvent, render } from '../../utils/testUtils';
+import { fireEvent, render, screen } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 
 jest.mock('../../utils/persistentStore', () => ({
@@ -45,7 +45,7 @@ describe('ExportDialog', () => {
         const numberOfRecordsText = `${expectedNumberOfRecords} records`;
 
         options.index = expectedNumberOfRecords - 1; // Header + all samples
-        const screen = render(<ExportDialog />, initialStateActions);
+        render(<ExportDialog />, initialStateActions);
 
         const numberOfRecords = screen.getByText(numberOfRecordsText);
         expect(numberOfRecords).not.toBe(undefined);
@@ -58,7 +58,7 @@ describe('ExportDialog', () => {
     it('should show the number of records only inside the window', () => {
         const numberOfRecordsText = '100000 records';
 
-        const screen = render(<ExportDialog />, initialStateActions);
+        render(<ExportDialog />, initialStateActions);
         const radioWindow = screen.getByText('Window');
         fireEvent.click(radioWindow);
 
@@ -73,7 +73,7 @@ describe('ExportDialog', () => {
     it('should open with the last option to export the selected area when area has been selected', () => {
         const numberOfRecordsText = '80000 records';
 
-        const screen = render(<ExportDialog />, [
+        render(<ExportDialog />, [
             chartCursorAction({ cursorBegin: 1, cursorEnd: 800000 }),
             ...initialStateActions,
             // Chart cursor uses timestamps, and the default sampling rate is 100_000 samples/sec

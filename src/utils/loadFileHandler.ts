@@ -6,7 +6,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
-import { deserialize } from 'bson';
+import { deserialize, Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
 import { unit } from 'mathjs';
@@ -122,7 +122,8 @@ type BufferReader = Awaited<ReturnType<typeof setupBuffer>>;
 /* Old save file format had two subsequent objects containing the global
 options object and the chartState respectively, so we call loadMetadata
 once more to get the remaining data */
-const handleLegacyFiles = (buffer: BufferReader, metadata: any) => {
+
+const handleLegacyFiles = (buffer: BufferReader, metadata: BsonDocument) => {
     const additionalData = deserialize(buffer!.readInitialChunk());
     return {
         options: { ...metadata, currentPane: metadata.currentPane },

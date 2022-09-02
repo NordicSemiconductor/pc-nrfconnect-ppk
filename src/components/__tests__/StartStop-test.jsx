@@ -8,7 +8,7 @@ import React from 'react';
 
 import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
 import { setDataLoggerState } from '../../slices/dataLoggerSlice';
-import { render } from '../../utils/testUtils';
+import { render, screen } from '../../utils/testUtils';
 import StartStop from '../SidePanel/StartStop';
 
 const dataLoggerStatePPK1 = {
@@ -53,7 +53,7 @@ const ppk1Tooltip = 'Start sampling at 7.7 kHz';
 
 describe('StartStop', () => {
     it('start button should have correct tooltip for PPK2', () => {
-        const screen = render(<StartStop />, initialStatePPK2Actions);
+        render(<StartStop />, initialStatePPK2Actions);
 
         const startButton = screen.getByText('Start');
         expect(startButton.textContent).toBe('Start');
@@ -61,7 +61,7 @@ describe('StartStop', () => {
     });
 
     it('start button should have correct tooltip for PPK1', () => {
-        const screen = render(<StartStop />, initialStatePPK1Actions);
+        render(<StartStop />, initialStatePPK1Actions);
 
         const startButton = screen.getByText('Start');
         expect(startButton.textContent).toBe('Start');
