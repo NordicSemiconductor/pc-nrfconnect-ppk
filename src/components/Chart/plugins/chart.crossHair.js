@@ -33,12 +33,12 @@ const plugin = {
             }
         }
         plugin.moveEvent = { layerX: layerX - left, layerY, id };
-        plugin.instances.forEach(instance => instance.update({ lazy: true }));
+        plugin.instances.forEach(instance => instance.update('none'));
     },
 
     pointerLeaveHandler() {
         plugin.moveEvent = null;
-        plugin.instances.forEach(instance => instance.update({ lazy: true }));
+        plugin.instances.forEach(instance => instance.update('none'));
     },
 
     beforeInit(chartInstance) {

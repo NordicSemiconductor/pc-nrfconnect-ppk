@@ -195,6 +195,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
 
+    // TODO: Revise cursorData? What does begin and end have to do with cursor?
     const cursorData = {
         cursorBegin,
         cursorEnd,

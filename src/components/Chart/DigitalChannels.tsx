@@ -6,9 +6,11 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import { ChartOptions, LineControllerDatasetOptions } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, bool, exact, number, shape } from 'prop-types';
 
+import { DigitalChannelStates, DigitalChannelsType } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 
 import chartCss from './chart.icss.scss';
@@ -18,27 +20,39 @@ const { rightMarginPx } = chartCss;
 const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
 
+interface DigitalChannelsProperties {
+    lineData: {
+        mainLine: { x: number; y: number }[];
+        uncertaintyLine: { x: number; y: number }[];
+    }[];
+    digitalChannels: DigitalChannelsType;
+    zoomedOutTooFar: boolean;
+    cursorData: {
+        begin: number;
+        end: number;
+        cursorBegin: number;
+        cursorEnd: number;
+    };
+}
+
 const DigitalChannels = ({
     lineData,
     digitalChannels,
     zoomedOutTooFar,
-    cursorData: { begin, end, cursorBegin, cursorEnd },
-}) => {
-    const bitsChartOptions = {
+    cursorData: { begin, end },
+}: DigitalChannelsProperties) => {
+    const bitsChartOptions: ChartOptions<'line'> = {
         scales: {
             xScale: {
-                display: false,
                 type: 'linear',
+                display: false,
                 min: begin,
                 max: end,
-                tickMarkLength: 0,
-                drawTicks: false,
-                cursor: {
-                    cursorBegin,
-                    cursorEnd,
+                ticks: {
+                    display: false,
                 },
             },
-            yScale: {
+            yScaleDigitalChannel: {
                 type: 'linear',
                 display: false,
                 min: -0.5,
@@ -46,14 +60,10 @@ const DigitalChannels = ({
             },
         },
         maintainAspectRatio: false,
-        animation: {
-            duration: 0,
-            active: { duration: 0 },
-            resize: { duration: 0 },
-        },
+        animation: false,
     };
 
-    const commonLineData = {
+    const commonLineData: Partial<LineControllerDatasetOptions> = {
         backgroundColor: dataColor,
         borderColor: dataColor,
         borderWidth: 1.5,
@@ -61,12 +71,11 @@ const DigitalChannels = ({
         pointHoverRadius: 0,
         pointHitRadius: 0,
         pointBorderWidth: 0,
-        lineTension: 0,
-        steppedLine: 'before',
+        stepped: 'before',
     };
 
     const bitsChartData = lineData
-        .map((singleBitLineData, i) => ({
+        .map((singleBitLineData: DigitalChannelStates, i: number) => ({
             datasets: [
                 {
                     ...commonLineData,
@@ -76,7 +85,8 @@ const DigitalChannels = ({
                 },
                 {
                     ...commonLineData,
-                    fill: '-1',
+                    fill: false,
+                    showLine: false,
                     data: singleBitLineData.uncertaintyLine,
                     label: `uncertainty ${i}`, // This label is not displayed, just needed as an internal key
                 },
@@ -85,7 +95,7 @@ const DigitalChannels = ({
         .filter((_, i) => digitalChannels[i]);
     return (
         <div className="chart-bits-container">
-            {bitsChartData.map((_, i) => (
+            {bitsChartData.map((_, i: number) => (
                 <div key={`${i + 1}`} className="chart-bits">
                     <span>{bitsChartData[i].datasets[0].label}</span>
                     <div

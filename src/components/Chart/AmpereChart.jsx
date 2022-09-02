@@ -175,11 +175,7 @@ const AmpereChart = ({
             },
         },
         maintainAspectRatio: false,
-        animation: {
-            duration: 0,
-            resize: { duration: 0 },
-            active: { duration: 0 },
-        },
+        animation: false,
         formatX: timestampToLabel,
         formatY: formatCurrent,
         triggerLevel,
