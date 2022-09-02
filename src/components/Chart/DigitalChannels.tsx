@@ -11,7 +11,6 @@ import { colors } from 'pc-nrfconnect-shared';
 import { arrayOf, bool, exact, number, shape } from 'prop-types';
 
 import { DigitalChannelStates, DigitalChannelsType } from './data/dataTypes';
-// @ts-expect-error This will be rewritten soon
 import crossHairPlugin from './plugins/chart.crossHair';
 
 import chartCss from './chart.icss.scss';
@@ -106,7 +105,18 @@ const DigitalChannels = ({
                         <Line
                             data={bitsChartData[i]}
                             options={bitsChartOptions}
-                            plugins={[crossHairPlugin]}
+                            plugins={[
+                                crossHairPlugin({
+                                    formatX() {
+                                        return [];
+                                    },
+                                    formatY() {
+                                        return '';
+                                    },
+                                    live: true,
+                                    snapping: false,
+                                }),
+                            ]}
                         />
                     </div>
                 </div>

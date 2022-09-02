@@ -186,7 +186,6 @@ class SerialDevice extends Device {
     }
 
     parseMeta(meta: any) {
-        console.log(meta);
         Object.entries(this.modifiers).forEach(
             ([modifierKey, modifierArray]) => {
                 Array.from(modifierArray).forEach((modifier, index) => {

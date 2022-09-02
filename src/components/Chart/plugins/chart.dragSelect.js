@@ -29,7 +29,6 @@ export default {
         dragSelect.pointerMoveHandler = event => {
             if (chartInstance.dragSelect.dragStart) {
                 chartInstance.dragSelect.dragEnd = event;
-                // chartInstance.update('none');
             }
         };
         canvas.addEventListener('pointermove', dragSelect.pointerMoveHandler);
@@ -49,7 +48,6 @@ export default {
                     const max = scale.getValueForPixel(endX).valueOf();
 
                     dragSelect.callback(min, max);
-                    // chartInstance.update('none');
                 }
                 dragSelect.dragStart = null;
                 dragSelect.dragEnd = null;

@@ -176,14 +176,12 @@ const AmpereChart = ({
         },
         maintainAspectRatio: false,
         animation: false,
-        formatX: timestampToLabel,
-        formatY: formatCurrent,
+
         triggerLevel,
         triggerActive: triggerRunning || triggerSingleWaiting,
         sendTriggerLevel,
         updateTriggerLevel,
-        snapping,
-        live,
+
         triggerHandleVisible: isRealTimePane && !externalTrigger,
         triggerOrigin,
         windowDuration,
@@ -194,7 +192,12 @@ const AmpereChart = ({
         zoomPanPlugin,
         triggerLevelPlugin,
         triggerOriginPlugin,
-        crossHairPlugin,
+        crossHairPlugin({
+            formatX: timestampToLabel,
+            formatY: formatCurrent,
+            snapping,
+            live,
+        }),
         {
             id: 'notifier',
             afterLayout(chart) {
