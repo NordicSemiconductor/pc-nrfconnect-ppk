@@ -26,7 +26,8 @@ const handleSvg = (
 const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
     const dispatch = useDispatch();
     const chartCursor = useCallback(
-        (...args) => dispatch(chartCursorAction({ ...args })),
+        (begin, end) =>
+            dispatch(chartCursorAction({ cursorBegin: begin, cursorEnd: end })),
         [dispatch]
     );
 
