@@ -7,16 +7,32 @@
 import { serialize } from 'bson';
 import fs from 'fs';
 import { logger } from 'pc-nrfconnect-shared';
-import { createDeflateRaw } from 'zlib';
+import { createDeflateRaw, DeflateRaw } from 'zlib';
+
+import { GlobalOptions } from '../globals';
+
+interface SaveData {
+    data: Float32Array;
+    bits: Uint16Array | null;
+    metadata: {
+        options: GlobalOptions;
+        chartState: unknown;
+        triggerState: unknown;
+        dataLoggerState: unknown;
+    };
+}
 
 const CURRENT_VERSION = 1;
 
-const write = deflateRaw => data =>
+const write = (deflateRaw: DeflateRaw) => (data: unknown) =>
     new Promise(resolve => {
         deflateRaw.write(data, 'binary', resolve);
     });
 
-const writeBuffer = async (data, fileWriter) => {
+const writeBuffer = async (
+    data: Float32Array | Uint16Array | null,
+    fileWriter: (data: unknown) => Promise<unknown>
+) => {
     if (!data || data.buffer == null) return;
     const { buffer } = data;
     const buf = Buffer.alloc(4);
@@ -26,7 +42,7 @@ const writeBuffer = async (data, fileWriter) => {
     await fileWriter(objbuf);
 };
 
-const initialise = filename => {
+const initialise = (filename: string) => {
     const file = fs.createWriteStream(filename);
     file.on('error', err => console.log(err.stack));
     const deflateRaw = createDeflateRaw();
@@ -34,7 +50,10 @@ const initialise = filename => {
     return deflateRaw;
 };
 
-const save = async (saveData, fileWriter) => {
+const save = async (
+    saveData: SaveData,
+    fileWriter: (data: unknown) => Promise<unknown>
+) => {
     fileWriter(serialize({ ...saveData.metadata, version: CURRENT_VERSION }));
 
     await writeBuffer(saveData.data, fileWriter);
@@ -43,7 +62,7 @@ const save = async (saveData, fileWriter) => {
     }
 };
 
-export default async (filename, saveData) => {
+export default async (filename: string, saveData: SaveData) => {
     const deflateRaw = initialise(filename);
     const fileWriter = write(deflateRaw);
 

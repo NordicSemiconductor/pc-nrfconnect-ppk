@@ -33,12 +33,12 @@ const plugin = {
             }
         }
         plugin.moveEvent = { layerX: layerX - left, layerY, id };
-        plugin.instances.forEach(instance => instance.update({ lazy: true }));
+        plugin.instances.forEach(instance => instance.update('none'));
     },
 
     pointerLeaveHandler() {
         plugin.moveEvent = null;
-        plugin.instances.forEach(instance => instance.update({ lazy: true }));
+        plugin.instances.forEach(instance => instance.update('none'));
     },
 
     beforeInit(chartInstance) {
@@ -113,7 +113,7 @@ const plugin = {
 
         canvas.style.cursor = 'pointer';
 
-        if (yScale) {
+        if (yScale?.id === 'yScale') {
             ctx.save();
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;

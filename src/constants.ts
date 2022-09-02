@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-export default {
+const PPKCommands = {
     TriggerSet: 0x01,
     AvgNumSet: 0x02, // (no-firmware)
     TriggerWindowSet: 0x03,
@@ -28,3 +28,7 @@ export default {
     Reset: 0x20,
     SetUserGains: 0x25,
 };
+
+type PPKCommands = number[];
+
+export default PPKCommands;

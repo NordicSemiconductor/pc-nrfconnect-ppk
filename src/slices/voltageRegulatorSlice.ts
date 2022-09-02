@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -35,10 +36,10 @@ const voltageRegulatorSlice = createSlice({
         updateRegulatorAction(
             state,
             action: PayloadAction<{
-                vdd: number;
-                currentVDD: number;
-                min: number;
-                max: number;
+                vdd?: number;
+                currentVDD?: number;
+                min?: number;
+                max?: number;
             }>
         ) {
             return {
@@ -46,7 +47,7 @@ const voltageRegulatorSlice = createSlice({
                 currentVDD: action.payload.currentVDD || state.currentVDD,
                 min: action.payload.min || state.min,
                 max: action.payload.max || state.max,
-                maxCap: state.maxCap || action.payload.max,
+                maxCap: state.maxCap || action.payload.max!,
             };
         },
         moveVoltageRegulatorVddAction(

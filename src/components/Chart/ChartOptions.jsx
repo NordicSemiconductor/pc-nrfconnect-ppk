@@ -70,7 +70,7 @@ const ChartOptions = () => {
      * @returns {void} dispatches new yMin to storage
      */
     const dispatchYMin = exponent => {
-        dispatch({ yMin: storeYMin(yMin * 1000 ** exponent) });
+        dispatch(storeYMin({ yMin: yMin * 1000 ** exponent }));
         setYMinExponent(exponent);
         usageData.sendUsageData(EventAction.Y_MIN_SET_EXPLICITLY);
     };
@@ -81,7 +81,7 @@ const ChartOptions = () => {
      * @returns {void} dispatches new yMax to storage
      */
     const dispatchYMax = exponent => {
-        dispatch({ yMax: storeYMax(yMax * 1000 ** exponent) });
+        dispatch(storeYMax({ yMax: yMax * 1000 ** exponent }));
         setYMaxExponent(exponent);
         usageData.sendUsageData(EventAction.Y_MAX_SET_EXPLICITLY);
     };

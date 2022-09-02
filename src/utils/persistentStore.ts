@@ -24,7 +24,7 @@ const VOLTAGE_REGULATOR_MAX_CAP = 'voltageRegulatorMaxCap';
 type SAMPLE_FREQUENCY = `sampleFreq-${number}`;
 type DURATION_SECONDS = `durationSeconds-${number}`;
 
-interface SpikeFilter {
+export interface SpikeFilter {
     samples: number;
     alpha: number;
     alpha5: number;

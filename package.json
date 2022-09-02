@@ -22,6 +22,7 @@
         "LICENSE"
     ],
     "scripts": {
+        "prepare": "husky install",
         "dev": "webpack watch --mode development",
         "webpack": "webpack build --mode development",
         "build": "webpack build",
@@ -34,10 +35,10 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "bson": "4.0.4",
+        "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.5.2",
+        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.6.1",
         "react-chartjs-2": "^4.2.0",
         "redux-mock-store": "^1.5.4"
     },

@@ -69,8 +69,9 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                             dispatch(toggleYAxisLock(null, null));
                             zoomToWindow(windowDuration);
                         } else {
-                            const { min, max } = chartRef.current.scales.yScale;
-                            dispatch(toggleYAxisLock(min, max));
+                            const { min: yMin, max: yMax } =
+                                chartRef.current.scales.yScale;
+                            dispatch(toggleYAxisLock({ yMin, yMax }));
                         }
                     }}
                     isToggled={yAxisLock}

@@ -263,7 +263,7 @@ const getExpectedChartActionsPPK2 = (fromIndex, toIndex, shift = 0) => {
         {
             type: 'trigger/completeTriggerAction',
             payload: {
-                triggerStartIndex: fromIndex,
+                origin: fromIndex,
             },
         },
     ];

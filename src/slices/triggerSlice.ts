@@ -44,7 +44,7 @@ const triggerSlice = createSlice({
     reducers: {
         triggerLevelSetAction(
             state,
-            action: PayloadAction<{ triggerLevel: number }>
+            action: PayloadAction<{ triggerLevel: number | null }>
         ) {
             const { triggerLevel } = action.payload;
             return { ...state, triggerLevel };
@@ -73,7 +73,7 @@ const triggerSlice = createSlice({
         },
         setTriggerStartAction(
             state,
-            action: PayloadAction<{ triggerStartIndex: number }>
+            action: PayloadAction<{ triggerStartIndex: number | null }>
         ) {
             const { triggerStartIndex } = action.payload;
             return { ...state, triggerStartIndex };
@@ -118,7 +118,7 @@ const triggerSlice = createSlice({
         },
         setTriggerOriginAction(
             state,
-            action: PayloadAction<{ origin: number }>
+            action: PayloadAction<{ origin: number | null }>
         ) {
             const triggerOrigin = action.payload.origin;
             return { ...state, triggerOrigin };

@@ -133,8 +133,7 @@ const chartSlice = createSlice({
                 }
             }
 
-            let { windowBegin, windowEnd } = action.payload;
-            const { windowDuration } = action.payload;
+            let { windowBegin, windowEnd, windowDuration } = action.payload;
             if (windowBegin === null && windowEnd === null) {
                 windowBegin = 0;
                 windowEnd = 0;
@@ -156,6 +155,7 @@ const chartSlice = createSlice({
                     windowEnd === 0
                         ? windowEndLock
                         : Math.min(windowEndLock!, windowEnd);
+                windowDuration = windowEnd! - windowBegin;
             }
 
             return {
@@ -163,11 +163,9 @@ const chartSlice = createSlice({
                 windowBegin,
                 windowEnd,
                 windowDuration,
-                windowBeginLock: windowBegin,
-                windowEndLock: windowEnd,
                 ...calcBuffer(windowDuration, windowEnd!),
-                yMin: yMin === null || yAxisLock ? state.yMin : yMin,
-                yMax: yMax === null || yAxisLock ? state.yMax : yMax,
+                yMin: yMin == null || yAxisLock ? state.yMin : yMin,
+                yMax: yMax == null || yAxisLock ? state.yMax : yMax,
             };
         },
         chartTrigger(
@@ -221,13 +219,16 @@ const chartSlice = createSlice({
             persistTimestampsVisible(newVisibilityValue);
             state.timestampsVisible = newVisibilityValue;
         },
-        toggleYAxisLock: (
+        toggleYAxisLock(
             state,
-            action: PayloadAction<{ yMin: number; yMax: number }>
-        ) => {
-            state.yAxisLock = !state.yAxisLock;
-            state.yMin = action.payload.yMin;
-            state.yMax = action.payload.yMax;
+            action: PayloadAction<{ yMin: number | null; yMax: number | null }>
+        ) {
+            return {
+                ...state,
+                yAxisLock: !state.yAxisLock,
+                yMin: action.payload?.yMin || null,
+                yMax: action.payload?.yMax || null,
+            };
         },
         chartWindowLockAction: state => {
             state.windowBeginLock = state.windowBegin;

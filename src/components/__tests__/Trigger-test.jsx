@@ -12,7 +12,7 @@ import {
     triggerLevelSetAction,
     triggerWindowRangeAction,
 } from '../../slices/triggerSlice';
-import { fireEvent, render } from '../../utils/testUtils';
+import { fireEvent, render, screen } from '../../utils/testUtils';
 import Trigger from '../SidePanel/Trigger/Trigger';
 
 const TRIGGER_LENGTH = 10;
@@ -32,7 +32,7 @@ const initialStateActions = [
 
 describe('Trigger', () => {
     it('should be possible to switch modes', () => {
-        const screen = render(<Trigger />, initialStateActions);
+        render(<Trigger />, initialStateActions);
 
         const singleButton = screen.getByText(/single/i);
         const continuousButton = screen.getByText(/continuous/i);
@@ -46,7 +46,7 @@ describe('Trigger', () => {
     });
 
     it('should update slider value if input field is changed, but only if the input is valid', () => {
-        const screen = render(<Trigger />, initialStateActions);
+        render(<Trigger />, initialStateActions);
 
         const triggerLengthInput = screen.getByText(/length/i).nextSibling;
         const sliderValue = screen.getByRole('slider');
