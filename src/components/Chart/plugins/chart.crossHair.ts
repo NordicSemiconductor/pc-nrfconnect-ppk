@@ -9,28 +9,27 @@ import { colors } from 'pc-nrfconnect-shared';
 
 const { gray700: color, white } = colors;
 
-interface Something extends Plugin<'line'> {
-    instances: Chart[];
-    moveEvent: { offsetX: number; offsetY: number; id: string } | null;
+const instances: Chart[] = [];
+let moveEvent: { offsetX: number; offsetY: number; id: string } | null = null;
+
+interface CrosshairPlugin extends Plugin<'line'> {
     pointerMoveHandler: (event: MouseEvent, chart: Chart) => void;
     pointerLeaveHandler: () => void;
 }
 
 const pluginBuilder = ({
-    formatX,
-    formatY,
-    snapping,
-    live,
+    formatX = () => [],
+    formatY = () => '',
+    snapping = false,
+    live = false,
 }: {
     formatX: (_usecs: number, index: number, array: number[]) => string[];
     formatY: (uA: number) => string;
     live: boolean;
     snapping: boolean;
 }) => {
-    const plugin: Something = {
+    const plugin: CrosshairPlugin = {
         id: 'crossHair',
-        instances: [],
-        moveEvent: null,
 
         pointerMoveHandler(evt, chart: Chart) {
             const {
@@ -38,7 +37,7 @@ const pluginBuilder = ({
                 id,
             } = chart;
             if (live) {
-                plugin.moveEvent = null;
+                moveEvent = null;
                 return;
             }
             let { offsetX, offsetY } = evt || {};
@@ -56,17 +55,17 @@ const pluginBuilder = ({
                     offsetY = y;
                 }
             }
-            plugin.moveEvent = { offsetX: offsetX - left, offsetY, id };
-            plugin.instances.forEach(instance => instance.update('none'));
+            moveEvent = { offsetX: offsetX - left, offsetY, id };
+            instances.forEach(instance => instance.update('none'));
         },
 
         pointerLeaveHandler() {
-            plugin.moveEvent = null;
-            plugin.instances.forEach(instance => instance.update('none'));
+            moveEvent = null;
+            instances.forEach(instance => instance.update('none'));
         },
 
         beforeInit(chartInstance) {
-            plugin.instances.push(chartInstance);
+            instances.push(chartInstance);
             const { canvas } = chartInstance.ctx;
             canvas.addEventListener('pointermove', evt =>
                 plugin.pointerMoveHandler(evt, chartInstance)
@@ -86,12 +85,12 @@ const pluginBuilder = ({
             const { ctx } = chartInstance;
             const { canvas } = ctx;
 
-            if (!plugin.moveEvent) {
+            if (!moveEvent) {
                 canvas.style.cursor = 'default';
                 return;
             }
 
-            const { offsetX, offsetY } = plugin.moveEvent;
+            const { offsetX, offsetY } = moveEvent;
             const x = Math.ceil(offsetX - 0.5) - 0.5;
             const y = Math.ceil(offsetY - 0.5) + 0.5;
 
@@ -169,11 +168,9 @@ const pluginBuilder = ({
         },
 
         destroy(chartInstance) {
-            const i = plugin.instances.findIndex(
-                ({ id }) => id === chartInstance.id
-            );
+            const i = instances.findIndex(({ id }) => id === chartInstance.id);
             if (i > -1) {
-                plugin.instances.splice(i, 1);
+                instances.splice(i, 1);
             }
         },
     };

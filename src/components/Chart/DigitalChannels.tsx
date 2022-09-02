@@ -105,18 +105,7 @@ const DigitalChannels = ({
                         <Line
                             data={bitsChartData[i]}
                             options={bitsChartOptions}
-                            plugins={[
-                                crossHairPlugin({
-                                    formatX() {
-                                        return [];
-                                    },
-                                    formatY() {
-                                        return '';
-                                    },
-                                    live: true,
-                                    snapping: false,
-                                }),
-                            ]}
+                            plugins={[crossHairPlugin({})]}
                         />
                     </div>
                 </div>
