@@ -113,7 +113,7 @@ const plugin = {
 
         canvas.style.cursor = 'pointer';
 
-        if (yScale) {
+        if (yScale?.id === 'yScale') {
             ctx.save();
             ctx.lineWidth = 0.5;
             ctx.strokeStyle = color;
