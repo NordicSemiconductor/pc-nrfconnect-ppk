@@ -10,7 +10,7 @@
     "author": "Nordic Semiconductor ASA",
     "license": "SEE LICENSE IN LICENSE",
     "engines": {
-        "nrfconnect": "^3.11.1"
+        "nrfconnect": "^3.12.0"
     },
     "main": "dist/bundle.js",
     "files": [
