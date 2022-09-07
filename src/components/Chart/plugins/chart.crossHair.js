@@ -13,10 +13,13 @@ const plugin = {
     instances: [],
     moveEvent: null,
 
-    pointerMoveHandler(
-        evt,
-        { chartArea: { left }, id, chart, options: { snapping, live } }
-    ) {
+    pointerMoveHandler(evt, chart) {
+        const {
+            chartArea: { left },
+            id,
+            options: { snapping, live },
+        } = chart;
+
         if (live) {
             plugin.moveEvent = null;
             return;
@@ -24,10 +27,15 @@ const plugin = {
         let { layerX, layerY } = evt || {};
 
         if (snapping) {
-            const hit = chart.getElementAtEvent(evt)[0];
+            const hit = chart.getElementsAtEventForMode(
+                evt,
+                'nearest',
+                {},
+                true
+            )[0];
             if (hit) {
                 // eslint-disable-next-line no-underscore-dangle
-                const { x, y } = hit._model;
+                const { x, y } = hit.element;
                 layerX = x;
                 layerY = y;
             }
