@@ -36,6 +36,19 @@ const mapState = () => ({
     deviceSetup,
 });
 
+const deviceFilter = device => {
+    const PPK2 = 'power_profiler_kit_2 1.0.0-5e7cc60';
+    const supportedPPK1Devices = [
+        'NRF51_FAMILY',
+        'NRF52_FAMILY',
+        'NRF53_FAMILY',
+    ];
+    return (
+        device.dfuTriggerVersion?.semVer === PPK2 ||
+        supportedPPK1Devices.includes(device.jlink?.deviceFamily)
+    );
+};
+
 const mapDispatch = dispatch => ({
     onDeviceSelected: device => {
         logger.info(
@@ -51,6 +64,7 @@ const mapDispatch = dispatch => ({
         logger.info(`Opening device with s/n ${device.serialNumber}`);
         dispatch(open(device));
     },
+    deviceFilter,
 });
 
 export default connect(mapState, mapDispatch)(DeviceSelector);
