@@ -192,7 +192,7 @@ const AmpereChart = ({
     const plugins = [
         dragSelectPlugin,
         zoomPanPlugin,
-        triggerLevelPlugin,
+        triggerLevelPlugin(dispatch),
         triggerOriginPlugin,
         crossHairPlugin,
         {

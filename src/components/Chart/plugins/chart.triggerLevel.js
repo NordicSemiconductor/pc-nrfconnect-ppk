@@ -6,10 +6,16 @@
 
 import { colors } from 'pc-nrfconnect-shared';
 
+import { updateTriggerLevel } from '../../../actions/deviceActions';
+
 const { gray700: color, nordicBlue } = colors;
 
 const getTriggerLevelFromCoordinate = coordinate =>
     Math.round(Math.min(1000000, Math.max(0, coordinate)));
+
+let dispatch = () => {
+    throw new Error('Dispatch not passed to plugin yet!');
+};
 
 const plugin = {
     id: 'triggerLevel',
@@ -61,24 +67,22 @@ const plugin = {
         chartInstance.triggerLine.y = evt.layerY;
         const {
             scales: { yScale },
-            options: { updateTriggerLevel },
         } = chartInstance;
         const level = getTriggerLevelFromCoordinate(
             yScale.getValueForPixel(chartInstance.triggerLine.y)
         );
-        updateTriggerLevel(level);
+        dispatch(updateTriggerLevel(level));
     },
 
     pointerLeaveHandler(chartInstance) {
         if (chartInstance.triggerLine.y !== null) {
             const {
                 scales: { yScale },
-                options: { sendTriggerLevel },
             } = chartInstance;
             const level = getTriggerLevelFromCoordinate(
                 yScale.getValueForPixel(chartInstance.triggerLine.y)
             );
-            sendTriggerLevel(level);
+            dispatch(updateTriggerLevel(level));
         }
         chartInstance.triggerLine.y = null;
     },
@@ -187,4 +191,7 @@ const plugin = {
     },
 };
 
-export default plugin;
+export default dispatchFromComponent => {
+    dispatch = dispatchFromComponent;
+    return plugin;
+};
