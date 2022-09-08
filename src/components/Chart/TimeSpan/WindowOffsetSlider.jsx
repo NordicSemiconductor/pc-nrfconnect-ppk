@@ -5,10 +5,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { number } from 'prop-types';
 
-import { setWindowOffsetAction } from '../../../slices/triggerSlice';
+import {
+    setWindowOffsetAction,
+    triggerState,
+} from '../../../slices/triggerSlice';
 
 import './timespan.scss';
 
@@ -18,18 +21,17 @@ const windowOffsetHandleSvg = (
     </svg>
 );
 
-const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
+const WindowOffsetSlider = ({ duration }) => {
     const dispatch = useDispatch();
-    const setWindowOffset = useCallback(
-        (...args) => dispatch(setWindowOffsetAction(...args)),
-        [dispatch]
-    );
+    const { triggerWindowOffset } = useSelector(triggerState);
+
     const [drag, setDrag] = useState(null);
 
     const onPointerDown = ({ clientX, pointerId, target }) => {
         target.setPointerCapture(pointerId);
         setDrag({ clientX, triggerWindowOffset });
     };
+
     const onPointerMove = ({ clientX, target }) => {
         if (!drag) return;
         let offset =
@@ -43,7 +45,7 @@ const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
         } else if (offset < -span) {
             offset = -span;
         }
-        setWindowOffset(offset);
+        dispatch(setWindowOffsetAction(offset));
     };
 
     const onPointerUp = ({ target, pointerId }) => {
@@ -75,6 +77,5 @@ const WindowOffsetSlider = ({ triggerWindowOffset, duration }) => {
 export default WindowOffsetSlider;
 
 WindowOffsetSlider.propTypes = {
-    triggerWindowOffset: number,
     duration: number,
 };

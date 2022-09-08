@@ -47,10 +47,7 @@ const TimeSpanTop = ({ width }) => {
                         duration={distanceFromOriginToTriggerHandle}
                         totalDuration={windowDuration}
                     />
-                    <WindowOffsetSlider
-                        triggerWindowOffset={triggerWindowOffset}
-                        duration={windowDuration}
-                    />
+                    <WindowOffsetSlider duration={windowDuration} />
                     <TimeSpanLabel
                         begin={distanceFromOriginToTriggerHandle}
                         end={windowDuration}
