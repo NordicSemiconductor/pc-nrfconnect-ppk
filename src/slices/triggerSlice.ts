@@ -54,7 +54,7 @@ const triggerSlice = createSlice({
             action: PayloadAction<{ triggerLength: number }>
         ) {
             const { triggerLength } = action.payload;
-            return { ...state, triggerLength, trigggerWindowOffset: 0 };
+            return { ...state, triggerLength, triggerWindowOffset: 0 };
         },
         toggleTriggerAction(
             state,
@@ -109,11 +109,8 @@ const triggerSlice = createSlice({
             const triggerWindowRange = action.payload;
             return { ...state, triggerWindowRange };
         },
-        setWindowOffsetAction(
-            state,
-            action: PayloadAction<{ offset: number }>
-        ) {
-            const triggerWindowOffset = action.payload.offset;
+        setWindowOffsetAction(state, action: PayloadAction<number>) {
+            const triggerWindowOffset = action.payload;
             return { ...state, triggerWindowOffset };
         },
         setTriggerOriginAction(
