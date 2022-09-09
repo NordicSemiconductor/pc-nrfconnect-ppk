@@ -1,3 +1,9 @@
+## 3.4.5 - 2022-09-09
+
+### Fixed
+
+-   Programming firmware now works with nRF Connect for Desktop v3.12.0.
+
 ## 3.4.4 - 2022-09-05
 
 ### Added
