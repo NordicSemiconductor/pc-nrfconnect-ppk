@@ -34,7 +34,6 @@ const plugin = {
                 true
             )[0];
             if (hit) {
-                // eslint-disable-next-line no-underscore-dangle
                 const { x, y } = hit.element;
                 layerX = x;
                 layerY = y;
