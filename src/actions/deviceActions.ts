@@ -124,6 +124,11 @@ export function samplingStart() {
                 ? EventAction.START_REAL_TIME_SAMPLE
                 : EventAction.START_DATA_LOGGER_SAMPLE
         );
+        usageData.sendUsageData(
+            device!.capabilities.hwTrigger
+                ? EventAction.SAMPLE_STARTED_WITH_PPK1_SELECTED
+                : EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED
+        );
         options.data.fill(NaN);
         if (options.bits) {
             options.bits.fill(0);

@@ -27,14 +27,3 @@
 .modal {
     background-color: #00000080;
 }
-
-// missing from shared
-.toggle {
-    min-height: fit-content;
-    .toggle-handle-secondary-toggled {
-        background: white; // overridden
-    }
-    .toggle-label {
-        font-size: 12px; // overridden
-    }
-}

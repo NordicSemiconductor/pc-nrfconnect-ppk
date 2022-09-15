@@ -13,6 +13,8 @@ const EventAction = {
     Y_MAX_SET_EXPLICITLY: 'YMax was explicitly changed',
     START_DATA_LOGGER_SAMPLE: 'Data Logger sampling started',
     START_REAL_TIME_SAMPLE: 'Real Time sampling started',
+    SAMPLE_STARTED_WITH_PPK1_SELECTED: 'Sample started with PPK1 selected',
+    SAMPLE_STARTED_WITH_PPK2_SELECTED: 'Sample started with PPK2 selected',
 };
 
 export default EventAction;
