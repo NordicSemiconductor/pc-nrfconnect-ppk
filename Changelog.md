@@ -1,3 +1,9 @@
+## Unreleased
+
+### Changed
+
+-   Better performance when paning large datasets
+
 ## 3.4.5 - 2022-09-07
 
 ### Fixed

@@ -175,9 +175,15 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const zoomedOutTooFarForDigitalChannels =
         windowDuration > digitalChannelsWindowLimit;
 
-    const digitalChannelsToDisplay = digitalChannels
-        .map((isVisible, channelNumber) => (isVisible ? channelNumber : null))
-        .filter(channelNumber => channelNumber != null);
+    const digitalChannelsToDisplay = useMemo(
+        () =>
+            digitalChannels
+                .map((isVisible, channelNumber) =>
+                    isVisible ? channelNumber : null
+                )
+                .filter(channelNumber => channelNumber != null),
+        [digitalChannels]
+    );
 
     const digitalChannelsToCompute = useMemo(
         () =>
@@ -285,25 +291,35 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const originalIndexBegin = timestampToIndex(begin);
     const originalIndexEnd = timestampToIndex(end);
     const step = len === 0 ? 2 : (originalIndexEnd - originalIndexBegin) / len;
-    const { ampereLineData, bitsLineData } = useMemo(() => {
-        const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
+    const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
 
-        return dataProcessor.process(
-            begin,
-            end,
-            digitalChannelsToCompute,
-            len,
-            windowDuration
-        );
+    const [ampereLineData, setAmpereLineData] = useState([]);
+    const [bitsLineData, setBitsLineData] = useState([]);
+
+    useEffect(() => {
+        const calculation = setTimeout(() => {
+            const processedData = dataProcessor.process(
+                begin,
+                end,
+                digitalChannelsToCompute,
+                len,
+                windowDuration
+            );
+
+            setAmpereLineData(processedData.ampereLineData);
+            setBitsLineData(processedData.bitsLineData);
+        });
+
+        return () => {
+            clearTimeout(calculation);
+        };
     }, [
         begin,
-        dataAccumulator,
-        dataSelector,
         end,
         len,
-        digitalChannelsToCompute,
-        step,
         windowDuration,
+        dataProcessor,
+        digitalChannelsToCompute,
     ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
