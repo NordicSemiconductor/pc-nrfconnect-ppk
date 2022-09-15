@@ -1,17 +1,17 @@
 ## Unreleased
 
-### Changed
-
--   Better performance when paning large datasets
-
-## 3.4.5 - 2022-09-07
-
 ### Added
 
 -   Device filter
     -   When using a PPK2 you should only select the PPK2 in this app.
     -   When using a PPK1 you can use it with any member of the nRF51, nRF52 or
         nRF53 Family.
+
+### Changed
+
+-   Better performance when paning large datasets
+
+## 3.4.5 - 2022-09-07
 
 ### Fixed
 
