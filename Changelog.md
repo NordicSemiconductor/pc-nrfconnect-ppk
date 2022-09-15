@@ -1,9 +1,9 @@
 ## 3.5.0 - 2022-09-15
 
-### Known Issues
+### Known Issue
 
 -   PPK1 measurements fail after some time with error message: "Corrupt data
-    detected, please heck connection to PPK"
+    detected, please check connection to PPK"
 
 ### Added
 
