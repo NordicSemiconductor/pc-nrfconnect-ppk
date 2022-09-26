@@ -1,9 +1,11 @@
-## 3.5.0 - 2022-09-15
+## 3.5.0 - 2022-09-26
 
 ### Known Issue
 
--   PPK1 measurements fail after some time with error message: "Corrupt data
-    detected, please check connection to PPK"
+-   PPK1 measurements may fail after some time with error message: "Corrupt data
+    detected, please check connection to PPK". A temporary solution, that we
+    have tested, is to manually downgrade JLink firmware on the device to
+    v6.58b.
 
 ### Added
 
