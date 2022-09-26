@@ -31,14 +31,14 @@
         "check:lint": "eslint --color .",
         "check:types": "check-for-typescript tsc --noEmit --pretty",
         "check:license": "nrfconnect-license check",
-        "nordic-publish": "nordic-publish"
+        "nordic-publish": "./dist/nordic-publish.js"
     },
     "dependencies": {},
     "devDependencies": {
         "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.6.1",
+        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.6.3",
         "react-chartjs-2": "^4.2.0",
         "redux-mock-store": "^1.5.4"
     },
