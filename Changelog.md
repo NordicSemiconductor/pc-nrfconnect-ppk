@@ -1,3 +1,9 @@
+## 3.5.1 - 2022-10-5
+
+### Fixed
+
+-   Resuming profiling used to crash.
+
 ## 3.5.0 - 2022-09-26
 
 ### Known Issue

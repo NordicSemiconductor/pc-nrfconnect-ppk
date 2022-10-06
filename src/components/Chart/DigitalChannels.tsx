@@ -51,6 +51,7 @@ const DigitalChannels = ({
                 max: end,
                 ticks: {
                     display: false,
+                    callback: () => undefined, // override chart.js tick callback which fails on resuming profiling
                 },
             },
             yScaleDigitalChannel: {
