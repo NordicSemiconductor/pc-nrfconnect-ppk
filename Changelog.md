@@ -1,3 +1,11 @@
+## 3.5.2 - 2022-10-12
+
+### Fixed
+
+-   PPK2 did not show up in **Device Selector** when the appropriate firmware
+    was not flashed. This release removes the filtering that was introduced in
+    v3.5.0.
+
 ## 3.5.1 - 2022-10-5
 
 ### Fixed
