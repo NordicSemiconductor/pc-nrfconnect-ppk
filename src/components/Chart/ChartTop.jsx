@@ -16,6 +16,7 @@ import {
     chartState,
     resetChart,
     toggleYAxisLock,
+    toggleYAxisLog,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
@@ -40,7 +41,7 @@ TimeWindowButton.propTypes = {
 
 const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
     const dispatch = useDispatch();
-    const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
+    const { windowBegin, windowEnd, yAxisLock, yAxisLog } = useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const live = windowBegin === 0 && windowEnd === 0;
@@ -75,6 +76,15 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                         }
                     }}
                     isToggled={yAxisLock}
+                    variant="primary"
+                    labelRight
+                />
+                <Toggle
+                    label="LOGARITHMIC Y-AXIS"
+                    onToggle={() => {
+                        dispatch(toggleYAxisLog());
+                    }}
+                    isToggled={yAxisLog}
                     variant="primary"
                     labelRight
                 />

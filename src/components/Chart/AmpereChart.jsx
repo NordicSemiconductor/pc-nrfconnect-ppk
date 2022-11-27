@@ -61,6 +61,7 @@ const AmpereChart = ({
         cursorEnd,
         yMin,
         yMax,
+        yAxisLog,
         timestampsVisible,
     } = useSelector(chartState);
     const { samplingRunning } = useSelector(appState);
@@ -158,7 +159,7 @@ const AmpereChart = ({
                 },
             },
             yScale: {
-                type: 'logarithmic',
+                type: yAxisLog ? 'logarithmic' : 'linear',
                 min: yMin === null ? valueRange.min : yMin,
                 max: yMax === null ? valueRange.max : yMax,
                 ticks: {
