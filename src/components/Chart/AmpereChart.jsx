@@ -158,7 +158,7 @@ const AmpereChart = ({
                 },
             },
             yScale: {
-                type: 'linear',
+                type: 'logarithmic',
                 min: yMin === null ? valueRange.min : yMin,
                 max: yMax === null ? valueRange.max : yMax,
                 ticks: {

@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Chart as ChartJS,
     LinearScale,
+    LogarithmicScale,
     LineElement,
     PointElement,
     Title,
@@ -48,7 +49,7 @@ import chartCss from './chart.icss.scss';
 
 // chart.js way of doing tree-shaking, meaning that components that will be included in the bundle
 // must be imported and registered. The registered components are used in both AmpereChart and DigitalChannels.
-ChartJS.register(LineElement, PointElement, LinearScale, Title);
+ChartJS.register(LineElement, PointElement, LinearScale, LogarithmicScale, Title);
 
 const { rightMarginPx } = chartCss;
 
