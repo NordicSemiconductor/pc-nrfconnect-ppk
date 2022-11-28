@@ -19,8 +19,8 @@ const deviceListing = {
 const deviceSetup = {
     dfu: {
         ppk2: {
-            application: getAppFile('firmware/pca63100_ppk2_5e7cc60.hex'),
-            semver: 'power_profiler_kit_2 1.0.0-5e7cc60',
+            application: getAppFile('firmware/pca63100_ppk2_7453297.hex'),
+            semver: 'power_profiler_kit_2 1.0.1-7453297',
         },
     },
     jprog: {
