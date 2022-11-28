@@ -1,3 +1,10 @@
+## 3.5.3 - 2022-11-28
+
+### Changed
+
+-   New PPK2 firmware. The first time you connect a PPK2 with an older firmware
+    version, you will be asked if you want your device to be programmed.
+
 ## 3.5.2 - 2022-10-12
 
 ### Fixed
