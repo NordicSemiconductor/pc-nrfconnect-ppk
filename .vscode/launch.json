@@ -1,0 +1,86 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Build Launcher",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${env:LauncherWorkspace}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "build:dev"
+            ]
+        },
+        {
+            "name": "Build:dev",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "build:dev"
+            ]
+        },
+        {
+            "name": "Watch App",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "watch"
+            ]
+        },
+        {
+            "name": "Open Launcher",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${env:LauncherWorkspace}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "app:debug"
+            ]
+        },
+        {
+            "name": "Open App",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${env:LauncherWorkspace}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "app:debug",  "--", "--open-local-app", "${workspaceFolderBasename}"
+            ]
+        },
+        {
+            "name": "Attach",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9223,
+            "webRoot": "${workspaceFolder}",
+            "timeout": 20000,
+            "preLaunchTask": "build:dev",
+        },
+        {
+            "name": "Build and Open App",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${env:LauncherWorkspace}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "app:debug",  "--", "--open-local-app", "${workspaceFolderBasename}"
+            ],
+            "preLaunchTask": "build:dev"
+        },
+    ],
+    "compounds": [
+        {
+          "name": "Build All",
+          "configurations": ["Build Launcher", "Build:dev"]
+        },
+        {
+            "name": "Build, Open and Attach",
+            "configurations": ["Open App", "Attach"],
+            "preLaunchTask": "build:dev"
+        },
+      ],
+  }
