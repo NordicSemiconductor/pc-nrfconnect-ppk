@@ -32,14 +32,18 @@ const asarPath = (() => {
 })();
 
 // eslint-disable-next-line import/no-dynamic-require
-const SerialPort = require(resolve(asarPath, 'node_modules', 'serialport'));
+const { SerialPort } = require(resolve(asarPath, 'node_modules', 'serialport'));
 
 let port = null;
 process.on('message', msg => {
     if (msg.open) {
         console.log('\x1b[2J'); // ansi clear screen
         process.send({ opening: msg.open });
-        port = new SerialPort(msg.open, { autoOpen: false });
+        port = new SerialPort({
+            path: msg.open,
+            autoOpen: false,
+            baudRate: 115200,
+        });
 
         let data = Buffer.alloc(0);
         port.on('data', buf => {
