@@ -1,3 +1,9 @@
+## 3.5.4 - Unreleased
+
+### Changed
+
+-   Update to work with nrf Connect for Desktop v3.13.0
+
 ## 3.5.3 - 2022-11-28
 
 ### Changed
