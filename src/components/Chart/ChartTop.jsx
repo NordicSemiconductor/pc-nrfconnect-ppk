@@ -64,6 +64,15 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
             <div className="settings-y-axis">
                 <Toggle
+                    label="LOGARITHMIC Y-AXIS"
+                    onToggle={() => {
+                        dispatch(toggleYAxisLog());
+                    }}
+                    isToggled={yAxisLog}
+                    variant="primary"
+                    labelRight
+                />
+                <Toggle
                     label="LOCK Y-AXIS"
                     onToggle={() => {
                         if (yAxisLock) {
@@ -76,15 +85,6 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
                         }
                     }}
                     isToggled={yAxisLock}
-                    variant="primary"
-                    labelRight
-                />
-                <Toggle
-                    label="LOGARITHMIC Y-AXIS"
-                    onToggle={() => {
-                        dispatch(toggleYAxisLog());
-                    }}
-                    isToggled={yAxisLog}
                     variant="primary"
                     labelRight
                 />
