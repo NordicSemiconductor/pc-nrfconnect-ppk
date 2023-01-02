@@ -1,6 +1,6 @@
 {
     "name": "pc-nrfconnect-ppk",
-    "version": "3.5.3",
+    "version": "3.5.4",
     "displayName": "Power Profiler",
     "description": "App for use with Nordic Power Profiler Kits",
     "homepage": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk",
@@ -11,7 +11,7 @@
     "author": "Nordic Semiconductor ASA",
     "license": "SEE LICENSE IN LICENSE",
     "engines": {
-        "nrfconnect": "^3.12.0"
+        "nrfconnect": "^3.13.0"
     },
     "main": "dist/bundle.js",
     "files": [
@@ -24,22 +24,25 @@
     ],
     "scripts": {
         "prepare": "husky install",
-        "dev": "webpack watch --mode development",
-        "webpack": "webpack build --mode development",
-        "build": "webpack build",
+        "watch": "run-p --silent --continue-on-error watch:*",
+        "watch:build": "run-esbuild --watch",
+        "watch:types": "tsc --noEmit --pretty --watch --preserveWatchOutput",
+        "build:dev": "run-esbuild",
+        "build:prod": "run-esbuild --prod",
         "test": "jest",
+        "check:app": "check-app-properties",
         "check": "run-p --silent --continue-on-error --print-label check:*",
         "check:lint": "eslint --color .",
         "check:types": "check-for-typescript tsc --noEmit --pretty",
         "check:license": "nrfconnect-license check",
-        "nordic-publish": "./dist/nordic-publish.js"
+        "nordic-publish": "node ./dist/nordic-publish.js"
     },
     "dependencies": {},
     "devDependencies": {
         "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.6.3",
+        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.13.2",
         "react-chartjs-2": "^4.2.0",
         "redux-mock-store": "^1.5.4"
     },
