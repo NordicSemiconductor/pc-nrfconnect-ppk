@@ -11,7 +11,7 @@
     "author": "Nordic Semiconductor ASA",
     "license": "SEE LICENSE IN LICENSE",
     "engines": {
-        "nrfconnect": "^3.13.0"
+        "nrfconnect": ">=4.0.0"
     },
     "main": "dist/bundle.js",
     "files": [
@@ -42,7 +42,7 @@
         "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.14.1",
+        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.14.3",
         "react-chartjs-2": "^4.2.0",
         "redux-mock-store": "^1.5.4"
     },

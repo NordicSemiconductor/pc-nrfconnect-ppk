@@ -2,7 +2,7 @@
 
 ### Changed
 
--   Update to work with nRF Connect for Desktop v3.13.0
+-   Update to work with nRF Connect for Desktop v4.0.0
 
 ## 3.5.3 - 2022-11-28
 
