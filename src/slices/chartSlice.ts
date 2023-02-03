@@ -189,6 +189,7 @@ const chartSlice = createSlice({
                 ...state,
                 windowBegin,
                 windowEnd,
+                windowDuration: action.payload.windowDuration,
                 initialWindowDuration,
                 windowBeginLock: windowBegin,
                 windowEndLock: windowEnd,
