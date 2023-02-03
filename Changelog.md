@@ -1,8 +1,17 @@
 ## 3.5.4 - Unreleased
 
+### Added
+
+-   Auto reconnect functionality.
+
 ### Changed
 
--   Update to work with nRF Connect for Desktop v4.0.0
+-   Update to work with nRF Connect for Desktop v4.0.0.
+
+### Fixed
+
+-   Issue in `Real Time` pane, where if you increased the `Length`, the length
+    would not be reflected in the window of the next trigger.
 
 ## 3.5.3 - 2022-11-28
 
