@@ -8,6 +8,7 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
+import { getCurrentWindow } from '@electron/remote';
 import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
 import { unit } from 'mathjs';
 import {
@@ -21,8 +22,6 @@ import {
     maxBufferSize as maxBufferSizeSelector,
 } from '../../slices/dataLoggerSlice';
 import EventAction from '../../usageDataActions';
-
-const { getCurrentWindow } = require('@electron/remote');
 
 export const BufferSettings = () => {
     const maxBufferSize = useSelector(maxBufferSizeSelector);
@@ -54,7 +53,7 @@ export const BufferSettings = () => {
                         );
                         usageData.sendUsageData(
                             EventAction.BUFFER_SIZE_CHANGED,
-                            newValue
+                            `${newValue}`
                         );
                         setChanged(true);
                     }}
