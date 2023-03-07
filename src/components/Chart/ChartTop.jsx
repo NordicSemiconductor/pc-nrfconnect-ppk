@@ -51,6 +51,7 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
         '1s',
         '3s',
         '10s',
+        '20s',
         '1min',
         '10min',
         '1h',
