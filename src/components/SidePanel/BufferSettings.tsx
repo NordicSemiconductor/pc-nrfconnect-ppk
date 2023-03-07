@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
+import React, { useState } from 'react';
+import FormLabel from 'react-bootstrap/FormLabel';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentWindow } from '@electron/remote';
 import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
 import { unit } from 'mathjs';
 import {
-    CollapsibleGroup,
+    Button,
+    Group,
     NumberInlineInput,
     usageData,
 } from 'pc-nrfconnect-shared';
@@ -30,45 +30,47 @@ export const BufferSettings = () => {
         min: 1,
         max: unit(maxBufferSizeForSystem, 'bytes').toNumber('MB'),
     };
-    const [changed, setChanged] = React.useState(false);
+
+    const [newValue, setNewValue] = useState(maxBufferSize);
+
     return (
-        <CollapsibleGroup
+        <Group
             heading="Sampling Buffer Size"
             title="Adjust max buffer size for sampling"
-            defaultCollapsed={false}
         >
-            <Form.Label
+            <FormLabel
                 htmlFor="slider-ram-size"
                 title="Change this value to update the amount of allocated memory. Increasing it will allow sampling for longer. Restart app after updating value for changes to take effect"
             >
                 <span className="flex-fill">Max size of buffer</span>
                 <NumberInlineInput
-                    value={maxBufferSize}
+                    value={newValue}
                     range={range}
-                    onChange={newValue => {
+                    onChange={value => {
+                        setNewValue(value);
+                    }}
+                />
+                <span>&nbsp;MB</span>
+            </FormLabel>
+            {newValue !== maxBufferSize ? (
+                <Button
+                    className="w-100 mt-2 secondary-btn"
+                    onClick={() => {
+                        usageData.sendUsageData(
+                            EventAction.BUFFER_SIZE_CHANGED,
+                            `${newValue}`
+                        );
                         dispatch(
                             changeMaxBufferSizeAction({
                                 maxBufferSize: newValue,
                             })
                         );
-                        usageData.sendUsageData(
-                            EventAction.BUFFER_SIZE_CHANGED,
-                            `${newValue}`
-                        );
-                        setChanged(true);
+                        getCurrentWindow().reload();
                     }}
-                />
-                <span>&nbsp;MB</span>
-            </Form.Label>
-            {changed && (
-                <Button
-                    className="w-100 secondary-btn restart-app-btn btn btn-set"
-                    variant="secondary"
-                    onClick={() => getCurrentWindow().reload()}
                 >
                     Restart app and apply settings
                 </Button>
-            )}
-        </CollapsibleGroup>
+            ) : null}
+        </Group>
     );
 };
