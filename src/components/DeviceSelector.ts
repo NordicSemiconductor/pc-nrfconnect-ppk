@@ -5,9 +5,16 @@
  */
 
 import { connect } from 'react-redux';
-import { DeviceSelector, getAppFile, logger } from 'pc-nrfconnect-shared';
+import {
+    Device,
+    DeviceSelector,
+    DeviceSelectorProps,
+    getAppFile,
+    logger,
+} from 'pc-nrfconnect-shared';
 
 import { close, open } from '../actions/deviceActions';
+import { TDispatch } from '../slices/thunk';
 
 const deviceListing = {
     nordicUsb: true,
@@ -37,8 +44,8 @@ const mapState = () => ({
     deviceSetup,
 });
 
-const mapDispatch = dispatch => ({
-    onDeviceSelected: device => {
+const mapDispatch = (dispatch: TDispatch): Partial<DeviceSelectorProps> => ({
+    onDeviceSelected: (device: Device) => {
         logger.info(
             `Validating firmware for device with s/n ${device.serialNumber}`
         );
