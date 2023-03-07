@@ -63,7 +63,10 @@ import {
     triggerSingleSetAction,
     triggerWindowRangeAction,
 } from '../slices/triggerSlice';
-import { updateRegulatorAction } from '../slices/voltageRegulatorSlice';
+import {
+    resetVoltageMaxCapForPPK1,
+    updateRegulatorAction,
+} from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
@@ -162,14 +165,14 @@ export function triggerStop() {
 }
 
 export const updateSpikeFilter =
-    () => async (_: TDispatch, getState: () => RootState) => {
+    () => (_: TDispatch, getState: () => RootState) => {
         // TODO: Must be tested for RTTDevice
         if (isRTTDevice(device)) {
             return;
         }
         const { spikeFilter } = getState().app;
         persistSpikeFilter(spikeFilter);
-        await device!.ppkSetSpikeFilter(spikeFilter);
+        device!.ppkSetSpikeFilter(spikeFilter);
         if (getState().app.app.advancedMode) {
             const { samples, alpha, alpha5 } = spikeFilter;
             logger.info(
@@ -319,6 +322,14 @@ export function open(deviceInfo: any) {
         try {
             device = Device(deviceInfo, onSample);
 
+            if (
+                device.capabilities.hwTrigger &&
+                getState().app.voltageRegulator.maxCap > 3600
+            ) {
+                // PPK1 PPK_1_SELECTED
+                resetMaxVoltageForPPK1(dispatch);
+            }
+
             usageData.sendUsageData(
                 device.capabilities.hwTrigger
                     ? EventAction.PPK_1_SELECTED
@@ -409,7 +420,7 @@ export function open(deviceInfo: any) {
             ) {
                 const timestamp = Date.now();
                 requestAnimationFrame(() => {
-                    /* 
+                    /*
                         requestAnimationFrame pauses when app is in the background.
                         If timestamp is more than 10ms ago, do not dispatch animationAction.
                     */
@@ -608,3 +619,8 @@ export function updateTriggerLevel(triggerLevel: number) {
         }
     };
 }
+
+const resetMaxVoltageForPPK1 = (dispatch: TDispatch) => {
+    dispatch(resetVoltageMaxCapForPPK1());
+    usageData.sendUsageData(EventAction.VOLTAGE_MAX_LIMIT_RESET);
+};

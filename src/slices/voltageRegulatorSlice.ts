@@ -65,6 +65,9 @@ const voltageRegulatorSlice = createSlice({
             setVoltageRegulatorMaxCap(maxCap);
             return { ...state, maxCap };
         },
+        resetVoltageMaxCapForPPK1(state) {
+            state.maxCap = 3600;
+        },
     },
 });
 
@@ -75,6 +78,7 @@ export const {
     moveVoltageRegulatorVddAction,
     updateRegulatorAction,
     updateVoltageRegulatorMaxCapAction,
+    resetVoltageMaxCapForPPK1,
 } = voltageRegulatorSlice.actions;
 
 export default voltageRegulatorSlice.reducer;
