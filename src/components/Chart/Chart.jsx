@@ -323,6 +323,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowDuration,
         dataProcessor,
         digitalChannelsToCompute,
+        yAxisLog,
     ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
