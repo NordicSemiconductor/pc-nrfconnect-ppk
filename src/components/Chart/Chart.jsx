@@ -156,6 +156,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         digitalChannels,
         digitalChannelsVisible,
         hasDigitalChannels,
+        yAxisLog,
     } = useSelector(chartState);
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showDigitalChannels =
@@ -303,6 +304,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 begin,
                 end,
                 digitalChannelsToCompute,
+                yAxisLog,
                 len,
                 windowDuration
             );
