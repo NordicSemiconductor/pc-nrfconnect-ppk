@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import Form from 'react-bootstrap/Form';
+import FormLabel from 'react-bootstrap/FormLabel';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     CollapsibleGroup,
@@ -35,7 +35,7 @@ export const CapVoltageSettings = () => {
                 className="voltage-regulator"
                 title="Supply voltage to the device will be capped to this value"
             >
-                <Form.Label htmlFor="cap-slider-vdd">
+                <FormLabel htmlFor="cap-slider-vdd">
                     <span className="flex-fill">Set max supply voltage to</span>
                     <NumberInlineInput
                         value={maxCap}
@@ -53,12 +53,12 @@ export const CapVoltageSettings = () => {
                             );
                             usageData.sendUsageData(
                                 EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                                maxCap
+                                `${maxCap}`
                             );
                         }}
                     />
                     &nbsp;mV
-                </Form.Label>
+                </FormLabel>
                 <Slider
                     id="cap-slider-vdd"
                     values={[maxCap]}
@@ -77,7 +77,7 @@ export const CapVoltageSettings = () => {
                         );
                         usageData.sendUsageData(
                             EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                            maxCap
+                            `${maxCap}`
                         );
                     }}
                 />
