@@ -1,3 +1,9 @@
+## Unreleased
+
+## Added
+
+-   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
+
 ## 3.5.4 - 2023-02-12
 
 ### Added
