@@ -25,6 +25,7 @@ export default () => ({
         begin: number,
         end: number,
         digitalChannelsToCompute: number[],
+        removeZeroValues: boolean,
         len: number,
         windowDuration: number
     ) {
@@ -57,7 +58,12 @@ export default () => ({
 
             for (let n = k; n < l; ++n) {
                 const ni = (n + data.length) % data.length;
-                const v = data[ni];
+                let v = data[ni];
+
+                if (removeZeroValues && v === 0) {
+                    v = NaN;
+                }
+
                 if (!Number.isNaN(v)) {
                     if (v > max) max = v;
                     if (v < min) min = v;

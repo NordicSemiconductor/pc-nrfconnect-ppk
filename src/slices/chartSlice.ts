@@ -37,6 +37,7 @@ interface ChartState {
     digitalChannelsVisible: boolean;
     timestampsVisible: boolean;
     yAxisLock: boolean;
+    yAxisLog: boolean;
     windowBeginLock: null | number;
     windowEndLock: null | number;
 }
@@ -61,6 +62,7 @@ const initialState = (): ChartState => ({
     digitalChannelsVisible: getDigitalChannelsVisible(),
     timestampsVisible: getTimestampsVisible(),
     yAxisLock: false,
+    yAxisLog: false,
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
 });
@@ -231,6 +233,9 @@ const chartSlice = createSlice({
                 yMax: action.payload?.yMax || null,
             };
         },
+        toggleYAxisLog: state => {
+            state.yAxisLog = !state.yAxisLog;
+        },
         chartWindowLockAction: state => {
             state.windowBeginLock = state.windowBegin;
             state.windowEndLock = state.windowEnd;
@@ -336,6 +341,7 @@ export const {
     toggleDigitalChannels,
     toggleTimestamps,
     toggleYAxisLock,
+    toggleYAxisLog,
     updateHasDigitalChannels,
 } = chartSlice.actions;
 
