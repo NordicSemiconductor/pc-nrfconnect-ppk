@@ -19,8 +19,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Chart as ChartJS,
     LinearScale,
-    LogarithmicScale,
     LineElement,
+    LogarithmicScale,
     PointElement,
     Title,
 } from 'chart.js';
@@ -49,7 +49,13 @@ import chartCss from './chart.icss.scss';
 
 // chart.js way of doing tree-shaking, meaning that components that will be included in the bundle
 // must be imported and registered. The registered components are used in both AmpereChart and DigitalChannels.
-ChartJS.register(LineElement, PointElement, LinearScale, LogarithmicScale, Title);
+ChartJS.register(
+    LineElement,
+    PointElement,
+    LinearScale,
+    LogarithmicScale,
+    Title
+);
 
 const { rightMarginPx } = chartCss;
 
@@ -136,12 +142,27 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             return false;
         },
     });
+
     useHotKey({
         hotKey: 'esc',
         title: 'Select none',
         isGlobal: false,
         action: () => {
             resetCursor();
+        },
+    });
+
+    useHotKey({
+        hotKey: 'alt+z',
+        title: 'Zoom to selected area',
+        isGlobal: false,
+        action: () => {
+            dispatch((_dispatch, getState) => {
+                const { cursorBegin, cursorEnd } = chartState(getState());
+                if (cursorBegin != null && cursorEnd != null) {
+                    chartWindow(cursorBegin, cursorEnd);
+                }
+            });
         },
     });
 
