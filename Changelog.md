@@ -2,7 +2,9 @@
 
 ## Added
 
--   Zoom to selection button, found in the bottom right corner.
+-   Zoom to selection button, which will make the window the size of the
+    selected area.
+    -   Hotkey: `alt+z`
 -   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
 
 ## 3.5.4 - 2023-02-12
