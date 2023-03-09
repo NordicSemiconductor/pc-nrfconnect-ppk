@@ -355,6 +355,17 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     SELECT ALL
                 </Button>
             );
+            buttons.push(
+                <Button
+                    key="zoom-to-selection-btn"
+                    variant="secondary"
+                    size="sm"
+                    disabled={cursorBegin == null || cursorEnd == null}
+                    onClick={() => chartWindow(cursorBegin, cursorEnd)}
+                >
+                    ZOOM TO SELECTION
+                </Button>
+            );
         }
 
         return buttons;
