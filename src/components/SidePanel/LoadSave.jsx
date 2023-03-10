@@ -5,8 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
+import { Button, Group } from 'pc-nrfconnect-shared';
 
 import { load, screenshot } from '../../actions/fileActions';
 import { appState, toggleSaveChoiceDialog } from '../../slices/appSlice';
@@ -22,8 +22,8 @@ export const Load = () => {
     return (
         <Button
             title="Large files may take a while to process"
-            className={`w-100 secondary-btn ${loading && 'active-anim'}`}
-            variant="set"
+            className={`w-100 ${loading && 'active-animation'}`}
+            variant="secondary"
             onClick={() => dispatch(load(setLoading))}
             disabled={loading}
         >
@@ -41,27 +41,27 @@ export const Save = () => {
 
     return (
         <>
-            <div className="save-load-btn-group">
+            <Group>
                 <Button
-                    className="w-100 secondary-btn"
+                    className="w-100"
                     title={
                         disabled ? 'Stop sampling to save or export' : undefined
                     }
-                    variant="set"
+                    variant="secondary"
                     disabled={disabled}
                     onClick={() => dispatch(toggleSaveChoiceDialog())}
                 >
                     Save / Export
                 </Button>
                 <Button
-                    className="w-100 screenshot-btn secondary-btn"
-                    variant="set"
+                    className="w-100"
+                    variant="secondary"
                     disabled={disabled}
                     onClick={() => dispatch(screenshot())}
                 >
                     Screenshot
                 </Button>
-            </div>
+            </Group>
             <SaveChoiceDialog />
             <ExportDialog />
         </>
