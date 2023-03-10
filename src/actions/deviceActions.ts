@@ -64,8 +64,8 @@ import {
     triggerWindowRangeAction,
 } from '../slices/triggerSlice';
 import {
-    resetVoltageMaxCapForPPK1,
-    updateRegulatorAction,
+    updateMaxCapOnDeviceSelected,
+    updateRegulator as updateRegulatorAction,
 } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
@@ -321,15 +321,7 @@ export function open(deviceInfo: any) {
 
         try {
             device = Device(deviceInfo, onSample);
-
-            if (
-                device.capabilities.hwTrigger &&
-                getState().app.voltageRegulator.maxCap > 3600
-            ) {
-                // PPK1 PPK_1_SELECTED
-                resetMaxVoltageForPPK1(dispatch);
-            }
-
+            console.log(device);
             usageData.sendUsageData(
                 device.capabilities.hwTrigger
                     ? EventAction.PPK_1_SELECTED
@@ -367,6 +359,11 @@ export function open(deviceInfo: any) {
                     ...device.vddRange,
                 })
             );
+            dispatch(
+                updateMaxCapOnDeviceSelected({
+                    isRTTDevice: isRTTDevice(device),
+                })
+            );
             await dispatch(initGains());
             if (device.capabilities.ppkSetSpikeFilter) {
                 dispatch(updateSpikeFilter());
@@ -393,6 +390,7 @@ export function open(deviceInfo: any) {
             dispatch({ type: 'device/deselectDevice' });
         }
 
+        console.log(device);
         dispatch(
             deviceOpenedAction({
                 portName: deviceInfo.serialNumber,
@@ -620,7 +618,4 @@ export function updateTriggerLevel(triggerLevel: number) {
     };
 }
 
-const resetMaxVoltageForPPK1 = (dispatch: TDispatch) => {
-    dispatch(resetVoltageMaxCapForPPK1());
-    usageData.sendUsageData(EventAction.VOLTAGE_MAX_LIMIT_RESET);
-};
+export const isConnectedToPPK1Device = () => isRTTDevice(device);

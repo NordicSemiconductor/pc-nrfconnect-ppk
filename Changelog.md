@@ -7,6 +7,10 @@
     -   Hotkey: `alt+z`
 -   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
 
+## Fixed
+
+-   PPK1: Could select higher VDD then what the device supports.
+
 ## 3.5.4 - 2023-02-12
 
 ### Added

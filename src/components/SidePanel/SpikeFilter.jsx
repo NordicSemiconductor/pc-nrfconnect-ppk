@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
+import { Button, CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';

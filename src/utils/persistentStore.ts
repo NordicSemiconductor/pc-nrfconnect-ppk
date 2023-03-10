@@ -19,7 +19,8 @@ const DIGITAL_CHANNELS_VISIBLE = 'digitalChannelsVisible';
 const DIGITAL_CHANNELS = 'digitalChannels';
 const TIMESTAMPS_VISIBLE = 'timestampsVisible';
 const MAX_BUFFER_SIZE = 'maxBufferSize';
-const VOLTAGE_REGULATOR_MAX_CAP = 'voltageRegulatorMaxCap';
+const VOLTAGE_REGULATOR_MAX_CAP_PPK1 = 'voltageRegulatorMaxCapPPK1';
+const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
 
 type SAMPLE_FREQUENCY = `sampleFreq-${number}`;
 type DURATION_SECONDS = `durationSeconds-${number}`;
@@ -52,7 +53,7 @@ interface StoreSchema {
     [TIMESTAMPS_VISIBLE]: boolean;
 
     [MAX_BUFFER_SIZE]: number;
-    [VOLTAGE_REGULATOR_MAX_CAP]: number;
+    [VOLTAGE_REGULATOR_MAX_CAP_PPK2]: number;
 
     [maxSampleFrequency: SAMPLE_FREQUENCY]: number;
     [maxSampleFrequency: DURATION_SECONDS]: number;
@@ -123,7 +124,11 @@ export const getMaxBufferSize = (defaultMaxBufferSize: number) => {
 export const setMaxBufferSize = (maxBufferSize: number) =>
     store<StoreSchema>().set(MAX_BUFFER_SIZE, maxBufferSize);
 
-export const getVoltageRegulatorMaxCap = (defaultMaxCap: number) =>
-    store<StoreSchema>().get(VOLTAGE_REGULATOR_MAX_CAP, defaultMaxCap);
-export const setVoltageRegulatorMaxCap = (maxCap: number) =>
-    store<StoreSchema>().set(VOLTAGE_REGULATOR_MAX_CAP, maxCap);
+export const getVoltageRegulatorMaxCapPPK1 = (defaultMaxCap: number) =>
+    store<StoreSchema>().get(VOLTAGE_REGULATOR_MAX_CAP_PPK1, defaultMaxCap);
+export const setVoltageRegulatorMaxCapPPK1 = (maxCap: number) =>
+    store<StoreSchema>().set(VOLTAGE_REGULATOR_MAX_CAP_PPK1, maxCap);
+export const getVoltageRegulatorMaxCapPPK2 = (defaultMaxCap: number) =>
+    store<StoreSchema>().get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);
+export const setVoltageRegulatorMaxCapPPK2 = (maxCap: number) =>
+    store<StoreSchema>().set(VOLTAGE_REGULATOR_MAX_CAP_PPK2, maxCap);

@@ -109,6 +109,8 @@ class RTTDevice extends Device {
 
     resistors = { hi: 1.8, mid: 28.0, lo: 510.0 };
 
+    vdd = 3000;
+
     vddRange = { min: 1850, max: 3600 };
 
     readloopRunning = false;
@@ -128,6 +130,7 @@ class RTTDevice extends Device {
     private byteHandlerFn: (byte: number) => void;
 
     public timestamp: number;
+    public isRTTDevice = true;
 
     constructor(
         device: any,

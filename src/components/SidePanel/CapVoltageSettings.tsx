@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import FormLabel from 'react-bootstrap/FormLabel';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -15,14 +15,34 @@ import {
 } from 'pc-nrfconnect-shared';
 
 import {
-    updateVoltageRegulatorMaxCapAction,
+    isConnectedToPPK1Device,
+    updateRegulator,
+} from '../../actions/deviceActions';
+import {
+    moveVoltageRegulatorVdd,
+    updateVoltageRegulatorMaxCapPPK1,
+    updateVoltageRegulatorMaxCapPPK2,
     voltageRegulatorState,
 } from '../../slices/voltageRegulatorSlice';
 import EventAction from '../../usageDataActions';
 
 export const CapVoltageSettings = () => {
-    const { min, max, maxCap } = useSelector(voltageRegulatorState);
+    const { min, max, vdd, maxCap } = useSelector(voltageRegulatorState);
+    const [newMaxCap, setNewMaxCap] = useState(maxCap);
     const dispatch = useDispatch();
+
+    const updateMaxCap = () =>
+        isConnectedToPPK1Device()
+            ? dispatch(updateVoltageRegulatorMaxCapPPK1(newMaxCap))
+            : dispatch(updateVoltageRegulatorMaxCapPPK2(newMaxCap));
+
+    const updateVoltageRegulator = () => {
+        updateMaxCap();
+        if (newMaxCap < vdd) {
+            dispatch(moveVoltageRegulatorVdd(newMaxCap));
+            dispatch(updateRegulator());
+        }
+    };
 
     return (
         <CollapsibleGroup
@@ -38,22 +58,14 @@ export const CapVoltageSettings = () => {
                 <FormLabel htmlFor="cap-slider-vdd">
                     <span className="flex-fill">Set max supply voltage to</span>
                     <NumberInlineInput
-                        value={maxCap}
+                        value={newMaxCap}
                         range={{ min, max }}
-                        onChange={value =>
-                            dispatch(
-                                updateVoltageRegulatorMaxCapAction({
-                                    maxCap: value,
-                                })
-                            )
-                        }
+                        onChange={value => setNewMaxCap(value)}
                         onChangeComplete={() => {
-                            dispatch(
-                                updateVoltageRegulatorMaxCapAction({ maxCap })
-                            );
+                            updateVoltageRegulator();
                             usageData.sendUsageData(
                                 EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                                `${maxCap}`
+                                `${newMaxCap}`
                             );
                         }}
                     />
@@ -61,23 +73,14 @@ export const CapVoltageSettings = () => {
                 </FormLabel>
                 <Slider
                     id="cap-slider-vdd"
-                    values={[maxCap]}
+                    values={[newMaxCap]}
                     range={{ min, max }}
-                    onChange={[
-                        value =>
-                            dispatch(
-                                updateVoltageRegulatorMaxCapAction({
-                                    maxCap: value,
-                                })
-                            ),
-                    ]}
+                    onChange={[value => setNewMaxCap(value)]}
                     onChangeComplete={() => {
-                        dispatch(
-                            updateVoltageRegulatorMaxCapAction({ maxCap })
-                        );
+                        updateVoltageRegulator();
                         usageData.sendUsageData(
                             EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                            `${maxCap}`
+                            `${newMaxCap}`
                         );
                     }}
                 />

@@ -20,6 +20,7 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
+// @ts-expect-error Is currently a jsx file
 import ChartOptions from './ChartOptions';
 
 import './charttop.scss';
@@ -52,7 +53,8 @@ const ChartTop = ({
     windowDuration,
 }: ChartTop) => {
     const dispatch = useDispatch();
-    const { windowBegin, windowEnd, yAxisLock, yAxisLog } = useSelector(chartState);
+    const { windowBegin, windowEnd, yAxisLock, yAxisLog } =
+        useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const live = windowBegin === 0 && windowEnd === 0;

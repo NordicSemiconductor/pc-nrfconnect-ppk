@@ -54,7 +54,8 @@ export const BufferSettings = () => {
             </FormLabel>
             {newValue !== maxBufferSize ? (
                 <Button
-                    className="w-100 mt-2 secondary-btn"
+                    className="w-100"
+                    variant="secondary"
                     onClick={() => {
                         usageData.sendUsageData(
                             EventAction.BUFFER_SIZE_CHANGED,
