@@ -20,7 +20,8 @@
         "firmware/*",
         "worker/*",
         "icon.png",
-        "LICENSE"
+        "LICENSE",
+        "Changelog.md"
     ],
     "scripts": {
         "prepare": "husky install",
@@ -37,12 +38,11 @@
         "check:license": "nrfconnect-license check",
         "nordic-publish": "node ./dist/nordic-publish.js"
     },
-    "dependencies": {},
     "devDependencies": {
         "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "git+https://github.com/NordicSemiconductor/pc-nrfconnect-shared.git#v6.18.7",
+        "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v18",
         "react-chartjs-2": "^4.2.0",
         "redux-mock-store": "^1.5.4"
     },
