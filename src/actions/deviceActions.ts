@@ -11,12 +11,8 @@
 import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
-import {
-    isRTTDevice,
-    isSerialDevice,
-    SampleValues,
-    SupportedDevice,
-} from '../device/types';
+import { SampleValues, SupportedDevice } from '../device/types';
+import { isRTTDevice, isSerialDevice } from '../device/utils';
 import {
     indexToTimestamp,
     initializeBitsBuffer,
@@ -321,7 +317,6 @@ export function open(deviceInfo: any) {
 
         try {
             device = Device(deviceInfo, onSample);
-            console.log(device);
             usageData.sendUsageData(
                 device.capabilities.hwTrigger
                     ? EventAction.PPK_1_SELECTED
@@ -390,7 +385,6 @@ export function open(deviceInfo: any) {
             dispatch({ type: 'device/deselectDevice' });
         }
 
-        console.log(device);
         dispatch(
             deviceOpenedAction({
                 portName: deviceInfo.serialNumber,

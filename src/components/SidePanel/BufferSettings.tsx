@@ -31,7 +31,7 @@ export const BufferSettings = () => {
         max: unit(maxBufferSizeForSystem, 'bytes').toNumber('MB'),
     };
 
-    const [newValue, setNewValue] = useState(maxBufferSize);
+    const [bufferSize, setBufferSize] = useState(maxBufferSize);
 
     return (
         <Group
@@ -44,26 +44,26 @@ export const BufferSettings = () => {
             >
                 <span className="flex-fill">Max size of buffer</span>
                 <NumberInlineInput
-                    value={newValue}
+                    value={bufferSize}
                     range={range}
                     onChange={value => {
-                        setNewValue(value);
+                        setBufferSize(value);
                     }}
                 />
                 <span>&nbsp;MB</span>
             </FormLabel>
-            {newValue !== maxBufferSize ? (
+            {bufferSize !== maxBufferSize ? (
                 <Button
                     className="w-100"
                     variant="secondary"
                     onClick={() => {
                         usageData.sendUsageData(
                             EventAction.BUFFER_SIZE_CHANGED,
-                            `${newValue}`
+                            `${bufferSize}`
                         );
                         dispatch(
                             changeMaxBufferSizeAction({
-                                maxBufferSize: newValue,
+                                maxBufferSize: bufferSize,
                             })
                         );
                         getCurrentWindow().reload();

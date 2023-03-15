@@ -13,7 +13,7 @@ import { getDeviceLibContext, logger } from 'pc-nrfconnect-shared';
 
 import PPKCmd from '../constants';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
-import { SampleValues } from './types';
+import type { SampleValues } from './types';
 
 export const SAMPLES_PER_AVERAGE = 10;
 const deviceLibContext = getDeviceLibContext();
@@ -130,7 +130,6 @@ class RTTDevice extends Device {
     private byteHandlerFn: (byte: number) => void;
 
     public timestamp: number;
-    public isRTTDevice = true;
 
     constructor(
         device: any,
