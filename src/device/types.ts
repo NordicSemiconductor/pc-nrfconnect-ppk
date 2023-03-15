@@ -15,18 +15,6 @@ export interface SampleValues {
     endOfTrigger?: boolean;
 }
 
-// Should test the capabilities from either deviceInfo or a device instance to
-// see if device is instance of RTTDevice
-export function isRTTDevice(deviceToTest: any): deviceToTest is RTTDevice {
-    return deviceToTest.capabilities.jlink;
-}
-
-export function isSerialDevice(
-    deviceToTest: any
-): deviceToTest is SerialDevice {
-    return !isRTTDevice(deviceToTest);
-}
-
 export type SupportedDevice = RTTDevice | SerialDevice;
 
 export interface serialport {

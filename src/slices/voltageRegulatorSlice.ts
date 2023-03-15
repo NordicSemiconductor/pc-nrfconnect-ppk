@@ -3,13 +3,14 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
-    getVoltageRegulatorMaxCap,
-    setVoltageRegulatorMaxCap,
+    getVoltageRegulatorMaxCapPPK1,
+    getVoltageRegulatorMaxCapPPK2,
+    setVoltageRegulatorMaxCapPPK1 as persistVoltageRegulatorMaxCapPPK1,
+    setVoltageRegulatorMaxCapPPK2 as persistVoltageRegulatorMaxCapPPK2,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
 
@@ -19,6 +20,8 @@ interface VoltageRegulatorState {
     min: number;
     max: number;
     maxCap: number;
+    maxCapPPK1: number;
+    maxCapPPK2: number;
 }
 
 const initialState = (): VoltageRegulatorState => ({
@@ -26,44 +29,63 @@ const initialState = (): VoltageRegulatorState => ({
     currentVDD: 3000,
     min: 1850,
     max: 3600,
-    maxCap: getVoltageRegulatorMaxCap(5000),
+    maxCap: 3600,
+    maxCapPPK1: getVoltageRegulatorMaxCapPPK1(3600),
+    maxCapPPK2: getVoltageRegulatorMaxCapPPK2(5000),
 });
 
 const voltageRegulatorSlice = createSlice({
     name: 'voltageRegulator',
     initialState: initialState(),
     reducers: {
-        updateRegulatorAction(
+        updateRegulator(
             state,
-            action: PayloadAction<{
+            {
+                payload: { vdd, currentVDD, min, max },
+            }: PayloadAction<{
                 vdd?: number;
                 currentVDD?: number;
                 min?: number;
                 max?: number;
             }>
         ) {
-            return {
-                vdd: action.payload.vdd || state.vdd,
-                currentVDD: action.payload.currentVDD || state.currentVDD,
-                min: action.payload.min || state.min,
-                max: action.payload.max || state.max,
-                maxCap: state.maxCap || action.payload.max!,
-            };
+            state.vdd = vdd || state.vdd;
+            state.currentVDD = currentVDD || state.currentVDD;
+            state.min = min || state.min;
+            state.max = max || state.max;
+            // state.maxCap = state.maxCapPPK2 || max!;
         },
-        moveVoltageRegulatorVddAction(
+        updateMaxCapOnDeviceSelected(
             state,
-            action: PayloadAction<{ vdd: number }>
+            {
+                payload: { isRTTDevice },
+            }: PayloadAction<{ isRTTDevice: boolean }>
         ) {
-            const { vdd } = action.payload;
-            return { ...state, vdd };
+            state.maxCap =
+                isRTTDevice === true ? state.maxCapPPK1 : state.maxCapPPK2;
         },
-        updateVoltageRegulatorMaxCapAction(
+        moveVoltageRegulatorVdd(
             state,
-            action: PayloadAction<{ maxCap: number }>
+            { payload: vdd }: PayloadAction<number>
         ) {
-            const { maxCap } = action.payload;
-            setVoltageRegulatorMaxCap(maxCap);
-            return { ...state, maxCap };
+            state.vdd = vdd;
+        },
+        updateVoltageRegulatorMaxCapPPK1(
+            state,
+            { payload: newMaxCap }: PayloadAction<number>
+        ) {
+            persistVoltageRegulatorMaxCapPPK1(newMaxCap);
+            state.maxCap = newMaxCap;
+            state.maxCapPPK2 = newMaxCap;
+        },
+
+        updateVoltageRegulatorMaxCapPPK2(
+            state,
+            { payload: newMaxCap }: PayloadAction<number>
+        ) {
+            persistVoltageRegulatorMaxCapPPK2(newMaxCap);
+            state.maxCap = newMaxCap;
+            state.maxCapPPK2 = newMaxCap;
         },
     },
 });
@@ -72,9 +94,11 @@ export const voltageRegulatorState = (state: RootState) =>
     state.app.voltageRegulator;
 
 export const {
-    moveVoltageRegulatorVddAction,
-    updateRegulatorAction,
-    updateVoltageRegulatorMaxCapAction,
+    updateRegulator,
+    updateMaxCapOnDeviceSelected,
+    moveVoltageRegulatorVdd,
+    updateVoltageRegulatorMaxCapPPK1,
+    updateVoltageRegulatorMaxCapPPK2,
 } = voltageRegulatorSlice.actions;
 
 export default voltageRegulatorSlice.reducer;

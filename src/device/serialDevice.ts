@@ -52,6 +52,7 @@ class SerialDevice extends Device {
 
     public adcSamplingTimeUs = 10;
     public resistors = { hi: 1.8, mid: 28, lo: 500 };
+    public vdd = 5000;
     public vddRange = { min: 800, max: 5000 };
     public triggerWindowRange = { min: 1, max: 100 };
     public isRunningInitially = false;

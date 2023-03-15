@@ -11,12 +11,8 @@
 import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import Device from '../device';
-import {
-    isRTTDevice,
-    isSerialDevice,
-    SampleValues,
-    SupportedDevice,
-} from '../device/types';
+import { SampleValues, SupportedDevice } from '../device/types';
+import { isRTTDevice, isSerialDevice } from '../device/utils';
 import {
     indexToTimestamp,
     initializeBitsBuffer,
@@ -63,7 +59,10 @@ import {
     triggerSingleSetAction,
     triggerWindowRangeAction,
 } from '../slices/triggerSlice';
-import { updateRegulatorAction } from '../slices/voltageRegulatorSlice';
+import {
+    updateMaxCapOnDeviceSelected,
+    updateRegulator as updateRegulatorAction,
+} from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
@@ -162,14 +161,14 @@ export function triggerStop() {
 }
 
 export const updateSpikeFilter =
-    () => async (_: TDispatch, getState: () => RootState) => {
+    () => (_: TDispatch, getState: () => RootState) => {
         // TODO: Must be tested for RTTDevice
         if (isRTTDevice(device)) {
             return;
         }
         const { spikeFilter } = getState().app;
         persistSpikeFilter(spikeFilter);
-        await device!.ppkSetSpikeFilter(spikeFilter);
+        device!.ppkSetSpikeFilter(spikeFilter);
         if (getState().app.app.advancedMode) {
             const { samples, alpha, alpha5 } = spikeFilter;
             logger.info(
@@ -318,7 +317,6 @@ export function open(deviceInfo: any) {
 
         try {
             device = Device(deviceInfo, onSample);
-
             usageData.sendUsageData(
                 device.capabilities.hwTrigger
                     ? EventAction.PPK_1_SELECTED
@@ -354,6 +352,11 @@ export function open(deviceInfo: any) {
                     vdd: metadata.vdd,
                     currentVDD: metadata.vdd,
                     ...device.vddRange,
+                })
+            );
+            dispatch(
+                updateMaxCapOnDeviceSelected({
+                    isRTTDevice: isRTTDevice(device),
                 })
             );
             await dispatch(initGains());
@@ -409,7 +412,7 @@ export function open(deviceInfo: any) {
             ) {
                 const timestamp = Date.now();
                 requestAnimationFrame(() => {
-                    /* 
+                    /*
                         requestAnimationFrame pauses when app is in the background.
                         If timestamp is more than 10ms ago, do not dispatch animationAction.
                     */
@@ -608,3 +611,5 @@ export function updateTriggerLevel(triggerLevel: number) {
         }
     };
 }
+
+export const isConnectedToPPK1Device = () => isRTTDevice(device);
