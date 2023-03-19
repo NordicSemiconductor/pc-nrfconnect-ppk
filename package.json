@@ -40,7 +40,7 @@
     },
     "devDependencies": {
         "bson": "4.6.5",
-        "chart.js": "^3.8.0",
+        "chart.js": "^4.2.1",
         "mathjs": "^10.6.3",
         "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v18",
         "react-chartjs-2": "^4.2.0",

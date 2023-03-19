@@ -7,6 +7,7 @@
 import React from 'react';
 import { App } from 'pc-nrfconnect-shared';
 
+import Chart from './components/Chartv2/Chart';
 import DataLogger from './components/DataLogger/DataLogger';
 import DeviceSelector from './components/DeviceSelector';
 import RealTime from './components/RealTime/RealTime';
@@ -22,8 +23,9 @@ export default () => (
         sidePanel={<SidePanel />}
         reportUsageData
         panes={[
-            { name: 'Data Logger', Main: DataLogger },
-            { name: 'Real-time', Main: RealTime },
+            { name: 'ChartJS', Main: Chart },
+            // { name: 'Data Logger', Main: DataLogger },
+            // { name: 'Real-time', Main: RealTime },
         ]}
     />
 );
