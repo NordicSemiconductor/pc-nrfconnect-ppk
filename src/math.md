@@ -35,6 +35,17 @@ In the code we've defined
 ```js
 const microSecondsPerSample = 1e6 / samplesPerSecond
 const timestamp = index * microSecondsPerSample
+
+// Notice also that:
+microSecondsPerSample = 1e6 / samplesPerSecond
+samplesPerSecond = 1e6 / microSecondsPerSample
+
+// e.g.
+const samplesPerSecond = 1e3;
+const microSecondsPerSample = 1e6 / samplesPerSecond = 1e6 / 1e3 = 1e3
+
+const samplesPerSecond = 1e4;
+const microSecondsPerSample = 1e6 / samplesPerSecond = 1e6 / 1e4 = 1e2
 ```
 
 For timestamp in seconds, $t_s$
@@ -58,7 +69,7 @@ $$
 In JavaScript we can do:
 
 ```js
-const index = (timestamp / 1e6) * samplesPerSecond
+const index = (timestamp / 1e6) / samplesPerSecond
 ```
 
 ## DataProcessor

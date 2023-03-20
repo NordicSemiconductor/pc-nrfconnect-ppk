@@ -43,7 +43,6 @@
         "chart.js": "^4.2.1",
         "mathjs": "^10.6.3",
         "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v18",
-        "react-chartjs-2": "^4.2.0",
         "redux-mock-store": "^1.5.4"
     },
     "eslintConfig": {
