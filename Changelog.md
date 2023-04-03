@@ -1,4 +1,4 @@
-## Unreleased
+## 3.6.0 - 2023-04-03
 
 ## Added
 
@@ -9,7 +9,8 @@
 
 ## Fixed
 
--   PPK1: Could select higher VDD then what the device supports.
+-   PPK1: Option to select a VDD higher than what the PPK1 device support.
+-   Missing nrf-udev installation resulted in the app crashing.
 
 ## 3.5.4 - 2023-02-12
 
