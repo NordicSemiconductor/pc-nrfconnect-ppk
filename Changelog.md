@@ -1,4 +1,4 @@
-## 3.6.0 - 2023-04-04
+## 3.6.0 - Unreleased
 
 ## Added
 
@@ -10,7 +10,18 @@
 ## Fixed
 
 -   PPK1: Option to select a VDD higher than what the PPK1 device support.
--   Missing nrf-udev installation resulted in the app crashing.
+
+## 3.5.5 - 2023-04-05
+
+### Fixed
+
+-   Linux: Missing nrf-udev installation resulted in the app crashing.
+
+### Known Issue
+
+-   PPK1: Does not work in nRF Connect for Desktop v4.0.1, but will be fixed in
+    the next patch release v4.0.2. In order to work with the PPK1, try
+    downgrading nRF Connect for Desktop to v4.0.0.
 
 ## 3.5.4 - 2023-02-12
 
