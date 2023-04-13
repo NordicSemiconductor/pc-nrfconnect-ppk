@@ -13,7 +13,7 @@ import { getDeviceLibContext, logger } from 'pc-nrfconnect-shared';
 
 import PPKCmd from '../constants';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
-import { SampleValues } from './types';
+import type { SampleValues } from './types';
 
 export const SAMPLES_PER_AVERAGE = 10;
 const deviceLibContext = getDeviceLibContext();
@@ -108,6 +108,8 @@ class RTTDevice extends Device {
     adcSamplingTimeUs = 13;
 
     resistors = { hi: 1.8, mid: 28.0, lo: 510.0 };
+
+    vdd = 3000;
 
     vddRange = { min: 1850, max: 3600 };
 

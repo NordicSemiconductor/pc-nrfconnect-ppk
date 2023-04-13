@@ -15,7 +15,8 @@ import ExportDialog from '../SaveExport/ExportDialog';
 jest.mock('../../utils/persistentStore', () => ({
     getLastSaveDir: () => 'mocked/save/dir',
     getMaxBufferSize: () => 200,
-    getVoltageRegulatorMaxCap: () => 5000,
+    getVoltageRegulatorMaxCapPPK1: () => 3600,
+    getVoltageRegulatorMaxCapPPK2: () => 5000,
     getDigitalChannels: () => [
         true,
         true,

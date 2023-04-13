@@ -1,3 +1,16 @@
+## 3.6.0 - Unreleased
+
+## Added
+
+-   Zoom to selection button, which will make the window the size of the
+    selected area.
+    -   Hotkey: `alt+z`
+-   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
+
+## Fixed
+
+-   PPK1: Option to select a VDD higher than what the PPK1 device support.
+
 ## 3.5.5 - 2023-04-05
 
 ### Fixed

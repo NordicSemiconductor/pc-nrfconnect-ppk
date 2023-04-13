@@ -4,26 +4,32 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { MutableRefObject } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import type { ChartJSOrUndefined } from 'react-chartjs-2/dist/types';
 import { useDispatch, useSelector } from 'react-redux';
-import { unit } from 'mathjs';
+import { BigNumber, Fraction, unit } from 'mathjs';
 import { Toggle } from 'pc-nrfconnect-shared';
-import { func, number, shape, string } from 'prop-types';
 
 import {
     chartState,
     resetChart,
     toggleYAxisLock,
+    toggleYAxisLog,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
+// @ts-expect-error Is currently a jsx file
 import ChartOptions from './ChartOptions';
 
 import './charttop.scss';
 
-const TimeWindowButton = ({ label, zoomToWindow }) => (
+type TimeWindowButton = {
+    label: string;
+    zoomToWindow: (duration: number | BigNumber | Fraction) => void;
+};
+const TimeWindowButton = ({ label, zoomToWindow }: TimeWindowButton) => (
     <Button
         variant="secondary"
         size="sm"
@@ -33,14 +39,22 @@ const TimeWindowButton = ({ label, zoomToWindow }) => (
     </Button>
 );
 
-TimeWindowButton.propTypes = {
-    label: string.isRequired,
-    zoomToWindow: func.isRequired,
+type ChartTop = {
+    chartPause: () => void;
+    zoomToWindow: (windowDuration: number | BigNumber | Fraction) => void;
+    chartRef: MutableRefObject<ChartJSOrUndefined<'line', unknown, unknown>>;
+    windowDuration: number;
 };
 
-const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
+const ChartTop = ({
+    chartPause,
+    zoomToWindow,
+    chartRef,
+    windowDuration,
+}: ChartTop) => {
     const dispatch = useDispatch();
-    const { windowBegin, windowEnd, yAxisLock } = useSelector(chartState);
+    const { windowBegin, windowEnd, yAxisLock, yAxisLog } =
+        useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const live = windowBegin === 0 && windowEnd === 0;
@@ -63,14 +77,28 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
         <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
             <div className="settings-y-axis">
                 <Toggle
+                    label="LOGARITHMIC Y-AXIS"
+                    onToggle={() => {
+                        dispatch(toggleYAxisLog());
+                    }}
+                    isToggled={yAxisLog}
+                    variant="primary"
+                    labelRight
+                />
+                <Toggle
                     label="LOCK Y-AXIS"
                     onToggle={() => {
                         if (yAxisLock) {
-                            dispatch(toggleYAxisLock(null, null));
+                            dispatch(
+                                toggleYAxisLock({ yMin: null, yMax: null })
+                            );
                             zoomToWindow(windowDuration);
                         } else {
-                            const { min: yMin, max: yMax } =
-                                chartRef.current.scales.yScale;
+                            const { min: yMin, max: yMax } = chartRef.current
+                                ?.scales?.yScale ?? {
+                                min: null,
+                                max: null,
+                            };
                             dispatch(toggleYAxisLock({ yMin, yMax }));
                         }
                     }}
@@ -94,22 +122,15 @@ const ChartTop = ({ chartPause, zoomToWindow, chartRef, windowDuration }) => {
             {isDataLoggerPane && (
                 <Toggle
                     label="LIVE VIEW"
-                    onToggle={() =>
-                        live ? chartPause() : dispatch(resetChart())
-                    }
+                    onToggle={() => {
+                        live ? chartPause() : dispatch(resetChart());
+                    }}
                     isToggled={live}
                     variant="primary"
                 />
             )}
         </div>
     );
-};
-
-ChartTop.propTypes = {
-    chartPause: func.isRequired,
-    zoomToWindow: func.isRequired,
-    chartRef: shape({}).isRequired,
-    windowDuration: number.isRequired,
 };
 
 export default ChartTop;

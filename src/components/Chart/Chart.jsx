@@ -20,6 +20,7 @@ import {
     Chart as ChartJS,
     LinearScale,
     LineElement,
+    LogarithmicScale,
     PointElement,
     Title,
 } from 'chart.js';
@@ -48,7 +49,13 @@ import chartCss from './chart.icss.scss';
 
 // chart.js way of doing tree-shaking, meaning that components that will be included in the bundle
 // must be imported and registered. The registered components are used in both AmpereChart and DigitalChannels.
-ChartJS.register(LineElement, PointElement, LinearScale, Title);
+ChartJS.register(
+    LineElement,
+    PointElement,
+    LinearScale,
+    LogarithmicScale,
+    Title
+);
 
 const { rightMarginPx } = chartCss;
 
@@ -135,12 +142,27 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             return false;
         },
     });
+
     useHotKey({
         hotKey: 'esc',
         title: 'Select none',
         isGlobal: false,
         action: () => {
             resetCursor();
+        },
+    });
+
+    useHotKey({
+        hotKey: 'alt+z',
+        title: 'Zoom to selected area',
+        isGlobal: false,
+        action: () => {
+            dispatch((_dispatch, getState) => {
+                const { cursorBegin, cursorEnd } = chartState(getState());
+                if (cursorBegin != null && cursorEnd != null) {
+                    chartWindow(cursorBegin, cursorEnd);
+                }
+            });
         },
     });
 
@@ -155,6 +177,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         digitalChannels,
         digitalChannelsVisible,
         hasDigitalChannels,
+        yAxisLog,
     } = useSelector(chartState);
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showDigitalChannels =
@@ -302,6 +325,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 begin,
                 end,
                 digitalChannelsToCompute,
+                yAxisLog,
                 len,
                 windowDuration
             );
@@ -320,6 +344,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowDuration,
         dataProcessor,
         digitalChannelsToCompute,
+        yAxisLog,
     ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
@@ -349,6 +374,17 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     }
                 >
                     SELECT ALL
+                </Button>
+            );
+            buttons.push(
+                <Button
+                    key="zoom-to-selection-btn"
+                    variant="secondary"
+                    size="sm"
+                    disabled={cursorBegin == null || cursorEnd == null}
+                    onClick={() => chartWindow(cursorBegin, cursorEnd)}
+                >
+                    ZOOM TO SELECTION
                 </Button>
             );
         }

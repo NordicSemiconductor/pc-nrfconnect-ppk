@@ -13,7 +13,7 @@
         align-items: baseline;
     }
 
-    .btn.active-anim {
+    .active-animation {
         overflow: hidden;
         position: relative;
 
@@ -115,10 +115,6 @@
         justify-content: center;
         padding-top: 1px;
         padding-bottom: 0;
-    }
-
-    .restart-app-btn {
-        margin-top: 8px;
     }
 
     .start-stop {

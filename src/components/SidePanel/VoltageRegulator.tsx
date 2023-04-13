@@ -13,7 +13,7 @@ import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
 import { updateRegulator } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';
 import {
-    moveVoltageRegulatorVddAction,
+    moveVoltageRegulatorVdd,
     voltageRegulatorState,
 } from '../../slices/voltageRegulatorSlice';
 
@@ -29,7 +29,7 @@ const VoltageRegulator = () => {
 
     useEffect(() => {
         if (vdd > max) {
-            dispatch(moveVoltageRegulatorVddAction({ vdd: max }));
+            dispatch(moveVoltageRegulatorVdd(max));
         }
     }, [vdd, max, dispatch]);
 
@@ -42,11 +42,9 @@ const VoltageRegulator = () => {
                         value={vdd}
                         range={{ min, max }}
                         onChange={value =>
-                            dispatch(
-                                moveVoltageRegulatorVddAction({ vdd: value })
-                            )
+                            dispatch(moveVoltageRegulatorVdd(value))
                         }
-                        onChangeComplete={() => dispatch(updateRegulator(vdd))}
+                        onChangeComplete={() => dispatch(updateRegulator())}
                     />{' '}
                     mV
                 </Form.Label>
@@ -55,12 +53,9 @@ const VoltageRegulator = () => {
                     values={[vdd]}
                     range={{ min, max }}
                     onChange={[
-                        value =>
-                            dispatch(
-                                moveVoltageRegulatorVddAction({ vdd: value })
-                            ),
+                        value => dispatch(moveVoltageRegulatorVdd(value)),
                     ]}
-                    onChangeComplete={() => dispatch(updateRegulator(vdd))}
+                    onChangeComplete={() => dispatch(updateRegulator())}
                 />
             </div>
         </BootstrapCollapse>

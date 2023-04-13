@@ -16,7 +16,12 @@ export default () => ({
     bitDataSelector: bitDataSelector(),
     noOpBitDataProcessor: noOpBitDataProcessor(),
 
-    process(begin: number, end: number, digitalChannelsToCompute: number[]) {
+    process(
+        begin: number,
+        end: number,
+        digitalChannelsToCompute: number[],
+        removeZeroValues: boolean
+    ) {
         const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
@@ -48,6 +53,11 @@ export default () => ({
             if (n < originalIndexEndCeiled) {
                 last = Number.isNaN(v) ? undefined : v;
             }
+
+            if (removeZeroValues && last === 0) {
+                last = NaN;
+            }
+
             this.ampereLineData[mappedIndex].y = last;
 
             if (!Number.isNaN(v)) {

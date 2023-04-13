@@ -18,7 +18,7 @@ export default (
     device: any,
     onSampleCallback: (values: SampleValues) => void
 ) => {
-    const instance = device.traits.jlink // isRTTDevice(device)
+    const instance = device.traits.jlink
         ? new RTTDevice(device, onSampleCallback)
         : new SerialDevice(device, onSampleCallback);
 
