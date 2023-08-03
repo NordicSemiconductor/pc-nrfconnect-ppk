@@ -9,11 +9,14 @@ import {
     Device,
     DeviceSelector,
     DeviceSelectorProps,
+    DeviceSetupConfig,
     getAppFile,
     logger,
+    sdfuDeviceSetup,
 } from 'pc-nrfconnect-shared';
 
 import { close, open } from '../actions/deviceActions';
+import { setShowPPK1Dialog } from '../features/DeprecatedDevice/DeprecatedDeviceSlice';
 import { TDispatch } from '../slices/thunk';
 
 const deviceListing = {
@@ -23,29 +26,34 @@ const deviceListing = {
     jlink: true,
 };
 
-const deviceSetup = {
-    dfu: {
-        ppk2: {
-            application: getAppFile('firmware/pca63100_ppk2_7453297.hex'),
-            semver: 'power_profiler_kit_2 1.0.1-7453297',
-        },
-    },
-    jprog: {
-        nrf52_family: {
-            fw: getAppFile('firmware/ppk_nrfconnect.hex'),
-            fwVersion: 'ppk-fw-2.1.0',
-            fwIdAddress: 0x10000,
-        },
-    },
+export const deviceSetupConfig: DeviceSetupConfig = {
+    deviceSetups: [
+        sdfuDeviceSetup(
+            [
+                {
+                    key: 'ppk2',
+                    application: getAppFile(
+                        'firmware/pca63100_ppk2_7453297.hex'
+                    ),
+                    semver: 'power_profiler_kit_2 1.0.1-7453297',
+                    params: {},
+                },
+            ],
+            false
+        ),
+    ],
 };
 
 const mapState = () => ({
     deviceListing,
-    deviceSetup,
+    deviceSetupConfig,
 });
 
 const mapDispatch = (dispatch: TDispatch): Partial<DeviceSelectorProps> => ({
     onDeviceSelected: (device: Device) => {
+        if (device.jlink) {
+            dispatch(setShowPPK1Dialog(true));
+        }
         logger.info(
             `Validating firmware for device with s/n ${device.serialNumber}`
         );
@@ -54,7 +62,6 @@ const mapDispatch = (dispatch: TDispatch): Partial<DeviceSelectorProps> => ({
         logger.info('Deselecting device');
         dispatch(close());
     },
-    releaseCurrentDevice: () => dispatch(close()),
     onDeviceIsReady: device => {
         logger.info(`Opening device with s/n ${device.serialNumber}`);
         dispatch(open(device));

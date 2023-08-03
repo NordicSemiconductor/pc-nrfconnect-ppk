@@ -42,7 +42,7 @@
         "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v30",
+        "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v69",
         "react-chartjs-2": "^4.2.0",
         "redux-mock-store": "^1.5.4"
     },

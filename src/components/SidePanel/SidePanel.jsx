@@ -8,6 +8,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
+import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice.tsx';
 import { options } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
@@ -54,6 +55,7 @@ export default () => {
                 <Load />
                 <DisplayOptions />
                 <Save />
+                <DeprecatedDeviceDialog />
             </SidePanel>
         );
     }
@@ -64,12 +66,13 @@ export default () => {
                 <Load />
                 {options.index !== 0 && <Save />}
                 <Instructions />
+                <DeprecatedDeviceDialog />
             </SidePanel>
         );
     }
 
     if (!realTimePane && !dataLoggerPane) {
-        return null;
+        return <DeprecatedDeviceDialog />;
     }
 
     return (
@@ -93,6 +96,7 @@ export default () => {
                     <CapVoltageSettings />
                 </>
             )}
+            <DeprecatedDeviceDialog />
         </SidePanel>
     );
 };

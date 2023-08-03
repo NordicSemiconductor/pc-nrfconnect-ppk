@@ -7,6 +7,7 @@
 import { NrfConnectState } from 'pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
+import deprecatedDevices from '../features/DeprecatedDevice/DeprecatedDeviceSlice';
 import app from './appSlice';
 import chart from './chartSlice';
 import dataLogger from './dataLoggerSlice';
@@ -31,6 +32,7 @@ const appReducer = combineReducers({
     gains,
     spikeFilter,
     dataLogger,
+    deprecatedDevices,
 });
 
 export default appReducer;
