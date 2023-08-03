@@ -24,10 +24,8 @@ import Gains from './Gains';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
-import ResistorCalibration from './ResistorCalibration';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
-import SwitchPoints from './SwitchPoints';
 import Trigger from './Trigger/Trigger';
 
 import './sidepanel.scss';
@@ -88,8 +86,6 @@ export default () => {
             )}
             {deviceOpen && advancedMode && (
                 <>
-                    <SwitchPoints />
-                    <ResistorCalibration />
                     <Gains />
                     <SpikeFilter />
                     <BufferSettings />

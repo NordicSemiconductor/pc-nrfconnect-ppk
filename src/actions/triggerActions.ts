@@ -8,7 +8,7 @@
 
 import { logger } from 'pc-nrfconnect-shared';
 
-import { SupportedDevice } from '../device/types';
+import SerialDevice from '../device/serialDevice';
 import { indexToTimestamp } from '../globals';
 import { RootState } from '../slices';
 import { chartTriggerWindowAction } from '../slices/chartSlice';
@@ -38,7 +38,7 @@ export const calculateWindowSize = (
 
 export function processTriggerSample(
     currentValue: number,
-    device: SupportedDevice,
+    device: SerialDevice,
     samplingData: {
         samplingTime: number;
         dataIndex: number;
@@ -51,7 +51,6 @@ export function processTriggerSample(
             samplingTime,
             dataIndex: currentIndex,
             dataBuffer,
-            endOfTrigger, // boolean for PPK1 and undefined for PPK2
         } = samplingData;
         const {
             trigger: {
@@ -63,10 +62,8 @@ export function processTriggerSample(
             },
         } = getState().app;
 
-        const isPPK1 = !!device.capabilities.hwTrigger;
-
         if (!triggerStartIndex) {
-            if (currentValue >= triggerLevel! || isPPK1) {
+            if (currentValue >= triggerLevel!) {
                 dispatch(
                     setTriggerStartAction({ triggerStartIndex: currentIndex })
                 );
@@ -76,10 +73,9 @@ export function processTriggerSample(
 
         const windowSize = calculateWindowSize(triggerLength, samplingTime);
 
-        const enoughSamplesCollected = isPPK1
-            ? endOfTrigger
-            : (triggerStartIndex + windowSize) % dataBuffer.length <=
-              currentIndex;
+        const enoughSamplesCollected =
+            (triggerStartIndex + windowSize) % dataBuffer.length <=
+            currentIndex;
         if (!enoughSamplesCollected) return;
 
         if (triggerSingleWaiting) {
@@ -97,8 +93,6 @@ export function processTriggerSample(
         const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
         const to = indexToTimestamp(currentIndex - shiftedIndex);
         dispatch(chartTriggerWindowAction(from!, to!, to! - from!));
-        isPPK1
-            ? dispatch(setTriggerStartAction({ triggerStartIndex: null }))
-            : dispatch(completeTriggerAction({ origin: triggerStartIndex }));
+        dispatch(completeTriggerAction({ origin: triggerStartIndex }));
     };
 }

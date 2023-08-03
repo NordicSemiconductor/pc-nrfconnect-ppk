@@ -19,7 +19,6 @@ import TriggerStart from './TriggerStart';
 import './trigger.scss';
 
 const Trigger = () => {
-    const { rttRunning, capabilities } = useSelector(appState);
     const { externalTrigger, triggerLevel, triggerRunning } =
         useSelector(triggerState);
 
@@ -38,15 +37,9 @@ const Trigger = () => {
                 <TriggerModeGroup
                     triggerMode={triggerMode}
                     setTriggerMode={setTriggerMode}
-                    hasExternal={!!capabilities.ppkTriggerExtToggle}
-                    externalTrigger={externalTrigger}
-                    rttRunning={rttRunning}
                     triggerRunning={triggerRunning}
                 />
-                <TriggerStart
-                    triggerMode={triggerMode}
-                    rttRunning={rttRunning}
-                />
+                <TriggerStart triggerMode={triggerMode} />
             </Group>
         </>
     );

@@ -15,7 +15,6 @@ interface AppState {
     metadata: any[];
     isSmuMode: boolean;
     deviceRunning: boolean;
-    rttRunning: boolean;
     advancedMode: boolean;
     capabilities: any;
     samplingRunning: boolean;
@@ -29,7 +28,6 @@ const initialState = (): AppState => ({
     metadata: [],
     isSmuMode: false,
     deviceRunning: false,
-    rttRunning: false,
     advancedMode: false,
     capabilities: {},
     samplingRunning: false,
@@ -64,9 +62,6 @@ const appSlice = createSlice({
             action: PayloadAction<{ isSmuMode: boolean }>
         ) => {
             state.isSmuMode = action.payload.isSmuMode;
-        },
-        rttStartAction: state => {
-            state.rttRunning = true;
         },
         toggleSaveChoiceDialog: state => {
             state.isSaveChoiceDialogVisible = !state.isSaveChoiceDialogVisible;
@@ -105,7 +100,6 @@ export const {
     deviceClosedAction,
     setDeviceRunningAction,
     setPowerModeAction,
-    rttStartAction,
     toggleSaveChoiceDialog,
     showExportDialog,
     hideExportDialog,

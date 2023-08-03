@@ -6,16 +6,11 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type RTTDevice from './rttDevice';
-import type SerialDevice from './serialDevice';
-
 export interface SampleValues {
     value?: number;
     bits?: number;
     endOfTrigger?: boolean;
 }
-
-export type SupportedDevice = RTTDevice | SerialDevice;
 
 export interface serialport {
     comName: string;

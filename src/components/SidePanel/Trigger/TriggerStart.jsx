@@ -31,7 +31,7 @@ function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {
     return triggerMode === SINGLE ? attrs.idleSingle : attrs.idleContinuous;
 }
 
-const TriggerStart = ({ triggerMode, rttRunning }) => {
+const TriggerStart = ({ triggerMode }) => {
     const dispatch = useDispatch();
     const { externalTrigger, triggerSingleWaiting, triggerRunning } =
         useSelector(triggerState);
@@ -84,7 +84,6 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
             className={`w-100 start-stop trigger-btn ${
                 isRunning ? 'active-anim' : ''
             }`}
-            disabled={!rttRunning || externalTrigger}
             variant="set"
             onClick={onClick}
         >
@@ -102,5 +101,4 @@ export default TriggerStart;
 
 TriggerStart.propTypes = {
     triggerMode: PropTypes.string.isRequired,
-    rttRunning: PropTypes.bool.isRequired,
 };

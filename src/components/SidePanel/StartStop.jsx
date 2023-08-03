@@ -29,7 +29,7 @@ const fmtOpts = { notation: 'fixed', precision: 1 };
 export default () => {
     const dispatch = useDispatch();
 
-    const { rttRunning, samplingRunning } = useSelector(appState);
+    const { samplingRunning } = useSelector(appState);
     const {
         sampleFreqLog10,
         sampleFreq,
@@ -109,7 +109,6 @@ export default () => {
                     title={startStopTitle}
                     className="w-100 secondary-btn start-stop"
                     variant="secondary"
-                    disabled={!rttRunning}
                     onClick={() => dispatch(samplingStart())}
                 >
                     <span className="mdi mdi-play-circle" />

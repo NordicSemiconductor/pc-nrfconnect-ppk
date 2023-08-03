@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import { CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
@@ -39,7 +39,7 @@ const Gains = () => {
                 <React.Fragment key={`${index + 1}`}>
                     <Form.Label
                         title={gainTitles[index]}
-                        className="pt-2 d-flex flex-row justify-content-between"
+                        className="d-flex justify-content-between flex-row pt-2"
                     >
                         <span>Range {index + 1}</span>
                         <span>{(gain / 100).toFixed(2)}</span>
