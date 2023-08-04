@@ -49,7 +49,7 @@ export default () => (
         </Button>
         <Button
             variant="set"
-            className="mt-3 w-100 secondary-btn"
+            className="w-100 secondary-btn mt-3"
             onClick={() => openUrl(urls.purchase)}
         >
             Get PPK2 device

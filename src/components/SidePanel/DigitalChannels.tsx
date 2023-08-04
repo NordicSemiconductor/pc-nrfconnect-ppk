@@ -10,6 +10,7 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { chartState, setDigitalChannels } from '../../slices/chartSlice';
+import { booleanTupleOf8 } from '../../utils/persistentStore';
 
 import './digital-channels.scss';
 
@@ -21,13 +22,13 @@ export default () => {
         return null;
     }
 
-    const value = digitalChannels.reduce((a, v, i) => {
+    const value = digitalChannels.reduce<number[]>((a, v, i) => {
         if (v) a.push(i);
         return a;
     }, []);
 
-    const toggle = i => {
-        const channels = [...digitalChannels];
+    const toggle = (i: number) => {
+        const channels: booleanTupleOf8 = [...digitalChannels];
         channels[i] = !channels[i];
         dispatch(setDigitalChannels({ digitalChannels: channels }));
     };

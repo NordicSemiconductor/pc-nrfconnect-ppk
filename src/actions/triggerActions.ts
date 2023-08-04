@@ -12,7 +12,7 @@ import SerialDevice from '../device/serialDevice';
 import { indexToTimestamp } from '../globals';
 import { RootState } from '../slices';
 import { chartTriggerWindowAction } from '../slices/chartSlice';
-import { TDispatch } from '../slices/thunk';
+import { TAction, TDispatch } from '../slices/thunk';
 import {
     clearSingleTriggerWaitingAction,
     completeTriggerAction,
@@ -45,7 +45,7 @@ export function processTriggerSample(
         dataBuffer: Float32Array;
         endOfTrigger: boolean;
     }
-) {
+): TAction {
     return (dispatch: TDispatch, getState: () => RootState) => {
         const {
             samplingTime,

@@ -8,7 +8,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
-import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice.tsx';
+import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import { options } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
@@ -49,7 +49,7 @@ export default () => {
 
     if (fileLoaded) {
         return (
-            <SidePanel className="side-panel">
+            <SidePanel>
                 <Load />
                 <DisplayOptions />
                 <Save />
@@ -60,7 +60,7 @@ export default () => {
 
     if (!deviceOpen) {
         return (
-            <SidePanel className="side-panel">
+            <SidePanel>
                 <Load />
                 {options.index !== 0 && <Save />}
                 <Instructions />
@@ -74,7 +74,7 @@ export default () => {
     }
 
     return (
-        <SidePanel className="side-panel">
+        <SidePanel>
             <PowerMode />
             {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}

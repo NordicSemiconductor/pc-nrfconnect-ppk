@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
+import { deviceOpenedAction } from '../../slices/appSlice';
 import {
     triggerLengthSetAction,
     triggerLevelSetAction,
@@ -19,7 +19,6 @@ const TRIGGER_LENGTH = 10;
 
 const initialStateActions = [
     // Set app State (app.app):
-    rttStartAction(),
     deviceOpenedAction({
         portName: 'testPort',
         capabilities: { ppkTriggerExtToggle: false },

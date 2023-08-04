@@ -13,7 +13,17 @@ import PropTypes from 'prop-types';
 import { triggerStop } from '../../../actions/deviceActions';
 import { CONTINUOUS, SINGLE } from './triggerConstants';
 
-const TriggerModeGroup = ({ triggerMode, setTriggerMode, triggerRunning }) => {
+interface TriggerModeGroup {
+    triggerMode: string;
+    setTriggerMode: (mode: string) => void;
+    triggerRunning: boolean;
+}
+
+const TriggerModeGroup = ({
+    triggerMode,
+    setTriggerMode,
+    triggerRunning,
+}: TriggerModeGroup) => {
     const dispatch = useDispatch();
     const setSingleTriggerMode = () => {
         if (triggerRunning && triggerMode === CONTINUOUS) {

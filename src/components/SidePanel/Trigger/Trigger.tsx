@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Group } from 'pc-nrfconnect-shared';
 
-import { appState } from '../../../slices/appSlice';
 import { triggerState } from '../../../slices/triggerSlice';
 import { CONTINUOUS } from './triggerConstants';
 import TriggerLength from './TriggerLength';
@@ -19,8 +18,7 @@ import TriggerStart from './TriggerStart';
 import './trigger.scss';
 
 const Trigger = () => {
-    const { externalTrigger, triggerLevel, triggerRunning } =
-        useSelector(triggerState);
+    const { triggerLevel, triggerRunning } = useSelector(triggerState);
 
     const [triggerMode, setTriggerMode] = useState(CONTINUOUS);
 
@@ -28,10 +26,7 @@ const Trigger = () => {
         <>
             <Group heading="Trigger parameters">
                 <TriggerLength />
-                <TriggerLevel
-                    triggerLevel={triggerLevel}
-                    externalTrigger={externalTrigger}
-                />
+                <TriggerLevel triggerLevel={triggerLevel} />
             </Group>
             <Group heading="Trigger type">
                 <TriggerModeGroup

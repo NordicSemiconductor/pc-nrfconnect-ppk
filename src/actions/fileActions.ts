@@ -14,19 +14,21 @@ import {
 } from 'pc-nrfconnect-shared';
 
 import { options, updateTitle } from '../globals';
+import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
 import { setChartState } from '../slices/chartSlice';
 import { setDataLoggerState } from '../slices/dataLoggerSlice';
+import { TDispatch } from '../slices/thunk';
 import { setTriggerState } from '../slices/triggerSlice';
 import loadData from '../utils/loadFileHandler';
 import { paneName } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
-import saveData from '../utils/saveFileHandler';
+import saveData, { SaveData } from '../utils/saveFileHandler';
 
 const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
-export const save = () => async (_, getState) => {
+export const save = () => async (_: TDispatch, getState: () => RootState) => {
     const saveFileName = `ppk-${getTimestamp()}-${paneName(getState())}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog({
         defaultPath: join(getLastSaveDir(), saveFileName),
@@ -37,7 +39,7 @@ export const save = () => async (_, getState) => {
     setLastSaveDir(dirname(filename));
 
     const { data, bits, ...opts } = options;
-    const dataToBeSaved = {
+    const dataToBeSaved: SaveData = {
         data,
         bits,
         metadata: {
@@ -54,55 +56,62 @@ export const save = () => async (_, getState) => {
     }
 };
 
-export const load = setLoading => async dispatch => {
-    const {
-        filePaths: [filename],
-    } =
-        (await dialog.showOpenDialog({
-            defaultPath: getLastSaveDir(),
-        })) || [];
-    if (!filename) {
-        return;
-    }
+export const load =
+    (setLoading: (value: boolean) => void) => async (dispatch: TDispatch) => {
+        const {
+            filePaths: [filename],
+        } =
+            (await dialog.showOpenDialog({
+                defaultPath: getLastSaveDir(),
+            })) || [];
+        if (!filename) {
+            return;
+        }
 
-    setLoading(true);
-    logger.info(`Restoring state from ${filename}`);
-    updateTitle(filename);
-    const result = await loadData(filename);
-    if (!result) {
-        logger.error(`Error loading from ${filename}`);
+        setLoading(true);
+        logger.info(`Restoring state from ${filename}`);
+        updateTitle(filename);
+        const result = await loadData(filename);
+        if (!result) {
+            logger.error(`Error loading from ${filename}`);
+            setLoading(false);
+            return;
+        }
+        const { dataBuffer, bits, metadata } = result;
+
+        const {
+            chartState,
+            triggerState,
+            dataLoggerState,
+            options: { currentPane, ...loadedOptions },
+        } = metadata;
+
+        Object.assign(options, loadedOptions);
+        options.data = dataBuffer;
+        options.bits = bits;
+
+        dispatch(setChartState(chartState));
+        dispatch(setFileLoadedAction({ loaded: true }));
+        if (dataLoggerState !== null) {
+            dispatch(setDataLoggerState({ state: dataLoggerState }));
+        }
+        if (triggerState !== null) {
+            dispatch(setTriggerState(triggerState));
+        }
+        if (currentPane !== null) dispatch(setCurrentPane(currentPane));
+        logger.info(`State successfully restored`);
         setLoading(false);
-        return;
-    }
-    const { dataBuffer, bits, metadata } = result;
-
-    const {
-        chartState,
-        triggerState,
-        dataLoggerState,
-        options: { currentPane, ...loadedOptions },
-    } = metadata;
-
-    Object.assign(options, loadedOptions);
-    options.data = dataBuffer;
-    options.bits = bits;
-
-    dispatch(setChartState(chartState));
-    dispatch(setFileLoadedAction({ loaded: true }));
-    if (dataLoggerState !== null) {
-        dispatch(setDataLoggerState({ state: dataLoggerState }));
-    }
-    if (triggerState !== null) {
-        dispatch(setTriggerState(triggerState));
-    }
-    if (currentPane !== null) dispatch(setCurrentPane(currentPane));
-    logger.info(`State successfully restored`);
-    setLoading(false);
-};
+    };
 
 export const screenshot = () => async () => {
     const win = getCurrentWindow();
     const mainElement = document.querySelector('.core19-main-container');
+
+    if (!mainElement) {
+        logger.error('screenshot: Could not get dimensions of Client Window');
+        return;
+    }
+
     const { x, y, width, height } = mainElement.getBoundingClientRect();
     const image = await win.capturePage({
         x,

@@ -39,6 +39,7 @@
         "nordic-publish": "node ./dist/nordic-publish.js"
     },
     "devDependencies": {
+        "@types/redux-mock-store": "^1.0.3",
         "bson": "4.6.5",
         "chart.js": "^3.8.0",
         "mathjs": "^10.6.3",

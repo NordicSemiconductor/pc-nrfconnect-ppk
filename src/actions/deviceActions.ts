@@ -40,8 +40,6 @@ import {
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
-import { resistorsResetAction } from '../slices/resistorCalibrationSlice';
-import { switchingPointsResetAction } from '../slices/switchingPointsSlice';
 import { TDispatch } from '../slices/thunk';
 import {
     clearSingleTriggerWaitingAction,
@@ -323,8 +321,6 @@ export function open(deviceInfo: any) {
                     triggerWindowRangeAction({ ...device.triggerWindowRange })
                 );
 
-            dispatch(resistorsResetAction({ ...metadata }));
-            dispatch(switchingPointsResetAction(metadata));
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
                 updateRegulatorAction({
@@ -334,16 +330,12 @@ export function open(deviceInfo: any) {
                 })
             );
             await dispatch(initGains());
-            if (device.capabilities.ppkSetSpikeFilter) {
-                dispatch(updateSpikeFilter());
-            }
-            if (device.capabilities.ppkSetPowerMode) {
-                const isSmuMode = metadata.mode === 2;
-                // 1 = Ampere
-                // 2 = SMU
-                dispatch(setPowerModeAction({ isSmuMode }));
-                if (!isSmuMode) dispatch(setDeviceRunning(true));
-            }
+            dispatch(updateSpikeFilter());
+            const isSmuMode = metadata.mode === 2;
+            // 1 = Ampere
+            // 2 = SMU
+            dispatch(setPowerModeAction({ isSmuMode }));
+            if (!isSmuMode) dispatch(setDeviceRunning(true));
 
             dispatch(setFileLoadedAction({ loaded: false }));
 

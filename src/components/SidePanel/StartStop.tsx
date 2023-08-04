@@ -24,7 +24,7 @@ import {
 } from '../../slices/dataLoggerSlice';
 import NumberWithUnit from './NumberWithUnitInput';
 
-const fmtOpts = { notation: 'fixed', precision: 1 };
+const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
 export default () => {
     const dispatch = useDispatch();
@@ -82,7 +82,7 @@ export default () => {
                     multiplier={range.multiplier}
                     range={range}
                     value={durationSeconds}
-                    onChange={v =>
+                    onChange={(v: number) =>
                         dispatch(updateDurationSeconds({ durationSeconds: v }))
                     }
                     onChangeComplete={completeChange}

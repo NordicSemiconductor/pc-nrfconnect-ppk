@@ -74,7 +74,7 @@ const ChartTop = ({
     ].slice(maxFreqLog10 - sampleFreqLog10, maxFreqLog10 - sampleFreqLog10 + 6);
 
     return (
-        <div className="chart-top d-flex flex-row justify-content-between align-items-center my-2">
+        <div className="chart-top d-flex justify-content-between align-items-center my-2 flex-row">
             <div className="settings-y-axis">
                 <Toggle
                     label="LOGARITHMIC Y-AXIS"

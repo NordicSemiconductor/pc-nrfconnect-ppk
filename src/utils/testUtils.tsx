@@ -13,15 +13,15 @@ jest.mock('pc-nrfconnect-shared', () => ({
     getAppDataDir: () => 'mocked/data/dir',
     getLastSaveDir: () => 'mocked/data/dir',
     getPersistentStore: jest.fn().mockImplementation(() => ({
-        get: (_, defaultVal) => defaultVal,
+        get: (_: unknown, defaultVal: unknown) => defaultVal,
         set: jest.fn(),
     })),
 }));
 
-window.ResizeObserver = function ResizeObserverStub() {
-    this.observe = () => {};
-    this.disconnect = () => {};
-};
+// window.ResizeObserver = function ResizeObserverStub() {
+//    this.observe = () => {};
+//    this.disconnect = () => {};
+// };
 
 const render = testUtils.render(appReducer);
 

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
+import { deviceOpenedAction } from '../../slices/appSlice';
 import { setDataLoggerState } from '../../slices/dataLoggerSlice';
 import { render, screen } from '../../utils/testUtils';
 import StartStop from '../SidePanel/StartStop';
@@ -31,7 +31,6 @@ const dataLoggerStatePPK2 = {
 };
 
 const initialStatePPK1Actions = [
-    rttStartAction(),
     deviceOpenedAction({
         portName: 'testPort',
         capabilities: { ppkTriggerExtToggle: false },
@@ -40,7 +39,6 @@ const initialStatePPK1Actions = [
 ];
 
 const initialStatePPK2Actions = [
-    rttStartAction(),
     deviceOpenedAction({
         portName: 'testPort',
         capabilities: { ppkTriggerExtToggle: false },
