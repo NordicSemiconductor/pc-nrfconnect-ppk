@@ -8,9 +8,19 @@ import React, { useEffect, useState } from 'react';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { logger } from 'pc-nrfconnect-shared';
-import { bool, func, number } from 'prop-types';
 
 import { options, timestampToIndex } from '../../globals';
+
+interface ExportSelection {
+    isExportDialogVisible: boolean;
+    setIndexBegin: (value: number) => void;
+    setIndexEnd: (value: number) => void;
+    windowBegin: number | null;
+    windowEnd: number | null;
+    cursorBegin?: number | null;
+    cursorEnd?: number | null;
+    windowDuration: number;
+}
 
 const ExportSelection = ({
     isExportDialogVisible,
@@ -21,13 +31,13 @@ const ExportSelection = ({
     cursorBegin,
     cursorEnd,
     windowDuration,
-}) => {
-    const setExportIndexes = (begin, end) => {
+}: ExportSelection) => {
+    const setExportIndexes = (begin: number, end: number) => {
         setIndexBegin(begin);
         setIndexEnd(end);
     };
 
-    const updateRadioSelected = value => {
+    const updateRadioSelected = (value: number) => {
         switch (value) {
             case 0:
                 setRadioValue(0);
@@ -67,6 +77,13 @@ const ExportSelection = ({
                 At last, if the starting point is less than zero, start at index zero instead.
                 */
                 const end = windowEnd || options.timestamp;
+                if (end == null) {
+                    logger.error(
+                        'exportSelection: End of selection is invalid, try to export all.'
+                    );
+                    return;
+                }
+
                 const start = windowBegin || end - windowDuration;
                 setExportIndexes(
                     Math.ceil(timestampToIndex(start < 0 ? 0 : start)),
@@ -125,17 +142,6 @@ const ExportSelection = ({
             </ToggleButtonGroup>{' '}
         </>
     );
-};
-
-ExportSelection.propTypes = {
-    isExportDialogVisible: bool.isRequired,
-    setIndexBegin: func.isRequired,
-    setIndexEnd: func.isRequired,
-    windowBegin: number,
-    windowEnd: number,
-    cursorBegin: number,
-    cursorEnd: number,
-    windowDuration: number,
 };
 
 export default ExportSelection;

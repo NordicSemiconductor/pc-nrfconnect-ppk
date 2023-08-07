@@ -160,7 +160,7 @@ export default () => {
         const { filePath: fn } = await dialog.showSaveDialog({
             defaultPath: filename,
         });
-        if (!fn) return;
+        if (!fn || indexBegin == null || indexEnd == null) return;
         setLastSaveDir(dirname(fn));
         setExporting(true);
         dispatch(

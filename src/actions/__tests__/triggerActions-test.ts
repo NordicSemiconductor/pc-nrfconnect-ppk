@@ -9,10 +9,11 @@ import thunk from 'redux-thunk';
 
 import SerialDevice from '../../device/serialDevice';
 import { indexToTimestamp } from '../../globals';
+import { TDispatch } from '../../slices/thunk';
 import { calculateWindowSize, processTriggerSample } from '../triggerActions';
 
 const middlewares = [thunk];
-const mockStore = configureMockStore(middlewares);
+const mockStore = configureMockStore<unknown, TDispatch>(middlewares);
 
 const mockDevicePPK2 = {
     ppkTriggerStop: jest.fn(),

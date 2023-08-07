@@ -49,7 +49,7 @@ export default () => {
 
     if (fileLoaded) {
         return (
-            <SidePanel>
+            <SidePanel className="side-panel">
                 <Load />
                 <DisplayOptions />
                 <Save />
@@ -60,7 +60,7 @@ export default () => {
 
     if (!deviceOpen) {
         return (
-            <SidePanel>
+            <SidePanel className="side-panel">
                 <Load />
                 {options.index !== 0 && <Save />}
                 <Instructions />
@@ -74,7 +74,7 @@ export default () => {
     }
 
     return (
-        <SidePanel>
+        <SidePanel className="side-panel">
             <PowerMode />
             {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}

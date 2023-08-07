@@ -7,7 +7,23 @@
 import React, { useEffect, useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import { Range } from 'pc-nrfconnect-shared/typings/generated/src/Slider/range';
 import { bool, func, number, shape, string } from 'prop-types';
+
+interface NumberWithUnit {
+    title?: string;
+    className?: string;
+    label: string;
+    unit: string;
+    multiplier: number;
+    range: Range;
+    value: number;
+    onChange: (value: number) => void;
+    onChangeComplete: () => void;
+    disabled?: boolean;
+    slider?: boolean;
+    props?: React.ComponentProps<typeof NumberInlineInput>;
+}
 
 const NumberWithUnit = ({
     title = '',
@@ -22,10 +38,10 @@ const NumberWithUnit = ({
     disabled = false,
     slider = false,
     ...props
-}) => {
+}: NumberWithUnit) => {
     const [internalValue, setInternalValue] = useState(value / multiplier);
 
-    const change = n => {
+    const change = (n: number) => {
         setInternalValue(n);
         onChange(n * multiplier);
     };
@@ -40,7 +56,7 @@ const NumberWithUnit = ({
             title={title}
             className={`${className} ${disabled ? 'disabled' : ''}`}
         >
-            <Form.Label className="d-flex flex-row align-items-baseline">
+            <Form.Label className="d-flex align-items-baseline flex-row">
                 <span>{label}&nbsp;</span>
                 <NumberInlineInput
                     value={internalValue}
