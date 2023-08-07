@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import Button from 'react-bootstrap/Button';
-import { Group, openUrl } from 'pc-nrfconnect-shared';
-
-import './instructions.scss';
+import { Button, Group, openUrl } from 'pc-nrfconnect-shared';
 
 const urls = {
     ppkUserGuide:
@@ -34,22 +31,23 @@ export default () => (
             measurements.
         </p>
         <Button
-            className="user-guide-link"
+            className="pl-0"
             variant="link"
             onClick={() => openUrl(urls.ppkUserGuide)}
         >
             PPK User Guide
         </Button>
         <Button
-            className="user-guide-link"
+            className="pl-0"
             variant="link"
             onClick={() => openUrl(urls.ppk2UserGuide)}
         >
             PPK2 User Guide
         </Button>
         <Button
-            variant="set"
-            className="w-100 secondary-btn mt-3"
+            variant="secondary"
+            key="button"
+            className="w-100 mt-3"
             onClick={() => openUrl(urls.purchase)}
         >
             Get PPK2 device
