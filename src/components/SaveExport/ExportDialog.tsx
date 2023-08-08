@@ -105,7 +105,7 @@ export default () => {
         false,
         'Digital logic pins (separate fields)'
     );
-    const contentSelection = [
+    const contentSelection: readonly [boolean, boolean, boolean, boolean] = [
         timestampToggled,
         currentToggled,
         bitsToggled,
@@ -131,10 +131,10 @@ export default () => {
 
         setNumberOfRecords(records);
         setFileSize(calculateTotalSize(contentSelection, records));
-        if (indexBegin && indexEnd) {
+        if (indexBegin != null && indexEnd != null) {
             const timestampBegin = indexToTimestamp(indexBegin);
             const timestampEnd = indexToTimestamp(indexEnd);
-            if (timestampBegin && timestampEnd) {
+            if (timestampBegin != null && timestampEnd != null) {
                 setDuration(timestampEnd - timestampBegin);
             }
         }
