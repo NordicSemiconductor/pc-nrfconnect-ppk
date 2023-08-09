@@ -4,38 +4,57 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { Chart, CoreScaleOptions, Scale } from 'chart.js';
+import { logger } from 'pc-nrfconnect-shared';
+
+type ZoomPanCallback = (
+    beginX?: number,
+    endX?: number,
+    beginY?: null | number,
+    endY?: null | number
+) => void;
+
+function isCanvasElement(
+    element: EventTarget | null
+): element is HTMLCanvasElement {
+    return element instanceof HTMLCanvasElement;
+}
+
 const wheelZoomFactor = 1.25;
 
-const isTrackPad = evt => {
-    if (evt.deltaX) return true;
-    if (evt.wheelDeltaY) {
-        if (evt.wheelDeltaY === evt.deltaY * -3) {
+const isTrackPad = (event: WheelEvent) => {
+    if (event.deltaX) return true;
+    // @ts-expect-error TODO: must fix in order to keep it compatible.
+    if (event.wheelDeltaY) {
+        // @ts-expect-error TODO: must fix in order to keep it compatible.
+        if (event.wheelDeltaY === event.deltaY * -3) {
             return true;
         }
-    } else if (evt.deltaMode === 0) {
+    } else if (event.deltaMode === 0) {
         return true;
     }
     return false;
 };
 
 const zoomAtOrigin = (
-    callback,
-    pX,
-    factorX,
-    xMin,
-    xMax,
-    pY,
-    factorY,
-    yMin,
-    yMax
+    callback: ZoomPanCallback,
+    pX: number,
+    factorX: number,
+    xMin: number,
+    xMax: number,
+    pY?: number,
+    factorY?: number,
+    yMin?: number,
+    yMax?: number
 ) => {
     const zX = Math.max(factorX, 0.1);
     const newMinX = pX - (pX - xMin) / zX;
     const newMaxX = pX + (xMax - pX) / zX;
     if (pY !== undefined) {
-        const zY = Math.max(factorY, 0.1);
-        const newMinY = pY - (pY - yMin) / zY;
-        const newMaxY = pY + (yMax - pY) / zY;
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+        const zY = Math.max(factorY!, 0.1);
+        const newMinY = pY - (pY - yMin!) / zY;
+        const newMaxY = pY + (yMax! - pY) / zY;
         callback(newMinX, newMaxX, newMinY, newMaxY);
         return;
     }
@@ -43,7 +62,11 @@ const zoomAtOrigin = (
 };
 
 let processingWheelEvents = false;
-let wheelEventToProcess;
+let wheelEventToProcess: {
+    event: WheelEvent;
+    scales: { [key: string]: Scale<CoreScaleOptions> };
+    callback?: ZoomPanCallback;
+};
 
 const processWheelEvents = () => {
     processingWheelEvents = false;
@@ -56,6 +79,8 @@ const processWheelEvents = () => {
 
     const { clientX, clientY, deltaX, deltaY } = event;
 
+    if (!isCanvasElement(event.target)) return;
+
     const { left: xOffset, top: yOffset } =
         event.target.getBoundingClientRect();
 
@@ -64,8 +89,8 @@ const processWheelEvents = () => {
     const isTrackpadZoom = isTrackPadEvent && event.shiftKey;
 
     const { xScale, yScale } = scales;
-    const { min: xMin, max: xMax, start: x0, end: x1, width } = scales.xScale;
-    const { min: yMin, max: yMax, start: y0, end: y1, height } = scales.yScale;
+    const { min: xMin, max: xMax, width } = scales.xScale;
+    const { min: yMin, max: yMax, height } = scales.yScale;
 
     if (isTrackpadZoom) {
         const pX =
@@ -76,8 +101,8 @@ const processWheelEvents = () => {
         const fy = 1.01 ** deltaY;
         zoomAtOrigin(callback, pX, fx, xMin, xMax, pY, fy, yMin, yMax);
     } else if (isTrackpadPan) {
-        const fx = (x1 - x0) / width;
-        const fy = (y0 - y1) / height;
+        const fx = (xMax - xMin) / width;
+        const fy = (yMin - yMax) / height;
         const dx = fx * deltaX;
         const dy = fy * deltaY;
         callback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
@@ -91,12 +116,37 @@ const processWheelEvents = () => {
             return;
         }
         const p = xScale.getValueForPixel(clientX - xOffset);
+        if (p == null) {
+            // As xScale.getValueForPixel may return undefined, we need to handle it appropriately.
+            logger.debug(
+                'zoomPan.ts-->processWheelEvents: getValueForPixel returned undefined.'
+            );
+            return;
+        }
+
         zoomAtOrigin(callback, p, z, xMin, Math.ceil(xMax));
     }
 };
 
 let processingPointerMoveEvents = false;
-let pointerMoveEventToProcess;
+
+interface DragStart {
+    type: string;
+    pX: number;
+    pY: number;
+    xMin: number;
+    xMax: number;
+    yMin: number;
+    yMax: number;
+    moved?: boolean;
+}
+
+let pointerMoveEventToProcess: {
+    event: PointerEvent;
+    dragStart: DragStart;
+    scales: { [key: string]: Scale<CoreScaleOptions> };
+    callback?: ZoomPanCallback;
+};
 
 const processPointerMoveEvents = () => {
     processingPointerMoveEvents = false;
@@ -106,6 +156,8 @@ const processPointerMoveEvents = () => {
     if (!callback) {
         return;
     }
+
+    if (!isCanvasElement(event.target)) return;
 
     const { clientX, clientY } = event;
     const { left: xOffset, top: yOffset } =
@@ -130,20 +182,30 @@ const processPointerMoveEvents = () => {
     zoomAtOrigin(callback, pX, zX, xMin, xMax, pY, zY, yMin, yMax);
 };
 
+interface ZoomPan {
+    pointerUpHandler?: (event: PointerEvent) => void;
+    pointerDownHandler?: (event: PointerEvent) => void;
+    pointerMoveHandler?: (event: PointerEvent) => void;
+    wheelHandler?: (event: WheelEvent) => void;
+    callback?: ZoomPanCallback;
+    dragStart?: DragStart | null;
+}
+
 export default {
     id: 'zoomPan',
 
-    beforeInit(chartInstance) {
-        const zoomPan = {};
-        chartInstance.zoomPan = zoomPan;
+    beforeInit(chart: Chart<'line'> & { zoomPan?: ZoomPan }) {
+        const zoomPan: ZoomPan = {};
+        chart.zoomPan = zoomPan;
 
-        const { canvas } = chartInstance.$context.chart.ctx;
+        // The following changes have to be properly tested.
+        const { canvas } = chart.ctx;
 
-        zoomPan.wheelHandler = event => {
+        zoomPan.wheelHandler = (event: WheelEvent) => {
             wheelEventToProcess = {
                 event,
-                scales: chartInstance.scales,
-                callback: zoomPan.callback,
+                scales: chart.scales,
+                callback: zoomPan.callback ?? undefined,
             };
 
             if (!processingWheelEvents) {
@@ -165,9 +227,14 @@ export default {
             if (event.shiftKey) {
                 return;
             }
+
+            if (!isCanvasElement(event.target)) {
+                return;
+            }
+
             if (event.button === 0 || event.button === 2) {
                 const type = event.button === 2 ? 'zoom' : 'pan';
-                const { xScale, yScale } = chartInstance.scales;
+                const { xScale, yScale } = chart.scales;
                 const { min: xMin, max: xMax } = xScale;
                 const { max: yMin, min: yMax } = yScale;
                 const { left: xOffset, top: yOffset } =
@@ -201,13 +268,18 @@ export default {
             if (!zoomPan.dragStart) {
                 return;
             }
+
+            if (!isCanvasElement(event.target)) {
+                return;
+            }
+
             event.target.setPointerCapture(event.pointerId);
             zoomPan.dragStart.moved = true;
 
             pointerMoveEventToProcess = {
                 event,
                 dragStart: { ...zoomPan.dragStart },
-                scales: chartInstance.scales,
+                scales: chart.scales,
                 callback: zoomPan.callback,
             };
 
@@ -223,6 +295,13 @@ export default {
         );
 
         zoomPan.pointerUpHandler = () => {
+            if (zoomPan.callback == null) {
+                logger.error(
+                    'zoomPan-->zoomPan.pointerUpHandler: no callback defined'
+                );
+                return;
+            }
+
             if (
                 zoomPan.dragStart &&
                 zoomPan.dragStart.type === 'zoom' &&
