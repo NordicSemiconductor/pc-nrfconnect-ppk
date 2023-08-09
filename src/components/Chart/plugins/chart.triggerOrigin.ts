@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { Chart } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp } from '../../../globals';
@@ -13,20 +14,23 @@ const { gray700: color } = colors;
 const plugin = {
     id: 'triggerorigin',
 
-    afterDraw(chartInstance) {
+    afterDraw(
+        chartInstance: Chart & { options: { triggerOrigin?: number | null } }
+    ) {
         const {
             chartArea: { top, bottom },
             scales: { xScale },
-            $context: {
-                chart: { ctx },
-            },
+            ctx,
             options: { triggerOrigin },
         } = chartInstance;
         // const { ctx }
         if (!triggerOrigin) return;
-        const x = Math.ceil(
-            xScale.getPixelForValue(indexToTimestamp(triggerOrigin - 1))
-        );
+
+        const timestamp = indexToTimestamp(triggerOrigin - 1);
+        if (timestamp == null) return;
+
+        const x = Math.ceil(xScale.getPixelForValue(timestamp));
+
         if (x < xScale.left || x > xScale.right) return;
 
         ctx.save();
