@@ -64,6 +64,8 @@ export const setSamplingRate = (rate: number): void => {
     options.samplingTime = getSamplingTime(rate);
 };
 
+export const getSamplesPerSecond = () => options.samplesPerSecond;
+
 /**
  * Initiates new sample array if new buffer size is not equal to the present one.
  * @param {number} samplingDuration maximum number of seconds with sampling

@@ -14,6 +14,12 @@
     -   Hotkey: `alt+z`
 -   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
 
+## Fixed
+
+-   Zooming further than what is permitted would cause the graph to pane. This
+    is now restricted, which means that if zooming has reached its limit, you
+    will need to explicitly pane the graph.
+
 ## 3.5.5 - 2023-04-05
 
 ### Fixed

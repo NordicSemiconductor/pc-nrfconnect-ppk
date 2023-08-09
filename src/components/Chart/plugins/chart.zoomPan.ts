@@ -7,6 +7,12 @@
 import { Chart, CoreScaleOptions, Scale } from 'chart.js';
 import { logger } from 'pc-nrfconnect-shared';
 
+import { getSamplesPerSecond } from '../../../globals';
+import {
+    MAX_WINDOW_DURATION,
+    MIN_WINDOW_DURATION,
+} from '../../../slices/chartSlice';
+
 type ZoomPanCallback = (
     beginX?: number,
     endX?: number,
@@ -66,6 +72,7 @@ let wheelEventToProcess: {
     event: WheelEvent;
     scales: { [key: string]: Scale<CoreScaleOptions> };
     callback?: ZoomPanCallback;
+    sampleFrequency?: number;
 };
 
 const processWheelEvents = () => {
@@ -121,6 +128,19 @@ const processWheelEvents = () => {
             logger.debug(
                 'zoomPan.ts-->processWheelEvents: getValueForPixel returned undefined.'
             );
+            return;
+        }
+
+        const windowWidth = xMax - xMin;
+        const samplesPerSecond = getSamplesPerSecond();
+
+        // On zoom out: do not attempt to adjust after reaching max zoom out.
+        if (z < 1 && windowWidth >= MAX_WINDOW_DURATION / samplesPerSecond) {
+            return;
+        }
+
+        // On zoom in: do not attempt to adjust after reaching max zoom in.
+        if (z > 1 && windowWidth <= MIN_WINDOW_DURATION / samplesPerSecond) {
             return;
         }
 
@@ -194,7 +214,9 @@ interface ZoomPan {
 export default {
     id: 'zoomPan',
 
-    beforeInit(chart: Chart<'line'> & { zoomPan?: ZoomPan }) {
+    beforeInit(
+        chart: Chart<'line'> & { zoomPan?: ZoomPan; sampleFrequency?: number }
+    ) {
         const zoomPan: ZoomPan = {};
         chart.zoomPan = zoomPan;
 
@@ -206,6 +228,7 @@ export default {
                 event,
                 scales: chart.scales,
                 callback: zoomPan.callback ?? undefined,
+                sampleFrequency: chart.sampleFrequency,
             };
 
             if (!processingWheelEvents) {

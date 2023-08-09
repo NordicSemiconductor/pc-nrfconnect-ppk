@@ -17,6 +17,7 @@ import { appState } from '../../slices/appSlice';
 import { chartState } from '../../slices/chartSlice';
 import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
+import { getSampleFreq } from '../../utils/persistentStore';
 import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin from './plugins/chart.dragSelect';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
