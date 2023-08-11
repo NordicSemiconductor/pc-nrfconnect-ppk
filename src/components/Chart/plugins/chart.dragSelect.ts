@@ -4,39 +4,59 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { Plugin } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
+
+import type { AmpereChart } from '../AmpereChart';
+import { isCanvasElement } from './utility';
 
 const CHART_SELECTION_COLOR = colors.gray100;
 const CHART_DRAG_COLOR = colors.gray100;
 
-export default {
+export type ChartCursorCallback = (xStart?: number, xEnd?: number) => void;
+
+export interface DragSelect {
+    dragStart?: PointerEvent | null;
+    dragEnd?: PointerEvent | null;
+    pointerDownHandler?: (event: PointerEvent) => void;
+    pointerMoveHandler?: (event: PointerEvent) => void;
+    pointerUpHandler?: (event: PointerEvent) => void;
+    callback?: ChartCursorCallback;
+}
+
+const plugin: Plugin<'line'> = {
     id: 'dragSelect',
 
-    beforeInit(chartInstance) {
-        const dragSelect = {};
-        chartInstance.dragSelect = dragSelect;
+    beforeInit(chart: AmpereChart) {
+        const dragSelect: DragSelect = {};
+        chart.dragSelect = dragSelect;
 
-        const { canvas } = chartInstance.$context.chart.ctx;
+        const { canvas } = chart.ctx;
 
         dragSelect.pointerDownHandler = event => {
             if (event.button === 0 && event.shiftKey) {
                 dragSelect.dragStart = event;
-                dragSelect.callback();
+                if (dragSelect.callback) {
+                    dragSelect.callback();
+                }
             }
         };
         canvas.addEventListener('pointerdown', dragSelect.pointerDownHandler);
 
         dragSelect.pointerMoveHandler = event => {
-            if (chartInstance.dragSelect.dragStart) {
-                chartInstance.dragSelect.dragEnd = event;
-                // chartInstance.update('none');
+            if (chart.dragSelect?.dragStart) {
+                chart.dragSelect.dragEnd = event;
             }
         };
         canvas.addEventListener('pointermove', dragSelect.pointerMoveHandler);
 
         dragSelect.pointerUpHandler = event => {
-            if (dragSelect.dragStart) {
+            if (dragSelect.dragStart?.target != null) {
                 const { dragStart } = dragSelect;
+                if (!isCanvasElement(dragStart.target)) {
+                    return;
+                }
+
                 const offsetX = dragStart.target.getBoundingClientRect().left;
                 const startX =
                     Math.min(dragStart.clientX, event.clientX) - offsetX;
@@ -44,12 +64,13 @@ export default {
                     Math.max(dragStart.clientX, event.clientX) - offsetX;
 
                 if (endX > startX) {
-                    const scale = chartInstance.scales.xScale;
-                    const min = scale.getValueForPixel(startX).valueOf();
-                    const max = scale.getValueForPixel(endX).valueOf();
+                    const scale = chart.scales.xScale;
+                    const min = scale.getValueForPixel(startX)?.valueOf();
+                    const max = scale.getValueForPixel(endX)?.valueOf();
 
-                    dragSelect.callback(min, max);
-                    // chartInstance.update('none');
+                    if (dragSelect.callback) {
+                        dragSelect.callback(min, max);
+                    }
                 }
                 dragSelect.dragStart = null;
                 dragSelect.dragEnd = null;
@@ -59,15 +80,15 @@ export default {
         canvas.addEventListener('pointerleave', dragSelect.pointerUpHandler);
     },
 
-    beforeDraw(chartInstance) {
+    beforeDraw(chart: AmpereChart) {
         const {
             chartArea: { left, right, top, bottom: areaBottom },
             scales: { xScale: scale },
-            dragSelect: { dragStart, dragEnd },
             canvas: { height: bottom },
-        } = chartInstance;
-        const { ctx } = chartInstance.$context.chart;
-        const { cursor } = scale.options;
+            options: { cursor },
+            ctx,
+        } = chart;
+        const { dragStart, dragEnd } = chart.dragSelect || {};
 
         if (typeof cursor.cursorBegin !== 'number' && !(dragStart && dragEnd)) {
             return;
@@ -75,7 +96,10 @@ export default {
 
         ctx.save();
 
-        if (typeof cursor.cursorBegin === 'number') {
+        if (
+            typeof cursor.cursorBegin === 'number' &&
+            typeof cursor.cursorEnd === 'number'
+        ) {
             const { cursorBegin, cursorEnd } = cursor;
             const sX =
                 Math.ceil(scale.getPixelForValue(cursorBegin) - 0.5) - 0.5;
@@ -107,7 +131,7 @@ export default {
             ctx.setLineDash([]);
         }
 
-        if (dragStart && dragEnd) {
+        if (dragStart && dragEnd && isCanvasElement(dragStart.target)) {
             const offsetX = dragStart.target.getBoundingClientRect().left;
             const startX = Math.max(
                 Math.min(dragStart.clientX, dragEnd.clientX) - offsetX,
@@ -123,3 +147,5 @@ export default {
         ctx.restore();
     },
 };
+
+export default plugin;

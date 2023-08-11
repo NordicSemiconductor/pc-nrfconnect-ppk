@@ -113,7 +113,7 @@ export const timestampToIndex = (timestamp: sampleTimestamp): sampleIndex => {
     );
 };
 
-export const indexToTimestamp = (index: sampleIndex): sampleTimestamp => {
+export const indexToTimestamp = (index: sampleIndex): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
     const microSecondsPerSecond = 1e6;
     return (

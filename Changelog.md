@@ -19,6 +19,9 @@
 -   Zooming further than what is permitted would cause the graph to pane. This
     is now restricted, which means that if zooming has reached its limit, you
     will need to explicitly pane the graph.
+-   Hovering the digital channels would show a horizontal line at the top of the
+    graph. Now the horizontal line will only be shown together with the vertical
+    line if you hover the graph.
 
 ## 3.5.5 - 2023-04-05
 

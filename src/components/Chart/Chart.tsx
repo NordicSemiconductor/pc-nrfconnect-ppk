@@ -36,7 +36,7 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
-import AmpereChart from './AmpereChart';
+import AmpereChartProperties from './AmpereChart';
 import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser from './data/dataAccumulator';
 import dataSelectorInitialiser from './data/dataSelector';
@@ -185,7 +185,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const { bits, data } = options;
 
-    const chartRef = useRef(null);
+    const chartRef = useRef<ChartJS | null>(null);
 
     const dataAccumulator = useLazyInitializedRef(
         dataAccumulatorInitialiser
@@ -403,7 +403,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     windowDuration={windowDuration}
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
-                <AmpereChart
+                <AmpereChartProperties
                     setLen={setLen}
                     setChartAreaWidth={setChartAreaWidth}
                     step={step}

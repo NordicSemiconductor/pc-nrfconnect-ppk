@@ -8,7 +8,8 @@ import { useRef } from 'react';
 
 const uninitialisedToken = Symbol('uninitialisedToken');
 
-export const useLazyInitializedRef = initialiser => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: figure out type of initialiser
+export const useLazyInitializedRef = (initialiser: any) => {
     const ref = useRef(uninitialisedToken);
     if (ref.current === uninitialisedToken) {
         ref.current = initialiser();

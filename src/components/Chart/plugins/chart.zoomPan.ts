@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { Chart, CoreScaleOptions, Scale } from 'chart.js';
+import { CoreScaleOptions, Plugin, Scale } from 'chart.js';
 import { logger } from 'pc-nrfconnect-shared';
 
 import { getSamplesPerSecond } from '../../../globals';
@@ -12,6 +12,8 @@ import {
     MAX_WINDOW_DURATION,
     MIN_WINDOW_DURATION,
 } from '../../../slices/chartSlice';
+import type { AmpereChart } from '../AmpereChart';
+import { isCanvasElement } from './utility';
 
 type ZoomPanCallback = (
     beginX?: number,
@@ -20,10 +22,13 @@ type ZoomPanCallback = (
     endY?: null | number
 ) => void;
 
-function isCanvasElement(
-    element: EventTarget | null
-): element is HTMLCanvasElement {
-    return element instanceof HTMLCanvasElement;
+export interface ZoomPan {
+    pointerUpHandler?: (event: PointerEvent) => void;
+    pointerDownHandler?: (event: PointerEvent) => void;
+    pointerMoveHandler?: (event: PointerEvent) => void;
+    wheelHandler?: (event: WheelEvent) => void;
+    callback?: ZoomPanCallback;
+    dragStart?: DragStart | null;
 }
 
 const wheelZoomFactor = 1.25;
@@ -202,28 +207,18 @@ const processPointerMoveEvents = () => {
     zoomAtOrigin(callback, pX, zX, xMin, xMax, pY, zY, yMin, yMax);
 };
 
-interface ZoomPan {
-    pointerUpHandler?: (event: PointerEvent) => void;
-    pointerDownHandler?: (event: PointerEvent) => void;
-    pointerMoveHandler?: (event: PointerEvent) => void;
-    wheelHandler?: (event: WheelEvent) => void;
-    callback?: ZoomPanCallback;
-    dragStart?: DragStart | null;
-}
-
-export default {
+const plugin: Plugin<'line'> = {
     id: 'zoomPan',
 
-    beforeInit(
-        chart: Chart<'line'> & { zoomPan?: ZoomPan; sampleFrequency?: number }
-    ) {
+    beforeInit(chart: AmpereChart) {
         const zoomPan: ZoomPan = {};
         chart.zoomPan = zoomPan;
 
-        // The following changes have to be properly tested.
+        console.log('zoomPan', chart);
+
         const { canvas } = chart.ctx;
 
-        zoomPan.wheelHandler = (event: WheelEvent) => {
+        zoomPan.wheelHandler = event => {
             wheelEventToProcess = {
                 event,
                 scales: chart.scales,
@@ -342,3 +337,5 @@ export default {
         );
     },
 };
+
+export default plugin;

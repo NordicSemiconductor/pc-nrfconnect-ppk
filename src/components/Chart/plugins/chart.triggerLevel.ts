@@ -4,35 +4,57 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { Plugin } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import { updateTriggerLevel } from '../../../actions/deviceActions';
+import { TDispatch } from '../../../slices/thunk';
+import type { AmpereChart } from '../AmpereChart';
 
 const { gray700: color, nordicBlue } = colors;
 
-const getTriggerLevelFromCoordinate = coordinate =>
+const getTriggerLevelFromCoordinate = (coordinate: number) =>
     Math.round(Math.min(1000000, Math.max(0, coordinate)));
 
-let dispatch = () => {
+let dispatch: TDispatch = () => {
     throw new Error('Dispatch not passed to plugin yet!');
 };
 
-const plugin = {
+interface TriggerLevelPlugin extends Plugin<'line'> {
+    getCoords: (chart: AmpereChart) => null | {
+        y: number;
+        label: {
+            x: number;
+            y: number;
+            w: number;
+            h: number;
+        };
+    };
+    pointerDownHandler: (event: PointerEvent, chart: AmpereChart) => void;
+    pointerMoveHandler: (event: PointerEvent, chart: AmpereChart) => void;
+    pointerLeaveHandler: (chart: AmpereChart) => void;
+}
+
+const plugin: TriggerLevelPlugin = {
     id: 'triggerLevel',
 
-    getCoords(chartInstance) {
+    getCoords(chart: AmpereChart) {
         const {
             chartArea: { left },
             scales: { yScale },
             options: { triggerLevel, triggerHandleVisible },
-        } = chartInstance;
-        if (triggerLevel === null || !triggerHandleVisible) {
+        } = chart;
+        if (triggerLevel == null || !triggerHandleVisible) {
             return null;
         }
         const y =
-            chartInstance.triggerLine.y !== null
-                ? chartInstance.triggerLine.y
+            chart.triggerLine.y !== null
+                ? chart.triggerLine.y
                 : yScale.getPixelForValue(triggerLevel);
+        if (y == null) {
+            return null;
+        }
+
         const width = 24;
         const height = 10;
         return {
@@ -46,72 +68,85 @@ const plugin = {
         };
     },
 
-    pointerDownHandler(evt, chartInstance) {
-        const { label } = this.getCoords(chartInstance) || {};
+    pointerDownHandler(event: PointerEvent, chart: AmpereChart) {
+        const { label } = this.getCoords(chart) || {};
         if (!label) return;
-        const { layerX, layerY } = evt || {};
+        const { x, y } = event || {};
         if (
-            layerX >= label.x &&
-            layerX <= label.x + label.w &&
-            layerY >= label.y &&
-            layerY <= label.y + label.h
+            x >= label.x &&
+            x <= label.x + label.w &&
+            y >= label.y &&
+            y <= label.y + label.h
         ) {
-            chartInstance.triggerLine.y = layerY;
+            chart.triggerLine.y = event.y;
         }
     },
 
-    pointerMoveHandler(evt, chartInstance) {
-        if (chartInstance.triggerLine.y === null) return;
-        const { label } = this.getCoords(chartInstance) || {};
-        if (!label) return;
-        chartInstance.triggerLine.y = evt.layerY;
+    pointerMoveHandler(event: PointerEvent, chart: AmpereChart) {
+        if (chart.triggerLine.y === null) {
+            return;
+        }
+
+        const { label } = this.getCoords(chart) || {};
+        if (label == null) {
+            return;
+        }
+
+        chart.triggerLine.y = event.y;
         const {
             scales: { yScale },
-        } = chartInstance;
-        const level = getTriggerLevelFromCoordinate(
-            yScale.getValueForPixel(chartInstance.triggerLine.y)
-        );
+        } = chart;
+
+        const yCoordinate = yScale.getValueForPixel(chart.triggerLine.y);
+        if (yCoordinate == null) {
+            return;
+        }
+
+        const level = getTriggerLevelFromCoordinate(yCoordinate);
+
         dispatch(updateTriggerLevel(level));
     },
 
-    pointerLeaveHandler(chartInstance) {
-        if (chartInstance.triggerLine.y !== null) {
+    pointerLeaveHandler(chart: AmpereChart) {
+        if (chart.triggerLine.y != null) {
             const {
                 scales: { yScale },
-            } = chartInstance;
-            const level = getTriggerLevelFromCoordinate(
-                yScale.getValueForPixel(chartInstance.triggerLine.y)
-            );
+            } = chart;
+
+            const yCoordinate = yScale.getValueForPixel(chart.triggerLine.y);
+            if (yCoordinate == null) {
+                return;
+            }
+            const level = getTriggerLevelFromCoordinate(yCoordinate);
             dispatch(updateTriggerLevel(level));
         }
-        chartInstance.triggerLine.y = null;
+        chart.triggerLine.y = null;
     },
 
-    beforeInit(chartInstance) {
-        chartInstance.triggerLine = { y: null };
-        const { canvas } = chartInstance.$context.chart.ctx;
+    beforeInit(chart: AmpereChart) {
+        chart.triggerLine = { y: null };
+        const { canvas } = chart.ctx;
         canvas.addEventListener('pointerdown', evt =>
-            plugin.pointerDownHandler(evt, chartInstance)
+            plugin.pointerDownHandler(evt, chart)
         );
         canvas.addEventListener('pointermove', evt =>
-            plugin.pointerMoveHandler(evt, chartInstance)
+            plugin.pointerMoveHandler(evt, chart)
         );
         canvas.addEventListener('pointerup', () =>
-            plugin.pointerLeaveHandler(chartInstance)
+            plugin.pointerLeaveHandler(chart)
         );
         canvas.addEventListener('pointerleave', () =>
-            plugin.pointerLeaveHandler(chartInstance)
+            plugin.pointerLeaveHandler(chart)
         );
     },
 
-    afterDraw(chartInstance) {
+    afterDraw(chart: AmpereChart) {
         const {
             chartArea: { left, right, top, bottom },
-            // chart: { ctx },
-        } = chartInstance;
-        const { ctx } = chartInstance.$context.chart;
+            ctx,
+        } = chart;
 
-        const coords = this.getCoords(chartInstance);
+        const coords = this.getCoords(chart);
 
         if (!coords) return;
         const { y, label } = coords;
@@ -191,7 +226,7 @@ const plugin = {
     },
 };
 
-export default dispatchFromComponent => {
+export default (dispatchFromComponent: TDispatch) => {
     dispatch = dispatchFromComponent;
     return plugin;
 };

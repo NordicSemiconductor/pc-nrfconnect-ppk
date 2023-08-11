@@ -4,26 +4,25 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { Chart } from 'chart.js';
+import { Plugin } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp } from '../../../globals';
+import type { AmpereChart } from '../AmpereChart';
 
 const { gray700: color } = colors;
 
-const plugin = {
+const plugin: Plugin<'line'> = {
     id: 'triggerorigin',
 
-    afterDraw(
-        chartInstance: Chart & { options: { triggerOrigin?: number | null } }
-    ) {
+    afterDraw(chartInstance: AmpereChart) {
         const {
             chartArea: { top, bottom },
             scales: { xScale },
             ctx,
             options: { triggerOrigin },
         } = chartInstance;
-        // const { ctx }
+
         if (!triggerOrigin) return;
 
         const timestamp = indexToTimestamp(triggerOrigin - 1);
