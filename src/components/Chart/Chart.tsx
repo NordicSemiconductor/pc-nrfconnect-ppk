@@ -26,6 +26,7 @@ import {
 } from 'chart.js';
 import { useHotKey } from 'pc-nrfconnect-shared';
 
+import Minimap from '../../features/minimap/Minimap';
 import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 import {
     isInitialised,
@@ -441,6 +442,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
+                <Minimap />
                 <div
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}

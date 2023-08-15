@@ -111,7 +111,3 @@ const TriggerStart = ({ triggerMode }: { triggerMode: string }) => {
 };
 
 export default TriggerStart;
-
-TriggerStart.propTypes = {
-    triggerMode: PropTypes.string.isRequired,
-};
