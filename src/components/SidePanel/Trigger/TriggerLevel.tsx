@@ -14,13 +14,15 @@ import PropTypes from 'prop-types';
 
 import { updateTriggerLevel } from '../../../actions/deviceActions';
 
-const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
+const TriggerLevel = ({ triggerLevel }: { triggerLevel: number | null }) => {
     const dispatch = useDispatch();
-    const [level, setLevel] = useState(triggerLevel);
+    const [level, setLevel] = useState(triggerLevel ?? 10);
     // use true for mA, false for uA
     const [levelUnit, setLevelUnit] = useState(false);
 
     useEffect(() => {
+        if (triggerLevel == null) return;
+
         setLevelUnit(triggerLevel > 1000);
         setLevel(
             triggerLevel > 1000
@@ -29,20 +31,19 @@ const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
         );
     }, [triggerLevel]);
 
-    const sendTriggerLevel = unit => {
-        dispatch(updateTriggerLevel(level * 1000 ** unit));
+    const sendTriggerLevel = (unit: boolean) => {
+        const exponent = unit ? 1 : 0;
+        dispatch(updateTriggerLevel(level * 1000 ** exponent));
         setLevelUnit(unit);
     };
     return (
         <div
             title="Rising edge level to run trigger"
-            className={`trigger-level-container ${
-                externalTrigger ? 'disabled' : ''
-            }`}
+            className="trigger-level-container"
         >
             <Form.Label
                 htmlFor="slider-trigger-level"
-                className="d-flex flex-row align-items-baseline"
+                className="d-flex align-items-baseline flex-row"
             >
                 <span className="flex-fill">Level</span>
                 <NumberInlineInput
@@ -64,7 +65,7 @@ const TriggerLevel = ({ triggerLevel, externalTrigger }) => {
                         The bug that this hack fixes is that selecting a value in the
                         dropdown also closes the collapsible trigger group around it.
                         */}
-                <SelectableContext.Provider value={false}>
+                <SelectableContext.Provider value={null}>
                     <Dropdown className="inline-dropdown">
                         <Dropdown.Toggle
                             id="dropdown-current-unit"
@@ -97,5 +98,4 @@ export default TriggerLevel;
 
 TriggerLevel.propTypes = {
     triggerLevel: PropTypes.number.isRequired,
-    externalTrigger: PropTypes.bool.isRequired,
 };

@@ -14,13 +14,9 @@ import {
     usageData,
 } from 'pc-nrfconnect-shared';
 
-import {
-    isConnectedToPPK1Device,
-    updateRegulator,
-} from '../../actions/deviceActions';
+import { updateRegulator } from '../../actions/deviceActions';
 import {
     moveVoltageRegulatorVdd,
-    updateVoltageRegulatorMaxCapPPK1,
     updateVoltageRegulatorMaxCapPPK2,
     voltageRegulatorState,
 } from '../../slices/voltageRegulatorSlice';
@@ -32,9 +28,7 @@ export const CapVoltageSettings = () => {
     const dispatch = useDispatch();
 
     const updateMaxCap = () =>
-        isConnectedToPPK1Device()
-            ? dispatch(updateVoltageRegulatorMaxCapPPK1(newMaxCap))
-            : dispatch(updateVoltageRegulatorMaxCapPPK2(newMaxCap));
+        dispatch(updateVoltageRegulatorMaxCapPPK2(newMaxCap));
 
     const updateVoltageRegulator = () => {
         updateMaxCap();

@@ -31,7 +31,7 @@ const SpikeFilter = () => {
         >
             <Form.Label
                 title="Number of samples after a dynamic range switch to apply filter"
-                className="pt-2 d-flex flex-row justify-content-between"
+                className="d-flex justify-content-between flex-row pt-2"
             >
                 <span>Samples to smooth</span>
                 <span>{samples}</span>
@@ -53,7 +53,7 @@ const SpikeFilter = () => {
             />
             <Form.Label
                 title="Higher values filter more aggressively"
-                className="pt-2 d-flex flex-row justify-content-between"
+                className="d-flex justify-content-between flex-row pt-2"
             >
                 <span>Coefficient for range 1-4</span>
                 <span>{alpha}</span>
@@ -75,7 +75,7 @@ const SpikeFilter = () => {
             />
             <Form.Label
                 title="Higher values filter more aggressively"
-                className="pt-2 d-flex flex-row justify-content-between"
+                className="d-flex justify-content-between flex-row pt-2"
             >
                 <span>Coefficient for range 5</span>
                 <span>{alpha5}</span>
@@ -100,7 +100,7 @@ const SpikeFilter = () => {
                     dispatch(resetSpikeFilterToDefaults());
                     dispatch(updateSpikeFilter());
                 }}
-                variant="set"
+                variant="secondary"
                 className="w-50 mb-2 mt-3"
             >
                 Defaults

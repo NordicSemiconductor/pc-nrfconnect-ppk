@@ -28,7 +28,10 @@ import './saveexport.scss';
 
 const { unit } = mathjs;
 
-const useToggledSetting = (initialState, label) => {
+const useToggledSetting = (
+    initialState: boolean,
+    label: string
+): [boolean, React.ElementType] => {
     const [value, setValue] = useState(initialState);
 
     const ToggleComponent = () => (
@@ -45,16 +48,23 @@ const useToggledSetting = (initialState, label) => {
 };
 
 const calculateTotalSize = (
-    [timestampToggled, currentToggled, bitsToggled, bitsSeparatedToggled],
-    numberOfRecords
+    [
+        timestampToggled,
+        currentToggled,
+        bitsToggled,
+        bitsSeparatedToggled,
+    ]: readonly [boolean, boolean, boolean, boolean],
+    numberOfRecords: number
 ) => {
     const recordLength =
-        timestampToggled * 10 +
-        currentToggled * 10 +
-        bitsToggled * 8 +
-        bitsSeparatedToggled * 16;
+        (timestampToggled ? 1 : 0) * 10 +
+        (currentToggled ? 1 : 0) * 10 +
+        (bitsToggled ? 1 : 0) * 8 +
+        (bitsSeparatedToggled ? 1 : 0) * 16;
+
     return mathjs
-        .to(unit(recordLength * numberOfRecords, 'bytes'), 'MB')
+        .unit(recordLength * numberOfRecords, 'bytes')
+        .to('MB')
         .format({ notation: 'fixed', precision: 0 });
 };
 
@@ -75,10 +85,10 @@ export default () => {
     } = useSelector(chartState);
     const { isExportDialogVisible } = useSelector(appState);
 
-    const [indexBegin, setIndexBegin] = useState(null);
-    const [indexEnd, setIndexEnd] = useState(null);
-    const [numberOfRecords, setNumberOfRecords] = useState(null);
-    const [fileSize, setFileSize] = useState(null);
+    const [indexBegin, setIndexBegin] = useState<number | null>(null);
+    const [indexEnd, setIndexEnd] = useState<number | null>(null);
+    const [numberOfRecords, setNumberOfRecords] = useState<number | null>(null);
+    const [fileSize, setFileSize] = useState<string | null>(null);
     const [duration, setDuration] = useState(0);
     const [formattedDuration, setFormattedDuration] = useState('');
 
@@ -95,12 +105,12 @@ export default () => {
         false,
         'Digital logic pins (separate fields)'
     );
-    const contentSelection = [
+    const contentSelection: readonly [boolean, boolean, boolean, boolean] = [
         timestampToggled,
         currentToggled,
         bitsToggled,
         bitsSeparatedToggled,
-    ];
+    ] as const;
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -112,10 +122,22 @@ export default () => {
     }, [isExportDialogVisible]);
 
     useEffect(() => {
-        const records = indexEnd - indexBegin + 1 || 0;
+        let records;
+        if (indexBegin == null || indexEnd == null) {
+            records = 0;
+        } else {
+            records = indexEnd - indexBegin + 1 || 0;
+        }
+
         setNumberOfRecords(records);
         setFileSize(calculateTotalSize(contentSelection, records));
-        setDuration(indexToTimestamp(indexEnd) - indexToTimestamp(indexBegin));
+        if (indexBegin != null && indexEnd != null) {
+            const timestampBegin = indexToTimestamp(indexBegin);
+            const timestampEnd = indexToTimestamp(indexEnd);
+            if (timestampBegin != null && timestampEnd != null) {
+                setDuration(timestampEnd - timestampBegin);
+            }
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [indexBegin, indexEnd]);
 
@@ -138,7 +160,7 @@ export default () => {
         const { filePath: fn } = await dialog.showSaveDialog({
             defaultPath: filename,
         });
-        if (!fn) return;
+        if (!fn || indexBegin == null || indexEnd == null) return;
         setLastSaveDir(dirname(fn));
         setExporting(true);
         dispatch(

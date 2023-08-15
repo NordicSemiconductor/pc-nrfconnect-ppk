@@ -10,9 +10,8 @@
 
 import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
-import Device from '../device';
-import { SampleValues, SupportedDevice } from '../device/types';
-import { isRTTDevice, isSerialDevice } from '../device/utils';
+import SerialDevice from '../device/serialDevice';
+import { SampleValues } from '../device/types';
 import {
     indexToTimestamp,
     initializeBitsBuffer,
@@ -26,7 +25,6 @@ import { RootState } from '../slices';
 import {
     deviceClosedAction,
     deviceOpenedAction,
-    rttStartAction,
     samplingStartAction,
     samplingStoppedAction,
     setDeviceRunningAction,
@@ -42,16 +40,9 @@ import {
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
-import { resistorsResetAction } from '../slices/resistorCalibrationSlice';
-import {
-    spikeFilteringToggleAction,
-    switchingPointsDownSetAction,
-    switchingPointsResetAction,
-} from '../slices/switchingPointsSlice';
 import { TDispatch } from '../slices/thunk';
 import {
     clearSingleTriggerWaitingAction,
-    externalTriggerToggledAction,
     setTriggerOriginAction,
     toggleTriggerAction,
     triggerLengthSetAction,
@@ -59,17 +50,14 @@ import {
     triggerSingleSetAction,
     triggerWindowRangeAction,
 } from '../slices/triggerSlice';
-import {
-    updateMaxCapOnDeviceSelected,
-    updateRegulator as updateRegulatorAction,
-} from '../slices/voltageRegulatorSlice';
+import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { isRealTimePane } from '../utils/panes';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 import { calculateWindowSize, processTriggerSample } from './triggerActions';
 
-let device: null | SupportedDevice = null;
+let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timer;
 
 const zeroCap = isDevelopment
@@ -123,11 +111,8 @@ export function samplingStart() {
                 ? EventAction.START_REAL_TIME_SAMPLE
                 : EventAction.START_DATA_LOGGER_SAMPLE
         );
-        usageData.sendUsageData(
-            device!.capabilities.hwTrigger
-                ? EventAction.SAMPLE_STARTED_WITH_PPK1_SELECTED
-                : EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED
-        );
+        usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
+
         options.data.fill(NaN);
         if (options.bits) {
             options.bits.fill(0);
@@ -162,10 +147,6 @@ export function triggerStop() {
 
 export const updateSpikeFilter =
     () => (_: TDispatch, getState: () => RootState) => {
-        // TODO: Must be tested for RTTDevice
-        if (isRTTDevice(device)) {
-            return;
-        }
         const { spikeFilter } = getState().app;
         persistSpikeFilter(spikeFilter);
         device!.ppkSetSpikeFilter(spikeFilter);
@@ -200,7 +181,7 @@ export function close() {
 }
 
 const initGains = () => async (dispatch: TDispatch) => {
-    if (isRTTDevice(device) || !device!.capabilities.ppkSetUserGains) {
+    if (!device!.capabilities.ppkSetUserGains) {
         return;
     }
     const { ug } = device!.modifiers;
@@ -316,12 +297,8 @@ export function open(deviceInfo: any) {
         };
 
         try {
-            device = Device(deviceInfo, onSample);
-            usageData.sendUsageData(
-                device.capabilities.hwTrigger
-                    ? EventAction.PPK_1_SELECTED
-                    : EventAction.PPK_2_SELECTED
-            );
+            device = new SerialDevice(deviceInfo, onSample);
+            usageData.sendUsageData(EventAction.PPK_2_SELECTED);
 
             dispatch(
                 setSamplingAttrsAction({
@@ -344,8 +321,6 @@ export function open(deviceInfo: any) {
                     triggerWindowRangeAction({ ...device.triggerWindowRange })
                 );
 
-            dispatch(resistorsResetAction({ ...metadata }));
-            dispatch(switchingPointsResetAction(metadata));
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
                 updateRegulatorAction({
@@ -354,24 +329,14 @@ export function open(deviceInfo: any) {
                     ...device.vddRange,
                 })
             );
-            dispatch(
-                updateMaxCapOnDeviceSelected({
-                    isRTTDevice: isRTTDevice(device),
-                })
-            );
             await dispatch(initGains());
-            if (device.capabilities.ppkSetSpikeFilter) {
-                dispatch(updateSpikeFilter());
-            }
-            if (device.capabilities.ppkSetPowerMode) {
-                const isSmuMode = metadata.mode === 2;
-                // 1 = Ampere
-                // 2 = SMU
-                dispatch(setPowerModeAction({ isSmuMode }));
-                if (!isSmuMode) dispatch(setDeviceRunning(true));
-            }
+            dispatch(updateSpikeFilter());
+            const isSmuMode = metadata.mode === 2;
+            // 1 = Ampere
+            // 2 = SMU
+            dispatch(setPowerModeAction({ isSmuMode }));
+            if (!isSmuMode) dispatch(setDeviceRunning(true));
 
-            dispatch(rttStartAction());
             dispatch(setFileLoadedAction({ loaded: false }));
 
             if (isRealTimePane(getState())) {
@@ -437,7 +402,7 @@ export function updateRegulator() {
 
 export const updateGains =
     (index: number) => async (_: TDispatch, getState: () => RootState) => {
-        if (isRTTDevice(device) || !device!.ppkSetUserGains) {
+        if (device!.ppkSetUserGains == null) {
             return;
         }
         const { gains } = getState().app;
@@ -450,15 +415,11 @@ export const updateGains =
  * Takes the window value in milliseconds, adjusts for microsecs
  * and resolves the number of bytes we need for this size of window.
  * @param {number} value  Value received in milliseconds
- * @returns {null} Nothing
+ * @returns {void} Nothing
  */
 export function triggerLengthUpdate(value: number) {
-    return async (dispatch: TDispatch) => {
+    return (dispatch: TDispatch) => {
         dispatch(triggerLengthSetAction({ triggerLength: value }));
-        // If division returns a decimal, round downward to nearest integer
-        if (isRTTDevice(device) && device!.capabilities.ppkTriggerWindowSet) {
-            await device.ppkTriggerWindowSet(value);
-        }
         logger.info(`Trigger length updated to ${value} ms`);
     };
 }
@@ -472,7 +433,7 @@ export function triggerStart() {
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
 
-        await device!.ppkTriggerSet(triggerLevel!);
+        await device!.ppkTriggerSet();
     };
 }
 
@@ -484,7 +445,7 @@ export function triggerSingleSet() {
         const { triggerLevel } = getState().app.trigger;
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
 
-        await device!.ppkTriggerSingleSet(triggerLevel!);
+        await device!.ppkTriggerSingleSet();
     };
 }
 
@@ -498,7 +459,6 @@ export function setDeviceRunning(isRunning: boolean) {
 
 export function setPowerMode(isSmuMode: boolean) {
     return async (dispatch: TDispatch) => {
-        if (!isSerialDevice(device)) return;
         logger.info(`Mode: ${isSmuMode ? 'Source meter' : 'Ampere meter'}`);
         if (isSmuMode) {
             await dispatch(setDeviceRunning(false));
@@ -512,104 +472,6 @@ export function setPowerMode(isSmuMode: boolean) {
     };
 }
 
-export function updateResistors() {
-    return async (_: TDispatch, getState: () => RootState) => {
-        if (!isRTTDevice(device)) return;
-        const { userResLo, userResMid, userResHi } =
-            getState().app.resistorCalibration;
-        logger.info(`Resistors set to ${userResLo}/${userResMid}/${userResHi}`);
-        await device!.ppkUpdateResistors(userResLo, userResMid, userResHi);
-    };
-}
-
-export function resetResistors() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
-        if (!isRTTDevice(device)) return;
-        const { resLo, resMid, resHi } = getState().app.resistorCalibration;
-        logger.info(`Resistors reset to ${resLo}/${resMid}/${resHi}`);
-        await device!.ppkUpdateResistors(resLo, resMid, resHi);
-        dispatch(resistorsResetAction({}));
-    };
-}
-
-export function externalTriggerToggled(chbState: boolean) {
-    return async (dispatch: TDispatch) => {
-        if (!isRTTDevice(device)) return;
-        if (chbState) {
-            await device!.ppkTriggerStop();
-            logger.info('Starting external trigger');
-        } else {
-            logger.info('Stopping external trigger');
-        }
-        await device!.ppkTriggerExtToggle();
-        dispatch(externalTriggerToggledAction());
-    };
-}
-
-export function spikeFilteringToggle() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
-        if (!isRTTDevice(device)) return;
-        if (getState().app.switchingPoints.spikeFiltering === false) {
-            await device!.ppkSpikeFilteringOn();
-        } else {
-            await device!.ppkSpikeFilteringOff();
-        }
-        dispatch(spikeFilteringToggleAction());
-    };
-}
-
-export function switchingPointsUpSet() {
-    return async (_: TDispatch, getState: () => RootState) => {
-        if (!isRTTDevice(device)) return;
-        const { switchUpSliderPosition } = getState().app.switchingPoints;
-        const pot = Math.floor(
-            13500.0 * ((10.98194 * switchUpSliderPosition) / 1000 / 0.41 - 1)
-        );
-        await device!.ppkSwitchPointUp(pot);
-    };
-}
-
-export function switchingPointsDownSet() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
-        if (!isRTTDevice(device)) return;
-        const { switchDownSliderPosition } = getState().app.switchingPoints;
-        const pot =
-            2000.0 * ((16.3 * (500 - switchDownSliderPosition)) / 100.0 - 1) -
-            30000.0;
-        await device!.ppkSwitchPointDown(Math.floor(pot / 2));
-        dispatch(
-            switchingPointsDownSetAction({
-                sliderValue: switchDownSliderPosition,
-            })
-        );
-    };
-}
-
-export function switchingPointsReset() {
-    return async (dispatch: TDispatch) => {
-        // Reset state of slider to initial values
-        dispatch(switchingPointsResetAction({}));
-        // Set these initial values in hardware
-        await dispatch(switchingPointsUpSet());
-        await dispatch(switchingPointsDownSet());
-    };
-}
-
-export function updateTriggerLevel(triggerLevel: number) {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
+export const updateTriggerLevel =
+    (triggerLevel: number) => (dispatch: TDispatch) =>
         dispatch(triggerLevelSetAction({ triggerLevel }));
-        if (!device!.capabilities.hwTrigger) return;
-
-        const { triggerSingleWaiting, triggerRunning } = getState().app.trigger;
-
-        if (triggerSingleWaiting) {
-            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
-            await device!.ppkTriggerSingleSet(triggerLevel);
-        } else if (triggerRunning) {
-            logger.info(`Trigger level updated to ${triggerLevel} \u00B5A`);
-            await device!.ppkTriggerSet(triggerLevel);
-        }
-    };
-}
-
-export const isConnectedToPPK1Device = () => isRTTDevice(device);

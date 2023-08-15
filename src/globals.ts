@@ -36,6 +36,8 @@ export interface GlobalOptions {
     index: sampleIndex;
     /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
     timestamp: sampleTimestamp;
+
+    currentPane?: number;
 }
 
 export const options: GlobalOptions = {

@@ -8,6 +8,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
+import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import { options } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
@@ -23,10 +24,8 @@ import Gains from './Gains';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
-import ResistorCalibration from './ResistorCalibration';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
-import SwitchPoints from './SwitchPoints';
 import Trigger from './Trigger/Trigger';
 
 import './sidepanel.scss';
@@ -54,6 +53,7 @@ export default () => {
                 <Load />
                 <DisplayOptions />
                 <Save />
+                <DeprecatedDeviceDialog />
             </SidePanel>
         );
     }
@@ -64,12 +64,13 @@ export default () => {
                 <Load />
                 {options.index !== 0 && <Save />}
                 <Instructions />
+                <DeprecatedDeviceDialog />
             </SidePanel>
         );
     }
 
     if (!realTimePane && !dataLoggerPane) {
-        return null;
+        return <DeprecatedDeviceDialog />;
     }
 
     return (
@@ -85,14 +86,13 @@ export default () => {
             )}
             {deviceOpen && advancedMode && (
                 <>
-                    <SwitchPoints />
-                    <ResistorCalibration />
                     <Gains />
                     <SpikeFilter />
                     <BufferSettings />
                     <CapVoltageSettings />
                 </>
             )}
+            <DeprecatedDeviceDialog />
         </SidePanel>
     );
 };

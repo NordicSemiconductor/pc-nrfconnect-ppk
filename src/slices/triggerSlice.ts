@@ -12,7 +12,6 @@ interface TriggerState {
     triggerLevel: null | number; // [microAmp]
     triggerSingleWaiting: boolean;
     triggerRunning: boolean;
-    externalTrigger: boolean;
     triggerLength: number;
     triggerWindowRange: {
         min: number;
@@ -27,7 +26,6 @@ const initialState = (): TriggerState => ({
     triggerLevel: null, // [microAmp]
     triggerSingleWaiting: false,
     triggerRunning: false,
-    externalTrigger: false,
     triggerLength: 0,
     triggerWindowRange: {
         min: (450 * 13) / 1e3,
@@ -61,14 +59,9 @@ const triggerSlice = createSlice({
             action: PayloadAction<{ triggerRunning: boolean }>
         ) {
             const { triggerRunning } = action.payload;
-            let { externalTrigger } = state;
-            if (!triggerRunning) {
-                externalTrigger = false;
-            }
             return {
                 ...state,
                 triggerRunning,
-                externalTrigger,
             };
         },
         setTriggerStartAction(
@@ -87,20 +80,6 @@ const triggerSlice = createSlice({
         },
         clearSingleTriggerWaitingAction(state) {
             return { ...state, triggerSingleWaiting: false };
-        },
-        externalTriggerToggledAction(state) {
-            const externalTrigger = !state.externalTrigger;
-            let { triggerRunning, triggerSingleWaiting } = state;
-            if (externalTrigger) {
-                triggerRunning = false;
-                triggerSingleWaiting = false;
-            }
-            return {
-                ...state,
-                externalTrigger,
-                triggerRunning,
-                triggerSingleWaiting,
-            };
         },
         triggerWindowRangeAction(
             state,
@@ -139,7 +118,6 @@ export const triggerState = (state: RootState) => state.app.trigger;
 export const {
     clearSingleTriggerWaitingAction,
     completeTriggerAction,
-    externalTriggerToggledAction,
     setTriggerOriginAction,
     setTriggerStartAction,
     setTriggerState,

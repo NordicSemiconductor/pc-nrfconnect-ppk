@@ -59,7 +59,7 @@ const StatBox = ({
             <h2 className="d-inline my-0">{label}</h2>
             {actionButtons.length > 0 && actionButtons.map(button => button)}
         </div>
-        <div className="d-flex flex-row flex-fill">
+        <div className="d-flex flex-fill flex-row">
             {delta === null && (
                 <div className="value-box">
                     Hold SHIFT+LEFT CLICK and DRAG to make a selection

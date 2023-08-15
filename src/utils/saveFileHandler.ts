@@ -11,11 +11,11 @@ import { createDeflateRaw, DeflateRaw } from 'zlib';
 
 import { GlobalOptions } from '../globals';
 
-interface SaveData {
+export interface SaveData {
     data: Float32Array;
     bits: Uint16Array | null;
     metadata: {
-        options: GlobalOptions;
+        options: Omit<GlobalOptions, 'data' | 'bits'>;
         chartState: unknown;
         triggerState: unknown;
         dataLoggerState: unknown;

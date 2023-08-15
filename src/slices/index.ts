@@ -7,13 +7,12 @@
 import { NrfConnectState } from 'pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
+import deprecatedDevices from '../features/DeprecatedDevice/DeprecatedDeviceSlice';
 import app from './appSlice';
 import chart from './chartSlice';
 import dataLogger from './dataLoggerSlice';
 import gains from './gainsSlice';
-import resistorCalibration from './resistorCalibrationSlice';
 import spikeFilter from './spikeFilterSlice';
-import switchingPoints from './switchingPointsSlice';
 import trigger from './triggerSlice';
 import voltageRegulator from './voltageRegulatorSlice';
 
@@ -25,12 +24,11 @@ const appReducer = combineReducers({
     app,
     chart,
     trigger,
-    switchingPoints,
     voltageRegulator,
-    resistorCalibration,
     gains,
     spikeFilter,
     dataLogger,
+    deprecatedDevices,
 });
 
 export default appReducer;

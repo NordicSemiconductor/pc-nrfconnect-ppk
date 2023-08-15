@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { deviceOpenedAction, rttStartAction } from '../../slices/appSlice';
+import { deviceOpenedAction } from '../../slices/appSlice';
 import {
     triggerLengthSetAction,
     triggerLevelSetAction,
@@ -19,7 +19,6 @@ const TRIGGER_LENGTH = 10;
 
 const initialStateActions = [
     // Set app State (app.app):
-    rttStartAction(),
     deviceOpenedAction({
         portName: 'testPort',
         capabilities: { ppkTriggerExtToggle: false },
@@ -49,18 +48,24 @@ describe('Trigger', () => {
         render(<Trigger />, initialStateActions);
 
         const triggerLengthInput = screen.getByText(/length/i).nextSibling;
+        if (triggerLengthInput == null) {
+            // Then something is wrong...
+            expect(false).toBe(true);
+        }
         const sliderValue = screen.getByRole('slider');
         expect(sliderValue.getAttribute('aria-valuenow')).toBe(
             `${TRIGGER_LENGTH}`
         );
-        fireEvent.change(triggerLengthInput, {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        fireEvent.change(triggerLengthInput!, {
             target: { value: 'abc' },
         });
         expect(triggerLengthInput).toHaveClass('invalid');
         expect(sliderValue.getAttribute('aria-valuenow')).toBe(
             `${TRIGGER_LENGTH}`
         );
-        fireEvent.change(triggerLengthInput, {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        fireEvent.change(triggerLengthInput!, {
             target: { value: '15' },
         });
         expect(triggerLengthInput).not.toHaveClass('invalid');

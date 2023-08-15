@@ -1,4 +1,11 @@
-## 3.6.0 - Unreleased
+## 4.0.0 - Unreleased
+
+## Removed
+
+-   Support for Power Profiler Kit (PPK1), hence the Power Profiler app will
+    only be usable for Power Profiler II (PPK2). If you connect a PPK1, you will
+    be shown a dialog with instructions on how to proceed. However, we recommend
+    replacing your PPK1 with a PPK2.
 
 ## Added
 
@@ -6,10 +13,6 @@
     selected area.
     -   Hotkey: `alt+z`
 -   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
-
-## Fixed
-
--   PPK1: Option to select a VDD higher than what the PPK1 device support.
 
 ## 3.5.5 - 2023-04-05
 

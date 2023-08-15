@@ -7,25 +7,20 @@
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 
+import SerialDevice from '../../device/serialDevice';
 import { indexToTimestamp } from '../../globals';
+import { TDispatch } from '../../slices/thunk';
 import { calculateWindowSize, processTriggerSample } from '../triggerActions';
 
 const middlewares = [thunk];
-const mockStore = configureMockStore(middlewares);
-
-const mockDevicePPK1 = {
-    ppkTriggerStop: jest.fn(),
-    capabilities: {
-        hwTrigger: true,
-    },
-};
+const mockStore = configureMockStore<unknown, TDispatch>(middlewares);
 
 const mockDevicePPK2 = {
     ppkTriggerStop: jest.fn(),
     capabilities: {
         prePostTriggering: true,
     },
-};
+} as unknown as SerialDevice;
 
 const defaultTriggerLength = 10;
 const defaultTriggerLevel = 10;
@@ -51,7 +46,8 @@ const beginIndex = 5;
 const samplingData = {
     dataIndex: beginIndex,
     samplingTime: 10,
-    dataBuffer: new Array(2000).fill(100),
+    dataBuffer: new Float32Array(2000).fill(100),
+    endOfTrigger: false,
 };
 
 describe('Handle trigger', () => {
@@ -67,7 +63,7 @@ describe('Handle trigger', () => {
 
     it('should set triggerStart if value is higher than trigger level', () => {
         const store = mockStore(initialState);
-        store.dispatch(processTriggerSample(15, mockDevicePPK1, samplingData));
+        store.dispatch(processTriggerSample(15, mockDevicePPK2, samplingData));
         const expectedActions = [
             {
                 type: 'trigger/setTriggerStartAction',
@@ -77,63 +73,6 @@ describe('Handle trigger', () => {
             },
         ];
         expect(store.getActions()).toEqual(expectedActions);
-    });
-
-    it('should chart window if enough samples have been processed', () => {
-        const newIndex = 1005;
-        const store = mockStore({
-            ...initialState,
-            app: {
-                ...initialState.app,
-                trigger: {
-                    ...initialState.app.trigger,
-                    triggerStartIndex: beginIndex,
-                },
-            },
-        });
-        store.dispatch(
-            processTriggerSample(5, mockDevicePPK1, {
-                ...samplingData,
-                dataIndex: newIndex,
-                endOfTrigger: true,
-            })
-        );
-        expect(store.getActions()).toEqual(
-            getExpectedChartActionsPPK1(beginIndex, newIndex)
-        );
-    });
-
-    describe('Single trigger', () => {
-        const newIndex = 1005;
-        const store = mockStore({
-            ...initialState,
-            app: {
-                ...initialState.app,
-                trigger: {
-                    ...initialState.app.trigger,
-                    triggerStartIndex: beginIndex,
-                    triggerSingleWaiting: true,
-                },
-            },
-        });
-
-        it('should reset single trigger and issue device stop samping command', () => {
-            store.dispatch(
-                processTriggerSample(5, mockDevicePPK1, {
-                    ...samplingData,
-                    dataIndex: newIndex,
-                    endOfTrigger: true,
-                })
-            );
-            expect(store.getActions()).toEqual([
-                {
-                    type: 'trigger/clearSingleTriggerWaitingAction',
-                    payload: undefined,
-                },
-                ...getExpectedChartActionsPPK1(beginIndex, newIndex),
-            ]);
-            expect(mockDevicePPK1.ppkTriggerStop).toHaveBeenCalledTimes(1);
-        });
     });
 
     describe('Buffer functionality', () => {
@@ -151,7 +90,7 @@ describe('Handle trigger', () => {
         it('Should handle the buffer wrapping around', () => {
             // window size here will be 1000, so it should start drawing at index 500
             store.dispatch(
-                processTriggerSample(5, mockDevicePPK1, {
+                processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: 499,
                     endOfTrigger: false,
@@ -159,15 +98,13 @@ describe('Handle trigger', () => {
             );
             expect(store.getActions().length).toBe(0);
             store.dispatch(
-                processTriggerSample(5, mockDevicePPK1, {
+                processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: 500,
                     endOfTrigger: true,
                 })
             );
-            expect(store.getActions().length).toBe(
-                getExpectedChartActionsPPK1(null, null).length
-            );
+            expect(store.getActions().length).toBe(2);
         });
     });
 
@@ -248,7 +185,11 @@ describe('Handle trigger', () => {
     });
 });
 
-const getExpectedChartActionsPPK2 = (fromIndex, toIndex, shift = 0) => {
+const getExpectedChartActionsPPK2 = (
+    fromIndex: number,
+    toIndex: number,
+    shift = 0
+) => {
     const from = indexToTimestamp(fromIndex - shift);
     const to = indexToTimestamp(toIndex - shift);
     return [
@@ -257,34 +198,14 @@ const getExpectedChartActionsPPK2 = (fromIndex, toIndex, shift = 0) => {
             payload: {
                 windowBegin: from,
                 windowEnd: to,
-                windowDuration: to - from,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                windowDuration: to! - from!,
             },
         },
         {
             type: 'trigger/completeTriggerAction',
             payload: {
                 origin: fromIndex,
-            },
-        },
-    ];
-};
-
-const getExpectedChartActionsPPK1 = (fromIndex, toIndex) => {
-    const from = indexToTimestamp(fromIndex);
-    const to = indexToTimestamp(toIndex);
-    return [
-        {
-            type: 'chart/chartTrigger',
-            payload: {
-                windowBegin: from,
-                windowEnd: to,
-                windowDuration: to - from,
-            },
-        },
-        {
-            type: 'trigger/setTriggerStartAction',
-            payload: {
-                triggerStartIndex: null,
             },
         },
     ];

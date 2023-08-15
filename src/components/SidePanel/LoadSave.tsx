@@ -21,9 +21,9 @@ export const Load = () => {
 
     return (
         <Button
-            title="Large files may take a while to process"
-            className={`w-100 ${loading && 'active-animation'}`}
             variant="secondary"
+            title="Large files may take a while to process"
+            className={`w-100 ${loading ? 'active-animation' : ''}`}
             onClick={() => dispatch(load(setLoading))}
             disabled={loading}
         >

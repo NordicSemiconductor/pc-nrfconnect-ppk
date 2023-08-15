@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import type { AnyAction } from 'redux';
 
 import { options } from '../../globals';
 import { showExportDialog } from '../../slices/appSlice';
@@ -35,7 +36,7 @@ jest.mock('../../utils/persistentStore', () => ({
 const initialStateActions = [
     chartWindowAction(1, 1_000_000, 1_000_000),
     showExportDialog(),
-];
+] as AnyAction[];
 
 describe('ExportDialog', () => {
     const totalSizeLargerThanZeroPattern = /[1-9][0-9]*\sMB/;
@@ -49,11 +50,11 @@ describe('ExportDialog', () => {
         render(<ExportDialog />, initialStateActions);
 
         const numberOfRecords = screen.getByText(numberOfRecordsText);
-        expect(numberOfRecords).not.toBe(undefined);
+        expect(numberOfRecords).not.toBeUndefined();
         const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
-        expect(totalSize).not.toBe(undefined);
+        expect(totalSize).not.toBeUndefined();
         const duration = screen.getByText(durationLargerThanZeroPattern);
-        expect(duration).not.toBe(undefined);
+        expect(duration).not.toBeUndefined();
     });
 
     it('should show the number of records only inside the window', () => {

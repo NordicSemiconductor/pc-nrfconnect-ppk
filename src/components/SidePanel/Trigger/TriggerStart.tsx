@@ -19,10 +19,20 @@ import { appState } from '../../../slices/appSlice';
 import { triggerState } from '../../../slices/triggerSlice';
 import { SINGLE } from './triggerConstants';
 
-function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {
-    if (externalTrigger) {
-        return ['External', null, null];
-    }
+interface ButtonAttributes {
+    idleSingle: [string, string, () => void];
+    idleContinuous: [string, string, () => void];
+    runningSingle: [string, string, () => void];
+    runningContinuous: [string, null, () => void];
+}
+
+interface GetButtonValues {
+    isRunning: boolean;
+    triggerMode: string;
+    attrs: ButtonAttributes;
+}
+
+function getButtonValues({ isRunning, triggerMode, attrs }: GetButtonValues) {
     if (isRunning) {
         return triggerMode === SINGLE
             ? attrs.runningSingle
@@ -31,10 +41,9 @@ function getButtonValues({ externalTrigger, isRunning, triggerMode, attrs }) {
     return triggerMode === SINGLE ? attrs.idleSingle : attrs.idleContinuous;
 }
 
-const TriggerStart = ({ triggerMode, rttRunning }) => {
+const TriggerStart = ({ triggerMode }: { triggerMode: string }) => {
     const dispatch = useDispatch();
-    const { externalTrigger, triggerSingleWaiting, triggerRunning } =
-        useSelector(triggerState);
+    const { triggerSingleWaiting, triggerRunning } = useSelector(triggerState);
 
     const { capabilities } = useSelector(appState);
 
@@ -49,7 +58,7 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
     const TITLE_IDLE = `Start sampling at ${formattedFreq} for a short duration when the set trigger level is reached`;
     const TITLE_RUNNING = 'Waiting for samples above trigger level';
 
-    const buttonAttributes = {
+    const buttonAttributes: ButtonAttributes = {
         // [label, title, onClick]
         idleSingle: [
             LABEL_START,
@@ -72,7 +81,6 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
     const isRunning = triggerRunning || triggerSingleWaiting;
 
     const [label, title, onClick] = getButtonValues({
-        externalTrigger,
         isRunning,
         triggerMode,
         attrs: buttonAttributes,
@@ -80,11 +88,10 @@ const TriggerStart = ({ triggerMode, rttRunning }) => {
 
     return (
         <Button
-            title={title}
+            title={title ?? ''}
             className={`w-100 start-stop trigger-btn ${
                 isRunning ? 'active-anim' : ''
             }`}
-            disabled={!rttRunning || externalTrigger}
             variant="set"
             onClick={onClick}
         >
@@ -102,5 +109,4 @@ export default TriggerStart;
 
 TriggerStart.propTypes = {
     triggerMode: PropTypes.string.isRequired,
-    rttRunning: PropTypes.bool.isRequired,
 };

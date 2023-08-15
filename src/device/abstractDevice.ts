@@ -40,10 +40,6 @@ interface capabilities {
     prePostTriggering?: boolean;
     samplingTimeUs?: number;
     maxContinuousSamplingTimeUs?: number;
-
-    // PPK1
-    hwTrigger?: boolean;
-    ppkTriggerWindowSet?: undefined | (() => Promise<unknown> | undefined);
 }
 
 // Device is implemented by rttDevice and serialDevice

@@ -61,7 +61,7 @@ const initialRanges = getAdjustedRanges(initialMaxBufferSize, [
     }, // 100kHz
 ]);
 
-interface DataLoggerState {
+export interface DataLoggerState {
     samplingTime: number;
     maxFreqLog10: number;
     sampleFreqLog10: number;
