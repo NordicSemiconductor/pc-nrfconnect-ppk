@@ -54,12 +54,12 @@ function draw(minimap: HTMLCanvasElement) {
         logger.info('Initial', initialX, ',', initialY);
 
         ctx.clearRect(0, 0, mapWidth, mapHeight);
-        ctx.fillStyle = '#00a9ce';
-        ctx.lineWidth = 0.1;
-        ctx.moveTo(initialX, initialY);
 
         ctx.beginPath();
-        for (let i = 1; i <= options.index; i += 100) {
+        ctx.strokeStyle = '#00A9CE';
+        ctx.lineWidth = 1;
+        ctx.moveTo(initialX, initialY);
+        for (let i = 1; i <= options.index; i += 1) {
             const xPosition = i * xScale;
             const yPosition = mapHeight - options.data[i] * yScale;
             ctx.lineTo(xPosition, yPosition);
