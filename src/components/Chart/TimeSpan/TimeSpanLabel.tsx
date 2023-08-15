@@ -21,18 +21,12 @@ const TimeSpanLabel = ({
     end,
     totalDuration = duration,
 }: TimeSpanLabel) => {
-    if (!begin) {
-        begin = 0;
-    }
-    if (!end) {
-        end = 100;
-    }
-
-    const [nBegin, nEnd] = begin > end ? [end, begin] : [begin, end];
+    const [nBegin, nEnd] =
+        (begin ?? 0) > (end ?? 0) ? [end, begin] : [begin, end];
 
     const start = nBegin != null ? (100 * nBegin) / totalDuration : 0;
     const width =
-        nBegin != null && nEnd !== null
+        nBegin != null && nEnd != null
             ? (100 * (nEnd - nBegin)) / totalDuration
             : 100;
 
