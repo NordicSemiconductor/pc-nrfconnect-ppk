@@ -5,12 +5,31 @@
  */
 
 import React from 'react';
-import { number } from 'prop-types';
 
 import { formatDuration } from '../../../utils/duration';
 
-const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {
+interface TimeSpanLabel {
+    begin?: number | null;
+    end?: number | null;
+    duration: number;
+    totalDuration?: number;
+}
+
+const TimeSpanLabel = ({
+    duration,
+    begin,
+    end,
+    totalDuration = duration,
+}: TimeSpanLabel) => {
+    if (!begin) {
+        begin = 0;
+    }
+    if (!end) {
+        end = 100;
+    }
+
     const [nBegin, nEnd] = begin > end ? [end, begin] : [begin, end];
+
     const start = nBegin != null ? (100 * nBegin) / totalDuration : 0;
     const width =
         nBegin != null && nEnd !== null
@@ -33,10 +52,3 @@ const TimeSpanLabel = ({ begin, end, duration, totalDuration = duration }) => {
 };
 
 export default TimeSpanLabel;
-
-TimeSpanLabel.propTypes = {
-    duration: number.isRequired,
-    begin: number,
-    end: number,
-    totalDuration: number,
-};

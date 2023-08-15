@@ -14,7 +14,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 import { colors } from 'pc-nrfconnect-shared';
-import { arrayOf, func, number, shape } from 'prop-types';
 
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { indexToTimestamp } from '../../globals';
@@ -22,6 +21,7 @@ import { appState } from '../../slices/appSlice';
 import { chartState } from '../../slices/chartSlice';
 import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
+import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin, { DragSelect } from './plugins/chart.dragSelect';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
@@ -36,20 +36,6 @@ const valueRange = { min: 0, max: undefined };
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
-
-interface AmpereChartProperties {
-    setLen: (length: number) => void;
-    setChartAreaWidth: (width: number) => void;
-    step: number;
-    chartRef: React.MutableRefObject<null | Chart>;
-    cursorData: {
-        cursorBegin: number | null | undefined;
-        cursorEnd: number | null | undefined;
-        begin: number;
-        end: number;
-    };
-    lineData: { x: number; y: number }[];
-}
 
 interface Cursor {
     cursorBegin?: null | number;
@@ -85,12 +71,25 @@ export interface AmpereChart extends Chart<'line'> {
     dragSelect?: DragSelect;
     zoomPan?: ZoomPan;
     sampleFrequency?: number;
-    triggerLine: { y?: number | null };
-    // Because apparently react-chartjs-2 puts options under config
+    triggerLine: Pick<AmpereState, 'y'>;
     config: AmpereChartConfigurations;
 }
 
-const AmpereChartProperties = ({
+interface AmpereChartProperties {
+    setLen: (length: number) => void;
+    setChartAreaWidth: (width: number) => void;
+    step: number;
+    chartRef: React.MutableRefObject<null | AmpereChart>;
+    cursorData: {
+        cursorBegin: number | null | undefined;
+        cursorEnd: number | null | undefined;
+        begin: number;
+        end: number;
+    };
+    lineData: AmpereState[];
+}
+
+const AmpereChart = ({
     setLen,
     setChartAreaWidth,
     step,
@@ -180,7 +179,7 @@ const AmpereChartProperties = ({
     const snapping = step <= 0.16 && !live;
 
     const pointRadius = step <= 0.08 ? 4 : 2;
-    const chartData: ChartData<'line'> = {
+    const chartDataSets: ChartData<'line', AmpereState[]> = {
         datasets: [
             {
                 borderColor: dataColor,
@@ -244,6 +243,7 @@ const AmpereChartProperties = ({
                 },
             },
         },
+        parsing: false,
         maintainAspectRatio: false,
         animation: false,
         formatX: timestampToLabel,
@@ -284,7 +284,8 @@ const AmpereChartProperties = ({
         <div className="chart-container">
             <Line
                 ref={chartRef as ForwardedRef<ChartJSOrUndefined<'line'>>}
-                data={chartData}
+                // Need to typecast because of react-chartjs-2
+                data={chartDataSets as ChartData<'line'>}
                 options={chartOptions}
                 plugins={plugins}
             />
@@ -292,20 +293,4 @@ const AmpereChartProperties = ({
     );
 };
 
-AmpereChartProperties.propTypes = {
-    setLen: func.isRequired,
-    setChartAreaWidth: func.isRequired,
-    step: number.isRequired,
-    chartRef: shape({}).isRequired,
-    cursorData: shape({
-        begin: number.isRequired,
-        end: number.isRequired,
-    }).isRequired,
-    lineData: arrayOf(
-        shape({
-            x: number,
-            y: number,
-        })
-    ),
-};
-export default AmpereChartProperties;
+export default AmpereChart;

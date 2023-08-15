@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { number } from 'prop-types';
 
 import { appState } from '../../../slices/appSlice';
 import { chartState } from '../../../slices/chartSlice';
@@ -17,7 +16,7 @@ import WindowOffsetSlider from './WindowOffsetSlider';
 
 import './timespan.scss';
 
-const TimeSpanTop = ({ width }) => {
+const TimeSpanTop = ({ width }: { width: number }) => {
     const [isZoomed, setIsZoomed] = useState(false);
 
     const { windowDuration } = useSelector(chartState);
@@ -39,7 +38,7 @@ const TimeSpanTop = ({ width }) => {
 
     return (
         <div className="timespan window" style={{ width }}>
-            {showHandle ? (
+            {showHandle && distanceFromOriginToTriggerHandle != null ? (
                 <>
                     <TimeSpanLabel
                         begin={0}
@@ -65,7 +64,3 @@ const TimeSpanTop = ({ width }) => {
 };
 
 export default TimeSpanTop;
-
-TimeSpanTop.propTypes = {
-    width: number,
-};

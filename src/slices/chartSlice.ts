@@ -266,11 +266,11 @@ const getCenter = (
 
 export const chartWindowAction =
     (
-        windowBegin: null | number,
-        windowEnd: null | number,
+        windowBegin: number | null,
+        windowEnd: number | null,
         windowDuration: number,
-        yMin?: number,
-        yMax?: number
+        yMin?: number | null,
+        yMax?: number | null
     ): TAction =>
     (dispatch, getState) => {
         const sampleFreq = getSampleFrequency(getState());

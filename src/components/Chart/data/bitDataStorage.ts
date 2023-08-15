@@ -7,27 +7,46 @@
 /* eslint no-plusplus: off */
 /* eslint-disable @typescript-eslint/no-non-null-assertion  -- temporarily added to be conservative while converting to typescript */
 
-import { numberOfDigitalChannels, sampleTimestamp } from '../../../globals';
+import { numberOfDigitalChannels } from '../../../globals';
 import { lineDataForBitState } from '../../../utils/bitConversion';
 import { createEmptyArrayWithDigitalChannelStates } from './commonBitDataFunctions';
-import {
-    BitStateIndexType,
+import type {
+    BitStateType,
     DigitalChannelStates,
     TimestampType,
 } from './dataTypes';
 
-export default () => ({
-    lineData: [...Array(numberOfDigitalChannels)].map(
-        () =>
-            ({
-                mainLine: createEmptyArrayWithDigitalChannelStates(),
-                uncertaintyLine: createEmptyArrayWithDigitalChannelStates(),
-            } as DigitalChannelStates)
-    ),
+export interface BitDataStorage {
+    lineData: DigitalChannelStates[];
+    bitIndexes: Array<number>;
+    previousBitStates: Array<BitStateType | null>;
+    digitalChannelsToCompute: number[] | undefined;
+    latestTimestamp: TimestampType;
+
+    initialise: (digitalChannelsToCompute: number[]) => void;
+    storeEntry: (
+        timestamp: TimestampType,
+        bitNumber: number,
+        bitState: BitStateType
+    ) => void;
+    storeBit: (
+        timestamp: TimestampType,
+        bitNumber: number,
+        bitState: BitStateType
+    ) => void;
+    addFinalEntries: () => void;
+    getLineData: () => DigitalChannelStates[];
+}
+
+export default (): BitDataStorage => ({
+    lineData: [...Array(numberOfDigitalChannels)].map(() => ({
+        mainLine: createEmptyArrayWithDigitalChannelStates(),
+        uncertaintyLine: createEmptyArrayWithDigitalChannelStates(),
+    })),
     bitIndexes: new Array(numberOfDigitalChannels),
     previousBitStates: new Array(numberOfDigitalChannels),
     digitalChannelsToCompute: undefined as number[] | undefined,
-    latestTimestamp: undefined as sampleTimestamp,
+    latestTimestamp: undefined as TimestampType,
 
     initialise(digitalChannelsToCompute: number[]) {
         this.bitIndexes.fill(0);
@@ -35,11 +54,7 @@ export default () => ({
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
-    storeEntry(
-        timestamp: TimestampType,
-        bitNumber: number,
-        bitState: BitStateIndexType
-    ) {
+    storeEntry(timestamp, bitNumber, bitState) {
         const current = this.lineData[bitNumber];
         const bitIndex = this.bitIndexes[bitNumber];
         const lineData = lineDataForBitState[bitState];
@@ -53,11 +68,7 @@ export default () => ({
         ++this.bitIndexes[bitNumber];
     },
 
-    storeBit(
-        timestamp: TimestampType,
-        bitNumber: number,
-        bitState: BitStateIndexType
-    ) {
+    storeBit(timestamp, bitNumber, bitState) {
         this.latestTimestamp = timestamp;
 
         const bitChanged = this.previousBitStates[bitNumber] !== bitState;
@@ -69,20 +80,22 @@ export default () => ({
     },
 
     addFinalEntries() {
-        this.digitalChannelsToCompute!.forEach(i => {
-            const hasEntry = this.bitIndexes[i] > 0;
-            const lastEntryIsNotForLastTimestamp =
-                this.latestTimestamp !==
-                this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.x;
+        if (this.digitalChannelsToCompute) {
+            this.digitalChannelsToCompute.forEach(i => {
+                const hasEntry = this.bitIndexes[i] > 0;
+                const lastEntryIsNotForLastTimestamp =
+                    this.latestTimestamp !==
+                    this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.x;
 
-            if (hasEntry && lastEntryIsNotForLastTimestamp) {
-                this.storeEntry(
-                    this.latestTimestamp!,
-                    i,
-                    this.previousBitStates[i]
-                );
-            }
-        });
+                if (hasEntry && lastEntryIsNotForLastTimestamp) {
+                    this.storeEntry(
+                        this.latestTimestamp!,
+                        i,
+                        this.previousBitStates[i]!
+                    );
+                }
+            });
+        }
     },
 
     getLineData() {

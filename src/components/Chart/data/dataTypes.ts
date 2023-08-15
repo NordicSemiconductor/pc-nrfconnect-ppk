@@ -7,8 +7,8 @@
 export type DigitalChannelsType = boolean[];
 export type BitStateIndexType = 0 | 1 | 2 | 3;
 export type BitNumberType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export type TimestampType = undefined | number;
-export type AmpereStateType = undefined | number;
+export type TimestampType = number | undefined;
+export type AmpereStateType = number | null | undefined;
 
 export enum BitStateType {
     zero = -0.4,
@@ -33,4 +33,13 @@ export interface DigitalChannelStates {
 export interface AmpereState {
     x: TimestampType;
     y: AmpereStateType;
+}
+
+export function isBitStateIndexType(
+    value: unknown
+): value is BitStateIndexType {
+    return (
+        typeof value === 'number' &&
+        (value === 0 || value === 1 || value === 2 || value === 3)
+    );
 }

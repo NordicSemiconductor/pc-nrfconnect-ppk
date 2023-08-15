@@ -6,7 +6,6 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { number } from 'prop-types';
 
 import { options } from '../../../globals';
 import { chartCursorAction, chartState } from '../../../slices/chartSlice';
@@ -23,7 +22,23 @@ const handleSvg = (
     </g>
 );
 
-const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
+interface TimeSpanBottom {
+    cursorBegin?: null | number;
+    cursorEnd?: null | number;
+    width: number;
+}
+
+interface Drag {
+    clientX: number;
+    cursorBegin: number;
+    cursorEnd: number;
+}
+
+const TimeSpanBottom = ({
+    cursorBegin = null,
+    cursorEnd = null,
+    width,
+}: TimeSpanBottom) => {
     const dispatch = useDispatch();
     const chartCursor = useCallback(
         (begin, end) =>
@@ -31,22 +46,47 @@ const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
         [dispatch]
     );
 
-    const [drag, setDrag] = useState(null);
+    const [drag, setDrag] = useState<Drag | null>(null);
     const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
 
-    const w1 = windowEnd || options.timestamp - options.samplingTime;
+    let w1 = 0;
+    if (windowEnd != null) {
+        w1 = windowEnd;
+    } else if (options.timestamp != null) {
+        w1 = options.timestamp - options.samplingTime;
+    }
+
     const w0 = windowBegin || w1 - windowDuration;
 
     const showHandles = cursorBegin !== null && w0 !== 0;
 
-    const onPointerDown = ({ clientX, pointerId, target }) => {
-        target.setPointerCapture(pointerId);
-        setDrag({ clientX, cursorBegin, cursorEnd });
+    const onPointerDown = ({
+        clientX,
+        pointerId,
+        target,
+    }: {
+        clientX: number;
+        pointerId: number;
+        target: null | EventTarget;
+    }) => {
+        if (target instanceof Element && cursorBegin && cursorEnd) {
+            target.setPointerCapture(pointerId);
+            setDrag({ clientX, cursorBegin, cursorEnd });
+        }
     };
-    const onPointerUp = ({ target, pointerId }) => {
-        target.releasePointerCapture(pointerId);
-        setDrag(null);
+    const onPointerUp = ({
+        target,
+        pointerId,
+    }: {
+        target: null | EventTarget;
+        pointerId: number;
+    }) => {
+        if (target instanceof Element) {
+            target.releasePointerCapture(pointerId);
+            setDrag(null);
+        }
     };
+
     const timeDelta =
         cursorBegin && cursorEnd
             ? Math.abs(cursorEnd - cursorBegin)
@@ -61,7 +101,11 @@ const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
                     }}
                     onPointerDown={onPointerDown}
                     onPointerMove={({ clientX, target }) => {
-                        if (drag) {
+                        if (
+                            drag &&
+                            target instanceof HTMLElement &&
+                            target.parentElement
+                        ) {
                             chartCursor(
                                 drag.cursorBegin +
                                     windowDuration *
@@ -84,7 +128,7 @@ const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
                 end={cursorEnd ? cursorEnd - w0 : null}
                 totalDuration={windowDuration}
             />
-            {showHandles && (
+            {showHandles && cursorEnd && (
                 <div
                     className="cursor end"
                     style={{
@@ -92,7 +136,11 @@ const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
                     }}
                     onPointerDown={onPointerDown}
                     onPointerMove={({ clientX, target }) => {
-                        if (drag) {
+                        if (
+                            drag &&
+                            target instanceof Element &&
+                            target.parentElement
+                        ) {
                             chartCursor(
                                 cursorBegin,
                                 drag.cursorEnd +
@@ -111,12 +159,6 @@ const TimeSpanBottom = ({ cursorBegin = null, cursorEnd = null, width }) => {
             )}
         </div>
     );
-};
-
-TimeSpanBottom.propTypes = {
-    cursorBegin: number,
-    cursorEnd: number,
-    width: number.isRequired,
 };
 
 export default TimeSpanBottom;

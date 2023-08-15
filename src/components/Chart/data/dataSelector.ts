@@ -7,13 +7,33 @@
 /* eslint no-plusplus: off */
 
 import { options, timestampToIndex } from '../../../globals';
-import bitDataSelector from './bitDataSelector';
+import { BitDataAccumulator } from './bitDataAccumulator';
+import bitDataSelector, { BitDataSelector } from './bitDataSelector';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
+import { AmpereState, DigitalChannelStates } from './dataTypes';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
-export default () => ({
+export interface DataSelector {
+    ampereLineData: AmpereState[];
+    bitDataSelector: BitDataSelector;
+    noOpBitDataProcessor: BitDataAccumulator;
+
+    process: (
+        begin: number,
+        end: number,
+        digitalChannelsToCompute: number[],
+        removeZeroValues: boolean
+    ) => {
+        ampereLineData: AmpereState[];
+        bitsLineData: DigitalChannelStates[];
+    };
+}
+
+export type DataSelectorInitialiser = () => DataSelector;
+export default (): DataSelector => ({
     ampereLineData: createEmptyArrayWithAmpereState(),
     bitDataSelector: bitDataSelector(),
+    /* @ts-expect-error -- Should not really escape this error */
     noOpBitDataProcessor: noOpBitDataProcessor(),
 
     process(

@@ -28,18 +28,25 @@ import { useHotKey } from 'pc-nrfconnect-shared';
 import { bool } from 'prop-types';
 
 import { indexToTimestamp, options, timestampToIndex } from '../../globals';
-import { useLazyInitializedRef } from '../../hooks/useLazyInitializedRef';
+import {
+    isInitialised,
+    useLazyInitializedRef,
+} from '../../hooks/useLazyInitializedRef';
+import { RootState } from '../../slices';
 import {
     chartCursorAction,
     chartState,
     chartWindowAction,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
+import { TDispatch } from '../../slices/thunk';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
-import AmpereChartProperties from './AmpereChart';
+import type { AmpereChart } from './AmpereChart';
+import AmpChart from './AmpereChart';
 import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser from './data/dataAccumulator';
 import dataSelectorInitialiser from './data/dataSelector';
+import { AmpereState, DigitalChannelStates } from './data/dataTypes';
 import DigitalChannels from './DigitalChannels';
 import StatBox from './StatBox';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
@@ -48,7 +55,7 @@ import TimeSpanTop from './TimeSpan/TimeSpanTop';
 import chartCss from './chart.icss.scss';
 
 // chart.js way of doing tree-shaking, meaning that components that will be included in the bundle
-// must be imported and registered. The registered components are used in both AmpereChart and DigitalChannels.
+// must be imported and registered. The registered components are used in both AmpChart and DigitalChannels.
 ChartJS.register(
     LineElement,
     PointElement,
@@ -61,8 +68,8 @@ const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
-const calcStats = (_begin, _end) => {
-    if (_begin === null || _end === null) {
+const calcStats = (_begin?: null | number, _end?: null | number) => {
+    if (_begin == null || _end == null) {
         return null;
     }
     let begin = _begin;
@@ -100,7 +107,12 @@ const calcStats = (_begin, _end) => {
 const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
     const chartWindow = useCallback(
-        (windowBegin, windowEnd, yMin, yMax) =>
+        (
+            windowBegin: number,
+            windowEnd: number,
+            yMin?: number | null,
+            yMax?: number | null
+        ) =>
             dispatch(
                 chartWindowAction(
                     windowBegin,
@@ -157,7 +169,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Zoom to selected area',
         isGlobal: false,
         action: () => {
-            dispatch((_dispatch, getState) => {
+            dispatch((_dispatch: TDispatch, getState: () => RootState) => {
                 const { cursorBegin, cursorEnd } = chartState(getState());
                 if (cursorBegin != null && cursorEnd != null) {
                     chartWindow(cursorBegin, cursorEnd);
@@ -185,7 +197,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const { bits, data } = options;
 
-    const chartRef = useRef<ChartJS | null>(null);
+    const chartRef = useRef<AmpereChart | null>(null);
 
     const dataAccumulator = useLazyInitializedRef(
         dataAccumulatorInitialiser
@@ -224,7 +236,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
 
-    // TODO: Revise cursorData? What does begin and end have to do with cursor?
     const cursorData = {
         cursorBegin,
         cursorEnd,
@@ -247,8 +258,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     );
 
     const zoomPanCallback = useCallback(
-        (beginX, endX, beginY, endY) => {
-            if (typeof beginX === 'undefined') {
+        (
+            beginX?: number,
+            endX?: number,
+            beginY?: number | null,
+            endY?: number | null
+        ) => {
+            if (beginX === undefined || endX === undefined) {
                 chartReset(windowDuration);
                 return;
             }
@@ -281,7 +297,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
      */
     const zoomToWindow = useCallback(
         localWindowDuration => {
-            if (windowEnd) {
+            if (windowBegin && windowEnd) {
                 const center = (windowBegin + windowEnd) / 2;
                 let localWindowBegin = center - localWindowDuration / 2;
                 let localWindowEnd = center + localWindowDuration / 2;
@@ -302,12 +318,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         if (!chartRef.current) {
             return;
         }
-        const { dragSelect, zoomPan } = chartRef.current;
-        dragSelect.callback = chartCursor;
-        zoomPan.callback = zoomPanCallback;
+        if (chartRef.current.dragSelect) {
+            chartRef.current.dragSelect.callback = chartCursor;
+        }
+        if (chartRef.current.zoomPan) {
+            chartRef.current.zoomPan.callback = zoomPanCallback;
+        }
     }, [chartCursor, zoomPanCallback]);
 
-    const chartResetToLive = () => zoomPanCallback(undefined, undefined);
     const chartPause = () =>
         chartWindow(options.timestamp - windowDuration, options.timestamp);
 
@@ -316,15 +334,20 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const step = len === 0 ? 2 : (originalIndexEnd - originalIndexBegin) / len;
     const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
 
-    const [ampereLineData, setAmpereLineData] = useState([]);
-    const [bitsLineData, setBitsLineData] = useState([]);
+    const [ampereLineData, setAmpereLineData] = useState<AmpereState[]>([]);
+    const [bitsLineData, setBitsLineData] = useState<DigitalChannelStates[]>(
+        []
+    );
 
     useEffect(() => {
+        if (!isInitialised(dataProcessor)) {
+            return;
+        }
         const calculation = setTimeout(() => {
             const processedData = dataProcessor.process(
                 begin,
                 end,
-                digitalChannelsToCompute,
+                digitalChannelsToCompute as number[],
                 yAxisLog,
                 len,
                 windowDuration
@@ -382,7 +405,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     variant="secondary"
                     size="sm"
                     disabled={cursorBegin == null || cursorEnd == null}
-                    onClick={() => chartWindow(cursorBegin, cursorEnd)}
+                    onClick={() => {
+                        if (cursorBegin != null && cursorEnd != null) {
+                            chartWindow(cursorBegin, cursorEnd);
+                        }
+                    }}
                 >
                     ZOOM TO SELECTION
                 </Button>
@@ -397,13 +424,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             <div className="chart-current">
                 <ChartTop
                     chartPause={chartPause}
-                    chartResetToLive={chartResetToLive}
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
                     windowDuration={windowDuration}
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
-                <AmpereChartProperties
+                <AmpChart
                     setLen={setLen}
                     setChartAreaWidth={setChartAreaWidth}
                     step={step}
@@ -433,6 +459,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     lineData={bitsLineData}
                     digitalChannels={digitalChannels}
                     zoomedOutTooFar={zoomedOutTooFarForDigitalChannels}
+                    /* ts-expect-error -- temporary */
                     cursorData={cursorData}
                 />
             )}

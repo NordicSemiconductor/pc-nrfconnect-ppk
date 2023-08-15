@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { Unit, unit } from 'mathjs';
-import { arrayOf, node, number, string } from 'prop-types';
 
 import { formatDurationHTML } from '../../utils/duration';
 
@@ -40,11 +39,11 @@ const Value = ({ label, u }: ValueProperties) => {
 };
 
 interface StatBoxProperties {
-    average: number | null;
-    max: number | null;
-    delta: number | null;
+    average?: number | null;
+    max?: number | null;
+    delta?: number | null;
     label: string;
-    actionButtons: any[];
+    actionButtons?: any[];
 }
 
 const StatBox = ({
@@ -81,13 +80,5 @@ const StatBox = ({
         </div>
     </div>
 );
-
-StatBox.propTypes = {
-    average: number,
-    max: number,
-    delta: number,
-    label: string.isRequired,
-    actionButtons: arrayOf(node),
-};
 
 export default StatBox;

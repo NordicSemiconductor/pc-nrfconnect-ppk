@@ -6,13 +6,30 @@
 
 import { useRef } from 'react';
 
+import {
+    DataAccumulator,
+    DataAccumulatorInitialiser,
+} from '../components/Chart/data/dataAccumulator';
+import {
+    DataSelector,
+    DataSelectorInitialiser,
+} from '../components/Chart/data/dataSelector';
+
 const uninitialisedToken = Symbol('uninitialisedToken');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO: figure out type of initialiser
-export const useLazyInitializedRef = (initialiser: any) => {
-    const ref = useRef(uninitialisedToken);
+export const useLazyInitializedRef = (
+    initialiser: DataAccumulatorInitialiser | DataSelectorInitialiser
+) => {
+    const ref = useRef<
+        DataAccumulator | DataSelector | typeof uninitialisedToken
+    >(uninitialisedToken);
     if (ref.current === uninitialisedToken) {
         ref.current = initialiser();
     }
     return ref;
 };
+
+export const isInitialised = (
+    processor: DataAccumulator | DataSelector | typeof uninitialisedToken
+): processor is DataAccumulator | DataSelector =>
+    processor !== uninitialisedToken;
