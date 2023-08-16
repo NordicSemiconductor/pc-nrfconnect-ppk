@@ -19,7 +19,7 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
-import { AmpereChart } from './AmpereChart';
+import { AmpereChartJS } from './AmpereChart';
 // @ts-expect-error Is currently a jsx file
 import ChartOptions from './ChartOptions';
 
@@ -42,7 +42,7 @@ const TimeWindowButton = ({ label, zoomToWindow }: TimeWindowButton) => (
 type ChartTop = {
     chartPause: () => void;
     zoomToWindow: (windowDuration: number | BigNumber | Fraction) => void;
-    chartRef: MutableRefObject<AmpereChart | null>;
+    chartRef: MutableRefObject<AmpereChartJS | null>;
     windowDuration: number;
 };
 

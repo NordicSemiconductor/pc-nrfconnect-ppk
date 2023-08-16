@@ -26,7 +26,7 @@ import {
 } from 'chart.js';
 import { useHotKey } from 'pc-nrfconnect-shared';
 
-import Minimap from '../../features/minimap/Minimap';
+import Minimap, { MinimapChart } from '../../features/minimap/Minimap';
 import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 import {
     isInitialised,
@@ -41,8 +41,8 @@ import {
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
-import type { AmpereChart } from './AmpereChart';
-import AmpChart from './AmpereChart';
+import type { AmpereChartJS } from './AmpereChart';
+import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser from './data/dataAccumulator';
 import dataSelectorInitialiser from './data/dataSelector';
@@ -197,7 +197,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const { bits, data } = options;
 
-    const chartRef = useRef<AmpereChart | null>(null);
+    const chartRef = useRef<AmpereChartJS | null>(null);
 
     const dataAccumulator = useLazyInitializedRef(
         dataAccumulatorInitialiser
@@ -429,7 +429,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     windowDuration={windowDuration}
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
-                <AmpChart
+                <AmpereChart
                     setLen={setLen}
                     setChartAreaWidth={setChartAreaWidth}
                     step={step}

@@ -7,18 +7,18 @@
 import { Plugin } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
-import type { AmpereChart } from '../AmpereChart';
+import type { AmpereChartJS } from '../AmpereChart';
 
 const { gray700: color, white } = colors;
 
 interface CrossHairPlugin extends Plugin<'line'> {
-    instances: AmpereChart[];
+    instances: AmpereChartJS[];
     moveEvent: null | {
         offsetX: number;
         offsetY: number;
         drawY: boolean;
     };
-    pointerMoveHandler: (event: PointerEvent, chart: AmpereChart) => void;
+    pointerMoveHandler: (event: PointerEvent, chart: AmpereChartJS) => void;
     pointerLeaveHandler: () => void;
 }
 
@@ -67,7 +67,7 @@ const plugin: CrossHairPlugin = {
         plugin.instances.forEach(instance => instance.update('none'));
     },
 
-    beforeInit(chart: AmpereChart) {
+    beforeInit(chart: AmpereChartJS) {
         plugin.instances.push(chart);
 
         const { canvas } = chart.ctx;
@@ -77,7 +77,7 @@ const plugin: CrossHairPlugin = {
         canvas.addEventListener('pointerleave', plugin.pointerLeaveHandler);
     },
 
-    afterDraw(chart: AmpereChart) {
+    afterDraw(chart: AmpereChartJS) {
         const {
             ctx,
             chartArea: { left, right, top, bottom },

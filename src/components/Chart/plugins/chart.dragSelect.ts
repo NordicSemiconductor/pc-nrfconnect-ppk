@@ -7,7 +7,7 @@
 import { Plugin } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
-import type { AmpereChart } from '../AmpereChart';
+import type { AmpereChartJS } from '../AmpereChart';
 import { isCanvasElement } from './utility';
 
 const CHART_SELECTION_COLOR = colors.gray100;
@@ -27,7 +27,7 @@ export interface DragSelect {
 const plugin: Plugin<'line'> = {
     id: 'dragSelect',
 
-    beforeInit(chart: AmpereChart) {
+    beforeInit(chart: AmpereChartJS) {
         const dragSelect: DragSelect = {};
         chart.dragSelect = dragSelect;
 
@@ -80,7 +80,7 @@ const plugin: Plugin<'line'> = {
         canvas.addEventListener('pointerleave', dragSelect.pointerUpHandler);
     },
 
-    beforeDraw(chart: AmpereChart) {
+    beforeDraw(chart: AmpereChartJS) {
         const {
             chartArea: { left, right, top, bottom: areaBottom },
             scales: { xScale: scale },

@@ -30,8 +30,8 @@ export interface GlobalOptions {
     index: number;
     /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
     timestamp: number;
-
     currentPane?: number;
+    totalDuration?: number;
 }
 
 export const options: GlobalOptions = {
@@ -41,6 +41,7 @@ export const options: GlobalOptions = {
     bits: null,
     index: 0,
     timestamp: 0,
+    totalDuration: bufferLengthInSeconds * 1_000_000,
 };
 
 /**
@@ -74,6 +75,7 @@ export const initializeDataBuffer = (samplingDuration: number) => {
         options.data = new Float32Array(newBufferSize);
     }
     options.data.fill(NaN);
+    options.totalDuration = samplingDuration * 1_000_000;
 };
 
 /**

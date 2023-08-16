@@ -12,7 +12,7 @@ import {
     MAX_WINDOW_DURATION,
     MIN_WINDOW_DURATION,
 } from '../../../slices/chartSlice';
-import type { AmpereChart } from '../AmpereChart';
+import type { AmpereChartJS } from '../AmpereChart';
 import { isCanvasElement } from './utility';
 
 type ZoomPanCallback = (
@@ -210,7 +210,7 @@ const processPointerMoveEvents = () => {
 const plugin: Plugin<'line'> = {
     id: 'zoomPan',
 
-    beforeInit(chart: AmpereChart) {
+    beforeInit(chart: AmpereChartJS) {
         const zoomPan: ZoomPan = {};
         chart.zoomPan = zoomPan;
 
