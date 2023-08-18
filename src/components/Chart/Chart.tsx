@@ -297,7 +297,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
      */
     const zoomToWindow = useCallback(
         localWindowDuration => {
-            if (windowBegin && windowEnd) {
+            if (windowBegin != null && windowEnd != null) {
                 const center = (windowBegin + windowEnd) / 2;
                 let localWindowBegin = center - localWindowDuration / 2;
                 let localWindowEnd = center + localWindowDuration / 2;
