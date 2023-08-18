@@ -5,6 +5,7 @@
  */
 
 import { numberOfDigitalChannels } from '../../../globals';
+import type { BitDataAccumulator } from './bitDataAccumulator';
 
 /**
  * Initialise an empty result object with mainLine and uncertaintyLine.
@@ -14,7 +15,7 @@ const emptyResult = [...Array(numberOfDigitalChannels)].map(() => ({
     uncertaintyLine: [],
 }));
 
-export default () => ({
+export default (): Partial<BitDataAccumulator> => ({
     initialise() {},
     processBits() {},
     processAccumulatedBits() {},

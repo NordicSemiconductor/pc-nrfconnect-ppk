@@ -11,23 +11,45 @@ import {
     options,
     timestampToIndex,
 } from '../../../globals';
-import bitDataAccumulator from './bitDataAccumulator';
+import bitDataAccumulator, { BitDataAccumulator } from './bitDataAccumulator';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
+import { AmpereState, DigitalChannelStates } from './dataTypes';
 import noOpBitDataProcessor from './noOpBitDataProcessor';
 
-export default () => ({
-    ampereLineData: createEmptyArrayWithAmpereState(),
-    bitDataAccumulator: bitDataAccumulator(),
-    noOpBitDataProcessor: noOpBitDataProcessor(),
-    bitStateAccumulator: new Array(numberOfDigitalChannels),
+export interface DataAccumulator {
+    ampereLineData: AmpereState[];
+    bitDataAccumulator: BitDataAccumulator;
+    noOpBitDataProcessor: BitDataAccumulator;
+    bitStateAccumulator: number[];
 
-    process(
+    process: (
         begin: number,
         end: number,
         digitalChannelsToCompute: number[],
         removeZeroValues: boolean,
         len: number,
         windowDuration: number
+    ) => {
+        ampereLineData: AmpereState[];
+        bitsLineData: DigitalChannelStates[];
+    };
+}
+
+export type DataAccumulatorInitialiser = () => DataAccumulator;
+export default (): DataAccumulator => ({
+    ampereLineData: createEmptyArrayWithAmpereState(),
+    bitDataAccumulator: bitDataAccumulator(),
+    /* @ts-expect-error -- Should not really escape this error */
+    noOpBitDataProcessor: noOpBitDataProcessor(),
+    bitStateAccumulator: new Array(numberOfDigitalChannels),
+
+    process(
+        begin,
+        end,
+        digitalChannelsToCompute,
+        removeZeroValues,
+        len,
+        windowDuration
     ) {
         const { data } = options;
         const bitDataProcessor =

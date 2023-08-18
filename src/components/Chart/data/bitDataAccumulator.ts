@@ -14,21 +14,35 @@ import {
     averagedBitState,
     sometimes0And1,
 } from '../../../utils/bitConversion';
-import bitDataStorage from './bitDataStorage';
-import { TimestampType } from './dataTypes';
+import bitDataStorage, { BitDataStorage } from './bitDataStorage';
+import {
+    BitStateIndexType,
+    DigitalChannelStates,
+    TimestampType,
+} from './dataTypes';
 
-export default () => ({
+export interface BitDataAccumulator {
+    bitDataStorage: BitDataStorage;
+    accumulator: Array<BitStateIndexType | null>;
+    digitalChannelsToCompute: number[] | undefined;
+    initialise: (digitalChannelsToCompute: number[]) => void;
+    processBits: (bitIndex: number) => void;
+    processAccumulatedBits: (timestamp: TimestampType) => void;
+    getLineData: () => DigitalChannelStates[];
+}
+
+export default (): BitDataAccumulator => ({
     bitDataStorage: bitDataStorage(),
     accumulator: new Array(numberOfDigitalChannels),
     digitalChannelsToCompute: undefined as number[] | undefined,
 
-    initialise(digitalChannelsToCompute: number[]) {
+    initialise(digitalChannelsToCompute) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
         this.accumulator.fill(null);
     },
 
-    processBits(bitIndex: number) {
+    processBits(bitIndex) {
         const bits = options.bits![bitIndex];
 
         if (bits) {
@@ -47,9 +61,9 @@ export default () => ({
         }
     },
 
-    processAccumulatedBits(timestamp: TimestampType) {
+    processAccumulatedBits(timestamp) {
         this.digitalChannelsToCompute!.forEach(i => {
-            this.bitDataStorage.storeBit(timestamp, i, this.accumulator[i]);
+            this.bitDataStorage.storeBit(timestamp, i, this.accumulator[i]!);
         });
 
         this.accumulator.fill(null);

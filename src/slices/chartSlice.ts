@@ -67,8 +67,8 @@ const initialState = (): ChartState => ({
     windowEndLock: null, // [microseconds]
 });
 
-const MIN_WINDOW_DURATION = 5e7;
-const MAX_WINDOW_DURATION = 1.2e13;
+export const MIN_WINDOW_DURATION = 5e7;
+export const MAX_WINDOW_DURATION = 1.2e13;
 const Y_MIN = -100;
 const Y_MAX = 1200000;
 
@@ -266,11 +266,11 @@ const getCenter = (
 
 export const chartWindowAction =
     (
-        windowBegin: null | number,
-        windowEnd: null | number,
+        windowBegin: number | null,
+        windowEnd: number | null,
         windowDuration: number,
-        yMin?: number,
-        yMax?: number
+        yMin?: number | null,
+        yMax?: number | null
     ): TAction =>
     (dispatch, getState) => {
         const sampleFreq = getSampleFrequency(getState());

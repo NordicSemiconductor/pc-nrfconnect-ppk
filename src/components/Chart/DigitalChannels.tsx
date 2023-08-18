@@ -8,10 +8,8 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import { ChartOptions, LineControllerDatasetOptions } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
-import { arrayOf, bool, exact, number, shape } from 'prop-types';
 
 import { DigitalChannelStates, DigitalChannelsType } from './data/dataTypes';
-// @ts-expect-error This will be rewritten soon
 import crossHairPlugin from './plugins/chart.crossHair';
 
 import chartCss from './chart.icss.scss';
@@ -22,17 +20,14 @@ const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
 
 interface DigitalChannelsProperties {
-    lineData: {
-        mainLine: { x: number; y: number }[];
-        uncertaintyLine: { x: number; y: number }[];
-    }[];
+    lineData: DigitalChannelStates[];
     digitalChannels: DigitalChannelsType;
     zoomedOutTooFar: boolean;
     cursorData: {
         begin: number;
         end: number;
-        cursorBegin: number;
-        cursorEnd: number;
+        cursorBegin?: number | null;
+        cursorEnd?: number | null;
     };
 }
 
@@ -119,27 +114,6 @@ const DigitalChannels = ({
             )}
         </div>
     );
-};
-
-const lineData = arrayOf(
-    shape({
-        x: number.isRequired,
-        y: number,
-    }).isRequired
-).isRequired;
-
-DigitalChannels.propTypes = {
-    lineData: arrayOf(
-        exact({ mainLine: lineData, uncertaintyLine: lineData }).isRequired
-    ).isRequired,
-    digitalChannels: arrayOf(bool).isRequired,
-    zoomedOutTooFar: bool.isRequired,
-    cursorData: shape({
-        cursorBegin: number,
-        cursorEnd: number,
-        begin: number,
-        end: number,
-    }).isRequired,
 };
 
 export default DigitalChannels;

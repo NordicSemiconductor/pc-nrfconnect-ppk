@@ -25,7 +25,7 @@ export function convertFloatToByteBuffer(floatnum: number): Uint8Array {
     return bytes;
 }
 
-interface capabilities {
+export interface Capabilities {
     digitalChannels?: boolean;
     ppkAverageStart?: boolean;
     ppkAverageStop?: boolean;
@@ -47,7 +47,7 @@ interface capabilities {
 export default abstract class Device extends EventEmitter {
     currentVdd = 0;
     triggerWindowRange = { min: 1, max: 10 };
-    capabilities: capabilities;
+    capabilities: Capabilities;
     public traits!: deviceTraits;
     public adcSamplingTimeUs!: number;
 

@@ -33,7 +33,7 @@ const synchronizeIndexAndTimestamp = (
 beforeEach(() => {
     options.data = new Float32Array();
     options.index = 0;
-    options.timestamp = undefined;
+    options.timestamp = 0;
     options.samplesPerSecond = 1e5;
 });
 

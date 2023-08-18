@@ -8,6 +8,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+import { Capabilities } from '../device/abstractDevice';
 import type { RootState } from '.';
 
 interface AppState {
@@ -16,7 +17,7 @@ interface AppState {
     isSmuMode: boolean;
     deviceRunning: boolean;
     advancedMode: boolean;
-    capabilities: any;
+    capabilities: Capabilities;
     samplingRunning: boolean;
     isSaveChoiceDialogVisible: boolean;
     isExportDialogVisible: boolean;

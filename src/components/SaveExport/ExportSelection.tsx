@@ -96,10 +96,12 @@ const ExportSelection = ({
             value: 2,
             id: 'radio-export-selected',
             onSelect: () => {
-                setExportIndexes(
-                    Math.ceil(timestampToIndex(cursorBegin)),
-                    Math.floor(timestampToIndex(cursorEnd))
-                );
+                if (cursorBegin != null && cursorEnd != null) {
+                    setExportIndexes(
+                        Math.ceil(timestampToIndex(cursorBegin)),
+                        Math.floor(timestampToIndex(cursorEnd))
+                    );
+                }
             },
         },
     ];
