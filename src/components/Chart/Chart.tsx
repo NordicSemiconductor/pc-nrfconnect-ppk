@@ -25,7 +25,6 @@ import {
     Title,
 } from 'chart.js';
 import { useHotKey } from 'pc-nrfconnect-shared';
-import { bool } from 'prop-types';
 
 import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 import {
@@ -465,10 +464,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             )}
         </div>
     );
-};
-
-Chart.propTypes = {
-    digitalChannelsEnabled: bool,
 };
 
 export default Chart;
