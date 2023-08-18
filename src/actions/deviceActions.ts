@@ -123,7 +123,6 @@ export function samplingStart() {
         dispatch(samplingStartAction());
         await device!.ppkAverageStart();
         logger.info('Sampling started');
-        console.log('device caps', device?.capabilities);
     };
 }
 

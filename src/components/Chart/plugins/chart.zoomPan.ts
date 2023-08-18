@@ -214,8 +214,6 @@ const plugin: Plugin<'line'> = {
         const zoomPan: ZoomPan = {};
         chart.zoomPan = zoomPan;
 
-        console.log('zoomPan', chart);
-
         const { canvas } = chart.ctx;
 
         zoomPan.wheelHandler = event => {
