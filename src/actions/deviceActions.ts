@@ -16,6 +16,7 @@ import {
     indexToTimestamp,
     initializeBitsBuffer,
     initializeDataBuffer,
+    minimapEvents,
     options,
     removeBitsBuffer,
     setSamplingRate,
@@ -123,6 +124,7 @@ export function samplingStart() {
         dispatch(samplingStartAction());
         await device!.ppkAverageStart();
         logger.info('Sampling started');
+        minimapEvents.startInterval();
     };
 }
 
@@ -132,6 +134,7 @@ export function samplingStop() {
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         logger.info('Sampling stopped');
+        minimapEvents.stop();
     };
 }
 

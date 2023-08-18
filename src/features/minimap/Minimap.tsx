@@ -1,10 +1,9 @@
 import React, { useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Chart, ChartOptions } from 'chart.js';
-import { colors, useHotKey } from 'pc-nrfconnect-shared';
+import { colors } from 'pc-nrfconnect-shared';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { indexToTimestamp, options } from '../../globals';
 import { chartState } from '../../slices/chartSlice';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
@@ -17,24 +16,18 @@ export interface MinimapOptions extends ChartOptions<'line'> {
 
 export interface MinimapChart extends Chart<'line'> {
     options: MinimapOptions;
+    windowNavigateCallback?: (windowCenter: number) => void;
 }
 
-const Minimap = () => {
+interface Minimap {
+    windowNavigateCallback?: (windowCenter: number) => void;
+}
+
+const Minimap = ({ windowNavigateCallback }: Minimap) => {
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
-    const { windowBegin, windowEnd } = useSelector(chartState);
-
-    useHotKey({
-        hotKey: 'alt+d',
-        title: 'Draw Minimap',
-        isGlobal: false,
-        action: () => {
-            if (minimapRef.current) {
-                initialiseMinimapData(minimapRef.current);
-            }
-        },
-    });
+    const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
 
     if (minimapRef.current == null && canvasRef.current != null) {
         minimapRef.current = new Chart(canvasRef.current, {
@@ -69,6 +62,7 @@ const Minimap = () => {
                         grid: undefined,
                     },
                 },
+                ampereChart: {},
             } as MinimapOptions,
             plugins: [minimapScroll],
         });
@@ -81,36 +75,36 @@ const Minimap = () => {
             windowBegin,
             windowEnd
         );
+
+        const { options: chartOptions } = minimapRef.current;
+        if (chartOptions.ampereChart == null) {
+            chartOptions.ampereChart = {
+                windowDuration,
+            };
+        } else {
+            chartOptions.ampereChart.windowDuration = windowDuration;
+        }
+    }
+
+    if (minimapRef.current && windowNavigateCallback) {
+        minimapRef.current.windowNavigateCallback = windowNavigateCallback;
     }
 
     return (
         <div className="tw-relative tw-h-20">
-            <div
-                ref={minimapSlider}
-                className="tw-absolute tw-bg-gray-400 tw-opacity-50 tw-top-0 tw-h-full"
-            />
             <canvas
                 ref={canvasRef}
                 id="minimap"
                 className="tw-h-20 tw-w-full tw-border-solid tw-border tw-border-gray800"
             />
+            <div
+                ref={minimapSlider}
+                className="tw-absolute tw-bg-gray-400 tw-opacity-50 tw-top-0 tw-h-full tw-pointer-events-none"
+                style={{ contain: 'strict' }}
+            />
         </div>
     );
 };
-
-function initialiseMinimapData(minimap: MinimapChart) {
-    const dataBuffer = [];
-
-    for (let i = 0; i < options.index; i += 1000) {
-        dataBuffer.push({
-            x: indexToTimestamp(i),
-            y: options.data[i],
-        });
-    }
-
-    minimap.data.datasets[0].data = dataBuffer;
-    minimap.update();
-}
 
 function drawSlider(
     minimap: MinimapChart,

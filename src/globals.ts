@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- Temporary included to make a conservative conversion to typescript */
 
 import { getCurrentWindow } from '@electron/remote';
+import { EventEmitter } from 'events';
 
 export const bufferLengthInSeconds = 60 * 5;
 export const numberOfDigitalChannels = 8;
@@ -31,7 +32,6 @@ export interface GlobalOptions {
     /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
     timestamp: number;
     currentPane?: number;
-    totalDuration?: number;
 }
 
 export const options: GlobalOptions = {
@@ -41,8 +41,33 @@ export const options: GlobalOptions = {
     bits: null,
     index: 0,
     timestamp: 0,
-    totalDuration: bufferLengthInSeconds * 1_000_000,
 };
+
+export const eventEmitter = new EventEmitter();
+export const minimapEvents = (() => {
+    let intervalId: NodeJS.Timer;
+    return {
+        startInterval: () => {
+            const interval = options.samplingTime * 1_000;
+            const totalSamplingTime =
+                options.samplingTime * options.data.length;
+            intervalId = setInterval(() => {
+                eventEmitter.emit('updateMinimap');
+            }, interval);
+
+            setTimeout(() => {
+                clearInterval(intervalId);
+            }, totalSamplingTime);
+        },
+        stop: () => {
+            clearInterval(intervalId);
+            eventEmitter.emit('updateMinimap');
+        },
+        update: () => {
+            eventEmitter.emit('updateMinimap');
+        },
+    };
+})();
 
 /**
  * Get the sampling time derived from samplesPerSecond
@@ -75,7 +100,6 @@ export const initializeDataBuffer = (samplingDuration: number) => {
         options.data = new Float32Array(newBufferSize);
     }
     options.data.fill(NaN);
-    options.totalDuration = samplingDuration * 1_000_000;
 };
 
 /**
@@ -118,6 +142,9 @@ export const indexToTimestamp = (index: number): number => {
             options.samplesPerSecond
     );
 };
+
+export const getTotalDurationInMicroSeconds = () =>
+    options.samplingTime * options.data.length;
 
 export const updateTitle = (info?: string) => {
     const title = getCurrentWindow().getTitle().split(':')[0].trim();

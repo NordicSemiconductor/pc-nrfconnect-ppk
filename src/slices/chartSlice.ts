@@ -170,6 +170,15 @@ const chartSlice = createSlice({
                 yMax: yMax == null || yAxisLock ? state.yMax : yMax,
             };
         },
+        paneWindow(state, { payload: windowCenter }: PayloadAction<number>) {
+            const windowBegin = windowCenter - state.windowDuration / 2;
+            const windowEnd = windowCenter + state.windowDuration / 2;
+
+            if (Number.isNaN(windowBegin) || Number.isNaN(windowEnd)) return;
+
+            state.windowBegin = windowBegin;
+            state.windowEnd = windowEnd;
+        },
         chartTrigger(
             state,
             action: PayloadAction<{
@@ -328,6 +337,7 @@ export const getWindowDuration = (state: RootState) =>
     state.app.chart.windowDuration;
 
 export const {
+    paneWindow,
     animationAction,
     chartCursorAction,
     chartTrigger,
