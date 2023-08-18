@@ -134,12 +134,11 @@ const AmpereChart = ({
             if (typeof _usecs !== 'number') {
                 return undefined as never;
             }
-            let usecs = _usecs;
             const timestampAtTriggerOrigin =
                 triggerOrigin == null ? null : indexToTimestamp(triggerOrigin);
-            if (timestampAtTriggerOrigin != null) {
-                usecs -= timestampAtTriggerOrigin;
-            }
+
+            const usecs = _usecs - (timestampAtTriggerOrigin ?? 0);
+
             const microseconds = Math.abs(usecs);
             const sign = usecs < 0 ? '-' : '';
             if (!array) {
