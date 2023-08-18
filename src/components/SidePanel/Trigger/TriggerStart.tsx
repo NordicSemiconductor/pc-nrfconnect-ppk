@@ -47,10 +47,15 @@ const TriggerStart = ({ triggerMode }: { triggerMode: string }) => {
 
     const { capabilities } = useSelector(appState);
 
-    const formattedFreq = unit(1e6 / capabilities.samplingTimeUs, 'Hz').format({
-        notation: 'fixed',
-        precision: 0,
-    });
+    let formattedFreq: string;
+    if (capabilities?.samplingTimeUs == null) {
+        formattedFreq = 'N/A';
+    } else {
+        formattedFreq = unit(1e6 / capabilities.samplingTimeUs, 'Hz').format({
+            notation: 'fixed',
+            precision: 0,
+        });
+    }
 
     const LABEL_START = 'Start';
     const LABEL_STOP = 'Stop';

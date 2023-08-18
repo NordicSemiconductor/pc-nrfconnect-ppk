@@ -7,7 +7,6 @@
 import React, { MutableRefObject } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import type { ChartJSOrUndefined } from 'react-chartjs-2/dist/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { BigNumber, Fraction, unit } from 'mathjs';
 import { Toggle } from 'pc-nrfconnect-shared';
@@ -20,6 +19,7 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
+import { AmpereChart } from './AmpereChart';
 // @ts-expect-error Is currently a jsx file
 import ChartOptions from './ChartOptions';
 
@@ -42,7 +42,7 @@ const TimeWindowButton = ({ label, zoomToWindow }: TimeWindowButton) => (
 type ChartTop = {
     chartPause: () => void;
     zoomToWindow: (windowDuration: number | BigNumber | Fraction) => void;
-    chartRef: MutableRefObject<ChartJSOrUndefined<'line', unknown, unknown>>;
+    chartRef: MutableRefObject<AmpereChart | null>;
     windowDuration: number;
 };
 

@@ -15,27 +15,21 @@ export const numberOfDigitalChannels = 8;
 const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 
-export type rate = number;
-export type microseconds = number;
-export type sampleArray = Float32Array;
-export type sampleIndex = number;
-export type sampleTimestamp = number | undefined | null;
-
 export interface GlobalOptions {
     /** Time between each sample denoted in microseconds, which is equal to 1e-6 seconds \
      *  e.g. if samplesPerSecond is 100_000, then a sample is taken every 10th microsecond
      */
-    samplingTime: microseconds;
+    samplingTime: number;
     /** The number of samples per second */
-    samplesPerSecond: rate;
+    samplesPerSecond: number;
     /** @var data: contains all samples of current denoted in uA (microAmpere). */
-    data: sampleArray;
+    data: Float32Array;
     /** @var [bits]: contains the bit state for each sample, variable may be null */
     bits: Uint16Array | null;
     /** @var index: pointer to the index of the last sample in data array */
-    index: sampleIndex;
+    index: number;
     /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
-    timestamp: sampleTimestamp;
+    timestamp: number;
 
     currentPane?: number;
 }
@@ -46,7 +40,7 @@ export const options: GlobalOptions = {
     data: new Float32Array(initialSamplesPerSecond * bufferLengthInSeconds),
     bits: null,
     index: 0,
-    timestamp: null,
+    timestamp: 0,
 };
 
 /**
@@ -63,6 +57,8 @@ export const setSamplingRate = (rate: number): void => {
     options.samplesPerSecond = rate;
     options.samplingTime = getSamplingTime(rate);
 };
+
+export const getSamplesPerSecond = () => options.samplesPerSecond;
 
 /**
  * Initiates new sample array if new buffer size is not equal to the present one.
@@ -100,18 +96,18 @@ export const removeBitsBuffer = (): void => {
     options.bits = null;
 };
 
-export const timestampToIndex = (timestamp: sampleTimestamp): sampleIndex => {
+export const timestampToIndex = (timestamp: number): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
     const microSecondsPerSecond = 1e6;
 
-    return (
+    return Math.round(
         options.index -
-        ((lastTimestamp - timestamp!) * options.samplesPerSecond) /
-            microSecondsPerSecond
+            ((lastTimestamp - timestamp!) * options.samplesPerSecond) /
+                microSecondsPerSecond
     );
 };
 
-export const indexToTimestamp = (index: sampleIndex): sampleTimestamp => {
+export const indexToTimestamp = (index: number): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
     const microSecondsPerSecond = 1e6;
     return (

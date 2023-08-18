@@ -118,7 +118,7 @@ export function samplingStart() {
             options.bits.fill(0);
         }
         options.index = 0;
-        options.timestamp = undefined;
+        options.timestamp = 0;
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
         await device!.ppkAverageStart();

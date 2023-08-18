@@ -8,23 +8,32 @@
 
 import { numberOfDigitalChannels, options } from '../../../globals';
 import { averagedBitState } from '../../../utils/bitConversion';
-import bitDataStorage from './bitDataStorage';
-import { TimestampType } from './dataTypes';
+import bitDataStorage, { BitDataStorage } from './bitDataStorage';
+import { DigitalChannelStates, TimestampType } from './dataTypes';
 
-export default () => ({
+export interface BitDataSelector {
+    bitDataStorage: BitDataStorage;
+    digitalChannelsToCompute: number[] | undefined;
+    initialise: (digitalChannelsToCompute: number[]) => void;
+    processBits: (bitIndex: number, timestamp: TimestampType) => void;
+    getLineData: () => DigitalChannelStates[];
+}
+
+export default (): BitDataSelector => ({
     bitDataStorage: bitDataStorage(),
     digitalChannelsToCompute: new Array(numberOfDigitalChannels),
 
-    initialise(digitalChannelsToCompute: number[]) {
+    initialise(digitalChannelsToCompute) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
-    processBits(bitIndex: number, timestamp: TimestampType) {
+    processBits(bitIndex, timestamp) {
         const bits = options.bits ? options.bits[bitIndex] : null;
 
         if (bits) {
-            this.digitalChannelsToCompute.forEach(i => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            this.digitalChannelsToCompute!.forEach(i => {
                 this.bitDataStorage.storeBit(
                     timestamp,
                     i,

@@ -65,11 +65,11 @@ describe('ExportDialog', () => {
         fireEvent.click(radioWindow);
 
         const numberOfRecords = screen.getByText(numberOfRecordsText);
-        expect(numberOfRecords).not.toBe(undefined);
+        expect(numberOfRecords).toBeDefined();
         const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
-        expect(totalSize).not.toBe(undefined);
+        expect(totalSize).toBeDefined();
         const duration = screen.getByText(durationLargerThanZeroPattern);
-        expect(duration).not.toBe(undefined);
+        expect(duration).toBeDefined();
     });
 
     it('should open with the last option to export the selected area when area has been selected', () => {
