@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ */
+
 import React, { useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Chart, ChartOptions } from 'chart.js';
@@ -33,7 +39,6 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
         minimapRef.current = new Chart(canvasRef.current, {
             type: 'line',
             data: {
-                labels: undefined,
                 datasets: [
                     {
                         label: 'minimap',
@@ -45,6 +50,7 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
                 ],
             },
             options: {
+                animation: false,
                 layout: {
                     padding: 0,
                 },
@@ -91,16 +97,22 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
     }
 
     return (
-        <div className="tw-relative tw-h-20">
+        <div
+            className="tw-relative tw-h-28 tw-w-full tw-py-4"
+            style={{
+                paddingLeft: '4.3rem',
+                paddingRight: '1.8rem',
+            }}
+        >
             <canvas
                 ref={canvasRef}
                 id="minimap"
-                className="tw-h-20 tw-w-full tw-border-solid tw-border tw-border-gray800"
+                className="tw-max-h-20 tw-w-full tw-border-solid tw-border tw-border-gray800"
             />
             <div
                 ref={minimapSlider}
-                className="tw-absolute tw-bg-gray-400 tw-opacity-50 tw-top-0 tw-h-full tw-pointer-events-none"
-                style={{ contain: 'strict' }}
+                className="tw-max-h-20 tw-absolute tw-bg-gray-400 tw-opacity-50 tw-pointer-events-none tw-overflow-hidden"
+                style={{ contain: 'strict', top: '1rem' }}
             />
         </div>
     );
@@ -115,15 +127,24 @@ function drawSlider(
     if (windowBegin == null || windowEnd == null) return;
 
     const {
+        canvas,
         scales: { x: xScale },
     } = minimap;
 
-    const begin = xScale.getPixelForValue(windowBegin);
-    const end = xScale.getPixelForValue(windowEnd);
-    const width = end - begin;
+    const canvasRectangle = canvas.getBoundingClientRect();
+    const parentRectangle = canvas.parentElement?.getBoundingClientRect();
+    if (parentRectangle == null) return;
 
-    slider.style.left = `${begin}px`;
+    const offsetLeft = canvasRectangle.left - parentRectangle.left;
+
+    const beginWithoutOffset = xScale.getPixelForValue(windowBegin);
+    const endWithoutOffset = xScale.getPixelForValue(windowEnd);
+    const width = endWithoutOffset - beginWithoutOffset;
+    const height = minimap.canvas.height;
+
+    slider.style.left = `${beginWithoutOffset + offsetLeft}px`;
     slider.style.width = `${width}px`;
+    slider.style.height = `${height}px`;
 }
 
 export default Minimap;

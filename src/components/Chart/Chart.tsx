@@ -26,7 +26,7 @@ import {
 } from 'chart.js';
 import { useHotKey } from 'pc-nrfconnect-shared';
 
-import Minimap, { MinimapChart } from '../../features/minimap/Minimap';
+import Minimap from '../../features/minimap/Minimap';
 import { indexToTimestamp, options, timestampToIndex } from '../../globals';
 import {
     isInitialised,

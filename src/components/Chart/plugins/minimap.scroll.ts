@@ -7,23 +7,20 @@
 import { Plugin } from 'chart.js';
 
 import type { MinimapChart } from '../../../features/minimap/Minimap';
-import {
-    eventEmitter,
-    getTotalDurationInMicroSeconds,
-    indexToTimestamp,
-    options,
-} from '../../../globals';
+import { eventEmitter, indexToTimestamp, options } from '../../../globals';
 
 interface MinimapScroll extends Plugin<'line'> {
     leftClickPressed: boolean;
-    updateMinimapData: (chart: MinimapChart) => void;
+    dataBuffer: Array<{ x: number; y: number | undefined }>; // { x: number; y: number }[];
     dataBufferStep: number;
-    dataBufferIndex: number;
-    dataBuffer: { x: number; y: number }[];
+    globalDataBufferIndex: number;
+    localDataBufferIndex: number;
+    updateMinimapData: (chart: MinimapChart) => void;
 }
 
 function pane(event: PointerEvent, chart: MinimapChart) {
     if (chart.windowNavigateCallback == null) return;
+    if (chart.data.datasets[0].data.length === 0) return;
 
     const {
         scales: { x: xScale },
@@ -51,15 +48,26 @@ function pane(event: PointerEvent, chart: MinimapChart) {
     chart.windowNavigateCallback(xPosition);
 }
 
+/*
+    globalLength = options.data
+
+    and we want to step over 1000 samples
+    i.e. accumulate 1000 samples into one sample.
+
+    localBufferLength -> (globalLength / 1000) * 2;
+*/
+
 const plugin: MinimapScroll = {
     id: 'minimapScroll',
     leftClickPressed: false,
     dataBufferStep: 1000,
-    dataBufferIndex: 0,
-    dataBuffer: [],
+    dataBuffer: new Array((options.data.length / 1000) * 2),
+    globalDataBufferIndex: 0,
+    localDataBufferIndex: 0,
 
     beforeInit(chart: MinimapChart) {
         const { canvas } = chart.ctx;
+        this.dataBuffer.fill({ x: 0, y: undefined });
 
         canvas.addEventListener('pointermove', event => {
             if (this.leftClickPressed === true) {
@@ -82,27 +90,29 @@ const plugin: MinimapScroll = {
         canvas.addEventListener('pointerleave', () => {
             this.leftClickPressed = false;
         });
-        eventEmitter.on('updateMinimap', () => this.updateMinimapData(chart));
+        eventEmitter.on('updateMinimap', () => {
+            this.updateMinimapData(chart);
+        });
     },
+
     updateMinimapData(chart) {
         do {
-            this.dataBuffer.push({
-                x: indexToTimestamp(this.dataBufferIndex),
-                y: options.data[this.dataBufferIndex],
-            });
+            const accumulatedData = accumulateData(
+                this.globalDataBufferIndex,
+                this.dataBufferStep
+            );
+            this.dataBuffer[this.localDataBufferIndex] = accumulatedData[0];
+            this.localDataBufferIndex += 1;
+            this.dataBuffer[this.localDataBufferIndex] = accumulatedData[1];
+            this.localDataBufferIndex += 1;
 
-            this.dataBufferIndex += this.dataBufferStep;
-        } while (this.dataBufferIndex + this.dataBufferStep < options.index);
-
-        console.log(this.dataBufferIndex);
-        console.log(options.data);
-        console.log(
-            options.index,
-            indexToTimestamp(options.index),
-            options.timestamp
+            this.globalDataBufferIndex += this.dataBufferStep;
+        } while (
+            this.globalDataBufferIndex + this.dataBufferStep <
+            options.index
         );
-        console.log(this.dataBuffer);
 
+        /* @ts-expect-error Have not figured out how to handle this */
         chart.data.datasets[0].data = this.dataBuffer;
         if (chart.options.scales?.x != null) {
             chart.options.scales.x.max = options.timestamp;
@@ -110,5 +120,48 @@ const plugin: MinimapScroll = {
         chart.update();
     },
 };
+
+function accumulateData(indexBegin: number, numberOfSamples: number) {
+    const { data } = options;
+
+    let min: number | undefined = Number.MAX_VALUE;
+    let max: number | undefined = Number.MIN_VALUE;
+
+    for (
+        let movingIndex = indexBegin;
+        movingIndex <= indexBegin + numberOfSamples;
+        movingIndex += 1
+    ) {
+        const value = data[movingIndex];
+
+        if (value > max) {
+            max = value;
+        }
+        if (min !== 0 && value < min) {
+            min = value < 0 ? 0 : value;
+        }
+    }
+
+    // We never expect this to happen, but if it would happen, it would lead
+    // chart.js to hang without error. Making the app unusable without warning.
+    // Hence, we'd rather want the points to be undefined.
+    if (min === Number.MAX_VALUE) {
+        min = undefined;
+    }
+    if (max === Number.MIN_VALUE) {
+        max = undefined;
+    }
+
+    return [
+        {
+            x: indexToTimestamp(indexBegin),
+            y: min,
+        },
+        {
+            x: indexToTimestamp(indexBegin),
+            y: max,
+        },
+    ];
+}
 
 export default plugin;
