@@ -68,8 +68,11 @@ const plugin: MinimapScroll = {
     beforeInit(chart: MinimapChart) {
         const { canvas } = chart.ctx;
         this.dataBuffer.fill({ x: 0, y: undefined });
+        this.globalDataBufferIndex = 0;
+        this.localDataBufferIndex = 0;
 
         canvas.addEventListener('pointermove', event => {
+            console.log('plugin', this);
             if (this.leftClickPressed === true) {
                 pane(event, chart);
             }
@@ -93,6 +96,9 @@ const plugin: MinimapScroll = {
         eventEmitter.on('updateMinimap', () => {
             this.updateMinimapData(chart);
         });
+
+        // In case data already exist
+        this.updateMinimapData(chart);
     },
 
     updateMinimapData(chart) {

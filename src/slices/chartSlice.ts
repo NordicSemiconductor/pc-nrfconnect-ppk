@@ -40,6 +40,7 @@ interface ChartState {
     yAxisLog: boolean;
     windowBeginLock: null | number;
     windowEndLock: null | number;
+    showMinimap: boolean;
 }
 
 const initialWindowDuration = 7 * 1e6;
@@ -65,6 +66,7 @@ const initialState = (): ChartState => ({
     yAxisLog: false,
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
+    showMinimap: true,
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -253,6 +255,9 @@ const chartSlice = createSlice({
             state.windowBeginLock = null;
             state.windowEndLock = null;
         },
+        setShowMinimap: (state, { payload: show }: PayloadAction<boolean>) => {
+            state.showMinimap = show;
+        },
     },
 });
 
@@ -335,6 +340,7 @@ function calcBuffer(windowDuration: number, windowEnd: number) {
 export const chartState = (state: RootState) => state.app.chart;
 export const getWindowDuration = (state: RootState) =>
     state.app.chart.windowDuration;
+export const showMinimap = (state: RootState) => state.app.chart.showMinimap;
 
 export const {
     paneWindow,
@@ -353,6 +359,7 @@ export const {
     toggleYAxisLock,
     toggleYAxisLog,
     updateHasDigitalChannels,
+    setShowMinimap,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;

@@ -4,13 +4,18 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Chart, ChartOptions } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { chartState } from '../../slices/chartSlice';
+import { minimapEvents } from '../../globals';
+import {
+    chartState,
+    showMinimap as getShowMinimap,
+} from '../../slices/chartSlice';
+import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
     ampereChart?: {
@@ -30,10 +35,18 @@ interface Minimap {
 }
 
 const Minimap = ({ windowNavigateCallback }: Minimap) => {
+    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
+    const showMinimap = useSelector(getShowMinimap);
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
     const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
+
+    useEffect(() => {
+        if (isDataLoggerPane && showMinimap) {
+            minimapEvents.update();
+        }
+    }, [isDataLoggerPane, showMinimap]);
 
     if (minimapRef.current == null && canvasRef.current != null) {
         minimapRef.current = new Chart(canvasRef.current, {
@@ -96,7 +109,7 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
         minimapRef.current.windowNavigateCallback = windowNavigateCallback;
     }
 
-    return (
+    return showMinimap && isDataLoggerPane ? (
         <div
             className="tw-relative tw-h-28 tw-w-full tw-py-4"
             style={{
@@ -115,7 +128,7 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
                 style={{ contain: 'strict', top: '1rem' }}
             />
         </div>
-    );
+    ) : null;
 };
 
 function drawSlider(
