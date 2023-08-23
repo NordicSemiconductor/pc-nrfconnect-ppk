@@ -120,7 +120,7 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
             <div
                 ref={minimapSlider}
                 className="tw-max-h-20 tw-absolute tw-bg-gray-400 tw-opacity-50 tw-pointer-events-none tw-overflow-hidden"
-                style={{ contain: 'strict', top: '1rem' }}
+                style={{ contain: 'strict', top: '1rem', minWidth: '1rem' }}
             />
         </div>
     );
@@ -147,10 +147,20 @@ function drawSlider(
 
     const beginWithoutOffset = xScale.getPixelForValue(windowBegin);
     const endWithoutOffset = xScale.getPixelForValue(windowEnd);
-    const width = endWithoutOffset - beginWithoutOffset;
+
+    const beginWithOffset = beginWithoutOffset + offsetLeft;
+    const windowOutsideSamples = beginWithOffset < offsetLeft;
+    const left = windowOutsideSamples ? offsetLeft : beginWithOffset;
+
+    const adjustWidth = windowOutsideSamples
+        ? offsetLeft - beginWithoutOffset
+        : 0;
+
+    const width = endWithoutOffset - beginWithoutOffset - adjustWidth;
+
     const height = minimap.canvas.height;
 
-    slider.style.left = `${beginWithoutOffset + offsetLeft}px`;
+    slider.style.left = `${left}px`;
     slider.style.width = `${width}px`;
     slider.style.height = `${height}px`;
 }
