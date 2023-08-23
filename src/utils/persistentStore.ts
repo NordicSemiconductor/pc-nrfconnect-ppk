@@ -6,10 +6,7 @@
 
 import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
 import { unit } from 'mathjs';
-import {
-    getAppDataDir,
-    getPersistentStore as store,
-} from 'pc-nrfconnect-shared';
+import { getAppDataDir, getPersistentStore } from 'pc-nrfconnect-shared';
 
 const LAST_SAVE_DIR = 'lastSaveDir';
 const SPIKE_FILTER_SAMPLES = 'spikeFilter.samples';
@@ -21,6 +18,14 @@ const TIMESTAMPS_VISIBLE = 'timestampsVisible';
 const MAX_BUFFER_SIZE = 'maxBufferSize';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK1 = 'voltageRegulatorMaxCapPPK1';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
+
+const store = getPersistentStore<StoreSchema>({
+    migrations: {
+        '4.0.0': instance => {
+            instance.set(VOLTAGE_REGULATOR_MAX_CAP_PPK2, 5000);
+        },
+    },
+});
 
 type SAMPLE_FREQUENCY = `sampleFreq-${number}`;
 type DURATION_SECONDS = `durationSeconds-${number}`;
@@ -59,24 +64,22 @@ interface StoreSchema {
     [maxSampleFrequency: DURATION_SECONDS]: number;
 }
 
-export const getLastSaveDir = () =>
-    store<StoreSchema>().get('lastSaveDir', getAppDataDir());
-export const setLastSaveDir = (dir: string) =>
-    store<StoreSchema>().set('lastSaveDir', dir);
+export const getLastSaveDir = () => store.get(LAST_SAVE_DIR, getAppDataDir());
+export const setLastSaveDir = (dir: string) => store.set('lastSaveDir', dir);
 
 export const getSpikeFilter = (defaults: SpikeFilter): SpikeFilter => ({
-    samples: store<StoreSchema>().get('spikeFilter.samples', defaults.samples),
-    alpha: store<StoreSchema>().get('spikeFilter.alpha', defaults.alpha),
-    alpha5: store<StoreSchema>().get('spikeFilter.alpha5', defaults.alpha5),
+    samples: store.get('spikeFilter.samples', defaults.samples),
+    alpha: store.get('spikeFilter.alpha', defaults.alpha),
+    alpha5: store.get('spikeFilter.alpha5', defaults.alpha5),
 });
 export const setSpikeFilter = ({ samples, alpha, alpha5 }: SpikeFilter) => {
-    store<StoreSchema>().set('spikeFilter.samples', samples);
-    store<StoreSchema>().set('spikeFilter.alpha', alpha);
-    store<StoreSchema>().set('spikeFilter.alpha5', alpha5);
+    store.set('spikeFilter.samples', samples);
+    store.set('spikeFilter.alpha', alpha);
+    store.set('spikeFilter.alpha5', alpha5);
 };
 
 export const getDigitalChannels = () =>
-    store<StoreSchema>().get(DIGITAL_CHANNELS, [
+    store.get(DIGITAL_CHANNELS, [
         true,
         true,
         false,
@@ -87,48 +90,41 @@ export const getDigitalChannels = () =>
         false,
     ]);
 export const setDigitalChannels = (digitalChannels: booleanTupleOf8) =>
-    store<StoreSchema>().set(DIGITAL_CHANNELS, digitalChannels);
+    store.set(DIGITAL_CHANNELS, digitalChannels);
 
 export const getDigitalChannelsVisible = () =>
-    store<StoreSchema>().get(DIGITAL_CHANNELS_VISIBLE, true);
+    store.get(DIGITAL_CHANNELS_VISIBLE, true);
 export const setDigitalChannelsVisible = (digitalChannelsVisible: boolean) =>
-    store<StoreSchema>().set(DIGITAL_CHANNELS_VISIBLE, digitalChannelsVisible);
+    store.set(DIGITAL_CHANNELS_VISIBLE, digitalChannelsVisible);
 
-export const getTimestampsVisible = () =>
-    store<StoreSchema>().get(TIMESTAMPS_VISIBLE, false);
+export const getTimestampsVisible = () => store.get(TIMESTAMPS_VISIBLE, false);
 export const setTimestampsVisible = (timestampsVisible: boolean) =>
-    store<StoreSchema>().set(TIMESTAMPS_VISIBLE, timestampsVisible);
+    store.set(TIMESTAMPS_VISIBLE, timestampsVisible);
 
 export const getSampleFreq = (maxSampleFreq: number) =>
-    store<StoreSchema>().get(`sampleFreq-${maxSampleFreq}`, maxSampleFreq);
+    store.get(`sampleFreq-${maxSampleFreq}`, maxSampleFreq);
 export const setSampleFreq = (maxSampleFreq: number, sampleFreq: number) =>
-    store<StoreSchema>().set(`sampleFreq-${maxSampleFreq}`, sampleFreq);
+    store.set(`sampleFreq-${maxSampleFreq}`, sampleFreq);
 
 export const getDuration = (maxSampleFreq: number, defaultValue: number) =>
-    store<StoreSchema>().get(`durationSeconds-${maxSampleFreq}`, defaultValue);
+    store.get(`durationSeconds-${maxSampleFreq}`, defaultValue);
 export const setDuration = (maxSampleFreq: number, durationSeconds: number) =>
-    store<StoreSchema>().set(
-        `durationSeconds-${maxSampleFreq}`,
-        durationSeconds
-    );
+    store.set(`durationSeconds-${maxSampleFreq}`, durationSeconds);
 
 export const getMaxBufferSize = (defaultMaxBufferSize: number) => {
-    const storedValue = store<StoreSchema>().get(
-        MAX_BUFFER_SIZE,
-        defaultMaxBufferSize
-    );
+    const storedValue = store.get(MAX_BUFFER_SIZE, defaultMaxBufferSize);
     return storedValue > unit(maxBufferSizeForSystem, 'bytes').toNumber('MB')
         ? defaultMaxBufferSize
         : storedValue;
 };
 export const setMaxBufferSize = (maxBufferSize: number) =>
-    store<StoreSchema>().set(MAX_BUFFER_SIZE, maxBufferSize);
+    store.set(MAX_BUFFER_SIZE, maxBufferSize);
 
 export const getVoltageRegulatorMaxCapPPK1 = (defaultMaxCap: number) =>
-    store<StoreSchema>().get(VOLTAGE_REGULATOR_MAX_CAP_PPK1, defaultMaxCap);
+    store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK1, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK1 = (maxCap: number) =>
-    store<StoreSchema>().set(VOLTAGE_REGULATOR_MAX_CAP_PPK1, maxCap);
+    store.set(VOLTAGE_REGULATOR_MAX_CAP_PPK1, maxCap);
 export const getVoltageRegulatorMaxCapPPK2 = (defaultMaxCap: number) =>
-    store<StoreSchema>().get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);
+    store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK2 = (maxCap: number) =>
-    store<StoreSchema>().set(VOLTAGE_REGULATOR_MAX_CAP_PPK2, maxCap);
+    store.set(VOLTAGE_REGULATOR_MAX_CAP_PPK2, maxCap);
