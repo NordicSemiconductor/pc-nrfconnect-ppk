@@ -156,15 +156,17 @@ function drawSlider(
     const beginWithoutOffset = xScale.getPixelForValue(windowBegin);
     const endWithoutOffset = xScale.getPixelForValue(windowEnd);
 
-    const beginWithOffset = beginWithoutOffset + offsetLeft;
-    const windowOutsideSamples = beginWithOffset < offsetLeft;
-    const left = windowOutsideSamples ? offsetLeft : beginWithOffset;
+    const beginWithOffset =
+        beginWithoutOffset > 0 ? beginWithoutOffset + offsetLeft : offsetLeft;
+    const left = beginWithOffset;
 
-    const adjustWidth = windowOutsideSamples
-        ? offsetLeft - beginWithoutOffset
-        : 0;
-
-    const width = endWithoutOffset - beginWithoutOffset - adjustWidth;
+    let width = endWithoutOffset - beginWithoutOffset;
+    const windowOutsideSamples =
+        beginWithOffset + width > canvasRectangle.right;
+    if (windowOutsideSamples) {
+        // Simply give the slider the width of the canvas
+        width = canvasRectangle.right - canvasRectangle.left;
+    }
 
     const height = minimap.canvas.height;
 
