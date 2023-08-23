@@ -11,11 +11,12 @@ import { eventEmitter, indexToTimestamp, options } from '../../../globals';
 
 interface MinimapScroll extends Plugin<'line'> {
     leftClickPressed: boolean;
-    dataBuffer: Array<{ x: number; y: number | undefined }>; // { x: number; y: number }[];
+    dataBuffer: Array<{ x: number; y: number | undefined }>;
     dataBufferStep: number;
     globalDataBufferIndex: number;
     localDataBufferIndex: number;
     updateMinimapData: (chart: MinimapChart) => void;
+    clearMinimap: (chart: MinimapChart) => void;
 }
 
 function pane(event: PointerEvent, chart: MinimapChart) {
@@ -48,15 +49,6 @@ function pane(event: PointerEvent, chart: MinimapChart) {
     chart.windowNavigateCallback(xPosition);
 }
 
-/*
-    globalLength = options.data
-
-    and we want to step over 1000 samples
-    i.e. accumulate 1000 samples into one sample.
-
-    localBufferLength -> (globalLength / 1000) * 2;
-*/
-
 const plugin: MinimapScroll = {
     id: 'minimapScroll',
     leftClickPressed: false,
@@ -72,7 +64,6 @@ const plugin: MinimapScroll = {
         this.localDataBufferIndex = 0;
 
         canvas.addEventListener('pointermove', event => {
-            console.log('plugin', this);
             if (this.leftClickPressed === true) {
                 pane(event, chart);
             }
@@ -96,9 +87,43 @@ const plugin: MinimapScroll = {
         eventEmitter.on('updateMinimap', () => {
             this.updateMinimapData(chart);
         });
+        eventEmitter.on('clearMinimap', () => {
+            this.clearMinimap(chart);
+        });
 
         // In case data already exist
         this.updateMinimapData(chart);
+    },
+
+    beforeDestroy(chart: MinimapChart) {
+        const { canvas } = chart.ctx;
+        canvas.removeEventListener('pointermove', event => {
+            if (this.leftClickPressed === true) {
+                pane(event, chart);
+            }
+        });
+
+        canvas.removeEventListener('pointerdown', event => {
+            if (event.button === 0) {
+                this.leftClickPressed = true;
+                pane(event, chart);
+            }
+        });
+
+        canvas.removeEventListener('pointerup', event => {
+            if (event.button === 0) {
+                this.leftClickPressed = false;
+            }
+        });
+        canvas.removeEventListener('pointerleave', () => {
+            this.leftClickPressed = false;
+        });
+        eventEmitter.removeListener('updateMinimap', () => {
+            this.updateMinimapData(chart);
+        });
+        eventEmitter.removeListener('clearMinimap', () => {
+            this.clearMinimap(chart);
+        });
     },
 
     updateMinimapData(chart) {
@@ -120,6 +145,17 @@ const plugin: MinimapScroll = {
 
         /* @ts-expect-error Have not figured out how to handle this */
         chart.data.datasets[0].data = this.dataBuffer;
+        if (chart.options.scales?.x != null) {
+            chart.options.scales.x.max = options.timestamp;
+        }
+        chart.update();
+    },
+
+    clearMinimap(chart) {
+        this.dataBuffer.fill({ x: 0, y: undefined });
+        this.globalDataBufferIndex = 0;
+        this.localDataBufferIndex = 0;
+        chart.data.datasets[0].data = [];
         if (chart.options.scales?.x != null) {
             chart.options.scales.x.max = options.timestamp;
         }

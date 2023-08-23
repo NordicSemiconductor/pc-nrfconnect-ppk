@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Chart, ChartOptions } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { minimapEvents } from '../../globals';
 import {
     chartState,
     showMinimap as getShowMinimap,
@@ -41,12 +40,6 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
     const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
-
-    useEffect(() => {
-        if (isDataLoggerPane && showMinimap) {
-            minimapEvents.update();
-        }
-    }, [isDataLoggerPane, showMinimap]);
 
     if (minimapRef.current == null && canvasRef.current != null) {
         minimapRef.current = new Chart(canvasRef.current, {
@@ -108,11 +101,13 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
     if (minimapRef.current && windowNavigateCallback) {
         minimapRef.current.windowNavigateCallback = windowNavigateCallback;
     }
+    const hideMinimap = !showMinimap || !isDataLoggerPane;
 
-    return showMinimap && isDataLoggerPane ? (
+    return (
         <div
             className="tw-relative tw-h-28 tw-w-full tw-py-4"
             style={{
+                display: `${hideMinimap ? 'none' : 'block'}`,
                 paddingLeft: '4.3rem',
                 paddingRight: '1.8rem',
             }}
@@ -128,7 +123,7 @@ const Minimap = ({ windowNavigateCallback }: Minimap) => {
                 style={{ contain: 'strict', top: '1rem' }}
             />
         </div>
-    ) : null;
+    );
 };
 
 function drawSlider(

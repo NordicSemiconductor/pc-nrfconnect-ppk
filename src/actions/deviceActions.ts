@@ -94,6 +94,7 @@ export const setupOptions =
             }
             options.index = 0;
             options.timestamp = 0;
+            minimapEvents.clear();
         } catch (err) {
             logger.error(err);
         }
@@ -120,6 +121,7 @@ export function samplingStart() {
         }
         options.index = 0;
         options.timestamp = 0;
+        minimapEvents.clear();
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
         await device!.ppkAverageStart();

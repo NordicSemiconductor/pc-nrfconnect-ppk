@@ -66,6 +66,9 @@ export const minimapEvents = (() => {
         update: () => {
             eventEmitter.emit('updateMinimap');
         },
+        clear: () => {
+            eventEmitter.emit('clearMinimap');
+        },
     };
 })();
 

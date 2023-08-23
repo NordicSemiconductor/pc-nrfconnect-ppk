@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
+import MinimapOptions from '../../features/minimap/MinimapOptions';
 import { options } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
@@ -53,6 +54,7 @@ export default () => {
                 <Load />
                 <DisplayOptions />
                 <Save />
+                <MinimapOptions />
                 <DeprecatedDeviceDialog />
             </SidePanel>
         );
@@ -78,6 +80,7 @@ export default () => {
             <PowerMode />
             {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}
+            <MinimapOptions />
             {options.timestamp === null || (
                 <>
                     <DisplayOptions />
