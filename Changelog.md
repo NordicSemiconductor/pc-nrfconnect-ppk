@@ -9,6 +9,10 @@
 
 ## Added
 
+-   Navigable minimap, which will display a zoomed-out map of the entire sample.
+    In order to navigate the sample, simply click on the location where you want
+    your window. The minimap also displays a slider, which shows the span of the
+    window.
 -   Zoom to selection button, which will make the window the size of the
     selected area.
     -   Hotkey: `alt+z`
