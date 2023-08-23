@@ -66,7 +66,7 @@ interface AmpereChartConfigurations extends ChartConfiguration<'line'> {
     options: AmpereChartOptions;
 }
 
-export interface AmpereChart extends Chart<'line'> {
+export interface AmpereChartJS extends Chart<'line'> {
     options: AmpereChartOptions;
     dragSelect?: DragSelect;
     zoomPan?: ZoomPan;
@@ -79,7 +79,7 @@ interface AmpereChartProperties {
     setLen: (length: number) => void;
     setChartAreaWidth: (width: number) => void;
     step: number;
-    chartRef: React.MutableRefObject<null | AmpereChart>;
+    chartRef: React.MutableRefObject<null | AmpereChartJS>;
     cursorData: {
         cursorBegin: number | null | undefined;
         cursorEnd: number | null | undefined;

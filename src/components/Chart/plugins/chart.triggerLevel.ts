@@ -9,7 +9,7 @@ import { colors } from 'pc-nrfconnect-shared';
 
 import { updateTriggerLevel } from '../../../actions/deviceActions';
 import { TDispatch } from '../../../slices/thunk';
-import type { AmpereChart } from '../AmpereChart';
+import type { AmpereChartJS } from '../AmpereChart';
 
 const { gray700: color, nordicBlue } = colors;
 
@@ -21,7 +21,7 @@ let dispatch: TDispatch = () => {
 };
 
 interface TriggerLevelPlugin extends Plugin<'line'> {
-    getCoords: (chart: AmpereChart) => null | {
+    getCoords: (chart: AmpereChartJS) => null | {
         y: number;
         label: {
             x: number;
@@ -30,15 +30,15 @@ interface TriggerLevelPlugin extends Plugin<'line'> {
             h: number;
         };
     };
-    pointerDownHandler: (event: PointerEvent, chart: AmpereChart) => void;
-    pointerMoveHandler: (event: PointerEvent, chart: AmpereChart) => void;
-    pointerLeaveHandler: (chart: AmpereChart) => void;
+    pointerDownHandler: (event: PointerEvent, chart: AmpereChartJS) => void;
+    pointerMoveHandler: (event: PointerEvent, chart: AmpereChartJS) => void;
+    pointerLeaveHandler: (chart: AmpereChartJS) => void;
 }
 
 const plugin: TriggerLevelPlugin = {
     id: 'triggerLevel',
 
-    getCoords(chart: AmpereChart) {
+    getCoords(chart: AmpereChartJS) {
         const {
             chartArea: { left },
             scales: { yScale },
@@ -68,7 +68,7 @@ const plugin: TriggerLevelPlugin = {
         };
     },
 
-    pointerDownHandler(event: PointerEvent, chart: AmpereChart) {
+    pointerDownHandler(event: PointerEvent, chart: AmpereChartJS) {
         const { label } = this.getCoords(chart) || {};
         if (!label) return;
         const { x, y } = event || {};
@@ -82,7 +82,7 @@ const plugin: TriggerLevelPlugin = {
         }
     },
 
-    pointerMoveHandler(event: PointerEvent, chart: AmpereChart) {
+    pointerMoveHandler(event: PointerEvent, chart: AmpereChartJS) {
         if (chart.triggerLine.y === null) {
             return;
         }
@@ -107,7 +107,7 @@ const plugin: TriggerLevelPlugin = {
         dispatch(updateTriggerLevel(level));
     },
 
-    pointerLeaveHandler(chart: AmpereChart) {
+    pointerLeaveHandler(chart: AmpereChartJS) {
         if (chart.triggerLine.y != null) {
             const {
                 scales: { yScale },
@@ -123,7 +123,7 @@ const plugin: TriggerLevelPlugin = {
         chart.triggerLine.y = null;
     },
 
-    beforeInit(chart: AmpereChart) {
+    beforeInit(chart: AmpereChartJS) {
         chart.triggerLine = { y: null };
         const { canvas } = chart.ctx;
         canvas.addEventListener('pointerdown', evt =>
@@ -140,7 +140,7 @@ const plugin: TriggerLevelPlugin = {
         );
     },
 
-    afterDraw(chart: AmpereChart) {
+    afterDraw(chart: AmpereChartJS) {
         const {
             chartArea: { left, right, top, bottom },
             ctx,

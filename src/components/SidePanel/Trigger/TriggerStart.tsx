@@ -8,7 +8,6 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
-import PropTypes from 'prop-types';
 
 import {
     triggerSingleSet,
@@ -111,7 +110,3 @@ const TriggerStart = ({ triggerMode }: { triggerMode: string }) => {
 };
 
 export default TriggerStart;
-
-TriggerStart.propTypes = {
-    triggerMode: PropTypes.string.isRequired,
-};

@@ -29,7 +29,7 @@ const initialState = (): VoltageRegulatorState => ({
     currentVDD: 3000,
     min: 1850,
     max: 3600,
-    maxCap: 3600,
+    maxCap: getVoltageRegulatorMaxCapPPK2(5000),
     maxCapPPK1: getVoltageRegulatorMaxCapPPK1(3600),
     maxCapPPK2: getVoltageRegulatorMaxCapPPK2(5000),
 });

@@ -30,7 +30,6 @@ export interface GlobalOptions {
     index: number;
     /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
     timestamp: number;
-
     currentPane?: number;
 }
 
@@ -116,6 +115,9 @@ export const indexToTimestamp = (index: number): number => {
             options.samplesPerSecond
     );
 };
+
+export const getTotalDurationInMicroSeconds = () =>
+    options.samplingTime * options.data.length;
 
 export const updateTitle = (info?: string) => {
     const title = getCurrentWindow().getTitle().split(':')[0].trim();

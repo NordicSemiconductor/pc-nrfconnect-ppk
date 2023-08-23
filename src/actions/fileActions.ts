@@ -13,6 +13,7 @@ import {
     setCurrentPane,
 } from 'pc-nrfconnect-shared';
 
+import { minimapEvents } from '../features/minimap/minimapEvents';
 import { options, updateTitle } from '../globals';
 import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
@@ -101,6 +102,8 @@ export const load =
         if (currentPane !== null) dispatch(setCurrentPane(currentPane));
         logger.info(`State successfully restored`);
         setLoading(false);
+
+        minimapEvents.update();
     };
 
 export const screenshot = () => async () => {

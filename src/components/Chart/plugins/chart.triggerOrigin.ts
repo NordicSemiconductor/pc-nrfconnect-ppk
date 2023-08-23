@@ -8,14 +8,14 @@ import { Plugin } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp } from '../../../globals';
-import type { AmpereChart } from '../AmpereChart';
+import type { AmpereChartJS } from '../AmpereChart';
 
 const { gray700: color } = colors;
 
 const plugin: Plugin<'line'> = {
     id: 'triggerorigin',
 
-    afterDraw(chartInstance: AmpereChart) {
+    afterDraw(chartInstance: AmpereChartJS) {
         const {
             chartArea: { top, bottom },
             scales: { xScale },

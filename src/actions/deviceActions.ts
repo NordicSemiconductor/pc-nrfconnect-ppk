@@ -12,6 +12,7 @@ import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
+import { minimapEvents } from '../features/minimap/minimapEvents';
 import {
     indexToTimestamp,
     initializeBitsBuffer,
@@ -93,6 +94,7 @@ export const setupOptions =
             }
             options.index = 0;
             options.timestamp = 0;
+            minimapEvents.clear();
         } catch (err) {
             logger.error(err);
         }
@@ -119,10 +121,12 @@ export function samplingStart() {
         }
         options.index = 0;
         options.timestamp = 0;
+        minimapEvents.clear();
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
         await device!.ppkAverageStart();
         logger.info('Sampling started');
+        minimapEvents.startInterval();
     };
 }
 
@@ -132,6 +136,7 @@ export function samplingStop() {
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         logger.info('Sampling stopped');
+        minimapEvents.stop();
     };
 }
 
