@@ -12,11 +12,11 @@ import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
 
 import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
+import { minimapEvents } from '../features/minimap/minimapEvents';
 import {
     indexToTimestamp,
     initializeBitsBuffer,
     initializeDataBuffer,
-    minimapEvents,
     options,
     removeBitsBuffer,
     setSamplingRate,

@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- Temporary included to make a conservative conversion to typescript */
 
 import { getCurrentWindow } from '@electron/remote';
-import { EventEmitter } from 'events';
 
 export const bufferLengthInSeconds = 60 * 5;
 export const numberOfDigitalChannels = 8;
@@ -42,35 +41,6 @@ export const options: GlobalOptions = {
     index: 0,
     timestamp: 0,
 };
-
-export const eventEmitter = new EventEmitter();
-export const minimapEvents = (() => {
-    let intervalId: NodeJS.Timer;
-    return {
-        startInterval: () => {
-            const interval = options.samplingTime * 1_000;
-            const totalSamplingTime =
-                options.samplingTime * options.data.length;
-            intervalId = setInterval(() => {
-                eventEmitter.emit('updateMinimap');
-            }, interval);
-
-            setTimeout(() => {
-                clearInterval(intervalId);
-            }, totalSamplingTime);
-        },
-        stop: () => {
-            clearInterval(intervalId);
-            eventEmitter.emit('updateMinimap');
-        },
-        update: () => {
-            eventEmitter.emit('updateMinimap');
-        },
-        clear: () => {
-            eventEmitter.emit('clearMinimap');
-        },
-    };
-})();
 
 /**
  * Get the sampling time derived from samplesPerSecond

@@ -13,7 +13,8 @@ import {
     setCurrentPane,
 } from 'pc-nrfconnect-shared';
 
-import { minimapEvents, options, updateTitle } from '../globals';
+import { minimapEvents } from '../features/minimap/minimapEvents';
+import { options, updateTitle } from '../globals';
 import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
 import { setChartState } from '../slices/chartSlice';
