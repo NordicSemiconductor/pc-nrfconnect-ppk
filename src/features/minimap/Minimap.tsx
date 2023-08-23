@@ -10,6 +10,7 @@ import { Chart, ChartOptions } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
+import { options } from '../../globals';
 import {
     chartState,
     showMinimap as getShowMinimap,
@@ -134,7 +135,10 @@ function drawSlider(
     windowBegin: number | null,
     windowEnd: number | null
 ) {
-    if (windowBegin == null || windowEnd == null) return;
+    if (windowBegin == null || windowEnd == null || options.index === 0) {
+        slider.style.display = 'hidden';
+        return;
+    }
 
     const {
         canvas,
@@ -165,6 +169,7 @@ function drawSlider(
     slider.style.left = `${left}px`;
     slider.style.width = `${width}px`;
     slider.style.height = `${height}px`;
+    slider.style.display = 'block';
 }
 
 export default Minimap;
