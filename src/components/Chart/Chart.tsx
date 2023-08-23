@@ -37,7 +37,7 @@ import {
     chartCursorAction,
     chartState,
     chartWindowAction,
-    paneWindow,
+    panWindow,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
@@ -125,8 +125,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             ),
         [dispatch]
     );
-    const paneWindowCallback = useCallback(
-        windowBegin => dispatch(paneWindow(windowBegin)),
+    const panWindowCallback = useCallback(
+        windowBegin => dispatch(panWindow(windowBegin)),
         [dispatch]
     );
 
@@ -448,7 +448,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                <Minimap windowNavigateCallback={paneWindowCallback} />
+                <Minimap windowNavigateCallback={panWindowCallback} />
                 <div
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}

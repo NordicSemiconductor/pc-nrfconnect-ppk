@@ -172,7 +172,7 @@ const chartSlice = createSlice({
                 yMax: yMax == null || yAxisLock ? state.yMax : yMax,
             };
         },
-        paneWindow(state, { payload: windowCenter }: PayloadAction<number>) {
+        panWindow(state, { payload: windowCenter }: PayloadAction<number>) {
             const windowBegin = windowCenter - state.windowDuration / 2;
             const windowEnd = windowCenter + state.windowDuration / 2;
 
@@ -343,7 +343,7 @@ export const getWindowDuration = (state: RootState) =>
 export const showMinimap = (state: RootState) => state.app.chart.showMinimap;
 
 export const {
-    paneWindow,
+    panWindow,
     animationAction,
     chartCursorAction,
     chartTrigger,
