@@ -13,7 +13,8 @@ export const minimapEvents = (() => {
     let intervalId: NodeJS.Timer;
     return {
         startInterval: () => {
-            const interval = options.samplingTime * 1_000;
+            const THREE_SECONDS_IN_MS = 3000;
+            const interval = THREE_SECONDS_IN_MS;
             const totalSamplingTime =
                 options.samplingTime * options.data.length;
             intervalId = setInterval(() => {

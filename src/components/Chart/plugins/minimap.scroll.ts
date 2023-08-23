@@ -7,7 +7,8 @@
 import { Plugin } from 'chart.js';
 
 import type { MinimapChart } from '../../../features/minimap/Minimap';
-import { eventEmitter, indexToTimestamp, options } from '../../../globals';
+import { eventEmitter } from '../../../features/minimap/minimapEvents';
+import { indexToTimestamp, options } from '../../../globals';
 
 interface MinimapScroll extends Plugin<'line'> {
     leftClickPressed: boolean;
@@ -19,7 +20,7 @@ interface MinimapScroll extends Plugin<'line'> {
     clearMinimap: (chart: MinimapChart) => void;
 }
 
-function pane(event: PointerEvent, chart: MinimapChart) {
+function pan(event: PointerEvent, chart: MinimapChart) {
     if (chart.windowNavigateCallback == null) return;
     if (chart.data.datasets[0].data.length === 0) return;
 
@@ -65,14 +66,14 @@ const plugin: MinimapScroll = {
 
         canvas.addEventListener('pointermove', event => {
             if (this.leftClickPressed === true) {
-                pane(event, chart);
+                pan(event, chart);
             }
         });
 
         canvas.addEventListener('pointerdown', event => {
             if (event.button === 0) {
                 this.leftClickPressed = true;
-                pane(event, chart);
+                pan(event, chart);
             }
         });
 
@@ -99,14 +100,14 @@ const plugin: MinimapScroll = {
         const { canvas } = chart.ctx;
         canvas.removeEventListener('pointermove', event => {
             if (this.leftClickPressed === true) {
-                pane(event, chart);
+                pan(event, chart);
             }
         });
 
         canvas.removeEventListener('pointerdown', event => {
             if (event.button === 0) {
                 this.leftClickPressed = true;
-                pane(event, chart);
+                pan(event, chart);
             }
         });
 
