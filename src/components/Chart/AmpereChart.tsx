@@ -196,6 +196,7 @@ const AmpereChart = ({
                 pointHoverBorderColor: dataColor,
                 tension: snapping ? 0.2 : 0,
                 label: 'Current',
+                xAxisID: 'xScale',
                 yAxisID: 'yScale',
             },
         ],
@@ -214,8 +215,10 @@ const AmpereChart = ({
                     callback: timestampToLabel,
                     maxTicksLimit: 7,
                 },
+                border: {
+                    display: true,
+                },
                 grid: {
-                    drawBorder: true,
                     drawOnChartArea: true,
                 },
                 afterFit: scale => {
@@ -233,8 +236,10 @@ const AmpereChart = ({
                             ? formatCurrent(uA)
                             : '',
                 },
+                border: {
+                    display: true,
+                },
                 grid: {
-                    drawBorder: true,
                     drawOnChartArea: true,
                 },
                 afterFit: scale => {

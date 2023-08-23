@@ -179,7 +179,7 @@ const plugin: CrossHairPlugin = {
         }
     },
 
-    destroy(chartInstance) {
+    afterDestroy(chartInstance) {
         const i = plugin.instances.findIndex(
             ({ id }) => id === chartInstance.id
         );
