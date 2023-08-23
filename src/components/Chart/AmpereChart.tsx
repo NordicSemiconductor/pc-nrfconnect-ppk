@@ -207,8 +207,8 @@ const AmpereChart = ({
             xScale: {
                 type: 'linear',
                 display: true,
-                min: begin,
-                max: end,
+                min: begin > 0 ? begin : 0,
+                max: begin > 0 ? end : windowDuration,
                 ticks: {
                     display: timestampsVisible,
                     autoSkipPadding: 25,
