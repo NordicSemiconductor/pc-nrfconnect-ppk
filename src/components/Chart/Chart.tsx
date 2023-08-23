@@ -37,7 +37,6 @@ import {
     chartCursorAction,
     chartState,
     chartWindowAction,
-    panWindow,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
@@ -123,10 +122,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     yMax
                 )
             ),
-        [dispatch]
-    );
-    const panWindowCallback = useCallback(
-        windowBegin => dispatch(panWindow(windowBegin)),
         [dispatch]
     );
 
@@ -448,7 +443,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                <Minimap windowNavigateCallback={panWindowCallback} />
+                <Minimap />
                 <div
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}

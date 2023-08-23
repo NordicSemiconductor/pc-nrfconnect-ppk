@@ -5,7 +5,7 @@
  */
 
 import React, { useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Chart, ChartOptions } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
@@ -13,6 +13,7 @@ import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { options } from '../../globals';
 import {
     chartState,
+    panWindow,
     showMinimap as getShowMinimap,
 } from '../../slices/chartSlice';
 import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
@@ -30,17 +31,18 @@ export interface MinimapChart extends Chart<'line'> {
     windowNavigateCallback?: (windowCenter: number) => void;
 }
 
-interface Minimap {
-    windowNavigateCallback?: (windowCenter: number) => void;
-}
-
-const Minimap = ({ windowNavigateCallback }: Minimap) => {
+const Minimap = () => {
+    const dispatch = useDispatch();
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showMinimap = useSelector(getShowMinimap);
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
     const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
+
+    function windowNavigateCallback(windowCenter: number) {
+        dispatch(panWindow(windowCenter));
+    }
 
     if (minimapRef.current == null && canvasRef.current != null) {
         minimapRef.current = new Chart(canvasRef.current, {
