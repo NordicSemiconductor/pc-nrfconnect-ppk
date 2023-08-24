@@ -7,7 +7,7 @@
 import { CoreScaleOptions, Plugin, Scale } from 'chart.js';
 import { logger } from 'pc-nrfconnect-shared';
 
-import { getSamplesPerSecond } from '../../../globals';
+import { getSamplesPerSecond, options } from '../../../globals';
 import {
     MAX_WINDOW_DURATION,
     MIN_WINDOW_DURATION,
@@ -59,8 +59,32 @@ const zoomAtOrigin = (
     yMax?: number
 ) => {
     const zX = Math.max(factorX, 0.1);
-    const newMinX = pX - (pX - xMin) / zX;
-    const newMaxX = pX + (xMax - pX) / zX;
+    let newMinX = Math.max(pX - (pX - xMin) / zX, 0);
+    let newMaxX = pX + (xMax - pX) / zX;
+
+    if (zX > 1 && newMaxX > options.timestamp) {
+        // If user have zoomed-out beyond the span of the sample, and try to zoom-back in,
+        // make sure that the zoom-in will zoom-in on the sample, until the window spans
+        // the entire sample or less.
+        const width = newMaxX - newMinX;
+        newMinX = 0;
+        newMaxX = width;
+    }
+
+    if (zX < 1 && newMaxX > options.timestamp) {
+        // On zoom-out, if the window moves outside of the span of the sample,
+        // make sure that the window will first span the entire sample, before
+        // it can move outside of the sample. This is only possible if the span
+        // of the sample is less than MAX_WINDOW_DURATION.
+        const width = newMaxX - newMinX;
+        newMaxX = options.timestamp;
+        newMinX = newMaxX - width;
+        if (newMinX < 0) {
+            newMinX = 0;
+            newMaxX = width;
+        }
+    }
+
     if (pY !== undefined) {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const zY = Math.max(factorY!, 0.1);
@@ -143,7 +167,6 @@ const processWheelEvents = () => {
         if (z < 1 && windowWidth >= MAX_WINDOW_DURATION / samplesPerSecond) {
             return;
         }
-
         // On zoom in: do not attempt to adjust after reaching max zoom in.
         if (z > 1 && windowWidth <= MIN_WINDOW_DURATION / samplesPerSecond) {
             return;
@@ -189,31 +212,66 @@ const processPointerMoveEvents = () => {
     const { left: xOffset, top: yOffset } =
         event.target.getBoundingClientRect();
 
-    const { xMin, xMax, yMin, yMax, pX, pY } = dragStart;
+    const {
+        xMin: xOriginStart,
+        xMax: xOriginEnd,
+        yMin,
+        yMax,
+        pX,
+        pY,
+    } = dragStart;
     const { xScale, yScale } = scales;
 
-    console.log('dragStart: ', dragStart);
+    const originalWidth = xOriginEnd - xOriginStart;
 
     const qX =
-        xMin +
-        (xMax - xMin) * ((clientX - xOffset - xScale.left) / xScale.width);
+        xOriginStart +
+        (xOriginEnd - xOriginStart) *
+            ((clientX - xOffset - xScale.left) / xScale.width);
     const qY =
         yMin +
         (yMax - yMin) * ((clientY - yOffset - yScale.top) / yScale.height);
 
-    console.log('qX: ', qX, 'qY: ', qY);
-
     if (dragStart.type === 'pan') {
-        zoomPanCallback(xMin + (pX - qX), xMax + (pX - qX), null, null);
+        let xNewStart = xOriginStart + (pX - qX);
+        let xNewEnd = xOriginEnd + (pX - qX);
+
+        if (xNewEnd > options.timestamp) {
+            if (xNewStart === 0) {
+                return;
+            }
+
+            xNewEnd = options.timestamp;
+            xNewStart = xNewEnd - originalWidth;
+        }
+
+        if (xNewStart < 0) {
+            // This means that user pans to the left beyond 0
+            // case 5, 6, 10
+            xNewStart = 0;
+            xNewEnd = originalWidth;
+        }
+
+        zoomPanCallback(xNewStart, xNewEnd, null, null);
         return;
     }
 
-    const zX = (wheelZoomFactor * 4) ** ((qX - pX) / (xMax - xMin));
+    const zX =
+        (wheelZoomFactor * 4) ** ((qX - pX) / (xOriginEnd - xOriginStart));
     const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
 
-    console.log('zX: ', zX, 'zY: ', zY);
     // TODO: DEAD CODE?
-    zoomAtOrigin(zoomPanCallback, pX, zX, xMin, xMax, pY, zY, yMin, yMax);
+    zoomAtOrigin(
+        zoomPanCallback,
+        pX,
+        zX,
+        xOriginStart,
+        xOriginEnd,
+        pY,
+        zY,
+        yMin,
+        yMax
+    );
 };
 
 const plugin: Plugin<'line'> = {
@@ -267,13 +325,13 @@ const plugin: Plugin<'line'> = {
                 const pX =
                     xMin +
                     (xMax - xMin) *
-                    ((event.clientX - xOffset - xScale.left) /
-                        xScale.width);
+                        ((event.clientX - xOffset - xScale.left) /
+                            xScale.width);
                 const pY =
                     yMin +
                     (yMax - yMin) *
-                    ((event.clientY - yOffset - yScale.top) /
-                        yScale.height);
+                        ((event.clientY - yOffset - yScale.top) /
+                            yScale.height);
 
                 zoomPan.dragStart = {
                     type,

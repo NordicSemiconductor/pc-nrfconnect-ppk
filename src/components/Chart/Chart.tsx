@@ -27,7 +27,12 @@ import {
 import { useHotKey } from 'pc-nrfconnect-shared';
 
 import Minimap from '../../features/minimap/Minimap';
-import { indexToTimestamp, options, timestampToIndex } from '../../globals';
+import {
+    getSamplesPerSecond,
+    indexToTimestamp,
+    options,
+    timestampToIndex,
+} from '../../globals';
 import {
     isInitialised,
     useLazyInitializedRef,
@@ -37,6 +42,7 @@ import {
     chartCursorAction,
     chartState,
     chartWindowAction,
+    MAX_WINDOW_DURATION,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
@@ -270,21 +276,20 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 return;
             }
 
-            const earliestDataTime =
-                options.timestamp -
-                (data.length / options.samplesPerSecond) * 1e6;
+            const earliestDataTime = 0;
+            const samplesPerSecond = getSamplesPerSecond();
+            const maxWindowWidth = MAX_WINDOW_DURATION / samplesPerSecond;
 
             const minLimit = windowBeginLock || earliestDataTime;
-            const maxLimit = windowEndLock || options.timestamp;
-            const p0 = Math.max(0, minLimit - beginX);
-            const p1 = Math.max(0, endX - maxLimit);
+            const maxLimit =
+                windowEndLock || Math.max(options.timestamp, maxWindowWidth);
 
-            if (p0 * p1 === 0) {
-                chartWindow(beginX - p1 + p0, endX - p1 + p0, beginY, endY);
-            }
+            const newBeginX = Math.max(beginX, minLimit);
+            const newEndX = Math.min(endX, maxLimit);
+
+            chartWindow(newBeginX, newEndX, beginY, endY);
         },
         [
-            data.length,
             windowBeginLock,
             windowEndLock,
             chartReset,
