@@ -1,12 +1,5 @@
 ## 4.0.0 - Unreleased
 
-## Removed
-
--   Support for Power Profiler Kit (PPK1), hence the Power Profiler app will
-    only be usable for Power Profiler II (PPK2). If you connect a PPK1, you will
-    be shown a dialog with instructions on how to proceed. However, we recommend
-    replacing your PPK1 with a PPK2.
-
 ## Added
 
 -   Navigable minimap, which will display a zoomed-out map of the entire sample.
@@ -17,6 +10,17 @@
     selected area.
     -   Hotkey: `alt+z`
 -   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
+
+## Changed
+
+-   The chart will now only show positive values along the x-axis.
+
+## Removed
+
+-   Support for Power Profiler Kit (PPK1), hence the Power Profiler app will
+    only be usable for Power Profiler II (PPK2). If you connect a PPK1, you will
+    be shown a dialog with instructions on how to proceed. However, we recommend
+    replacing your PPK1 with a PPK2.
 
 ## Fixed
 

@@ -90,7 +90,8 @@ const Minimap = () => {
             minimapRef.current,
             minimapSlider.current,
             windowBegin,
-            windowEnd
+            windowEnd,
+            windowDuration
         );
 
         const { options: chartOptions } = minimapRef.current;
@@ -125,7 +126,7 @@ const Minimap = () => {
             <div
                 ref={minimapSlider}
                 className="tw-max-h-20 tw-absolute tw-bg-gray-400 tw-opacity-50 tw-pointer-events-none tw-overflow-hidden"
-                style={{ contain: 'strict', top: '1rem', minWidth: '1rem' }}
+                style={{ contain: 'strict', top: '1rem' }}
             />
         </div>
     );
@@ -135,10 +136,11 @@ function drawSlider(
     minimap: MinimapChart,
     slider: HTMLDivElement,
     windowBegin: number | null,
-    windowEnd: number | null
+    windowEnd: number | null,
+    windowDuration: number | null
 ) {
     if (windowBegin == null || windowEnd == null || options.index === 0) {
-        slider.style.display = 'hidden';
+        slider.style.display = 'none';
         return;
     }
 
@@ -153,18 +155,43 @@ function drawSlider(
 
     const offsetLeft = canvasRectangle.left - parentRectangle.left;
 
-    const beginWithoutOffset = xScale.getPixelForValue(windowBegin);
-    const endWithoutOffset = xScale.getPixelForValue(windowEnd);
+    let left = 0;
+    let width = 0;
+    if (windowBegin === 0 && windowEnd === 0 && windowDuration != null) {
+        // Since options.index !== 0 and both begin and end are 0, it means that
+        // live has been toggled on, meaning that the window will be at the end.
+        const MAX_WIDTH = canvasRectangle.width;
+        width = xScale.getPixelForValue(windowDuration);
+        width = width > MAX_WIDTH ? MAX_WIDTH : width;
+        left = canvasRectangle.width + offsetLeft - width;
+    } else {
+        const beginWithoutOffset =
+            windowBegin !== 0 ? xScale.getPixelForValue(windowBegin) : 0;
+        const endWithoutOffset = xScale.getPixelForValue(windowEnd);
 
-    const beginWithOffset = beginWithoutOffset + offsetLeft;
-    const windowOutsideSamples = beginWithOffset < offsetLeft;
-    const left = windowOutsideSamples ? offsetLeft : beginWithOffset;
+        const beginWithOffset =
+            beginWithoutOffset > 0
+                ? beginWithoutOffset + offsetLeft
+                : offsetLeft;
 
-    const adjustWidth = windowOutsideSamples
-        ? offsetLeft - beginWithoutOffset
-        : 0;
+        left = beginWithOffset;
 
-    const width = endWithoutOffset - beginWithoutOffset - adjustWidth;
+        const MIN_WIDTH = 16;
+        width = endWithoutOffset - beginWithoutOffset;
+        width = width > MIN_WIDTH ? width : MIN_WIDTH;
+
+        const windowOutsideSamples =
+            width > canvasRectangle.right - canvasRectangle.left;
+        if (windowOutsideSamples) {
+            // When the window spans the entire sample, give the slider the width of the canvas.
+            width = canvasRectangle.width;
+        } else if (left + width > canvasRectangle.width + offsetLeft) {
+            // Most likely, window is zoomed in so that the slider uses its
+            // min-width, hence, we should offset it so that it does not move
+            // outside the canvas.
+            left = canvasRectangle.width + offsetLeft - width;
+        }
+    }
 
     const height = minimap.canvas.height;
 

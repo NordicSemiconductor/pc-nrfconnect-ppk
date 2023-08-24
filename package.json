@@ -41,10 +41,10 @@
     "devDependencies": {
         "@types/redux-mock-store": "^1.0.3",
         "bson": "4.6.5",
-        "chart.js": "^3.8.0",
+        "chart.js": "^4.3.3",
         "mathjs": "^10.6.3",
         "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v79",
-        "react-chartjs-2": "^4.2.0",
+        "react-chartjs-2": "^5.2.0",
         "redux-mock-store": "^1.5.4"
     },
     "eslintConfig": {
