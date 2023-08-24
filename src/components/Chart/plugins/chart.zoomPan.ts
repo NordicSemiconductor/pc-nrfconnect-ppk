@@ -27,7 +27,7 @@ export interface ZoomPan {
     pointerDownHandler?: (event: PointerEvent) => void;
     pointerMoveHandler?: (event: PointerEvent) => void;
     wheelHandler?: (event: WheelEvent) => void;
-    callback?: ZoomPanCallback;
+    zoomPanCallback?: ZoomPanCallback;
     dragStart?: DragStart | null;
 }
 
@@ -48,7 +48,7 @@ const isTrackPad = (event: WheelEvent) => {
 };
 
 const zoomAtOrigin = (
-    callback: ZoomPanCallback,
+    zoomPanCallback: ZoomPanCallback,
     pX: number,
     factorX: number,
     xMin: number,
@@ -66,26 +66,26 @@ const zoomAtOrigin = (
         const zY = Math.max(factorY!, 0.1);
         const newMinY = pY - (pY - yMin!) / zY;
         const newMaxY = pY + (yMax! - pY) / zY;
-        callback(newMinX, newMaxX, newMinY, newMaxY);
+        zoomPanCallback(newMinX, newMaxX, newMinY, newMaxY);
         return;
     }
-    callback(newMinX, newMaxX, null, null);
+    zoomPanCallback(newMinX, newMaxX, null, null);
 };
 
 let processingWheelEvents = false;
 let wheelEventToProcess: {
     event: WheelEvent;
     scales: { [key: string]: Scale<CoreScaleOptions> };
-    callback?: ZoomPanCallback;
+    zoomPanCallback?: ZoomPanCallback;
     sampleFrequency?: number;
 };
 
 const processWheelEvents = () => {
     processingWheelEvents = false;
 
-    const { event, scales, callback } = wheelEventToProcess;
+    const { event, scales, zoomPanCallback } = wheelEventToProcess;
 
-    if (!callback) {
+    if (!zoomPanCallback) {
         return;
     }
 
@@ -111,13 +111,13 @@ const processWheelEvents = () => {
             yMax + (yMin - yMax) * ((clientY - yOffset - yScale.top) / height);
         const fx = 1.01 ** deltaX;
         const fy = 1.01 ** deltaY;
-        zoomAtOrigin(callback, pX, fx, xMin, xMax, pY, fy, yMin, yMax);
+        zoomAtOrigin(zoomPanCallback, pX, fx, xMin, xMax, pY, fy, yMin, yMax);
     } else if (isTrackpadPan) {
         const fx = (xMax - xMin) / width;
         const fy = (yMin - yMax) / height;
         const dx = fx * deltaX;
         const dy = fy * deltaY;
-        callback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
+        zoomPanCallback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
     } else {
         let z = 0;
         if (deltaY < 0) {
@@ -149,7 +149,7 @@ const processWheelEvents = () => {
             return;
         }
 
-        zoomAtOrigin(callback, p, z, xMin, Math.ceil(xMax));
+        zoomAtOrigin(zoomPanCallback, p, z, xMin, Math.ceil(xMax));
     }
 };
 
@@ -170,15 +170,16 @@ let pointerMoveEventToProcess: {
     event: PointerEvent;
     dragStart: DragStart;
     scales: { [key: string]: Scale<CoreScaleOptions> };
-    callback?: ZoomPanCallback;
+    zoomPanCallback?: ZoomPanCallback;
 };
 
 const processPointerMoveEvents = () => {
     processingPointerMoveEvents = false;
 
-    const { event, dragStart, scales, callback } = pointerMoveEventToProcess;
+    const { event, dragStart, scales, zoomPanCallback } =
+        pointerMoveEventToProcess;
 
-    if (!callback) {
+    if (!zoomPanCallback) {
         return;
     }
 
@@ -190,6 +191,9 @@ const processPointerMoveEvents = () => {
 
     const { xMin, xMax, yMin, yMax, pX, pY } = dragStart;
     const { xScale, yScale } = scales;
+
+    console.log('dragStart: ', dragStart);
+
     const qX =
         xMin +
         (xMax - xMin) * ((clientX - xOffset - xScale.left) / xScale.width);
@@ -197,14 +201,19 @@ const processPointerMoveEvents = () => {
         yMin +
         (yMax - yMin) * ((clientY - yOffset - yScale.top) / yScale.height);
 
+    console.log('qX: ', qX, 'qY: ', qY);
+
     if (dragStart.type === 'pan') {
-        callback(xMin + (pX - qX), xMax + (pX - qX), null, null);
+        zoomPanCallback(xMin + (pX - qX), xMax + (pX - qX), null, null);
         return;
     }
 
     const zX = (wheelZoomFactor * 4) ** ((qX - pX) / (xMax - xMin));
     const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
-    zoomAtOrigin(callback, pX, zX, xMin, xMax, pY, zY, yMin, yMax);
+
+    console.log('zX: ', zX, 'zY: ', zY);
+    // TODO: DEAD CODE?
+    zoomAtOrigin(zoomPanCallback, pX, zX, xMin, xMax, pY, zY, yMin, yMax);
 };
 
 const plugin: Plugin<'line'> = {
@@ -220,7 +229,7 @@ const plugin: Plugin<'line'> = {
             wheelEventToProcess = {
                 event,
                 scales: chart.scales,
-                callback: zoomPan.callback ?? undefined,
+                zoomPanCallback: zoomPan.zoomPanCallback ?? undefined,
                 sampleFrequency: chart.sampleFrequency,
             };
 
@@ -232,12 +241,12 @@ const plugin: Plugin<'line'> = {
         canvas.addEventListener('wheel', zoomPan.wheelHandler);
 
         zoomPan.pointerDownHandler = event => {
-            if (!zoomPan.callback) {
+            if (!zoomPan.zoomPanCallback) {
                 return;
             }
             if (event.button === 1) {
                 // reset min-max window
-                zoomPan.callback();
+                zoomPan.zoomPanCallback();
                 return;
             }
             if (event.shiftKey) {
@@ -258,13 +267,13 @@ const plugin: Plugin<'line'> = {
                 const pX =
                     xMin +
                     (xMax - xMin) *
-                        ((event.clientX - xOffset - xScale.left) /
-                            xScale.width);
+                    ((event.clientX - xOffset - xScale.left) /
+                        xScale.width);
                 const pY =
                     yMin +
                     (yMax - yMin) *
-                        ((event.clientY - yOffset - yScale.top) /
-                            yScale.height);
+                    ((event.clientY - yOffset - yScale.top) /
+                        yScale.height);
 
                 zoomPan.dragStart = {
                     type,
@@ -296,7 +305,7 @@ const plugin: Plugin<'line'> = {
                 event,
                 dragStart: { ...zoomPan.dragStart },
                 scales: chart.scales,
-                callback: zoomPan.callback,
+                zoomPanCallback: zoomPan.zoomPanCallback,
             };
 
             if (!processingPointerMoveEvents) {
@@ -311,7 +320,7 @@ const plugin: Plugin<'line'> = {
         );
 
         zoomPan.pointerUpHandler = () => {
-            if (zoomPan.callback == null) {
+            if (zoomPan.zoomPanCallback == null) {
                 logger.error(
                     'zoomPan-->zoomPan.pointerUpHandler: no callback defined'
                 );
@@ -323,7 +332,7 @@ const plugin: Plugin<'line'> = {
                 zoomPan.dragStart.type === 'zoom' &&
                 !zoomPan.dragStart.moved
             ) {
-                zoomPan.callback();
+                zoomPan.zoomPanCallback();
             }
             zoomPan.dragStart = null;
         };

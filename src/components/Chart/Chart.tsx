@@ -323,7 +323,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             chartRef.current.dragSelect.callback = chartCursor;
         }
         if (chartRef.current.zoomPan) {
-            chartRef.current.zoomPan.callback = zoomPanCallback;
+            chartRef.current.zoomPan.zoomPanCallback = zoomPanCallback;
         }
     }, [chartCursor, zoomPanCallback]);
 
