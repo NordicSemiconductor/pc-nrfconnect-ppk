@@ -5,7 +5,7 @@
  */
 
 import { CoreScaleOptions, Plugin, Scale } from 'chart.js';
-import { logger } from 'pc-nrfconnect-shared';
+import { logger, usageData } from 'pc-nrfconnect-shared';
 
 import { getSamplesPerSecond, options } from '../../../globals';
 import {
@@ -256,11 +256,11 @@ const processPointerMoveEvents = () => {
         return;
     }
 
+    // We should consider removing this.
     const zX =
         (wheelZoomFactor * 4) ** ((qX - pX) / (xOriginEnd - xOriginStart));
     const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
 
-    // TODO: DEAD CODE?
     zoomAtOrigin(
         zoomPanCallback,
         pX,

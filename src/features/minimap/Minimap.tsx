@@ -139,7 +139,6 @@ function drawSlider(
     windowEnd: number | null,
     windowDuration: number | null
 ) {
-    console.log('windowBegin, windowEnd', windowBegin, windowEnd);
     if (windowBegin == null || windowEnd == null || options.index === 0) {
         slider.style.display = 'none';
         return;
@@ -186,12 +185,10 @@ function drawSlider(
         if (windowOutsideSamples) {
             // When the window spans the entire sample, give the slider the width of the canvas.
             width = canvasRectangle.width;
-            console.log('Width', width);
         } else if (left + width > canvasRectangle.width + offsetLeft) {
             // Most likely, window is zoomed in so that the slider uses its
             // min-width, hence, we should offset it so that it does not move
             // outside the canvas.
-            console.log('PASSING');
             left = canvasRectangle.width + offsetLeft - width;
         }
     }
