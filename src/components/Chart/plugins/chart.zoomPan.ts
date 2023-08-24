@@ -257,6 +257,7 @@ const processPointerMoveEvents = () => {
     }
 
     // We should consider removing this.
+    usageData.sendUsageData('RightClickZoom (Consider removing)');
     const zX =
         (wheelZoomFactor * 4) ** ((qX - pX) / (xOriginEnd - xOriginStart));
     const zY = (wheelZoomFactor * 4) ** ((qY - pY) / (yMax - yMin));
