@@ -39,7 +39,7 @@ const DigitalChannels = ({
 }: DigitalChannelsProperties) => {
     const bitsChartOptions: ChartOptions<'line'> = {
         scales: {
-            xScale: {
+            x: {
                 type: 'linear',
                 display: false,
                 min: begin,
@@ -49,7 +49,7 @@ const DigitalChannels = ({
                     callback: () => undefined, // override chart.js tick callback which fails on resuming profiling
                 },
             },
-            yScaleDigitalChannel: {
+            y: {
                 type: 'linear',
                 display: false,
                 min: -0.5,
@@ -64,10 +64,7 @@ const DigitalChannels = ({
         backgroundColor: dataColor,
         borderColor: dataColor,
         borderWidth: 1.5,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        pointHitRadius: 0,
-        pointBorderWidth: 0,
+        pointStyle: false,
         stepped: 'before',
     };
 
