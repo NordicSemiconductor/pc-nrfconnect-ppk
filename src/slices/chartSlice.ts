@@ -162,6 +162,19 @@ const chartSlice = createSlice({
                 windowDuration = windowEnd! - windowBegin;
             }
 
+            if (windowBegin < 0) {
+                windowBegin = 0;
+                windowEnd = windowDuration;
+            } else if (windowBegin > options.timestamp) {
+                windowEnd = options.timestamp;
+                if (windowEnd - windowDuration) {
+                    windowBegin = 0;
+                    windowEnd = windowDuration;
+                } else {
+                    windowBegin = windowEnd - windowDuration;
+                }
+            }
+
             return {
                 ...state,
                 windowBegin,
