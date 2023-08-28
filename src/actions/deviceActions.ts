@@ -18,7 +18,6 @@ import {
     initializeBitsBuffer,
     initializeDataBuffer,
     options,
-    removeBitsBuffer,
     setSamplingRate,
     updateTitle,
 } from '../globals';
@@ -114,6 +113,9 @@ export function samplingStart() {
                 : EventAction.START_DATA_LOGGER_SAMPLE
         );
         usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
+
+        // Prepare global options
+        dispatch(setupOptions());
 
         options.data.fill(NaN);
         if (options.bits) {

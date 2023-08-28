@@ -4,18 +4,14 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import { unit } from 'mathjs';
 import { Group, Slider } from 'pc-nrfconnect-shared';
 
-import {
-    samplingStart,
-    samplingStop,
-    setupOptions,
-} from '../../actions/deviceActions';
+import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';
 import {
     dataLoggerState,
@@ -48,11 +44,6 @@ export default () => {
 
     const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
 
-    const completeChange = useCallback(
-        () => dispatch(setupOptions()),
-        [dispatch]
-    );
-
     return (
         <Group heading="Sampling parameters">
             <div className={samplingRunning ? 'disabled' : ''}>
@@ -73,7 +64,7 @@ export default () => {
                                     })
                                 ),
                         ]}
-                        onChangeComplete={completeChange}
+                        onChangeComplete={() => {}}
                     />
                 </div>
                 <NumberWithUnit
@@ -85,7 +76,7 @@ export default () => {
                     onChange={(v: number) =>
                         dispatch(updateDurationSeconds({ durationSeconds: v }))
                     }
-                    onChangeComplete={completeChange}
+                    onChangeComplete={() => {}}
                     slider
                 />
             </div>
