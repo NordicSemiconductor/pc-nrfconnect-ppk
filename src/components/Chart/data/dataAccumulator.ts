@@ -59,6 +59,7 @@ export default (): DataAccumulator => ({
 
         const originalIndexBegin = timestampToIndex(begin);
         const originalIndexEnd = timestampToIndex(end);
+
         const step =
             len === 0 ? 0 : (originalIndexEnd - originalIndexBegin) / len;
 

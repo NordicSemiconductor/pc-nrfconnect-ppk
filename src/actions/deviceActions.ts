@@ -18,7 +18,6 @@ import {
     initializeBitsBuffer,
     initializeDataBuffer,
     options,
-    removeBitsBuffer,
     setSamplingRate,
     updateTitle,
 } from '../globals';
@@ -76,21 +75,13 @@ export const setupOptions =
 
                 setSamplingRate(newSamplesPerSecond);
                 initializeDataBuffer(realtimeWindowDuration);
-                if (device.capabilities.ppkSetPowerMode) {
-                    initializeBitsBuffer(realtimeWindowDuration);
-                } else {
-                    removeBitsBuffer();
-                }
+                initializeBitsBuffer(realtimeWindowDuration);
             } else {
                 const { durationSeconds, sampleFreq } =
                     getState().app.dataLogger;
                 setSamplingRate(sampleFreq);
                 initializeDataBuffer(durationSeconds);
-                if (device.capabilities.ppkSetPowerMode) {
-                    initializeBitsBuffer(durationSeconds);
-                } else {
-                    removeBitsBuffer();
-                }
+                initializeBitsBuffer(durationSeconds);
             }
             options.index = 0;
             options.timestamp = 0;
@@ -114,6 +105,9 @@ export function samplingStart() {
                 : EventAction.START_DATA_LOGGER_SAMPLE
         );
         usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
+
+        // Prepare global options
+        dispatch(setupOptions());
 
         options.data.fill(NaN);
         if (options.bits) {

@@ -24,6 +24,8 @@
 
 ## Fixed
 
+-   When changing the sampling parameters in the side panel, after having done a
+    sample, it would remove the sample data.
 -   Zooming further than what is permitted would cause the graph to pane. This
     is now restricted, which means that if zooming has reached its limit, you
     will need to explicitly pane the graph.
