@@ -75,21 +75,13 @@ export const setupOptions =
 
                 setSamplingRate(newSamplesPerSecond);
                 initializeDataBuffer(realtimeWindowDuration);
-                if (device.capabilities.ppkSetPowerMode) {
-                    initializeBitsBuffer(realtimeWindowDuration);
-                } else {
-                    removeBitsBuffer();
-                }
+                initializeBitsBuffer(realtimeWindowDuration);
             } else {
                 const { durationSeconds, sampleFreq } =
                     getState().app.dataLogger;
                 setSamplingRate(sampleFreq);
                 initializeDataBuffer(durationSeconds);
-                if (device.capabilities.ppkSetPowerMode) {
-                    initializeBitsBuffer(durationSeconds);
-                } else {
-                    removeBitsBuffer();
-                }
+                initializeBitsBuffer(durationSeconds);
             }
             options.index = 0;
             options.timestamp = 0;
