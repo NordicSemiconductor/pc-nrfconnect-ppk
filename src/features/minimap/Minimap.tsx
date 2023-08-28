@@ -63,6 +63,7 @@ const Minimap = () => {
             options: {
                 animation: false,
                 layout: {
+                    autoPadding: false,
                     padding: 0,
                 },
                 scales: {
@@ -118,10 +119,18 @@ const Minimap = () => {
                 paddingRight: '1.8rem',
             }}
         >
+            {options.index === 0 ||
+            minimapRef.current?.data.datasets[0].data.length === 0
+                ? MinimapDefaultState()
+                : null}
             <canvas
                 ref={canvasRef}
                 id="minimap"
-                className="tw-max-h-20 tw-w-full tw-border-solid tw-border tw-border-gray800"
+                className="tw-max-h-20 tw-w-full tw-border-solid tw-border"
+                style={{
+                    borderColor: colors.gray100,
+                    display: options.index === 0 ? 'none' : 'block',
+                }}
             />
             <div
                 ref={minimapSlider}
@@ -131,6 +140,15 @@ const Minimap = () => {
         </div>
     );
 };
+
+const MinimapDefaultState = () => (
+    <div
+        className="tw-h-full tw-w-full tw-flex tw-items-center tw-justify-center"
+        style={{ backgroundColor: colors.gray100 }}
+    >
+        Minimap - no data available...
+    </div>
+);
 
 function drawSlider(
     minimap: MinimapChart,

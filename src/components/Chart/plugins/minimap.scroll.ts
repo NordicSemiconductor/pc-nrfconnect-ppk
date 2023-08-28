@@ -150,6 +150,13 @@ const plugin: MinimapScroll = {
             chart.options.scales.x.max = options.timestamp;
         }
         chart.update();
+
+        if (this.globalDataBufferIndex > options.index) {
+            // Redo last interval if options.index has not come far enough;
+            // TODO: Make sure this is not async ?
+            this.localDataBufferIndex -= 2;
+            this.globalDataBufferIndex -= this.dataBufferStep;
+        }
     },
 
     clearMinimap(chart) {
