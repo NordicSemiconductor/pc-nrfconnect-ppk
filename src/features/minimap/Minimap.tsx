@@ -4,19 +4,15 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Chart, ChartOptions } from 'chart.js';
 import { colors } from 'pc-nrfconnect-shared';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { options } from '../../globals';
-import {
-    chartState,
-    panWindow,
-    showMinimap as getShowMinimap,
-} from '../../slices/chartSlice';
-import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
+import { chartState, panWindow } from '../../slices/chartSlice';
+import { showMinimap as getShowMinimap } from './minimapSlice';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
     ampereChart?: {
@@ -33,7 +29,6 @@ export interface MinimapChart extends Chart<'line'> {
 
 const Minimap = () => {
     const dispatch = useDispatch();
-    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showMinimap = useSelector(getShowMinimap);
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -44,77 +39,45 @@ const Minimap = () => {
         dispatch(panWindow(windowCenter));
     }
 
-    if (minimapRef.current == null && canvasRef.current != null) {
-        minimapRef.current = new Chart(canvasRef.current, {
-            type: 'line',
-            data: {
-                datasets: [
-                    {
-                        label: 'minimap',
-                        fill: false,
-                        borderColor: colors.primary,
-                        data: [],
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                        pointHitRadius: 0,
-                    },
-                ],
-            },
-            options: {
-                animation: false,
-                layout: {
-                    autoPadding: false,
-                    padding: 0,
-                },
-                scales: {
-                    x: {
-                        type: 'linear',
-                        display: false,
-                        ticks: undefined,
-                        grid: undefined,
-                    },
-                    y: {
-                        type: 'linear',
-                        display: false,
-                        ticks: undefined,
-                        grid: undefined,
-                    },
-                },
-                ampereChart: {},
-            } as MinimapOptions,
-            plugins: [minimapScroll],
-        });
-    }
+    minimapRef.current = initializeMinimapChart(
+        minimapRef.current,
+        canvasRef.current
+    );
 
-    if (minimapRef.current && minimapSlider.current) {
-        drawSlider(
-            minimapRef.current,
-            minimapSlider.current,
-            windowBegin,
-            windowEnd,
-            windowDuration
-        );
+    updateSlider(
+        minimapRef.current,
+        minimapSlider.current,
+        windowBegin,
+        windowEnd,
+        windowDuration
+    );
 
-        const { options: chartOptions } = minimapRef.current;
-        if (chartOptions.ampereChart == null) {
-            chartOptions.ampereChart = {
-                windowDuration,
-            };
-        } else {
-            chartOptions.ampereChart.windowDuration = windowDuration;
-        }
-    }
-
-    if (minimapRef.current && windowNavigateCallback) {
+    if (minimapRef.current) {
         minimapRef.current.windowNavigateCallback = windowNavigateCallback;
     }
-    const hideMinimap = !showMinimap || !isDataLoggerPane;
+
+    useEffect(() => {
+        if (
+            minimapRef.current != null &&
+            minimapSlider.current != null &&
+            showMinimap
+        ) {
+            drawSlider(
+                minimapRef.current,
+                minimapSlider.current,
+                windowBegin,
+                windowEnd,
+                windowDuration
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showMinimap, canvasRef.current?.style.display]);
 
     return (
         <div
             className="tw-relative tw-h-28 tw-w-full tw-py-4"
             style={{
-                display: `${hideMinimap ? 'none' : 'block'}`,
+                display: `${showMinimap ? 'block' : 'none'}`,
                 paddingLeft: '4.3rem',
                 paddingRight: '1.8rem',
             }}
@@ -217,6 +180,87 @@ function drawSlider(
     slider.style.width = `${width}px`;
     slider.style.height = `${height}px`;
     slider.style.display = 'block';
+}
+
+function updateSlider(
+    minimapRef: MinimapChart | null,
+    minimapSliderRef: HTMLDivElement | null,
+    windowBegin: number | null,
+    windowEnd: number | null,
+    windowDuration: number | null
+) {
+    if (minimapRef == null || minimapSliderRef == null) return;
+
+    drawSlider(
+        minimapRef,
+        minimapSliderRef,
+        windowBegin,
+        windowEnd,
+        windowDuration
+    );
+
+    const { options: chartOptions } = minimapRef;
+    if (chartOptions.ampereChart == null) {
+        chartOptions.ampereChart = {
+            windowDuration,
+        };
+    } else {
+        chartOptions.ampereChart.windowDuration = windowDuration;
+    }
+}
+
+function initializeMinimapChart(
+    minimapRef: MinimapChart | null,
+    canvasRef: HTMLCanvasElement | null
+) {
+    if (minimapRef != null) {
+        return minimapRef;
+    }
+
+    if (canvasRef != null) {
+        return new Chart(canvasRef, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'minimap',
+                        fill: false,
+                        borderColor: colors.primary,
+                        data: [],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        pointHitRadius: 0,
+                    },
+                ],
+            },
+            options: {
+                animation: false,
+                layout: {
+                    autoPadding: false,
+                    padding: 0,
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        display: false,
+                        ticks: undefined,
+                        grid: undefined,
+                    },
+                    y: {
+                        type: 'linear',
+                        display: false,
+                        ticks: undefined,
+                        grid: undefined,
+                    },
+                },
+                ampereChart: {},
+            } as MinimapOptions,
+            plugins: [minimapScroll],
+        });
+    }
+
+    // If canvasRef is still null
+    return null;
 }
 
 export default Minimap;

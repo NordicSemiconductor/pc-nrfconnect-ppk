@@ -76,7 +76,6 @@ export default () => {
                     onChange={(v: number) =>
                         dispatch(updateDurationSeconds({ durationSeconds: v }))
                     }
-                    onChangeComplete={() => {}}
                     slider
                 />
             </div>

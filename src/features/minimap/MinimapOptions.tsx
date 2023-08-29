@@ -9,9 +9,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button } from 'pc-nrfconnect-shared';
 
 import {
-    setShowMinimap,
+    setShowMinimapAction,
     showMinimap as getShowMinimap,
-} from '../../slices/chartSlice';
+} from './minimapSlice';
 
 export default () => {
     const showMinimap = useSelector(getShowMinimap);
@@ -24,7 +24,7 @@ export default () => {
             title={`Click in order to ${
                 showMinimap ? 'hide' : 'show'
             } a navigable minimap`}
-            onClick={() => dispatch(setShowMinimap(!showMinimap))}
+            onClick={() => dispatch(setShowMinimapAction(!showMinimap))}
         >
             {showMinimap ? 'Hide Minimap' : 'Show Minimap'}
         </Button>

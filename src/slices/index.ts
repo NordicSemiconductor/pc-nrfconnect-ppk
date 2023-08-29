@@ -8,6 +8,7 @@ import { NrfConnectState } from 'pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
 import deprecatedDevices from '../features/DeprecatedDevice/DeprecatedDeviceSlice';
+import minimap from '../features/minimap/minimapSlice';
 import app from './appSlice';
 import chart from './chartSlice';
 import dataLogger from './dataLoggerSlice';
@@ -23,6 +24,7 @@ export type RootState = NrfConnectState<AppState>;
 const appReducer = combineReducers({
     app,
     chart,
+    minimap,
     trigger,
     voltageRegulator,
     gains,
