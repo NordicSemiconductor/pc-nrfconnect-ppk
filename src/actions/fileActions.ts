@@ -5,13 +5,13 @@
  */
 
 import { dialog, getCurrentWindow } from '@electron/remote';
-import fs from 'fs';
-import { dirname, join } from 'path';
 import {
     currentPane as currentPaneSelector,
     logger,
     setCurrentPane,
-} from 'pc-nrfconnect-shared';
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import fs from 'fs';
+import { dirname, join } from 'path';
 
 import { minimapEvents } from '../features/minimap/minimapEvents';
 import { options, updateTitle } from '../globals';

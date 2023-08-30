@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Group } from 'pc-nrfconnect-shared';
+import { Button, Group } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { load, screenshot } from '../../actions/fileActions';
 import { appState, toggleSaveChoiceDialog } from '../../slices/appSlice';

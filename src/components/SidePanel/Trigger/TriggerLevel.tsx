@@ -9,7 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import SelectableContext from 'react-bootstrap/SelectableContext';
 import { useDispatch } from 'react-redux';
-import { NumberInlineInput } from 'pc-nrfconnect-shared';
+import { NumberInlineInput } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import PropTypes from 'prop-types';
 
 import { updateTriggerLevel } from '../../../actions/deviceActions';

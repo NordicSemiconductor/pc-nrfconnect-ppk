@@ -6,7 +6,10 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { DialogButton, GenericDialog } from 'pc-nrfconnect-shared';
+import {
+    DialogButton,
+    GenericDialog,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import installSpecificVersionGif from '../../../resources/install_specific_version.gif';
 import { getShowPPK1Dialog, setShowPPK1Dialog } from './DeprecatedDeviceSlice';

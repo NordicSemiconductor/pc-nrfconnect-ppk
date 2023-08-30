@@ -6,8 +6,8 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
-import { colors } from 'pc-nrfconnect-shared';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { options } from '../../globals';

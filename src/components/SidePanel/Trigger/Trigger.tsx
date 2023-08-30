@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Group } from 'pc-nrfconnect-shared';
+import { Group } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { triggerState } from '../../../slices/triggerSlice';
 import { CONTINUOUS } from './triggerConstants';

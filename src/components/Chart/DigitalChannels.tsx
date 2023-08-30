@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { ChartOptions, LineControllerDatasetOptions } from 'chart.js';
-import { colors } from 'pc-nrfconnect-shared';
 
 import { DigitalChannelStates, DigitalChannelsType } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';

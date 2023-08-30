@@ -3,12 +3,12 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
-import { testUtils } from 'pc-nrfconnect-shared/test';
+import { testUtils } from '@nordicsemiconductor/pc-nrfconnect-shared/test';
 
 import appReducer from '../slices';
 
-jest.mock('pc-nrfconnect-shared', () => ({
-    ...jest.requireActual('pc-nrfconnect-shared'),
+jest.mock('@nordicsemiconductor/pc-nrfconnect-shared', () => ({
+    ...jest.requireActual('@nordicsemiconductor/pc-nrfconnect-shared'),
     getAppDir: () => '/mocked/data/dir',
     getAppDataDir: () => 'mocked/data/dir',
     getLastSaveDir: () => 'mocked/data/dir',

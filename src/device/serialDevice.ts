@@ -6,9 +6,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: Remove, only added for conservative refactoring to typescript */
 
+import { getAppDir, logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { fork } from 'child_process';
 import path from 'path';
-import { getAppDir, logger } from 'pc-nrfconnect-shared';
 
 import PPKCmd from '../constants';
 import { SpikeFilter } from '../utils/persistentStore';

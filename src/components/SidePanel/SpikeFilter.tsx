@@ -7,7 +7,11 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, CollapsibleGroup, Slider } from 'pc-nrfconnect-shared';
+import {
+    Button,
+    CollapsibleGroup,
+    Slider,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';

@@ -11,9 +11,9 @@ import type {
     ForwardedRef,
 } from 'react-chartjs-2/dist/types';
 import { useDispatch, useSelector } from 'react-redux';
+import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
-import { colors } from 'pc-nrfconnect-shared';
 
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { indexToTimestamp } from '../../globals';

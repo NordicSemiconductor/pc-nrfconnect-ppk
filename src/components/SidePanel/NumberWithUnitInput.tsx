@@ -6,8 +6,11 @@
 
 import React, { useEffect, useState } from 'react';
 import Form from 'react-bootstrap/Form';
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
-import { Range } from 'pc-nrfconnect-shared/typings/generated/src/Slider/range';
+import {
+    NumberInlineInput,
+    Slider,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { Range } from '@nordicsemiconductor/pc-nrfconnect-shared/typings/generated/src/Slider/range';
 import { bool, func, number, shape, string } from 'prop-types';
 
 interface NumberWithUnit {

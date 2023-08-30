@@ -6,7 +6,10 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SidePanel, useHotKey } from 'pc-nrfconnect-shared';
+import {
+    SidePanel,
+    useHotKey,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import MinimapOptions from '../../features/minimap/MinimapOptions';

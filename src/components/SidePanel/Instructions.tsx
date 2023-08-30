@@ -5,7 +5,11 @@
  */
 
 import React from 'react';
-import { Button, Group, openUrl } from 'pc-nrfconnect-shared';
+import {
+    Button,
+    Group,
+    openUrl,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 const urls = {
     ppkUserGuide:

@@ -6,11 +6,11 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
+import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { deserialize, Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
 import { unit } from 'mathjs';
-import { logger } from 'pc-nrfconnect-shared';
 import { pipeline, Writable } from 'stream';
 import { promisify } from 'util';
 import { createInflateRaw } from 'zlib';

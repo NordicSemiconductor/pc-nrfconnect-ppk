@@ -16,7 +16,15 @@ export default () => {
     const active = useSelector(isDataLoggerPane);
     useEffect(() => {
         dispatch(setupOptions());
-        return active ? () => dispatch(samplingStop()) : undefined;
+        return () => {
+            if (active) {
+                () => dispatch(samplingStop());
+            }
+        };
     }, [active, dispatch]);
-    return active && <Chart digitalChannelsEnabled />;
+
+    if (!active) {
+        return null;
+    }
+    return <Chart digitalChannelsEnabled />;
 };

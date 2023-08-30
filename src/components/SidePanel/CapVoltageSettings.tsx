@@ -12,7 +12,7 @@ import {
     NumberInlineInput,
     Slider,
     usageData,
-} from 'pc-nrfconnect-shared';
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
 import {

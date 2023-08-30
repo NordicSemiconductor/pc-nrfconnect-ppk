@@ -8,8 +8,8 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
+import { Group, Slider } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { unit } from 'mathjs';
-import { Group, Slider } from 'pc-nrfconnect-shared';
 
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';

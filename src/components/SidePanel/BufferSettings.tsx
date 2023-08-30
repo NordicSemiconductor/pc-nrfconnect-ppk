@@ -8,14 +8,14 @@ import React, { useState } from 'react';
 import FormLabel from 'react-bootstrap/FormLabel';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentWindow } from '@electron/remote';
-import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
-import { unit } from 'mathjs';
 import {
     Button,
     Group,
     NumberInlineInput,
     usageData,
-} from 'pc-nrfconnect-shared';
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
+import { unit } from 'mathjs';
 
 import {
     changeMaxBufferSizeAction,

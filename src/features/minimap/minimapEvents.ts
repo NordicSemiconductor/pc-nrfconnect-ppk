@@ -10,7 +10,7 @@ import { options } from '../../globals';
 
 export const eventEmitter = new EventEmitter();
 export const minimapEvents = (() => {
-    let intervalId: NodeJS.Timer;
+    let intervalId: NodeJS.Timeout;
     return {
         startInterval: () => {
             const THREE_SECONDS_IN_MS = 3000;

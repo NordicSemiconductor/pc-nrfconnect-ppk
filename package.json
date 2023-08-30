@@ -10,10 +10,18 @@
     },
     "author": "Nordic Semiconductor ASA",
     "license": "SEE LICENSE IN LICENSE",
-    "engines": {
-        "nrfconnect": ">=4.0.0"
-    },
     "main": "dist/bundle.js",
+    "nrfConnectForDesktop": {
+        "html": "dist/index.html",
+        "nrfutil": {
+            "device": [
+                "1.2.2"
+            ]
+        }
+    },
+    "engines": {
+        "nrfconnect": "^4.1.2"
+    },
     "files": [
         "dist/",
         "resources/icon.*",
@@ -39,16 +47,16 @@
         "nordic-publish": "node ./dist/nordic-publish.js"
     },
     "devDependencies": {
+        "@nordicsemiconductor/pc-nrfconnect-shared": "^97.0.0",
         "@types/redux-mock-store": "^1.0.3",
         "bson": "4.6.5",
         "chart.js": "^4.3.3",
         "mathjs": "^10.6.3",
-        "pc-nrfconnect-shared": "github:NordicSemiconductor/pc-nrfconnect-shared#v79",
         "react-chartjs-2": "^5.2.0",
         "redux-mock-store": "^1.5.4"
     },
     "eslintConfig": {
-        "extends": "./node_modules/pc-nrfconnect-shared/config/eslintrc"
+        "extends": "./node_modules/@nordicsemiconductor/pc-nrfconnect-shared/config/eslintrc"
     },
-    "prettier": "./node_modules/pc-nrfconnect-shared/config/prettier.config.js"
+    "prettier": "@nordicsemiconductor/pc-nrfconnect-shared/config/prettier.config.js"
 }

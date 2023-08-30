@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { logger, usageData } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { CoreScaleOptions, Plugin, Scale } from 'chart.js';
-import { logger, usageData } from 'pc-nrfconnect-shared';
 
 import { getSamplesPerSecond, options } from '../../../globals';
 import {

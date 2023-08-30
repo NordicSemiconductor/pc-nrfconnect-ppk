@@ -9,7 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
 import SelectableContext from 'react-bootstrap/SelectableContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { NumberInlineInput, usageData } from 'pc-nrfconnect-shared';
+import { NumberInlineInput, usageData } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { func, number } from 'prop-types';
 
 import {

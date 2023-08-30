@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
-import { logger } from 'pc-nrfconnect-shared';
 
 import { indexToTimestamp, options } from '../globals';
 import { hideExportDialog } from '../slices/appSlice';

@@ -8,7 +8,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: Remove, only added for conservative refactoring to typescript */
 
-import { isDevelopment, logger, usageData } from 'pc-nrfconnect-shared';
+import {
+    isDevelopment,
+    logger,
+    usageData,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
@@ -58,7 +62,7 @@ import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 import { calculateWindowSize, processTriggerSample } from './triggerActions';
 
 let device: null | SerialDevice = null;
-let updateRequestInterval: NodeJS.Timer;
+let updateRequestInterval: NodeJS.Timeout | undefined;
 
 const zeroCap = isDevelopment
     ? (n: number) => n

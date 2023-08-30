@@ -16,7 +16,16 @@ export default () => {
     const active = useSelector(isRealTimePane);
     useEffect(() => {
         dispatch(setupOptions());
-        return active ? () => dispatch(triggerStop()) : undefined;
+
+        return () => {
+            if (active) {
+                () => dispatch(triggerStop());
+            }
+        };
     }, [active, dispatch]);
-    return active && <Chart />;
+
+    if (!active) {
+        return null;
+    }
+    return <Chart />;
 };
