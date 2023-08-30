@@ -8,7 +8,10 @@ import React, { useEffect } from 'react';
 import BootstrapCollapse from 'react-bootstrap/Collapse';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import {
+    NumberInlineInput,
+    Slider,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';

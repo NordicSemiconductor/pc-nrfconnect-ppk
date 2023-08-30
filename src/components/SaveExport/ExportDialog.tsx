@@ -13,9 +13,9 @@ import ProgressBar from 'react-bootstrap/ProgressBar';
 import Row from 'react-bootstrap/Row';
 import { useDispatch, useSelector } from 'react-redux';
 import { dialog } from '@electron/remote';
+import { Toggle } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
-import { Toggle } from 'pc-nrfconnect-shared';
 
 import exportChart from '../../actions/exportChartAction';
 import { indexToTimestamp } from '../../globals';

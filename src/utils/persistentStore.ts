@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import {
+    getAppDataDir,
+    getPersistentStore,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { kMaxLength as maxBufferSizeForSystem } from 'buffer';
 import { unit } from 'mathjs';
-import { getAppDataDir, getPersistentStore } from 'pc-nrfconnect-shared';
 
 const LAST_SAVE_DIR = 'lastSaveDir';
 const SPIKE_FILTER_SAMPLES = 'spikeFilter.samples';

@@ -6,7 +6,10 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { CollapsibleGroup, Toggle } from 'pc-nrfconnect-shared';
+import {
+    CollapsibleGroup,
+    Toggle,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
     chartState,

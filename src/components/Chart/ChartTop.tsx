@@ -8,8 +8,8 @@ import React, { MutableRefObject } from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
+import { Toggle } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { BigNumber, Fraction, unit } from 'mathjs';
-import { Toggle } from 'pc-nrfconnect-shared';
 
 import {
     chartState,
@@ -74,7 +74,7 @@ const ChartTop = ({
     ].slice(maxFreqLog10 - sampleFreqLog10, maxFreqLog10 - sampleFreqLog10 + 6);
 
     return (
-        <div className="chart-top d-flex justify-content-between align-items-center my-2 flex-row">
+        <div className="chart-top d-flex justify-content-between align-items-center tw-min-w-[1200px] my-2 flex-row">
             <div className="settings-y-axis">
                 <Toggle
                     label="LOGARITHMIC Y-AXIS"

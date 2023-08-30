@@ -6,7 +6,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 
-import { logger } from 'pc-nrfconnect-shared';
+import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import SerialDevice from '../device/serialDevice';
 import { indexToTimestamp } from '../globals';

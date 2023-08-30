@@ -8,7 +8,7 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
-import { Group, Toggle } from 'pc-nrfconnect-shared';
+import { Group, Toggle } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { setDeviceRunning, setPowerMode } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';

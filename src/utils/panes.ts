@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { currentPane } from 'pc-nrfconnect-shared';
+import { currentPane } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import type { RootState } from '../slices';
 

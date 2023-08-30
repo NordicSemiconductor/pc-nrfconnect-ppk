@@ -16,6 +16,7 @@ import React, {
 } from 'react';
 import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHotKey } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import {
     Chart as ChartJS,
     LinearScale,
@@ -24,7 +25,6 @@ import {
     PointElement,
     Title,
 } from 'chart.js';
-import { useHotKey } from 'pc-nrfconnect-shared';
 
 import Minimap from '../../features/minimap/Minimap';
 import {

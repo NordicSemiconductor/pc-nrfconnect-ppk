@@ -13,7 +13,7 @@ import {
     getAppFile,
     logger,
     sdfuDeviceSetup,
-} from 'pc-nrfconnect-shared';
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { close, open } from '../actions/deviceActions';
 import { setShowPPK1Dialog } from '../features/DeprecatedDevice/DeprecatedDeviceSlice';

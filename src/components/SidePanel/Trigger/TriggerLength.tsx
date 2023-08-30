@@ -7,7 +7,10 @@
 import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { NumberInlineInput, Slider } from 'pc-nrfconnect-shared';
+import {
+    NumberInlineInput,
+    Slider,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { triggerLengthUpdate } from '../../../actions/deviceActions';
 import { triggerState } from '../../../slices/triggerSlice';

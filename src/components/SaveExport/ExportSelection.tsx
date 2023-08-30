@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
-import { logger } from 'pc-nrfconnect-shared';
+import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { options, timestampToIndex } from '../../globals';
 
