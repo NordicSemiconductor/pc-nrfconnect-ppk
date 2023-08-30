@@ -16,14 +16,19 @@ export const minimapEvents = (() => {
             const THREE_SECONDS_IN_MS = 3000;
             const interval = THREE_SECONDS_IN_MS;
             const totalSamplingTime =
-                options.samplingTime * options.data.length;
+                (options.samplingTime / 1000) * options.data.length;
             intervalId = setInterval(() => {
                 eventEmitter.emit('updateMinimap');
             }, interval);
 
-            setTimeout(() => {
-                clearInterval(intervalId);
-            }, totalSamplingTime);
+            if (totalSamplingTime < 2_147_483_647) {
+                // setTimeout is restricted to 32-bit value
+                // Just drop the clearInterval if the total sampling time is more than that,
+                // and trust that it will be cleared by either stop or clear.
+                setTimeout(() => {
+                    clearInterval(intervalId);
+                }, totalSamplingTime);
+            }
         },
         stop: () => {
             clearInterval(intervalId);
@@ -33,6 +38,7 @@ export const minimapEvents = (() => {
             eventEmitter.emit('updateMinimap');
         },
         clear: () => {
+            clearInterval(intervalId);
             eventEmitter.emit('clearMinimap');
         },
     };

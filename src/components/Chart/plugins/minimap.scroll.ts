@@ -16,6 +16,8 @@ interface MinimapScroll extends Plugin<'line'> {
     dataBufferStep: number;
     globalDataBufferIndex: number;
     localDataBufferIndex: number;
+    scaleDownFlag: boolean;
+    adjustDataResolution: () => void;
     updateMinimapData: (chart: MinimapChart) => void;
     clearMinimap: (chart: MinimapChart) => void;
 }
@@ -53,10 +55,11 @@ function pan(event: PointerEvent, chart: MinimapChart) {
 const plugin: MinimapScroll = {
     id: 'minimapScroll',
     leftClickPressed: false,
-    dataBufferStep: 1000,
-    dataBuffer: new Array((options.data.length / 1000) * 2),
+    dataBufferStep: 1,
+    dataBuffer: new Array(1_000 * 2),
     globalDataBufferIndex: 0,
     localDataBufferIndex: 0,
+    scaleDownFlag: false,
 
     beforeInit(chart: MinimapChart) {
         const { canvas } = chart.ctx;
@@ -127,22 +130,62 @@ const plugin: MinimapScroll = {
         });
     },
 
-    updateMinimapData(chart) {
-        do {
-            const accumulatedData = accumulateData(
-                this.globalDataBufferIndex,
-                this.dataBufferStep
-            );
-            this.dataBuffer[this.localDataBufferIndex] = accumulatedData[0];
-            this.localDataBufferIndex += 1;
-            this.dataBuffer[this.localDataBufferIndex] = accumulatedData[1];
-            this.localDataBufferIndex += 1;
+    adjustDataResolution() {
+        // Figure out how far the sample has come, in case it's a loaded sample
+        const numberOfSamples = options.index;
 
-            this.globalDataBufferIndex += this.dataBufferStep;
-        } while (
-            this.globalDataBufferIndex + this.dataBufferStep <
-            options.index
-        );
+        // Figure out a resolution based on the number of samples.
+        if (numberOfSamples < 1_000) {
+            this.scaleDownFlag = false;
+            this.dataBufferStep = 1;
+        } else {
+            this.scaleDownFlag = true;
+            this.dataBufferStep = Math.ceil(numberOfSamples / (1_000 * 0.8));
+        }
+
+        this.dataBuffer.fill({ x: 0, y: undefined });
+        this.globalDataBufferIndex = 0;
+        this.localDataBufferIndex = 0;
+    },
+
+    updateMinimapData(chart) {
+        if (options.index < 400) {
+            // Not able to make it look any good...
+            return;
+        }
+
+        if (options.index / this.dataBufferStep > 1_000) {
+            // Buffer would overflow, so adjust the resolution.
+            this.adjustDataResolution();
+        }
+
+        if (this.scaleDownFlag) {
+            do {
+                const accumulatedData = accumulateData(
+                    this.globalDataBufferIndex,
+                    this.dataBufferStep
+                );
+                this.dataBuffer[this.localDataBufferIndex] = accumulatedData[0];
+                this.localDataBufferIndex += 1;
+                this.dataBuffer[this.localDataBufferIndex] = accumulatedData[1];
+                this.localDataBufferIndex += 1;
+
+                this.globalDataBufferIndex += this.dataBufferStep;
+            } while (
+                this.globalDataBufferIndex + this.dataBufferStep <
+                options.index
+            );
+        } else {
+            while (this.globalDataBufferIndex + 1 <= options.index) {
+                this.dataBuffer[this.localDataBufferIndex] = {
+                    x: indexToTimestamp(this.globalDataBufferIndex),
+                    y: options.data[this.globalDataBufferIndex],
+                };
+
+                this.globalDataBufferIndex += 1;
+                this.localDataBufferIndex += 1;
+            }
+        }
 
         /* @ts-expect-error Have not figured out how to handle this */
         chart.data.datasets[0].data = this.dataBuffer;
@@ -150,9 +193,18 @@ const plugin: MinimapScroll = {
             chart.options.scales.x.max = options.timestamp;
         }
         chart.update();
+
+        if (this.globalDataBufferIndex > options.index && this.scaleDownFlag) {
+            // Redo last interval if options.index has not come far enough;
+            // TODO: Make sure this is not async ?
+            this.localDataBufferIndex -= 2;
+            this.globalDataBufferIndex -= this.dataBufferStep;
+        }
     },
 
     clearMinimap(chart) {
+        this.scaleDownFlag = false;
+        this.dataBufferStep = 1;
         this.dataBuffer.fill({ x: 0, y: undefined });
         this.globalDataBufferIndex = 0;
         this.localDataBufferIndex = 0;

@@ -60,6 +60,9 @@ describe('ExportDialog', () => {
     it('should show the number of records only inside the window', () => {
         const numberOfRecordsText = '100000 records';
 
+        // Need to adjust options in order to at least contain more than necessary
+        options.timestamp = 1_000_000 * 7;
+
         render(<ExportDialog />, initialStateActions);
         const radioWindow = screen.getByText('Window');
         fireEvent.click(radioWindow);

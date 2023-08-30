@@ -6,7 +6,7 @@
 
 import { currentPane } from 'pc-nrfconnect-shared';
 
-import { RootState } from '../slices';
+import type { RootState } from '../slices';
 
 export const REAL_TIME = 1;
 export const DATA_LOGGER = 0;

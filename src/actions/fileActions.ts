@@ -103,6 +103,7 @@ export const load =
         logger.info(`State successfully restored`);
         setLoading(false);
 
+        minimapEvents.clear();
         minimapEvents.update();
     };
 
