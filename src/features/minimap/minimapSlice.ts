@@ -6,9 +6,9 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { isDataLoggerPane } from '../utils/panes';
-import type { RootState } from '.';
-import type { TAction } from './thunk';
+import type { RootState } from '../../slices/index';
+import type { TAction } from '../../slices/thunk';
+import { isDataLoggerPane } from '../../utils/panes';
 
 interface MinimapState {
     showMinimap: boolean;
