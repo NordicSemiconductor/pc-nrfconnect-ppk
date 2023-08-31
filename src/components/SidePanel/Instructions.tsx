@@ -12,8 +12,6 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 const urls = {
-    ppkUserGuide:
-        'https://infocenter.nordicsemi.com/topic/ug_ppk/UG/ppk/PPK_user_guide_Intro.html',
     ppk2UserGuide:
         'https://infocenter.nordicsemi.com/topic/ug_ppk2/UG/ppk/PPK_user_guide_Intro.html',
     purchase:
@@ -27,20 +25,12 @@ export default () => (
             measures real-time power consumption of your designs.
         </p>
         <p>
-            Select a device to sample real-time measurements or load an existing
-            data set.
+            Select a PPK2 device to sample real-time measurements or load an
+            existing data set.
         </p>
         <p>
-            <i>PPK</i> or <i>PPK2</i> hardware is required to sample real-time
-            measurements.
+            <i>PPK2</i> hardware is required to sample real-time measurements.
         </p>
-        <Button
-            className="pl-0"
-            variant="link"
-            onClick={() => openUrl(urls.ppkUserGuide)}
-        >
-            PPK User Guide
-        </Button>
         <Button
             className="pl-0"
             variant="link"
