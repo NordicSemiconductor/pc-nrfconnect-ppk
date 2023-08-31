@@ -40,6 +40,7 @@ interface ChartState {
     yAxisLog: boolean;
     windowBeginLock: null | number;
     windowEndLock: null | number;
+    showSettings: boolean;
 }
 
 const initialWindowDuration = 7 * 1e6;
@@ -65,6 +66,7 @@ const initialState = (): ChartState => ({
     yAxisLog: false,
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
+    showSettings: false,
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -266,6 +268,12 @@ const chartSlice = createSlice({
             state.windowBeginLock = null;
             state.windowEndLock = null;
         },
+        setShowSettings: (
+            state,
+            { payload: showSettings }: PayloadAction<boolean>
+        ) => {
+            state.showSettings = showSettings;
+        },
     },
 });
 
@@ -348,6 +356,8 @@ function calcBuffer(windowDuration: number, windowEnd: number) {
 export const chartState = (state: RootState) => state.app.chart;
 export const getWindowDuration = (state: RootState) =>
     state.app.chart.windowDuration;
+export const showChartSettings = (state: RootState) =>
+    state.app.chart.showSettings;
 
 export const {
     panWindow,
@@ -366,6 +376,7 @@ export const {
     toggleYAxisLock,
     toggleYAxisLog,
     updateHasDigitalChannels,
+    setShowSettings,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;
