@@ -17,6 +17,7 @@ import {
     SampleValues,
     SupportedDevice,
 } from '../device/types';
+import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import {
     indexToTimestamp,
     initializeBitsBuffer,
@@ -139,6 +140,7 @@ export function samplingStart() {
         dispatch(samplingStartAction());
         await device!.ppkAverageStart();
         logger.info('Sampling started');
+        startPreventSleep();
     };
 }
 
@@ -148,6 +150,7 @@ export function samplingStop() {
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         logger.info('Sampling stopped');
+        stopPreventSleep();
     };
 }
 
@@ -158,6 +161,7 @@ export function triggerStop() {
         await device.ppkTriggerStop();
         dispatch(toggleTriggerAction({ triggerRunning: false }));
         dispatch(clearSingleTriggerWaitingAction());
+        stopPreventSleep();
     };
 }
 
@@ -409,7 +413,7 @@ export function open(deviceInfo: any) {
             ) {
                 const timestamp = Date.now();
                 requestAnimationFrame(() => {
-                    /* 
+                    /*
                         requestAnimationFrame pauses when app is in the background.
                         If timestamp is more than 10ms ago, do not dispatch animationAction.
                     */
@@ -470,6 +474,7 @@ export function triggerStart() {
         logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
 
         await device!.ppkTriggerSet(triggerLevel!);
+        startPreventSleep();
     };
 }
 
@@ -482,6 +487,7 @@ export function triggerSingleSet() {
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
 
         await device!.ppkTriggerSingleSet(triggerLevel!);
+        startPreventSleep();
     };
 }
 

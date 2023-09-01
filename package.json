@@ -1,6 +1,6 @@
 {
     "name": "pc-nrfconnect-ppk",
-    "version": "3.5.5",
+    "version": "3.5.6-sleepfix",
     "displayName": "Power Profiler",
     "description": "App for use with Nordic Power Profiler Kits",
     "homepage": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk",
