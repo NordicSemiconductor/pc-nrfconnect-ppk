@@ -17,5 +17,6 @@ export async function startPreventSleep() {
 export function stopPreventSleep() {
     if (preventSleepId !== undefined) {
         preventSleep.end(preventSleepId);
+        preventSleepId = undefined;
     }
 }
