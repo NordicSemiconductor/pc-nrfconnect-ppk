@@ -17,6 +17,7 @@ import {
 import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
 import { minimapEvents } from '../features/minimap/minimapEvents';
+import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import {
     indexToTimestamp,
     initializeBitsBuffer,
@@ -125,6 +126,7 @@ export function samplingStart() {
         await device!.ppkAverageStart();
         logger.info('Sampling started');
         minimapEvents.startInterval();
+        startPreventSleep();
     };
 }
 
@@ -135,6 +137,7 @@ export function samplingStop() {
         await device.ppkAverageStop();
         logger.info('Sampling stopped');
         minimapEvents.stop();
+        stopPreventSleep();
     };
 }
 
@@ -145,6 +148,7 @@ export function triggerStop() {
         await device.ppkTriggerStop();
         dispatch(toggleTriggerAction({ triggerRunning: false }));
         dispatch(clearSingleTriggerWaitingAction());
+        stopPreventSleep();
     };
 }
 
@@ -437,6 +441,7 @@ export function triggerStart() {
         logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
 
         await device!.ppkTriggerSet();
+        startPreventSleep();
     };
 }
 
@@ -449,6 +454,7 @@ export function triggerSingleSet() {
         logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
 
         await device!.ppkTriggerSingleSet();
+        startPreventSleep();
     };
 }
 
