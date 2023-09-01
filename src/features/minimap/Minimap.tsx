@@ -89,7 +89,7 @@ const Minimap = () => {
             <canvas
                 ref={canvasRef}
                 id="minimap"
-                className="tw-max-h-20 tw-w-full tw-border-solid tw-border"
+                className="tw-max-h-20 tw-w-full tw-border tw-border-solid"
                 style={{
                     borderColor: colors.gray100,
                     display: options.index === 0 ? 'none' : 'block',
@@ -97,7 +97,7 @@ const Minimap = () => {
             />
             <div
                 ref={minimapSlider}
-                className="tw-max-h-20 tw-absolute tw-bg-gray-400 tw-opacity-50 tw-pointer-events-none tw-overflow-hidden"
+                className="tw-pointer-events-none tw-absolute tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50"
                 style={{ contain: 'strict', top: '1rem' }}
             />
         </div>
@@ -106,7 +106,7 @@ const Minimap = () => {
 
 const MinimapDefaultState = () => (
     <div
-        className="tw-h-full tw-w-full tw-flex tw-items-center tw-justify-center"
+        className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
         style={{ backgroundColor: colors.gray100 }}
     >
         Minimap - not enough data available...
