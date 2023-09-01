@@ -9,6 +9,7 @@
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import SerialDevice from '../device/serialDevice';
+import { stopPreventSleep } from '../features/preventSleep';
 import { indexToTimestamp } from '../globals';
 import { RootState } from '../slices';
 import { chartTriggerWindowAction } from '../slices/chartSlice';
@@ -82,6 +83,7 @@ export function processTriggerSample(
             logger.info('Trigger received, stopped waiting');
             dispatch(clearSingleTriggerWaitingAction());
             device.ppkTriggerStop();
+            stopPreventSleep();
         }
 
         const shiftedIndex = getShiftedIndex(
