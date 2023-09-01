@@ -6,9 +6,11 @@
 
 import React from 'react';
 import { Line } from 'react-chartjs-2';
+import { useSelector } from 'react-redux';
 import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { ChartOptions, LineControllerDatasetOptions } from 'chart.js';
 
+import { chartState } from '../../slices/chartSlice';
 import { DigitalChannelStates, DigitalChannelsType } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 
@@ -37,13 +39,14 @@ const DigitalChannels = ({
     zoomedOutTooFar,
     cursorData: { begin, end },
 }: DigitalChannelsProperties) => {
+    const { windowDuration } = useSelector(chartState);
     const bitsChartOptions: ChartOptions<'line'> = {
         scales: {
             x: {
                 type: 'linear',
                 display: false,
-                min: begin,
-                max: end,
+                min: begin > 0 ? begin : 0,
+                max: begin > 0 ? end : windowDuration,
                 ticks: {
                     display: false,
                     callback: () => undefined, // override chart.js tick callback which fails on resuming profiling
