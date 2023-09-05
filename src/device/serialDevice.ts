@@ -6,20 +6,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: Remove, only added for conservative refactoring to typescript */
 
-import { getAppDir, logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { fork } from 'child_process';
-import path from 'path';
+import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
+import { SerialPort } from 'serialport';
 
 import PPKCmd from '../constants';
 import { SpikeFilter } from '../utils/persistentStore';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
-import {
-    Mask,
-    modifiers,
-    PPK2,
-    SampleValues,
-    serialDeviceMessage,
-} from './types';
+import { Mask, modifiers, PPK2, SampleValues } from './types';
 
 /* eslint-disable no-bitwise */
 
@@ -61,8 +55,7 @@ class SerialDevice extends Device {
 
     // This are all declared to make typescript aware of their existence.
     private spikeFilter;
-    private path;
-    private child;
+    private path: string;
     private parser: any;
     private expectedCounter: null | number;
     private dataLossCounter: number;
@@ -72,6 +65,9 @@ class SerialDevice extends Device {
     private prevRange: undefined | number;
     private afterSpike: undefined | number;
     private consecutiveRangeSample: undefined | number;
+
+    private port: SerialPort | undefined;
+    private data: Buffer = Buffer.alloc(0);
 
     constructor(
         deviceInfo: PPK2,
@@ -89,31 +85,39 @@ class SerialDevice extends Device {
             samples: 3,
         };
         this.path = deviceInfo.serialport.comName;
-        this.child = fork(
-            path.resolve(getAppDir(), 'worker', 'serialDevice.js')
-        );
-        this.parser = null;
-        this.resetDataLossCounter();
+        this.port = new SerialPort({
+            path: this.path,
+            baudRate: 115200,
+            autoOpen: false,
+        });
 
-        this.child.on('message', (message: serialDeviceMessage) => {
+        this.port.on('data', buf => {
+            this.data = Buffer.concat([this.data, buf]);
+        });
+
+        setInterval(() => {
+            if (this.data.length === 0) return;
+
             if (!this.parser) {
                 console.error('Program logic error, parser is not set.');
                 return;
             }
 
-            if ('data' in message && message.data) {
-                this.parser(Buffer.from(message.data));
-                return;
-            }
-            console.log(`message: ${JSON.stringify(message)}`);
-        });
-        this.child.on('close', code => {
-            if (code) {
-                console.log(`Child process exited with code ${code}`);
+            this.parser(Buffer.from(this.data));
+            this.data = Buffer.alloc(0);
+        }, 30);
+
+        this.parser = null;
+        this.resetDataLossCounter();
+
+        this.port.on('close', (error: Error) => {
+            if (error) {
+                logger.error(`Port closed with error ${describeError(error)}`);
             } else {
-                console.log('Child process cleanly exited');
+                logger.info('Port close.');
             }
         });
+
         this.expectedCounter = null;
         this.dataLossCounter = 0;
         this.corruptedSamples = [];
@@ -182,7 +186,9 @@ class SerialDevice extends Device {
     }
 
     start() {
-        this.child.send({ open: this.path });
+        this.port?.open(err => {
+            logger.error(describeError(err));
+        });
         return this.getMetadata();
     }
 
@@ -199,7 +205,7 @@ class SerialDevice extends Device {
     }
 
     stop() {
-        this.child.kill();
+        this.port?.close();
     }
 
     sendCommand(cmd: PPKCmd) {
@@ -218,7 +224,7 @@ class SerialDevice extends Device {
             this.consecutiveRangeSample = 0;
             this.afterSpike = 0;
         }
-        this.child.send({ write: cmd });
+        this.port?.write(cmd);
         return Promise.resolve(cmd.length);
     }
 
