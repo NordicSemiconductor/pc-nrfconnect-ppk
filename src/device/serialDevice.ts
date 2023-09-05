@@ -68,6 +68,7 @@ class SerialDevice extends Device {
 
     private port: SerialPort | undefined;
     private data: Buffer = Buffer.alloc(0);
+    private intervalId: NodeJS.Timeout | undefined;
 
     constructor(
         deviceInfo: PPK2,
@@ -95,22 +96,11 @@ class SerialDevice extends Device {
             this.data = Buffer.concat([this.data, buf]);
         });
 
-        setInterval(() => {
-            if (this.data.length === 0) return;
-
-            if (!this.parser) {
-                console.error('Program logic error, parser is not set.');
-                return;
-            }
-
-            this.parser(Buffer.from(this.data));
-            this.data = Buffer.alloc(0);
-        }, 30);
-
         this.parser = null;
         this.resetDataLossCounter();
 
         this.port.on('close', (error: Error) => {
+            clearInterval(this.intervalId);
             if (error) {
                 logger.error(`Port closed with error ${describeError(error)}`);
             } else {
@@ -188,6 +178,21 @@ class SerialDevice extends Device {
     start() {
         this.port?.open(err => {
             logger.error(describeError(err));
+            if (!err) {
+                this.intervalId = setInterval(() => {
+                    if (this.data.length === 0) return;
+
+                    if (!this.parser) {
+                        console.error(
+                            'Program logic error, parser is not set.'
+                        );
+                        return;
+                    }
+
+                    this.parser(Buffer.from(this.data));
+                    this.data = Buffer.alloc(0);
+                }, 30);
+            }
         });
         return this.getMetadata();
     }
