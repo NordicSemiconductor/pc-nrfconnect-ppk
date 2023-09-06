@@ -32,7 +32,6 @@ import chartCss from './chart.icss.scss';
 
 const { rightMarginPx, yAxisWidthPx } = chartCss;
 
-const valueRange = { min: 0, max: undefined };
 const yAxisWidth = parseInt(yAxisWidthPx, 10);
 const rightMargin = parseInt(rightMarginPx, 10);
 const dataColor = colors.nordicBlue;
@@ -227,8 +226,8 @@ const AmpereChart = ({
             },
             yScale: {
                 type: yAxisLog ? 'logarithmic' : 'linear',
-                min: yMin === null ? valueRange.min : yMin,
-                max: yMax === null ? valueRange.max : yMax,
+                min: yMin != null ? yMin : undefined,
+                max: yMax != null ? yMax : undefined,
                 ticks: {
                     maxTicksLimit: 7,
                     callback: uA =>
