@@ -31,7 +31,6 @@ const minimapSlice = createSlice({
 export const setShowMinimapAction =
     (showMinimap: boolean): TAction =>
     (dispatch, getState) => {
-        console.count('setShowMinimapAction');
         const isInDataLoggerPane = isDataLoggerPane(getState());
 
         if (!isInDataLoggerPane) {
