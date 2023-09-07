@@ -7,9 +7,11 @@
 import React, { useEffect, useState } from 'react';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
+import { useSelector } from 'react-redux';
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { options, timestampToIndex } from '../../globals';
+import { isRealTimePane } from '../../utils/panes';
 
 interface ExportSelection {
     isExportDialogVisible: boolean;
@@ -32,6 +34,7 @@ const ExportSelection = ({
     cursorEnd,
     windowDuration,
 }: ExportSelection) => {
+    const isRealTime = useSelector(isRealTimePane);
     const setExportIndexes = (begin: number, end: number) => {
         setIndexBegin(begin);
         setIndexEnd(end);
@@ -110,7 +113,7 @@ const ExportSelection = ({
         if (cursorBegin != null) {
             updateRadioSelected(2);
         } else {
-            updateRadioSelected(0);
+            updateRadioSelected(1);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExportDialogVisible]);
@@ -125,6 +128,7 @@ const ExportSelection = ({
                 value={radioValue}
             >
                 {exportSelection
+                    .filter(radio => !isRealTime || radio.name !== 'All')
                     .filter(radio => radio.value !== 2 || cursorBegin != null)
                     .map(radio => (
                         <ToggleButton

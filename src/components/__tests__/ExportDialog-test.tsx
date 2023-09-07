@@ -49,6 +49,9 @@ describe('ExportDialog', () => {
         options.index = expectedNumberOfRecords - 1; // Header + all samples
         render(<ExportDialog />, initialStateActions);
 
+        const buttonToSelectAll = screen.getByText('All');
+        fireEvent.click(buttonToSelectAll);
+
         const numberOfRecords = screen.getByText(numberOfRecordsText);
         expect(numberOfRecords).not.toBeUndefined();
         const totalSize = screen.getByText(totalSizeLargerThanZeroPattern);
