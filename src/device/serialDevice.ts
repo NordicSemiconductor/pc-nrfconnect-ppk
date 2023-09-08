@@ -309,12 +309,15 @@ class SerialDevice extends Device {
         return (
             new Promise(resolve => {
                 this.parser = (data: Buffer) => {
+                    const t = performance.now();
                     metadata = `${metadata}${data}`;
                     if (metadata.includes('END')) {
                         // hopefully we have the complete string, HW is the last line
                         this.parser = this.parseMeasurementData.bind(this);
                         resolve(metadata);
                     }
+
+                    console.log('Parsing data', performance.now() - t);
                 };
                 this.sendCommand([PPKCmd.GetMetadata]);
             })

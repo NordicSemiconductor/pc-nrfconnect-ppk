@@ -75,6 +75,7 @@ const { rightMarginPx } = chartCss;
 const rightMargin = parseInt(rightMarginPx, 10);
 
 const calcStats = (_begin?: null | number, _end?: null | number) => {
+    const t = performance.now();
     if (_begin == null || _end == null) {
         return null;
     }
@@ -103,6 +104,7 @@ const calcStats = (_begin?: null | number, _end?: null | number) => {
             ++len;
         }
     }
+    console.log('calcStats', performance.now() - t);
     return {
         average: sum / (len || 1),
         max,
@@ -353,6 +355,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         if (!isInitialised(dataProcessor)) {
             return;
         }
+        const t = performance.now();
         const calculation = setTimeout(() => {
             const processedData = dataProcessor.process(
                 begin,
@@ -367,6 +370,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             setBitsLineData(processedData.bitsLineData);
         });
 
+        console.log('new chart Data', performance.now() - t);
         return () => {
             clearTimeout(calculation);
         };

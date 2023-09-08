@@ -234,6 +234,7 @@ export function open(deviceInfo: any) {
         };
 
         const onSample = ({ value, bits, endOfTrigger }: SampleValues) => {
+            const t = performance.now();
             if (options.timestamp == null) {
                 options.timestamp = 0;
             }
@@ -253,6 +254,7 @@ export function open(deviceInfo: any) {
                 !triggerStartIndex &&
                 !triggerSingleWaiting
             ) {
+                console.log('onSample', performance.now() - t);
                 return;
             }
 
@@ -273,6 +275,7 @@ export function open(deviceInfo: any) {
                         prevValue = zeroCappedValue;
                         prevBits |= b16;
                     }
+                    console.log('onSample', performance.now() - t);
                     return;
                 }
                 nbSamples = 0;
@@ -301,6 +304,7 @@ export function open(deviceInfo: any) {
                     })
                 );
             }
+            console.log('onSample', performance.now() - t);
         };
 
         try {

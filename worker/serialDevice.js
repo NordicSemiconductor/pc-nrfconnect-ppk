@@ -47,14 +47,18 @@ process.on('message', msg => {
 
         let data = Buffer.alloc(0);
         port.on('data', buf => {
+            const t = performance.now();
             data = Buffer.concat([data, buf]);
+            console.log('Fill data buffer:', performance.now() - t);
         });
         setInterval(() => {
             if (data.length === 0) return;
+            const t = performance.now();
             process.send(data.slice(), err => {
                 if (err) console.log(err);
             });
             data = Buffer.alloc(0);
+            console.log('Sending Data to renderer:', performance.now() - t);
         }, 30);
         port.open(err => {
             if (err) {
