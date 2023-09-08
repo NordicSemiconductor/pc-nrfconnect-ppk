@@ -57,7 +57,7 @@ export default () => {
                 <Load />
                 <DisplayOptions />
                 <Save />
-                <MinimapOptions />
+                {dataLoggerPane && <MinimapOptions />}
                 <DeprecatedDeviceDialog />
             </SidePanel>
         );
@@ -83,7 +83,7 @@ export default () => {
             <PowerMode />
             {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}
-            <MinimapOptions />
+            {dataLoggerPane && <MinimapOptions />}
             {options.timestamp === null || (
                 <>
                     <DisplayOptions />
