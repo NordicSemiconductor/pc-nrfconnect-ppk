@@ -25,8 +25,8 @@ const initialStateActions = [
     }),
     // Set trigger State (app.trigger):
     triggerWindowRangeAction({ min: 1, max: 100 }),
-    triggerLengthSetAction({ triggerLength: TRIGGER_LENGTH }),
-    triggerLevelSetAction({ triggerLevel: 1000 }),
+    triggerLengthSetAction(TRIGGER_LENGTH),
+    triggerLevelSetAction(1000),
 ];
 
 describe('Trigger', () => {

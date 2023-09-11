@@ -67,9 +67,7 @@ describe('Handle trigger', () => {
         const expectedActions = [
             {
                 type: 'trigger/setTriggerStartAction',
-                payload: {
-                    triggerStartIndex: beginIndex,
-                },
+                payload: beginIndex,
             },
         ];
         expect(store.getActions()).toEqual(expectedActions);
@@ -204,9 +202,7 @@ const getExpectedChartActionsPPK2 = (
         },
         {
             type: 'trigger/completeTriggerAction',
-            payload: {
-                origin: fromIndex,
-            },
+            payload: fromIndex,
         },
     ];
 };

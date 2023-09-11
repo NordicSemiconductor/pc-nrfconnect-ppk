@@ -42,73 +42,68 @@ const triggerSlice = createSlice({
     reducers: {
         triggerLevelSetAction(
             state,
-            action: PayloadAction<{ triggerLevel: number | null }>
+            { payload: triggerLevel }: PayloadAction<number | null>
         ) {
-            const { triggerLevel } = action.payload;
-            return { ...state, triggerLevel };
+            state.triggerLevel = triggerLevel;
         },
         triggerLengthSetAction(
             state,
-            action: PayloadAction<{ triggerLength: number }>
+            { payload: triggerLength }: PayloadAction<number>
         ) {
-            const { triggerLength } = action.payload;
-            return { ...state, triggerLength, triggerWindowOffset: 0 };
+            state.triggerLength = triggerLength;
+            state.triggerWindowOffset = 0;
         },
         toggleTriggerAction(
             state,
-            action: PayloadAction<{ triggerRunning: boolean }>
+            { payload: triggerRunning }: PayloadAction<boolean>
         ) {
-            const { triggerRunning } = action.payload;
-            return {
-                ...state,
-                triggerRunning,
-            };
+            state.triggerRunning = triggerRunning;
         },
         setTriggerStartAction(
             state,
-            action: PayloadAction<{ triggerStartIndex: number | null }>
+            { payload: triggerStartIndex }: PayloadAction<number | null>
         ) {
-            const { triggerStartIndex } = action.payload;
-            return { ...state, triggerStartIndex };
+            state.triggerStartIndex = triggerStartIndex;
         },
         triggerSingleSetAction(state) {
-            return {
-                ...state,
-                triggerSingleWaiting: true,
-                triggerRunning: false,
-            };
+            state.triggerSingleWaiting = true;
+            state.triggerRunning = false;
         },
         clearSingleTriggerWaitingAction(state) {
-            return { ...state, triggerSingleWaiting: false };
+            state.triggerSingleWaiting = false;
         },
         triggerWindowRangeAction(
             state,
-            action: PayloadAction<{ min: number; max: number }>
+            {
+                payload: triggerWindowRange,
+            }: PayloadAction<{ min: number; max: number }>
         ) {
-            const triggerWindowRange = action.payload;
-            return { ...state, triggerWindowRange };
+            state.triggerWindowRange = triggerWindowRange;
         },
-        setWindowOffsetAction(state, action: PayloadAction<number>) {
-            const triggerWindowOffset = action.payload;
-            return { ...state, triggerWindowOffset };
+        setWindowOffsetAction(
+            state,
+            { payload: triggerWindowOffset }: PayloadAction<number>
+        ) {
+            state.triggerWindowOffset = triggerWindowOffset;
         },
         setTriggerOriginAction(
             state,
-            action: PayloadAction<{ origin: number | null }>
+            { payload: triggerOrigin }: PayloadAction<number | null>
         ) {
-            const triggerOrigin = action.payload.origin;
-            return { ...state, triggerOrigin };
+            state.triggerOrigin = triggerOrigin;
         },
-        setTriggerState(state) {
-            return { ...state };
+        setTriggerState(
+            _state,
+            { payload: newState }: PayloadAction<TriggerState>
+        ) {
+            return newState;
         },
         completeTriggerAction(
             state,
-            action: PayloadAction<{ origin: number }>
+            { payload: triggerOrigin }: PayloadAction<number>
         ) {
-            const triggerOrigin = action.payload.origin;
-            const triggerStartIndex = null;
-            return { ...state, triggerOrigin, triggerStartIndex };
+            state.triggerOrigin = triggerOrigin;
+            state.triggerStartIndex = null;
         },
     },
 });
