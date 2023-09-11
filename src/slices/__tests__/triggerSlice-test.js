@@ -13,9 +13,7 @@ describe('triggerReducer', () => {
         it('should set trigger level', () => {
             const state = reducer(initialState, {
                 type: triggerActions.triggerLevelSetAction,
-                payload: {
-                    triggerLevel: 5,
-                },
+                payload: 5,
             });
             expect(state.triggerLevel).toEqual(5);
         });
@@ -23,9 +21,7 @@ describe('triggerReducer', () => {
         it('should set trigger length', () => {
             const state = reducer(initialState, {
                 type: triggerActions.triggerLengthSetAction,
-                payload: {
-                    triggerLength: 37.85,
-                },
+                payload: 37.85,
             });
             expect(state.triggerLength).toEqual(37.85);
         });

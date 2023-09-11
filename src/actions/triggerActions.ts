@@ -65,9 +65,7 @@ export function processTriggerSample(
 
         if (!triggerStartIndex) {
             if (currentValue >= triggerLevel!) {
-                dispatch(
-                    setTriggerStartAction({ triggerStartIndex: currentIndex })
-                );
+                dispatch(setTriggerStartAction(currentIndex));
             }
             return;
         }
@@ -95,6 +93,6 @@ export function processTriggerSample(
         const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
         const to = indexToTimestamp(currentIndex - shiftedIndex);
         dispatch(chartTriggerWindowAction(from!, to!, to! - from!));
-        dispatch(completeTriggerAction({ origin: triggerStartIndex }));
+        dispatch(completeTriggerAction(triggerStartIndex));
     };
 }

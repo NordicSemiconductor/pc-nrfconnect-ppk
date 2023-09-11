@@ -119,7 +119,7 @@ const AmpereChart = ({
     const sendTriggerLevel = (level: number) =>
         dispatch(updateTriggerLevelAction(level));
     const updateTriggerLevel = (level: number) =>
-        dispatch(triggerLevelSetAction({ triggerLevel: level }));
+        dispatch(triggerLevelSetAction(level));
 
     const formatCurrent = (uA: number) =>
         typeof uA === 'number'

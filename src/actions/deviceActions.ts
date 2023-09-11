@@ -95,7 +95,7 @@ export const setupOptions =
             logger.error(err);
         }
         dispatch(chartWindowUnLockAction());
-        dispatch(setTriggerOriginAction({ origin: null }));
+        dispatch(setTriggerOriginAction(null));
         dispatch(updateHasDigitalChannels());
         dispatch(animationAction());
     };
@@ -146,7 +146,7 @@ export function triggerStop() {
         if (!device) return;
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
-        dispatch(toggleTriggerAction({ triggerRunning: false }));
+        dispatch(toggleTriggerAction(false));
         dispatch(clearSingleTriggerWaitingAction());
         stopPreventSleep();
     };
@@ -181,7 +181,7 @@ export function close() {
         device.removeAllListeners();
         device = null;
         dispatch(deviceClosedAction());
-        dispatch(triggerLevelSetAction({ triggerLevel: null }));
+        dispatch(triggerLevelSetAction(null));
         logger.info('PPK closed');
         updateTitle();
     };
@@ -315,14 +315,15 @@ export function open(deviceInfo: any) {
             );
             dispatch(setupOptions());
             dispatch(
-                setDeviceRunningAction({ isRunning: device.isRunningInitially })
+                setDeviceRunningAction({
+                    isRunning: device.isRunningInitially,
+                })
             );
             const metadata = device.parseMeta(await device.start());
             const { triggerLength, triggerLevel, triggerWindowRange } =
                 getState().app.trigger;
             if (!triggerLength) await dispatch(triggerLengthUpdate(10));
-            if (!triggerLevel)
-                dispatch(triggerLevelSetAction({ triggerLevel: 1000 }));
+            if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
             if (!triggerWindowRange)
                 dispatch(
                     triggerWindowRangeAction({ ...device.triggerWindowRange })
@@ -426,7 +427,7 @@ export const updateGains =
  */
 export function triggerLengthUpdate(value: number) {
     return (dispatch: TDispatch) => {
-        dispatch(triggerLengthSetAction({ triggerLength: value }));
+        dispatch(triggerLengthSetAction(value));
         logger.info(`Trigger length updated to ${value} ms`);
     };
 }
@@ -434,7 +435,7 @@ export function triggerLengthUpdate(value: number) {
 export function triggerStart() {
     return async (dispatch: TDispatch, getState: () => RootState) => {
         dispatch(resetCursorAndChart());
-        dispatch(toggleTriggerAction({ triggerRunning: true }));
+        dispatch(toggleTriggerAction(true));
         dispatch(clearSingleTriggerWaitingAction());
 
         const { triggerLevel } = getState().app.trigger;
@@ -483,4 +484,4 @@ export function setPowerMode(isSmuMode: boolean) {
 
 export const updateTriggerLevel =
     (triggerLevel: number) => (dispatch: TDispatch) =>
-        dispatch(triggerLevelSetAction({ triggerLevel }));
+        dispatch(triggerLevelSetAction(triggerLevel));
