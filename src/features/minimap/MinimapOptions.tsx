@@ -14,8 +14,8 @@ import {
 } from './minimapSlice';
 
 export default () => {
-    const showMinimap = useSelector(getShowMinimap);
     const dispatch = useDispatch();
+    const showMinimap = useSelector(getShowMinimap);
 
     return (
         <Button

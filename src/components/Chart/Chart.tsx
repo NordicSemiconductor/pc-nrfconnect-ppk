@@ -271,6 +271,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             beginY?: number | null,
             endY?: number | null
         ) => {
+            if (!isDataLoggerPane) return;
             if (beginX === undefined || endX === undefined) {
                 chartReset(windowDuration);
                 return;
@@ -290,11 +291,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             chartWindow(newBeginX, newEndX, beginY, endY);
         },
         [
+            isDataLoggerPane,
             windowBeginLock,
             windowEndLock,
+            chartWindow,
             chartReset,
             windowDuration,
-            chartWindow,
         ]
     );
 

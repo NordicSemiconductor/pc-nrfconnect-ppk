@@ -71,7 +71,7 @@ const plugin: TriggerLevelPlugin = {
     pointerDownHandler(event: PointerEvent, chart: AmpereChartJS) {
         const { label } = this.getCoords(chart) || {};
         if (!label) return;
-        const { x, y } = event || {};
+        const { offsetX: x, offsetY: y } = event || {};
         if (
             x >= label.x &&
             x <= label.x + label.w &&
@@ -92,7 +92,7 @@ const plugin: TriggerLevelPlugin = {
             return;
         }
 
-        chart.triggerLine.y = event.y;
+        chart.triggerLine.y = event.offsetY;
         const {
             scales: { yScale },
         } = chart;
