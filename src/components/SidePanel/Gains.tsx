@@ -42,7 +42,7 @@ const Gains = () => {
                 <React.Fragment key={`${index + 1}`}>
                     <Form.Label
                         title={gainTitles[index]}
-                        className="d-flex justify-content-between flex-row pt-2"
+                        className="d-flex justify-content-between flex-row"
                     >
                         <span>Range {index + 1}</span>
                         <span>{(gain / 100).toFixed(2)}</span>

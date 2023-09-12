@@ -6,9 +6,18 @@
 
 @import '~@nordicsemiconductor/pc-nrfconnect-shared/styles';
 
+.sidepanel-group .body > * {
+    margin: 0 !important;
+}
+.sidepanel-group .body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .side-panel {
     .form-label {
-        margin-bottom: 0ex;
+        margin-bottom: 0;
         display: flex;
         align-items: baseline;
     }
@@ -60,20 +69,6 @@
         .btn:disabled {
             opacity: initial !important;
         }
-        .dot {
-            position: absolute;
-            top: 1px;
-            right: 1px;
-            width: 6px;
-            height: 6px;
-            border-radius: 3px;
-        }
-        .btn-set .sourcemeter {
-            background: $red;
-        }
-        .btn-set .amperemeter {
-            background: $nordic-blue;
-        }
     }
 
     .dropdown-toggle {
@@ -82,29 +77,8 @@
 
     .save-load-btn-group {
         button:not(:first-of-type) {
-            margin-top: 8px;
+            padding-top: 8px;
         }
-    }
-
-    .sample-frequency-group {
-        margin-bottom: 12px;
-    }
-
-    .buffer-summary {
-        margin-top: 4px;
-    }
-
-    .start-btn {
-        margin-top: 24px;
-    }
-
-    .voltage-regulator {
-        margin-top: 8px;
-        margin-bottom: 16px;
-    }
-
-    .cap-voltage-regulator-container {
-        margin-bottom: 32px;
     }
 
     .secondary-btn {
@@ -121,15 +95,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-top: 24px;
-        padding: 0;
         height: 34px;
         border-color: $gray-700;
 
         span {
             color: $gray-700;
             font-size: 20px;
-            margin-right: 8px;
+            padding-right: 8px;
         }
     }
 }
