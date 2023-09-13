@@ -7,10 +7,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: only temporary whilst refactoring from javascript */
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
+import { DeviceTraits } from '@nordicsemiconductor/pc-nrfconnect-shared/nrfutil/device/common';
 import EventEmitter from 'events';
 
 import PPKCmd from '../constants';
-import { deviceTraits, SampleValues } from './types';
+import { SampleValues } from './types';
 
 const getAllPropertyNames = (obj: any): any => {
     const proto = Object.getPrototypeOf(obj);
@@ -48,7 +49,7 @@ export default abstract class Device extends EventEmitter {
     currentVdd = 0;
     triggerWindowRange = { min: 1, max: 10 };
     capabilities: Capabilities;
-    public traits!: deviceTraits;
+    public traits!: DeviceTraits;
     public adcSamplingTimeUs!: number;
 
     constructor(onSampleCallback: (values: SampleValues) => unknown) {
