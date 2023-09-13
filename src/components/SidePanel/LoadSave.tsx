@@ -23,7 +23,7 @@ export const Load = () => {
         <Button
             variant="secondary"
             title="Large files may take a while to process"
-            className={`w-100 ${loading ? 'active-animation' : ''}`}
+            className={`tw-w-full ${loading ? 'active-animation' : ''}`}
             onClick={() => dispatch(load(setLoading))}
             disabled={loading}
         >
