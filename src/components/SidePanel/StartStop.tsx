@@ -5,10 +5,13 @@
  */
 
 import React from 'react';
-import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { Group, Slider } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    Group,
+    Slider,
+    StartStopButton,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { unit } from 'mathjs';
 
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
@@ -85,27 +88,18 @@ export default () => {
                 <br />
                 {formattedPeriod} period
             </div>
-            {samplingRunning ? (
-                <Button
-                    title={startStopTitle}
-                    className="w-100 secondary-btn start-stop active-anim"
-                    variant="secondary"
-                    onClick={() => dispatch(samplingStop())}
-                >
-                    <span className="mdi mdi-stop-circle" />
-                    Stop
-                </Button>
-            ) : (
-                <Button
-                    title={startStopTitle}
-                    className="w-100 secondary-btn start-stop"
-                    variant="secondary"
-                    onClick={() => dispatch(samplingStart())}
-                >
-                    <span className="mdi mdi-play-circle" />
-                    Start
-                </Button>
-            )}
+            <StartStopButton
+                title={startStopTitle}
+                startText="Start"
+                stopText="Stop"
+                onClick={() => {
+                    if (samplingRunning) dispatch(samplingStop());
+                    else dispatch(samplingStart());
+                }}
+                showIcon
+                variant="secondary"
+                started={samplingRunning}
+            />
         </Group>
     );
 };
