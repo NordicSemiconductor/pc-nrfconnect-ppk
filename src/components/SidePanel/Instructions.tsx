@@ -7,6 +7,7 @@
 import React from 'react';
 import {
     Button,
+    ExternalLink,
     Group,
     openUrl,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -31,17 +32,11 @@ export default () => (
         <p>
             <i>PPK2</i> hardware is required to sample real-time measurements.
         </p>
-        <Button
-            className="pl-0"
-            variant="link"
-            onClick={() => openUrl(urls.ppk2UserGuide)}
-        >
-            PPK2 User Guide
-        </Button>
+        <ExternalLink label="PPK2 User Guide" href={urls.ppk2UserGuide} />
         <Button
             variant="secondary"
             key="button"
-            className="w-100 mt-3"
+            className="tw-w-full"
             onClick={() => openUrl(urls.purchase)}
         >
             Get PPK2 device

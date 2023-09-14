@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { Button, Group } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
     setShowMinimapAction,
@@ -18,15 +18,17 @@ export default () => {
     const showMinimap = useSelector(getShowMinimap);
 
     return (
-        <Button
-            variant="secondary"
-            className="w-100"
-            title={`Click in order to ${
-                showMinimap ? 'hide' : 'show'
-            } a navigable minimap`}
-            onClick={() => dispatch(setShowMinimapAction(!showMinimap))}
-        >
-            {showMinimap ? 'Hide Minimap' : 'Show Minimap'}
-        </Button>
+        <Group>
+            <Button
+                variant="secondary"
+                className="tw-w-full"
+                title={`Click in order to ${
+                    showMinimap ? 'hide' : 'show'
+                } a navigable minimap`}
+                onClick={() => dispatch(setShowMinimapAction(!showMinimap))}
+            >
+                {showMinimap ? 'Hide Minimap' : 'Show Minimap'}
+            </Button>
+        </Group>
     );
 };

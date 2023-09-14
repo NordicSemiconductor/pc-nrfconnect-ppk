@@ -6,20 +6,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: Remove, only added for conservative refactoring to typescript */
 
-import { getAppDir, logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    Device as SharedDevice,
+    getAppDir,
+    logger,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { fork } from 'child_process';
 import path from 'path';
 
 import PPKCmd from '../constants';
 import { SpikeFilter } from '../utils/persistentStore';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
-import {
-    Mask,
-    modifiers,
-    PPK2,
-    SampleValues,
-    serialDeviceMessage,
-} from './types';
+import { Mask, modifiers, SampleValues, serialDeviceMessage } from './types';
 
 /* eslint-disable no-bitwise */
 
@@ -74,7 +72,7 @@ class SerialDevice extends Device {
     private consecutiveRangeSample: undefined | number;
 
     constructor(
-        deviceInfo: PPK2,
+        device: SharedDevice,
         onSampleCallback: (values: SampleValues) => unknown
     ) {
         super(onSampleCallback);
@@ -88,7 +86,7 @@ class SerialDevice extends Device {
             alpha5: 0.06,
             samples: 3,
         };
-        this.path = deviceInfo.serialport.comName;
+        this.path = device.serialPorts?.at(0)?.comName;
         this.child = fork(
             path.resolve(getAppDir(), 'worker', 'serialDevice.js')
         );

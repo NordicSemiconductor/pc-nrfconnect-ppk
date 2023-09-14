@@ -31,16 +31,20 @@ interface GetButtonValues {
     attrs: ButtonAttributes;
 }
 
-function getButtonValues({ isRunning, triggerMode, attrs }: GetButtonValues) {
+const getButtonValues = ({
+    isRunning,
+    triggerMode,
+    attrs,
+}: GetButtonValues) => {
     if (isRunning) {
         return triggerMode === SINGLE
             ? attrs.runningSingle
             : attrs.runningContinuous;
     }
     return triggerMode === SINGLE ? attrs.idleSingle : attrs.idleContinuous;
-}
+};
 
-const TriggerStart = ({ triggerMode }: { triggerMode: string }) => {
+export default ({ triggerMode }: { triggerMode: string }) => {
     const dispatch = useDispatch();
     const { triggerSingleWaiting, triggerRunning } = useSelector(triggerState);
 
@@ -108,5 +112,3 @@ const TriggerStart = ({ triggerMode }: { triggerMode: string }) => {
         </Button>
     );
 };
-
-export default TriggerStart;

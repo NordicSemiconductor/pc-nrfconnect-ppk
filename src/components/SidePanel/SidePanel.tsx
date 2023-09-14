@@ -53,7 +53,7 @@ export default () => {
 
     if (fileLoaded) {
         return (
-            <SidePanel className="side-panel">
+            <SidePanel className="side-panel tw-mt-9">
                 <Load />
                 <DisplayOptions />
                 <Save />
@@ -65,7 +65,7 @@ export default () => {
 
     if (!deviceOpen) {
         return (
-            <SidePanel className="side-panel">
+            <SidePanel className="side-panel tw-mt-9">
                 <Load />
                 {options.index !== 0 && <Save />}
                 <Instructions />
@@ -79,7 +79,7 @@ export default () => {
     }
 
     return (
-        <SidePanel className="side-panel">
+        <SidePanel className="side-panel tw-mt-9">
             <PowerMode />
             {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}

@@ -6,9 +6,9 @@
 
 /* eslint-disable no-bitwise */
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
-/* eslint-disable @typescript-eslint/no-explicit-any -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import {
+    Device,
     isDevelopment,
     logger,
     usageData,
@@ -209,8 +209,9 @@ const initGains = () => async (dispatch: TDispatch) => {
     );
 };
 
-export function open(deviceInfo: any) {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
+export const open =
+    (deviceInfo: Device) =>
+    async (dispatch: TDispatch, getState: () => RootState) => {
         // TODO: Check if this is right?
         // Is this suppose to be run when another device is already connected?
         // Seems like it closes old device somewhere else first, meaning this is redundant.
@@ -397,7 +398,6 @@ export function open(deviceInfo: any) {
             }
         }, 30);
     };
-}
 
 export function updateRegulator() {
     return async (dispatch: TDispatch, getState: () => RootState) => {

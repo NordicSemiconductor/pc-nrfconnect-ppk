@@ -4,55 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export interface SampleValues {
     value?: number;
     bits?: number;
     endOfTrigger?: boolean;
-}
-
-export interface serialport {
-    comName: string;
-    manufacturer: string;
-    path: string;
-    productId: string;
-    serialNumber: string;
-}
-
-export interface deviceTraits {
-    broken: boolean;
-    jlink: boolean;
-    mcuBoot: boolean;
-    nordicDfu: boolean;
-    nordicUsb: boolean;
-    seggerUsb: boolean;
-    serialPorts: boolean;
-    usb: boolean;
-}
-
-export interface PPK2 {
-    id: number;
-    boardVersion?: undefined;
-    dfuTriggerInfo: any;
-    dfuTriggerVersion: { semVer: string };
-    favorite: boolean;
-    nickname: string;
-    serialNumber: string;
-    serialPorts: serialport[];
-    serialport: serialport;
-    traits: deviceTraits;
-    usb: {
-        device: {
-            address: number;
-            busNumber: number;
-            configList: any;
-            descriptor: any;
-        };
-        manufacturer: string;
-        product: string;
-        serialNumber: string;
-    };
 }
 
 export interface Modifiers {
