@@ -24,6 +24,10 @@
 
 ## Fixed
 
+-   PPK2 would create noise in the measurement when the LED was pulsing (i.e.
+    PWM), a new firmware (power_profiler_2 1_1_0) has been added and will make
+    the LED static during sampling. The next time you connect to a PPK2 with an
+    old firmware, you will be able to program it with the new version.
 -   When changing the sampling parameters in the side panel, after having done a
     sample, it would remove the sample data.
 -   Zooming further than what is permitted would cause the graph to pane. This
