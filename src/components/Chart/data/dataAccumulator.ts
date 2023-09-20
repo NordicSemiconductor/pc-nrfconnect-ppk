@@ -80,7 +80,7 @@ export default (): DataAccumulator => ({
             let max: number | undefined = -Number.MAX_VALUE;
 
             for (let n = k; n < l; ++n) {
-                let v = data[n];
+                let v = data[n] ?? NaN;
 
                 if (removeZeroValues && v === 0) {
                     v = NaN;
