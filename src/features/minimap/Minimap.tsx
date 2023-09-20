@@ -73,6 +73,10 @@ const Minimap = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showMinimap, canvasRef.current?.style.display]);
 
+    const hasGeneratedMinimap =
+        minimapRef.current != null &&
+        minimapRef.current?.data.datasets[0].data.length > 0;
+
     return (
         <div
             className="tw-relative tw-h-28 tw-w-full tw-py-4"
@@ -82,17 +86,14 @@ const Minimap = () => {
                 paddingRight: '1.8rem',
             }}
         >
-            {options.index === 0 ||
-            minimapRef.current?.data.datasets[0].data.length === 0
-                ? MinimapDefaultState()
-                : null}
+            {hasGeneratedMinimap ? null : MinimapDefaultState()}
             <canvas
                 ref={canvasRef}
                 id="minimap"
                 className="tw-max-h-20 tw-w-full tw-border tw-border-solid"
                 style={{
                     borderColor: colors.gray100,
-                    display: options.index === 0 ? 'none' : 'block',
+                    display: hasGeneratedMinimap ? 'block' : 'none',
                 }}
             />
             <div
