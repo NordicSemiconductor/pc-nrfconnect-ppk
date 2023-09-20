@@ -454,7 +454,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                <Minimap />
+                {isDataLoggerPane ? <Minimap /> : null}
                 <div
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}
