@@ -80,8 +80,7 @@ export default (): DataAccumulator => ({
             let max: number | undefined = -Number.MAX_VALUE;
 
             for (let n = k; n < l; ++n) {
-                const ni = (n + data.length) % data.length;
-                let v = data[ni];
+                let v = data[n];
 
                 if (removeZeroValues && v === 0) {
                     v = NaN;
@@ -91,7 +90,7 @@ export default (): DataAccumulator => ({
                     if (v > max) max = v;
                     if (v < min) min = v;
 
-                    bitDataProcessor.processBits(ni);
+                    bitDataProcessor.processBits(n);
                 }
             }
 
@@ -99,6 +98,7 @@ export default (): DataAccumulator => ({
                 min = undefined;
                 max = undefined;
             }
+
             this.ampereLineData[mappedIndex].x = timestamp;
             this.ampereLineData[mappedIndex].y = min;
             ++mappedIndex;
