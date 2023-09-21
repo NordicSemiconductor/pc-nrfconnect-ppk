@@ -139,7 +139,7 @@ const ChartOptions = () => {
     return (
         <>
             <div
-                className="tw-flex tw-w-1/2 tw-flex-row tw-items-center tw-justify-between tw-py-2 tw-pl-4"
+                className="tw-flex tw-w-1/2 tw-flex-row tw-items-center tw-justify-between tw-py-2"
                 style={{
                     // Added in order to make consistent with the font from Toggle,
                     // should be removed and replaced by either 14px or 16px (base).
@@ -176,7 +176,7 @@ const ChartOptions = () => {
                 />
             </div>
             <div
-                className="tw-flex tw-w-1/2 tw-flex-row tw-justify-between tw-py-2 tw-pl-4"
+                className="tw-flex tw-w-1/2 tw-flex-row tw-justify-between tw-py-2"
                 style={{
                     // Added in order to make consistent with the font from Toggle,
                     // should be removed and replaced by either 14px or 16px (base).
