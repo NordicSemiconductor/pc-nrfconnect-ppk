@@ -106,10 +106,7 @@ const Minimap = () => {
 };
 
 const MinimapDefaultState = () => (
-    <div
-        className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
-        style={{ backgroundColor: colors.gray100 }}
-    >
+    <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-100 tw-text-gray-700">
         Minimap - not enough data available...
     </div>
 );
