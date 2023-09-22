@@ -38,28 +38,31 @@ const VoltageRegulator = () => {
 
     return (
         <BootstrapCollapse in={isVoltageSettable}>
-            <div className="voltage-regulator">
-                <Form.Label htmlFor="slider-vdd">
-                    <span className="flex-fill">Set supply voltage to</span>
-                    <NumberInlineInput
-                        value={vdd}
+            {/* Wrap in a div so that bootstrap collapse calculates the height correctly, this avoids a jitter when collapsing */}
+            <div>
+                <div className="tw-pt-2">
+                    <Form.Label htmlFor="slider-vdd">
+                        <span className="flex-fill">Set supply voltage to</span>
+                        <NumberInlineInput
+                            value={vdd}
+                            range={{ min, max }}
+                            onChange={value =>
+                                dispatch(moveVoltageRegulatorVdd(value))
+                            }
+                            onChangeComplete={() => dispatch(updateRegulator())}
+                        />{' '}
+                        mV
+                    </Form.Label>
+                    <Slider
+                        id="slider-vdd"
+                        values={[vdd]}
                         range={{ min, max }}
-                        onChange={value =>
-                            dispatch(moveVoltageRegulatorVdd(value))
-                        }
+                        onChange={[
+                            value => dispatch(moveVoltageRegulatorVdd(value)),
+                        ]}
                         onChangeComplete={() => dispatch(updateRegulator())}
-                    />{' '}
-                    mV
-                </Form.Label>
-                <Slider
-                    id="slider-vdd"
-                    values={[vdd]}
-                    range={{ min, max }}
-                    onChange={[
-                        value => dispatch(moveVoltageRegulatorVdd(value)),
-                    ]}
-                    onChangeComplete={() => dispatch(updateRegulator())}
-                />
+                    />
+                </div>
             </div>
         </BootstrapCollapse>
     );
