@@ -59,7 +59,7 @@ export const CapVoltageSettings = () => {
                             updateVoltageRegulator();
                             usageData.sendUsageData(
                                 EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                                `${newMaxCap}`
+                                { maxCap: newMaxCap }
                             );
                         }}
                     />
@@ -74,7 +74,7 @@ export const CapVoltageSettings = () => {
                         updateVoltageRegulator();
                         usageData.sendUsageData(
                             EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                            `${newMaxCap}`
+                            { maxCap: newMaxCap }
                         );
                     }}
                 />

@@ -49,7 +49,7 @@ const mapState = () => ({
 
 const mapDispatch = (dispatch: TDispatch): Partial<DeviceSelectorProps> => ({
     onDeviceSelected: (device: Device) => {
-        if (device.jlink) {
+        if (device.traits.jlink) {
             dispatch(setShowPPK1Dialog(true));
         }
         logger.info(
