@@ -59,7 +59,7 @@ export const BufferSettings = () => {
                     onClick={() => {
                         usageData.sendUsageData(
                             EventAction.BUFFER_SIZE_CHANGED,
-                            `${bufferSize}`
+                            { bufferSize }
                         );
                         dispatch(
                             changeMaxBufferSizeAction({

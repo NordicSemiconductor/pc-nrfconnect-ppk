@@ -119,7 +119,7 @@ export const indexToTimestamp = (index: number): number => {
 export const getTotalDurationInMicroSeconds = () =>
     options.samplingTime * options.data.length;
 
-export const updateTitle = (info?: string) => {
+export const updateTitle = (info?: string | null) => {
     const title = getCurrentWindow().getTitle().split(':')[0].trim();
     getCurrentWindow().setTitle(`${title}${info ? ':' : ''} ${info || ''}`);
 };
