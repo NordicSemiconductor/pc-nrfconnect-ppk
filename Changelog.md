@@ -14,6 +14,8 @@
 ## Changed
 
 -   The chart will now only show positive values along the x-axis.
+-   From **nrf-device-lib-js** to **nrfutil device**, as a backend for
+    interacting with devices.
 
 ## Removed
 
