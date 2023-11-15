@@ -94,7 +94,7 @@ export const removeBitsBuffer = (): void => {
 };
 
 export const timestampToIndex = (timestamp: number): number =>
-    (timestamp / microSecondsPerSecond) * options.samplesPerSecond;
+    Math.floor((timestamp / microSecondsPerSecond) * options.samplesPerSecond);
 
 export const indexToTimestamp = (index: number): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
