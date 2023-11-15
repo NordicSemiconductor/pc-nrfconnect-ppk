@@ -5,7 +5,6 @@
  */
 
 // FIXME: Will ned to remove the line under at some point.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- Temporary included to make a conservative conversion to typescript */
 
 import { getCurrentWindow } from '@electron/remote';
 
@@ -14,6 +13,7 @@ export const numberOfDigitalChannels = 8;
 
 const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
+const microSecondsPerSecond = 1e6;
 
 export interface GlobalOptions {
     /** Time between each sample denoted in microseconds, which is equal to 1e-6 seconds \
@@ -47,10 +47,8 @@ export const options: GlobalOptions = {
  * @param {number} samplingRate number of samples per second
  * @returns {number} samplingTime which is the time in microseconds between samples
  */
-export const getSamplingTime = (samplingRate: number): number => {
-    const microSecondsPerSecond = 1e6;
-    return microSecondsPerSecond / samplingRate;
-};
+export const getSamplingTime = (samplingRate: number): number =>
+    microSecondsPerSecond / samplingRate;
 
 export const setSamplingRate = (rate: number): void => {
     options.samplesPerSecond = rate;
@@ -95,20 +93,12 @@ export const removeBitsBuffer = (): void => {
     options.bits = null;
 };
 
-export const timestampToIndex = (timestamp: number): number => {
-    const lastTimestamp = options?.timestamp ? options.timestamp : 0;
-    const microSecondsPerSecond = 1e6;
-
-    return (
-        options.index -
-        ((lastTimestamp - timestamp!) * options.samplesPerSecond) /
-            microSecondsPerSecond
-    );
-};
+export const timestampToIndex = (timestamp: number): number =>
+    (timestamp / microSecondsPerSecond) * options.samplesPerSecond;
 
 export const indexToTimestamp = (index: number): number => {
     const lastTimestamp = options?.timestamp ? options.timestamp : 0;
-    const microSecondsPerSecond = 1e6;
+
     return (
         lastTimestamp -
         ((options.index - index) * microSecondsPerSecond) /

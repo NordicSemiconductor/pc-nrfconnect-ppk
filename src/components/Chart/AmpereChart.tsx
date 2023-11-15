@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import type {
     ChartJSOrUndefined,
@@ -21,6 +21,7 @@ import { appState } from '../../slices/appSlice';
 import { chartState } from '../../slices/chartSlice';
 import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
+import { type CursorData } from './Chart';
 import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin, { DragSelect } from './plugins/chart.dragSelect';
@@ -75,23 +76,25 @@ export interface AmpereChartJS extends Chart<'line'> {
 }
 
 interface AmpereChartProperties {
-    setLen: (length: number) => void;
+    setWindowsNumberOfPixels: (length: number) => void;
     setChartAreaWidth: (width: number) => void;
-    step: number;
+    samplesPixel: number;
     chartRef: React.MutableRefObject<null | AmpereChartJS>;
-    cursorData: {
-        cursorBegin: number | null | undefined;
-        cursorEnd: number | null | undefined;
-        begin: number;
-        end: number;
-    };
+    cursorData: CursorData;
     lineData: AmpereState[];
 }
 
-const AmpereChart = ({
-    setLen,
+const formatCurrent = (uA: number) =>
+    typeof uA === 'number'
+        ? unit(uA, 'uA')
+              .format({ notation: 'auto', precision: 4 })
+              .replace('u', '\u00B5')
+        : (undefined as never);
+
+export default ({
+    setWindowsNumberOfPixels,
     setChartAreaWidth,
-    step,
+    samplesPixel,
     chartRef,
     cursorData: { begin, end },
     lineData,
@@ -121,14 +124,7 @@ const AmpereChart = ({
     const updateTriggerLevel = (level: number) =>
         dispatch(triggerLevelSetAction(level));
 
-    const formatCurrent = (uA: number) =>
-        typeof uA === 'number'
-            ? unit(uA, 'uA')
-                  .format({ notation: 'auto', precision: 4 })
-                  .replace('u', '\u00B5')
-            : (undefined as never);
-
-    const timestampToLabel = React.useCallback(
+    const timestampToLabel = useCallback(
         (_usecs, index, array) => {
             if (typeof _usecs !== 'number') {
                 return undefined as never;
@@ -174,14 +170,14 @@ const AmpereChart = ({
         windowBegin === 0 &&
         windowEnd === 0 &&
         (samplingRunning || triggerRunning || triggerSingleWaiting);
-    const snapping = step <= 0.16 && !live;
+    const snapping = samplesPixel <= 0.16 && !live;
 
-    const pointRadius = step <= 0.08 ? 4 : 2;
+    const pointRadius = samplesPixel <= 0.08 ? 4 : 2;
     const chartDataSets: ChartData<'line', AmpereState[]> = {
         datasets: [
             {
                 borderColor: dataColor,
-                borderWidth: step > 2 ? 1 : 1.5,
+                borderWidth: samplesPixel > 2 ? 1 : 1.5,
                 fill: false,
                 data: lineData,
                 pointRadius: snapping ? pointRadius : 0,
@@ -277,7 +273,7 @@ const AmpereChart = ({
                 chartArea.right = width - rightMargin;
                 const { left, right } = chart.chartArea;
                 const w = Math.trunc(right - left);
-                setLen(Math.min(w, 2000));
+                setWindowsNumberOfPixels(Math.min(w, 2000));
                 setChartAreaWidth(w);
             },
         },
@@ -295,5 +291,3 @@ const AmpereChart = ({
         </div>
     );
 };
-
-export default AmpereChart;

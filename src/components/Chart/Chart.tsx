@@ -70,6 +70,13 @@ ChartJS.register(
     Title
 );
 
+export type CursorData = {
+    cursorBegin: number | null | undefined;
+    cursorEnd: number | null | undefined;
+    begin: number;
+    end: number;
+};
+
 const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
@@ -112,6 +119,7 @@ const calcStats = (_begin?: null | number, _end?: null | number) => {
 
 const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
+
     const chartWindow = useCallback(
         (
             windowBegin: number,
@@ -144,6 +152,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             ),
         [dispatch]
     );
+
     const chartCursor = useCallback(
         (cursorBegin, cursorEnd) =>
             dispatch(chartCursorAction({ cursorBegin, cursorEnd })),
@@ -198,6 +207,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         hasDigitalChannels,
         yAxisLog,
     } = useSelector(chartState);
+
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
@@ -243,14 +253,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
 
-    const cursorData = {
+    const cursorData: CursorData = {
         cursorBegin,
         cursorEnd,
         begin,
         end,
     };
 
-    const [len, setLen] = useState(0);
+    const [windowNumberOfPixels, setWindowsNumberOfPixels] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
     const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
@@ -341,10 +351,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const chartPause = () =>
         chartWindow(options.timestamp - windowDuration, options.timestamp);
 
-    const originalIndexBegin = timestampToIndex(begin);
-    const originalIndexEnd = timestampToIndex(end);
-    const step = len === 0 ? 2 : (originalIndexEnd - originalIndexBegin) / len;
-    const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
+    const samplesInWindowView = timestampToIndex(windowDuration);
+    const samplesPixel =
+        windowNumberOfPixels === 0
+            ? 2
+            : samplesInWindowView / windowNumberOfPixels;
+    const dataProcessor = samplesPixel > 1 ? dataAccumulator : dataSelector;
 
     const [ampereLineData, setAmpereLineData] = useState<AmpereState[]>([]);
     const [bitsLineData, setBitsLineData] = useState<DigitalChannelStates[]>(
@@ -361,7 +373,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 end,
                 digitalChannelsToCompute as number[],
                 yAxisLog,
-                len,
+                windowNumberOfPixels,
                 windowDuration
             );
 
@@ -375,7 +387,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     }, [
         begin,
         end,
-        len,
+        windowNumberOfPixels,
         windowDuration,
         dataProcessor,
         digitalChannelsToCompute,
@@ -442,9 +454,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
                 <AmpereChart
-                    setLen={setLen}
+                    setWindowsNumberOfPixels={setWindowsNumberOfPixels}
                     setChartAreaWidth={setChartAreaWidth}
-                    step={step}
+                    samplesPixel={samplesPixel}
                     chartRef={chartRef}
                     cursorData={cursorData}
                     lineData={ampereLineData}
