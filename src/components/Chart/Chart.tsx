@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-plusplus: off */
-/* eslint operator-assignment: off */
-
 import React, {
     useCallback,
     useEffect,
@@ -55,7 +52,7 @@ import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes'
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
-import dataAccumulatorInitialiser from './data/dataAccumulator';
+import dataAccumulatorInitialiser, { calcStats } from './data/dataAccumulator';
 import dataSelectorInitialiser from './data/dataSelector';
 import { AmpereState, DigitalChannelStates } from './data/dataTypes';
 import DigitalChannels from './DigitalChannels';
@@ -85,42 +82,6 @@ export type CursorData = {
 const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
-
-const calcStats = (_begin?: null | number, _end?: null | number) => {
-    if (_begin == null || _end == null) {
-        return null;
-    }
-    let begin = _begin;
-    let end = _end;
-    if (end < begin) {
-        [begin, end] = [end, begin];
-    }
-
-    const { data } = options;
-    const indexBegin = Math.ceil(timestampToIndex(begin));
-    const indexEnd = Math.floor(timestampToIndex(end));
-
-    let sum = 0;
-    let len = 0;
-    let max;
-
-    for (let n = indexBegin; n <= indexEnd; ++n) {
-        const k = (n + data.length) % data.length;
-        const v = data[k];
-        if (!Number.isNaN(v)) {
-            if (max === undefined || v > max) {
-                max = v;
-            }
-            sum = sum + v;
-            ++len;
-        }
-    }
-    return {
-        average: sum / (len || 1),
-        max,
-        delta: end - begin,
-    };
-};
 
 const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
@@ -267,12 +228,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [windowNumberOfPixels, setWindowsNumberOfPixels] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
-    const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
-    const selectionStats = useMemo(
-        () => calcStats(cursorBegin, cursorEnd),
-        [cursorBegin, cursorEnd]
-    );
-
     const resetCursor = useCallback(
         () => chartCursor(null, null),
         [chartCursor]
@@ -334,8 +289,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             let localWindowBegin = center - localWindowDuration / 2;
             let localWindowEnd = center + localWindowDuration / 2;
             if (localWindowEnd > windowEnd) {
-                localWindowBegin =
-                    localWindowBegin - (localWindowEnd - windowEnd);
+                localWindowBegin -= localWindowEnd - windowEnd;
                 localWindowEnd = windowEnd;
             }
             chartWindow(localWindowBegin, localWindowEnd);
@@ -365,6 +319,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [ampereLineData, setAmpereLineData] = useState<AmpereState[]>([]);
     const [bitsLineData, setBitsLineData] = useState<DigitalChannelStates[]>(
         []
+    );
+
+    const windowStats = calcStats(begin, end);
+    const selectionStats = useMemo(
+        () => calcStats(cursorBegin, cursorEnd),
+        [cursorBegin, cursorEnd]
     );
 
     useEffect(() => {

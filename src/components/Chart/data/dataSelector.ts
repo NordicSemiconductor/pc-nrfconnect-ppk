@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-plusplus: off */
-
 import { options, timestampToIndex } from '../../../globals';
 import { BitDataAccumulator } from './bitDataAccumulator';
 import bitDataSelector, { BitDataSelector } from './bitDataSelector';
@@ -61,7 +59,7 @@ export default (): DataSelector => ({
         for (
             let n = originalIndexBeginFloored;
             n <= originalIndexEndCeiled;
-            ++mappedIndex, ++n
+            mappedIndex += 1, n += 1
         ) {
             const k = (n + data.length) % data.length;
             const v = data[k];
