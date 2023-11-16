@@ -31,7 +31,6 @@ interface ChartState {
     yMax?: null | number;
     bufferLength: number;
     bufferRemaining: number;
-    index: number;
     hasDigitalChannels: boolean;
     digitalChannels: booleanTupleOf8;
     digitalChannelsVisible: boolean;
@@ -57,7 +56,6 @@ const initialState = (): ChartState => ({
     yMax: null,
     bufferLength: initialBufferLength,
     bufferRemaining: initialBufferLength,
-    index: 0,
     hasDigitalChannels: false,
     digitalChannels: getDigitalChannels(),
     digitalChannelsVisible: getDigitalChannelsVisible(),
