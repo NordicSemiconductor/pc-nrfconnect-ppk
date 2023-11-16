@@ -11,6 +11,7 @@ import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { ChartOptions, LineControllerDatasetOptions } from 'chart.js';
 
 import { chartState } from '../../slices/chartSlice';
+import { type CursorData } from './Chart';
 import { DigitalChannelStates, DigitalChannelsType } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 
@@ -25,12 +26,7 @@ interface DigitalChannelsProperties {
     lineData: DigitalChannelStates[];
     digitalChannels: DigitalChannelsType;
     zoomedOutTooFar: boolean;
-    cursorData: {
-        begin: number;
-        end: number;
-        cursorBegin?: number | null;
-        cursorEnd?: number | null;
-    };
+    cursorData: CursorData;
 }
 
 const DigitalChannels = ({

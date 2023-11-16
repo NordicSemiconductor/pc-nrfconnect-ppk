@@ -71,6 +71,13 @@ ChartJS.register(
     Title
 );
 
+export type CursorData = {
+    cursorBegin: number | null | undefined;
+    cursorEnd: number | null | undefined;
+    begin: number;
+    end: number;
+};
+
 const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
@@ -247,7 +254,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const end = windowEnd || options.timestamp - options.samplingTime;
     const begin = windowBegin || end - windowDuration;
 
-    const cursorData = {
+    const cursorData: CursorData = {
         cursorBegin,
         cursorEnd,
         begin,

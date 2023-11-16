@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Line } from 'react-chartjs-2';
 import type {
     ChartJSOrUndefined,
@@ -21,6 +21,7 @@ import { appState } from '../../slices/appSlice';
 import { chartState } from '../../slices/chartSlice';
 import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
+import { type CursorData } from './Chart';
 import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin, { DragSelect } from './plugins/chart.dragSelect';
@@ -79,16 +80,18 @@ interface AmpereChartProperties {
     setChartAreaWidth: (width: number) => void;
     samplesPixel: number;
     chartRef: React.MutableRefObject<null | AmpereChartJS>;
-    cursorData: {
-        cursorBegin: number | null | undefined;
-        cursorEnd: number | null | undefined;
-        begin: number;
-        end: number;
-    };
+    cursorData: CursorData;
     lineData: AmpereState[];
 }
 
-const AmpereChart = ({
+const formatCurrent = (uA: number) =>
+    typeof uA === 'number'
+        ? unit(uA, 'uA')
+              .format({ notation: 'auto', precision: 4 })
+              .replace('u', '\u00B5')
+        : (undefined as never);
+
+export default ({
     setWindowsNumberOfPixels,
     setChartAreaWidth,
     samplesPixel,
@@ -121,14 +124,7 @@ const AmpereChart = ({
     const updateTriggerLevel = (level: number) =>
         dispatch(triggerLevelSetAction(level));
 
-    const formatCurrent = (uA: number) =>
-        typeof uA === 'number'
-            ? unit(uA, 'uA')
-                  .format({ notation: 'auto', precision: 4 })
-                  .replace('u', '\u00B5')
-            : (undefined as never);
-
-    const timestampToLabel = React.useCallback(
+    const timestampToLabel = useCallback(
         (_usecs, index, array) => {
             if (typeof _usecs !== 'number') {
                 return undefined as never;
@@ -295,5 +291,3 @@ const AmpereChart = ({
         </div>
     );
 };
-
-export default AmpereChart;
