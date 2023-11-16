@@ -18,7 +18,7 @@ import { unit } from 'mathjs';
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { indexToTimestamp } from '../../globals';
 import { appState } from '../../slices/appSlice';
-import { chartState } from '../../slices/chartSlice';
+import { chartState, isLiveMode } from '../../slices/chartSlice';
 import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
 import { type CursorData } from './Chart';
@@ -100,6 +100,7 @@ export default ({
     lineData,
 }: AmpereChartProperties) => {
     const dispatch = useDispatch();
+    const liveMode = useSelector(isLiveMode);
     const {
         triggerLevel,
         triggerRunning,
@@ -107,8 +108,6 @@ export default ({
         triggerOrigin,
     } = useSelector(triggerState);
     const {
-        windowBegin,
-        windowEnd,
         windowDuration,
         cursorBegin,
         cursorEnd,
@@ -167,9 +166,7 @@ export default ({
     );
 
     const live =
-        windowBegin === 0 &&
-        windowEnd === 0 &&
-        (samplingRunning || triggerRunning || triggerSingleWaiting);
+        liveMode && (samplingRunning || triggerRunning || triggerSingleWaiting);
     const snapping = samplesPixel <= 0.16 && !live;
 
     const pointRadius = samplesPixel <= 0.08 ? 4 : 2;

@@ -11,14 +11,13 @@ import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { options } from '../../globals';
-import { chartState, panWindow } from '../../slices/chartSlice';
+import { getChartRange, isLiveMode, panWindow } from '../../slices/chartSlice';
 import { showMinimap as getShowMinimap } from './minimapSlice';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
     ampereChart?: {
-        windowDuration?: number | null;
-        windowBegin?: number | null;
-        windowEnd?: number | null;
+        windowDuration: number;
+        windowEnd: number;
     };
 }
 
@@ -33,7 +32,8 @@ const Minimap = () => {
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
-    const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
+    const { windowEnd, windowDuration } = useSelector(getChartRange);
+    const liveMode = useSelector(isLiveMode);
 
     function windowNavigateCallback(windowCenter: number) {
         dispatch(panWindow(windowCenter));
@@ -47,9 +47,9 @@ const Minimap = () => {
     updateSlider(
         minimapRef.current,
         minimapSlider.current,
-        windowBegin,
         windowEnd,
-        windowDuration
+        windowDuration,
+        liveMode
     );
 
     if (minimapRef.current) {
@@ -65,13 +65,18 @@ const Minimap = () => {
             drawSlider(
                 minimapRef.current,
                 minimapSlider.current,
-                windowBegin,
                 windowEnd,
-                windowDuration
+                windowDuration,
+                liveMode
             );
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showMinimap, canvasRef.current?.style.display]);
+    }, [
+        showMinimap,
+        canvasRef.current?.style.display,
+        liveMode,
+        windowEnd,
+        windowDuration,
+    ]);
 
     const hasGeneratedMinimap =
         minimapRef.current != null &&
@@ -114,11 +119,11 @@ const MinimapDefaultState = () => (
 function drawSlider(
     minimap: MinimapChart,
     slider: HTMLDivElement,
-    windowBegin: number | null,
-    windowEnd: number | null,
-    windowDuration: number | null
+    windowEnd: number,
+    windowDuration: number,
+    liveMode: boolean
 ) {
-    if (windowBegin == null || windowEnd == null || options.index === 0) {
+    if (options.index === 0) {
         slider.style.display = 'none';
         return;
     }
@@ -136,16 +141,17 @@ function drawSlider(
 
     let left = 0;
     let width = 0;
-    if (windowBegin === 0 && windowEnd === 0 && windowDuration != null) {
-        // Since options.index !== 0 and both begin and end are 0, it means that
+    if (liveMode) {
         // live has been toggled on, meaning that the window will be at the end.
         const MAX_WIDTH = canvasRectangle.width;
         width = xScale.getPixelForValue(windowDuration);
         width = width > MAX_WIDTH ? MAX_WIDTH : width;
         left = canvasRectangle.width + offsetLeft - width;
     } else {
-        const beginWithoutOffset =
-            windowBegin !== 0 ? xScale.getPixelForValue(windowBegin) : 0;
+        const beginWithoutOffset = xScale.getPixelForValue(
+            Math.max(0, windowEnd - windowDuration)
+        );
+
         const endWithoutOffset = xScale.getPixelForValue(windowEnd);
 
         const beginWithOffset =
@@ -183,23 +189,24 @@ function drawSlider(
 function updateSlider(
     minimapRef: MinimapChart | null,
     minimapSliderRef: HTMLDivElement | null,
-    windowBegin: number | null,
-    windowEnd: number | null,
-    windowDuration: number | null
+    windowEnd: number,
+    windowDuration: number,
+    liveMode: boolean
 ) {
     if (minimapRef == null || minimapSliderRef == null) return;
 
     drawSlider(
         minimapRef,
         minimapSliderRef,
-        windowBegin,
         windowEnd,
-        windowDuration
+        windowDuration,
+        liveMode
     );
 
     const { options: chartOptions } = minimapRef;
     if (chartOptions.ampereChart == null) {
         chartOptions.ampereChart = {
+            windowEnd,
             windowDuration,
         };
     } else {
@@ -251,7 +258,6 @@ function initializeMinimapChart(
                         grid: undefined,
                     },
                 },
-                ampereChart: {},
             } as MinimapOptions,
             plugins: [minimapScroll],
         });
