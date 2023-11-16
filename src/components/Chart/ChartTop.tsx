@@ -15,7 +15,6 @@ import { BigNumber, Fraction, unit } from 'mathjs';
 
 import {
     chartState,
-    resetChart,
     setShowSettings,
     showChartSettings,
     toggleYAxisLock,
@@ -42,23 +41,23 @@ const TimeWindowButton = ({ label, zoomToWindow }: TimeWindowButton) => (
 );
 
 type ChartTop = {
-    chartPause: () => void;
+    onLiveModeChange: (live: boolean) => void;
+    live: boolean;
     zoomToWindow: (windowDuration: number | BigNumber | Fraction) => void;
     chartRef: MutableRefObject<AmpereChartJS | null>;
     windowDuration: number;
 };
 
 const ChartTop = ({
-    chartPause,
+    onLiveModeChange,
+    live,
     zoomToWindow,
     chartRef,
     windowDuration,
 }: ChartTop) => {
     const dispatch = useDispatch();
-    const { windowBegin, windowEnd } = useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
-    const live = windowBegin === 0 && windowEnd === 0;
 
     const timeWindowLabels = [
         '10ms',
@@ -100,9 +99,7 @@ const ChartTop = ({
                 <div className="tw-flex tw-w-1/4 tw-flex-row tw-justify-end">
                     <Toggle
                         label="LIVE VIEW"
-                        onToggle={() => {
-                            live ? chartPause() : dispatch(resetChart());
-                        }}
+                        onToggle={onLiveModeChange}
                         isToggled={live}
                         variant="primary"
                     />

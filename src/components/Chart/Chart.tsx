@@ -43,6 +43,7 @@ import {
     chartState,
     chartWindowAction,
     MAX_WINDOW_DURATION,
+    resetChart,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
@@ -282,6 +283,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             endY?: number | null
         ) => {
             if (!isDataLoggerPane) return;
+
             if (beginX === undefined || endX === undefined) {
                 chartReset(windowDuration);
                 return;
@@ -298,15 +300,20 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             const newBeginX = Math.max(beginX, minLimit);
             const newEndX = Math.min(endX, maxLimit);
 
+            if (windowDuration === newEndX - newBeginX) {
+                dispatch(setLiveMode(false));
+            }
+
             chartWindow(newBeginX, newEndX, beginY, endY);
         },
         [
             isDataLoggerPane,
             windowBeginLock,
             windowEndLock,
+            windowDuration,
             chartWindow,
             chartReset,
-            windowDuration,
+            dispatch,
         ]
     );
 
@@ -447,7 +454,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         <div className="chart-outer">
             <div className="chart-current">
                 <ChartTop
-                    chartPause={chartPause}
+                    onLiveModeChange={isLive => {
+                        isLive ? dispatch(resetChart()) : chartPause();
+                    }}
+                    live={windowBegin === 0 && windowEnd === 0}
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
                     windowDuration={windowDuration}

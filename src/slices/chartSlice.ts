@@ -191,6 +191,7 @@ const chartSlice = createSlice({
 
             state.windowBegin = windowBegin;
             state.windowEnd = windowEnd;
+            state.liveMode = windowEnd >= DataManager().getTimestamp();
         },
         chartTrigger(
             state,
@@ -313,6 +314,10 @@ export const chartWindowAction =
                 yMax,
             })
         );
+
+        if (windowEnd >= DataManager().getTimestamp()) {
+            dispatch(setLiveMode(true));
+        }
     };
 
 export const chartTriggerWindowAction =
