@@ -75,9 +75,9 @@ export interface AmpereChartJS extends Chart<'line'> {
 }
 
 interface AmpereChartProperties {
-    setLen: (length: number) => void;
+    setWindowsNumberOfPixels: (length: number) => void;
     setChartAreaWidth: (width: number) => void;
-    step: number;
+    samplesPixel: number;
     chartRef: React.MutableRefObject<null | AmpereChartJS>;
     cursorData: {
         cursorBegin: number | null | undefined;
@@ -89,9 +89,9 @@ interface AmpereChartProperties {
 }
 
 const AmpereChart = ({
-    setLen,
+    setWindowsNumberOfPixels,
     setChartAreaWidth,
-    step,
+    samplesPixel,
     chartRef,
     cursorData: { begin, end },
     lineData,
@@ -174,14 +174,14 @@ const AmpereChart = ({
         windowBegin === 0 &&
         windowEnd === 0 &&
         (samplingRunning || triggerRunning || triggerSingleWaiting);
-    const snapping = step <= 0.16 && !live;
+    const snapping = samplesPixel <= 0.16 && !live;
 
-    const pointRadius = step <= 0.08 ? 4 : 2;
+    const pointRadius = samplesPixel <= 0.08 ? 4 : 2;
     const chartDataSets: ChartData<'line', AmpereState[]> = {
         datasets: [
             {
                 borderColor: dataColor,
-                borderWidth: step > 2 ? 1 : 1.5,
+                borderWidth: samplesPixel > 2 ? 1 : 1.5,
                 fill: false,
                 data: lineData,
                 pointRadius: snapping ? pointRadius : 0,
@@ -277,7 +277,7 @@ const AmpereChart = ({
                 chartArea.right = width - rightMargin;
                 const { left, right } = chart.chartArea;
                 const w = Math.trunc(right - left);
-                setLen(Math.min(w, 2000));
+                setWindowsNumberOfPixels(Math.min(w, 2000));
                 setChartAreaWidth(w);
             },
         },
