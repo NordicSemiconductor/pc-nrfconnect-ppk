@@ -43,6 +43,7 @@ import {
     chartState,
     chartWindowAction,
     MAX_WINDOW_DURATION,
+    resetChart,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
@@ -440,7 +441,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         <div className="chart-outer">
             <div className="chart-current">
                 <ChartTop
-                    chartPause={chartPause}
+                    onLiveModeChange={isLive => {
+                        isLive ? dispatch(resetChart()) : chartPause();
+                    }}
+                    live={windowBegin === 0 && windowEnd === 0}
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
                     windowDuration={windowDuration}
