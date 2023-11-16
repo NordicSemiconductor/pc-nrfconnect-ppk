@@ -7,7 +7,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { options } from '../globals';
+import { microSecondsPerSecond, options } from '../globals';
 import {
     booleanTupleOf8,
     getDigitalChannels,
@@ -22,15 +22,13 @@ import { getMaxSampleFrequency, getSampleFrequency } from './dataLoggerSlice';
 import { TAction } from './thunk';
 
 interface ChartState {
+    liveMode: boolean;
     cursorBegin?: null | number;
     cursorEnd?: null | number;
-    windowBegin: null | number;
-    windowEnd: null | number;
+    windowEnd: number;
     windowDuration: number;
     yMin?: null | number;
     yMax?: null | number;
-    bufferLength: number;
-    bufferRemaining: number;
     hasDigitalChannels: boolean;
     digitalChannels: booleanTupleOf8;
     digitalChannelsVisible: boolean;
@@ -40,22 +38,18 @@ interface ChartState {
     windowBeginLock: null | number;
     windowEndLock: null | number;
     showSettings: boolean;
+    latestDataTimestamp: number;
 }
 
-const initialWindowDuration = 7 * 1e6;
-const initialBufferLength =
-    (options.data.length / options.samplesPerSecond) * 1e6 -
-    initialWindowDuration;
+const initialWindowDuration = 7 * microSecondsPerSecond;
 const initialState = (): ChartState => ({
+    liveMode: true,
     cursorBegin: null, // [microseconds]
     cursorEnd: null, // [microseconds]
-    windowBegin: 0, // [microseconds]
-    windowEnd: 0, // [microseconds]
+    windowEnd: initialWindowDuration, // [microseconds]
     windowDuration: initialWindowDuration, // [microseconds]
     yMin: null,
     yMax: null,
-    bufferLength: initialBufferLength,
-    bufferRemaining: initialBufferLength,
     hasDigitalChannels: false,
     digitalChannels: getDigitalChannels(),
     digitalChannelsVisible: getDigitalChannelsVisible(),
@@ -65,6 +59,7 @@ const initialState = (): ChartState => ({
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
     showSettings: false,
+    latestDataTimestamp: 0,
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -76,25 +71,6 @@ const chartSlice = createSlice({
     name: 'chart',
     initialState: initialState(),
     reducers: {
-        animationAction(state) {
-            const { windowDuration, windowEnd } = state;
-            const { bufferLength, bufferRemaining } = calcBuffer(
-                windowDuration,
-                windowEnd!
-            );
-            if (windowEnd === 0) {
-                return {
-                    ...state,
-                    bufferLength,
-                    bufferRemaining,
-                    index: options.index,
-                };
-            }
-            return {
-                ...state,
-                bufferRemaining,
-            };
-        },
         setYMax: (state, action: PayloadAction<{ yMax: number }>) => {
             state.yMax = action.payload.yMax;
         },
@@ -114,8 +90,7 @@ const chartSlice = createSlice({
         chartWindow(
             state,
             action: PayloadAction<{
-                windowBegin: null | number;
-                windowEnd: null | number;
+                windowEnd: number;
                 windowDuration: number;
                 yMin?: null | number;
                 yMax?: null | number;
@@ -135,61 +110,34 @@ const chartSlice = createSlice({
                 }
             }
 
-            let { windowBegin, windowEnd, windowDuration } = action.payload;
-            if (windowBegin === null && windowEnd === null) {
-                windowBegin = 0;
-                windowEnd = 0;
-            } else {
-                const [half, center] = getCenter(
-                    windowBegin!,
-                    windowEnd!,
-                    windowDuration
-                );
-                windowBegin = center - half;
-                windowEnd = center + half;
-            }
+            let { windowEnd, windowDuration } = action.payload;
+            let windowBegin = Math.max(0, windowEnd - windowDuration);
 
             const { yAxisLock, windowBeginLock, windowEndLock } = state;
 
             if (windowBeginLock !== null) {
                 windowBegin = Math.max(windowBeginLock, windowBegin);
-                windowEnd =
-                    windowEnd === 0
-                        ? windowEndLock
-                        : Math.min(windowEndLock!, windowEnd);
-                windowDuration = windowEnd! - windowBegin;
+                windowEnd = windowBegin - (windowEndLock ?? 0);
+                windowDuration = windowEnd - windowBegin;
             }
 
-            if (windowBegin < 0) {
-                windowBegin = 0;
-                windowEnd = windowDuration;
-            } else if (windowBegin > options.timestamp) {
-                windowEnd = options.timestamp;
-                if (windowEnd - windowDuration) {
-                    windowBegin = 0;
-                    windowEnd = windowDuration;
-                } else {
-                    windowBegin = windowEnd - windowDuration;
-                }
+            if (windowEnd > options.timestamp) {
+                windowEnd = Math.max(windowDuration, options.timestamp);
             }
 
             return {
                 ...state,
-                windowBegin,
                 windowEnd,
                 windowDuration,
-                ...calcBuffer(windowDuration, windowEnd!),
                 yMin: yMin == null || yAxisLock ? state.yMin : yMin,
                 yMax: yMax == null || yAxisLock ? state.yMax : yMax,
             };
         },
         panWindow(state, { payload: windowCenter }: PayloadAction<number>) {
-            const windowBegin = windowCenter - state.windowDuration / 2;
             const windowEnd = windowCenter + state.windowDuration / 2;
 
-            if (Number.isNaN(windowBegin) || Number.isNaN(windowEnd)) return;
+            if (Number.isNaN(windowEnd)) return;
 
-            state.windowBegin = windowBegin;
             state.windowEnd = windowEnd;
         },
         chartTrigger(
@@ -200,24 +148,16 @@ const chartSlice = createSlice({
                 windowDuration: number;
             }>
         ) {
-            const [half, center] = getCenter(
-                action.payload.windowBegin,
-                action.payload.windowEnd,
-                action.payload.windowDuration
-            );
-
-            const windowBegin = center - half;
-            const windowEnd = center + half;
+            const { windowBegin, windowEnd, windowDuration } = action.payload;
 
             return {
                 ...state,
                 windowBegin,
                 windowEnd,
-                windowDuration: action.payload.windowDuration,
+                windowDuration,
                 initialWindowDuration,
                 windowBeginLock: windowBegin,
                 windowEndLock: windowEnd,
-                ...calcBuffer(action.payload.windowDuration, windowEnd),
             };
         },
         setChartState: state => {
@@ -259,43 +199,40 @@ const chartSlice = createSlice({
             state.yAxisLog = !state.yAxisLog;
         },
         chartWindowLockAction: state => {
-            state.windowBeginLock = state.windowBegin;
+            state.windowBeginLock = Math.max(
+                0,
+                state.windowEnd - state.windowDuration
+            );
             state.windowEndLock = state.windowEnd;
         },
         chartWindowUnLockAction: state => {
             state.windowBeginLock = null;
             state.windowEndLock = null;
         },
-        setShowSettings: (
-            state,
-            { payload: showSettings }: PayloadAction<boolean>
-        ) => {
-            state.showSettings = showSettings;
+        setShowSettings: (state, action: PayloadAction<boolean>) => {
+            state.showSettings = action.payload;
+        },
+        setLatestDataTimestamp: (state, action: PayloadAction<number>) => {
+            state.latestDataTimestamp = action.payload;
+        },
+        setLiveMode: (state, action: PayloadAction<boolean>) => {
+            state.liveMode = action.payload;
         },
     },
 });
 
 const calculateDuration = (
     sampleFrequency: number,
-    windowDuration: null | number
-): number | null =>
-    windowDuration === null
-        ? null
-        : Math.min(
-              MAX_WINDOW_DURATION / sampleFrequency,
-              Math.max(MIN_WINDOW_DURATION / sampleFrequency, windowDuration)
-          );
-
-const getCenter = (
-    begin: number,
-    end: number,
-    duration: number
-): [number, number] => [duration / 2, (begin + end) / 2];
+    windowDuration: number
+): number =>
+    Math.min(
+        MAX_WINDOW_DURATION / sampleFrequency,
+        Math.max(MIN_WINDOW_DURATION / sampleFrequency, windowDuration)
+    );
 
 export const chartWindowAction =
     (
-        windowBegin: number | null,
-        windowEnd: number | null,
+        windowEnd: number,
         windowDuration: number,
         yMin?: number | null,
         yMax?: number | null
@@ -306,9 +243,8 @@ export const chartWindowAction =
 
         dispatch(
             chartWindow({
-                windowBegin,
                 windowEnd,
-                windowDuration: duration!,
+                windowDuration: duration,
                 yMin,
                 yMax,
             })
@@ -326,40 +262,60 @@ export const chartTriggerWindowAction =
         );
     };
 
+export const animationAction = (): TAction => (dispatch, getState) => {
+    dispatch(setLatestDataTimestamp(options.timestamp));
+    if (isLiveMode(getState())) {
+        dispatch(scrollToEnd());
+    }
+};
+
 export const resetCursor = () =>
     chartCursorAction({ cursorBegin: null, cursorEnd: null });
 
-export const resetChart = (): TAction => (dispatch, getState) =>
-    dispatch(chartWindowAction(null, null, getWindowDuration(getState())));
+const scrollToEnd = (): TAction => (dispatch, getState) =>
+    dispatch(
+        chartWindowAction(
+            Math.max(
+                options.timestamp - getState().app.chart.windowDuration,
+                getState().app.chart.windowDuration
+            ),
+            getWindowDuration(getState())
+        )
+    );
 
-export const resetCursorAndChart = (): TAction => (dispatch, getState) => {
-    dispatch(chartWindowAction(null, null, getWindowDuration(getState())));
+export const resetCursorAndChart = (): TAction => dispatch => {
+    dispatch(scrollToEnd());
     dispatch(resetCursor());
 };
-
-function calcBuffer(windowDuration: number, windowEnd: number) {
-    const { data, samplesPerSecond, timestamp } = options;
-    const totalInUs = (data.length / samplesPerSecond) * 1e6;
-    const bufferLength = totalInUs - windowDuration;
-    const bufferRemaining =
-        windowEnd !== 0
-            ? bufferLength - (timestamp! - windowEnd)
-            : bufferLength;
-    return {
-        bufferLength,
-        bufferRemaining,
-    };
-}
 
 export const chartState = (state: RootState) => state.app.chart;
 export const getWindowDuration = (state: RootState) =>
     state.app.chart.windowDuration;
 export const showChartSettings = (state: RootState) =>
     state.app.chart.showSettings;
+export const getChartRange = (state: RootState) => {
+    const windowEnd = Math.max(
+        state.app.chart.liveMode
+            ? options.timestamp
+            : state.app.chart.windowEnd,
+        state.app.chart.windowDuration
+    );
+
+    const windowDuration = state.app.chart.windowDuration;
+    const windowBegin = Math.max(0, windowEnd - windowDuration);
+
+    return {
+        windowEnd,
+        windowBegin,
+        windowDuration,
+    };
+};
+
+export const isLiveMode = (state: RootState) => state.app.chart.liveMode;
 
 export const {
+    setLatestDataTimestamp,
     panWindow,
-    animationAction,
     chartCursorAction,
     chartTrigger,
     chartWindow,
@@ -375,6 +331,7 @@ export const {
     toggleYAxisLog,
     updateHasDigitalChannels,
     setShowSettings,
+    setLiveMode,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;

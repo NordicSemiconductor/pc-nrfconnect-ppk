@@ -17,8 +17,7 @@ interface ExportSelection {
     isExportDialogVisible: boolean;
     setIndexBegin: (value: number) => void;
     setIndexEnd: (value: number) => void;
-    windowBegin: number | null;
-    windowEnd: number | null;
+    windowEnd: number;
     cursorBegin?: number | null;
     cursorEnd?: number | null;
     windowDuration: number;
@@ -28,7 +27,6 @@ const ExportSelection = ({
     isExportDialogVisible,
     setIndexBegin,
     setIndexEnd,
-    windowBegin,
     windowEnd,
     cursorBegin,
     cursorEnd,
@@ -74,12 +72,7 @@ const ExportSelection = ({
             value: 1,
             id: 'radio-export-window',
             onSelect: () => {
-                /* If no windowEnd is provided, then assume you want the last timestamp recorded.
-                If no windowBegin, take calculate beginning of window by subtracting the "size" of
-                the window from the end.
-                At last, if the starting point is less than zero, start at index zero instead.
-                */
-                const end = windowEnd || options.timestamp;
+                const end = windowEnd;
                 if (end == null) {
                     logger.error(
                         'exportSelection: End of selection is invalid, try to export all.'
@@ -87,7 +80,7 @@ const ExportSelection = ({
                     return;
                 }
 
-                const start = windowBegin || end - windowDuration;
+                const start = Math.min(0, end - windowDuration);
                 setExportIndexes(
                     Math.ceil(timestampToIndex(start < 0 ? 0 : start)),
                     Math.floor(timestampToIndex(end))

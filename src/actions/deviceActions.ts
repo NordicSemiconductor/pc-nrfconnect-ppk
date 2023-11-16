@@ -231,7 +231,7 @@ export const open =
                 options.samplingTime
             );
             const end = indexToTimestamp(windowSize);
-            dispatch(chartWindowAction(0, end!, end!));
+            dispatch(chartWindowAction(end, windowSize)); // TODO test this
         };
 
         const onSample = ({ value, bits, endOfTrigger }: SampleValues) => {

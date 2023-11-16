@@ -13,7 +13,7 @@ export const numberOfDigitalChannels = 8;
 
 const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
-const microSecondsPerSecond = 1e6;
+export const microSecondsPerSecond = 1e6;
 
 export interface GlobalOptions {
     /** Time between each sample denoted in microseconds, which is equal to 1e-6 seconds \

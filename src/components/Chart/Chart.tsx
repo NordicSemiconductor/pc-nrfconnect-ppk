@@ -42,8 +42,10 @@ import {
     chartCursorAction,
     chartState,
     chartWindowAction,
+    getChartRange,
+    isLiveMode,
     MAX_WINDOW_DURATION,
-    resetChart,
+    setLiveMode,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
@@ -120,6 +122,7 @@ const calcStats = (_begin?: null | number, _end?: null | number) => {
 
 const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
+    const liveMode = useSelector(isLiveMode);
 
     const chartWindow = useCallback(
         (
@@ -130,7 +133,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         ) =>
             dispatch(
                 chartWindowAction(
-                    windowBegin,
                     windowEnd,
                     windowEnd - windowBegin,
                     yMin,
@@ -144,11 +146,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowDuration =>
             dispatch(
                 chartWindowAction(
-                    null,
-                    null,
-                    windowDuration,
-                    undefined,
-                    undefined
+                    options.timestamp - windowDuration,
+                    windowDuration
                 )
             ),
         [dispatch]
@@ -196,9 +195,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     });
 
     const {
-        windowBegin,
-        windowEnd,
-        windowDuration,
         windowBeginLock,
         windowEndLock,
         cursorBegin,
@@ -207,7 +203,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         digitalChannelsVisible,
         hasDigitalChannels,
         yAxisLog,
+        latestDataTimestamp,
     } = useSelector(chartState);
+
+    const { windowDuration, windowBegin, windowEnd } =
+        useSelector(getChartRange);
 
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showDigitalChannels =
@@ -251,8 +251,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         ]
     );
 
-    const end = windowEnd || options.timestamp - options.samplingTime;
-    const begin = windowBegin || end - windowDuration;
+    const end = windowEnd;
+    const begin = Math.max(0, end - windowDuration);
 
     const cursorData: CursorData = {
         cursorBegin,
@@ -316,25 +316,22 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
      */
     const zoomToWindow = useCallback(
         localWindowDuration => {
-            if (windowBegin === 0 && windowEnd === 0) {
+            if (liveMode) {
                 chartReset(localWindowDuration);
                 return;
             }
-            if (windowBegin != null && windowEnd != null) {
-                const center = (windowBegin + windowEnd) / 2;
-                let localWindowBegin = center - localWindowDuration / 2;
-                let localWindowEnd = center + localWindowDuration / 2;
-                if (localWindowEnd > windowEnd) {
-                    localWindowBegin =
-                        localWindowBegin - (localWindowEnd - windowEnd);
-                    localWindowEnd = windowEnd;
-                }
-                chartWindow(localWindowBegin, localWindowEnd);
-                return;
+
+            const center = (windowBegin + windowEnd) / 2;
+            let localWindowBegin = center - localWindowDuration / 2;
+            let localWindowEnd = center + localWindowDuration / 2;
+            if (localWindowEnd > windowEnd) {
+                localWindowBegin =
+                    localWindowBegin - (localWindowEnd - windowEnd);
+                localWindowEnd = windowEnd;
             }
-            chartReset(localWindowDuration);
+            chartWindow(localWindowBegin, localWindowEnd);
         },
-        [chartWindow, chartReset, windowBegin, windowEnd]
+        [liveMode, windowBegin, windowEnd, chartWindow, chartReset]
     );
 
     useEffect(() => {
@@ -348,9 +345,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             chartRef.current.zoomPan.zoomPanCallback = zoomPanCallback;
         }
     }, [chartCursor, zoomPanCallback]);
-
-    const chartPause = () =>
-        chartWindow(options.timestamp - windowDuration, options.timestamp);
 
     const samplesInWindowView = timestampToIndex(windowDuration);
     const samplesPixel =
@@ -393,6 +387,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         dataProcessor,
         digitalChannelsToCompute,
         yAxisLog,
+        latestDataTimestamp,
     ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
@@ -449,9 +444,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             <div className="chart-current">
                 <ChartTop
                     onLiveModeChange={isLive => {
-                        isLive ? dispatch(resetChart()) : chartPause();
+                        dispatch(setLiveMode(isLive));
                     }}
-                    live={windowBegin === 0 && windowEnd === 0}
+                    live={liveMode}
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
                     windowDuration={windowDuration}
