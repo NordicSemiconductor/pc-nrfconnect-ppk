@@ -288,12 +288,11 @@ export const resetCursorAndChart = (): TAction => dispatch => {
     dispatch(resetCursor());
 };
 
-export const chartState = (state: RootState) => state.app.chart;
 export const getWindowDuration = (state: RootState) =>
     state.app.chart.windowDuration;
 export const showChartSettings = (state: RootState) =>
     state.app.chart.showSettings;
-export const getChartRange = (state: RootState) => {
+export const getChartXAxisRange = (state: RootState) => {
     const windowEnd = Math.max(
         state.app.chart.liveMode
             ? options.timestamp
@@ -305,13 +304,35 @@ export const getChartRange = (state: RootState) => {
     const windowBegin = Math.max(0, windowEnd - windowDuration);
 
     return {
+        xAxisMax: state.app.chart.latestDataTimestamp,
         windowEnd,
         windowBegin,
         windowDuration,
+        windowBeginLock: state.app.chart.windowBeginLock,
+        windowEndLock: state.app.chart.windowEndLock,
     };
 };
+export const getChartYAxisRange = (state: RootState) => ({
+    yMax: state.app.chart.yMax,
+    yMin: state.app.chart.yMin,
+    yAxisLog: state.app.chart.yAxisLog,
+    yAxisLock: state.app.chart.yAxisLock,
+});
+
+export const getCursorRange = (state: RootState) => ({
+    cursorBegin: state.app.chart.cursorBegin,
+    cursorEnd: state.app.chart.cursorEnd,
+});
+
+export const getChartDigitalChanelInfo = (state: RootState) => ({
+    digitalChannels: state.app.chart.digitalChannels,
+    digitalChannelsVisible: state.app.chart.digitalChannelsVisible,
+    hasDigitalChannels: state.app.chart.hasDigitalChannels,
+});
 
 export const isLiveMode = (state: RootState) => state.app.chart.liveMode;
+export const isTimestampsVisible = (state: RootState) =>
+    state.app.chart.timestampsVisible;
 
 export const {
     setLatestDataTimestamp,

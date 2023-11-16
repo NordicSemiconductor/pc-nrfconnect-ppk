@@ -18,7 +18,13 @@ import { unit } from 'mathjs';
 import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
 import { indexToTimestamp } from '../../globals';
 import { appState } from '../../slices/appSlice';
-import { chartState, isLiveMode } from '../../slices/chartSlice';
+import {
+    getChartYAxisRange,
+    getCursorRange,
+    getWindowDuration,
+    isLiveMode,
+    isTimestampsVisible,
+} from '../../slices/chartSlice';
 import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
 import { type CursorData } from './Chart';
@@ -107,15 +113,10 @@ export default ({
         triggerSingleWaiting,
         triggerOrigin,
     } = useSelector(triggerState);
-    const {
-        windowDuration,
-        cursorBegin,
-        cursorEnd,
-        yMin,
-        yMax,
-        yAxisLog,
-        timestampsVisible,
-    } = useSelector(chartState);
+    const { yMin, yMax, yAxisLog } = useSelector(getChartYAxisRange);
+    const timestampsVisible = useSelector(isTimestampsVisible);
+    const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
+    const windowDuration = useSelector(getWindowDuration);
     const { samplingRunning } = useSelector(appState);
     const isRealTimePane = useSelector(isRealTimePaneSelector);
     const sendTriggerLevel = (level: number) =>

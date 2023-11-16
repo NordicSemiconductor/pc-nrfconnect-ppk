@@ -9,14 +9,19 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { chartState, setDigitalChannels } from '../../slices/chartSlice';
+import {
+    getChartDigitalChanelInfo,
+    setDigitalChannels,
+} from '../../slices/chartSlice';
 import { booleanTupleOf8 } from '../../utils/persistentStore';
 
 import './digital-channels.scss';
 
 export default () => {
     const dispatch = useDispatch();
-    const { digitalChannels, hasDigitalChannels } = useSelector(chartState);
+    const { digitalChannels, hasDigitalChannels } = useSelector(
+        getChartDigitalChanelInfo
+    );
 
     if (!hasDigitalChannels) {
         return null;
