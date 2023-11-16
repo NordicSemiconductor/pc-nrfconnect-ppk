@@ -11,7 +11,11 @@ import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { options } from '../../globals';
-import { getChartRange, isLiveMode, panWindow } from '../../slices/chartSlice';
+import {
+    getChartXAxisRange,
+    isLiveMode,
+    panWindow,
+} from '../../slices/chartSlice';
 import { showMinimap as getShowMinimap } from './minimapSlice';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
@@ -32,7 +36,7 @@ const Minimap = () => {
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
-    const { windowEnd, windowDuration } = useSelector(getChartRange);
+    const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
     const liveMode = useSelector(isLiveMode);
 
     function windowNavigateCallback(windowCenter: number) {

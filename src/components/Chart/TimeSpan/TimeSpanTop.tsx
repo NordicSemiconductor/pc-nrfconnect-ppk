@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { appState } from '../../../slices/appSlice';
-import { chartState } from '../../../slices/chartSlice';
+import { getWindowDuration } from '../../../slices/chartSlice';
 import { triggerState } from '../../../slices/triggerSlice';
 import { isRealTimePane as isRealTimePaneSelector } from '../../../utils/panes';
 import TimeSpanLabel from './TimeSpanLabel';
@@ -19,7 +19,7 @@ import './timespan.scss';
 const TimeSpanTop = ({ width }: { width: number }) => {
     const [isZoomed, setIsZoomed] = useState(false);
 
-    const { windowDuration } = useSelector(chartState);
+    const windowDuration = useSelector(getWindowDuration);
     const { triggerWindowOffset, triggerLength } = useSelector(triggerState);
     const isRealTimePane = useSelector(isRealTimePaneSelector);
 

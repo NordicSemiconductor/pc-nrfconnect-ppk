@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { ChartOptions, LineControllerDatasetOptions } from 'chart.js';
 
-import { chartState } from '../../slices/chartSlice';
+import { getWindowDuration } from '../../slices/chartSlice';
 import { type CursorData } from './Chart';
 import { DigitalChannelStates, DigitalChannelsType } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
@@ -35,7 +35,7 @@ const DigitalChannels = ({
     zoomedOutTooFar,
     cursorData: { begin, end },
 }: DigitalChannelsProperties) => {
-    const { windowDuration } = useSelector(chartState);
+    const windowDuration = useSelector(getWindowDuration);
     const bitsChartOptions: ChartOptions<'line'> = {
         scales: {
             x: {

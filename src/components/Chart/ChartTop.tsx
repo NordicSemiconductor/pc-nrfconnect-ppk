@@ -14,7 +14,7 @@ import {
 import { BigNumber, Fraction, unit } from 'mathjs';
 
 import {
-    chartState,
+    getChartYAxisRange,
     setShowSettings,
     showChartSettings,
     toggleYAxisLock,
@@ -125,7 +125,7 @@ const ChartSettingsDialog = ({
 }) => {
     const dispatch = useDispatch();
     const showSettings = useSelector(showChartSettings);
-    const { yAxisLock, yAxisLog } = useSelector(chartState);
+    const { yAxisLock, yAxisLog } = useSelector(getChartYAxisRange);
 
     return (
         <InfoDialog

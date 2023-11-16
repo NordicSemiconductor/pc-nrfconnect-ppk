@@ -20,7 +20,11 @@ import { dirname, join } from 'path';
 import exportChart from '../../actions/exportChartAction';
 import { indexToTimestamp } from '../../globals';
 import { appState, hideExportDialog } from '../../slices/appSlice';
-import { chartState, getChartRange } from '../../slices/chartSlice';
+import {
+    getChartDigitalChanelInfo,
+    getChartXAxisRange,
+    getCursorRange,
+} from '../../slices/chartSlice';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 import ExportSelection from './ExportSelection';
 
@@ -75,9 +79,9 @@ const createFileName = () => {
 
 export default () => {
     const dispatch = useDispatch();
-    const { cursorBegin, cursorEnd, hasDigitalChannels } =
-        useSelector(chartState);
-    const { windowEnd, windowDuration } = useSelector(getChartRange);
+    const { hasDigitalChannels } = useSelector(getChartDigitalChanelInfo);
+    const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
+    const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
     const { isExportDialogVisible } = useSelector(appState);
 
     const [indexBegin, setIndexBegin] = useState<number | null>(null);

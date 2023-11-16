@@ -12,7 +12,8 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    chartState,
+    getChartDigitalChanelInfo,
+    isTimestampsVisible,
     toggleDigitalChannels,
     toggleTimestamps,
 } from '../../slices/chartSlice';
@@ -21,8 +22,10 @@ import DigitalChannels from './DigitalChannels';
 
 export default () => {
     const dispatch = useDispatch();
-    const { digitalChannelsVisible, timestampsVisible, hasDigitalChannels } =
-        useSelector(chartState);
+    const { digitalChannelsVisible, hasDigitalChannels } = useSelector(
+        getChartDigitalChanelInfo
+    );
+    const timestampsVisible = useSelector(isTimestampsVisible);
     const isDataLogger = useSelector(isDataLoggerPane);
 
     return (

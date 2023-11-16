@@ -8,7 +8,10 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { options } from '../../../globals';
-import { chartCursorAction, getChartRange } from '../../../slices/chartSlice';
+import {
+    chartCursorAction,
+    getChartXAxisRange,
+} from '../../../slices/chartSlice';
 import TimeSpanLabel from './TimeSpanLabel';
 
 import './timespan.scss';
@@ -48,7 +51,7 @@ const TimeSpanBottom = ({
 
     const [drag, setDrag] = useState<Drag | null>(null);
     const { windowBegin, windowEnd, windowDuration } =
-        useSelector(getChartRange);
+        useSelector(getChartXAxisRange);
 
     let w1 = 0;
     if (windowEnd != null) {

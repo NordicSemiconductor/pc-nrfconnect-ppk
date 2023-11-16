@@ -40,9 +40,11 @@ import {
 import { RootState } from '../../slices';
 import {
     chartCursorAction,
-    chartState,
     chartWindowAction,
-    getChartRange,
+    getChartDigitalChanelInfo,
+    getChartXAxisRange,
+    getChartYAxisRange,
+    getCursorRange,
     isLiveMode,
     MAX_WINDOW_DURATION,
     setLiveMode,
@@ -186,7 +188,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         isGlobal: false,
         action: () => {
             dispatch((_dispatch: TDispatch, getState: () => RootState) => {
-                const { cursorBegin, cursorEnd } = chartState(getState());
+                const { cursorBegin, cursorEnd } = getCursorRange(getState());
                 if (cursorBegin != null && cursorEnd != null) {
                     chartWindow(cursorBegin, cursorEnd);
                 }
@@ -194,20 +196,21 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         },
     });
 
+    const { digitalChannels, digitalChannelsVisible, hasDigitalChannels } =
+        useSelector(getChartDigitalChanelInfo);
+
+    const { yAxisLog } = useSelector(getChartYAxisRange);
+
+    const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
+
     const {
         windowBeginLock,
         windowEndLock,
-        cursorBegin,
-        cursorEnd,
-        digitalChannels,
-        digitalChannelsVisible,
-        hasDigitalChannels,
-        yAxisLog,
-        latestDataTimestamp,
-    } = useSelector(chartState);
-
-    const { windowDuration, windowBegin, windowEnd } =
-        useSelector(getChartRange);
+        xAxisMax,
+        windowDuration,
+        windowBegin,
+        windowEnd,
+    } = useSelector(getChartXAxisRange);
 
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showDigitalChannels =
@@ -393,7 +396,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         dataProcessor,
         digitalChannelsToCompute,
         yAxisLog,
-        latestDataTimestamp,
+        xAxisMax,
     ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
