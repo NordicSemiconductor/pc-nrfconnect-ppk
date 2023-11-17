@@ -252,6 +252,10 @@ export const chartWindowAction =
                 yMax,
             })
         );
+
+        if (windowEnd >= DataManager().getTimestamp()) {
+            dispatch(setLiveMode(true));
+        }
     };
 
 export const chartTriggerWindowAction =
