@@ -240,6 +240,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             endY?: number | null
         ) => {
             if (!isDataLoggerPane) return;
+
             if (beginX === undefined || endX === undefined) {
                 chartReset(windowDuration);
                 return;
@@ -257,15 +258,20 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             const newBeginX = Math.max(beginX, minLimit);
             const newEndX = Math.min(endX, maxLimit);
 
+            if (windowDuration === newEndX - newBeginX) {
+                dispatch(setLiveMode(false));
+            }
+
             chartWindow(newBeginX, newEndX, beginY, endY);
         },
         [
             isDataLoggerPane,
             windowBeginLock,
             windowEndLock,
+            windowDuration,
             chartWindow,
             chartReset,
-            windowDuration,
+            dispatch,
         ]
     );
 
