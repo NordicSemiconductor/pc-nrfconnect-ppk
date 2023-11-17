@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { options } from '../../globals';
 import { fireEvent, render, screen } from '../../utils/testUtils';
 import SidePanel from '../SidePanel/SidePanel';
 
@@ -22,13 +21,13 @@ describe('SidePanel', () => {
     });
 
     it('should have LoadSave present if the number of samples is non-zero', () => {
-        options.index = 1;
+        // DataManager().getTotalSavedRecords() = 1 // TODO Mock This
         render(<SidePanel />);
         expect(screen.getByText('Save / Export')).toBeDefined();
     });
 
     it('successfully opens SaveChoiceDialog when clicking Save / Export button', () => {
-        options.index = 1;
+        // DataManager().getTotalSavedRecords() = 1 // TODO Mock This
         render(<SidePanel />);
 
         const saveButton = screen.getByText('Save / Export');

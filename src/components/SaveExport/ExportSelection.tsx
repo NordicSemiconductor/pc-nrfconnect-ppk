@@ -10,7 +10,7 @@ import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useSelector } from 'react-redux';
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { options, timestampToIndex } from '../../globals';
+import { DataManager, timestampToIndex } from '../../globals';
 import { isRealTimePane } from '../../utils/panes';
 
 interface ExportSelection {
@@ -23,7 +23,7 @@ interface ExportSelection {
     windowDuration: number;
 }
 
-const ExportSelection = ({
+export default ({
     isExportDialogVisible,
     setIndexBegin,
     setIndexEnd,
@@ -64,7 +64,7 @@ const ExportSelection = ({
             value: 0,
             id: 'radio-export-all',
             onSelect: () => {
-                setExportIndexes(0, options.index);
+                setExportIndexes(0, DataManager().getTotalSavedRecords());
             },
         },
         {
@@ -142,5 +142,3 @@ const ExportSelection = ({
         </>
     );
 };
-
-export default ExportSelection;

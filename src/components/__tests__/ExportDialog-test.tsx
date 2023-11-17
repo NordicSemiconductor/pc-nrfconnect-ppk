@@ -7,7 +7,6 @@
 import React from 'react';
 import type { AnyAction } from 'redux';
 
-import { options } from '../../globals';
 import { showExportDialog } from '../../slices/appSlice';
 import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
 import { fireEvent, render, screen } from '../../utils/testUtils';
@@ -46,7 +45,8 @@ describe('ExportDialog', () => {
         const expectedNumberOfRecords = 2_000_000;
         const numberOfRecordsText = `${expectedNumberOfRecords} records`;
 
-        options.index = expectedNumberOfRecords - 1; // Header + all samples
+        // options.index = expectedNumberOfRecords - 1; // Header + all samples
+        // TODO MOCK DataManger
         render(<ExportDialog />, initialStateActions);
 
         const buttonToSelectAll = screen.getByText('All');
@@ -64,7 +64,7 @@ describe('ExportDialog', () => {
         const numberOfRecordsText = '100000 records';
 
         // Need to adjust options in order to at least contain more than necessary
-        options.timestamp = 1_000_000 * 7;
+        // DataManager().getTimestamp() = 1_000_000 * 7; // TODO Mock this
 
         render(<ExportDialog />, initialStateActions);
         const radioWindow = screen.getByText('Window');

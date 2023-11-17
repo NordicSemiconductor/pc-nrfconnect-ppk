@@ -4,11 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import {
-    numberOfDigitalChannels,
-    options,
-    timestampToIndex,
-} from '../../../globals';
+import { DataManager, numberOfDigitalChannels } from '../../../globals';
 import bitDataAccumulator, { BitDataAccumulator } from './bitDataAccumulator';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
 import { AmpereState, DigitalChannelStates } from './dataTypes';
@@ -23,15 +19,16 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
         [begin, end] = [end, begin];
     }
 
-    const { data } = options;
-    const indexBegin = Math.ceil(timestampToIndex(begin));
-    const indexEnd = Math.floor(timestampToIndex(end));
+    const data = DataManager().getData(
+        begin,
+        Math.min(end, DataManager().getTimestamp())
+    );
 
     let sum = 0;
     let len = 0;
     let max;
 
-    for (let n = indexBegin; n <= indexEnd; n += 1) {
+    for (let n = 0; n <= data.length; n += 1) {
         const k = (n + data.length) % data.length;
         const v = data[k];
         if (!Number.isNaN(v)) {
@@ -81,34 +78,35 @@ export default (): DataAccumulator => ({
         end,
         digitalChannelsToCompute,
         removeZeroValues,
-        len,
+        maxNumberOfPoints,
         windowDuration
     ) {
-        const { data } = options;
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
                 ? this.bitDataAccumulator
                 : this.noOpBitDataProcessor;
 
-        const originalIndexBegin = timestampToIndex(begin);
-        const originalIndexEnd = timestampToIndex(end);
+        const data = DataManager().getData(begin, end);
+        const bits = DataManager().getDataBits(begin, end);
 
-        const step =
-            len === 0 ? 0 : (originalIndexEnd - originalIndexBegin) / len;
+        const numberOfGroupedPoints =
+            maxNumberOfPoints === 0 ? 0 : data.length / maxNumberOfPoints;
 
         let mappedIndex = 0;
 
         bitDataProcessor.initialise(digitalChannelsToCompute);
 
         for (
-            let originalIndex = originalIndexBegin;
-            mappedIndex < len + len;
-            mappedIndex += 1, originalIndex += step
+            let originalIndex = 0;
+            mappedIndex < 2 * maxNumberOfPoints;
+            mappedIndex += 1, originalIndex += numberOfGroupedPoints
         ) {
             const timestamp =
-                begin + windowDuration * (mappedIndex / (len + len));
+                begin +
+                windowDuration *
+                    (mappedIndex / (maxNumberOfPoints + maxNumberOfPoints));
             const k = Math.floor(originalIndex);
-            const l = Math.floor(originalIndex + step);
+            const l = Math.floor(originalIndex + numberOfGroupedPoints);
             let min: number | undefined = Number.MAX_VALUE;
             let max: number | undefined = -Number.MAX_VALUE;
 
@@ -123,7 +121,9 @@ export default (): DataAccumulator => ({
                     if (v > max) max = v;
                     if (v < min) min = v;
 
-                    bitDataProcessor.processBits(n);
+                    if (bits && n < bits.length) {
+                        bitDataProcessor.processBits(bits[n]);
+                    }
                 }
             }
 

@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-plusplus: off */
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- added temporarily to be conservative while converting to typescript */
 
-import { numberOfDigitalChannels, options } from '../../../globals';
+import { numberOfDigitalChannels } from '../../../globals';
 import {
     always0,
     always1,
@@ -26,7 +25,7 @@ export interface BitDataAccumulator {
     accumulator: Array<BitStateIndexType | null>;
     digitalChannelsToCompute: number[] | undefined;
     initialise: (digitalChannelsToCompute: number[]) => void;
-    processBits: (bitIndex: number) => void;
+    processBits: (bits: number) => void;
     processAccumulatedBits: (timestamp: TimestampType) => void;
     getLineData: () => DigitalChannelStates[];
 }
@@ -42,28 +41,26 @@ export default (): BitDataAccumulator => ({
         this.accumulator.fill(null);
     },
 
-    processBits(bitIndex) {
-        const bits = options.bits![bitIndex];
+    processBits(bits) {
+        this.digitalChannelsToCompute!.forEach(i => {
+            const bitState = averagedBitState(bits, i);
 
-        if (bits) {
-            this.digitalChannelsToCompute!.forEach(i => {
-                const bitState = averagedBitState(bits, i);
-
-                if (this.accumulator[i] === null) {
-                    this.accumulator[i] = bitState;
-                } else if (
-                    (this.accumulator[i] === always1 && bitState !== always1) ||
-                    (this.accumulator[i] === always0 && bitState !== always0)
-                ) {
-                    this.accumulator[i] = sometimes0And1;
-                }
-            });
-        }
+            if (this.accumulator[i] === null) {
+                this.accumulator[i] = bitState;
+            } else if (
+                (this.accumulator[i] === always1 && bitState !== always1) ||
+                (this.accumulator[i] === always0 && bitState !== always0)
+            ) {
+                this.accumulator[i] = sometimes0And1;
+            }
+        });
     },
 
     processAccumulatedBits(timestamp) {
         this.digitalChannelsToCompute!.forEach(i => {
-            this.bitDataStorage.storeBit(timestamp, i, this.accumulator[i]!);
+            const bitState = this.accumulator[i];
+            if (bitState != null)
+                this.bitDataStorage.storeBit(timestamp, i, bitState);
         });
 
         this.accumulator.fill(null);

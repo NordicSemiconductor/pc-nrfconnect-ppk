@@ -25,9 +25,8 @@ import {
 
 import Minimap from '../../features/minimap/Minimap';
 import {
+    DataManager,
     getSamplesPerSecond,
-    indexToTimestamp,
-    options,
     timestampToIndex,
 } from '../../globals';
 import {
@@ -109,7 +108,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowDuration =>
             dispatch(
                 chartWindowAction(
-                    options.timestamp - windowDuration,
+                    DataManager().getTimestamp() - windowDuration,
                     windowDuration
                 )
             ),
@@ -127,8 +126,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Select all',
         isGlobal: false,
         action: () => {
-            if (options.index > 0) {
-                return chartCursor(0, indexToTimestamp(options.index));
+            if (DataManager().getTimestamp() > 0) {
+                return chartCursor(0, DataManager().getTimestamp());
             }
             return false;
         },
@@ -177,7 +176,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
-    const { bits } = options;
+    const bits = DataManager().getDataBits(windowBegin, windowEnd); // TO Check this
 
     const chartRef = useRef<AmpereChartJS | null>(null);
 
@@ -253,7 +252,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
             const minLimit = windowBeginLock || earliestDataTime;
             const maxLimit =
-                windowEndLock || Math.max(options.timestamp, maxWindowWidth);
+                windowEndLock ||
+                Math.max(DataManager().getTimestamp(), maxWindowWidth);
 
             const newBeginX = Math.max(beginX, minLimit);
             const newEndX = Math.min(endX, maxLimit);
@@ -379,11 +379,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 <Button
                     key="select-all-btn"
                     variant="secondary"
-                    disabled={options.index <= 0}
+                    disabled={DataManager().getTotalSavedRecords() <= 0}
                     size="sm"
-                    onClick={() =>
-                        chartCursor(0, indexToTimestamp(options.index))
-                    }
+                    onClick={() => chartCursor(0, DataManager().getTimestamp())}
                 >
                     SELECT ALL
                 </Button>

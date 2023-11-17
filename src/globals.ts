@@ -27,20 +27,112 @@ export interface GlobalOptions {
     /** @var [bits]: contains the bit state for each sample, variable may be null */
     bits: Uint16Array | null;
     /** @var index: pointer to the index of the last sample in data array */
-    index: number;
-    /** Timestamp for the latest sample taken, incremented by {samplingTime} for each sample */
     timestamp: number;
     currentPane?: number;
 }
-
-export const options: GlobalOptions = {
+const options: GlobalOptions = {
     samplingTime: initialSamplingTime,
     samplesPerSecond: initialSamplesPerSecond,
     data: new Float32Array(initialSamplesPerSecond * bufferLengthInSeconds),
     bits: null,
-    index: 0,
     timestamp: 0,
 };
+
+export const DataManager = () => ({
+    getSamplingTime: () => options.samplingTime,
+    setSamplingTime: (samplingTime: number) => {
+        options.samplingTime = samplingTime;
+    },
+    setSamplingRate: (rate: number) => {
+        options.samplesPerSecond = rate;
+        options.samplingTime = getSamplingTime(rate);
+    },
+    getSamplesPerSecond: () => options.samplesPerSecond,
+    setSamplesPerSecond: (samplesPerSecond: number) => {
+        options.samplesPerSecond = samplesPerSecond;
+    },
+    getData: (fromTime = 0, toTime = options.timestamp) =>
+        options.data.slice(
+            timestampToIndex(fromTime),
+            timestampToIndex(toTime)
+        ),
+    getDataBits: (fromTime = 0, toTime = options.timestamp) =>
+        options.bits
+            ? options.bits.slice(
+                  timestampToIndex(fromTime),
+                  timestampToIndex(toTime)
+              )
+            : null,
+    getTimestamp: () => options.timestamp - options.samplingTime,
+    addData: (data: number, bitData: number) => {
+        const index = timestampToIndex(options.timestamp);
+
+        if (index < options.data.length) {
+            options.data[index] = data;
+        }
+
+        if (options.bits) {
+            options.bits[index] = bitData;
+        }
+
+        options.timestamp += options.samplingTime;
+
+        return {
+            dataAdded: index < options.data.length,
+            bitDataAdded: !!options.bits,
+        };
+    },
+    addBitData: (data: number) => {
+        if (!options.bits) return;
+        options.bits[timestampToIndex(options.timestamp)] = data;
+        options.timestamp += options.samplingTime;
+    },
+    reset: () => {
+        options.samplingTime = initialSamplingTime;
+        options.samplesPerSecond = initialSamplesPerSecond;
+        options.data = new Float32Array(
+            initialSamplesPerSecond * bufferLengthInSeconds
+        );
+        options.bits = null;
+        options.timestamp = 0;
+    },
+    initializeBitsBuffer: (samplingDuration: number) => {
+        const newBufferSize = Math.trunc(
+            samplingDuration * options.samplesPerSecond
+        );
+        if (!options.bits || options.bits.length !== newBufferSize) {
+            options.bits = new Uint16Array(newBufferSize);
+        }
+        options.bits.fill(0);
+    },
+    initializeDataBuffer: (samplingDuration: number) => {
+        const newBufferSize = Math.trunc(
+            samplingDuration * options.samplesPerSecond
+        );
+        if (options.data.length !== newBufferSize) {
+            options.data = new Float32Array(newBufferSize);
+        }
+        options.data.fill(NaN);
+    },
+    getDataBufferSize: () => options.data.length,
+    getTotalSavedRecords: () => timestampToIndex(options.timestamp),
+    isBufferFull: () =>
+        timestampToIndex(options.timestamp) === options.data.length,
+    getMetadata: () => ({
+        samplesPerSecond: options.samplesPerSecond,
+        samplingTime: options.samplingTime,
+        timestamp: options.timestamp,
+    }),
+    loadData: (
+        data: Float32Array,
+        bits: Uint16Array | null,
+        timestamp: number
+    ) => {
+        options.data = data;
+        options.bits = bits;
+        options.timestamp = timestamp;
+    },
+});
 
 /**
  * Get the sampling time derived from samplesPerSecond
@@ -50,44 +142,7 @@ export const options: GlobalOptions = {
 export const getSamplingTime = (samplingRate: number): number =>
     microSecondsPerSecond / samplingRate;
 
-export const setSamplingRate = (rate: number): void => {
-    options.samplesPerSecond = rate;
-    options.samplingTime = getSamplingTime(rate);
-};
-
 export const getSamplesPerSecond = () => options.samplesPerSecond;
-
-/**
- * Initiates new sample array if new buffer size is not equal to the present one.
- * @param {number} samplingDuration maximum number of seconds with sampling
- * @returns {void} derives buffer size and initiates new buffer for data samples if the current length of the buffer is not equal to the new buffer size.
- * Also fills the buffer with NaN to make sure the buffer is cleared.
- */
-export const initializeDataBuffer = (samplingDuration: number) => {
-    const newBufferSize = Math.trunc(
-        samplingDuration * options.samplesPerSecond
-    );
-    if (options.data.length !== newBufferSize) {
-        options.data = new Float32Array(newBufferSize);
-    }
-    options.data.fill(NaN);
-};
-
-/**
- *
- * @param {number} samplingDuration maximum number of seconds with sampling
- * @returns {void} derives buffer size and initiates new buffer for bits if there is no buffer from before or if the current length of buffer
- * is not equal to the new buffer size. Fills the buffer with zeroes to make sure it is empty.
- */
-export const initializeBitsBuffer = (samplingDuration: number) => {
-    const newBufferSize = Math.trunc(
-        samplingDuration * options.samplesPerSecond
-    );
-    if (!options.bits || options.bits.length !== newBufferSize) {
-        options.bits = new Uint16Array(newBufferSize);
-    }
-    options.bits.fill(0);
-};
 
 export const removeBitsBuffer = (): void => {
     options.bits = null;

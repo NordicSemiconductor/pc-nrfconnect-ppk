@@ -13,7 +13,7 @@ import {
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import MinimapOptions from '../../features/minimap/MinimapOptions';
-import { options } from '../../globals';
+import { DataManager } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
     appState,
@@ -67,7 +67,7 @@ export default () => {
         return (
             <SidePanel className="side-panel tw-mt-9">
                 <Load />
-                {options.index !== 0 && <Save />}
+                {DataManager().getTimestamp() !== 0 && <Save />}
                 <Instructions />
                 <DeprecatedDeviceDialog />
             </SidePanel>
@@ -84,7 +84,7 @@ export default () => {
             {realTimePane && <Trigger />}
             {dataLoggerPane && <StartStop />}
             {dataLoggerPane && <MinimapOptions />}
-            {options.timestamp === null || (
+            {DataManager().getTimestamp() === null || (
                 <>
                     <DisplayOptions />
                     <Save />
