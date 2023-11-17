@@ -40,7 +40,7 @@ export const formatDataForExport = (
     let content = '';
     const dc = Array(8).fill(0);
     for (let n = 0; n <= length; n += 1) {
-        const value = bufferData.getFloat32(n);
+        const value = bufferData[n];
         if (!Number.isNaN(value)) {
             if (bitsData) {
                 const bitstring = dc.map(
