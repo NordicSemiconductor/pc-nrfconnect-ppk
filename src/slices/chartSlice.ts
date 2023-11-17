@@ -142,6 +142,7 @@ const chartSlice = createSlice({
             if (Number.isNaN(windowEnd)) return;
 
             state.windowEnd = windowEnd;
+            state.liveMode = windowEnd >= DataManager().getTimestamp();
         },
         chartTrigger(
             state,
