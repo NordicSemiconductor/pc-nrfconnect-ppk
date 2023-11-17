@@ -91,7 +91,6 @@ describe('Handle trigger', () => {
                 processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: 499,
-                    endOfTrigger: false,
                 })
             );
             expect(store.getActions().length).toBe(0);
@@ -99,7 +98,6 @@ describe('Handle trigger', () => {
                 processTriggerSample(5, mockDevicePPK2, {
                     ...samplingData,
                     dataIndex: 500,
-                    endOfTrigger: true,
                 })
             );
             expect(store.getActions().length).toBe(2);

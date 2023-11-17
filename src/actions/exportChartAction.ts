@@ -7,7 +7,7 @@
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
-import { indexToTimestamp, options } from '../globals';
+import { DataManager, indexToTimestamp } from '../globals';
 import { hideExportDialog } from '../slices/appSlice';
 import { TDispatch } from '../slices/thunk';
 import { averagedBitState } from '../utils/bitConversion';
@@ -32,7 +32,6 @@ const selectivePrint = (
 ) => `${strArr.filter((_, i) => selectArr[i]).join(',')}\n`;
 
 export const formatDataForExport = (
-    start: number,
     length: number,
     bufferData: Float32Array,
     bitsData: Uint16Array | null,
@@ -40,14 +39,13 @@ export const formatDataForExport = (
 ) => {
     let content = '';
     const dc = Array(8).fill(0);
-    for (let n = start; n <= start + length; n += 1) {
-        const k = (n + bufferData.length) % bufferData.length;
-        const value = bufferData[k];
+    for (let n = 0; n <= length; n += 1) {
+        const value = bufferData.getFloat32(n);
         if (!Number.isNaN(value)) {
             if (bitsData) {
                 const bitstring = dc.map(
                     (_, i) =>
-                        ['-', '0', '1', 'X'][averagedBitState(bitsData[k], i)]
+                        ['-', '0', '1', 'X'][averagedBitState(bitsData[n], i)]
                 );
                 content += selectivePrint(
                     [
@@ -108,10 +106,9 @@ export default (
                                     reject();
                                 }
                                 const content = formatDataForExport(
-                                    start,
                                     len,
-                                    options.data,
-                                    options.bits,
+                                    DataManager().getData(),
+                                    DataManager().getDataBits(),
                                     contentSelection
                                 );
                                 fs.write(fd, content, () => {

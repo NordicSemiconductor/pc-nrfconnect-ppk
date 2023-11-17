@@ -18,14 +18,7 @@ import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
 import { minimapEvents } from '../features/minimap/minimapEvents';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import {
-    indexToTimestamp,
-    initializeBitsBuffer,
-    initializeDataBuffer,
-    options,
-    setSamplingRate,
-    updateTitle,
-} from '../globals';
+import { DataManager, indexToTimestamp, updateTitle } from '../globals';
 import { RootState } from '../slices';
 import {
     deviceClosedAction,
@@ -73,23 +66,21 @@ export const setupOptions =
     () => (dispatch: TDispatch, getState: () => RootState) => {
         if (!device) return;
         try {
+            DataManager().reset();
             if (isRealTimePane(getState())) {
                 // in real-time
                 const realtimeWindowDuration = 300;
                 const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
-
-                setSamplingRate(newSamplesPerSecond);
-                initializeDataBuffer(realtimeWindowDuration);
-                initializeBitsBuffer(realtimeWindowDuration);
+                DataManager().setSamplingRate(newSamplesPerSecond);
+                DataManager().initializeDataBuffer(realtimeWindowDuration);
+                DataManager().initializeBitsBuffer(realtimeWindowDuration);
             } else {
                 const { durationSeconds, sampleFreq } =
                     getState().app.dataLogger;
-                setSamplingRate(sampleFreq);
-                initializeDataBuffer(durationSeconds);
-                initializeBitsBuffer(durationSeconds);
+                DataManager().setSamplingRate(sampleFreq);
+                DataManager().initializeDataBuffer(durationSeconds);
+                DataManager().initializeBitsBuffer(durationSeconds);
             }
-            options.index = 0;
-            options.timestamp = 0;
             minimapEvents.clear();
         } catch (err) {
             logger.error(err);
@@ -114,12 +105,6 @@ export function samplingStart() {
         // Prepare global options
         dispatch(setupOptions());
 
-        options.data.fill(NaN);
-        if (options.bits) {
-            options.bits.fill(0);
-        }
-        options.index = 0;
-        options.timestamp = 0;
         minimapEvents.clear();
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
@@ -228,17 +213,13 @@ export const open =
             const { triggerLength } = getState().app.trigger;
             const windowSize = calculateWindowSize(
                 triggerLength,
-                options.samplingTime
+                DataManager().getSamplingTime()
             );
             const end = indexToTimestamp(windowSize);
             dispatch(chartWindowAction(end, windowSize)); // TODO test this
         };
 
-        const onSample = ({ value, bits, endOfTrigger }: SampleValues) => {
-            if (options.timestamp == null) {
-                options.timestamp = 0;
-            }
-
+        const onSample = ({ value, bits }: SampleValues) => {
             const {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq, sampleFreq },
@@ -279,15 +260,14 @@ export const open =
                 nbSamples = 0;
             }
 
-            options.data[options.index] = zeroCappedValue;
-            if (options.bits) {
-                options.bits[options.index] = b16 | prevBits;
+            if (
+                DataManager().addData(zeroCappedValue, b16 | prevBits)
+                    .bitDataAdded
+            ) {
                 prevBits = 0;
             }
-            options.index += 1;
-            options.timestamp += options.samplingTime;
 
-            if (options.index === options.data.length) {
+            if (DataManager().isBufferFull()) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
                 }
@@ -295,10 +275,8 @@ export const open =
             if (triggerRunning || triggerSingleWaiting) {
                 dispatch(
                     processTriggerSample(value!, device!, {
-                        samplingTime: options.samplingTime,
-                        dataIndex: options.index,
-                        dataBuffer: options.data,
-                        endOfTrigger: endOfTrigger!,
+                        samplingTime: DataManager().getSamplingTime(),
+                        dataIndex: DataManager().getTotalSavedRecords(),
                     })
                 );
             }
@@ -381,7 +359,7 @@ export const open =
         let renderIndex: number;
         updateRequestInterval = setInterval(() => {
             if (
-                renderIndex !== options.index &&
+                renderIndex !== DataManager().getTotalSavedRecords() &&
                 getState().app.app.samplingRunning
             ) {
                 const timestamp = Date.now();
@@ -394,7 +372,7 @@ export const open =
                         dispatch(animationAction());
                     }
                 });
-                renderIndex = options.index;
+                renderIndex = DataManager().getTotalSavedRecords();
             }
         }, 30);
     };

@@ -10,7 +10,7 @@ import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import SerialDevice from '../device/serialDevice';
 import { stopPreventSleep } from '../features/preventSleep';
-import { indexToTimestamp } from '../globals';
+import { DataManager, indexToTimestamp } from '../globals';
 import { RootState } from '../slices';
 import { chartTriggerWindowAction } from '../slices/chartSlice';
 import { TAction, TDispatch } from '../slices/thunk';
@@ -43,16 +43,10 @@ export function processTriggerSample(
     samplingData: {
         samplingTime: number;
         dataIndex: number;
-        dataBuffer: Float32Array;
-        endOfTrigger: boolean;
     }
 ): TAction {
     return (dispatch: TDispatch, getState: () => RootState) => {
-        const {
-            samplingTime,
-            dataIndex: currentIndex,
-            dataBuffer,
-        } = samplingData;
+        const { samplingTime, dataIndex: currentIndex } = samplingData;
         const {
             trigger: {
                 triggerLength,
@@ -73,7 +67,8 @@ export function processTriggerSample(
         const windowSize = calculateWindowSize(triggerLength, samplingTime);
 
         const enoughSamplesCollected =
-            (triggerStartIndex + windowSize) % dataBuffer.length <=
+            (triggerStartIndex + windowSize) %
+                DataManager().getTotalSavedRecords() <=
             currentIndex;
         if (!enoughSamplesCollected) return;
 
@@ -92,7 +87,7 @@ export function processTriggerSample(
         );
         const from = indexToTimestamp(triggerStartIndex - shiftedIndex);
         const to = indexToTimestamp(currentIndex - shiftedIndex);
-        dispatch(chartTriggerWindowAction(from!, to!, to! - from!));
+        dispatch(chartTriggerWindowAction(from, to, to - from));
         dispatch(completeTriggerAction(triggerStartIndex));
     };
 }

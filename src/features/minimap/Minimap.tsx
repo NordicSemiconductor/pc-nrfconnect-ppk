@@ -10,7 +10,7 @@ import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { options } from '../../globals';
+import { DataManager } from '../../globals';
 import {
     getChartXAxisRange,
     isLiveMode,
@@ -127,7 +127,7 @@ function drawSlider(
     windowDuration: number,
     liveMode: boolean
 ) {
-    if (options.index === 0) {
+    if (DataManager().getTimestamp() === 0) {
         slider.style.display = 'none';
         return;
     }

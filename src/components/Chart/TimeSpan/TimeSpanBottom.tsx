@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { options } from '../../../globals';
+import { DataManager } from '../../../globals';
 import {
     chartCursorAction,
     getChartXAxisRange,
@@ -56,9 +56,9 @@ const TimeSpanBottom = ({
     let w1 = 0;
     if (windowEnd != null) {
         w1 = windowEnd;
-    } else if (options.timestamp != null) {
-        w1 = options.timestamp - options.samplingTime;
     }
+
+    w1 = DataManager().getTimestamp() - DataManager().getSamplingTime();
 
     const w0 = windowBegin || w1 - windowDuration;
 

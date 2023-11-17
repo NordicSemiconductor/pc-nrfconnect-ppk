@@ -6,7 +6,7 @@
 
 import { EventEmitter } from 'events';
 
-import { options } from '../../globals';
+import { DataManager } from '../../globals';
 
 export const eventEmitter = new EventEmitter();
 export const minimapEvents = (() => {
@@ -16,7 +16,8 @@ export const minimapEvents = (() => {
             const THREE_SECONDS_IN_MS = 3000;
             const interval = THREE_SECONDS_IN_MS;
             const totalSamplingTime =
-                (options.samplingTime / 1000) * options.data.length;
+                (DataManager().getSamplingTime() / 1000) *
+                DataManager().getDataBufferSize();
             intervalId = setInterval(() => {
                 eventEmitter.emit('updateMinimap');
             }, interval);

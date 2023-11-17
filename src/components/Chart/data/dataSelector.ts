@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { options, timestampToIndex } from '../../../globals';
+import { DataManager, microSecondsPerSecond } from '../../../globals';
 import { BitDataAccumulator } from './bitDataAccumulator';
 import bitDataSelector, { BitDataSelector } from './bitDataSelector';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
@@ -40,35 +40,29 @@ export default (): DataSelector => ({
         digitalChannelsToCompute: number[],
         removeZeroValues: boolean
     ) {
-        const { data } = options;
+        const data = DataManager().getData(begin, end);
+        const bits = DataManager().getDataBits(begin, end);
+
         const bitDataProcessor =
             digitalChannelsToCompute.length > 0
                 ? this.bitDataSelector
                 : this.noOpBitDataProcessor;
-
-        const originalIndexBegin = timestampToIndex(begin);
-        const originalIndexEnd = timestampToIndex(end);
 
         let mappedIndex = 0;
 
         bitDataProcessor.initialise(digitalChannelsToCompute);
 
         let last;
-        const originalIndexBeginFloored = Math.floor(originalIndexBegin);
-        const originalIndexEndCeiled = Math.ceil(originalIndexEnd);
-        for (
-            let n = originalIndexBeginFloored;
-            n <= originalIndexEndCeiled;
-            mappedIndex += 1, n += 1
-        ) {
+        for (let n = 0; n <= data.length; mappedIndex += 1, n += 1) {
             const k = (n + data.length) % data.length;
             const v = data[k];
             const timestamp =
                 begin +
-                ((n - originalIndexBegin) * 1e6) / options.samplesPerSecond;
+                (n * microSecondsPerSecond) /
+                    DataManager().getSamplesPerSecond();
             this.ampereLineData[mappedIndex].x = timestamp;
 
-            if (n < originalIndexEndCeiled) {
+            if (n < data.length) {
                 last = Number.isNaN(v) ? undefined : v;
             }
 
@@ -78,8 +72,8 @@ export default (): DataSelector => ({
 
             this.ampereLineData[mappedIndex].y = last;
 
-            if (!Number.isNaN(v)) {
-                bitDataProcessor.processBits(k, timestamp);
+            if (!Number.isNaN(v) && bits) {
+                bitDataProcessor.processBits(bits[k], timestamp);
             }
         }
 

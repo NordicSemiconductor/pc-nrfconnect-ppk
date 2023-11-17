@@ -7,7 +7,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { microSecondsPerSecond, options } from '../globals';
+import { DataManager, microSecondsPerSecond } from '../globals';
 import {
     booleanTupleOf8,
     getDigitalChannels,
@@ -121,8 +121,11 @@ const chartSlice = createSlice({
                 windowDuration = windowEnd - windowBegin;
             }
 
-            if (windowEnd > options.timestamp) {
-                windowEnd = Math.max(windowDuration, options.timestamp);
+            if (windowEnd > DataManager().getTimestamp()) {
+                windowEnd = Math.max(
+                    windowDuration,
+                    DataManager().getTimestamp()
+                );
             }
 
             return {
@@ -161,10 +164,10 @@ const chartSlice = createSlice({
             };
         },
         setChartState: state => {
-            state.hasDigitalChannels = options.bits !== null;
+            state.hasDigitalChannels = DataManager().getDataBits() !== null;
         },
         updateHasDigitalChannels: state => {
-            state.hasDigitalChannels = options.bits !== null;
+            state.hasDigitalChannels = DataManager().getDataBits() !== null;
         },
         setDigitalChannels(
             state,
@@ -263,7 +266,7 @@ export const chartTriggerWindowAction =
     };
 
 export const animationAction = (): TAction => (dispatch, getState) => {
-    dispatch(setLatestDataTimestamp(options.timestamp));
+    dispatch(setLatestDataTimestamp(DataManager().getTimestamp()));
     if (isLiveMode(getState())) {
         dispatch(scrollToEnd());
     }
@@ -276,7 +279,8 @@ const scrollToEnd = (): TAction => (dispatch, getState) =>
     dispatch(
         chartWindowAction(
             Math.max(
-                options.timestamp - getState().app.chart.windowDuration,
+                DataManager().getTimestamp() -
+                    getState().app.chart.windowDuration,
                 getState().app.chart.windowDuration
             ),
             getWindowDuration(getState())
@@ -295,7 +299,7 @@ export const showChartSettings = (state: RootState) =>
 export const getChartXAxisRange = (state: RootState) => {
     const windowEnd = Math.max(
         state.app.chart.liveMode
-            ? options.timestamp
+            ? DataManager().getTimestamp()
             : state.app.chart.windowEnd,
         state.app.chart.windowDuration
     );

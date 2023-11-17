@@ -14,7 +14,7 @@ import fs from 'fs';
 import { dirname, join } from 'path';
 
 import { minimapEvents } from '../features/minimap/minimapEvents';
-import { options, updateTitle } from '../globals';
+import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
 import { setChartState } from '../slices/chartSlice';
@@ -39,12 +39,17 @@ export const save = () => async (_: TDispatch, getState: () => RootState) => {
     }
     setLastSaveDir(dirname(filename));
 
-    const { data, bits, ...opts } = options;
+    const data = DataManager().getData();
+    const bits = DataManager().getDataBits();
+    const metadata = DataManager().getMetadata();
     const dataToBeSaved: SaveData = {
         data,
         bits,
         metadata: {
-            options: { ...opts, currentPane: currentPaneSelector(getState()) },
+            options: {
+                ...metadata,
+                currentPane: currentPaneSelector(getState()),
+            },
             chartState: getState().app.chart,
             triggerState: getState().app.trigger,
             dataLoggerState: getState().app.dataLogger,
@@ -84,12 +89,12 @@ export const load =
             chartState,
             triggerState,
             dataLoggerState,
-            options: { currentPane, ...loadedOptions },
+            options: { currentPane, samplingTime, samplesPerSecond, timestamp },
         } = metadata;
 
-        Object.assign(options, loadedOptions);
-        options.data = dataBuffer;
-        options.bits = bits;
+        DataManager().setSamplingTime(samplingTime);
+        DataManager().setSamplesPerSecond(samplesPerSecond);
+        DataManager().loadData(dataBuffer, bits, timestamp);
 
         dispatch(setChartState(chartState));
         dispatch(setFileLoadedAction({ loaded: true }));
