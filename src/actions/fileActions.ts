@@ -40,11 +40,11 @@ export const save = () => async (_: TDispatch, getState: () => RootState) => {
     setLastSaveDir(dirname(filename));
 
     const data = DataManager().getData();
-    const bits = DataManager().getDataBits();
     const metadata = DataManager().getMetadata();
+
     const dataToBeSaved: SaveData = {
-        data,
-        bits,
+        data: data.current,
+        bits: data.bits,
         metadata: {
             options: {
                 ...metadata,

@@ -25,9 +25,9 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
     let len = 0;
     let max;
 
-    for (let n = 0; n <= data.length; n += 1) {
-        const k = (n + data.length) % data.length;
-        const v = data[k];
+    for (let n = 0; n <= data.current.length; n += 1) {
+        const k = (n + data.current.length) % data.current.length;
+        const v = data.current[k];
         if (!Number.isNaN(v)) {
             if (max === undefined || v > max) {
                 max = v;
@@ -84,10 +84,11 @@ export default (): DataAccumulator => ({
                 : this.noOpBitDataProcessor;
 
         const data = DataManager().getData(begin, end);
-        const bits = DataManager().getDataBits(begin, end);
 
         const numberOfGroupedPoints =
-            maxNumberOfPoints === 0 ? 0 : data.length / maxNumberOfPoints;
+            maxNumberOfPoints === 0
+                ? 0
+                : data.current.length / maxNumberOfPoints;
 
         let mappedIndex = 0;
 
@@ -108,7 +109,7 @@ export default (): DataAccumulator => ({
             let max: number | undefined = -Number.MAX_VALUE;
 
             for (let n = k; n < l; n += 1) {
-                let v = data[n] ?? NaN;
+                let v = data.current[n] ?? NaN;
 
                 if (removeZeroValues && v === 0) {
                     v = NaN;
@@ -118,8 +119,8 @@ export default (): DataAccumulator => ({
                     if (v > max) max = v;
                     if (v < min) min = v;
 
-                    if (bits && n < bits.length) {
-                        bitDataProcessor.processBits(bits[n]);
+                    if (data.bits && n < data.bits.length) {
+                        bitDataProcessor.processBits(data.bits[n]);
                     }
                 }
             }
