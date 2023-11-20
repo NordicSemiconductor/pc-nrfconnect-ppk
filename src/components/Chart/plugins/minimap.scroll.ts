@@ -183,7 +183,7 @@ const plugin: MinimapScroll = {
                 indexToTimestamp(this.globalDataBufferIndex)
             );
 
-            data.forEach(v => {
+            data.current.forEach(v => {
                 this.dataBuffer[this.localDataBufferIndex] = {
                     x: indexToTimestamp(this.globalDataBufferIndex),
                     y: v,
@@ -235,7 +235,7 @@ function accumulateData(indexBegin: number, numberOfSamples: number) {
     let min: number = Number.MAX_VALUE;
     let max: number = Number.MIN_VALUE;
 
-    data.forEach(value => {
+    data.current.forEach(value => {
         if (value > max) {
             max = value;
         }

@@ -105,10 +105,12 @@ export default (
                                 if (cancel.current) {
                                     reject();
                                 }
+                                const data = DataManager().getData();
+
                                 const content = formatDataForExport(
                                     len,
-                                    DataManager().getData(),
-                                    DataManager().getDataBits(),
+                                    data.current,
+                                    data.bits,
                                     contentSelection
                                 );
                                 fs.write(fd, content, () => {

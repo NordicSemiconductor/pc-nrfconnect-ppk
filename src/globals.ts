@@ -38,6 +38,16 @@ const options: GlobalOptions = {
     timestamp: 0,
 };
 
+const getDataCurrent = (fromTime = 0, toTime = options.timestamp) =>
+    options.data.slice(timestampToIndex(fromTime), timestampToIndex(toTime));
+const getDataBits = (fromTime = 0, toTime = options.timestamp) =>
+    options.bits
+        ? options.bits.slice(
+              timestampToIndex(fromTime),
+              timestampToIndex(toTime)
+          )
+        : null;
+
 export const DataManager = () => ({
     getSamplingTime: () => options.samplingTime,
     setSamplingTime: (samplingTime: number) => {
@@ -51,18 +61,10 @@ export const DataManager = () => ({
     setSamplesPerSecond: (samplesPerSecond: number) => {
         options.samplesPerSecond = samplesPerSecond;
     },
-    getData: (fromTime = 0, toTime = options.timestamp) =>
-        options.data.slice(
-            timestampToIndex(fromTime),
-            timestampToIndex(toTime)
-        ),
-    getDataBits: (fromTime = 0, toTime = options.timestamp) =>
-        options.bits
-            ? options.bits.slice(
-                  timestampToIndex(fromTime),
-                  timestampToIndex(toTime)
-              )
-            : null,
+    getData: (fromTime = 0, toTime = options.timestamp) => ({
+        current: getDataCurrent(fromTime, toTime),
+        bits: getDataBits(fromTime, toTime),
+    }),
     getTimestamp: () => options.timestamp - options.samplingTime,
     addData: (data: number, bitData: number) => {
         const index = timestampToIndex(options.timestamp);

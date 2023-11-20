@@ -176,7 +176,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
-    const bits = DataManager().getDataBits(windowBegin, windowEnd); // TO Check this
+    const bits = DataManager().getData(windowBegin, windowEnd).bits; // TO Check this
 
     const chartRef = useRef<AmpereChartJS | null>(null);
 
