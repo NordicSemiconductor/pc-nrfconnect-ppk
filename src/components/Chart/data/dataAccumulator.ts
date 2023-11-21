@@ -4,7 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { DataManager, numberOfDigitalChannels } from '../../../globals';
+import {
+    DataManager,
+    indexToTimestamp,
+    numberOfDigitalChannels,
+    timestampToIndex,
+} from '../../../globals';
 import bitDataAccumulator, { BitDataAccumulator } from './bitDataAccumulator';
 import { createEmptyArrayWithAmpereState } from './commonBitDataFunctions';
 import { AmpereState, DigitalChannelStates } from './dataTypes';
@@ -85,12 +90,20 @@ export default (): DataAccumulator => ({
                 ? this.bitDataAccumulator
                 : this.noOpBitDataProcessor;
 
-        const data = DataManager().getData(begin, end);
+        const noOfRawSamples =
+            DataManager().getNumberOfSamplesInWindow(windowDuration);
 
         const numberOfGroupedPoints =
             maxNumberOfPoints === 0
                 ? 0
-                : data.current.length / maxNumberOfPoints;
+                : Math.ceil(noOfRawSamples / maxNumberOfPoints);
+
+        const timeGroup = indexToTimestamp(numberOfGroupedPoints);
+
+        begin = Math.floor(begin / timeGroup) * timeGroup;
+        end = (Math.floor(end / timeGroup) + 1) * timeGroup;
+
+        const data = DataManager().getData(begin, end);
 
         let mappedIndex = 0;
 
@@ -101,12 +114,14 @@ export default (): DataAccumulator => ({
             mappedIndex < 2 * maxNumberOfPoints;
             mappedIndex += 1, originalIndex += numberOfGroupedPoints
         ) {
-            const timestamp =
-                begin +
-                windowDuration *
-                    (mappedIndex / (maxNumberOfPoints + maxNumberOfPoints));
-            const k = Math.floor(originalIndex);
-            const l = Math.floor(originalIndex + numberOfGroupedPoints);
+            const timestamp = indexToTimestamp(
+                timestampToIndex(
+                    begin + indexToTimestamp(originalIndex) + timeGroup / 2
+                )
+            );
+
+            const k = originalIndex;
+            const l = originalIndex + numberOfGroupedPoints;
             let min: number | undefined = Number.MAX_VALUE;
             let max: number | undefined = -Number.MAX_VALUE;
 
