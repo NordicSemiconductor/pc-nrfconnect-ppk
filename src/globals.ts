@@ -292,6 +292,8 @@ export const DataManager = () => ({
         options.timestamp = timestamp;
     },
     hasBits: () => !!options.bits,
+    getNumberOfSamplesInWindow: (windowDuration: number) =>
+        timestampToIndex(windowDuration),
 });
 
 /**
