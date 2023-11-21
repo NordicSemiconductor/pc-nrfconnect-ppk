@@ -47,19 +47,16 @@ export default (): DataSelector => ({
                 ? this.bitDataSelector
                 : this.noOpBitDataProcessor;
 
-        let mappedIndex = 0;
-
         bitDataProcessor.initialise(digitalChannelsToCompute);
 
         let last;
-        for (let n = 0; n <= data.current.length; mappedIndex += 1, n += 1) {
-            const k = (n + data.current.length) % data.current.length;
-            const v = data.current[k];
+        for (let n = 0; n <= data.current.length; n += 1) {
+            const v = data.current[n];
             const timestamp =
                 begin +
                 (n * microSecondsPerSecond) /
                     DataManager().getSamplesPerSecond();
-            this.ampereLineData[mappedIndex].x = timestamp;
+            this.ampereLineData[n].x = timestamp;
 
             if (n < data.current.length) {
                 last = Number.isNaN(v) ? undefined : v;
@@ -69,15 +66,15 @@ export default (): DataSelector => ({
                 last = NaN;
             }
 
-            this.ampereLineData[mappedIndex].y = last;
+            this.ampereLineData[n].y = last;
 
             if (!Number.isNaN(v) && data.bits) {
-                bitDataProcessor.processBits(data.bits[k], timestamp);
+                bitDataProcessor.processBits(data.bits[n], timestamp);
             }
         }
 
         return {
-            ampereLineData: this.ampereLineData.slice(0, mappedIndex),
+            ampereLineData: this.ampereLineData.slice(0, data.current.length),
             bitsLineData: bitDataProcessor.getLineData(),
         };
     },
