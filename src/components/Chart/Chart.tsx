@@ -176,7 +176,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
-    const bits = DataManager().getData(windowBegin, windowEnd).bits; // TO Check this
+    const hasBits = DataManager().hasBits();
 
     const chartRef = useRef<AmpereChartJS | null>(null);
 
@@ -203,11 +203,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const digitalChannelsToCompute = useMemo(
         () =>
-            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && bits
+            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && hasBits
                 ? digitalChannelsToDisplay
                 : [],
         [
-            bits,
+            hasBits,
             zoomedOutTooFarForDigitalChannels,
             showDigitalChannels,
             digitalChannelsToDisplay,

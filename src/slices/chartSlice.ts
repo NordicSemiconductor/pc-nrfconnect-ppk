@@ -165,10 +165,10 @@ const chartSlice = createSlice({
             };
         },
         setChartState: state => {
-            state.hasDigitalChannels = DataManager().getData().bits !== null;
+            state.hasDigitalChannels = DataManager().hasBits();
         },
         updateHasDigitalChannels: state => {
-            state.hasDigitalChannels = DataManager().getData().bits !== null;
+            state.hasDigitalChannels = DataManager().hasBits();
         },
         setDigitalChannels(
             state,

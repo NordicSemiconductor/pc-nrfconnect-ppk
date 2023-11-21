@@ -38,15 +38,162 @@ const options: GlobalOptions = {
     timestamp: 0,
 };
 
-const getDataCurrent = (fromTime = 0, toTime = options.timestamp) =>
-    options.data.slice(timestampToIndex(fromTime), timestampToIndex(toTime));
-const getDataBits = (fromTime = 0, toTime = options.timestamp) =>
-    options.bits
-        ? options.bits.slice(
-              timestampToIndex(fromTime),
-              timestampToIndex(toTime)
-          )
-        : null;
+let cachedBegin: number | undefined;
+let cashedDataCurrent: Float32Array | undefined;
+let cashedBits: Uint16Array | undefined;
+
+const loadNeededDataCurrent = (
+    begin: number,
+    end: number,
+    getData: (fromTime: number, toTime: number) => Float32Array,
+    cashedData?: Float32Array
+): Float32Array => {
+    if (!cashedData || cachedBegin === undefined) return getData(begin, end);
+
+    const lastEnd = cachedBegin + indexToTimestamp(cashedData.length);
+
+    let usableCachedData: Float32Array = cashedData;
+
+    const beginDelta =
+        timestampToIndex(begin) - timestampToIndex(cachedBegin ?? 0);
+    if (beginDelta > 0) {
+        usableCachedData = usableCachedData.slice(beginDelta);
+    }
+
+    const endDelta = timestampToIndex(lastEnd ?? 0) - timestampToIndex(end);
+    if (lastEnd && endDelta > 0) {
+        usableCachedData = usableCachedData.slice(
+            0,
+            usableCachedData.length - endDelta
+        );
+    }
+
+    let frontData: Float32Array = new Float32Array(0);
+    if (cachedBegin > begin) {
+        frontData = getData(begin, cachedBegin);
+    }
+
+    let backData: Float32Array = new Float32Array(0);
+    if (end > lastEnd) {
+        backData = getData(lastEnd, end);
+    }
+
+    const result = new Float32Array(
+        frontData.length + usableCachedData.length + backData.length
+    );
+
+    result.set(frontData);
+    result.set(usableCachedData, frontData.length);
+    result.set(backData, frontData.length + usableCachedData.length);
+
+    return result;
+};
+
+const loadNeededDataBits = (
+    begin: number,
+    end: number,
+    getData: (fromTime: number, toTime: number) => Uint16Array | null,
+    cashedData?: Uint16Array
+): Uint16Array | null => {
+    if (!cashedData || cachedBegin === undefined) return getData(begin, end);
+
+    const lastEnd = cachedBegin + indexToTimestamp(cashedData.length);
+
+    let usableCachedData: Uint16Array = cashedData;
+
+    const beginDelta =
+        timestampToIndex(begin) - timestampToIndex(cachedBegin ?? 0);
+    if (beginDelta > 0) {
+        usableCachedData = usableCachedData.slice(beginDelta);
+    }
+
+    const endDelta = timestampToIndex(lastEnd ?? 0) - timestampToIndex(end);
+    if (lastEnd && endDelta > 0) {
+        usableCachedData = usableCachedData.slice(
+            0,
+            usableCachedData.length - endDelta
+        );
+    }
+
+    let frontData: Uint16Array | null = new Uint16Array(0);
+    if (cachedBegin > begin) {
+        frontData = getData(begin, cachedBegin);
+    }
+
+    let backData: Uint16Array | null = new Uint16Array(0);
+    if (end > lastEnd) {
+        backData = getData(lastEnd, end);
+    }
+
+    const result = new Uint16Array(
+        (frontData?.length ?? 0) +
+            usableCachedData.length +
+            (backData?.length ?? 0)
+    );
+
+    if (frontData) result.set(frontData);
+    result.set(usableCachedData, frontData?.length ?? 0);
+
+    if (backData)
+        result.set(
+            backData,
+            (frontData?.length ?? 0) + usableCachedData.length
+        );
+
+    return result;
+};
+
+const getDataCurrent = (fromTime: number, toTime: number) => {
+    const result = loadNeededDataCurrent(
+        fromTime,
+        toTime,
+        (begin: number, end: number) =>
+            options.data.slice(timestampToIndex(begin), timestampToIndex(end)),
+        cashedDataCurrent
+    );
+    if (DataManager().getTimestamp() < toTime) {
+        cashedDataCurrent = result.slice(
+            0,
+            timestampToIndex(Math.min(DataManager().getTimestamp(), toTime)) -
+                timestampToIndex(fromTime)
+        );
+    } else {
+        cashedDataCurrent = result;
+    }
+
+    return result;
+};
+
+const getDataBits = (fromTime: number, toTime: number) => {
+    if (!options.bits) {
+        return null;
+    }
+
+    const result = loadNeededDataBits(
+        fromTime,
+        toTime,
+        (begin: number, end: number) =>
+            options.bits
+                ? options.bits?.slice(
+                      timestampToIndex(begin),
+                      timestampToIndex(end)
+                  )
+                : null,
+        cashedBits
+    );
+
+    if (DataManager().getTimestamp() < toTime) {
+        cashedBits = result?.slice(
+            0,
+            timestampToIndex(Math.min(DataManager().getTimestamp(), toTime)) -
+                timestampToIndex(fromTime)
+        );
+    } else {
+        cashedBits = result ?? undefined;
+    }
+
+    return result;
+};
 
 export const DataManager = () => ({
     getSamplingTime: () => options.samplingTime,
@@ -61,10 +208,17 @@ export const DataManager = () => ({
     setSamplesPerSecond: (samplesPerSecond: number) => {
         options.samplesPerSecond = samplesPerSecond;
     },
-    getData: (fromTime = 0, toTime = options.timestamp) => ({
-        current: getDataCurrent(fromTime, toTime),
-        bits: getDataBits(fromTime, toTime),
-    }),
+    getData: (fromTime = 0, toTime = options.timestamp) => {
+        const result = {
+            current: getDataCurrent(fromTime, toTime),
+            bits: getDataBits(fromTime, toTime),
+        };
+
+        cachedBegin = fromTime;
+
+        return result;
+    },
+
     getTimestamp: () => options.timestamp - options.samplingTime,
     addData: (data: number, bitData: number) => {
         const index = timestampToIndex(options.timestamp);
@@ -97,6 +251,9 @@ export const DataManager = () => ({
         );
         options.bits = null;
         options.timestamp = 0;
+        cachedBegin = undefined;
+        cashedBits = undefined;
+        cashedDataCurrent = undefined;
     },
     initializeBitsBuffer: (samplingDuration: number) => {
         const newBufferSize = Math.trunc(
@@ -134,6 +291,7 @@ export const DataManager = () => ({
         options.bits = bits;
         options.timestamp = timestamp;
     },
+    hasBits: () => !!options.bits,
 });
 
 /**
