@@ -26,8 +26,7 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
     let max;
 
     for (let n = 0; n <= data.current.length; n += 1) {
-        const k = (n + data.current.length) % data.current.length;
-        const v = data.current[k];
+        const v = data.current[n];
         if (!Number.isNaN(v)) {
             if (max === undefined || v > max) {
                 max = v;
