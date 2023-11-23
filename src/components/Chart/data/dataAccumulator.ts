@@ -42,9 +42,9 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
         if (!Number.isNaN(v)) {
             if (max === undefined || v > max) {
                 max = v;
+                sum += v;
+                len += 1;
             }
-            sum += v;
-            len += 1;
         }
     }
     return {

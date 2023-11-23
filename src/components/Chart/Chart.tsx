@@ -320,7 +320,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         []
     );
 
-    const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
+    const windowStats = calcStats(begin, end);
     const selectionStats = useMemo(
         () => calcStats(cursorBegin, cursorEnd),
         [cursorBegin, cursorEnd]
