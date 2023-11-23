@@ -13,10 +13,11 @@ import {
 import fs from 'fs';
 import { dirname, join } from 'path';
 
+import { miniMapAnimationAction } from '../features/minimap/minimapSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
-import { setChartState } from '../slices/chartSlice';
+import { setChartState, setLatestDataTimestamp } from '../slices/chartSlice';
 import { setDataLoggerState } from '../slices/dataLoggerSlice';
 import { TDispatch } from '../slices/thunk';
 import { setTriggerState } from '../slices/triggerSlice';
@@ -110,6 +111,7 @@ export const load =
         DataManager().setSamplesPerSecond(samplesPerSecond);
         DataManager().loadData(dataBuffer, bits, timestamp);
 
+        dispatch(setLatestDataTimestamp(timestamp));
         dispatch(setChartState(chartState));
         dispatch(setFileLoadedAction({ loaded: true }));
         if (dataLoggerState !== null) {
@@ -120,6 +122,7 @@ export const load =
         }
         if (currentPane !== null) dispatch(setCurrentPane(currentPane));
         logger.info(`State successfully restored`);
+        dispatch(miniMapAnimationAction());
         setLoading(false);
     };
 
