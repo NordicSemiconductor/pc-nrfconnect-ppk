@@ -7,7 +7,7 @@
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
-import { DataManager, indexToTimestamp } from '../globals';
+import { DataManager, indexToTimestamp, timestampToIndex } from '../globals';
 import { hideExportDialog } from '../slices/appSlice';
 import { TDispatch } from '../slices/thunk';
 import { averagedBitState } from '../utils/bitConversion';
@@ -32,14 +32,14 @@ const selectivePrint = (
 ) => `${strArr.filter((_, i) => selectArr[i]).join(',')}\n`;
 
 export const formatDataForExport = (
-    length: number,
+    start: number,
     bufferData: Float32Array,
     bitsData: Uint16Array | null,
     selection: readonly [boolean, boolean, boolean, boolean]
 ) => {
     let content = '';
     const dc = Array(8).fill(0);
-    for (let n = 0; n <= length; n += 1) {
+    for (let n = 0; n < bufferData.length; n += 1) {
         const value = bufferData[n];
         if (!Number.isNaN(value)) {
             if (bitsData) {
@@ -49,8 +49,7 @@ export const formatDataForExport = (
                 );
                 content += selectivePrint(
                     [
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        indexToTimestamp(n)! / 1000,
+                        indexToTimestamp(n + start) / 1000,
                         value.toFixed(3),
                         bitstring.join(''),
                         bitstring.join(','),
@@ -59,8 +58,12 @@ export const formatDataForExport = (
                 );
             } else {
                 content += selectivePrint(
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    [indexToTimestamp(n)! / 1000, value.toFixed(3), '', ''],
+                    [
+                        indexToTimestamp(n + start) / 1000,
+                        value.toFixed(3),
+                        '',
+                        '',
+                    ],
                     selection
                 );
             }
@@ -71,8 +74,8 @@ export const formatDataForExport = (
 
 export default (
         filename: string,
-        indexBegin: number,
-        indexEnd: number,
+        timestampBegin: number,
+        timestampEnd: number,
         contentSelection: readonly [boolean, boolean, boolean, boolean],
         setProgress: (progress: number) => void,
         setExporting: (value: boolean) => void,
@@ -97,7 +100,11 @@ export default (
         );
 
         return (
-            indexer(indexBegin, indexEnd, 10000)
+            indexer(
+                timestampToIndex(timestampBegin),
+                timestampToIndex(timestampEnd),
+                10000
+            )
                 .map(
                     ([start, len]) =>
                         () =>
@@ -105,10 +112,13 @@ export default (
                                 if (cancel.current) {
                                     reject();
                                 }
-                                const data = DataManager().getData();
+                                const data = DataManager().getData(
+                                    indexToTimestamp(start),
+                                    indexToTimestamp(start + len)
+                                );
 
                                 const content = formatDataForExport(
-                                    len,
+                                    start,
                                     data.current,
                                     data.bits,
                                     contentSelection
@@ -116,8 +126,9 @@ export default (
                                 fs.write(fd, content, () => {
                                     setProgress(
                                         Math.round(
-                                            ((start - indexBegin) /
-                                                (indexEnd - indexBegin)) *
+                                            ((start - timestampBegin) /
+                                                (timestampEnd -
+                                                    timestampBegin)) *
                                                 100
                                         )
                                     );

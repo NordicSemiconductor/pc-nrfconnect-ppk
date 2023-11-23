@@ -4,19 +4,19 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useSelector } from 'react-redux';
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { DataManager, timestampToIndex } from '../../globals';
+import { DataManager } from '../../globals';
 import { isRealTimePane } from '../../utils/panes';
 
 interface ExportSelection {
     isExportDialogVisible: boolean;
-    setIndexBegin: (value: number) => void;
-    setIndexEnd: (value: number) => void;
+    setTimestampBegin: (value: number) => void;
+    setTimestampEnd: (value: number) => void;
     windowEnd: number;
     cursorBegin?: number | null;
     cursorEnd?: number | null;
@@ -25,82 +25,84 @@ interface ExportSelection {
 
 export default ({
     isExportDialogVisible,
-    setIndexBegin,
-    setIndexEnd,
+    setTimestampBegin,
+    setTimestampEnd,
     windowEnd,
     cursorBegin,
     cursorEnd,
     windowDuration,
 }: ExportSelection) => {
     const isRealTime = useSelector(isRealTimePane);
-    const setExportIndexes = (begin: number, end: number) => {
-        setIndexBegin(begin);
-        setIndexEnd(end);
-    };
-
-    const updateRadioSelected = (value: number) => {
-        switch (value) {
-            case 0:
-                setRadioValue(0);
-                exportSelection[0].onSelect();
-                break;
-            case 1:
-                setRadioValue(1);
-                exportSelection[1].onSelect();
-                break;
-            case 2:
-                setRadioValue(2);
-                exportSelection[2].onSelect();
-                break;
-            default:
-                logger.error(`Unexpected radio selected: ${value}`);
-        }
-    };
+    const setExportTimestamp = useCallback(
+        (begin: number, end: number) => {
+            setTimestampBegin(begin);
+            setTimestampEnd(end);
+        },
+        [setTimestampBegin, setTimestampEnd]
+    );
 
     const [radioValue, setRadioValue] = useState(0);
-    const exportSelection = [
-        {
-            name: 'All',
-            value: 0,
-            id: 'radio-export-all',
-            onSelect: () => {
-                setExportIndexes(0, DataManager().getTotalSavedRecords());
+    const exportSelection = useMemo(
+        () => [
+            {
+                name: 'All',
+                value: 0,
+                id: 'radio-export-all',
+                onSelect: () => {
+                    setExportTimestamp(0, DataManager().getTimestamp());
+                },
             },
-        },
-        {
-            name: 'Window',
-            value: 1,
-            id: 'radio-export-window',
-            onSelect: () => {
-                const end = windowEnd;
-                if (end == null) {
-                    logger.error(
-                        'exportSelection: End of selection is invalid, try to export all.'
+            {
+                name: 'Window',
+                value: 1,
+                id: 'radio-export-window',
+                onSelect: () => {
+                    const end = Math.min(
+                        windowEnd,
+                        DataManager().getTimestamp()
                     );
-                    return;
-                }
 
-                const start = Math.min(0, end - windowDuration);
-                setExportIndexes(
-                    Math.ceil(timestampToIndex(start < 0 ? 0 : start)),
-                    Math.floor(timestampToIndex(end))
-                );
+                    setExportTimestamp(Math.max(0, end - windowDuration), end);
+                },
             },
-        },
-        {
-            name: 'Selected',
-            value: 2,
-            id: 'radio-export-selected',
-            onSelect: () => {
-                if (cursorBegin != null && cursorEnd != null) {
-                    setExportIndexes(
-                        Math.ceil(timestampToIndex(cursorBegin)),
-                        Math.floor(timestampToIndex(cursorEnd))
-                    );
-                }
+            {
+                name: 'Selected',
+                value: 2,
+                id: 'radio-export-selected',
+                onSelect: () => {
+                    if (cursorBegin != null && cursorEnd != null) {
+                        setExportTimestamp(
+                            Math.ceil(cursorBegin),
+                            Math.floor(cursorEnd)
+                        );
+                    }
+                },
             },
+        ],
+        [cursorBegin, cursorEnd, setExportTimestamp, windowDuration, windowEnd]
+    );
+
+    const updateRadioSelected = useCallback(
+        (value: number) => {
+            switch (value) {
+                case 0:
+                    setRadioValue(0);
+                    exportSelection[0].onSelect();
+                    break;
+                case 1:
+                    setRadioValue(1);
+                    exportSelection[1].onSelect();
+                    break;
+                case 2:
+                    setRadioValue(2);
+                    exportSelection[2].onSelect();
+                    break;
+                default:
+                    logger.error(`Unexpected radio selected: ${value}`);
+            }
         },
-    ];
+        [exportSelection]
+    );
 
     useEffect(() => {
         if (cursorBegin != null) {
@@ -108,8 +110,7 @@ export default ({
         } else {
             updateRadioSelected(1);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isExportDialogVisible]);
+    }, [cursorBegin, isExportDialogVisible, updateRadioSelected]);
 
     return (
         <>

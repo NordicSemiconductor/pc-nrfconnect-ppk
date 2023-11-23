@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { dialog, getCurrentWindow } from '@electron/remote';
@@ -17,7 +17,7 @@ import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
 
 import exportChart from '../../actions/exportChartAction';
-import { indexToTimestamp } from '../../globals';
+import { timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../slices/appSlice';
 import {
     getChartDigitalChanelInfo,
@@ -83,8 +83,8 @@ export default () => {
     const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
     const { isExportDialogVisible } = useSelector(appState);
 
-    const [indexBegin, setIndexBegin] = useState<number | null>(null);
-    const [indexEnd, setIndexEnd] = useState<number | null>(null);
+    const [timestampBegin, setTimestampBegin] = useState<number | null>(null);
+    const [timestampEnd, setTimestampEnd] = useState<number | null>(null);
     const [numberOfRecords, setNumberOfRecords] = useState<number | null>(null);
     const [fileSize, setFileSize] = useState<string | null>(null);
     const [duration, setDuration] = useState(0);
@@ -103,15 +103,26 @@ export default () => {
         false,
         'Digital logic pins (separate fields)'
     );
-    const contentSelection: readonly [boolean, boolean, boolean, boolean] = [
-        timestampToggled,
-        currentToggled,
-        bitsToggled,
-        bitsSeparatedToggled,
-    ] as const;
+    const contentSelection: readonly [boolean, boolean, boolean, boolean] =
+        useMemo(
+            () =>
+                [
+                    timestampToggled,
+                    currentToggled,
+                    bitsToggled,
+                    bitsSeparatedToggled,
+                ] as const,
+            [
+                bitsSeparatedToggled,
+                bitsToggled,
+                currentToggled,
+                timestampToggled,
+            ]
+        );
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
+
     useEffect(() => {
         setProgress(0);
         if (isExportDialogVisible) {
@@ -120,24 +131,18 @@ export default () => {
     }, [isExportDialogVisible]);
 
     useEffect(() => {
-        let records;
-        if (indexBegin == null || indexEnd == null) {
-            records = 0;
-        } else {
-            records = indexEnd - indexBegin + 1 || 0;
-        }
+        if (timestampEnd == null || timestampBegin == null) return;
+        const records =
+            timestampToIndex(timestampEnd) - timestampToIndex(timestampBegin);
 
         setNumberOfRecords(records);
         setFileSize(calculateTotalSize(contentSelection, records));
-        if (indexBegin != null && indexEnd != null) {
-            const timestampBegin = indexToTimestamp(indexBegin);
-            const timestampEnd = indexToTimestamp(indexEnd);
+        if (timestampBegin != null && timestampEnd != null) {
             if (timestampBegin != null && timestampEnd != null) {
                 setDuration(timestampEnd - timestampBegin);
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [indexBegin, indexEnd]);
+    }, [contentSelection, timestampBegin, timestampEnd]);
 
     useEffect(() => {
         setFormattedDuration(
@@ -167,13 +172,14 @@ export default () => {
                 ],
             }
         );
+        if (!fn || timestampBegin == null || timestampEnd == null) return;
         setLastSaveDir(dirname(fn));
         setExporting(true);
         dispatch(
             exportChart(
                 fn,
-                indexBegin,
-                indexEnd,
+                timestampBegin,
+                timestampEnd,
                 contentSelection,
                 setProgress,
                 setExporting,
@@ -207,8 +213,8 @@ export default () => {
                     <div className="tw-flex tw-h-full tw-flex-1 tw-grow-[2] tw-flex-col tw-gap-2 tw-border tw-border-gray-200 tw-p-4 ">
                         <ExportSelection
                             isExportDialogVisible={isExportDialogVisible}
-                            setIndexBegin={setIndexBegin}
-                            setIndexEnd={setIndexEnd}
+                            setTimestampBegin={setTimestampBegin}
+                            setTimestampEnd={setTimestampEnd}
                             windowEnd={windowEnd}
                             cursorBegin={cursorBegin}
                             cursorEnd={cursorEnd}
