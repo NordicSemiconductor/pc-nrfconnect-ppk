@@ -284,11 +284,6 @@ export const DataManager = () => ({
             bitDataAdded: !!options.bits,
         };
     },
-    addBitData: (data: number) => {
-        if (!options.bits) return;
-        options.bits[timestampToIndex(options.timestamp)] = data;
-        options.timestamp += options.samplingTime;
-    },
     reset: () => {
         options.samplingTime = initialSamplingTime;
         options.samplesPerSecond = initialSamplesPerSecond;

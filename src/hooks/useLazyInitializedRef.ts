@@ -10,19 +10,15 @@ import {
     DataAccumulator,
     DataAccumulatorInitialiser,
 } from '../components/Chart/data/dataAccumulator';
-import {
-    DataSelector,
-    DataSelectorInitialiser,
-} from '../components/Chart/data/dataSelector';
 
 const uninitialisedToken = Symbol('uninitialisedToken');
 
 export const useLazyInitializedRef = (
-    initialiser: DataAccumulatorInitialiser | DataSelectorInitialiser
+    initialiser: DataAccumulatorInitialiser
 ) => {
-    const ref = useRef<
-        DataAccumulator | DataSelector | typeof uninitialisedToken
-    >(uninitialisedToken);
+    const ref = useRef<DataAccumulator | typeof uninitialisedToken>(
+        uninitialisedToken
+    );
     if (ref.current === uninitialisedToken) {
         ref.current = initialiser();
     }
@@ -30,6 +26,5 @@ export const useLazyInitializedRef = (
 };
 
 export const isInitialised = (
-    processor: DataAccumulator | DataSelector | typeof uninitialisedToken
-): processor is DataAccumulator | DataSelector =>
-    processor !== uninitialisedToken;
+    processor: DataAccumulator | typeof uninitialisedToken
+): processor is DataAccumulator => processor !== uninitialisedToken;
