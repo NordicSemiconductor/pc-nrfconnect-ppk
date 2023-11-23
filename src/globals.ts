@@ -303,7 +303,9 @@ export const DataManager = () => ({
         if (!options.bits || options.bits.length !== newBufferSize) {
             options.bits = new Uint16Array(newBufferSize);
         }
-        options.bits.fill(0);
+        for (let i = 0; i < options.bits.length; i += 1) {
+            options.bits[i] = 0;
+        }
     },
     initializeDataBuffer: (samplingDuration: number) => {
         const newBufferSize = Math.trunc(
@@ -312,7 +314,9 @@ export const DataManager = () => ({
         if (options.data.length !== newBufferSize) {
             options.data = new Float32Array(newBufferSize);
         }
-        options.data.fill(NaN);
+        for (let i = 0; i < options.data.length; i += 1) {
+            options.data[i] = NaN;
+        }
     },
     getDataBufferSize: () => options.data.length,
     getTotalSavedRecords: () =>
