@@ -5,15 +5,14 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import Col from 'react-bootstrap/Col';
-import Modal from 'react-bootstrap/Modal';
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import Row from 'react-bootstrap/Row';
 import { useDispatch, useSelector } from 'react-redux';
 import { dialog } from '@electron/remote';
-import { Toggle } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    DialogButton,
+    GenericDialog,
+    Toggle,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
 
@@ -175,69 +174,67 @@ export default () => {
         );
     };
     return (
-        <Modal
-            show={isExportDialogVisible}
-            className="export-dialog"
+        <GenericDialog
+            className="tw-preflight"
+            title="Export selection to CSV"
+            footer={
+                <>
+                    <DialogButton
+                        variant="primary"
+                        onClick={saveFile}
+                        disabled={exporting}
+                    >
+                        Save
+                    </DialogButton>
+                    <DialogButton variant="secondary" onClick={close}>
+                        Close
+                    </DialogButton>
+                </>
+            }
+            isVisible={isExportDialogVisible}
             onHide={close}
         >
-            <Modal.Header closeButton>
-                <Modal.Title>Export selection to CSV</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Row className="export-settings">
-                    <Col sm={8}>
-                        <Card className="h-100">
-                            <Card.Body>
-                                <ExportSelection
-                                    isExportDialogVisible={
-                                        isExportDialogVisible
-                                    }
-                                    setIndexBegin={setIndexBegin}
-                                    setIndexEnd={setIndexEnd}
-                                    windowEnd={windowEnd}
-                                    cursorBegin={cursorBegin}
-                                    cursorEnd={cursorEnd}
-                                    windowDuration={windowDuration}
-                                />
-                                <h2>Export fields</h2>
-                                <div className="w-fit-content">
-                                    <TimestampToggle />
-                                    <CurrentToggle />
-                                    {hasDigitalChannels && (
-                                        <>
-                                            <BitsToggle />
-                                            <BitsSeparatedToggle />
-                                        </>
-                                    )}
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col sm={4}>
-                        <Card className="h-100">
-                            <Card.Body>
-                                <h2>Estimation</h2>
-                                <p>{numberOfRecords} records</p>
-                                <p>{fileSize}</p>
-                                <p>{formattedDuration}</p>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-                <ProgressBar now={progress} animated className="mt-4" />
-            </Modal.Body>
-            <Modal.Footer>
-                <Button
-                    variant="primary"
-                    onClick={saveFile}
-                    disabled={exporting}
-                >
-                    Save
-                </Button>
-                <Button variant="secondary" onClick={close}>
-                    Close
-                </Button>
-            </Modal.Footer>
-        </Modal>
+            <div className="tw-flex tw-flex-col tw-gap-4">
+                <div className="tw-flex tw-flex-row tw-gap-4">
+                    <div className="tw-flex tw-h-full tw-flex-1 tw-grow-[2] tw-flex-col tw-gap-2 tw-border tw-border-gray-200 tw-p-4 ">
+                        <ExportSelection
+                            isExportDialogVisible={isExportDialogVisible}
+                            setIndexBegin={setIndexBegin}
+                            setIndexEnd={setIndexEnd}
+                            windowEnd={windowEnd}
+                            cursorBegin={cursorBegin}
+                            cursorEnd={cursorEnd}
+                            windowDuration={windowDuration}
+                        />
+                        <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                            Export fields
+                        </p>
+                        <div className="tw-w-fit">
+                            <TimestampToggle />
+                            <CurrentToggle />
+                            {hasDigitalChannels && (
+                                <>
+                                    <BitsToggle />
+                                    <BitsSeparatedToggle />
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="tw-flex-1 tw-grow tw-border tw-border-gray-200 ">
+                        <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4">
+                            <p className="tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                                Estimation
+                            </p>
+                            <p>{numberOfRecords} records</p>
+                            <p>{fileSize}</p>
+                            <p>{formattedDuration}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <ProgressBar now={progress} animated />
+            </div>
+        </GenericDialog>
     );
 };

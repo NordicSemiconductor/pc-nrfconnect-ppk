@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import Col from 'react-bootstrap/Col';
-import Modal from 'react-bootstrap/Modal';
-import Row from 'react-bootstrap/Row';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+    Button,
+    DialogButton,
+    GenericDialog,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { save } from '../../actions/fileActions';
 import {
@@ -19,8 +19,6 @@ import {
     toggleSaveChoiceDialog,
 } from '../../slices/appSlice';
 
-import './saveexport.scss';
-
 export default () => {
     const dispatch = useDispatch();
     const { isSaveChoiceDialogVisible } = useSelector(appState);
@@ -28,75 +26,70 @@ export default () => {
     const close = () => dispatch(toggleSaveChoiceDialog());
 
     return (
-        <Modal
-            show={isSaveChoiceDialogVisible}
-            className="choice-dialog"
+        <GenericDialog
+            className="tw-preflight"
+            title="What would you like to save?"
+            footer={
+                <DialogButton variant="secondary" onClick={close}>
+                    Close
+                </DialogButton>
+            }
+            isVisible={isSaveChoiceDialogVisible}
             onHide={close}
         >
-            <Modal.Header closeButton>
-                <Modal.Title>What would you like to save?</Modal.Title>
-            </Modal.Header>
+            <div className="tw-flex tw-flex-row tw-gap-4">
+                <div className="tw-h-full tw-w-full">
+                    <div className="tw-flex tw-flex-col tw-gap-2 tw-border tw-border-b-0 tw-border-gray-200 tw-p-4">
+                        <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                            Save session data
+                        </p>
+                        <p>
+                            Great if you want to view the data again in this
+                            application. Not usable by other software.
+                        </p>
+                        <p>.PPK</p>
+                    </div>
+                    <div>
+                        <Button
+                            variant="secondary"
+                            size="lg"
+                            className="tw-w-full"
+                            onClick={() => {
+                                close();
+                                dispatch(save());
+                            }}
+                        >
+                            SAVE
+                        </Button>
+                    </div>
+                </div>
 
-            <Modal.Body>
-                <Row>
-                    <Col>
-                        <Card className="h-100">
-                            <Card.Body className="pb-0">
-                                <h2>Save session data</h2>
-                                <p>
-                                    Great if you want to view the data again in
-                                    this application. Not usable by other
-                                    software.
-                                </p>
-                                <p>.PPK</p>
-                            </Card.Body>
-                            <Card.Footer className="p-0">
-                                <Button
-                                    variant="plain"
-                                    className="w-100"
-                                    onClick={() => {
-                                        close();
-                                        dispatch(save());
-                                    }}
-                                >
-                                    SAVE
-                                </Button>
-                            </Card.Footer>
-                        </Card>
-                    </Col>
-                    <Col>
-                        <Card className="h-100">
-                            <Card.Body className="pb-0">
-                                <h2>Export selected range</h2>
-                                <p>
-                                    Great if you want to manipulate your data in
-                                    other software. Can not be opened by this
-                                    application.
-                                </p>
-                                <p>.CSV</p>
-                            </Card.Body>
-                            <Card.Footer className="p-0">
-                                <Button
-                                    variant="plain"
-                                    className="w-100"
-                                    onClick={() => {
-                                        close();
-                                        dispatch(showExportDialog());
-                                    }}
-                                >
-                                    EXPORT
-                                </Button>
-                            </Card.Footer>
-                        </Card>
-                    </Col>
-                </Row>
-            </Modal.Body>
-
-            <Modal.Footer>
-                <Button variant="secondary" onClick={close}>
-                    Close
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                <div className="tw-h-full tw-w-full">
+                    <div className="tw-flex tw-flex-col tw-gap-2 tw-border tw-border-b-0 tw-border-gray-200 tw-p-4">
+                        <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                            Export selected range
+                        </p>
+                        <p>
+                            Great if you want to manipulate your data in other
+                            software. Can not be opened by this application.
+                        </p>
+                        <p>.CSV</p>
+                    </div>
+                    <div>
+                        <Button
+                            variant="secondary"
+                            className="tw-w-full"
+                            size="lg"
+                            onClick={() => {
+                                close();
+                                dispatch(showExportDialog());
+                            }}
+                        >
+                            EXPORT
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </GenericDialog>
     );
 };

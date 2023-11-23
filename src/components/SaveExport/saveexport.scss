@@ -6,44 +6,6 @@
 
 @import '~@nordicsemiconductor/pc-nrfconnect-shared/styles';
 
-.modal-body {
-    padding: 2rem;
-}
-
-.export-dialog,
-.choice-dialog {
-    color: $gray-600;
-
-    h2 {
-        margin-bottom: 1rem;
-        margin-top: 2rem;
-
-        text-transform: uppercase;
-        font-size: 10px;
-        font-weight: normal;
-        letter-spacing: 0.5ex;
-
-        color: $gray-400;
-    }
-
-    .export-toggle {
-        margin-bottom: 0.5rem;
-    }
-
-    .w-fit-content {
-        width: fit-content;
-    }
-
-    .progress {
-        border-radius: 0;
-    }
-}
-
-.card-header {
-    background-color: unset;
-    border-bottom: none;
-}
-
 .radio-export {
     width: 100%;
     background-color: #455a64;

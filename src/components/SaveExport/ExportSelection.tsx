@@ -113,7 +113,9 @@ export default ({
 
     return (
         <>
-            <h2>Area to export</h2>
+            <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-wider tw-text-gray-400">
+                Area to export
+            </p>
             <ToggleButtonGroup
                 type="radio"
                 name="radio-export"
@@ -138,7 +140,7 @@ export default ({
                             {radio.name}
                         </ToggleButton>
                     ))}
-            </ToggleButtonGroup>{' '}
+            </ToggleButtonGroup>
         </>
     );
 };
