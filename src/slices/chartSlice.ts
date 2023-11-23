@@ -339,7 +339,8 @@ export const getChartDigitalChanelInfo = (state: RootState) => ({
     hasDigitalChannels: state.app.chart.hasDigitalChannels,
 });
 
-export const isLiveMode = (state: RootState) => state.app.chart.liveMode;
+export const isLiveMode = (state: RootState) =>
+    state.app.chart.liveMode && state.app.app.samplingRunning;
 export const isTimestampsVisible = (state: RootState) =>
     state.app.chart.timestampsVisible;
 
