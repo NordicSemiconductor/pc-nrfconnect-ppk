@@ -95,7 +95,9 @@ const loadNeededDataCurrent = (
     result.set(usableCachedData, frontData.length);
     result.set(backData, frontData.length + usableCachedData.length);
 
-    const expectedDataSize = timestampToIndex(end) - timestampToIndex(begin);
+    const expectedDataSize =
+        timestampToIndex(Math.min(getTimestamp(), end)) -
+        timestampToIndex(begin);
     if (expectedDataSize !== result.length) {
         console.error(
             'This should never happen. Math is wrong',
