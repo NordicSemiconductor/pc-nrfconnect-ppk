@@ -7,6 +7,7 @@
 import React, {
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -27,6 +28,7 @@ import Minimap from '../../features/minimap/Minimap';
 import {
     DataManager,
     getSamplesPerSecond,
+    indexToTimestamp,
     timestampToIndex,
 } from '../../globals';
 import {
@@ -52,7 +54,6 @@ import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser, { calcStats } from './data/dataAccumulator';
-import dataSelectorInitialiser from './data/dataSelector';
 import { AmpereState, DigitalChannelStates } from './data/dataTypes';
 import DigitalChannels from './DigitalChannels';
 import StatBox from './StatBox';
@@ -180,10 +181,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const chartRef = useRef<AmpereChartJS | null>(null);
 
-    const dataAccumulator = useLazyInitializedRef(
+    const dataProcessor = useLazyInitializedRef(
         dataAccumulatorInitialiser
     ).current;
-    const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
     const { sampleFreq } = useSelector(dataLoggerState);
 
@@ -310,11 +310,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     }, [chartCursor, zoomPanCallback]);
 
     const samplesInWindowView = timestampToIndex(windowDuration);
-    const samplesPixel =
+    const samplesPerPixel =
         windowNumberOfPixels === 0
             ? 2
             : samplesInWindowView / windowNumberOfPixels;
-    const dataProcessor = samplesPixel > 1 ? dataAccumulator : dataSelector;
 
     const [ampereLineData, setAmpereLineData] = useState<AmpereState[]>([]);
     const [bitsLineData, setBitsLineData] = useState<DigitalChannelStates[]>(
@@ -327,17 +326,23 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         [cursorBegin, cursorEnd]
     );
 
-    useEffect(() => {
+    const updateChart = useCallback(() => {
         if (!isInitialised(dataProcessor)) {
             return;
         }
-        const calculation = setTimeout(() => {
+
+        const timeout = setTimeout(() => {
             const processedData = dataProcessor.process(
                 begin,
                 end,
-                digitalChannelsToCompute as number[],
+                zoomedOutTooFarForDigitalChannels
+                    ? []
+                    : (digitalChannelsToCompute as number[]),
                 yAxisLog,
-                windowNumberOfPixels,
+                Math.min(
+                    indexToTimestamp(windowDuration),
+                    windowNumberOfPixels
+                ),
                 windowDuration
             );
 
@@ -346,18 +351,30 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         });
 
         return () => {
-            clearTimeout(calculation);
+            clearTimeout(timeout);
         };
     }, [
         begin,
-        end,
-        windowNumberOfPixels,
-        windowDuration,
         dataProcessor,
         digitalChannelsToCompute,
+        end,
+        windowDuration,
+        windowNumberOfPixels,
         yAxisLog,
-        xAxisMax,
+        zoomedOutTooFarForDigitalChannels,
     ]);
+
+    useLayoutEffect(() => {
+        if (liveMode) {
+            updateChart();
+        }
+    }, [xAxisMax, liveMode, updateChart]);
+
+    useLayoutEffect(() => {
+        if (!liveMode) {
+            updateChart();
+        }
+    }, [liveMode, updateChart]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
@@ -422,7 +439,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 <AmpereChart
                     setWindowsNumberOfPixels={setWindowsNumberOfPixels}
                     setChartAreaWidth={setChartAreaWidth}
-                    samplesPixel={samplesPixel}
+                    samplesPixel={samplesPerPixel}
                     chartRef={chartRef}
                     cursorData={cursorData}
                     lineData={ampereLineData}
