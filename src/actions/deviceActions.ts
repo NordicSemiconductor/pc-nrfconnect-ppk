@@ -16,7 +16,10 @@ import {
 
 import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
-import { minimapEvents } from '../features/minimap/minimapEvents';
+import {
+    miniMapAnimationAction,
+    resetMinimap,
+} from '../features/minimap/minimapSlice';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import { DataManager, indexToTimestamp, updateTitle } from '../globals';
 import { RootState } from '../slices';
@@ -33,6 +36,7 @@ import {
     animationAction,
     chartWindowAction,
     chartWindowUnLockAction,
+    resetChartTime,
     resetCursorAndChart,
     updateHasDigitalChannels,
 } from '../slices/chartSlice';
@@ -67,6 +71,10 @@ export const setupOptions =
         if (!device) return;
         try {
             DataManager().reset();
+
+            dispatch(resetChartTime());
+            dispatch(resetMinimap());
+
             if (isRealTimePane(getState())) {
                 // in real-time
                 const realtimeWindowDuration = 300;
@@ -81,7 +89,6 @@ export const setupOptions =
                 DataManager().initializeDataBuffer(durationSeconds);
                 DataManager().initializeBitsBuffer(durationSeconds);
             }
-            minimapEvents.clear();
         } catch (err) {
             logger.error(err);
         }
@@ -105,12 +112,9 @@ export function samplingStart() {
         // Prepare global options
         dispatch(setupOptions());
 
-        minimapEvents.clear();
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
         await device!.ppkAverageStart();
-        logger.info('Sampling started');
-        minimapEvents.startInterval();
         startPreventSleep();
     };
 }
@@ -120,8 +124,6 @@ export function samplingStop() {
         if (!device) return;
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
-        logger.info('Sampling stopped');
-        minimapEvents.stop();
         stopPreventSleep();
     };
 }
@@ -363,13 +365,25 @@ export const open =
                 getState().app.app.samplingRunning
             ) {
                 const timestamp = Date.now();
+                if (getState().app.chart.liveMode) {
+                    requestAnimationFrame(() => {
+                        /*
+                            requestAnimationFrame pauses when app is in the background.
+                            If timestamp is more than 10ms ago, do not dispatch animationAction.
+                        */
+                        if (Date.now() - timestamp < 100) {
+                            dispatch(animationAction());
+                        }
+                    });
+                }
+
                 requestAnimationFrame(() => {
                     /*
                         requestAnimationFrame pauses when app is in the background.
                         If timestamp is more than 10ms ago, do not dispatch animationAction.
                     */
                     if (Date.now() - timestamp < 100) {
-                        dispatch(animationAction());
+                        dispatch(miniMapAnimationAction());
                     }
                 });
                 renderIndex = DataManager().getTotalSavedRecords();
