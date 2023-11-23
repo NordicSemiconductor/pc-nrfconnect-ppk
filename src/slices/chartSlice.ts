@@ -71,6 +71,9 @@ const chartSlice = createSlice({
     name: 'chart',
     initialState: initialState(),
     reducers: {
+        resetChartTime: state => {
+            state.latestDataTimestamp = 0;
+        },
         setYMax: (state, action: PayloadAction<{ yMax: number }>) => {
             state.yMax = action.payload.yMax;
         },
@@ -343,6 +346,8 @@ export const isLiveMode = (state: RootState) =>
     state.app.chart.liveMode && state.app.app.samplingRunning;
 export const isTimestampsVisible = (state: RootState) =>
     state.app.chart.timestampsVisible;
+export const isSessionActive = (state: RootState) =>
+    state.app.chart.latestDataTimestamp !== 0;
 
 export const {
     setLatestDataTimestamp,
@@ -363,6 +368,7 @@ export const {
     updateHasDigitalChannels,
     setShowSettings,
     setLiveMode,
+    resetChartTime,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;
