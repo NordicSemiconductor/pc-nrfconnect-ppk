@@ -11,7 +11,7 @@ import { DigitalChannelStates, TimestampType } from './dataTypes';
 
 export interface BitDataSelector {
     bitDataStorage: BitDataStorage;
-    digitalChannelsToCompute: number[] | undefined;
+    digitalChannelsToCompute: number[];
     initialise: (digitalChannelsToCompute: number[]) => void;
     processBits: (bits: number, timestamp: TimestampType) => void;
     getLineData: () => DigitalChannelStates[];
@@ -27,8 +27,7 @@ export default (): BitDataSelector => ({
     },
 
     processBits(bits, timestamp) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.digitalChannelsToCompute!.forEach(i => {
+        this.digitalChannelsToCompute.forEach(i => {
             this.bitDataStorage.storeBit(
                 timestamp,
                 i,
