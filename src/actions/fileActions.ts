@@ -37,10 +37,19 @@ const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
 export const save = () => async (_: TDispatch, getState: () => RootState) => {
-    const saveFileName = `ppk-${getTimestamp()}-${paneName(getState())}.ppk`;
-    const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(getLastSaveDir(), saveFileName),
-    });
+    const saveFileName = `ppk-${getTimestamp()}`;
+    let { filePath: filename } = await dialog.showSaveDialog(
+        getCurrentWindow(),
+        {
+            defaultPath: join(getLastSaveDir(), saveFileName),
+            filters: [
+                {
+                    name: 'Power profiler kit',
+                    extensions: ['ppk'],
+                },
+            ],
+        }
+    );
     if (!filename) {
         return;
     }
@@ -63,6 +72,9 @@ export const save = () => async (_: TDispatch, getState: () => RootState) => {
         },
     };
 
+    if (!filename.toLocaleLowerCase().endsWith('.ppk')) {
+        filename = `${filename}.ppk`;
+    }
     const saved = await saveData(filename, dataToBeSaved);
     if (saved) {
         logger.info(`State saved to: ${filename}`);
@@ -74,8 +86,14 @@ export const load =
         const {
             filePaths: [filename],
         } =
-            (await dialog.showOpenDialog({
+            (await dialog.showOpenDialog(getCurrentWindow(), {
                 defaultPath: getLastSaveDir(),
+                filters: [
+                    {
+                        name: 'Power profiler kit',
+                        extensions: ['ppk'],
+                    },
+                ],
             })) || [];
         if (!filename) {
             return;
@@ -144,10 +162,13 @@ export const screenshot = () => async () => {
         { name: 'All Files', extensions: ['*'] },
     ];
 
-    const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(getLastSaveDir(), `ppk-${timestamp}.png`),
-        filters,
-    });
+    const { filePath: filename } = await dialog.showSaveDialog(
+        getCurrentWindow(),
+        {
+            defaultPath: join(getLastSaveDir(), `ppk-${timestamp}.png`),
+            filters,
+        }
+    );
     if (!filename) {
         return;
     }
