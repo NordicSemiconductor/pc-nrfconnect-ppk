@@ -13,7 +13,6 @@ import {
 import fs from 'fs';
 import { dirname, join } from 'path';
 
-import { minimapEvents } from '../features/minimap/minimapEvents';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
@@ -107,9 +106,6 @@ export const load =
         if (currentPane !== null) dispatch(setCurrentPane(currentPane));
         logger.info(`State successfully restored`);
         setLoading(false);
-
-        minimapEvents.clear();
-        minimapEvents.update();
     };
 
 export const screenshot = () => async () => {

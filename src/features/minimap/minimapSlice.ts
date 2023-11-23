@@ -6,16 +6,19 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+import { DataManager } from '../../globals';
 import type { RootState } from '../../slices/index';
 import type { TAction } from '../../slices/thunk';
 import { isDataLoggerPane } from '../../utils/panes';
 
 interface MinimapState {
     showMinimap: boolean;
+    xAxisMaxTime: number;
 }
 
 const initialState: MinimapState = {
     showMinimap: false,
+    xAxisMaxTime: 0,
 };
 
 const minimapSlice = createSlice({
@@ -24,6 +27,9 @@ const minimapSlice = createSlice({
     reducers: {
         setShowMinimap: (state, { payload: show }: PayloadAction<boolean>) => {
             state.showMinimap = show;
+        },
+        miniMapAnimationAction: state => {
+            state.xAxisMaxTime = DataManager().getTimestamp();
         },
     },
 });
@@ -42,5 +48,7 @@ export const setShowMinimapAction =
     };
 
 export const showMinimap = (state: RootState) => state.app.minimap.showMinimap;
-export const { setShowMinimap } = minimapSlice.actions;
+export const getXAxisMaxTime = (state: RootState) =>
+    state.app.minimap.xAxisMaxTime;
+export const { setShowMinimap, miniMapAnimationAction } = minimapSlice.actions;
 export default minimapSlice.reducer;

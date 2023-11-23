@@ -8,6 +8,7 @@ import React from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    Button,
     Group,
     Slider,
     StartStopButton,
@@ -15,7 +16,9 @@ import {
 import { unit } from 'mathjs';
 
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
+import { DataManager } from '../../globals';
 import { appState } from '../../slices/appSlice';
+import { isSessionActive, resetChartTime } from '../../slices/chartSlice';
 import {
     dataLoggerState,
     updateDurationSeconds,
@@ -27,6 +30,7 @@ const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
 export default () => {
     const dispatch = useDispatch();
+    const sessionActive = useSelector(isSessionActive);
 
     const { samplingRunning } = useSelector(appState);
     const {
@@ -67,7 +71,7 @@ export default () => {
                             ),
                     ]}
                     onChangeComplete={() => {}}
-                    disabled={samplingRunning}
+                    disabled={samplingRunning || sessionActive}
                 />
             </div>
             <NumberWithUnit
@@ -81,7 +85,7 @@ export default () => {
                 }
                 onChangeComplete={() => {}}
                 slider
-                disabled={samplingRunning}
+                disabled={samplingRunning || sessionActive}
             />
 
             <div className="small buffer-summary">
@@ -100,7 +104,21 @@ export default () => {
                 showIcon
                 variant="secondary"
                 started={samplingRunning}
+                disabled={!samplingRunning && sessionActive}
             />
+
+            <Button
+                title={startStopTitle}
+                size="lg"
+                onClick={() => {
+                    DataManager().reset();
+                    dispatch(resetChartTime());
+                }}
+                variant="secondary"
+                disabled={samplingRunning || !sessionActive}
+            >
+                Clear session data
+            </Button>
         </Group>
     );
 };

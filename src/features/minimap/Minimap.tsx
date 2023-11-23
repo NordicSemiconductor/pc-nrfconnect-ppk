@@ -10,13 +10,14 @@ import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { DataManager } from '../../globals';
+import { DataManager, indexToTimestamp } from '../../globals';
 import {
     getChartXAxisRange,
     isLiveMode,
+    isSessionActive,
     panWindow,
 } from '../../slices/chartSlice';
-import { showMinimap as getShowMinimap } from './minimapSlice';
+import { getXAxisMaxTime, showMinimap as getShowMinimap } from './minimapSlice';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
     ampereChart?: {
@@ -31,13 +32,20 @@ export interface MinimapChart extends Chart<'line'> {
 }
 
 const Minimap = () => {
+    const sessionActive = useSelector(isSessionActive);
+    const lastLoadedTimeStamp = useRef(0);
     const dispatch = useDispatch();
     const showMinimap = useSelector(getShowMinimap);
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
-    const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
+    const {
+        windowEnd,
+        windowDuration,
+        xAxisMax: topChartXAxisMax,
+    } = useSelector(getChartXAxisRange);
     const liveMode = useSelector(isLiveMode);
+    const xAxisMax = useSelector(getXAxisMaxTime);
 
     function windowNavigateCallback(windowCenter: number) {
         dispatch(panWindow(windowCenter));
@@ -82,9 +90,35 @@ const Minimap = () => {
         windowDuration,
     ]);
 
-    const hasGeneratedMinimap =
-        minimapRef.current != null &&
-        minimapRef.current?.data.datasets[0].data.length > 0;
+    useEffect(() => {
+        if (!minimapRef.current) return;
+
+        const nonNullRef = minimapRef.current;
+
+        const newData = DataManager().getData(lastLoadedTimeStamp.current);
+
+        newData.current.forEach((v, i) => {
+            minimapScroll.onNewData(
+                v,
+                lastLoadedTimeStamp.current + indexToTimestamp(i)
+            );
+        });
+
+        lastLoadedTimeStamp.current = DataManager().getTimestamp();
+
+        minimapScroll.updateMinimapData(nonNullRef);
+    }, [xAxisMax]);
+
+    useEffect(() => {
+        if (!minimapRef.current) return;
+        const nonNullRef = minimapRef.current;
+
+        if (!sessionActive) {
+            minimapScroll.clearMinimap(nonNullRef);
+        }
+    }, [sessionActive]);
+
+    const isWindowDurationFull = topChartXAxisMax > windowDuration;
 
     return (
         <div
@@ -95,14 +129,14 @@ const Minimap = () => {
                 paddingRight: '1.8rem',
             }}
         >
-            {hasGeneratedMinimap ? null : MinimapDefaultState()}
+            {isWindowDurationFull ? null : MinimapDefaultState()}
             <canvas
                 ref={canvasRef}
                 id="minimap"
                 className="tw-max-h-20 tw-w-full tw-border tw-border-solid"
                 style={{
                     borderColor: colors.gray100,
-                    display: hasGeneratedMinimap ? 'block' : 'none',
+                    display: isWindowDurationFull ? 'block' : 'none',
                 }}
             />
             <div
