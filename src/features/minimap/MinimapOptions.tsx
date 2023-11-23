@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Group } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { Group, Toggle } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
     setShowMinimapAction,
@@ -19,16 +19,16 @@ export default () => {
 
     return (
         <Group>
-            <Button
-                variant="secondary"
-                className="tw-w-full"
+            <Toggle
+                label="Show Minimap"
                 title={`Click in order to ${
                     showMinimap ? 'hide' : 'show'
                 } a navigable minimap`}
-                onClick={() => dispatch(setShowMinimapAction(!showMinimap))}
+                onToggle={() => dispatch(setShowMinimapAction(!showMinimap))}
+                isToggled={showMinimap}
             >
                 {showMinimap ? 'Hide Minimap' : 'Show Minimap'}
-            </Button>
+            </Toggle>
         </Group>
     );
 };
