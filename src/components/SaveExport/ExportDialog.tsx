@@ -7,7 +7,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { useDispatch, useSelector } from 'react-redux';
-import { dialog } from '@electron/remote';
+import { dialog, getCurrentWindow } from '@electron/remote';
 import {
     DialogButton,
     GenericDialog,
@@ -155,10 +155,12 @@ export default () => {
         dispatch(hideExportDialog());
     };
     const saveFile = async () => {
-        const { filePath: fn } = await dialog.showSaveDialog({
-            defaultPath: filename,
-        });
-        if (!fn || indexBegin == null || indexEnd == null) return;
+        const { filePath: fn } = await dialog.showSaveDialog(
+            getCurrentWindow(),
+            {
+                defaultPath: filename,
+            }
+        );
         setLastSaveDir(dirname(fn));
         setExporting(true);
         dispatch(

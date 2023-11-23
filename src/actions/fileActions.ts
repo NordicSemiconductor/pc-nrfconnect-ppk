@@ -30,9 +30,12 @@ const getTimestamp = () =>
 
 export const save = () => async (_: TDispatch, getState: () => RootState) => {
     const saveFileName = `ppk-${getTimestamp()}-${paneName(getState())}.ppk`;
-    const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(getLastSaveDir(), saveFileName),
-    });
+    const { filePath: filename } = await dialog.showSaveDialog(
+        getCurrentWindow(),
+        {
+            defaultPath: join(getLastSaveDir(), saveFileName),
+        }
+    );
     if (!filename) {
         return;
     }
@@ -131,10 +134,13 @@ export const screenshot = () => async () => {
         { name: 'All Files', extensions: ['*'] },
     ];
 
-    const { filePath: filename } = await dialog.showSaveDialog({
-        defaultPath: join(getLastSaveDir(), `ppk-${timestamp}.png`),
-        filters,
-    });
+    const { filePath: filename } = await dialog.showSaveDialog(
+        getCurrentWindow(),
+        {
+            defaultPath: join(getLastSaveDir(), `ppk-${timestamp}.png`),
+            filters,
+        }
+    );
     if (!filename) {
         return;
     }
