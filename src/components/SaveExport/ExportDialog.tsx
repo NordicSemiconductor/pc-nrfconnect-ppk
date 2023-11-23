@@ -159,6 +159,12 @@ export default () => {
             getCurrentWindow(),
             {
                 defaultPath: filename,
+                filters: [
+                    {
+                        name: 'Comma separated values',
+                        extensions: ['csv'],
+                    },
+                ],
             }
         );
         setLastSaveDir(dirname(fn));

@@ -34,6 +34,12 @@ export const save = () => async (_: TDispatch, getState: () => RootState) => {
         getCurrentWindow(),
         {
             defaultPath: join(getLastSaveDir(), saveFileName),
+            filters: [
+                {
+                    name: 'Power profiler kit',
+                    extensions: ['ppk'],
+                },
+            ],
         }
     );
     if (!filename) {
@@ -71,6 +77,12 @@ export const load =
         } =
             (await dialog.showOpenDialog(getCurrentWindow(), {
                 defaultPath: getLastSaveDir(),
+                filters: [
+                    {
+                        name: 'Power profiler kit',
+                        extensions: ['ppk'],
+                    },
+                ],
             })) || [];
         if (!filename) {
             return;
