@@ -49,40 +49,41 @@ export default () => {
 
     return (
         <Group heading="Sampling parameters">
-            <div className={samplingRunning ? 'disabled' : ''}>
-                <div className="sample-frequency-group">
-                    <Form.Label htmlFor="data-logger-sampling-frequency">
-                        {sampleFreq.toLocaleString('en')} samples per second
-                    </Form.Label>
-                    <Slider
-                        ticks
-                        id="data-logger-sampling-frequency"
-                        values={[sampleFreqLog10]}
-                        range={{ min: 0, max: maxFreqLog10 }}
-                        onChange={[
-                            v =>
-                                dispatch(
-                                    updateSampleFreqLog10({
-                                        sampleFreqLog10: v,
-                                    })
-                                ),
-                        ]}
-                        onChangeComplete={() => {}}
-                    />
-                </div>
-                <NumberWithUnit
-                    label="Sample for"
-                    unit={range.name}
-                    multiplier={range.multiplier}
-                    range={range}
-                    value={durationSeconds}
-                    onChange={(v: number) =>
-                        dispatch(updateDurationSeconds({ durationSeconds: v }))
-                    }
+            <div className="sample-frequency-group">
+                <Form.Label htmlFor="data-logger-sampling-frequency">
+                    {sampleFreq.toLocaleString('en')} samples per second
+                </Form.Label>
+                <Slider
+                    ticks
+                    id="data-logger-sampling-frequency"
+                    values={[sampleFreqLog10]}
+                    range={{ min: 0, max: maxFreqLog10 }}
+                    onChange={[
+                        v =>
+                            dispatch(
+                                updateSampleFreqLog10({
+                                    sampleFreqLog10: v,
+                                })
+                            ),
+                    ]}
                     onChangeComplete={() => {}}
-                    slider
+                    disabled={samplingRunning}
                 />
             </div>
+            <NumberWithUnit
+                label="Sample for"
+                unit={range.name}
+                multiplier={range.multiplier}
+                range={range}
+                value={durationSeconds}
+                onChange={(v: number) =>
+                    dispatch(updateDurationSeconds({ durationSeconds: v }))
+                }
+                onChangeComplete={() => {}}
+                slider
+                disabled={samplingRunning}
+            />
+
             <div className="small buffer-summary">
                 Estimated RAM required {formattedRamSize}
                 <br />
