@@ -69,7 +69,7 @@ export const load =
         const {
             filePaths: [filename],
         } =
-            (await dialog.showOpenDialog({
+            (await dialog.showOpenDialog(getCurrentWindow(), {
                 defaultPath: getLastSaveDir(),
             })) || [];
         if (!filename) {
