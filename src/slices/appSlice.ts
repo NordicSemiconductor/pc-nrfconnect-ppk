@@ -91,6 +91,8 @@ const appSlice = createSlice({
     },
 });
 
+export const isSamplingRunning = (state: RootState) =>
+    state.app.app.samplingRunning;
 export const appState = (state: RootState) => state.app.app;
 export const advancedMode = (state: RootState) => state.app.app.advancedMode;
 export const deviceOpen = (state: RootState) =>

@@ -13,6 +13,7 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { BigNumber, Fraction, unit } from 'mathjs';
 
+import { isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     setShowSettings,
@@ -58,6 +59,7 @@ const ChartTop = ({
     const dispatch = useDispatch();
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
+    const samplingRunning = useSelector(isSamplingRunning);
 
     const timeWindowLabels = [
         '10ms',
@@ -102,6 +104,7 @@ const ChartTop = ({
                         onToggle={onLiveModeChange}
                         isToggled={live}
                         variant="primary"
+                        disabled={!samplingRunning}
                     />
                 </div>
             )}
