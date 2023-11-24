@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Group } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { load, screenshot } from '../../actions/fileActions';
+import { DataManager } from '../../globals';
 import {
     isSamplingRunning,
     toggleSaveChoiceDialog,
@@ -38,7 +39,7 @@ export const Save = () => {
     const dispatch = useDispatch();
     const samplingRunning = useSelector(isSamplingRunning);
 
-    const disabled = samplingRunning;
+    const disabled = samplingRunning || DataManager().getTimestamp() === 0;
 
     return (
         <>

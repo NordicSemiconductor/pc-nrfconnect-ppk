@@ -7,6 +7,7 @@
 import React from 'react';
 import type { AnyAction } from 'redux';
 
+import { indexToTimestamp } from '../../globals';
 import { showExportDialog } from '../../slices/appSlice';
 import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
 import { fireEvent, render, screen } from '../../utils/testUtils';
@@ -32,8 +33,21 @@ jest.mock('../../utils/persistentStore', () => ({
     getSpikeFilter: () => ({ samples: 3, alpha: 0.18, alpha5: 0.06 }),
 }));
 
+const getTimestampMock = jest.fn(() => 0);
+
+jest.mock('../../globals', () => {
+    const temp = jest.requireActual('../../globals');
+    return {
+        ...temp,
+        DataManager: () => ({
+            ...temp,
+            getTimestamp: getTimestampMock,
+        }),
+    };
+});
+
 const initialStateActions = [
-    chartWindowAction(1, 1_000_000, 1_000_000),
+    chartWindowAction(1_000_000, 1_000_000),
     showExportDialog(),
 ] as AnyAction[];
 
@@ -41,12 +55,14 @@ describe('ExportDialog', () => {
     const totalSizeLargerThanZeroPattern = /[1-9][0-9]*\sMB/;
     const durationLargerThanZeroPattern = /[0-9][0-9]*\ss/;
 
-    it('should show the number of records for the whole sample when exporting `All`', () => {
+    test('should show the number of records for the whole sample when exporting "All"', () => {
         const expectedNumberOfRecords = 2_000_000;
         const numberOfRecordsText = `${expectedNumberOfRecords} records`;
 
-        // options.index = expectedNumberOfRecords - 1; // Header + all samples
-        // TODO MOCK DataManger
+        getTimestampMock.mockImplementation(() =>
+            indexToTimestamp(expectedNumberOfRecords)
+        );
+
         render(<ExportDialog />, initialStateActions);
 
         const buttonToSelectAll = screen.getByText('All');
@@ -60,11 +76,13 @@ describe('ExportDialog', () => {
         expect(duration).not.toBeUndefined();
     });
 
-    it('should show the number of records only inside the window', () => {
+    test('should show the number of records only inside the window', () => {
+        const expectedNumberOfRecords = 100_000;
         const numberOfRecordsText = '100000 records';
 
-        // Need to adjust options in order to at least contain more than necessary
-        // DataManager().getTimestamp() = 1_000_000 * 7; // TODO Mock this
+        getTimestampMock.mockImplementation(() =>
+            indexToTimestamp(expectedNumberOfRecords)
+        );
 
         render(<ExportDialog />, initialStateActions);
         const radioWindow = screen.getByText('Window');
@@ -78,7 +96,7 @@ describe('ExportDialog', () => {
         expect(duration).toBeDefined();
     });
 
-    it('should open with the last option to export the selected area when area has been selected', () => {
+    test('should open with the last option to export the selected area when area has been selected', () => {
         const numberOfRecordsText = '80000 records';
 
         render(<ExportDialog />, [
