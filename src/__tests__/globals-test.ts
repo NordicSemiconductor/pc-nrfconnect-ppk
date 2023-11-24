@@ -16,6 +16,7 @@ describe('timestampToIndex', () => {
     });
 
     it('should return index equal to options.index if argument is options.timestamp', () => {
+        DataManager().setSamplesPerSecond(1);
         expect(timestampToIndex(30 * 1e6)).toBe(30);
     });
 });

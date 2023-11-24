@@ -121,7 +121,6 @@ export default ({
                 value={radioValue}
             >
                 {exportSelection
-                    .filter(radio => radio.name !== 'All')
                     .filter(radio => radio.value !== 2 || cursorBegin != null)
                     .map(radio => (
                         <ToggleButton

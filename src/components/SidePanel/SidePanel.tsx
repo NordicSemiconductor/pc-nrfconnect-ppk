@@ -13,13 +13,13 @@ import {
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import MinimapOptions from '../../features/minimap/MinimapOptions';
-import { DataManager } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
     appState,
     deviceOpen as deviceOpenSelector,
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
+import { isSessionActive } from '../../slices/chartSlice';
 import { BufferSettings } from './BufferSettings';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
@@ -45,6 +45,7 @@ export default () => {
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
     const { fileLoaded } = useSelector(appState);
+    const sessionActive = useSelector(isSessionActive);
 
     if (fileLoaded) {
         return (
@@ -62,7 +63,7 @@ export default () => {
         return (
             <SidePanel className="side-panel tw-mt-9">
                 <Load />
-                {DataManager().getTimestamp() !== 0 && <Save />}
+                {sessionActive && <Save />}
                 <Instructions />
                 <DeprecatedDeviceDialog />
             </SidePanel>
@@ -74,13 +75,9 @@ export default () => {
             <PowerMode />
             <StartStop />
             <MinimapOptions />
-            {DataManager().getTimestamp() === null || (
-                <>
-                    <DisplayOptions />
-                    <Save />
-                </>
-            )}
-            {deviceOpen && advancedMode && (
+            <DisplayOptions />
+            <Save />
+            {advancedMode && (
                 <>
                     <Gains />
                     <SpikeFilter />
