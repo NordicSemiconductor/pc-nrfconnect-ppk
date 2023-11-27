@@ -10,7 +10,6 @@ import usageData from '@nordicsemiconductor/pc-nrfconnect-shared/src/utils/usage
 
 import DataLogger from './components/DataLogger/DataLogger';
 import DeviceSelector from './components/DeviceSelector';
-import RealTime from './components/RealTime/RealTime';
 import SidePanel from './components/SidePanel/SidePanel';
 import reducers from './slices';
 
@@ -23,9 +22,6 @@ render(
         appReducer={reducers}
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
-        panes={[
-            { name: 'Data Logger', Main: DataLogger },
-            { name: 'Real-time', Main: RealTime },
-        ]}
+        panes={[{ name: 'Data Logger', Main: DataLogger }]}
     />
 );

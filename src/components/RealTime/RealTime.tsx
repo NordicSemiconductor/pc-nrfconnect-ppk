@@ -4,26 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { PaneProps } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { setupOptions, triggerStop } from '../../actions/deviceActions';
-import { isRealTimePane } from '../../utils/panes';
 import Chart from '../Chart/Chart';
 
-export default () => {
-    const dispatch = useDispatch();
-    const active = useSelector(isRealTimePane);
-    useEffect(() => {
-        dispatch(setupOptions());
-
-        return () => {
-            if (active) {
-                () => dispatch(triggerStop());
-            }
-        };
-    }, [active, dispatch]);
-
+export default ({ active }: PaneProps) => {
     if (!active) {
         return null;
     }

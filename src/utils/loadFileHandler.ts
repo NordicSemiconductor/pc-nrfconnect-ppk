@@ -153,9 +153,9 @@ export default async (filename: string) => {
     try {
         const buffer = await setupBuffer(filename);
         return {
-            metadata: loadMetadata(buffer!),
-            dataBuffer: loadData(buffer!),
-            bits: loadBits(buffer!),
+            metadata: loadMetadata(buffer),
+            dataBuffer: loadData(buffer),
+            bits: loadBits(buffer),
         };
     } catch (err) {
         return false;

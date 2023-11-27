@@ -20,7 +20,6 @@ import {
     deviceOpen as deviceOpenSelector,
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
 import { BufferSettings } from './BufferSettings';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
@@ -30,7 +29,6 @@ import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
-import Trigger from './Trigger/Trigger';
 
 import './sidepanel.scss';
 
@@ -48,16 +46,13 @@ export default () => {
     const deviceOpen = useSelector(deviceOpenSelector);
     const { fileLoaded } = useSelector(appState);
 
-    const realTimePane = useSelector(isRealTimePane);
-    const dataLoggerPane = useSelector(isDataLoggerPane);
-
     if (fileLoaded) {
         return (
             <SidePanel className="side-panel tw-mt-9">
                 <Load />
                 <DisplayOptions />
                 <Save />
-                {dataLoggerPane && <MinimapOptions />}
+                <MinimapOptions />
                 <DeprecatedDeviceDialog />
             </SidePanel>
         );
@@ -74,16 +69,11 @@ export default () => {
         );
     }
 
-    if (!realTimePane && !dataLoggerPane) {
-        return <DeprecatedDeviceDialog />;
-    }
-
     return (
         <SidePanel className="side-panel tw-mt-9">
             <PowerMode />
-            {realTimePane && <Trigger />}
-            {dataLoggerPane && <StartStop />}
-            {dataLoggerPane && <MinimapOptions />}
+            <StartStop />
+            <MinimapOptions />
             {DataManager().getTimestamp() === null || (
                 <>
                     <DisplayOptions />

@@ -17,7 +17,6 @@ import {
     toggleDigitalChannels,
     toggleTimestamps,
 } from '../../slices/chartSlice';
-import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
 
 export default () => {
@@ -26,7 +25,6 @@ export default () => {
         getChartDigitalChanelInfo
     );
     const timestampsVisible = useSelector(isTimestampsVisible);
-    const isDataLogger = useSelector(isDataLoggerPane);
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
@@ -36,7 +34,7 @@ export default () => {
                 label="Timestamps"
                 variant="primary"
             />
-            {hasDigitalChannels && isDataLogger && (
+            {hasDigitalChannels && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(toggleDigitalChannels())}

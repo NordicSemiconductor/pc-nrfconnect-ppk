@@ -8,7 +8,6 @@ import { dialog, getCurrentWindow } from '@electron/remote';
 import {
     currentPane as currentPaneSelector,
     logger,
-    setCurrentPane,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 import { dirname, join } from 'path';
@@ -20,9 +19,7 @@ import { setFileLoadedAction } from '../slices/appSlice';
 import { setChartState, setLatestDataTimestamp } from '../slices/chartSlice';
 import { setDataLoggerState } from '../slices/dataLoggerSlice';
 import { TDispatch } from '../slices/thunk';
-import { setTriggerState } from '../slices/triggerSlice';
 import loadData from '../utils/loadFileHandler';
-import { paneName } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { SaveData } from '../utils/saveFileHandler';
 
@@ -30,7 +27,7 @@ const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
 export const save = () => async (_: TDispatch, getState: () => RootState) => {
-    const saveFileName = `ppk-${getTimestamp()}-${paneName(getState())}.ppk`;
+    const saveFileName = `ppk-${getTimestamp()}.ppk`;
     const { filePath: filename } = await dialog.showSaveDialog(
         getCurrentWindow(),
         {
@@ -60,7 +57,6 @@ export const save = () => async (_: TDispatch, getState: () => RootState) => {
                 currentPane: currentPaneSelector(getState()),
             },
             chartState: getState().app.chart,
-            triggerState: getState().app.trigger,
             dataLoggerState: getState().app.dataLogger,
         },
     };
@@ -102,9 +98,8 @@ export const load =
 
         const {
             chartState,
-            triggerState,
             dataLoggerState,
-            options: { currentPane, samplingTime, samplesPerSecond, timestamp },
+            options: { samplingTime, samplesPerSecond, timestamp },
         } = metadata;
 
         DataManager().setSamplingTime(samplingTime);
@@ -117,10 +112,7 @@ export const load =
         if (dataLoggerState !== null) {
             dispatch(setDataLoggerState({ state: dataLoggerState }));
         }
-        if (triggerState !== null) {
-            dispatch(setTriggerState(triggerState));
-        }
-        if (currentPane !== null) dispatch(setCurrentPane(currentPane));
+
         logger.info(`State successfully restored`);
         dispatch(miniMapAnimationAction());
         setLoading(false);

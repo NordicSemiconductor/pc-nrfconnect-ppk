@@ -98,7 +98,10 @@ const loadNeededDataCurrent = (
     const expectedDataSize =
         timestampToIndex(Math.min(getTimestamp(), end)) -
         timestampToIndex(begin);
-    if (expectedDataSize !== result.length) {
+    if (
+        expectedDataSize !== result.length &&
+        end <= DataManager().getTimestamp()
+    ) {
         console.error(
             'This should never happen. Math is wrong',
             begin,

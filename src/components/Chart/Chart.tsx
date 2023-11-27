@@ -49,7 +49,6 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
-import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
@@ -173,7 +172,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowEnd,
     } = useSelector(getChartXAxisRange);
 
-    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
@@ -239,8 +237,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             beginY?: number | null,
             endY?: number | null
         ) => {
-            if (!isDataLoggerPane) return;
-
             if (beginX === undefined || endX === undefined) {
                 chartReset(windowDuration);
                 return;
@@ -265,7 +261,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             chartWindow(newBeginX, newEndX, beginY, endY);
         },
         [
-            isDataLoggerPane,
             windowBeginLock,
             windowEndLock,
             windowDuration,
@@ -391,34 +386,32 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             </Button>,
         ];
 
-        if (isDataLoggerPane) {
-            buttons.push(
-                <Button
-                    key="select-all-btn"
-                    variant="secondary"
-                    disabled={DataManager().getTotalSavedRecords() <= 0}
-                    size="sm"
-                    onClick={() => chartCursor(0, DataManager().getTimestamp())}
-                >
-                    SELECT ALL
-                </Button>
-            );
-            buttons.push(
-                <Button
-                    key="zoom-to-selection-btn"
-                    variant="secondary"
-                    size="sm"
-                    disabled={cursorBegin == null || cursorEnd == null}
-                    onClick={() => {
-                        if (cursorBegin != null && cursorEnd != null) {
-                            chartWindow(cursorBegin, cursorEnd);
-                        }
-                    }}
-                >
-                    ZOOM TO SELECTION
-                </Button>
-            );
-        }
+        buttons.push(
+            <Button
+                key="select-all-btn"
+                variant="secondary"
+                disabled={DataManager().getTotalSavedRecords() <= 0}
+                size="sm"
+                onClick={() => chartCursor(0, DataManager().getTimestamp())}
+            >
+                SELECT ALL
+            </Button>
+        );
+        buttons.push(
+            <Button
+                key="zoom-to-selection-btn"
+                variant="secondary"
+                size="sm"
+                disabled={cursorBegin == null || cursorEnd == null}
+                onClick={() => {
+                    if (cursorBegin != null && cursorEnd != null) {
+                        chartWindow(cursorBegin, cursorEnd);
+                    }
+                }}
+            >
+                ZOOM TO SELECTION
+            </Button>
+        );
 
         return buttons;
     };
@@ -449,7 +442,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                {isDataLoggerPane ? <Minimap /> : null}
+                <Minimap />
                 <div
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}
