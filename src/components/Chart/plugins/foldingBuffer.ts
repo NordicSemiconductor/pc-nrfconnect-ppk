@@ -43,14 +43,18 @@ export class FoldingBuffer {
             x:
                 timestamp * (1 - alpha) +
                 this.min[this.min.length - 1].x * alpha,
-            y: Math.min(value, this.min[this.min.length - 1].y),
+            y: !Number.isNaN(value)
+                ? Math.min(value, this.min[this.min.length - 1].y)
+                : this.min[this.min.length - 1].y,
         };
 
         this.max[this.max.length - 1] = {
             x:
                 timestamp * (1 - alpha) +
                 this.max[this.max.length - 1].x * alpha,
-            y: Math.max(value, this.max[this.max.length - 1].y),
+            y: !Number.isNaN(value)
+                ? Math.max(value, this.max[this.max.length - 1].y)
+                : this.max[this.max.length - 1].y,
         };
 
         if (this.lastElementFoldCount === this.numberOfTimesToFold) {
@@ -70,9 +74,21 @@ export class FoldingBuffer {
     }
 
     getData() {
-        return [
-            ...this.min.slice(0, this.min.length - 2),
-            this.max.slice(0, this.min.length - 2),
-        ];
+        const out = this.min
+            .map((min, i) => {
+                const isValid = this.max[i].y >= min.y;
+
+                // if min > max implies we are using +-Number.MAX_Value which will crash chart js
+                return [
+                    { x: min.x, y: isValid ? min.y : undefined },
+                    {
+                        x: this.max[i].x,
+                        y: isValid ? this.max[i].y : undefined,
+                    },
+                ];
+            })
+            .flat();
+
+        return out;
     }
 }
