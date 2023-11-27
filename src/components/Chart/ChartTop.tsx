@@ -22,7 +22,6 @@ import {
     toggleYAxisLog,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
-import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 import { AmpereChartJS } from './AmpereChart';
 import ChartOptions from './ChartOptions';
 
@@ -58,7 +57,6 @@ const ChartTop = ({
 }: ChartTop) => {
     const dispatch = useDispatch();
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
-    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
     const samplingRunning = useSelector(isSamplingRunning);
 
     const timeWindowLabels = [
@@ -86,28 +84,24 @@ const ChartTop = ({
                     <span className="mdi mdi-cog" /> <p>SETTINGS</p>
                 </button>
             </div>
-            {isDataLoggerPane && (
-                <div className="tw-flex tw-w-2/4 tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-place-self-auto">
-                    {timeWindowLabels.map(label => (
-                        <TimeWindowButton
-                            label={label}
-                            key={label}
-                            zoomToWindow={zoomToWindow}
-                        />
-                    ))}
-                </div>
-            )}
-            {isDataLoggerPane && (
-                <div className="tw-flex tw-w-1/4 tw-flex-row tw-justify-end">
-                    <Toggle
-                        label="LIVE VIEW"
-                        onToggle={onLiveModeChange}
-                        isToggled={live}
-                        variant="primary"
-                        disabled={!samplingRunning}
+            <div className="tw-flex tw-w-2/4 tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-place-self-auto">
+                {timeWindowLabels.map(label => (
+                    <TimeWindowButton
+                        label={label}
+                        key={label}
+                        zoomToWindow={zoomToWindow}
                     />
-                </div>
-            )}
+                ))}
+            </div>
+            <div className="tw-flex tw-w-1/4 tw-flex-row tw-justify-end">
+                <Toggle
+                    label="LIVE VIEW"
+                    onToggle={onLiveModeChange}
+                    isToggled={live}
+                    variant="primary"
+                    disabled={!samplingRunning}
+                />
+            </div>
             <ChartSettingsDialog
                 zoomToWindow={zoomToWindow}
                 chartRef={chartRef}

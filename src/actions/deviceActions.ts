@@ -21,7 +21,7 @@ import {
     resetMinimap,
 } from '../features/minimap/minimapSlice';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { DataManager, indexToTimestamp, updateTitle } from '../globals';
+import { DataManager, updateTitle } from '../globals';
 import { RootState } from '../slices';
 import {
     deviceClosedAction,
@@ -34,7 +34,6 @@ import {
 } from '../slices/appSlice';
 import {
     animationAction,
-    chartWindowAction,
     chartWindowUnLockAction,
     resetChartTime,
     resetCursorAndChart,
@@ -43,21 +42,10 @@ import {
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
 import { TDispatch } from '../slices/thunk';
-import {
-    clearSingleTriggerWaitingAction,
-    setTriggerOriginAction,
-    toggleTriggerAction,
-    triggerLengthSetAction,
-    triggerLevelSetAction,
-    triggerSingleSetAction,
-    triggerWindowRangeAction,
-} from '../slices/triggerSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
-import { isRealTimePane } from '../utils/panes';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
-import { calculateWindowSize, processTriggerSample } from './triggerActions';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
@@ -75,25 +63,14 @@ export const setupOptions =
             dispatch(resetChartTime());
             dispatch(resetMinimap());
 
-            if (isRealTimePane(getState())) {
-                // in real-time
-                const realtimeWindowDuration = 300;
-                const newSamplesPerSecond = 1e6 / device.adcSamplingTimeUs;
-                DataManager().setSamplingRate(newSamplesPerSecond);
-                DataManager().initializeDataBuffer(realtimeWindowDuration);
-                DataManager().initializeBitsBuffer(realtimeWindowDuration);
-            } else {
-                const { durationSeconds, sampleFreq } =
-                    getState().app.dataLogger;
-                DataManager().setSamplingRate(sampleFreq);
-                DataManager().initializeDataBuffer(durationSeconds);
-                DataManager().initializeBitsBuffer(durationSeconds);
-            }
+            const { durationSeconds, sampleFreq } = getState().app.dataLogger;
+            DataManager().setSamplingRate(sampleFreq);
+            DataManager().initializeDataBuffer(durationSeconds);
+            DataManager().initializeBitsBuffer(durationSeconds);
         } catch (err) {
             logger.error(err);
         }
         dispatch(chartWindowUnLockAction());
-        dispatch(setTriggerOriginAction(null));
         dispatch(updateHasDigitalChannels());
         dispatch(animationAction());
     };
@@ -101,12 +78,7 @@ export const setupOptions =
 // Only used by Data Logger Pane
 /* Start reading current measurements */
 export function samplingStart() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
-        usageData.sendUsageData(
-            isRealTimePane(getState())
-                ? EventAction.START_REAL_TIME_SAMPLE
-                : EventAction.START_DATA_LOGGER_SAMPLE
-        );
+    return async (dispatch: TDispatch) => {
         usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
         // Prepare global options
@@ -129,12 +101,10 @@ export function samplingStop() {
 }
 
 export function triggerStop() {
-    return async (dispatch: TDispatch) => {
+    return async () => {
         if (!device) return;
         logger.info('Stopping trigger');
         await device.ppkTriggerStop();
-        dispatch(toggleTriggerAction(false));
-        dispatch(clearSingleTriggerWaitingAction());
         stopPreventSleep();
     };
 }
@@ -161,14 +131,11 @@ export function close() {
         if (getState().app.app.samplingRunning) {
             await dispatch(samplingStop());
         }
-        if (getState().app.trigger.triggerRunning) {
-            await dispatch(triggerStop());
-        }
+
         await device.stop();
         device.removeAllListeners();
         device = null;
         dispatch(deviceClosedAction());
-        dispatch(triggerLevelSetAction(null));
         logger.info('PPK closed');
         updateTitle();
     };
@@ -211,32 +178,12 @@ export const open =
         let nbSamples = 0;
         let nbSamplesTotal = 0;
 
-        const initializeChartForRealTime = () => {
-            const { triggerLength } = getState().app.trigger;
-            const windowSize = calculateWindowSize(
-                triggerLength,
-                DataManager().getSamplingTime()
-            );
-            const end = indexToTimestamp(windowSize);
-            dispatch(chartWindowAction(end, windowSize)); // TODO test this
-        };
-
         const onSample = ({ value, bits }: SampleValues) => {
             const {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq, sampleFreq },
-                trigger: {
-                    triggerRunning,
-                    triggerStartIndex,
-                    triggerSingleWaiting,
-                },
             } = getState().app;
-            if (
-                !triggerRunning &&
-                !samplingRunning &&
-                !triggerStartIndex &&
-                !triggerSingleWaiting
-            ) {
+            if (!samplingRunning) {
                 return;
             }
 
@@ -274,14 +221,6 @@ export const open =
                     dispatch(samplingStop());
                 }
             }
-            if (triggerRunning || triggerSingleWaiting) {
-                dispatch(
-                    processTriggerSample(value!, device!, {
-                        samplingTime: DataManager().getSamplingTime(),
-                        dataIndex: DataManager().getTotalSavedRecords(),
-                    })
-                );
-            }
         };
 
         try {
@@ -301,14 +240,6 @@ export const open =
                 })
             );
             const metadata = device.parseMeta(await device.start());
-            const { triggerLength, triggerLevel, triggerWindowRange } =
-                getState().app.trigger;
-            if (!triggerLength) await dispatch(triggerLengthUpdate(10));
-            if (!triggerLevel) dispatch(triggerLevelSetAction(1000));
-            if (!triggerWindowRange)
-                dispatch(
-                    triggerWindowRangeAction({ ...device.triggerWindowRange })
-                );
 
             await device.ppkUpdateRegulator(metadata.vdd);
             dispatch(
@@ -327,10 +258,6 @@ export const open =
             if (!isSmuMode) dispatch(setDeviceRunning(true));
 
             dispatch(setFileLoadedAction({ loaded: false }));
-
-            if (isRealTimePane(getState())) {
-                initializeChartForRealTime();
-            }
 
             logger.info('PPK started');
         } catch (err) {
@@ -411,46 +338,6 @@ export const updateGains =
         logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
     };
 
-/**
- * Takes the window value in milliseconds, adjusts for microsecs
- * and resolves the number of bytes we need for this size of window.
- * @param {number} value  Value received in milliseconds
- * @returns {void} Nothing
- */
-export function triggerLengthUpdate(value: number) {
-    return (dispatch: TDispatch) => {
-        dispatch(triggerLengthSetAction(value));
-        logger.info(`Trigger length updated to ${value} ms`);
-    };
-}
-
-export function triggerStart() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
-        dispatch(resetCursorAndChart());
-        dispatch(toggleTriggerAction(true));
-        dispatch(clearSingleTriggerWaitingAction());
-
-        const { triggerLevel } = getState().app.trigger;
-        logger.info(`Starting trigger at ${triggerLevel} \u00B5A`);
-
-        await device!.ppkTriggerSet();
-        startPreventSleep();
-    };
-}
-
-export function triggerSingleSet() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
-        dispatch(resetCursorAndChart());
-        dispatch(triggerSingleSetAction());
-
-        const { triggerLevel } = getState().app.trigger;
-        logger.info(`Waiting for single trigger at ${triggerLevel} \u00B5A`);
-
-        await device!.ppkTriggerSingleSet();
-        startPreventSleep();
-    };
-}
-
 export function setDeviceRunning(isRunning: boolean) {
     return async (dispatch: TDispatch) => {
         await device!.ppkDeviceRunning(isRunning ? 1 : 0);
@@ -473,7 +360,3 @@ export function setPowerMode(isSmuMode: boolean) {
         }
     };
 }
-
-export const updateTriggerLevel =
-    (triggerLevel: number) => (dispatch: TDispatch) =>
-        dispatch(triggerLevelSetAction(triggerLevel));

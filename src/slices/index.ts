@@ -14,7 +14,6 @@ import chart from './chartSlice';
 import dataLogger from './dataLoggerSlice';
 import gains from './gainsSlice';
 import spikeFilter from './spikeFilterSlice';
-import trigger from './triggerSlice';
 import voltageRegulator from './voltageRegulatorSlice';
 
 type AppState = ReturnType<typeof appReducer>;
@@ -25,7 +24,6 @@ const appReducer = combineReducers({
     app,
     chart,
     minimap,
-    trigger,
     voltageRegulator,
     gains,
     spikeFilter,

@@ -10,15 +10,16 @@ import fs from 'fs';
 import { createDeflateRaw, DeflateRaw } from 'zlib';
 
 import { GlobalOptions } from '../globals';
+import { ChartState } from '../slices/chartSlice';
+import { DataLoggerState } from '../slices/dataLoggerSlice';
 
 export interface SaveData {
     data: Float32Array;
     bits: Uint16Array | null;
     metadata: {
         options: Omit<GlobalOptions, 'data' | 'bits'>;
-        chartState: unknown;
-        triggerState: unknown;
-        dataLoggerState: unknown;
+        chartState: ChartState;
+        dataLoggerState: DataLoggerState;
     };
 }
 

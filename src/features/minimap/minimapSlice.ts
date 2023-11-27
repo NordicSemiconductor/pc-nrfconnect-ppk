@@ -9,7 +9,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataManager } from '../../globals';
 import type { RootState } from '../../slices/index';
 import type { TAction } from '../../slices/thunk';
-import { isDataLoggerPane } from '../../utils/panes';
 
 interface MinimapState {
     showMinimap: boolean;
@@ -39,14 +38,7 @@ const minimapSlice = createSlice({
 
 export const setShowMinimapAction =
     (showMinimap: boolean): TAction =>
-    (dispatch, getState) => {
-        const isInDataLoggerPane = isDataLoggerPane(getState());
-
-        if (!isInDataLoggerPane) {
-            dispatch(setShowMinimap(false));
-            return;
-        }
-
+    dispatch => {
         dispatch(setShowMinimap(showMinimap));
     };
 

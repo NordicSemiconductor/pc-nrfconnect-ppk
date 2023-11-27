@@ -21,7 +21,7 @@ import type { RootState } from '.';
 import { getMaxSampleFrequency, getSampleFrequency } from './dataLoggerSlice';
 import { TAction } from './thunk';
 
-interface ChartState {
+export interface ChartState {
     liveMode: boolean;
     cursorBegin?: null | number;
     cursorEnd?: null | number;

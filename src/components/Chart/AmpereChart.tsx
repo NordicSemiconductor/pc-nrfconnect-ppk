@@ -4,20 +4,18 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Line } from 'react-chartjs-2';
 import type {
     ChartJSOrUndefined,
     ForwardedRef,
 } from 'react-chartjs-2/dist/types';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 
-import { updateTriggerLevel as updateTriggerLevelAction } from '../../actions/deviceActions';
-import { indexToTimestamp } from '../../globals';
-import { appState } from '../../slices/appSlice';
+import { isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     getCursorRange,
@@ -25,14 +23,10 @@ import {
     isLiveMode,
     isTimestampsVisible,
 } from '../../slices/chartSlice';
-import { triggerLevelSetAction, triggerState } from '../../slices/triggerSlice';
-import { isRealTimePane as isRealTimePaneSelector } from '../../utils/panes';
 import { type CursorData } from './Chart';
 import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin, { DragSelect } from './plugins/chart.dragSelect';
-import triggerLevelPlugin from './plugins/chart.triggerLevel';
-import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin, { ZoomPan } from './plugins/chart.zoomPan';
 
 import chartCss from './chart.icss.scss';
@@ -49,20 +43,10 @@ interface Cursor {
 }
 
 export interface AmpereChartOptions extends ChartOptions<'line'> {
-    formatX: (
-        usecs: number,
-        index: number,
-        array: number[]
-    ) => string | string[] | undefined;
+    formatX: (usecs: number) => string | string[] | undefined;
     formatY: (current: number) => string;
-    triggerLevel?: null | number;
-    triggerActive: boolean;
-    sendTriggerLevel: (level: number) => void;
-    updateTriggerLevel: (level: number) => void;
     snapping: boolean;
     live: boolean;
-    triggerHandleVisible: boolean;
-    triggerOrigin: number | null;
     windowDuration: number;
     cursor: Cursor;
     id?: string;
@@ -97,6 +81,23 @@ const formatCurrent = (uA: number) =>
               .replace('u', '\u00B5')
         : (undefined as never);
 
+const timestampToLabel = (usecs: number) => {
+    const microseconds = Math.abs(usecs);
+    const sign = usecs < 0 ? '-' : '';
+
+    const d = new Date(microseconds / 1e3);
+    const h = d.getUTCHours().toString().padStart(2, '0');
+    const m = d.getUTCMinutes().toString().padStart(2, '0');
+    const s = d.getUTCSeconds().toString().padStart(2, '0');
+
+    const time = `${sign}${h}:${m}:${s}`;
+    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
+        3
+    )}`.padStart(7, '0');
+
+    return [time, subsecond];
+};
+
 export default ({
     setWindowsNumberOfPixels,
     setChartAreaWidth,
@@ -105,69 +106,14 @@ export default ({
     cursorData: { begin, end },
     lineData,
 }: AmpereChartProperties) => {
-    const dispatch = useDispatch();
     const liveMode = useSelector(isLiveMode);
-    const {
-        triggerLevel,
-        triggerRunning,
-        triggerSingleWaiting,
-        triggerOrigin,
-    } = useSelector(triggerState);
     const { yMin, yMax, yAxisLog } = useSelector(getChartYAxisRange);
     const timestampsVisible = useSelector(isTimestampsVisible);
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
     const windowDuration = useSelector(getWindowDuration);
-    const { samplingRunning } = useSelector(appState);
-    const isRealTimePane = useSelector(isRealTimePaneSelector);
-    const sendTriggerLevel = (level: number) =>
-        dispatch(updateTriggerLevelAction(level));
-    const updateTriggerLevel = (level: number) =>
-        dispatch(triggerLevelSetAction(level));
+    const samplingRunning = useSelector(isSamplingRunning);
 
-    const timestampToLabel = useCallback(
-        (_usecs, index, array) => {
-            if (typeof _usecs !== 'number') {
-                return undefined as never;
-            }
-            const timestampAtTriggerOrigin =
-                triggerOrigin == null ? null : indexToTimestamp(triggerOrigin);
-
-            const usecs = _usecs - (timestampAtTriggerOrigin ?? 0);
-
-            const microseconds = Math.abs(usecs);
-            const sign = usecs < 0 ? '-' : '';
-            if (!array) {
-                return `${sign}${Number(microseconds / 1e3).toFixed(3)} ms`;
-            }
-            if (
-                timestampAtTriggerOrigin &&
-                index > 0 &&
-                index < array.length - 1
-            ) {
-                const first = array[0] - timestampAtTriggerOrigin;
-                const last = array[array.length - 1] - timestampAtTriggerOrigin;
-                const range = last - first;
-                if (usecs - first < range / 8 || last - usecs < range / 8) {
-                    return undefined;
-                }
-            }
-            const d = new Date(microseconds / 1e3);
-            const h = d.getUTCHours().toString().padStart(2, '0');
-            const m = d.getUTCMinutes().toString().padStart(2, '0');
-            const s = d.getUTCSeconds().toString().padStart(2, '0');
-
-            const time = `${sign}${h}:${m}:${s}`;
-            const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
-                3
-            )}`.padStart(7, '0');
-
-            return [time, subsecond];
-        },
-        [triggerOrigin]
-    );
-
-    const live =
-        liveMode && (samplingRunning || triggerRunning || triggerSingleWaiting);
+    const live = liveMode && samplingRunning;
     const snapping = samplesPixel <= 0.16 && !live;
 
     const pointRadius = samplesPixel <= 0.08 ? 4 : 2;
@@ -205,7 +151,8 @@ export default ({
                 ticks: {
                     display: timestampsVisible,
                     autoSkipPadding: 25,
-                    callback: timestampToLabel,
+                    callback: value =>
+                        timestampToLabel(Number.parseInt(value.toString(), 10)),
                     maxTicksLimit: 7,
                 },
                 border: {
@@ -245,14 +192,8 @@ export default ({
         animation: false,
         formatX: timestampToLabel,
         formatY: formatCurrent,
-        triggerLevel,
-        triggerActive: triggerRunning || triggerSingleWaiting,
-        sendTriggerLevel,
-        updateTriggerLevel,
         snapping,
         live,
-        triggerHandleVisible: isRealTimePane,
-        triggerOrigin,
         windowDuration,
         cursor: { cursorBegin, cursorEnd },
         id: 'ampereChart',
@@ -261,8 +202,6 @@ export default ({
     const plugins = [
         dragSelectPlugin,
         zoomPanPlugin,
-        triggerLevelPlugin(dispatch),
-        triggerOriginPlugin,
         crossHairPlugin,
         {
             id: 'notifier',
