@@ -27,7 +27,7 @@ export default () => {
                 onToggle={() => dispatch(setShowMinimapAction(!showMinimap))}
                 isToggled={showMinimap}
             >
-                {showMinimap ? 'Hide Minimap' : 'Show Minimap'}
+                Show Minimap
             </Toggle>
         </Group>
     );
