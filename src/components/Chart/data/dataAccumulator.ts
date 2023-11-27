@@ -103,7 +103,9 @@ const accumulate = (
     const needMinMaxLine = numberOfPointsPerGrouped !== 1;
 
     if (!needMinMaxLine) {
-        const ampereLineData: AmpereState[] = new Array(noOfPointToRender);
+        const ampereLineData: AmpereState[] = new Array(
+            Math.ceil(noOfPointToRender)
+        );
         data.current.forEach((v, i) => {
             const timestamp = begin + offset + i * timeGroup;
             if (!Number.isNaN(v) && data.bits && i < data.bits.length) {
@@ -123,7 +125,9 @@ const accumulate = (
         };
     }
 
-    const ampereLineData: AmpereState[] = new Array(noOfPointToRender * 2);
+    const ampereLineData: AmpereState[] = new Array(
+        Math.ceil(noOfPointToRender) * 2
+    );
 
     {
         let min: number = Number.MAX_VALUE;
