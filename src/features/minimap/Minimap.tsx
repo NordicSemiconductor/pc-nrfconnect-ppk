@@ -29,6 +29,18 @@ export interface MinimapOptions extends ChartOptions<'line'> {
 export interface MinimapChart extends Chart<'line'> {
     options: MinimapOptions;
     windowNavigateCallback?: (windowCenter: number) => void;
+    updateSlider?: (
+        minimapRef: MinimapChart,
+        windowEnd: number,
+        windowDuration: number,
+        liveMode: boolean
+    ) => void;
+    onSliderRangeChange?: (
+        windowEnd: number,
+        windowDuration: number,
+        liveMode: boolean
+    ) => void;
+    redrawSlider?: () => void;
 }
 
 const Minimap = () => {
@@ -46,6 +58,7 @@ const Minimap = () => {
     } = useSelector(getChartXAxisRange);
     const liveMode = useSelector(isLiveMode);
     const xAxisMax = useSelector(getXAxisMaxTime);
+    const isWindowDurationFull = topChartXAxisMax > windowDuration;
 
     function windowNavigateCallback(windowCenter: number) {
         dispatch(panWindow(windowCenter));
@@ -56,16 +69,11 @@ const Minimap = () => {
         canvasRef.current
     );
 
-    updateSlider(
-        minimapRef.current,
-        minimapSlider.current,
-        windowEnd,
-        windowDuration,
-        liveMode
-    );
-
     if (minimapRef.current) {
         minimapRef.current.windowNavigateCallback = windowNavigateCallback;
+        minimapRef.current.updateSlider = (minimap, end, duration, live) => {
+            updateSlider(minimap, minimapSlider.current, end, duration, live);
+        };
     }
 
     useEffect(() => {
@@ -74,13 +82,27 @@ const Minimap = () => {
             minimapSlider.current != null &&
             showMinimap
         ) {
-            drawSlider(
-                minimapRef.current,
-                minimapSlider.current,
+            minimapRef.current.onSliderRangeChange?.(
                 windowEnd,
                 windowDuration,
                 liveMode
             );
+
+            // if showing for first time we need to re update slider once chart has a width
+            if (minimapRef.current.width === 0) {
+                const resizeObserver = new ResizeObserver(() => {
+                    if (minimapRef.current && minimapRef.current.width !== 0) {
+                        minimapRef.current.onSliderRangeChange?.(
+                            windowEnd,
+                            windowDuration,
+                            liveMode
+                        );
+                        resizeObserver.unobserve(minimapRef.current.canvas);
+                    }
+                });
+
+                resizeObserver.observe(minimapRef.current.canvas);
+            }
         }
     }, [
         showMinimap,
@@ -117,8 +139,6 @@ const Minimap = () => {
             minimapScroll.clearMinimap(nonNullRef);
         }
     }, [sessionActive]);
-
-    const isWindowDurationFull = topChartXAxisMax > windowDuration;
 
     return (
         <div
@@ -249,6 +269,7 @@ function updateSlider(
         };
     } else {
         chartOptions.ampereChart.windowDuration = windowDuration;
+        chartOptions.ampereChart.windowEnd = windowEnd;
     }
 }
 
