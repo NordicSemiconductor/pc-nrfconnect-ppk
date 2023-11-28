@@ -12,11 +12,18 @@ import {
 import fs from 'fs';
 import { dirname, join } from 'path';
 
-import { miniMapAnimationAction } from '../features/minimap/minimapSlice';
+import {
+    miniMapAnimationAction,
+    resetMinMap,
+} from '../features/minimap/minimapSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
-import { setChartState, setLatestDataTimestamp } from '../slices/chartSlice';
+import {
+    resetChartTime,
+    setChartState,
+    setLatestDataTimestamp,
+} from '../slices/chartSlice';
 import { setDataLoggerState } from '../slices/dataLoggerSlice';
 import { TDispatch } from '../slices/thunk';
 import loadData from '../utils/loadFileHandler';
@@ -87,6 +94,9 @@ export const load =
 
         setLoading(true);
         logger.info(`Restoring state from ${filename}`);
+        DataManager().reset();
+        dispatch(resetChartTime());
+        dispatch(resetMinMap());
         updateTitle(filename);
         const result = await loadData(filename);
         if (!result) {

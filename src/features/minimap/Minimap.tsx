@@ -135,10 +135,10 @@ const Minimap = () => {
         if (!minimapRef.current) return;
         const nonNullRef = minimapRef.current;
 
-        if (!sessionActive) {
+        if (!sessionActive || xAxisMax === 0) {
             minimapScroll.clearMinimap(nonNullRef);
         }
-    }, [sessionActive]);
+    }, [sessionActive, xAxisMax]);
 
     return (
         <div

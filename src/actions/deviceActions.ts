@@ -16,7 +16,10 @@ import {
 
 import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
-import { miniMapAnimationAction } from '../features/minimap/minimapSlice';
+import {
+    miniMapAnimationAction,
+    resetMinMap,
+} from '../features/minimap/minimapSlice';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import { DataManager, updateTitle } from '../globals';
 import { RootState } from '../slices';
@@ -32,6 +35,7 @@ import {
 import {
     animationAction,
     chartWindowUnLockAction,
+    resetChartTime,
     resetCursorAndChart,
     updateHasDigitalChannels,
 } from '../slices/chartSlice';
@@ -55,6 +59,8 @@ export const setupOptions =
         if (!device) return;
         try {
             DataManager().reset();
+            dispatch(resetChartTime());
+            dispatch(resetMinMap());
 
             const { durationSeconds, sampleFreq } = getState().app.dataLogger;
             DataManager().setSamplingRate(sampleFreq);
