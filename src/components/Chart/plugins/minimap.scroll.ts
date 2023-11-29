@@ -17,18 +17,55 @@ interface MinimapScroll extends Plugin<'line'> {
     clearMinimap: (chart: MinimapChart) => void;
 }
 
-let lastXPosition = 0;
 let leftClickPressed = false;
+let clickOnSlider = false;
 let chartRef: MinimapChart;
+let lastSliderTimeStamp = 0;
+let lastClickDeltaFromCenter = 0;
 
 const getClickMetaData = (chart: MinimapChart, offsetX: number) => {
     if (chart.windowNavigateCallback == null) return;
     if (chart.data.datasets[0].data.length === 0) return;
 
-    const windowDuration = chart.options.ampereChart?.windowDuration;
-    const windowEnd = chart.options.ampereChart?.windowEnd;
+    const sliderOffsetX = chart.options.slider?.offsetX;
+    const sliderWidth = chart.options.slider?.width;
 
-    if (windowDuration == null || windowEnd == null) {
+    if (sliderOffsetX == null || sliderWidth == null) {
+        return;
+    }
+
+    const clickedOnSlider =
+        offsetX >= sliderOffsetX && offsetX <= sliderOffsetX + sliderWidth;
+
+    let deltaOffSliderCenter = 0;
+    if (clickedOnSlider) {
+        deltaOffSliderCenter = offsetX - sliderOffsetX - sliderWidth / 2;
+    }
+
+    return {
+        clickedOnSlider,
+        deltaOffSliderCenter,
+    };
+};
+
+const calculateSliderCenterXPosition = (
+    chart: MinimapChart,
+    offsetX: number,
+    clickedOnSlider: boolean,
+    deltaFromCenter: number
+) => {
+    if (chart.windowNavigateCallback == null) return;
+    if (chart.data.datasets[0].data.length === 0) return;
+
+    const windowDuration = chart.options.ampereChart?.windowDuration;
+    const sliderOffsetX = chart.options.slider?.offsetX;
+    const sliderWidth = chart.options.slider?.width;
+
+    if (
+        windowDuration == null ||
+        sliderOffsetX == null ||
+        sliderWidth == null
+    ) {
         return;
     }
 
@@ -36,25 +73,25 @@ const getClickMetaData = (chart: MinimapChart, offsetX: number) => {
         scales: { x: xScale },
     } = chart;
 
-    const xPosition = xScale.getValueForPixel(offsetX);
-    if (xPosition == null) return;
-
-    const windowBegin = windowEnd - windowDuration;
-    const clickedOnSlider = xPosition >= windowBegin && xPosition <= windowEnd;
-    const delta = xPosition - lastXPosition;
-    const currentSliderCenter = windowEnd - windowDuration / 2;
-
-    let centerPosition = xPosition;
+    let newSliderCenterOffsetX = offsetX;
     if (clickedOnSlider) {
-        centerPosition = currentSliderCenter + delta;
+        newSliderCenterOffsetX = offsetX - deltaFromCenter;
     }
 
-    lastXPosition += delta;
+    const xPosition = xScale.getValueForPixel(newSliderCenterOffsetX);
+    if (xPosition == null) return;
 
-    return {
-        clickedOnSlider,
-        centerPosition,
-    };
+    const maxCenter = lastSliderTimeStamp - windowDuration / 2;
+    const minCenter = windowDuration / 2;
+
+    if (xPosition > maxCenter || xPosition < minCenter) {
+        const metaData = getClickMetaData(chart, offsetX);
+        if (metaData) {
+            lastClickDeltaFromCenter = metaData.deltaOffSliderCenter;
+        }
+    }
+
+    return Math.max(minCenter, Math.min(maxCenter, xPosition));
 };
 
 const pointerEnter = (event: PointerEvent) => {
@@ -68,8 +105,16 @@ const pointerDown = (event: PointerEvent) => {
         leftClickPressed = true;
         const metaData = getClickMetaData(chartRef, event.offsetX);
         if (metaData) {
-            if (!metaData?.clickedOnSlider) {
-                chartRef.windowNavigateCallback?.(metaData.centerPosition);
+            clickOnSlider = metaData.clickedOnSlider;
+            lastClickDeltaFromCenter = metaData.deltaOffSliderCenter;
+            const center = calculateSliderCenterXPosition(
+                chartRef,
+                event.offsetX,
+                false,
+                0
+            );
+            if (!metaData.clickedOnSlider && center != null) {
+                chartRef.windowNavigateCallback?.(center);
             }
         }
     }
@@ -87,10 +132,13 @@ const pointerMove = (event: PointerEvent) => {
     // if left clicking
     // eslint-disable-next-line no-bitwise
     if ((event.buttons & 0x01) === 0x01 && leftClickPressed) {
-        const metaData = getClickMetaData(chartRef, event.offsetX);
-        if (metaData) {
-            chartRef.windowNavigateCallback?.(metaData.centerPosition);
-        }
+        const center = calculateSliderCenterXPosition(
+            chartRef,
+            event.offsetX,
+            clickOnSlider,
+            lastClickDeltaFromCenter
+        );
+        if (center != null) chartRef.windowNavigateCallback?.(center);
     } else {
         leftClickPressed = false;
     }
@@ -105,6 +153,10 @@ const plugin: MinimapScroll = {
         const { canvas } = chart.ctx;
 
         chart.onSliderRangeChange = (end, duration, liveMode) => {
+            if (leftClickPressed && lastSliderTimeStamp < end) {
+                return;
+            }
+
             chart.updateSlider?.(chart, end, duration, liveMode);
             chart.redrawSlider = () => {
                 chart.updateSlider?.(chart, end, duration, liveMode);
@@ -124,6 +176,9 @@ const plugin: MinimapScroll = {
     },
     onNewData(value, timestamp) {
         this.foldingBuffer.addData(value, timestamp);
+        if (!leftClickPressed) {
+            lastSliderTimeStamp = timestamp;
+        }
     },
 
     beforeDestroy(chart: MinimapChart) {
@@ -139,13 +194,15 @@ const plugin: MinimapScroll = {
 
     updateMinimapData(chart) {
         if (!leftClickPressed) {
+            const data = this.foldingBuffer.getData();
             /* @ts-expect-error Have not figured out how to handle this */
-            chart.data.datasets[0].data = this.foldingBuffer.getData();
+            chart.data.datasets[0].data = data;
             if (chart.options.scales?.x != null) {
                 chart.options.scales.x.max = DataManager().getTimestamp();
             }
             chart.update();
             chart.redrawSlider?.();
+            if (data.length) lastSliderTimeStamp = data[data.length - 1].x;
         }
     },
 

@@ -24,6 +24,10 @@ export interface MinimapOptions extends ChartOptions<'line'> {
         windowDuration: number;
         windowEnd: number;
     };
+    slider?: {
+        offsetX: number;
+        width: number;
+    };
 }
 
 export interface MinimapChart extends Chart<'line'> {
@@ -237,6 +241,11 @@ function drawSlider(
     slider.style.width = `${width}px`;
     slider.style.height = `${height}px`;
     slider.style.display = 'block';
+
+    return {
+        offsetX: left - offsetLeft,
+        width,
+    };
 }
 
 function updateSlider(
@@ -248,7 +257,7 @@ function updateSlider(
 ) {
     if (minimapRef == null || minimapSliderRef == null) return;
 
-    drawSlider(
+    const sliderMeta = drawSlider(
         minimapRef,
         minimapSliderRef,
         windowEnd,
@@ -265,6 +274,18 @@ function updateSlider(
     } else {
         chartOptions.ampereChart.windowDuration = windowDuration;
         chartOptions.ampereChart.windowEnd = windowEnd;
+    }
+
+    if (sliderMeta) {
+        if (chartOptions.slider == null) {
+            chartOptions.slider = {
+                offsetX: sliderMeta.offsetX,
+                width: sliderMeta.width,
+            };
+        } else {
+            chartOptions.slider.offsetX = sliderMeta.offsetX;
+            chartOptions.slider.width = sliderMeta.width;
+        }
     }
 }
 
