@@ -132,6 +132,10 @@ const pointerMove = (event: PointerEvent) => {
     // if left clicking
     // eslint-disable-next-line no-bitwise
     if ((event.buttons & 0x01) === 0x01 && leftClickPressed) {
+        const target = event.target;
+        if (target instanceof Element) {
+            target.setPointerCapture(event.pointerId);
+        }
         const center = calculateSliderCenterXPosition(
             chartRef,
             event.offsetX,
