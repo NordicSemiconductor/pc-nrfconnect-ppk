@@ -218,7 +218,7 @@ function drawSlider(
 
         left = beginWithOffset;
 
-        const MIN_WIDTH = 16;
+        const MIN_WIDTH = 1;
         width = endWithoutOffset - beginWithoutOffset;
         width = width > MIN_WIDTH ? width : MIN_WIDTH;
 
