@@ -82,27 +82,22 @@ const Minimap = () => {
             minimapSlider.current != null &&
             showMinimap
         ) {
-            minimapRef.current.onSliderRangeChange?.(
-                windowEnd,
-                windowDuration,
-                liveMode
-            );
+            const resizeObserver = new ResizeObserver(() => {
+                if (minimapRef.current) {
+                    minimapRef.current.onSliderRangeChange?.(
+                        windowEnd,
+                        windowDuration,
+                        liveMode
+                    );
+                }
+            });
 
-            // if showing for first time we need to re update slider once chart has a width
-            if (minimapRef.current.width === 0) {
-                const resizeObserver = new ResizeObserver(() => {
-                    if (minimapRef.current && minimapRef.current.width !== 0) {
-                        minimapRef.current.onSliderRangeChange?.(
-                            windowEnd,
-                            windowDuration,
-                            liveMode
-                        );
-                        resizeObserver.unobserve(minimapRef.current.canvas);
-                    }
-                });
+            resizeObserver.observe(minimapRef.current.canvas);
 
-                resizeObserver.observe(minimapRef.current.canvas);
-            }
+            return () => {
+                minimapRef.current &&
+                    resizeObserver.unobserve(minimapRef.current.canvas);
+            };
         }
     }, [
         showMinimap,
