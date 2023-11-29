@@ -34,8 +34,8 @@ const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
 export const save = () => async (_: TDispatch, getState: () => RootState) => {
-    const saveFileName = `ppk-${getTimestamp()}.ppk`;
-    const { filePath: filename } = await dialog.showSaveDialog(
+    const saveFileName = `ppk-${getTimestamp()}`;
+    let { filePath: filename } = await dialog.showSaveDialog(
         getCurrentWindow(),
         {
             defaultPath: join(getLastSaveDir(), saveFileName),
@@ -68,6 +68,9 @@ export const save = () => async (_: TDispatch, getState: () => RootState) => {
         },
     };
 
+    if (!filename.toLocaleLowerCase().endsWith('.ppk')) {
+        filename = `${filename}.ppk`;
+    }
     const saved = await saveData(filename, dataToBeSaved);
     if (saved) {
         logger.info(`State saved to: ${filename}`);
