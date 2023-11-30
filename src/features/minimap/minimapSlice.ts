@@ -30,7 +30,7 @@ const minimapSlice = createSlice({
         miniMapAnimationAction: state => {
             state.xAxisMaxTime = DataManager().getTimestamp();
         },
-        resetMinMap: state => {
+        resetMinimap: state => {
             state.xAxisMaxTime = 0;
         },
     },
@@ -45,6 +45,6 @@ export const setShowMinimapAction =
 export const showMinimap = (state: RootState) => state.app.minimap.showMinimap;
 export const getXAxisMaxTime = (state: RootState) =>
     state.app.minimap.xAxisMaxTime;
-export const { setShowMinimap, miniMapAnimationAction, resetMinMap } =
+export const { setShowMinimap, miniMapAnimationAction, resetMinimap } =
     minimapSlice.actions;
 export default minimapSlice.reducer;

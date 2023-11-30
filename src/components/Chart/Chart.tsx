@@ -39,7 +39,7 @@ import { RootState } from '../../slices';
 import {
     chartCursorAction,
     chartWindowAction,
-    getChartDigitalChanelInfo,
+    getChartDigitalChannelInfo,
     getChartXAxisRange,
     getChartYAxisRange,
     getCursorRange,
@@ -157,7 +157,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     });
 
     const { digitalChannels, digitalChannelsVisible, hasDigitalChannels } =
-        useSelector(getChartDigitalChanelInfo);
+        useSelector(getChartDigitalChannelInfo);
 
     const { yAxisLog } = useSelector(getChartYAxisRange);
 
@@ -174,8 +174,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
-
-    const hasBits = DataManager().hasBits();
 
     const chartRef = useRef<AmpereChartJS | null>(null);
 
@@ -199,6 +197,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         [digitalChannels]
     );
 
+    // hasBits needs to be a dependency so digitalChannelsToCompute can update.
+    const hasBits = DataManager().hasBits();
     const digitalChannelsToCompute = useMemo(
         () =>
             !zoomedOutTooFarForDigitalChannels && showDigitalChannels && hasBits
@@ -212,17 +212,16 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         ]
     );
 
-    const end = windowEnd;
-    const begin = Math.max(0, end - windowDuration);
+    const begin = Math.max(0, windowEnd - windowDuration);
 
     const cursorData: CursorData = {
         cursorBegin,
         cursorEnd,
         begin,
-        end,
+        end: windowEnd,
     };
 
-    const [windowNumberOfPixels, setWindowsNumberOfPixels] = useState(0);
+    const [numberOfPixelsInWindow, setNumberOfPixelsInWindow] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
     const resetCursor = useCallback(
@@ -254,9 +253,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             const newBeginX = Math.max(beginX, minLimit);
             const newEndX = Math.min(endX, maxLimit);
 
-            if (windowDuration === newEndX - newBeginX) {
-                dispatch(setLiveMode(false));
-            }
+            dispatch(setLiveMode(false));
 
             chartWindow(newBeginX, newEndX, beginY, endY);
         },
@@ -306,16 +303,16 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const samplesInWindowView = timestampToIndex(windowDuration);
     const samplesPerPixel =
-        windowNumberOfPixels === 0
+        numberOfPixelsInWindow === 0
             ? 2
-            : samplesInWindowView / windowNumberOfPixels;
+            : samplesInWindowView / numberOfPixelsInWindow;
 
     const [ampereLineData, setAmpereLineData] = useState<AmpereState[]>([]);
     const [bitsLineData, setBitsLineData] = useState<DigitalChannelStates[]>(
         []
     );
 
-    const windowStats = calcStats(begin, end);
+    const windowStats = calcStats(begin, windowEnd);
     const selectionStats = useMemo(
         () => calcStats(cursorBegin, cursorEnd),
         [cursorBegin, cursorEnd]
@@ -329,14 +326,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         const timeout = setTimeout(() => {
             const processedData = dataProcessor.process(
                 begin,
-                end,
+                windowEnd,
                 zoomedOutTooFarForDigitalChannels
                     ? []
                     : (digitalChannelsToCompute as number[]),
                 yAxisLog,
                 Math.min(
                     indexToTimestamp(windowDuration),
-                    windowNumberOfPixels
+                    numberOfPixelsInWindow
                 ),
                 windowDuration
             );
@@ -352,9 +349,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         begin,
         dataProcessor,
         digitalChannelsToCompute,
-        end,
+        windowEnd,
         windowDuration,
-        windowNumberOfPixels,
+        numberOfPixelsInWindow,
         yAxisLog,
         zoomedOutTooFarForDigitalChannels,
     ]);
@@ -430,9 +427,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
                 <AmpereChart
-                    setWindowsNumberOfPixels={setWindowsNumberOfPixels}
+                    setNumberOfPixelsInWindow={setNumberOfPixelsInWindow}
                     setChartAreaWidth={setChartAreaWidth}
-                    samplesPixel={samplesPerPixel}
+                    numberOfSamplesPerPixel={samplesPerPixel}
                     chartRef={chartRef}
                     cursorData={cursorData}
                     lineData={ampereLineData}

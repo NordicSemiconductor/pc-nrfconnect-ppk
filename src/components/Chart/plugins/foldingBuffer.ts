@@ -27,22 +27,29 @@ export class FoldingBuffer {
     numberOfTimesToFold = 1;
     lastElementFoldCount = 0;
 
-    private addDefault(timestamp: number) {
+    #addDefault(timestamp: number) {
         this.min.push({ x: timestamp, y: Number.MAX_VALUE });
         this.max.push({ x: timestamp, y: -Number.MAX_VALUE });
     }
 
+    #fold() {
+        this.numberOfTimesToFold *= 2;
+
+        this.min = foldData(this.min, Math.min);
+        this.max = foldData(this.max, Math.max);
+    }
+
     addData(value: number, timestamp: number) {
         if (this.lastElementFoldCount === 0) {
-            this.addDefault(timestamp);
+            this.#addDefault(timestamp);
         }
 
         this.lastElementFoldCount += 1;
         const alpha = 1 / this.lastElementFoldCount;
         this.min[this.min.length - 1] = {
             x:
-                timestamp * (1 - alpha) +
-                this.min[this.min.length - 1].x * alpha,
+                timestamp * alpha +
+                this.min[this.min.length - 1].x * (1 - alpha),
             y: !Number.isNaN(value)
                 ? Math.min(value, this.min[this.min.length - 1].y)
                 : this.min[this.min.length - 1].y,
@@ -50,8 +57,8 @@ export class FoldingBuffer {
 
         this.max[this.max.length - 1] = {
             x:
-                timestamp * (1 - alpha) +
-                this.max[this.max.length - 1].x * alpha,
+                timestamp * alpha +
+                this.max[this.max.length - 1].x * (1 - alpha),
             y: !Number.isNaN(value)
                 ? Math.max(value, this.max[this.max.length - 1].y)
                 : this.max[this.max.length - 1].y,
@@ -62,15 +69,8 @@ export class FoldingBuffer {
         }
 
         if (this.min.length === this.maxNumberOfElements) {
-            this.fold();
+            this.#fold();
         }
-    }
-
-    private fold() {
-        this.numberOfTimesToFold *= 2;
-
-        this.min = foldData(this.min, Math.min);
-        this.max = foldData(this.max, Math.max);
     }
 
     getData() {

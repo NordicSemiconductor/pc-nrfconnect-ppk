@@ -66,9 +66,9 @@ export interface AmpereChartJS extends Chart<'line'> {
 }
 
 interface AmpereChartProperties {
-    setWindowsNumberOfPixels: (length: number) => void;
+    setNumberOfPixelsInWindow: (length: number) => void;
     setChartAreaWidth: (width: number) => void;
-    samplesPixel: number;
+    numberOfSamplesPerPixel: number;
     chartRef: React.MutableRefObject<null | AmpereChartJS>;
     cursorData: CursorData;
     lineData: AmpereState[];
@@ -99,9 +99,9 @@ const timestampToLabel = (usecs: number) => {
 };
 
 export default ({
-    setWindowsNumberOfPixels,
+    setNumberOfPixelsInWindow,
     setChartAreaWidth,
-    samplesPixel,
+    numberOfSamplesPerPixel,
     chartRef,
     cursorData: { begin, end },
     lineData,
@@ -114,14 +114,14 @@ export default ({
     const samplingRunning = useSelector(isSamplingRunning);
 
     const live = liveMode && samplingRunning;
-    const snapping = samplesPixel <= 0.16 && !live;
+    const snapping = numberOfSamplesPerPixel <= 0.16 && !live;
 
-    const pointRadius = samplesPixel <= 0.08 ? 4 : 2;
+    const pointRadius = numberOfSamplesPerPixel <= 0.08 ? 4 : 2;
     const chartDataSets: ChartData<'line', AmpereState[]> = {
         datasets: [
             {
                 borderColor: dataColor,
-                borderWidth: samplesPixel > 2 ? 1 : 1.5,
+                borderWidth: numberOfSamplesPerPixel > 2 ? 1 : 1.5,
                 fill: false,
                 data: lineData,
                 pointRadius: snapping ? pointRadius : 0,
@@ -210,7 +210,7 @@ export default ({
                 chartArea.right = width - rightMargin;
                 const { left, right } = chart.chartArea;
                 const w = Math.trunc(right - left);
-                setWindowsNumberOfPixels(Math.min(w, 2000));
+                setNumberOfPixelsInWindow(Math.min(w, 2000));
                 setChartAreaWidth(w);
             },
         },

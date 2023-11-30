@@ -26,7 +26,7 @@ export interface BitDataAccumulator {
     digitalChannelsToCompute: number[] | undefined;
     initialise: (digitalChannelsToCompute: number[]) => void;
     processBits: (bits: number) => void;
-    processBitState: (butState: BitStateIndexType, channel: number) => void;
+    processBitState: (bitState: BitStateIndexType, channel: number) => void;
     processAccumulatedBits: (timestamp: TimestampType) => void;
     getLineData: () => DigitalChannelStates[];
 }
@@ -39,6 +39,7 @@ export default (): BitDataAccumulator => ({
     initialise(digitalChannelsToCompute) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
+        // .fill is slower then a normal for loop when array is large
         for (let i = 0; i < this.accumulator.length; i += 1) {
             this.accumulator[i] = null;
         }
@@ -69,6 +70,7 @@ export default (): BitDataAccumulator => ({
                 this.bitDataStorage.storeBit(timestamp, i, bitState);
         });
 
+        // .fill is slower then a normal for loop when array is large
         for (let i = 0; i < this.accumulator.length; i += 1) {
             this.accumulator[i] = null;
         }

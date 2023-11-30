@@ -41,7 +41,7 @@ export interface ChartState {
     latestDataTimestamp: number;
 }
 
-const initialWindowDuration = 7 * microSecondsPerSecond;
+const initialWindowDuration = 10 * microSecondsPerSecond;
 const initialState = (): ChartState => ({
     liveMode: true,
     cursorBegin: null, // [microseconds]
@@ -336,7 +336,7 @@ export const getCursorRange = (state: RootState) => ({
     cursorEnd: state.app.chart.cursorEnd,
 });
 
-export const getChartDigitalChanelInfo = (state: RootState) => ({
+export const getChartDigitalChannelInfo = (state: RootState) => ({
     digitalChannels: state.app.chart.digitalChannels,
     digitalChannelsVisible: state.app.chart.digitalChannelsVisible,
     hasDigitalChannels: state.app.chart.hasDigitalChannels,
