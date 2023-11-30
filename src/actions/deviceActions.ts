@@ -18,7 +18,7 @@ import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
 import {
     miniMapAnimationAction,
-    resetMinMap,
+    resetMinimap,
 } from '../features/minimap/minimapSlice';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import { DataManager, updateTitle } from '../globals';
@@ -60,7 +60,7 @@ export const setupOptions =
         try {
             DataManager().reset();
             dispatch(resetChartTime());
-            dispatch(resetMinMap());
+            dispatch(resetMinimap());
 
             const { durationSeconds, sampleFreq } = getState().app.dataLogger;
             DataManager().setSamplingRate(sampleFreq);

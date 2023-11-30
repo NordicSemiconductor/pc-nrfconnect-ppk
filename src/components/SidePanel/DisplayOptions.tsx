@@ -12,7 +12,7 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    getChartDigitalChanelInfo,
+    getChartDigitalChannelInfo,
     isTimestampsVisible,
     toggleDigitalChannels,
     toggleTimestamps,
@@ -22,7 +22,7 @@ import DigitalChannels from './DigitalChannels';
 export default () => {
     const dispatch = useDispatch();
     const { digitalChannelsVisible, hasDigitalChannels } = useSelector(
-        getChartDigitalChanelInfo
+        getChartDigitalChannelInfo
     );
     const timestampsVisible = useSelector(isTimestampsVisible);
 

@@ -14,7 +14,7 @@ import { dirname, join } from 'path';
 
 import {
     miniMapAnimationAction,
-    resetMinMap,
+    resetMinimap,
 } from '../features/minimap/minimapSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
@@ -99,7 +99,7 @@ export const load =
         logger.info(`Restoring state from ${filename}`);
         DataManager().reset();
         dispatch(resetChartTime());
-        dispatch(resetMinMap());
+        dispatch(resetMinimap());
         updateTitle(filename);
         const result = await loadData(filename);
         if (!result) {

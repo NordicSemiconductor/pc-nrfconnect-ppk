@@ -48,6 +48,7 @@ export default (): BitDataStorage => ({
     latestTimestamp: undefined as TimestampType,
 
     initialise(digitalChannelsToCompute: number[]) {
+        // .fill is slower then a normal for loop when array is large
         for (let i = 0; i < this.bitIndexes.length; i += 1) {
             this.bitIndexes[i] = 0;
         }

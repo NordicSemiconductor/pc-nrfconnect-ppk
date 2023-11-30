@@ -20,7 +20,7 @@ import exportChart from '../../actions/exportChartAction';
 import { timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../slices/appSlice';
 import {
-    getChartDigitalChanelInfo,
+    getChartDigitalChannelInfo,
     getChartXAxisRange,
     getCursorRange,
 } from '../../slices/chartSlice';
@@ -78,7 +78,7 @@ const createFileName = () => {
 
 export default () => {
     const dispatch = useDispatch();
-    const { hasDigitalChannels } = useSelector(getChartDigitalChanelInfo);
+    const { hasDigitalChannels } = useSelector(getChartDigitalChannelInfo);
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
     const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
     const { isExportDialogVisible } = useSelector(appState);

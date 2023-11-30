@@ -129,52 +129,50 @@ const accumulate = (
         Math.ceil(noOfPointToRender) * 2
     );
 
-    {
-        let min: number = Number.MAX_VALUE;
-        let max: number = -Number.MAX_VALUE;
+    let min: number = Number.MAX_VALUE;
+    let max: number = -Number.MAX_VALUE;
 
-        let timestamp = begin + offset;
-        data.current.forEach((v, index) => {
-            const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
-            const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;
-            const grpIndex = Math.floor(index / numberOfPointsPerGrouped);
+    let timestamp = begin + offset;
+    data.current.forEach((v, index) => {
+        const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
+        const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;
+        const groupIndex = Math.floor(index / numberOfPointsPerGrouped);
 
-            if (firstItemInGrp) {
-                min = Number.MAX_VALUE;
-                max = -Number.MAX_VALUE;
+        if (firstItemInGrp) {
+            min = Number.MAX_VALUE;
+            max = -Number.MAX_VALUE;
+        }
+
+        if (removeZeroValues && v === 0) {
+            v = NaN;
+        }
+
+        if (!Number.isNaN(v)) {
+            if (v > max) max = v;
+            if (v < min) min = v;
+
+            if (data.bits && index < data.bits.length) {
+                bitAccumulator.processBits(data.bits[index]);
             }
+        }
 
-            if (removeZeroValues && v === 0) {
-                v = NaN;
+        ampereLineData[groupIndex * 2] = {
+            x: timestamp,
+            y: min > max ? undefined : min,
+        };
+
+        ampereLineData[(groupIndex + 1) * 2 - 1] = {
+            x: timestamp,
+            y: min > max ? undefined : max,
+        };
+
+        if (lastItemInGrp) {
+            timestamp += timeGroup;
+            if (min <= max) {
+                bitAccumulator.processAccumulatedBits(timestamp);
             }
-
-            if (!Number.isNaN(v)) {
-                if (v > max) max = v;
-                if (v < min) min = v;
-
-                if (data.bits && index < data.bits.length) {
-                    bitAccumulator.processBits(data.bits[index]);
-                }
-            }
-
-            ampereLineData[grpIndex * 2] = {
-                x: timestamp,
-                y: min > max ? undefined : min,
-            };
-
-            ampereLineData[(grpIndex + 1) * 2 - 1] = {
-                x: timestamp,
-                y: min > max ? undefined : max,
-            };
-
-            if (lastItemInGrp) {
-                timestamp += timeGroup;
-                if (min <= max) {
-                    bitAccumulator.processAccumulatedBits(timestamp);
-                }
-            }
-        });
-    }
+        }
+    });
 
     return {
         ampereLineData,
@@ -182,40 +180,27 @@ const accumulate = (
     };
 };
 
-const simplifyCurrentData = (
+const removeCurrentSamplesOutsideScopes = (
     current: AmpereState[],
     begin: number,
     end: number
 ) => current.filter(v => v.x !== undefined && v.x >= begin && v.x <= end);
 
-const simplifyDigitalChannelsData = (
-    dataChanel: DigitalChannelState[],
+const removeDigitalChannelsSamplesOutsideScopes = (
+    dataChannel: DigitalChannelState[],
     begin: number,
     end: number
 ) => {
-    if (dataChanel.length === 1) {
+    if (dataChannel.length > 1) {
         return [
             {
                 x: begin,
-                y: dataChanel[0].y,
+                y: dataChannel[0].y,
             },
+            ...dataChannel.slice(1, dataChannel.length - 2),
             {
                 x: end,
-                y: dataChanel[0].y,
-            },
-        ];
-    }
-
-    if (dataChanel.length > 1) {
-        return [
-            {
-                x: begin,
-                y: dataChanel[0].y,
-            },
-            ...dataChanel.slice(1, dataChanel.length - 2),
-            {
-                x: end,
-                y: dataChanel[dataChanel.length - 1].y,
+                y: dataChannel[dataChannel.length - 1].y,
             },
         ];
     }
@@ -223,24 +208,31 @@ const simplifyDigitalChannelsData = (
     return [];
 };
 
-const simplifyDigitalChannelStateData = (
-    dataChanel: DigitalChannelStates,
+const removeDigitalChannelStateSamplesOutsideScopes = (
+    dataChannel: DigitalChannelStates,
     begin: number,
     end: number
 ) => ({
-    mainLine: simplifyDigitalChannelsData(dataChanel.mainLine, begin, end),
-    uncertaintyLine: simplifyDigitalChannelsData(
-        dataChanel.uncertaintyLine,
+    mainLine: removeDigitalChannelsSamplesOutsideScopes(
+        dataChannel.mainLine,
+        begin,
+        end
+    ),
+    uncertaintyLine: removeDigitalChannelsSamplesOutsideScopes(
+        dataChannel.uncertaintyLine,
         begin,
         end
     ),
 });
 
-const simplifyDigitalChannelsStatesData = (
-    dataChanel: DigitalChannelStates[],
+const removeDigitalChannelsStatesSamplesOutsideScopes = (
+    dataChannel: DigitalChannelStates[],
     begin: number,
     end: number
-) => dataChanel.map(c => simplifyDigitalChannelStateData(c, begin, end));
+) =>
+    dataChannel.map(c =>
+        removeDigitalChannelStateSamplesOutsideScopes(c, begin, end)
+    );
 
 const findMissingRanges = (
     accumulatedResult: AccumulatedResult,
@@ -407,7 +399,7 @@ export default (): DataAccumulator => ({
                 );
 
             const usableCachedData: AccumulatedResult = {
-                ampereLineData: simplifyCurrentData(
+                ampereLineData: removeCurrentSamplesOutsideScopes(
                     cachedResult.ampereLineData,
                     begin,
                     Math.min(
@@ -415,7 +407,7 @@ export default (): DataAccumulator => ({
                         DataManager().getTimestamp()
                     )
                 ),
-                bitsLineData: simplifyDigitalChannelsStatesData(
+                bitsLineData: removeDigitalChannelsStatesSamplesOutsideScopes(
                     cachedResult.bitsLineData,
                     begin,
                     Math.min(
