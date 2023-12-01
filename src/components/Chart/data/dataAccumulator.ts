@@ -29,10 +29,6 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
 
     end = Math.min(end, DataManager().getTimestamp());
 
-    if (end < begin) {
-        [begin, end] = [end, begin];
-    }
-
     const data = DataManager().getData(begin, end);
     let sum = 0;
     let len = 0;
