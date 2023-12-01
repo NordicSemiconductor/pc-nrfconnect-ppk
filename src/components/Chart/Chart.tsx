@@ -7,7 +7,6 @@
 import React, {
     useCallback,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -312,7 +311,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         []
     );
 
-    const windowStats = calcStats(begin, windowEnd);
+    const [windowStats, setWindowStats] =
+        useState<ReturnType<typeof calcStats>>(null);
+
     const selectionStats = useMemo(
         () => calcStats(cursorBegin, cursorEnd),
         [cursorBegin, cursorEnd]
@@ -323,28 +324,39 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             return;
         }
 
-        const timeout = setTimeout(() => {
-            const processedData = dataProcessor.process(
-                begin,
-                windowEnd,
-                zoomedOutTooFarForDigitalChannels
-                    ? []
-                    : (digitalChannelsToCompute as number[]),
-                yAxisLog,
-                Math.min(
-                    indexToTimestamp(windowDuration),
-                    numberOfPixelsInWindow
-                ),
-                windowDuration
-            );
+        const processedData = dataProcessor.process(
+            begin,
+            windowEnd,
+            zoomedOutTooFarForDigitalChannels
+                ? []
+                : (digitalChannelsToCompute as number[]),
+            yAxisLog,
+            Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
+            windowDuration
+        );
 
-            setAmpereLineData(processedData.ampereLineData);
-            setBitsLineData(processedData.bitsLineData);
+        const avgTemp = processedData.averageLine.reduce(
+            (previousValue, currentValue) => ({
+                sum: previousValue.sum + currentValue.y,
+                count: previousValue.count + currentValue.count,
+            }),
+            {
+                sum: 0,
+                count: 0,
+            }
+        );
+        const average = avgTemp.sum / avgTemp.count;
+        const max = Math.max(
+            ...processedData.ampereLineData.map(v => v.y ?? 0)
+        );
+
+        setAmpereLineData(processedData.ampereLineData);
+        setBitsLineData(processedData.bitsLineData);
+        setWindowStats({
+            max,
+            average,
+            delta: Math.min(windowEnd, DataManager().getTimestamp()) - begin,
         });
-
-        return () => {
-            clearTimeout(timeout);
-        };
     }, [
         begin,
         dataProcessor,
@@ -356,17 +368,29 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         zoomedOutTooFarForDigitalChannels,
     ]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         if (liveMode) {
-            updateChart();
-        }
-    }, [xAxisMax, liveMode, updateChart]);
+            const timeout = setTimeout(() => {
+                updateChart();
+            });
 
-    useLayoutEffect(() => {
-        if (!liveMode) {
-            updateChart();
+            return () => {
+                clearTimeout(timeout);
+            };
         }
-    }, [liveMode, updateChart]);
+    }, [xAxisMax, liveMode, updateChart, begin, windowEnd]);
+
+    useEffect(() => {
+        if (!liveMode) {
+            const timeout = setTimeout(() => {
+                updateChart();
+            });
+
+            return () => {
+                clearTimeout(timeout);
+            };
+        }
+    }, [begin, liveMode, updateChart, windowEnd]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 

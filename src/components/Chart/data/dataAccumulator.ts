@@ -27,27 +27,25 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
         return null;
     }
 
+    end = Math.min(end, DataManager().getTimestamp());
+
     if (end < begin) {
         [begin, end] = [end, begin];
     }
 
-    const data = DataManager().getData(
-        begin,
-        Math.min(end, DataManager().getTimestamp())
-    );
-
+    const data = DataManager().getData(begin, end);
     let sum = 0;
     let len = 0;
     let max;
 
-    for (let n = 0; n <= data.current.length; n += 1) {
+    for (let n = 0; n < data.current.length; n += 1) {
         const v = data.current[n];
         if (!Number.isNaN(v)) {
             if (max === undefined || v > max) {
                 max = v;
-                sum += v;
-                len += 1;
             }
+            sum += v;
+            len += 1;
         }
     }
     return {
@@ -70,12 +68,16 @@ export interface DataAccumulator {
     ) => {
         ampereLineData: AmpereState[];
         bitsLineData: DigitalChannelStates[];
+        averageLine: AverageLine[];
     };
 }
+
+type AverageLine = { x: TimestampType; y: number; count: number };
 
 type AccumulatedResult = {
     ampereLineData: AmpereState[];
     bitsLineData: DigitalChannelStates[];
+    averageLine: AverageLine[];
 };
 
 let cachedResult: AccumulatedResult | undefined;
@@ -122,12 +124,17 @@ const accumulate = (
         return {
             ampereLineData,
             bitsLineData: bitAccumulator.getLineData(),
+            averageLine: ampereLineData.map(
+                d => ({ ...d, count: 1 } as AverageLine)
+            ),
         };
     }
 
     const ampereLineData: AmpereState[] = new Array(
         Math.ceil(noOfPointToRender) * 2
     );
+
+    const averageLine: AverageLine[] = new Array(Math.ceil(noOfPointToRender));
 
     let min: number = Number.MAX_VALUE;
     let max: number = -Number.MAX_VALUE;
@@ -141,6 +148,12 @@ const accumulate = (
         if (firstItemInGrp) {
             min = Number.MAX_VALUE;
             max = -Number.MAX_VALUE;
+
+            averageLine[groupIndex] = {
+                x: timestamp,
+                y: 0,
+                count: 0,
+            };
         }
 
         if (removeZeroValues && v === 0) {
@@ -154,6 +167,12 @@ const accumulate = (
             if (data.bits && index < data.bits.length) {
                 bitAccumulator.processBits(data.bits[index]);
             }
+
+            averageLine[groupIndex] = {
+                x: timestamp,
+                y: averageLine[groupIndex].y + v,
+                count: averageLine[groupIndex].count + 1,
+            };
         }
 
         ampereLineData[groupIndex * 2] = {
@@ -177,11 +196,12 @@ const accumulate = (
     return {
         ampereLineData,
         bitsLineData: bitAccumulator.getLineData(),
+        averageLine,
     };
 };
 
-const removeCurrentSamplesOutsideScopes = (
-    current: AmpereState[],
+const removeCurrentSamplesOutsideScopes = <T extends AmpereState | AverageLine>(
+    current: T[],
     begin: number,
     end: number
 ) => current.filter(v => v.x !== undefined && v.x >= begin && v.x <= end);
@@ -360,6 +380,7 @@ export default (): DataAccumulator => ({
             return {
                 ampereLineData: [],
                 bitsLineData: [],
+                averageLine: [],
             };
         }
 
@@ -398,22 +419,25 @@ export default (): DataAccumulator => ({
                     digitalChannelsToCompute
                 );
 
+            const cachedEnd = Math.min(
+                Math.floor(end / timeGroup) * timeGroup,
+                DataManager().getTimestamp()
+            );
             const usableCachedData: AccumulatedResult = {
                 ampereLineData: removeCurrentSamplesOutsideScopes(
                     cachedResult.ampereLineData,
                     begin,
-                    Math.min(
-                        Math.floor(end / timeGroup) * timeGroup,
-                        DataManager().getTimestamp()
-                    )
+                    cachedEnd
                 ),
                 bitsLineData: removeDigitalChannelsStatesSamplesOutsideScopes(
                     cachedResult.bitsLineData,
                     begin,
-                    Math.min(
-                        Math.floor(end / timeGroup) * timeGroup,
-                        DataManager().getTimestamp()
-                    )
+                    cachedEnd
+                ),
+                averageLine: removeCurrentSamplesOutsideScopes(
+                    cachedResult.averageLine,
+                    begin,
+                    cachedEnd
                 ),
             };
 
@@ -465,6 +489,11 @@ export default (): DataAccumulator => ({
                     ],
                     digitalChannelsToCompute
                 ),
+                averageLine: [
+                    ...(frontData?.averageLine ?? []),
+                    ...usableCachedData.averageLine,
+                    ...(backData?.averageLine ?? []),
+                ],
             };
         };
 
@@ -473,6 +502,7 @@ export default (): DataAccumulator => ({
         return {
             ampereLineData: cachedResult.ampereLineData,
             bitsLineData: cachedResult.bitsLineData,
+            averageLine: cachedResult.averageLine,
         };
     },
 });
