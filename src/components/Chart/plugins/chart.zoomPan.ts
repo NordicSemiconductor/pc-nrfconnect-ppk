@@ -7,7 +7,7 @@
 import { logger, usageData } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { CoreScaleOptions, Plugin, Scale } from 'chart.js';
 
-import { getSamplesPerSecond, options } from '../../../globals';
+import { DataManager, getSamplesPerSecond } from '../../../globals';
 import {
     MAX_WINDOW_DURATION,
     MIN_WINDOW_DURATION,
@@ -62,7 +62,7 @@ const zoomAtOrigin = (
     let newMinX = Math.max(pX - (pX - xMin) / zX, 0);
     let newMaxX = pX + (xMax - pX) / zX;
 
-    if (zX > 1 && newMaxX > options.timestamp) {
+    if (zX > 1 && newMaxX > DataManager().getTimestamp()) {
         // If user have zoomed-out beyond the span of the sample, and try to zoom-back in,
         // make sure that the zoom-in will zoom-in on the sample, until the window spans
         // the entire sample or less.
@@ -71,13 +71,13 @@ const zoomAtOrigin = (
         newMaxX = width;
     }
 
-    if (zX < 1 && newMaxX > options.timestamp) {
+    if (zX < 1 && newMaxX > DataManager().getTimestamp()) {
         // On zoom-out, if the window moves outside of the span of the sample,
         // make sure that the window will first span the entire sample, before
         // it can move outside of the sample. This is only possible if the span
         // of the sample is less than MAX_WINDOW_DURATION.
         const width = newMaxX - newMinX;
-        newMaxX = options.timestamp;
+        newMaxX = DataManager().getTimestamp();
         newMinX = newMaxX - width;
         if (newMinX < 0) {
             newMinX = 0;
@@ -236,12 +236,12 @@ const processPointerMoveEvents = () => {
         let xNewStart = xOriginStart + (pX - qX);
         let xNewEnd = xOriginEnd + (pX - qX);
 
-        if (xNewEnd > options.timestamp) {
+        if (xNewEnd > DataManager().getTimestamp()) {
             if (xNewStart === 0) {
                 return;
             }
 
-            xNewEnd = options.timestamp;
+            xNewEnd = DataManager().getTimestamp();
             xNewStart = xNewEnd - originalWidth;
         }
 

@@ -9,8 +9,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Button, Group } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { load, screenshot } from '../../actions/fileActions';
-import { appState, toggleSaveChoiceDialog } from '../../slices/appSlice';
-import { triggerState } from '../../slices/triggerSlice';
+import { DataManager } from '../../globals';
+import {
+    isSamplingRunning,
+    toggleSaveChoiceDialog,
+} from '../../slices/appSlice';
 import ExportDialog from '../SaveExport/ExportDialog';
 import SaveChoiceDialog from '../SaveExport/SaveChoiceDialog';
 
@@ -34,10 +37,9 @@ export const Load = () => {
 
 export const Save = () => {
     const dispatch = useDispatch();
-    const { samplingRunning } = useSelector(appState);
-    const { triggerSingleWaiting, triggerRunning } = useSelector(triggerState);
+    const samplingRunning = useSelector(isSamplingRunning);
 
-    const disabled = samplingRunning || triggerSingleWaiting || triggerRunning;
+    const disabled = samplingRunning || DataManager().getTimestamp() === 0;
 
     return (
         <>

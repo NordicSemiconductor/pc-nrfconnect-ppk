@@ -7,7 +7,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { options } from '../globals';
+import { DataManager, microSecondsPerSecond } from '../globals';
 import {
     booleanTupleOf8,
     getDigitalChannels,
@@ -21,17 +21,14 @@ import type { RootState } from '.';
 import { getMaxSampleFrequency, getSampleFrequency } from './dataLoggerSlice';
 import { TAction } from './thunk';
 
-interface ChartState {
+export interface ChartState {
+    liveMode: boolean;
     cursorBegin?: null | number;
     cursorEnd?: null | number;
-    windowBegin: null | number;
-    windowEnd: null | number;
+    windowEnd: number;
     windowDuration: number;
     yMin?: null | number;
     yMax?: null | number;
-    bufferLength: number;
-    bufferRemaining: number;
-    index: number;
     hasDigitalChannels: boolean;
     digitalChannels: booleanTupleOf8;
     digitalChannelsVisible: boolean;
@@ -41,23 +38,18 @@ interface ChartState {
     windowBeginLock: null | number;
     windowEndLock: null | number;
     showSettings: boolean;
+    latestDataTimestamp: number;
 }
 
-const initialWindowDuration = 7 * 1e6;
-const initialBufferLength =
-    (options.data.length / options.samplesPerSecond) * 1e6 -
-    initialWindowDuration;
+const initialWindowDuration = 10 * microSecondsPerSecond;
 const initialState = (): ChartState => ({
+    liveMode: true,
     cursorBegin: null, // [microseconds]
     cursorEnd: null, // [microseconds]
-    windowBegin: 0, // [microseconds]
-    windowEnd: 0, // [microseconds]
+    windowEnd: initialWindowDuration, // [microseconds]
     windowDuration: initialWindowDuration, // [microseconds]
     yMin: null,
     yMax: null,
-    bufferLength: initialBufferLength,
-    bufferRemaining: initialBufferLength,
-    index: 0,
     hasDigitalChannels: false,
     digitalChannels: getDigitalChannels(),
     digitalChannelsVisible: getDigitalChannelsVisible(),
@@ -67,6 +59,7 @@ const initialState = (): ChartState => ({
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
     showSettings: false,
+    latestDataTimestamp: 0,
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -78,24 +71,8 @@ const chartSlice = createSlice({
     name: 'chart',
     initialState: initialState(),
     reducers: {
-        animationAction(state) {
-            const { windowDuration, windowEnd } = state;
-            const { bufferLength, bufferRemaining } = calcBuffer(
-                windowDuration,
-                windowEnd!
-            );
-            if (windowEnd === 0) {
-                return {
-                    ...state,
-                    bufferLength,
-                    bufferRemaining,
-                    index: options.index,
-                };
-            }
-            return {
-                ...state,
-                bufferRemaining,
-            };
+        resetChartTime: state => {
+            state.latestDataTimestamp = 0;
         },
         setYMax: (state, action: PayloadAction<{ yMax: number }>) => {
             state.yMax = action.payload.yMax;
@@ -116,8 +93,7 @@ const chartSlice = createSlice({
         chartWindow(
             state,
             action: PayloadAction<{
-                windowBegin: null | number;
-                windowEnd: null | number;
+                windowEnd: number;
                 windowDuration: number;
                 yMin?: null | number;
                 yMax?: null | number;
@@ -137,62 +113,39 @@ const chartSlice = createSlice({
                 }
             }
 
-            let { windowBegin, windowEnd, windowDuration } = action.payload;
-            if (windowBegin === null && windowEnd === null) {
-                windowBegin = 0;
-                windowEnd = 0;
-            } else {
-                const [half, center] = getCenter(
-                    windowBegin!,
-                    windowEnd!,
-                    windowDuration
-                );
-                windowBegin = center - half;
-                windowEnd = center + half;
-            }
+            let { windowEnd, windowDuration } = action.payload;
+            let windowBegin = Math.max(0, windowEnd - windowDuration);
 
             const { yAxisLock, windowBeginLock, windowEndLock } = state;
 
             if (windowBeginLock !== null) {
                 windowBegin = Math.max(windowBeginLock, windowBegin);
-                windowEnd =
-                    windowEnd === 0
-                        ? windowEndLock
-                        : Math.min(windowEndLock!, windowEnd);
-                windowDuration = windowEnd! - windowBegin;
+                windowEnd = windowBegin - (windowEndLock ?? 0);
+                windowDuration = windowEnd - windowBegin;
             }
 
-            if (windowBegin < 0) {
-                windowBegin = 0;
-                windowEnd = windowDuration;
-            } else if (windowBegin > options.timestamp) {
-                windowEnd = options.timestamp;
-                if (windowEnd - windowDuration) {
-                    windowBegin = 0;
-                    windowEnd = windowDuration;
-                } else {
-                    windowBegin = windowEnd - windowDuration;
-                }
+            if (windowEnd > DataManager().getTimestamp()) {
+                windowEnd = Math.max(
+                    windowDuration,
+                    DataManager().getTimestamp()
+                );
             }
 
             return {
                 ...state,
-                windowBegin,
                 windowEnd,
                 windowDuration,
-                ...calcBuffer(windowDuration, windowEnd!),
                 yMin: yMin == null || yAxisLock ? state.yMin : yMin,
                 yMax: yMax == null || yAxisLock ? state.yMax : yMax,
             };
         },
         panWindow(state, { payload: windowCenter }: PayloadAction<number>) {
-            const windowBegin = windowCenter - state.windowDuration / 2;
             const windowEnd = windowCenter + state.windowDuration / 2;
 
-            if (Number.isNaN(windowBegin) || Number.isNaN(windowEnd)) return;
+            if (Number.isNaN(windowEnd)) return;
 
-            state.windowBegin = windowBegin;
             state.windowEnd = windowEnd;
+            state.liveMode = windowEnd >= DataManager().getTimestamp();
         },
         chartTrigger(
             state,
@@ -202,31 +155,23 @@ const chartSlice = createSlice({
                 windowDuration: number;
             }>
         ) {
-            const [half, center] = getCenter(
-                action.payload.windowBegin,
-                action.payload.windowEnd,
-                action.payload.windowDuration
-            );
-
-            const windowBegin = center - half;
-            const windowEnd = center + half;
+            const { windowBegin, windowEnd, windowDuration } = action.payload;
 
             return {
                 ...state,
                 windowBegin,
                 windowEnd,
-                windowDuration: action.payload.windowDuration,
+                windowDuration,
                 initialWindowDuration,
                 windowBeginLock: windowBegin,
                 windowEndLock: windowEnd,
-                ...calcBuffer(action.payload.windowDuration, windowEnd),
             };
         },
         setChartState: state => {
-            state.hasDigitalChannels = options.bits !== null;
+            state.hasDigitalChannels = DataManager().hasBits();
         },
         updateHasDigitalChannels: state => {
-            state.hasDigitalChannels = options.bits !== null;
+            state.hasDigitalChannels = DataManager().hasBits();
         },
         setDigitalChannels(
             state,
@@ -261,43 +206,40 @@ const chartSlice = createSlice({
             state.yAxisLog = !state.yAxisLog;
         },
         chartWindowLockAction: state => {
-            state.windowBeginLock = state.windowBegin;
+            state.windowBeginLock = Math.max(
+                0,
+                state.windowEnd - state.windowDuration
+            );
             state.windowEndLock = state.windowEnd;
         },
         chartWindowUnLockAction: state => {
             state.windowBeginLock = null;
             state.windowEndLock = null;
         },
-        setShowSettings: (
-            state,
-            { payload: showSettings }: PayloadAction<boolean>
-        ) => {
-            state.showSettings = showSettings;
+        setShowSettings: (state, action: PayloadAction<boolean>) => {
+            state.showSettings = action.payload;
+        },
+        setLatestDataTimestamp: (state, action: PayloadAction<number>) => {
+            state.latestDataTimestamp = action.payload;
+        },
+        setLiveMode: (state, action: PayloadAction<boolean>) => {
+            state.liveMode = action.payload;
         },
     },
 });
 
 const calculateDuration = (
     sampleFrequency: number,
-    windowDuration: null | number
-): number | null =>
-    windowDuration === null
-        ? null
-        : Math.min(
-              MAX_WINDOW_DURATION / sampleFrequency,
-              Math.max(MIN_WINDOW_DURATION / sampleFrequency, windowDuration)
-          );
-
-const getCenter = (
-    begin: number,
-    end: number,
-    duration: number
-): [number, number] => [duration / 2, (begin + end) / 2];
+    windowDuration: number
+): number =>
+    Math.min(
+        MAX_WINDOW_DURATION / sampleFrequency,
+        Math.max(MIN_WINDOW_DURATION / sampleFrequency, windowDuration)
+    );
 
 export const chartWindowAction =
     (
-        windowBegin: number | null,
-        windowEnd: number | null,
+        windowEnd: number,
         windowDuration: number,
         yMin?: number | null,
         yMax?: number | null
@@ -308,13 +250,16 @@ export const chartWindowAction =
 
         dispatch(
             chartWindow({
-                windowBegin,
                 windowEnd,
-                windowDuration: duration!,
+                windowDuration: duration,
                 yMin,
                 yMax,
             })
         );
+
+        if (windowEnd >= DataManager().getTimestamp()) {
+            dispatch(setLiveMode(true));
+        }
     };
 
 export const chartTriggerWindowAction =
@@ -328,40 +273,85 @@ export const chartTriggerWindowAction =
         );
     };
 
+export const animationAction = (): TAction => (dispatch, getState) => {
+    dispatch(setLatestDataTimestamp(DataManager().getTimestamp()));
+    if (isLiveMode(getState())) {
+        dispatch(scrollToEnd());
+    }
+};
+
 export const resetCursor = () =>
     chartCursorAction({ cursorBegin: null, cursorEnd: null });
 
-export const resetChart = (): TAction => (dispatch, getState) =>
-    dispatch(chartWindowAction(null, null, getWindowDuration(getState())));
+const scrollToEnd = (): TAction => (dispatch, getState) =>
+    dispatch(
+        chartWindowAction(
+            Math.max(
+                DataManager().getTimestamp() -
+                    getState().app.chart.windowDuration,
+                getState().app.chart.windowDuration
+            ),
+            getWindowDuration(getState())
+        )
+    );
 
-export const resetCursorAndChart = (): TAction => (dispatch, getState) => {
-    dispatch(chartWindowAction(null, null, getWindowDuration(getState())));
+export const resetCursorAndChart = (): TAction => dispatch => {
+    dispatch(scrollToEnd());
     dispatch(resetCursor());
 };
 
-function calcBuffer(windowDuration: number, windowEnd: number) {
-    const { data, samplesPerSecond, timestamp } = options;
-    const totalInUs = (data.length / samplesPerSecond) * 1e6;
-    const bufferLength = totalInUs - windowDuration;
-    const bufferRemaining =
-        windowEnd !== 0
-            ? bufferLength - (timestamp! - windowEnd)
-            : bufferLength;
-    return {
-        bufferLength,
-        bufferRemaining,
-    };
-}
-
-export const chartState = (state: RootState) => state.app.chart;
 export const getWindowDuration = (state: RootState) =>
     state.app.chart.windowDuration;
 export const showChartSettings = (state: RootState) =>
     state.app.chart.showSettings;
+export const getChartXAxisRange = (state: RootState) => {
+    const windowEnd = Math.max(
+        state.app.chart.liveMode
+            ? DataManager().getTimestamp()
+            : state.app.chart.windowEnd,
+        state.app.chart.windowDuration
+    );
+
+    const windowDuration = state.app.chart.windowDuration;
+    const windowBegin = Math.max(0, windowEnd - windowDuration);
+
+    return {
+        xAxisMax: state.app.chart.latestDataTimestamp,
+        windowEnd,
+        windowBegin,
+        windowDuration,
+        windowBeginLock: state.app.chart.windowBeginLock,
+        windowEndLock: state.app.chart.windowEndLock,
+    };
+};
+export const getChartYAxisRange = (state: RootState) => ({
+    yMax: state.app.chart.yMax,
+    yMin: state.app.chart.yMin,
+    yAxisLog: state.app.chart.yAxisLog,
+    yAxisLock: state.app.chart.yAxisLock,
+});
+
+export const getCursorRange = (state: RootState) => ({
+    cursorBegin: state.app.chart.cursorBegin,
+    cursorEnd: state.app.chart.cursorEnd,
+});
+
+export const getChartDigitalChannelInfo = (state: RootState) => ({
+    digitalChannels: state.app.chart.digitalChannels,
+    digitalChannelsVisible: state.app.chart.digitalChannelsVisible,
+    hasDigitalChannels: state.app.chart.hasDigitalChannels,
+});
+
+export const isLiveMode = (state: RootState) =>
+    state.app.chart.liveMode && state.app.app.samplingRunning;
+export const isTimestampsVisible = (state: RootState) =>
+    state.app.chart.timestampsVisible;
+export const isSessionActive = (state: RootState) =>
+    state.app.chart.latestDataTimestamp !== 0;
 
 export const {
+    setLatestDataTimestamp,
     panWindow,
-    animationAction,
     chartCursorAction,
     chartTrigger,
     chartWindow,
@@ -377,6 +367,8 @@ export const {
     toggleYAxisLog,
     updateHasDigitalChannels,
     setShowSettings,
+    setLiveMode,
+    resetChartTime,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;

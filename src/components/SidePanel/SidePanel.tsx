@@ -13,14 +13,13 @@ import {
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import MinimapOptions from '../../features/minimap/MinimapOptions';
-import { options } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
     appState,
     deviceOpen as deviceOpenSelector,
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import { isSessionActive } from '../../slices/chartSlice';
 import { BufferSettings } from './BufferSettings';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
@@ -30,7 +29,6 @@ import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
-import Trigger from './Trigger/Trigger';
 
 import './sidepanel.scss';
 
@@ -47,9 +45,7 @@ export default () => {
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
     const { fileLoaded } = useSelector(appState);
-
-    const realTimePane = useSelector(isRealTimePane);
-    const dataLoggerPane = useSelector(isDataLoggerPane);
+    const sessionActive = useSelector(isSessionActive);
 
     if (fileLoaded) {
         return (
@@ -57,7 +53,7 @@ export default () => {
                 <Load />
                 <DisplayOptions />
                 <Save />
-                {dataLoggerPane && <MinimapOptions />}
+                <MinimapOptions />
                 <DeprecatedDeviceDialog />
             </SidePanel>
         );
@@ -67,30 +63,21 @@ export default () => {
         return (
             <SidePanel className="side-panel tw-mt-9">
                 <Load />
-                {options.index !== 0 && <Save />}
+                {sessionActive && <Save />}
                 <Instructions />
                 <DeprecatedDeviceDialog />
             </SidePanel>
         );
     }
 
-    if (!realTimePane && !dataLoggerPane) {
-        return <DeprecatedDeviceDialog />;
-    }
-
     return (
         <SidePanel className="side-panel tw-mt-9">
             <PowerMode />
-            {realTimePane && <Trigger />}
-            {dataLoggerPane && <StartStop />}
-            {dataLoggerPane && <MinimapOptions />}
-            {options.timestamp === null || (
-                <>
-                    <DisplayOptions />
-                    <Save />
-                </>
-            )}
-            {deviceOpen && advancedMode && (
+            <StartStop />
+            <MinimapOptions />
+            <DisplayOptions />
+            <Save />
+            {advancedMode && (
                 <>
                     <Gains />
                     <SpikeFilter />

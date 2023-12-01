@@ -4,18 +4,16 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-plusplus: off */
-
-import { numberOfDigitalChannels, options } from '../../../globals';
+import { numberOfDigitalChannels } from '../../../globals';
 import { averagedBitState } from '../../../utils/bitConversion';
 import bitDataStorage, { BitDataStorage } from './bitDataStorage';
 import { DigitalChannelStates, TimestampType } from './dataTypes';
 
 export interface BitDataSelector {
     bitDataStorage: BitDataStorage;
-    digitalChannelsToCompute: number[] | undefined;
+    digitalChannelsToCompute: number[];
     initialise: (digitalChannelsToCompute: number[]) => void;
-    processBits: (bitIndex: number, timestamp: TimestampType) => void;
+    processBits: (bits: number, timestamp: TimestampType) => void;
     getLineData: () => DigitalChannelStates[];
 }
 
@@ -28,19 +26,14 @@ export default (): BitDataSelector => ({
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
-    processBits(bitIndex, timestamp) {
-        const bits = options.bits ? options.bits[bitIndex] : null;
-
-        if (bits) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.digitalChannelsToCompute!.forEach(i => {
-                this.bitDataStorage.storeBit(
-                    timestamp,
-                    i,
-                    averagedBitState(bits, i)
-                );
-            });
-        }
+    processBits(bits, timestamp) {
+        this.digitalChannelsToCompute.forEach(i => {
+            this.bitDataStorage.storeBit(
+                timestamp,
+                i,
+                averagedBitState(bits, i)
+            );
+        });
     },
 
     getLineData() {

@@ -7,7 +7,7 @@
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
-import { indexToTimestamp, options } from '../globals';
+import { DataManager, indexToTimestamp, timestampToIndex } from '../globals';
 import { hideExportDialog } from '../slices/appSlice';
 import { TDispatch } from '../slices/thunk';
 import { averagedBitState } from '../utils/bitConversion';
@@ -33,26 +33,23 @@ const selectivePrint = (
 
 export const formatDataForExport = (
     start: number,
-    length: number,
     bufferData: Float32Array,
     bitsData: Uint16Array | null,
     selection: readonly [boolean, boolean, boolean, boolean]
 ) => {
     let content = '';
     const dc = Array(8).fill(0);
-    for (let n = start; n <= start + length; n += 1) {
-        const k = (n + bufferData.length) % bufferData.length;
-        const value = bufferData[k];
+    for (let n = 0; n < bufferData.length; n += 1) {
+        const value = bufferData[n];
         if (!Number.isNaN(value)) {
             if (bitsData) {
                 const bitstring = dc.map(
                     (_, i) =>
-                        ['-', '0', '1', 'X'][averagedBitState(bitsData[k], i)]
+                        ['-', '0', '1', 'X'][averagedBitState(bitsData[n], i)]
                 );
                 content += selectivePrint(
                     [
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        indexToTimestamp(n)! / 1000,
+                        indexToTimestamp(n + start) / 1000,
                         value.toFixed(3),
                         bitstring.join(''),
                         bitstring.join(','),
@@ -61,8 +58,12 @@ export const formatDataForExport = (
                 );
             } else {
                 content += selectivePrint(
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    [indexToTimestamp(n)! / 1000, value.toFixed(3), '', ''],
+                    [
+                        indexToTimestamp(n + start) / 1000,
+                        value.toFixed(3),
+                        '',
+                        '',
+                    ],
                     selection
                 );
             }
@@ -73,8 +74,8 @@ export const formatDataForExport = (
 
 export default (
         filename: string,
-        indexBegin: number,
-        indexEnd: number,
+        timestampBegin: number,
+        timestampEnd: number,
         contentSelection: readonly [boolean, boolean, boolean, boolean],
         setProgress: (progress: number) => void,
         setExporting: (value: boolean) => void,
@@ -99,7 +100,11 @@ export default (
         );
 
         return (
-            indexer(indexBegin, indexEnd, 10000)
+            indexer(
+                timestampToIndex(timestampBegin),
+                timestampToIndex(timestampEnd),
+                10000
+            )
                 .map(
                     ([start, len]) =>
                         () =>
@@ -107,18 +112,23 @@ export default (
                                 if (cancel.current) {
                                     reject();
                                 }
+                                const data = DataManager().getData(
+                                    indexToTimestamp(start),
+                                    indexToTimestamp(start + len)
+                                );
+
                                 const content = formatDataForExport(
                                     start,
-                                    len,
-                                    options.data,
-                                    options.bits,
+                                    data.current,
+                                    data.bits,
                                     contentSelection
                                 );
                                 fs.write(fd, content, () => {
                                     setProgress(
                                         Math.round(
-                                            ((start - indexBegin) /
-                                                (indexEnd - indexBegin)) *
+                                            ((start - timestampBegin) /
+                                                (timestampEnd -
+                                                    timestampBegin)) *
                                                 100
                                         )
                                     );

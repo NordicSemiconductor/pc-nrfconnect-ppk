@@ -11,19 +11,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Group, Toggle } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { setDeviceRunning, setPowerMode } from '../../actions/deviceActions';
-import { appState } from '../../slices/appSlice';
-import { triggerState } from '../../slices/triggerSlice';
+import { appState, isSamplingRunning } from '../../slices/appSlice';
 import VoltageRegulator from './VoltageRegulator';
 
 export default () => {
     const dispatch = useDispatch();
-    const { capabilities, isSmuMode, deviceRunning, samplingRunning } =
-        useSelector(appState);
-    const { triggerRunning, triggerSingleWaiting } = useSelector(triggerState);
+    const { capabilities, isSmuMode, deviceRunning } = useSelector(appState);
+    const samplingRunning = useSelector(isSamplingRunning);
 
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
-
-    const isRunning = samplingRunning || triggerRunning || triggerSingleWaiting;
 
     return (
         <Group heading={`${capabilities.ppkSetPowerMode ? 'Mode' : ''}`}>
@@ -32,13 +28,13 @@ export default () => {
                 {capabilities.ppkSetPowerMode && (
                     <ButtonGroup
                         className={`power-mode w-100 ${
-                            isRunning ? 'disabled' : ''
+                            samplingRunning ? 'disabled' : ''
                         }`}
                     >
                         <Button
                             title="Measure current on device under test powered by PPK2"
                             variant={isSmuMode ? 'set' : 'unset'}
-                            disabled={isSmuMode || isRunning}
+                            disabled={isSmuMode || samplingRunning}
                             onClick={togglePowerMode}
                         >
                             Source meter
@@ -51,7 +47,7 @@ export default () => {
                         <Button
                             title="Measure current on device under test powered externally"
                             variant={isSmuMode ? 'unset' : 'set'}
-                            disabled={!isSmuMode || isRunning}
+                            disabled={!isSmuMode || samplingRunning}
                             onClick={togglePowerMode}
                         >
                             Ampere meter

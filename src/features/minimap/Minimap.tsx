@@ -10,30 +10,59 @@ import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { options } from '../../globals';
-import { chartState, panWindow } from '../../slices/chartSlice';
-import { showMinimap as getShowMinimap } from './minimapSlice';
+import { DataManager, indexToTimestamp } from '../../globals';
+import {
+    getChartXAxisRange,
+    isLiveMode,
+    isSessionActive,
+    panWindow,
+} from '../../slices/chartSlice';
+import { getXAxisMaxTime, showMinimap as getShowMinimap } from './minimapSlice';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
     ampereChart?: {
-        windowDuration?: number | null;
-        windowBegin?: number | null;
-        windowEnd?: number | null;
+        windowDuration: number;
+        windowEnd: number;
+    };
+    slider?: {
+        offsetX: number;
+        width: number;
     };
 }
 
 export interface MinimapChart extends Chart<'line'> {
     options: MinimapOptions;
     windowNavigateCallback?: (windowCenter: number) => void;
+    updateSlider?: (
+        minimapRef: MinimapChart,
+        windowEnd: number,
+        windowDuration: number,
+        liveMode: boolean
+    ) => void;
+    onSliderRangeChange?: (
+        windowEnd: number,
+        windowDuration: number,
+        liveMode: boolean
+    ) => void;
+    redrawSlider?: () => void;
 }
 
 const Minimap = () => {
+    const sessionActive = useSelector(isSessionActive);
+    const lastLoadedTimeStamp = useRef(0);
     const dispatch = useDispatch();
     const showMinimap = useSelector(getShowMinimap);
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
-    const { windowBegin, windowEnd, windowDuration } = useSelector(chartState);
+    const {
+        windowEnd,
+        windowDuration,
+        xAxisMax: topChartXAxisMax,
+    } = useSelector(getChartXAxisRange);
+    const liveMode = useSelector(isLiveMode);
+    const xAxisMax = useSelector(getXAxisMaxTime);
+    const isWindowDurationFull = topChartXAxisMax > windowDuration;
 
     function windowNavigateCallback(windowCenter: number) {
         dispatch(panWindow(windowCenter));
@@ -44,16 +73,11 @@ const Minimap = () => {
         canvasRef.current
     );
 
-    updateSlider(
-        minimapRef.current,
-        minimapSlider.current,
-        windowBegin,
-        windowEnd,
-        windowDuration
-    );
-
     if (minimapRef.current) {
         minimapRef.current.windowNavigateCallback = windowNavigateCallback;
+        minimapRef.current.updateSlider = (minimap, end, duration, live) => {
+            updateSlider(minimap, minimapSlider.current, end, duration, live);
+        };
     }
 
     useEffect(() => {
@@ -62,20 +86,58 @@ const Minimap = () => {
             minimapSlider.current != null &&
             showMinimap
         ) {
-            drawSlider(
-                minimapRef.current,
-                minimapSlider.current,
-                windowBegin,
-                windowEnd,
-                windowDuration
-            );
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showMinimap, canvasRef.current?.style.display]);
+            const resizeObserver = new ResizeObserver(() => {
+                if (minimapRef.current) {
+                    minimapRef.current.onSliderRangeChange?.(
+                        windowEnd,
+                        windowDuration,
+                        liveMode
+                    );
+                }
+            });
 
-    const hasGeneratedMinimap =
-        minimapRef.current != null &&
-        minimapRef.current?.data.datasets[0].data.length > 0;
+            resizeObserver.observe(minimapRef.current.canvas);
+
+            return () => {
+                minimapRef.current &&
+                    resizeObserver.unobserve(minimapRef.current.canvas);
+            };
+        }
+    }, [
+        showMinimap,
+        canvasRef.current?.style.display,
+        liveMode,
+        windowEnd,
+        windowDuration,
+    ]);
+
+    useEffect(() => {
+        if (!minimapRef.current) return;
+
+        const nonNullRef = minimapRef.current;
+
+        const newData = DataManager().getData(lastLoadedTimeStamp.current);
+
+        newData.current.forEach((v, i) => {
+            minimapScroll.onNewData(
+                v,
+                lastLoadedTimeStamp.current + indexToTimestamp(i)
+            );
+        });
+
+        lastLoadedTimeStamp.current = DataManager().getTimestamp();
+
+        minimapScroll.updateMinimapData(nonNullRef);
+    }, [xAxisMax]);
+
+    useEffect(() => {
+        if (!minimapRef.current) return;
+        const nonNullRef = minimapRef.current;
+
+        if (!sessionActive || xAxisMax === 0) {
+            minimapScroll.clearMinimap(nonNullRef);
+        }
+    }, [sessionActive, xAxisMax]);
 
     return (
         <div
@@ -86,14 +148,14 @@ const Minimap = () => {
                 paddingRight: '1.8rem',
             }}
         >
-            {hasGeneratedMinimap ? null : MinimapDefaultState()}
+            {isWindowDurationFull ? null : MinimapDefaultState()}
             <canvas
                 ref={canvasRef}
                 id="minimap"
                 className="tw-max-h-20 tw-w-full tw-border tw-border-solid"
                 style={{
                     borderColor: colors.gray100,
-                    display: hasGeneratedMinimap ? 'block' : 'none',
+                    display: isWindowDurationFull ? 'block' : 'none',
                 }}
             />
             <div
@@ -114,11 +176,11 @@ const MinimapDefaultState = () => (
 function drawSlider(
     minimap: MinimapChart,
     slider: HTMLDivElement,
-    windowBegin: number | null,
-    windowEnd: number | null,
-    windowDuration: number | null
+    windowEnd: number,
+    windowDuration: number,
+    liveMode: boolean
 ) {
-    if (windowBegin == null || windowEnd == null || options.index === 0) {
+    if (DataManager().getTimestamp() === 0) {
         slider.style.display = 'none';
         return;
     }
@@ -136,16 +198,17 @@ function drawSlider(
 
     let left = 0;
     let width = 0;
-    if (windowBegin === 0 && windowEnd === 0 && windowDuration != null) {
-        // Since options.index !== 0 and both begin and end are 0, it means that
+    if (liveMode) {
         // live has been toggled on, meaning that the window will be at the end.
         const MAX_WIDTH = canvasRectangle.width;
         width = xScale.getPixelForValue(windowDuration);
         width = width > MAX_WIDTH ? MAX_WIDTH : width;
         left = canvasRectangle.width + offsetLeft - width;
     } else {
-        const beginWithoutOffset =
-            windowBegin !== 0 ? xScale.getPixelForValue(windowBegin) : 0;
+        const beginWithoutOffset = xScale.getPixelForValue(
+            Math.max(0, windowEnd - windowDuration)
+        );
+
         const endWithoutOffset = xScale.getPixelForValue(windowEnd);
 
         const beginWithOffset =
@@ -155,7 +218,7 @@ function drawSlider(
 
         left = beginWithOffset;
 
-        const MIN_WIDTH = 16;
+        const MIN_WIDTH = 1;
         width = endWithoutOffset - beginWithoutOffset;
         width = width > MIN_WIDTH ? width : MIN_WIDTH;
 
@@ -178,32 +241,51 @@ function drawSlider(
     slider.style.width = `${width}px`;
     slider.style.height = `${height}px`;
     slider.style.display = 'block';
+
+    return {
+        offsetX: left - offsetLeft,
+        width,
+    };
 }
 
 function updateSlider(
     minimapRef: MinimapChart | null,
     minimapSliderRef: HTMLDivElement | null,
-    windowBegin: number | null,
-    windowEnd: number | null,
-    windowDuration: number | null
+    windowEnd: number,
+    windowDuration: number,
+    liveMode: boolean
 ) {
     if (minimapRef == null || minimapSliderRef == null) return;
 
-    drawSlider(
+    const sliderMeta = drawSlider(
         minimapRef,
         minimapSliderRef,
-        windowBegin,
         windowEnd,
-        windowDuration
+        windowDuration,
+        liveMode
     );
 
     const { options: chartOptions } = minimapRef;
     if (chartOptions.ampereChart == null) {
         chartOptions.ampereChart = {
+            windowEnd,
             windowDuration,
         };
     } else {
         chartOptions.ampereChart.windowDuration = windowDuration;
+        chartOptions.ampereChart.windowEnd = windowEnd;
+    }
+
+    if (sliderMeta) {
+        if (chartOptions.slider == null) {
+            chartOptions.slider = {
+                offsetX: sliderMeta.offsetX,
+                width: sliderMeta.width,
+            };
+        } else {
+            chartOptions.slider.offsetX = sliderMeta.offsetX;
+            chartOptions.slider.width = sliderMeta.width;
+        }
     }
 }
 
@@ -251,7 +333,6 @@ function initializeMinimapChart(
                         grid: undefined,
                     },
                 },
-                ampereChart: {},
             } as MinimapOptions,
             plugins: [minimapScroll],
         });

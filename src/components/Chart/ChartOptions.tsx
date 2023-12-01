@@ -14,7 +14,7 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    chartState,
+    getChartYAxisRange,
     setYMax as storeYMax,
     setYMin as storeYMin,
 } from '../../slices/chartSlice';
@@ -42,7 +42,7 @@ const ChartOptions = () => {
         yMin: storedYMin,
         yMax: storedYMax,
         yAxisLock,
-    } = useSelector(chartState);
+    } = useSelector(getChartYAxisRange);
     const dispatch = useDispatch();
 
     const [yMin, setYMin] = useState(0);

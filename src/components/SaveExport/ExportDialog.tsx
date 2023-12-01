@@ -4,23 +4,26 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import Col from 'react-bootstrap/Col';
-import Modal from 'react-bootstrap/Modal';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import Row from 'react-bootstrap/Row';
 import { useDispatch, useSelector } from 'react-redux';
-import { dialog } from '@electron/remote';
-import { Toggle } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { dialog, getCurrentWindow } from '@electron/remote';
+import {
+    DialogButton,
+    GenericDialog,
+    Toggle,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import * as mathjs from 'mathjs';
 import { dirname, join } from 'path';
 
 import exportChart from '../../actions/exportChartAction';
-import { indexToTimestamp } from '../../globals';
+import { timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../slices/appSlice';
-import { chartState } from '../../slices/chartSlice';
+import {
+    getChartDigitalChannelInfo,
+    getChartXAxisRange,
+    getCursorRange,
+} from '../../slices/chartSlice';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 import ExportSelection from './ExportSelection';
 
@@ -75,18 +78,13 @@ const createFileName = () => {
 
 export default () => {
     const dispatch = useDispatch();
-    const {
-        windowBegin,
-        windowEnd,
-        cursorBegin,
-        cursorEnd,
-        windowDuration,
-        hasDigitalChannels,
-    } = useSelector(chartState);
+    const { hasDigitalChannels } = useSelector(getChartDigitalChannelInfo);
+    const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
+    const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
     const { isExportDialogVisible } = useSelector(appState);
 
-    const [indexBegin, setIndexBegin] = useState<number | null>(null);
-    const [indexEnd, setIndexEnd] = useState<number | null>(null);
+    const [timestampBegin, setTimestampBegin] = useState<number | null>(null);
+    const [timestampEnd, setTimestampEnd] = useState<number | null>(null);
     const [numberOfRecords, setNumberOfRecords] = useState<number | null>(null);
     const [fileSize, setFileSize] = useState<string | null>(null);
     const [duration, setDuration] = useState(0);
@@ -105,15 +103,26 @@ export default () => {
         false,
         'Digital logic pins (separate fields)'
     );
-    const contentSelection: readonly [boolean, boolean, boolean, boolean] = [
-        timestampToggled,
-        currentToggled,
-        bitsToggled,
-        bitsSeparatedToggled,
-    ] as const;
+    const contentSelection: readonly [boolean, boolean, boolean, boolean] =
+        useMemo(
+            () =>
+                [
+                    timestampToggled,
+                    currentToggled,
+                    bitsToggled,
+                    bitsSeparatedToggled,
+                ] as const,
+            [
+                bitsSeparatedToggled,
+                bitsToggled,
+                currentToggled,
+                timestampToggled,
+            ]
+        );
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
     const [progress, setProgress] = useState(0);
+
     useEffect(() => {
         setProgress(0);
         if (isExportDialogVisible) {
@@ -122,24 +131,18 @@ export default () => {
     }, [isExportDialogVisible]);
 
     useEffect(() => {
-        let records;
-        if (indexBegin == null || indexEnd == null) {
-            records = 0;
-        } else {
-            records = indexEnd - indexBegin + 1 || 0;
-        }
+        if (timestampEnd == null || timestampBegin == null) return;
+        const records =
+            timestampToIndex(timestampEnd) - timestampToIndex(timestampBegin);
 
         setNumberOfRecords(records);
         setFileSize(calculateTotalSize(contentSelection, records));
-        if (indexBegin != null && indexEnd != null) {
-            const timestampBegin = indexToTimestamp(indexBegin);
-            const timestampEnd = indexToTimestamp(indexEnd);
+        if (timestampBegin != null && timestampEnd != null) {
             if (timestampBegin != null && timestampEnd != null) {
                 setDuration(timestampEnd - timestampBegin);
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [indexBegin, indexEnd]);
+    }, [contentSelection, timestampBegin, timestampEnd]);
 
     useEffect(() => {
         setFormattedDuration(
@@ -157,17 +160,26 @@ export default () => {
         dispatch(hideExportDialog());
     };
     const saveFile = async () => {
-        const { filePath: fn } = await dialog.showSaveDialog({
-            defaultPath: filename,
-        });
-        if (!fn || indexBegin == null || indexEnd == null) return;
+        const { filePath: fn } = await dialog.showSaveDialog(
+            getCurrentWindow(),
+            {
+                defaultPath: filename,
+                filters: [
+                    {
+                        name: 'Comma separated values',
+                        extensions: ['csv'],
+                    },
+                ],
+            }
+        );
+        if (!fn || timestampBegin == null || timestampEnd == null) return;
         setLastSaveDir(dirname(fn));
         setExporting(true);
         dispatch(
             exportChart(
                 fn,
-                indexBegin,
-                indexEnd,
+                timestampBegin,
+                timestampEnd,
                 contentSelection,
                 setProgress,
                 setExporting,
@@ -176,70 +188,67 @@ export default () => {
         );
     };
     return (
-        <Modal
-            show={isExportDialogVisible}
-            className="export-dialog"
+        <GenericDialog
+            className="tw-preflight"
+            title="Export selection to CSV"
+            footer={
+                <>
+                    <DialogButton
+                        variant="primary"
+                        onClick={saveFile}
+                        disabled={exporting}
+                    >
+                        Save
+                    </DialogButton>
+                    <DialogButton variant="secondary" onClick={close}>
+                        Close
+                    </DialogButton>
+                </>
+            }
+            isVisible={isExportDialogVisible}
             onHide={close}
         >
-            <Modal.Header closeButton>
-                <Modal.Title>Export selection to CSV</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Row className="export-settings">
-                    <Col sm={8}>
-                        <Card className="h-100">
-                            <Card.Body>
-                                <ExportSelection
-                                    isExportDialogVisible={
-                                        isExportDialogVisible
-                                    }
-                                    setIndexBegin={setIndexBegin}
-                                    setIndexEnd={setIndexEnd}
-                                    windowBegin={windowBegin}
-                                    windowEnd={windowEnd}
-                                    cursorBegin={cursorBegin}
-                                    cursorEnd={cursorEnd}
-                                    windowDuration={windowDuration}
-                                />
-                                <h2>Export fields</h2>
-                                <div className="w-fit-content">
-                                    <TimestampToggle />
-                                    <CurrentToggle />
-                                    {hasDigitalChannels && (
-                                        <>
-                                            <BitsToggle />
-                                            <BitsSeparatedToggle />
-                                        </>
-                                    )}
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col sm={4}>
-                        <Card className="h-100">
-                            <Card.Body>
-                                <h2>Estimation</h2>
-                                <p>{numberOfRecords} records</p>
-                                <p>{fileSize}</p>
-                                <p>{formattedDuration}</p>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-                <ProgressBar now={progress} animated className="mt-4" />
-            </Modal.Body>
-            <Modal.Footer>
-                <Button
-                    variant="primary"
-                    onClick={saveFile}
-                    disabled={exporting}
-                >
-                    Save
-                </Button>
-                <Button variant="secondary" onClick={close}>
-                    Close
-                </Button>
-            </Modal.Footer>
-        </Modal>
+            <div className="tw-flex tw-flex-col tw-gap-4">
+                <div className="tw-flex tw-flex-row tw-gap-4">
+                    <div className="tw-flex tw-h-full tw-flex-1 tw-grow-[2] tw-flex-col tw-gap-2 tw-border tw-border-gray-200 tw-p-4 ">
+                        <ExportSelection
+                            isExportDialogVisible={isExportDialogVisible}
+                            setTimestampBegin={setTimestampBegin}
+                            setTimestampEnd={setTimestampEnd}
+                            windowEnd={windowEnd}
+                            cursorBegin={cursorBegin}
+                            cursorEnd={cursorEnd}
+                            windowDuration={windowDuration}
+                        />
+                        <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                            Export fields
+                        </p>
+                        <div className="tw-w-fit">
+                            <TimestampToggle />
+                            <CurrentToggle />
+                            {hasDigitalChannels && (
+                                <>
+                                    <BitsToggle />
+                                    <BitsSeparatedToggle />
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="tw-flex-1 tw-grow tw-border tw-border-gray-200 ">
+                        <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4">
+                            <p className="tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                                Estimation
+                            </p>
+                            <p>{numberOfRecords} records</p>
+                            <p>{fileSize}</p>
+                            <p>{formattedDuration}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <ProgressBar now={progress} animated />
+            </div>
+        </GenericDialog>
     );
 };

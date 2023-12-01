@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-plusplus: off */
 /* eslint-disable @typescript-eslint/no-non-null-assertion  -- temporarily added to be conservative while converting to typescript */
 
 import { numberOfDigitalChannels } from '../../../globals';
@@ -49,8 +48,16 @@ export default (): BitDataStorage => ({
     latestTimestamp: undefined as TimestampType,
 
     initialise(digitalChannelsToCompute: number[]) {
-        this.bitIndexes.fill(0);
-        this.previousBitStates.fill(null);
+        // .fill is slower then a normal for loop when array is large
+        for (let i = 0; i < this.bitIndexes.length; i += 1) {
+            this.bitIndexes[i] = 0;
+        }
+
+        for (let i = 0; i < this.previousBitStates.length; i += 1) {
+            this.previousBitStates[i] = null;
+        }
+
+        this.latestTimestamp = undefined;
         this.digitalChannelsToCompute = digitalChannelsToCompute;
     },
 
@@ -65,7 +72,7 @@ export default (): BitDataStorage => ({
         current.uncertaintyLine[bitIndex].x = timestamp;
         current.uncertaintyLine[bitIndex].y = lineData.uncertaintyLine;
 
-        ++this.bitIndexes[bitNumber];
+        this.bitIndexes[bitNumber] += 1;
     },
 
     storeBit(timestamp, bitNumber, bitState) {

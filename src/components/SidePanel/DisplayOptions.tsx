@@ -12,18 +12,19 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    chartState,
+    getChartDigitalChannelInfo,
+    isTimestampsVisible,
     toggleDigitalChannels,
     toggleTimestamps,
 } from '../../slices/chartSlice';
-import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
 
 export default () => {
     const dispatch = useDispatch();
-    const { digitalChannelsVisible, timestampsVisible, hasDigitalChannels } =
-        useSelector(chartState);
-    const isDataLogger = useSelector(isDataLoggerPane);
+    const { digitalChannelsVisible, hasDigitalChannels } = useSelector(
+        getChartDigitalChannelInfo
+    );
+    const timestampsVisible = useSelector(isTimestampsVisible);
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
@@ -33,7 +34,7 @@ export default () => {
                 label="Timestamps"
                 variant="primary"
             />
-            {hasDigitalChannels && isDataLogger && (
+            {hasDigitalChannels && (
                 <>
                     <Toggle
                         onToggle={() => dispatch(toggleDigitalChannels())}

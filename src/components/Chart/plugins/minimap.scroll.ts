@@ -7,256 +7,217 @@
 import { Plugin } from 'chart.js';
 
 import type { MinimapChart } from '../../../features/minimap/Minimap';
-import { eventEmitter } from '../../../features/minimap/minimapEvents';
-import { indexToTimestamp, options } from '../../../globals';
+import { DataManager } from '../../../globals';
+import { FoldingBuffer } from './foldingBuffer';
 
 interface MinimapScroll extends Plugin<'line'> {
-    leftClickPressed: boolean;
-    dataBuffer: Array<{ x: number; y: number | undefined }>;
-    dataBufferStep: number;
-    globalDataBufferIndex: number;
-    localDataBufferIndex: number;
-    scaleDownFlag: boolean;
-    adjustDataResolution: () => void;
+    foldingBuffer: FoldingBuffer;
     updateMinimapData: (chart: MinimapChart) => void;
+    onNewData: (value: number, timestamp: number) => void;
     clearMinimap: (chart: MinimapChart) => void;
 }
 
-function pan(event: PointerEvent, chart: MinimapChart) {
+let leftClickPressed = false;
+let clickOnSlider = false;
+let chartRef: MinimapChart;
+let lastSliderTimeStamp = 0;
+let lastClickDeltaFromCenter = 0;
+
+const getClickMetaData = (chart: MinimapChart, offsetX: number) => {
     if (chart.windowNavigateCallback == null) return;
     if (chart.data.datasets[0].data.length === 0) return;
+
+    const sliderOffsetX = chart.options.slider?.offsetX;
+    const sliderWidth = chart.options.slider?.width;
+
+    if (sliderOffsetX == null || sliderWidth == null) {
+        return;
+    }
+
+    const clickedOnSlider =
+        offsetX >= sliderOffsetX && offsetX <= sliderOffsetX + sliderWidth;
+
+    let deltaOffSliderCenter = 0;
+    if (clickedOnSlider) {
+        deltaOffSliderCenter = offsetX - sliderOffsetX - sliderWidth / 2;
+    }
+
+    return {
+        clickedOnSlider,
+        deltaOffSliderCenter,
+    };
+};
+
+const calculateSliderCenterXPosition = (
+    chart: MinimapChart,
+    offsetX: number,
+    clickedOnSlider: boolean,
+    deltaFromCenter: number
+) => {
+    if (chart.windowNavigateCallback == null) return;
+    if (chart.data.datasets[0].data.length === 0) return;
+
+    const windowDuration = chart.options.ampereChart?.windowDuration;
+    const sliderOffsetX = chart.options.slider?.offsetX;
+    const sliderWidth = chart.options.slider?.width;
+
+    if (
+        windowDuration == null ||
+        sliderOffsetX == null ||
+        sliderWidth == null
+    ) {
+        return;
+    }
 
     const {
         scales: { x: xScale },
     } = chart;
 
-    const xPosition = xScale.getValueForPixel(event.offsetX);
+    let newSliderCenterOffsetX = offsetX;
+    if (clickedOnSlider) {
+        newSliderCenterOffsetX = offsetX - deltaFromCenter;
+    }
+
+    const xPosition = xScale.getValueForPixel(newSliderCenterOffsetX);
     if (xPosition == null) return;
-    if (chart.options.ampereChart?.windowDuration == null) {
-        return;
+
+    const maxCenter = lastSliderTimeStamp - windowDuration / 2;
+    const minCenter = windowDuration / 2;
+
+    if (xPosition > maxCenter || xPosition < minCenter) {
+        const metaData = getClickMetaData(chart, offsetX);
+        if (metaData) {
+            lastClickDeltaFromCenter = metaData.deltaOffSliderCenter;
+        }
     }
 
-    const halfWindow = chart.options.ampereChart.windowDuration / 2;
+    return Math.max(minCenter, Math.min(maxCenter, xPosition));
+};
 
-    if (xPosition - halfWindow < 0) {
-        chart.windowNavigateCallback(halfWindow);
-        return;
+const pointerEnter = (event: PointerEvent) => {
+    getClickMetaData(chartRef, event.offsetX);
+};
+
+const pointerDown = (event: PointerEvent) => {
+    // if left clicking
+    // eslint-disable-next-line no-bitwise
+    if ((event.buttons & 0x01) === 0x01) {
+        leftClickPressed = true;
+        const metaData = getClickMetaData(chartRef, event.offsetX);
+        if (metaData) {
+            clickOnSlider = metaData.clickedOnSlider;
+            lastClickDeltaFromCenter = metaData.deltaOffSliderCenter;
+            const center = calculateSliderCenterXPosition(
+                chartRef,
+                event.offsetX,
+                false,
+                0
+            );
+            if (!metaData.clickedOnSlider && center != null) {
+                chartRef.windowNavigateCallback?.(center);
+            }
+        }
     }
+};
 
-    const edgeOfMinimap = indexToTimestamp(options.index);
-    if (xPosition + halfWindow > edgeOfMinimap) {
-        chart.windowNavigateCallback(edgeOfMinimap - halfWindow);
-        return;
+const pointerUp = (event: PointerEvent) => {
+    // if left clicking
+    // eslint-disable-next-line no-bitwise
+    if ((event.buttons & 0x01) === 0x01) {
+        leftClickPressed = false;
     }
+};
 
-    chart.windowNavigateCallback(xPosition);
-}
+const pointerMove = (event: PointerEvent) => {
+    // if left clicking
+    // eslint-disable-next-line no-bitwise
+    if ((event.buttons & 0x01) === 0x01 && leftClickPressed) {
+        const target = event.target;
+        if (target instanceof Element) {
+            target.setPointerCapture(event.pointerId);
+        }
+        const center = calculateSliderCenterXPosition(
+            chartRef,
+            event.offsetX,
+            clickOnSlider,
+            lastClickDeltaFromCenter
+        );
+        if (center != null) chartRef.windowNavigateCallback?.(center);
+    } else {
+        leftClickPressed = false;
+    }
+};
 
 const plugin: MinimapScroll = {
     id: 'minimapScroll',
-    leftClickPressed: false,
-    dataBufferStep: 1,
-    dataBuffer: new Array(1_000 * 2),
-    globalDataBufferIndex: 0,
-    localDataBufferIndex: 0,
-    scaleDownFlag: false,
+    foldingBuffer: new FoldingBuffer(),
 
     beforeInit(chart: MinimapChart) {
+        chartRef = chart;
         const { canvas } = chart.ctx;
-        this.dataBuffer.fill({ x: 0, y: undefined });
-        this.globalDataBufferIndex = 0;
-        this.localDataBufferIndex = 0;
 
-        canvas.addEventListener('pointermove', event => {
-            if (this.leftClickPressed === true) {
-                pan(event, chart);
+        chart.onSliderRangeChange = (end, duration, liveMode) => {
+            if (leftClickPressed && lastSliderTimeStamp < end) {
+                return;
             }
-        });
 
-        canvas.addEventListener('pointerdown', event => {
-            if (event.button === 0) {
-                this.leftClickPressed = true;
-                pan(event, chart);
-            }
-        });
+            chart.updateSlider?.(chart, end, duration, liveMode);
+            chart.redrawSlider = () => {
+                chart.updateSlider?.(chart, end, duration, liveMode);
+            };
+        };
 
-        canvas.addEventListener('pointerup', event => {
-            if (event.button === 0) {
-                this.leftClickPressed = false;
-            }
-        });
-        canvas.addEventListener('pointerleave', () => {
-            this.leftClickPressed = false;
-        });
-        eventEmitter.on('updateMinimap', () => {
-            this.updateMinimapData(chart);
-        });
-        eventEmitter.on('clearMinimap', () => {
-            this.clearMinimap(chart);
-        });
+        canvas.addEventListener('pointermove', pointerMove);
+
+        canvas.addEventListener('pointerdown', pointerDown);
+
+        canvas.addEventListener('pointerup', pointerUp);
+
+        canvas.addEventListener('pointerenter', pointerEnter);
 
         // In case data already exist
         this.updateMinimapData(chart);
     },
+    onNewData(value, timestamp) {
+        this.foldingBuffer.addData(value, timestamp);
+        if (!leftClickPressed) {
+            lastSliderTimeStamp = timestamp;
+        }
+    },
 
     beforeDestroy(chart: MinimapChart) {
         const { canvas } = chart.ctx;
-        canvas.removeEventListener('pointermove', event => {
-            if (this.leftClickPressed === true) {
-                pan(event, chart);
-            }
-        });
+        canvas.removeEventListener('pointermove', pointerMove);
 
-        canvas.removeEventListener('pointerdown', event => {
-            if (event.button === 0) {
-                this.leftClickPressed = true;
-                pan(event, chart);
-            }
-        });
+        canvas.removeEventListener('pointerdown', pointerDown);
 
-        canvas.removeEventListener('pointerup', event => {
-            if (event.button === 0) {
-                this.leftClickPressed = false;
-            }
-        });
-        canvas.removeEventListener('pointerleave', () => {
-            this.leftClickPressed = false;
-        });
-        eventEmitter.removeListener('updateMinimap', () => {
-            this.updateMinimapData(chart);
-        });
-        eventEmitter.removeListener('clearMinimap', () => {
-            this.clearMinimap(chart);
-        });
-    },
+        canvas.removeEventListener('pointerup', pointerUp);
 
-    adjustDataResolution() {
-        // Figure out how far the sample has come, in case it's a loaded sample
-        const numberOfSamples = options.index;
-
-        // Figure out a resolution based on the number of samples.
-        if (numberOfSamples < 1_000) {
-            this.scaleDownFlag = false;
-            this.dataBufferStep = 1;
-        } else {
-            this.scaleDownFlag = true;
-            this.dataBufferStep = Math.ceil(numberOfSamples / (1_000 * 0.8));
-        }
-
-        this.dataBuffer.fill({ x: 0, y: undefined });
-        this.globalDataBufferIndex = 0;
-        this.localDataBufferIndex = 0;
+        canvas.removeEventListener('pointerenter', pointerEnter);
     },
 
     updateMinimapData(chart) {
-        if (options.index < 400) {
-            // Not able to make it look any good...
-            return;
-        }
-
-        if (options.index / this.dataBufferStep > 1_000) {
-            // Buffer would overflow, so adjust the resolution.
-            this.adjustDataResolution();
-        }
-
-        if (this.scaleDownFlag) {
-            do {
-                const accumulatedData = accumulateData(
-                    this.globalDataBufferIndex,
-                    this.dataBufferStep
-                );
-                this.dataBuffer[this.localDataBufferIndex] = accumulatedData[0];
-                this.localDataBufferIndex += 1;
-                this.dataBuffer[this.localDataBufferIndex] = accumulatedData[1];
-                this.localDataBufferIndex += 1;
-
-                this.globalDataBufferIndex += this.dataBufferStep;
-            } while (
-                this.globalDataBufferIndex + this.dataBufferStep <
-                options.index
-            );
-        } else {
-            while (this.globalDataBufferIndex + 1 <= options.index) {
-                this.dataBuffer[this.localDataBufferIndex] = {
-                    x: indexToTimestamp(this.globalDataBufferIndex),
-                    y: options.data[this.globalDataBufferIndex],
-                };
-
-                this.globalDataBufferIndex += 1;
-                this.localDataBufferIndex += 1;
+        if (!leftClickPressed) {
+            const data = this.foldingBuffer.getData();
+            /* @ts-expect-error Have not figured out how to handle this */
+            chart.data.datasets[0].data = data;
+            if (chart.options.scales?.x != null) {
+                chart.options.scales.x.max = DataManager().getTimestamp();
             }
-        }
-
-        /* @ts-expect-error Have not figured out how to handle this */
-        chart.data.datasets[0].data = this.dataBuffer;
-        if (chart.options.scales?.x != null) {
-            chart.options.scales.x.max = options.timestamp;
-        }
-        chart.update();
-
-        if (this.globalDataBufferIndex > options.index && this.scaleDownFlag) {
-            // Redo last interval if options.index has not come far enough;
-            // TODO: Make sure this is not async ?
-            this.localDataBufferIndex -= 2;
-            this.globalDataBufferIndex -= this.dataBufferStep;
+            chart.update();
+            chart.redrawSlider?.();
+            if (data.length) lastSliderTimeStamp = data[data.length - 1].x;
         }
     },
 
     clearMinimap(chart) {
-        this.scaleDownFlag = false;
-        this.dataBufferStep = 1;
-        this.dataBuffer.fill({ x: 0, y: undefined });
-        this.globalDataBufferIndex = 0;
-        this.localDataBufferIndex = 0;
+        this.foldingBuffer = new FoldingBuffer();
         chart.data.datasets[0].data = [];
         if (chart.options.scales?.x != null) {
-            chart.options.scales.x.max = options.timestamp;
+            chart.options.scales.x.max = DataManager().getTimestamp();
         }
         chart.update();
     },
 };
-
-function accumulateData(indexBegin: number, numberOfSamples: number) {
-    const { data } = options;
-
-    let min: number | undefined = Number.MAX_VALUE;
-    let max: number | undefined = Number.MIN_VALUE;
-
-    for (
-        let movingIndex = indexBegin;
-        movingIndex <= indexBegin + numberOfSamples;
-        movingIndex += 1
-    ) {
-        const value = data[movingIndex];
-
-        if (value > max) {
-            max = value;
-        }
-        if (min !== 0 && value < min) {
-            min = value < 0 ? 0 : value;
-        }
-    }
-
-    // We never expect this to happen, but if it would happen, it would lead
-    // chart.js to hang without error. Making the app unusable without warning.
-    // Hence, we'd rather want the points to be undefined.
-    if (min === Number.MAX_VALUE) {
-        min = undefined;
-    }
-    if (max === Number.MIN_VALUE) {
-        max = undefined;
-    }
-
-    return [
-        {
-            x: indexToTimestamp(indexBegin),
-            y: min,
-        },
-        {
-            x: indexToTimestamp(indexBegin),
-            y: max,
-        },
-    ];
-}
 
 export default plugin;

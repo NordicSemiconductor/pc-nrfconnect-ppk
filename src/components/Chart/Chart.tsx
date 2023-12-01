@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint no-plusplus: off */
-/* eslint operator-assignment: off */
-
 import React, {
     useCallback,
     useEffect,
@@ -28,9 +25,9 @@ import {
 
 import Minimap from '../../features/minimap/Minimap';
 import {
+    DataManager,
     getSamplesPerSecond,
     indexToTimestamp,
-    options,
     timestampToIndex,
 } from '../../globals';
 import {
@@ -40,18 +37,21 @@ import {
 import { RootState } from '../../slices';
 import {
     chartCursorAction,
-    chartState,
     chartWindowAction,
+    getChartDigitalChannelInfo,
+    getChartXAxisRange,
+    getChartYAxisRange,
+    getCursorRange,
+    isLiveMode,
     MAX_WINDOW_DURATION,
+    setLiveMode,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { TDispatch } from '../../slices/thunk';
-import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
-import dataAccumulatorInitialiser from './data/dataAccumulator';
-import dataSelectorInitialiser from './data/dataSelector';
+import dataAccumulatorInitialiser, { calcStats } from './data/dataAccumulator';
 import { AmpereState, DigitalChannelStates } from './data/dataTypes';
 import DigitalChannels from './DigitalChannels';
 import StatBox from './StatBox';
@@ -70,48 +70,21 @@ ChartJS.register(
     Title
 );
 
+export type CursorData = {
+    cursorBegin: number | null | undefined;
+    cursorEnd: number | null | undefined;
+    begin: number;
+    end: number;
+};
+
 const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
-const calcStats = (_begin?: null | number, _end?: null | number) => {
-    if (_begin == null || _end == null) {
-        return null;
-    }
-    let begin = _begin;
-    let end = _end;
-    if (end < begin) {
-        [begin, end] = [end, begin];
-    }
-
-    const { data } = options;
-    const indexBegin = Math.ceil(timestampToIndex(begin));
-    const indexEnd = Math.floor(timestampToIndex(end));
-
-    let sum = 0;
-    let len = 0;
-    let max;
-
-    for (let n = indexBegin; n <= indexEnd; ++n) {
-        const k = (n + data.length) % data.length;
-        const v = data[k];
-        if (!Number.isNaN(v)) {
-            if (max === undefined || v > max) {
-                max = v;
-            }
-            sum = sum + v;
-            ++len;
-        }
-    }
-    return {
-        average: sum / (len || 1),
-        max,
-        delta: end - begin,
-    };
-};
-
 const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
+    const liveMode = useSelector(isLiveMode);
+
     const chartWindow = useCallback(
         (
             windowBegin: number,
@@ -121,7 +94,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         ) =>
             dispatch(
                 chartWindowAction(
-                    windowBegin,
                     windowEnd,
                     windowEnd - windowBegin,
                     yMin,
@@ -135,15 +107,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowDuration =>
             dispatch(
                 chartWindowAction(
-                    null,
-                    null,
-                    windowDuration,
-                    undefined,
-                    undefined
+                    DataManager().getTimestamp() - windowDuration,
+                    windowDuration
                 )
             ),
         [dispatch]
     );
+
     const chartCursor = useCallback(
         (cursorBegin, cursorEnd) =>
             dispatch(chartCursorAction({ cursorBegin, cursorEnd })),
@@ -155,8 +125,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Select all',
         isGlobal: false,
         action: () => {
-            if (options.index > 0) {
-                return chartCursor(0, indexToTimestamp(options.index));
+            if (DataManager().getTimestamp() > 0) {
+                return chartCursor(0, DataManager().getTimestamp());
             }
             return false;
         },
@@ -177,7 +147,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         isGlobal: false,
         action: () => {
             dispatch((_dispatch: TDispatch, getState: () => RootState) => {
-                const { cursorBegin, cursorEnd } = chartState(getState());
+                const { cursorBegin, cursorEnd } = getCursorRange(getState());
                 if (cursorBegin != null && cursorEnd != null) {
                     chartWindow(cursorBegin, cursorEnd);
                 }
@@ -185,31 +155,30 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         },
     });
 
+    const { digitalChannels, digitalChannelsVisible, hasDigitalChannels } =
+        useSelector(getChartDigitalChannelInfo);
+
+    const { yAxisLog } = useSelector(getChartYAxisRange);
+
+    const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
+
     const {
-        windowBegin,
-        windowEnd,
-        windowDuration,
         windowBeginLock,
         windowEndLock,
-        cursorBegin,
-        cursorEnd,
-        digitalChannels,
-        digitalChannelsVisible,
-        hasDigitalChannels,
-        yAxisLog,
-    } = useSelector(chartState);
-    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
+        xAxisMax,
+        windowDuration,
+        windowBegin,
+        windowEnd,
+    } = useSelector(getChartXAxisRange);
+
     const showDigitalChannels =
         digitalChannelsVisible && digitalChannelsEnabled;
 
-    const { bits } = options;
-
     const chartRef = useRef<AmpereChartJS | null>(null);
 
-    const dataAccumulator = useLazyInitializedRef(
+    const dataProcessor = useLazyInitializedRef(
         dataAccumulatorInitialiser
     ).current;
-    const dataSelector = useLazyInitializedRef(dataSelectorInitialiser).current;
 
     const { sampleFreq } = useSelector(dataLoggerState);
 
@@ -227,37 +196,32 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         [digitalChannels]
     );
 
+    // hasBits needs to be a dependency so digitalChannelsToCompute can update.
+    const hasBits = DataManager().hasBits();
     const digitalChannelsToCompute = useMemo(
         () =>
-            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && bits
+            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && hasBits
                 ? digitalChannelsToDisplay
                 : [],
         [
-            bits,
+            hasBits,
             zoomedOutTooFarForDigitalChannels,
             showDigitalChannels,
             digitalChannelsToDisplay,
         ]
     );
 
-    const end = windowEnd || options.timestamp - options.samplingTime;
-    const begin = windowBegin || end - windowDuration;
+    const begin = Math.max(0, windowEnd - windowDuration);
 
-    const cursorData = {
+    const cursorData: CursorData = {
         cursorBegin,
         cursorEnd,
         begin,
-        end,
+        end: windowEnd,
     };
 
-    const [len, setLen] = useState(0);
+    const [numberOfPixelsInWindow, setNumberOfPixelsInWindow] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
-
-    const windowStats = useMemo(() => calcStats(begin, end), [begin, end]);
-    const selectionStats = useMemo(
-        () => calcStats(cursorBegin, cursorEnd),
-        [cursorBegin, cursorEnd]
-    );
 
     const resetCursor = useCallback(
         () => chartCursor(null, null),
@@ -271,7 +235,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             beginY?: number | null,
             endY?: number | null
         ) => {
-            if (!isDataLoggerPane) return;
             if (beginX === undefined || endX === undefined) {
                 chartReset(windowDuration);
                 return;
@@ -283,20 +246,23 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
             const minLimit = windowBeginLock || earliestDataTime;
             const maxLimit =
-                windowEndLock || Math.max(options.timestamp, maxWindowWidth);
+                windowEndLock ||
+                Math.max(DataManager().getTimestamp(), maxWindowWidth);
 
             const newBeginX = Math.max(beginX, minLimit);
             const newEndX = Math.min(endX, maxLimit);
 
+            dispatch(setLiveMode(false));
+
             chartWindow(newBeginX, newEndX, beginY, endY);
         },
         [
-            isDataLoggerPane,
             windowBeginLock,
             windowEndLock,
+            windowDuration,
             chartWindow,
             chartReset,
-            windowDuration,
+            dispatch,
         ]
     );
 
@@ -305,25 +271,21 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
      */
     const zoomToWindow = useCallback(
         localWindowDuration => {
-            if (windowBegin === 0 && windowEnd === 0) {
+            if (liveMode) {
                 chartReset(localWindowDuration);
                 return;
             }
-            if (windowBegin != null && windowEnd != null) {
-                const center = (windowBegin + windowEnd) / 2;
-                let localWindowBegin = center - localWindowDuration / 2;
-                let localWindowEnd = center + localWindowDuration / 2;
-                if (localWindowEnd > windowEnd) {
-                    localWindowBegin =
-                        localWindowBegin - (localWindowEnd - windowEnd);
-                    localWindowEnd = windowEnd;
-                }
-                chartWindow(localWindowBegin, localWindowEnd);
-                return;
+
+            const center = (windowBegin + windowEnd) / 2;
+            let localWindowBegin = center - localWindowDuration / 2;
+            let localWindowEnd = center + localWindowDuration / 2;
+            if (localWindowEnd > windowEnd) {
+                localWindowBegin -= localWindowEnd - windowEnd;
+                localWindowEnd = windowEnd;
             }
-            chartReset(localWindowDuration);
+            chartWindow(localWindowBegin, localWindowEnd);
         },
-        [chartWindow, chartReset, windowBegin, windowEnd]
+        [liveMode, windowBegin, windowEnd, chartWindow, chartReset]
     );
 
     useEffect(() => {
@@ -338,49 +300,97 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         }
     }, [chartCursor, zoomPanCallback]);
 
-    const chartPause = () =>
-        chartWindow(options.timestamp - windowDuration, options.timestamp);
-
-    const originalIndexBegin = timestampToIndex(begin);
-    const originalIndexEnd = timestampToIndex(end);
-    const step = len === 0 ? 2 : (originalIndexEnd - originalIndexBegin) / len;
-    const dataProcessor = step > 1 ? dataAccumulator : dataSelector;
+    const samplesInWindowView = timestampToIndex(windowDuration);
+    const samplesPerPixel =
+        numberOfPixelsInWindow === 0
+            ? 2
+            : samplesInWindowView / numberOfPixelsInWindow;
 
     const [ampereLineData, setAmpereLineData] = useState<AmpereState[]>([]);
     const [bitsLineData, setBitsLineData] = useState<DigitalChannelStates[]>(
         []
     );
 
-    useEffect(() => {
+    const [windowStats, setWindowStats] =
+        useState<ReturnType<typeof calcStats>>(null);
+
+    const selectionStats = useMemo(
+        () => calcStats(cursorBegin, cursorEnd),
+        [cursorBegin, cursorEnd]
+    );
+
+    const updateChart = useCallback(() => {
         if (!isInitialised(dataProcessor)) {
             return;
         }
-        const calculation = setTimeout(() => {
-            const processedData = dataProcessor.process(
-                begin,
-                end,
-                digitalChannelsToCompute as number[],
-                yAxisLog,
-                len,
-                windowDuration
-            );
 
-            setAmpereLineData(processedData.ampereLineData);
-            setBitsLineData(processedData.bitsLineData);
+        const processedData = dataProcessor.process(
+            begin,
+            windowEnd,
+            zoomedOutTooFarForDigitalChannels
+                ? []
+                : (digitalChannelsToCompute as number[]),
+            yAxisLog,
+            Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
+            windowDuration
+        );
+
+        const avgTemp = processedData.averageLine.reduce(
+            (previousValue, currentValue) => ({
+                sum: previousValue.sum + currentValue.y,
+                count: previousValue.count + currentValue.count,
+            }),
+            {
+                sum: 0,
+                count: 0,
+            }
+        );
+        const average = avgTemp.sum / avgTemp.count;
+        const max = Math.max(
+            ...processedData.ampereLineData.map(v => v.y ?? 0)
+        );
+
+        setAmpereLineData(processedData.ampereLineData);
+        setBitsLineData(processedData.bitsLineData);
+        setWindowStats({
+            max,
+            average,
+            delta: Math.min(windowEnd, DataManager().getTimestamp()) - begin,
         });
-
-        return () => {
-            clearTimeout(calculation);
-        };
     }, [
         begin,
-        end,
-        len,
-        windowDuration,
         dataProcessor,
         digitalChannelsToCompute,
+        windowEnd,
+        windowDuration,
+        numberOfPixelsInWindow,
         yAxisLog,
+        zoomedOutTooFarForDigitalChannels,
     ]);
+
+    useEffect(() => {
+        if (liveMode) {
+            const timeout = setTimeout(() => {
+                updateChart();
+            });
+
+            return () => {
+                clearTimeout(timeout);
+            };
+        }
+    }, [xAxisMax, liveMode, updateChart, begin, windowEnd]);
+
+    useEffect(() => {
+        if (!liveMode) {
+            const timeout = setTimeout(() => {
+                updateChart();
+            });
+
+            return () => {
+                clearTimeout(timeout);
+            };
+        }
+    }, [begin, liveMode, updateChart, windowEnd]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
@@ -397,36 +407,32 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             </Button>,
         ];
 
-        if (isDataLoggerPane) {
-            buttons.push(
-                <Button
-                    key="select-all-btn"
-                    variant="secondary"
-                    disabled={options.index <= 0}
-                    size="sm"
-                    onClick={() =>
-                        chartCursor(0, indexToTimestamp(options.index))
+        buttons.push(
+            <Button
+                key="select-all-btn"
+                variant="secondary"
+                disabled={DataManager().getTotalSavedRecords() <= 0}
+                size="sm"
+                onClick={() => chartCursor(0, DataManager().getTimestamp())}
+            >
+                SELECT ALL
+            </Button>
+        );
+        buttons.push(
+            <Button
+                key="zoom-to-selection-btn"
+                variant="secondary"
+                size="sm"
+                disabled={cursorBegin == null || cursorEnd == null}
+                onClick={() => {
+                    if (cursorBegin != null && cursorEnd != null) {
+                        chartWindow(cursorBegin, cursorEnd);
                     }
-                >
-                    SELECT ALL
-                </Button>
-            );
-            buttons.push(
-                <Button
-                    key="zoom-to-selection-btn"
-                    variant="secondary"
-                    size="sm"
-                    disabled={cursorBegin == null || cursorEnd == null}
-                    onClick={() => {
-                        if (cursorBegin != null && cursorEnd != null) {
-                            chartWindow(cursorBegin, cursorEnd);
-                        }
-                    }}
-                >
-                    ZOOM TO SELECTION
-                </Button>
-            );
-        }
+                }}
+            >
+                ZOOM TO SELECTION
+            </Button>
+        );
 
         return buttons;
     };
@@ -435,16 +441,19 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         <div className="chart-outer">
             <div className="chart-current">
                 <ChartTop
-                    chartPause={chartPause}
+                    onLiveModeChange={isLive => {
+                        dispatch(setLiveMode(isLive));
+                    }}
+                    live={liveMode}
                     zoomToWindow={zoomToWindow}
                     chartRef={chartRef}
                     windowDuration={windowDuration}
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
                 <AmpereChart
-                    setLen={setLen}
+                    setNumberOfPixelsInWindow={setNumberOfPixelsInWindow}
                     setChartAreaWidth={setChartAreaWidth}
-                    step={step}
+                    numberOfSamplesPerPixel={samplesPerPixel}
                     chartRef={chartRef}
                     cursorData={cursorData}
                     lineData={ampereLineData}
@@ -454,7 +463,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                {isDataLoggerPane ? <Minimap /> : null}
+                <Minimap />
                 <div
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}

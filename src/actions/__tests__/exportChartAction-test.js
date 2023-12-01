@@ -6,10 +6,9 @@
 
 import { formatDataForExport } from '../exportChartAction';
 
-const buffer = [5, 6, 7, 8, 9, 10];
-const bitsData = [0xaaaa, 0xaaaa, 0xaaaa, 0x5555, 0x6566, 0xaaaa];
+const buffer = [7, 8, 9, 10];
+const bitsData = [0xaaaa, 0x5555, 0x6566];
 const startingPoint = 2;
-const numberOfDataPoints = 2;
 
 // There seems to be a discrepancy between the length parameter
 // (in this example we have a length of 2, but the resulting string has 3 samples)
@@ -21,7 +20,6 @@ describe('formatData', () => {
         const selection = [false, true, false, false];
         const content = formatDataForExport(
             startingPoint,
-            numberOfDataPoints,
             buffer,
             bitsData,
             selection
@@ -37,7 +35,6 @@ describe('formatData', () => {
         const selection = [true, true, false, false];
         const content = formatDataForExport(
             startingPoint,
-            numberOfDataPoints,
             buffer,
             bitsData,
             selection
@@ -53,7 +50,6 @@ describe('formatData', () => {
         const selection = [true, true, true, true];
         const content = formatDataForExport(
             startingPoint,
-            numberOfDataPoints,
             buffer,
             bitsData,
             selection

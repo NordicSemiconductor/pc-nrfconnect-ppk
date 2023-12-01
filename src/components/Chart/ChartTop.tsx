@@ -13,16 +13,15 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { BigNumber, Fraction, unit } from 'mathjs';
 
+import { isSamplingRunning } from '../../slices/appSlice';
 import {
-    chartState,
-    resetChart,
+    getChartYAxisRange,
     setShowSettings,
     showChartSettings,
     toggleYAxisLock,
     toggleYAxisLog,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
-import { isDataLoggerPane as isDataLoggerPaneSelector } from '../../utils/panes';
 import { AmpereChartJS } from './AmpereChart';
 import ChartOptions from './ChartOptions';
 
@@ -42,23 +41,23 @@ const TimeWindowButton = ({ label, zoomToWindow }: TimeWindowButton) => (
 );
 
 type ChartTop = {
-    chartPause: () => void;
+    onLiveModeChange: (live: boolean) => void;
+    live: boolean;
     zoomToWindow: (windowDuration: number | BigNumber | Fraction) => void;
     chartRef: MutableRefObject<AmpereChartJS | null>;
     windowDuration: number;
 };
 
 const ChartTop = ({
-    chartPause,
+    onLiveModeChange,
+    live,
     zoomToWindow,
     chartRef,
     windowDuration,
 }: ChartTop) => {
     const dispatch = useDispatch();
-    const { windowBegin, windowEnd } = useSelector(chartState);
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
-    const isDataLoggerPane = useSelector(isDataLoggerPaneSelector);
-    const live = windowBegin === 0 && windowEnd === 0;
+    const samplingRunning = useSelector(isSamplingRunning);
 
     const timeWindowLabels = [
         '10ms',
@@ -85,29 +84,24 @@ const ChartTop = ({
                     <span className="mdi mdi-cog" /> <p>SETTINGS</p>
                 </button>
             </div>
-            {isDataLoggerPane && (
-                <div className="tw-flex tw-w-2/4 tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-place-self-auto">
-                    {timeWindowLabels.map(label => (
-                        <TimeWindowButton
-                            label={label}
-                            key={label}
-                            zoomToWindow={zoomToWindow}
-                        />
-                    ))}
-                </div>
-            )}
-            {isDataLoggerPane && (
-                <div className="tw-flex tw-w-1/4 tw-flex-row tw-justify-end">
-                    <Toggle
-                        label="LIVE VIEW"
-                        onToggle={() => {
-                            live ? chartPause() : dispatch(resetChart());
-                        }}
-                        isToggled={live}
-                        variant="primary"
+            <div className="tw-flex tw-w-2/4 tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-place-self-auto">
+                {timeWindowLabels.map(label => (
+                    <TimeWindowButton
+                        label={label}
+                        key={label}
+                        zoomToWindow={zoomToWindow}
                     />
-                </div>
-            )}
+                ))}
+            </div>
+            <div className="tw-flex tw-w-1/4 tw-flex-row tw-justify-end">
+                <Toggle
+                    label="LIVE VIEW"
+                    onToggle={onLiveModeChange}
+                    isToggled={live}
+                    variant="primary"
+                    disabled={!samplingRunning}
+                />
+            </div>
             <ChartSettingsDialog
                 zoomToWindow={zoomToWindow}
                 chartRef={chartRef}
@@ -128,7 +122,7 @@ const ChartSettingsDialog = ({
 }) => {
     const dispatch = useDispatch();
     const showSettings = useSelector(showChartSettings);
-    const { yAxisLock, yAxisLog } = useSelector(chartState);
+    const { yAxisLock, yAxisLog } = useSelector(getChartYAxisRange);
 
     return (
         <InfoDialog
