@@ -11,21 +11,24 @@
 
 ## Changed
 
--   The Y axis settings are now moved into a dialog. To open the settings dialog, press
-    SETTINGS, in the top left corner of the graph. The dialog contains the options to
-    toggle linear or logarithmic scale, and the option to lock the Y axis.
+-   The Y axis settings are now moved into a dialog. To open the settings
+    dialog, press SETTINGS, in the top left corner of the graph. The dialog
+    contains the options to toggle linear or logarithmic scale, and the option
+    to lock the Y axis.
 -   The chart will now only show positive values along the X axis.
 -   Backend from the usage of **nrf-device-lib-js** to **nrfutil device** for
     interacting with devices.
 
 ## Removed
 
--   Support for Power Profiler Kit (PPK1), hence the Power Profiler app will
-    only be usable with Power Profiler Kit II (PPK2). If you connect a PPK1, you
-    a dialog will display instructions on how to proceed. However, it is
+-   Support for Power Profiler Kit (PPK1), as it makes it difficult, and
+    sometimes impossible to implement new features. Hence, Power Profiler app
+    will only be usable for Power Profiler Kit II (PPK2). In order to use a
+    PPK1, it is required to use a version before v4.0.0, however, it is
     recommended to replace your deprecated PPK1 with a PPK2.
--   _Real-Time_ pane, as this was mainly intended for the deprecated PPK1.
-    The useful Trigger feature will be re-introduced in the _Data Logger_ pane in an upcoming release.
+-   _Real-Time_ pane, as this was mainly intended for the deprecated PPK1. The
+    useful Trigger feature will be re-introduced in the _Data Logger_ pane in an
+    upcoming release.
 
 ## Fixed
 
