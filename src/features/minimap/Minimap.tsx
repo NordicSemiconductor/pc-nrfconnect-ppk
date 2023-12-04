@@ -6,13 +6,14 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { classNames, colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { DataManager, indexToTimestamp } from '../../globals';
 import {
     getChartXAxisRange,
+    getChartYAxisRange,
     isLiveMode,
     isSessionActive,
     panWindow,
@@ -62,6 +63,7 @@ const Minimap = () => {
     } = useSelector(getChartXAxisRange);
     const liveMode = useSelector(isLiveMode);
     const xAxisMax = useSelector(getXAxisMaxTime);
+    const { yAxisLog } = useSelector(getChartYAxisRange);
     const isWindowDurationFull = topChartXAxisMax > windowDuration;
 
     function windowNavigateCallback(windowCenter: number) {
@@ -70,7 +72,8 @@ const Minimap = () => {
 
     minimapRef.current = initializeMinimapChart(
         minimapRef.current,
-        canvasRef.current
+        canvasRef.current,
+        yAxisLog
     );
 
     if (minimapRef.current) {
@@ -79,6 +82,16 @@ const Minimap = () => {
             updateSlider(minimap, minimapSlider.current, end, duration, live);
         };
     }
+
+    useEffect(() => {
+        if (minimapRef.current?.options.scales?.y) {
+            minimapRef.current.options.scales.y.type = yAxisLog
+                ? 'logarithmic'
+                : 'linear';
+
+            minimapScroll.updateMinimapData(minimapRef.current);
+        }
+    }, [yAxisLog]);
 
     useEffect(() => {
         if (
@@ -139,6 +152,11 @@ const Minimap = () => {
         }
     }, [sessionActive, xAxisMax]);
 
+    const sliderWidth = Number.parseInt(
+        minimapSlider.current?.getAttribute('data-width') ?? '0',
+        10
+    );
+
     return (
         <div
             className="tw-relative tw-h-28 tw-w-full tw-py-4"
@@ -158,10 +176,20 @@ const Minimap = () => {
                     display: isWindowDurationFull ? 'block' : 'none',
                 }}
             />
+
             <div
                 ref={minimapSlider}
-                className="tw-pointer-events-none tw-absolute tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50"
-                style={{ contain: 'strict', top: '1rem' }}
+                className={classNames(
+                    'tw-pointer-events-none tw-absolute tw-max-h-20 tw-overflow-hidden  tw-opacity-50',
+                    sliderWidth < 5 && sliderWidth > 0
+                        ? 'tw-bg-red-400'
+                        : 'tw-bg-gray-400'
+                )}
+                style={{
+                    contain: 'strict',
+                    top: '1rem',
+                    display: isWindowDurationFull ? 'block' : 'none',
+                }}
             />
         </div>
     );
@@ -241,6 +269,7 @@ function drawSlider(
     slider.style.width = `${width}px`;
     slider.style.height = `${height}px`;
     slider.style.display = 'block';
+    slider.setAttribute('data-width', width.toString());
 
     return {
         offsetX: left - offsetLeft,
@@ -291,7 +320,8 @@ function updateSlider(
 
 function initializeMinimapChart(
     minimapRef: MinimapChart | null,
-    canvasRef: HTMLCanvasElement | null
+    canvasRef: HTMLCanvasElement | null,
+    yAxisLog: boolean
 ) {
     if (minimapRef != null) {
         return minimapRef;
@@ -327,7 +357,7 @@ function initializeMinimapChart(
                         grid: undefined,
                     },
                     y: {
-                        type: 'linear',
+                        type: yAxisLog ? 'logarithmic' : 'linear',
                         display: false,
                         ticks: undefined,
                         grid: undefined,
