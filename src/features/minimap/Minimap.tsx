@@ -13,6 +13,7 @@ import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { DataManager, indexToTimestamp } from '../../globals';
 import {
     getChartXAxisRange,
+    getChartYAxisRange,
     isLiveMode,
     isSessionActive,
     panWindow,
@@ -62,6 +63,7 @@ const Minimap = () => {
     } = useSelector(getChartXAxisRange);
     const liveMode = useSelector(isLiveMode);
     const xAxisMax = useSelector(getXAxisMaxTime);
+    const { yAxisLog } = useSelector(getChartYAxisRange);
     const isWindowDurationFull = topChartXAxisMax > windowDuration;
 
     function windowNavigateCallback(windowCenter: number) {
@@ -70,7 +72,8 @@ const Minimap = () => {
 
     minimapRef.current = initializeMinimapChart(
         minimapRef.current,
-        canvasRef.current
+        canvasRef.current,
+        yAxisLog
     );
 
     if (minimapRef.current) {
@@ -79,6 +82,16 @@ const Minimap = () => {
             updateSlider(minimap, minimapSlider.current, end, duration, live);
         };
     }
+
+    useEffect(() => {
+        if (minimapRef.current?.options.scales?.y) {
+            minimapRef.current.options.scales.y.type = yAxisLog
+                ? 'logarithmic'
+                : 'linear';
+
+            minimapScroll.updateMinimapData(minimapRef.current);
+        }
+    }, [yAxisLog]);
 
     useEffect(() => {
         if (
@@ -291,7 +304,8 @@ function updateSlider(
 
 function initializeMinimapChart(
     minimapRef: MinimapChart | null,
-    canvasRef: HTMLCanvasElement | null
+    canvasRef: HTMLCanvasElement | null,
+    yAxisLog: boolean
 ) {
     if (minimapRef != null) {
         return minimapRef;
@@ -327,7 +341,7 @@ function initializeMinimapChart(
                         grid: undefined,
                     },
                     y: {
-                        type: 'linear',
+                        type: yAxisLog ? 'logarithmic' : 'linear',
                         display: false,
                         ticks: undefined,
                         grid: undefined,
