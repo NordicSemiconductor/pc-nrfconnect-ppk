@@ -4,15 +4,16 @@
 
 -   Navigable minimap, which will display a zoomed-out map of the entire sample.
     In order to navigate the sample, simply click on the location where you want
-    your window. The minimap also displays a slider, which shows the span of the
-    window.
+    your window, or drag the slider in along the horizontal axis.
 -   Zoom to selection button, which will make the window the size of the
-    selected area.
-    -   Hotkey: `alt+z`
+    selected area. Hotkey is `alt+z`.
 -   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
 
 ## Changed
 
+-   Y-axis settings are moved into a dialog. To open the settings dialog, press
+    SETTINGS, in the top left corner of the graph. It contains the options to
+    toggle linear/logarithmic scale, and the option to lock the y-axis.
 -   The chart will now only show positive values along the x-axis.
 -   From **nrf-device-lib-js** to **nrfutil device**, as a backend for
     interacting with devices.
@@ -20,9 +21,12 @@
 ## Removed
 
 -   Support for Power Profiler Kit (PPK1), hence the Power Profiler app will
-    only be usable for Power Profiler II (PPK2). If you connect a PPK1, you will
-    be shown a dialog with instructions on how to proceed. However, we recommend
-    replacing your PPK1 with a PPK2.
+    only be usable for Power Profiler Kit II (PPK2). If you connect a PPK1, you
+    will be shown a dialog with instructions on how to proceed. However, we
+    recommend replacing your deprecated PPK1 with a PPK2.
+-   _Real-Time_ pane, as this was mainly intended for the deprecated PPK1.
+    However, we realize that the Trigger feature is useful, and we intend to
+    re-implement this feature in the _Data Logger_ pane in an upcoming release.
 
 ## Fixed
 
