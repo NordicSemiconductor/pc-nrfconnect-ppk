@@ -469,7 +469,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}
                 >
-                    <StatBox {...windowStats} label="Window" />
+                    <StatBox
+                        average={windowStats?.average ? windowStats.average : 0}
+                        max={windowStats?.max ? windowStats.max : 0}
+                        delta={windowStats?.delta ? windowStats.delta : 0}
+                        label="Window"
+                    />
                     <StatBox
                         {...selectionStats}
                         label="Selection"
