@@ -6,7 +6,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { classNames, colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
@@ -152,11 +152,6 @@ const Minimap = () => {
         }
     }, [sessionActive, xAxisMax]);
 
-    const sliderWidth = Number.parseInt(
-        minimapSlider.current?.getAttribute('data-width') ?? '0',
-        10
-    );
-
     return (
         <div
             className="tw-relative tw-h-28 tw-w-full tw-py-4"
@@ -179,12 +174,7 @@ const Minimap = () => {
 
             <div
                 ref={minimapSlider}
-                className={classNames(
-                    'tw-pointer-events-none tw-absolute tw-max-h-20 tw-overflow-hidden  tw-opacity-50',
-                    sliderWidth < 5 && sliderWidth > 0
-                        ? 'tw-bg-red-400'
-                        : 'tw-bg-gray-400'
-                )}
+                className="tw-pointer-events-none tw-absolute tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50"
                 style={{
                     contain: 'strict',
                     top: '1rem',
@@ -246,7 +236,7 @@ function drawSlider(
 
         left = beginWithOffset;
 
-        const MIN_WIDTH = 1;
+        const MIN_WIDTH = 5;
         width = endWithoutOffset - beginWithoutOffset;
         width = width > MIN_WIDTH ? width : MIN_WIDTH;
 
@@ -269,7 +259,6 @@ function drawSlider(
     slider.style.width = `${width}px`;
     slider.style.height = `${height}px`;
     slider.style.display = 'block';
-    slider.setAttribute('data-width', width.toString());
 
     return {
         offsetX: left - offsetLeft,
