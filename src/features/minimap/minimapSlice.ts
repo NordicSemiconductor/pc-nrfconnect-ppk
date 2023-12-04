@@ -16,7 +16,7 @@ interface MinimapState {
 }
 
 const initialState: MinimapState = {
-    showMinimap: false,
+    showMinimap: true,
     xAxisMaxTime: 0,
 };
 
