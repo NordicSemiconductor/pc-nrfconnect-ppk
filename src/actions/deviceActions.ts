@@ -232,7 +232,7 @@ export const open =
                         device.capabilities.maxContinuousSamplingTimeUs!,
                 })
             );
-            dispatch(setupOptions());
+
             dispatch(
                 setDeviceRunningAction({
                     isRunning: device.isRunningInitially,
