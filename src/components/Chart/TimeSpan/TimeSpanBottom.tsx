@@ -7,7 +7,6 @@
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { DataManager } from '../../../globals';
 import {
     chartCursorAction,
     getChartXAxisRange,
@@ -50,19 +49,9 @@ const TimeSpanBottom = ({
     );
 
     const [drag, setDrag] = useState<Drag | null>(null);
-    const { windowBegin, windowEnd, windowDuration } =
-        useSelector(getChartXAxisRange);
+    const { windowBegin, windowDuration } = useSelector(getChartXAxisRange);
 
-    let w1 = 0;
-    if (windowEnd != null) {
-        w1 = windowEnd;
-    }
-
-    w1 = DataManager().getTimestamp() - DataManager().getSamplingTime();
-
-    const w0 = windowBegin || w1 - windowDuration;
-
-    const showHandles = cursorBegin !== null && w0 !== 0;
+    const showHandles = cursorBegin !== null && cursorEnd !== null;
 
     const onPointerDown = ({
         clientX,
@@ -73,7 +62,11 @@ const TimeSpanBottom = ({
         pointerId: number;
         target: null | EventTarget;
     }) => {
-        if (target instanceof Element && cursorBegin && cursorEnd) {
+        if (
+            target instanceof Element &&
+            cursorBegin != null &&
+            cursorEnd != null
+        ) {
             target.setPointerCapture(pointerId);
             setDrag({ clientX, cursorBegin, cursorEnd });
         }
@@ -92,7 +85,7 @@ const TimeSpanBottom = ({
     };
 
     const timeDelta =
-        cursorBegin && cursorEnd
+        cursorBegin != null && cursorEnd != null
             ? Math.abs(cursorEnd - cursorBegin)
             : windowDuration;
     return (
@@ -101,7 +94,9 @@ const TimeSpanBottom = ({
                 <div
                     className="cursor begin"
                     style={{
-                        left: `${(100 * (cursorBegin - w0)) / windowDuration}%`,
+                        left: `${
+                            (100 * (cursorBegin - windowBegin)) / windowDuration
+                        }%`,
                     }}
                     onPointerDown={onPointerDown}
                     onPointerMove={({ clientX, target }) => {
@@ -128,15 +123,17 @@ const TimeSpanBottom = ({
             )}
             <TimeSpanLabel
                 duration={timeDelta}
-                begin={cursorBegin ? cursorBegin - w0 : null}
-                end={cursorEnd ? cursorEnd - w0 : null}
+                begin={cursorBegin != null ? cursorBegin - windowBegin : null}
+                end={cursorEnd != null ? cursorEnd - windowBegin : null}
                 totalDuration={windowDuration}
             />
-            {showHandles && cursorEnd && (
+            {showHandles && (
                 <div
                     className="cursor end"
                     style={{
-                        left: `${(100 * (cursorEnd - w0)) / windowDuration}%`,
+                        left: `${
+                            (100 * (cursorEnd - windowBegin)) / windowDuration
+                        }%`,
                     }}
                     onPointerDown={onPointerDown}
                     onPointerMove={({ clientX, target }) => {

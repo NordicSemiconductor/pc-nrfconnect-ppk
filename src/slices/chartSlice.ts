@@ -87,8 +87,26 @@ const chartSlice = createSlice({
                 cursorEnd: null | number;
             }>
         ) => {
-            state.cursorBegin = action.payload.cursorBegin;
-            state.cursorEnd = action.payload.cursorEnd;
+            const end =
+                action.payload.cursorEnd != null
+                    ? Math.max(
+                          0,
+                          Math.min(
+                              DataManager().getTimestamp(),
+                              action.payload.cursorEnd
+                          )
+                      )
+                    : null;
+            const begin =
+                action.payload.cursorBegin != null
+                    ? Math.min(
+                          Math.max(0, action.payload.cursorBegin),
+                          DataManager().getTimestamp()
+                      )
+                    : null;
+
+            state.cursorBegin = begin;
+            state.cursorEnd = end;
         },
         chartWindow(
             state,
