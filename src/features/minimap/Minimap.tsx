@@ -173,8 +173,11 @@ const Minimap = () => {
             />
             <div
                 ref={minimapSlider}
-                className="tw-pointer-events-none tw-absolute tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50"
-                style={{ contain: 'strict', top: '1rem' }}
+                style={{
+                    contain: 'strict',
+                    top: '1rem',
+                    display: isWindowDurationFull ? 'block' : 'none',
+                }}
             />
         </div>
     );
