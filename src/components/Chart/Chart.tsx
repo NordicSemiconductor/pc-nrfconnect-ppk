@@ -346,9 +346,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             }
         );
         const average = avgTemp.sum / avgTemp.count;
-        const max = Math.max(
-            ...processedData.ampereLineData.map(v => v.y ?? 0)
-        );
+        const max =
+            processedData.ampereLineData.length > 0
+                ? Math.max(...processedData.ampereLineData.map(v => v.y ?? 0))
+                : 0;
 
         setAmpereLineData(processedData.ampereLineData);
         setBitsLineData(processedData.bitsLineData);
@@ -468,7 +469,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     className="chart-bottom"
                     style={{ paddingRight: `${rightMargin}px` }}
                 >
-                    <StatBox {...windowStats} label="Window" />
+                    <StatBox
+                        average={windowStats?.average ? windowStats.average : 0}
+                        max={windowStats?.max ? windowStats.max : 0}
+                        delta={windowStats?.delta ? windowStats.delta : 0}
+                        label="Window"
+                    />
                     <StatBox
                         {...selectionStats}
                         label="Selection"

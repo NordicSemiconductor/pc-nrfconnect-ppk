@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- conservative refactoring, TODO: remove this line */
 
 import React from 'react';
+import { classNames } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Unit, unit } from 'mathjs';
 
 import { formatDurationHTML } from '../../utils/duration';
@@ -22,7 +23,7 @@ const Value = ({ label, u }: ValueProperties) => {
     const v = u.format({ notation: 'fixed', precision: 2 });
     const [valStr, unitStr] = v.split(' ');
     return (
-        <div className="value-box">
+        <div className="value-box tw-border tw-border-solid tw-border-gray-200">
             <div className="value">
                 {Number.isNaN(u.value) || (
                     <>
@@ -42,7 +43,7 @@ interface StatBoxProperties {
     average?: number | null;
     max?: number | null;
     delta?: number | null;
-    label: string;
+    label: 'Window' | 'Selection';
     actionButtons?: any[];
 }
 
@@ -58,7 +59,11 @@ const StatBox = ({
             <h2 className="d-inline my-0">{label}</h2>
             {actionButtons.length > 0 && actionButtons.map(button => button)}
         </div>
-        <div className="d-flex flex-fill flex-row">
+        <div
+            className={`d-flex flex-fill flex-row ${classNames(
+                label === 'Window' ? 'tw-bg-white' : 'tw-bg-gray-100'
+            )}`}
+        >
             {delta === null && (
                 <div className="value-box">
                     Hold SHIFT+LEFT CLICK and DRAG to make a selection
@@ -68,7 +73,7 @@ const StatBox = ({
                 <>
                     <Value label="average" u={unit(average!, 'uA')} />
                     <Value label="max" u={unit(max || 0, 'uA')} />
-                    <div className="value-box">
+                    <div className="value-box tw-border tw-border-solid tw-border-gray-200">
                         {formatDurationHTML(delta)}time
                     </div>
                     <Value
