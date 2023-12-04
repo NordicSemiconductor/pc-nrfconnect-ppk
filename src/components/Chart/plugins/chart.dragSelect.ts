@@ -100,10 +100,10 @@ const plugin: Plugin<'line'> = {
             typeof cursor.cursorBegin === 'number' &&
             typeof cursor.cursorEnd === 'number'
         ) {
-            const { cursorBegin, cursorEnd } = cursor;
-            const sX =
-                Math.ceil(scale.getPixelForValue(cursorBegin) - 0.5) - 0.5;
-            const eX = Math.ceil(scale.getPixelForValue(cursorEnd) - 0.5) - 0.5;
+            const begin = Math.min(cursor.cursorBegin, cursor.cursorEnd);
+            const end = Math.max(cursor.cursorBegin, cursor.cursorEnd);
+            const sX = Math.ceil(scale.getPixelForValue(begin) - 0.5) - 0.5;
+            const eX = Math.ceil(scale.getPixelForValue(end) - 0.5) - 0.5;
             const startX = Math.max(sX, left);
             const endX = Math.min(eX, right);
             if (startX < right && endX > left) {
