@@ -7,7 +7,7 @@
     your window, or drag the slider in along the horizontal axis.
 -   Zoom to selection button, which will make the window the size of the
     selected area. Hotkey is ALT+Z.
--   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
+-   Option to toggle logarithmic scale on the Y Axis, by @danielkucera.
 
 ## Changed
 
@@ -16,16 +16,14 @@
     contains the options to toggle linear or logarithmic scale, and the option
     to lock the Y axis.
 -   The chart will now only show positive values along the X axis.
--   Backend from the usage of **nrf-device-lib-js** to **nrfutil device** for
-    interacting with devices.
+-   Backend for interacting with devices from **nrf-device-lib-js** to **nrfutil device** .
 
 ## Removed
 
--   Support for Power Profiler Kit (PPK1), as it makes it difficult, and
-    sometimes impossible to implement new features. Hence, Power Profiler app
+-   Support for Power Profiler Kit (PPK1). From this release, Power Profiler app
     will only be usable for Power Profiler Kit II (PPK2). In order to use a
-    PPK1, it is required to use a version before v4.0.0, however, it is
-    recommended to replace your deprecated PPK1 with a PPK2.
+    PPK1, use a version before v4.0.0 or replace the deprecated PPK1 with a PPK2.
+    Removing support for PPK1 allows us to add new PPK2 features to the application.
 -   _Real-Time_ pane, as this was mainly intended for the deprecated PPK1. The
     useful Trigger feature will be re-introduced in the _Data Logger_ pane in an
     upcoming release.
