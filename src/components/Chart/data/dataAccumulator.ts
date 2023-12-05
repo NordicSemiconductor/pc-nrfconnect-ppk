@@ -27,6 +27,13 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
         return null;
     }
 
+    if (begin > end) {
+        const temp = begin;
+        begin = end;
+        end = temp;
+    }
+
+    begin = Math.max(begin, 0);
     end = Math.min(end, DataManager().getTimestamp());
 
     const data = DataManager().getData(begin, end);
