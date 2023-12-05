@@ -4,25 +4,31 @@
 
 -   Navigable minimap, which will display a zoomed-out map of the entire sample.
     In order to navigate the sample, simply click on the location where you want
-    your window. The minimap also displays a slider, which shows the span of the
-    window.
+    your window, or drag the slider in along the horizontal axis.
 -   Zoom to selection button, which will make the window the size of the
-    selected area.
-    -   Hotkey: `alt+z`
--   Option to toggle logarithmic scale on the Y-Axis, by @danielkucera.
+    selected area. Hotkey is ALT+Z.
+-   Option to toggle logarithmic scale on the Y Axis, by @danielkucera.
 
 ## Changed
 
--   The chart will now only show positive values along the x-axis.
--   From **nrf-device-lib-js** to **nrfutil device**, as a backend for
-    interacting with devices.
+-   The Y axis settings are now moved into a dialog. To open the settings
+    dialog, press SETTINGS, in the top left corner of the graph. The dialog
+    contains the options to toggle linear or logarithmic scale, and the option
+    to lock the Y axis.
+-   The chart will now only show positive values along the X axis.
+-   Backend for interacting with devices from **nrf-device-lib-js** to **nrfutil
+    device**.
 
 ## Removed
 
--   Support for Power Profiler Kit (PPK1), hence the Power Profiler app will
-    only be usable for Power Profiler II (PPK2). If you connect a PPK1, you will
-    be shown a dialog with instructions on how to proceed. However, we recommend
-    replacing your PPK1 with a PPK2.
+-   Support for Power Profiler Kit (PPK1). From this release, Power Profiler app
+    will only be usable for Power Profiler Kit II (PPK2). In order to use a
+    PPK1, use a version before v4.0.0 or replace the deprecated PPK1 with a
+    PPK2. Removing support for PPK1 allows us to add new PPK2 features to the
+    application.
+-   _Real-Time_ pane, as this was mainly intended for the deprecated PPK1. The
+    useful Trigger feature will be re-introduced in the _Data Logger_ pane in an
+    upcoming release.
 
 ## Fixed
 
