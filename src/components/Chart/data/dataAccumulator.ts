@@ -65,7 +65,6 @@ export interface DataAccumulator {
         begin: number,
         end: number,
         digitalChannelsToCompute: number[],
-        removeZeroValues: boolean,
         len: number,
         windowDuration: number
     ) => {
@@ -90,7 +89,6 @@ const accumulate = (
     end: number,
     timeGroup: number,
     numberOfPointsPerGrouped: number,
-    removeZeroValues: boolean,
     digitalChannelsToCompute: number[]
 ) => {
     const offset =
@@ -120,7 +118,7 @@ const accumulate = (
 
             ampereLineData[i] = {
                 x: timestamp,
-                y: v,
+                y: v * 1000,
             };
         });
 
@@ -159,13 +157,9 @@ const accumulate = (
             };
         }
 
-        if (removeZeroValues && v === 0) {
-            v = NaN;
-        }
-
         if (!Number.isNaN(v)) {
-            if (v > max) max = v;
-            if (v < min) min = v;
+            if (v * 1000 > max) max = v * 1000; // uA to nA
+            if (v * 1000 < min) min = v * 1000; // uA to nA
 
             if (data.bits && index < data.bits.length) {
                 bitAccumulator.processBits(data.bits[index]);
@@ -418,7 +412,6 @@ export default (): DataAccumulator => ({
                     end,
                     timeGroup,
                     numberOfPointsPerGroup,
-                    removeZeroValues,
                     digitalChannelsToCompute
                 );
 
@@ -450,7 +443,6 @@ export default (): DataAccumulator => ({
                     end,
                     timeGroup,
                     numberOfPointsPerGroup,
-                    removeZeroValues,
                     digitalChannelsToCompute
                 );
             }
@@ -468,7 +460,6 @@ export default (): DataAccumulator => ({
                     r.end,
                     timeGroup,
                     numberOfPointsPerGroup,
-                    removeZeroValues,
                     digitalChannelsToCompute
                 ),
             }));

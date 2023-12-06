@@ -9,7 +9,6 @@
 
 import {
     Device,
-    isDevelopment,
     logger,
     usageData,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -49,10 +48,6 @@ import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
-
-const zeroCap = isDevelopment
-    ? (n: number) => n
-    : (n: number) => Math.max(0, n);
 
 export const setupOptions =
     () => (dispatch: TDispatch, getState: () => RootState) => {
@@ -186,7 +181,11 @@ export const open =
                 return;
             }
 
-            let zeroCappedValue = zeroCap(value!);
+            let cappedValue = value ?? 0.2;
+            if (cappedValue < 0.2) {
+                cappedValue = 0;
+            }
+
             const b16 = convertBits16(bits!);
 
             if (samplingRunning && sampleFreq < maxSampleFreq) {
@@ -195,12 +194,11 @@ export const open =
                 nbSamplesTotal += 1;
                 const f = Math.min(nbSamplesTotal, samplesPerAverage);
                 if (Number.isFinite(value) && Number.isFinite(prevValue)) {
-                    zeroCappedValue =
-                        prevValue + (zeroCappedValue - prevValue) / f;
+                    cappedValue = prevValue + (cappedValue - prevValue) / f;
                 }
                 if (nbSamples < samplesPerAverage) {
                     if (value !== undefined) {
-                        prevValue = zeroCappedValue;
+                        prevValue = cappedValue;
                         prevBits |= b16;
                     }
                     return;
@@ -209,8 +207,7 @@ export const open =
             }
 
             if (
-                DataManager().addData(zeroCappedValue, b16 | prevBits)
-                    .bitDataAdded
+                DataManager().addData(cappedValue, b16 | prevBits).bitDataAdded
             ) {
                 prevBits = 0;
             }

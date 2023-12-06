@@ -40,7 +40,6 @@ import {
     chartWindowAction,
     getChartDigitalChannelInfo,
     getChartXAxisRange,
-    getChartYAxisRange,
     getCursorRange,
     isLiveMode,
     MAX_WINDOW_DURATION,
@@ -157,8 +156,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const { digitalChannels, digitalChannelsVisible, hasDigitalChannels } =
         useSelector(getChartDigitalChannelInfo);
-
-    const { yAxisLog } = useSelector(getChartYAxisRange);
 
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
 
@@ -330,7 +327,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             zoomedOutTooFarForDigitalChannels
                 ? []
                 : (digitalChannelsToCompute as number[]),
-            yAxisLog,
             Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
             windowDuration
         );
@@ -365,7 +361,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowEnd,
         windowDuration,
         numberOfPixelsInWindow,
-        yAxisLog,
         zoomedOutTooFarForDigitalChannels,
     ]);
 

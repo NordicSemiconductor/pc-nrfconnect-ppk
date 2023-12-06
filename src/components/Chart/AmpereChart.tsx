@@ -74,9 +74,9 @@ interface AmpereChartProperties {
     lineData: AmpereState[];
 }
 
-const formatCurrent = (uA: number) =>
-    typeof uA === 'number'
-        ? unit(uA, 'uA')
+const formatCurrent = (nA: number) =>
+    typeof nA === 'number'
+        ? unit(nA, 'nA')
               .format({ notation: 'auto', precision: 4 })
               .replace('u', '\u00B5')
         : (undefined as never);
@@ -171,9 +171,9 @@ export default ({
                 max: yMax != null ? yMax : undefined,
                 ticks: {
                     maxTicksLimit: 7,
-                    callback: uA =>
-                        typeof uA === 'number' && uA >= 0
-                            ? formatCurrent(uA)
+                    callback: nA =>
+                        typeof nA === 'number' && nA >= 0
+                            ? formatCurrent(nA)
                             : '',
                 },
                 border: {
