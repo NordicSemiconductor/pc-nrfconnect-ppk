@@ -56,15 +56,11 @@ const Minimap = () => {
     const minimapRef = useRef<MinimapChart | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const minimapSlider = useRef<HTMLDivElement | null>(null);
-    const {
-        windowEnd,
-        windowDuration,
-        xAxisMax: topChartXAxisMax,
-    } = useSelector(getChartXAxisRange);
+    const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
     const liveMode = useSelector(isLiveMode);
     const xAxisMax = useSelector(getXAxisMaxTime);
     const { yAxisLog } = useSelector(getChartYAxisRange);
-    const isWindowDurationFull = topChartXAxisMax > windowDuration;
+    const isWindowDurationFull = DataManager().getTimestamp() > windowDuration;
 
     function windowNavigateCallback(windowCenter: number) {
         dispatch(panWindow(windowCenter));
