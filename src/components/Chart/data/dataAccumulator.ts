@@ -85,15 +85,13 @@ type AccumulatedResult = {
 let cachedResult: AccumulatedResult | undefined;
 
 const accumulate = (
-    begin: number,
-    end: number,
+    begin: number, // normalizeTime
+    end: number, // normalizeTime
     timeGroup: number,
     numberOfPointsPerGrouped: number,
     digitalChannelsToCompute: number[]
 ) => {
-    const offset =
-        begin - Math.floor(normalizeTime(begin) / timeGroup) * timeGroup;
-    begin -= offset;
+    begin = Math.floor(begin / timeGroup) * timeGroup;
     end = begin + Math.ceil((end - begin) / timeGroup) * timeGroup;
 
     const data = DataManager().getData(begin, end);
@@ -110,7 +108,7 @@ const accumulate = (
             Math.ceil(noOfPointToRender)
         );
         data.current.forEach((v, i) => {
-            const timestamp = begin + offset + i * timeGroup;
+            const timestamp = begin + i * timeGroup;
             if (!Number.isNaN(v) && data.bits && i < data.bits.length) {
                 bitAccumulator.processBits(data.bits[i]);
                 bitAccumulator.processAccumulatedBits(timestamp);
@@ -140,7 +138,7 @@ const accumulate = (
     let min: number = Number.MAX_VALUE;
     let max: number = -Number.MAX_VALUE;
 
-    let timestamp = begin + offset;
+    let timestamp = begin;
     data.current.forEach((v, index) => {
         const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
         const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;
@@ -256,26 +254,27 @@ const findMissingRanges = (
     begin: number,
     end: number
 ) => {
-    const timestamps = accumulatedResult.ampereLineData
-        .filter(v => v.x !== undefined)
-        .map(v => v.x as number);
+    const timestamps =
+        accumulatedResult.ampereLineData
+            .filter(v => v.x !== undefined)
+            .map(v => v.x as number) ?? [];
     const min = Math.min(...timestamps);
     const max = Math.max(...timestamps);
 
     const result: { begin: number; end: number; location: 'front' | 'back' }[] =
         [];
 
-    if (min !== begin) {
+    if (min > begin) {
         result.push({
             begin,
-            end: min - indexToTimestamp(1),
+            end: Math.max(begin, min - indexToTimestamp(1)),
             location: 'front',
         });
     }
 
-    if (max !== end) {
+    if (max < end) {
         result.push({
-            begin: max + indexToTimestamp(1),
+            begin: Math.min(end, max + indexToTimestamp(1)),
             end,
             location: 'back',
         });
@@ -362,15 +361,17 @@ export default (): DataAccumulator => ({
         begin,
         end,
         digitalChannelsToCompute,
-        removeZeroValues,
         maxNumberOfPoints,
         windowDuration
     ) {
         // We want an extra sample from both end to show line going out of chart
-        begin = Math.max(0, begin - DataManager().getSamplingTime());
+        begin = Math.max(0, normalizeTime(begin)); // normalizeTime floors
+
         end = Math.min(
             DataManager().getTimestamp(),
-            end + DataManager().getSamplingTime()
+            normalizeTime(end) === end
+                ? end
+                : normalizeTime(end) + DataManager().getSamplingTime()
         );
 
         if (maxNumberOfPoints === 0) {
@@ -415,25 +416,28 @@ export default (): DataAccumulator => ({
                     digitalChannelsToCompute
                 );
 
-            const cachedEnd = Math.min(
-                Math.floor(end / timeGroup) * timeGroup,
+            const requiredEnd = Math.min(
+                Math.ceil(end / timeGroup) * timeGroup,
                 DataManager().getTimestamp()
             );
+
+            const requiredBegin = Math.floor(begin / timeGroup) * timeGroup;
+
             const usableCachedData: AccumulatedResult = {
                 ampereLineData: removeCurrentSamplesOutsideScopes(
                     cachedResult.ampereLineData,
-                    begin,
-                    cachedEnd
+                    requiredBegin,
+                    requiredEnd
                 ),
                 bitsLineData: removeDigitalChannelsStatesSamplesOutsideScopes(
                     cachedResult.bitsLineData,
-                    begin,
-                    cachedEnd
+                    requiredBegin,
+                    requiredEnd
                 ),
                 averageLine: removeCurrentSamplesOutsideScopes(
                     cachedResult.averageLine,
-                    begin,
-                    cachedEnd
+                    requiredBegin,
+                    requiredEnd
                 ),
             };
 

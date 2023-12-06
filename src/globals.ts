@@ -7,6 +7,7 @@
 // FIXME: Will ned to remove the line under at some point.
 
 import { getCurrentWindow } from '@electron/remote';
+import usageData from '@nordicsemiconductor/pc-nrfconnect-shared/src/utils/usageData';
 
 export const bufferLengthInSeconds = 60 * 5;
 export const numberOfDigitalChannels = 8;
@@ -42,16 +43,16 @@ let cashedDataCurrent: Float32Array | undefined;
 let cashedBits: Uint16Array | undefined;
 
 const loadNeededDataCurrent = (
-    begin: number,
-    end: number,
+    begin: number, // inclusive and normalized
+    end: number, // inclusive and normalized
     getData: (fromTime: number, toTime: number) => Float32Array,
     cashedData?: Float32Array
 ): Float32Array => {
-    if (!cashedData || cachedBegin === undefined) {
+    if (!cashedData || cashedData.length === 0 || cachedBegin === undefined) {
         return getData(begin, end);
     }
 
-    const cacheEnd = cachedBegin + indexToTimestamp(cashedData.length);
+    const cacheEnd = cachedBegin + indexToTimestamp(cashedData.length - 1);
 
     if (begin > cacheEnd || cachedBegin > end) {
         return getData(begin, end);
@@ -79,12 +80,12 @@ const loadNeededDataCurrent = (
 
     let frontData: Float32Array = new Float32Array(0);
     if (cacheRange.begin > begin) {
-        frontData = getData(begin, cacheRange.begin);
+        frontData = getData(begin, cacheRange.begin - indexToTimestamp(1));
     }
 
     let backData: Float32Array = new Float32Array(0);
     if (end > cacheRange.end) {
-        backData = getData(cacheRange.end, end);
+        backData = getData(cacheRange.end + indexToTimestamp(1), end);
     }
 
     const result = new Float32Array(
@@ -97,22 +98,22 @@ const loadNeededDataCurrent = (
 
     const expectedDataSize =
         timestampToIndex(Math.min(getTimestamp(), end)) -
-        timestampToIndex(begin);
+        timestampToIndex(begin) +
+        1;
     if (
         expectedDataSize !== result.length &&
         end <= DataManager().getTimestamp()
     ) {
-        console.error(
-            'This should never happen. Math is wrong',
-            begin,
-            end,
-            frontData.length,
-            usableCachedData.length,
-            backData.length,
-            getData(begin, end).length,
-            result.length,
-            expectedDataSize,
-            cacheRange
+        usageData.sendErrorReport(
+            `Reading chart data error was incorrect. 
+            begin: ${begin}, 
+            end: ${end},
+            frontDataRead: ${frontData.length}, 
+            cacheDataUsed: ${usableCachedData.length}, 
+            endDataRead: ${backData.length},
+            expectedLength: ${expectedDataSize}, 
+            resultLength: ${result.length}, 
+            cacheRange: ${cacheRange}`
         );
     }
 
@@ -188,14 +189,18 @@ const getDataCurrent = (fromTime: number, toTime: number) => {
         fromTime,
         toTime,
         (begin: number, end: number) =>
-            options.data.slice(timestampToIndex(begin), timestampToIndex(end)),
+            options.data.slice(
+                timestampToIndex(begin),
+                timestampToIndex(end) + 1
+            ),
         cashedDataCurrent
     );
     if (DataManager().getTimestamp() < toTime) {
         cashedDataCurrent = result.slice(
             0,
-            timestampToIndex(Math.min(DataManager().getTimestamp(), toTime)) -
-                timestampToIndex(fromTime)
+            timestampToIndex(DataManager().getTimestamp()) -
+                timestampToIndex(fromTime) +
+                1
         );
     } else {
         cashedDataCurrent = result;
@@ -216,7 +221,7 @@ const getDataBits = (fromTime: number, toTime: number) => {
             options.bits
                 ? options.bits?.slice(
                       timestampToIndex(begin),
-                      timestampToIndex(end)
+                      timestampToIndex(end) + 1
                   )
                 : null,
         cashedBits
@@ -225,8 +230,9 @@ const getDataBits = (fromTime: number, toTime: number) => {
     if (DataManager().getTimestamp() < toTime) {
         cashedBits = result?.slice(
             0,
-            timestampToIndex(Math.min(DataManager().getTimestamp(), toTime)) -
-                timestampToIndex(fromTime)
+            timestampToIndex(DataManager().getTimestamp()) -
+                timestampToIndex(fromTime) +
+                1
         );
     } else {
         cashedBits = result ?? undefined;
@@ -256,7 +262,7 @@ export const DataManager = () => ({
     },
     getData: (fromTime = 0, toTime = getTimestamp()) => {
         fromTime = normalizeTime(fromTime);
-        toTime = normalizeTime(toTime);
+        toTime = Math.min(getTimestamp(), normalizeTime(toTime));
 
         const result = {
             current: getDataCurrent(fromTime, toTime),
