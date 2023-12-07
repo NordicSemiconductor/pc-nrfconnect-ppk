@@ -1,4 +1,4 @@
-## 4.0.0-beta1 - Unreleased
+## 4.0.0-beta1 - 2023-12-07
 
 ## Added
 
