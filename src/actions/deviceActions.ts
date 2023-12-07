@@ -182,6 +182,7 @@ export const open =
             }
 
             let cappedValue = value ?? 0.2;
+            // PPK 2 can only read till 200nA (0.2uA)
             if (cappedValue < 0.2) {
                 cappedValue = 0;
             }
