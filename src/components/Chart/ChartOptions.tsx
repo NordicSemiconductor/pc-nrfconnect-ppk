@@ -29,12 +29,13 @@ const UNIT_EXPONENT = {
     MILLI_AMPERE: 1,
     AMPERE: 2,
 };
-const UNIT_LABELS = ['\u00B5A', 'mA', 'A'];
+const UNIT_LABELS = ['nA', '\u00B5A', 'mA', 'A'];
 
 const UNIT_ITEMS: DropdownItem[] = [
     { label: UNIT_LABELS[0], value: '0' },
     { label: UNIT_LABELS[1], value: '1' },
     { label: UNIT_LABELS[2], value: '2' },
+    { label: UNIT_LABELS[3], value: '3' },
 ];
 
 const ChartOptions = () => {
@@ -56,16 +57,19 @@ const ChartOptions = () => {
         UNIT_EXPONENT.MICRO_AMPERE
     );
 
-    /** Get the appropriate exponent to decide what unit to use given the number of microAmpere, uA
-     * @param {number} uA number av microAmpere
-     * @returns {UNIT_EXPONENT} exponent to use for transforming to and from microAmpere
+    /** Get the appropriate exponent to decide what unit to use given the number of nanoAmpere, nA
+     * @param {number} nA number av nanoAmpere
+     * @returns {UNIT_EXPONENT} exponent to use for transforming to and from nanoAmpere
      */
-    const getUnitPower = (uA: number) => {
-        const absoluteValue = Math.abs(uA);
-        if (absoluteValue >= 1e6) {
+    const getUnitPower = (nA: number) => {
+        const absoluteValue = Math.abs(nA);
+        if (absoluteValue >= 1e9) {
+            return 3;
+        }
+        if (absoluteValue > 1e6) {
             return 2;
         }
-        if (absoluteValue > 1000) {
+        if (absoluteValue > 1e3) {
             return 1;
         }
         return 0;
@@ -120,7 +124,7 @@ const ChartOptions = () => {
         const unitPower = getUnitPower(storedYMin);
         setYMinExponent(unitPower);
         const newYMin = Number(getPrettyValue(storedYMin, unitPower));
-        if (Number.isNaN(newYMin)) return;
+        if (Number.isNaN(newYMin) || newYMin < 0) return;
 
         setYMin(newYMin);
     }, [storedYMin]);
@@ -131,7 +135,7 @@ const ChartOptions = () => {
         setYMaxExponent(unitPower);
 
         const newYMax = Number(getPrettyValue(storedYMax, unitPower));
-        if (Number.isNaN(newYMax)) return;
+        if (Number.isNaN(newYMax) || newYMax < 0) return;
 
         setYMax(newYMax);
     }, [storedYMax]);

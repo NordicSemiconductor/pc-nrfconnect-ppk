@@ -44,6 +44,13 @@ export class FoldingBuffer {
             this.#addDefault(timestamp);
         }
 
+        value *= 1000; // uA to nA
+
+        // workaround to support log y axis
+        if (value < 200) {
+            value = 200;
+        }
+
         this.lastElementFoldCount += 1;
         const alpha = 1 / this.lastElementFoldCount;
         this.min[this.min.length - 1] = {

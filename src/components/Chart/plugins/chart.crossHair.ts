@@ -158,21 +158,21 @@ const plugin: CrossHairPlugin = {
             ctx.stroke();
 
             const yCoordinate = yScale.getValueForPixel(offsetY);
-            const uA = yCoordinate ? formatY(yCoordinate) : null;
+            const nA = yCoordinate != null ? formatY(yCoordinate) : null;
 
-            if (uA != null) {
-                const { width: uAWidth } = ctx.measureText(uA);
+            if (nA != null) {
+                const { width: nAWidth } = ctx.measureText(nA);
 
                 ctx.fillStyle = color;
                 ctx.textAlign = 'right';
                 ctx.fillRect(
-                    right - uAWidth - 10,
+                    right - nAWidth - 10,
                     offsetY - 20,
-                    uAWidth + 10,
+                    nAWidth + 10,
                     20
                 );
                 ctx.fillStyle = white;
-                ctx.fillText(uA, right - 5, offsetY - 7);
+                ctx.fillText(nA, right - 5, offsetY - 7);
             }
 
             ctx.restore();

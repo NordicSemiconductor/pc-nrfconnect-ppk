@@ -64,8 +64,8 @@ const initialState = (): ChartState => ({
 
 export const MIN_WINDOW_DURATION = 5e7;
 export const MAX_WINDOW_DURATION = 1.2e13;
-const Y_MIN = -100;
-const Y_MAX = 1200000;
+const Y_MIN = 0;
+const Y_MAX = 1200000000;
 
 const chartSlice = createSlice({
     name: 'chart',
