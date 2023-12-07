@@ -142,10 +142,13 @@ const processWheelEvents = () => {
         const deltaYAxis = yMax - yMin;
         const dx = fx * deltaX;
         const dy = fy * deltaY;
+        const newBeginX = Math.max(0, xMin + dx);
+        let newEndX = Math.max(0, xMax + dx);
+        if (newBeginX === 0) newEndX = xMax;
         const newBeginY = Math.max(0, yMin + dy);
         let newEndY = Math.max(0, yMax + dy);
         if (newBeginY === 0) newEndY = deltaYAxis;
-        zoomPanCallback(xMin + dx, xMax + dx, newBeginY, newEndY);
+        zoomPanCallback(newBeginX, newEndX, newBeginY, newEndY);
     } else {
         let z = 0;
         if (deltaY < 0) {
