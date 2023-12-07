@@ -139,9 +139,13 @@ const processWheelEvents = () => {
     } else if (isTrackpadPan) {
         const fx = (xMax - xMin) / width;
         const fy = (yMin - yMax) / height;
+        const deltaYAxis = yMax - yMin;
         const dx = fx * deltaX;
         const dy = fy * deltaY;
-        zoomPanCallback(xMin + dx, xMax + dx, yMin + dy, yMax + dy);
+        const newBeginY = Math.max(0, yMin + dy);
+        let newEndY = Math.max(0, yMax + dy);
+        if (newBeginY === 0) newEndY = deltaYAxis;
+        zoomPanCallback(xMin + dx, xMax + dx, newBeginY, newEndY);
     } else {
         let z = 0;
         if (deltaY < 0) {
