@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { usageData } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { serialize } from 'bson';
 import fs from 'fs';
 import { createDeflateRaw, DeflateRaw } from 'zlib';
@@ -12,6 +12,7 @@ import { createDeflateRaw, DeflateRaw } from 'zlib';
 import { GlobalOptions } from '../globals';
 import { ChartState } from '../slices/chartSlice';
 import { DataLoggerState } from '../slices/dataLoggerSlice';
+import EventAction from '../usageDataActions';
 
 export interface SaveData {
     data: Float32Array;
@@ -70,8 +71,11 @@ export default async (filename: string, saveData: SaveData) => {
     if (!saveData) return false;
     try {
         await save(saveData, fileWriter);
+        usageData.sendUsageData(EventAction.EXPORT_DATA, {
+            exportType: 'PPK',
+        });
     } catch (err) {
-        logger.error(`Error saving state to ${filename}`);
+        usageData.sendErrorReport(`Error saving state to ${filename}`);
         return false;
     } finally {
         deflateRaw.end();

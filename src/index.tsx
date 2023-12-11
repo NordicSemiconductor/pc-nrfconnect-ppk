@@ -22,6 +22,7 @@ render(
         appReducer={reducers}
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
+        feedback
         panes={[{ name: 'Data Logger', Main: DataLogger }]}
     />
 );

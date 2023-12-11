@@ -17,6 +17,7 @@ const EventAction = {
     START_REAL_TIME_SAMPLE: 'Real Time sampling started',
     SAMPLE_STARTED_WITH_PPK1_SELECTED: 'Sample started with PPK1 selected',
     SAMPLE_STARTED_WITH_PPK2_SELECTED: 'Sample started with PPK2 selected',
+    EXPORT_DATA: 'Export data',
 };
 
 export default EventAction;

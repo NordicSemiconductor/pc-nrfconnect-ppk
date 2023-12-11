@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { logger, usageData } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
 import { DataManager, indexToTimestamp, timestampToIndex } from '../globals';
 import { hideExportDialog } from '../slices/appSlice';
 import { TDispatch } from '../slices/thunk';
+import EventAction from '../usageDataActions';
 import { averagedBitState } from '../utils/bitConversion';
 
 // create and array of [index, length] to split longer range
@@ -143,6 +144,11 @@ export default (
                 .then(() => {
                     dispatch(hideExportDialog());
                     logger.info(`Exported CSV to: ${filename}`);
+                    usageData.sendUsageData(EventAction.EXPORT_DATA, {
+                        timestampBegin,
+                        timestampEnd,
+                        exportType: 'CSV',
+                    });
                 })
                 .finally(() => {
                     fs.closeSync(fd);

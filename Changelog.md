@@ -1,3 +1,15 @@
+## 4.0.0-beta2 - 2023-12-12
+
+## Added
+
+-   Feedback tab
+
+## Fixed
+
+-   Error when recording data exceed buffer size by one sample resulting in
+    error in console.
+-   Window stats where off by a factor of 1000
+
 ## 4.0.0-beta1 - 2023-12-07
 
 ## Added
