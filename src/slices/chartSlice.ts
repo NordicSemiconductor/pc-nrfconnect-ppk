@@ -3,7 +3,6 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- temporarily added to be conservative while converting to typescript */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -18,7 +17,7 @@ import {
     setTimestampsVisible as persistTimestampsVisible,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
-import { getMaxSampleFrequency, getSampleFrequency } from './dataLoggerSlice';
+import { getSampleFrequency } from './dataLoggerSlice';
 import { TAction } from './thunk';
 
 export interface ChartState {
@@ -278,17 +277,6 @@ export const chartWindowAction =
         if (windowEnd >= DataManager().getTimestamp()) {
             dispatch(setLiveMode(true));
         }
-    };
-
-export const chartTriggerWindowAction =
-    (windowBegin: number, windowEnd: number, windowDuration: number): TAction =>
-    (dispatch, getState) => {
-        const maxSampleFreq = getMaxSampleFrequency(getState());
-        const duration = calculateDuration(maxSampleFreq, windowDuration);
-
-        dispatch(
-            chartTrigger({ windowBegin, windowEnd, windowDuration: duration! })
-        );
     };
 
 export const animationAction = (): TAction => (dispatch, getState) => {
