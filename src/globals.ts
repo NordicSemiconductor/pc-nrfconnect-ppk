@@ -113,7 +113,7 @@ const loadNeededDataCurrent = (
             endDataRead: ${backData.length},
             expectedLength: ${expectedDataSize}, 
             resultLength: ${result.length}, 
-            cacheRange: ${cacheRange}`
+            cacheRange: {begin: ${cacheRange.begin}, end: ${cacheRange.end}}`
         );
     }
 
