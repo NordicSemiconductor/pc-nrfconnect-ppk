@@ -105,7 +105,7 @@ const loadNeededDataCurrent = (
         end <= DataManager().getTimestamp()
     ) {
         usageData.sendErrorReport(
-            `Reading chart data error was incorrect. 
+            `Unexpected result when merging cached and read data. 
             begin: ${begin}, 
             end: ${end},
             frontDataRead: ${frontData.length}, 
@@ -331,7 +331,7 @@ export const DataManager = () => ({
     getTotalSavedRecords: () =>
         options.timestamp ? timestampToIndex(getTimestamp()) + 1 : 0,
     isBufferFull: () =>
-        timestampToIndex(getTimestamp()) === options.data.length,
+        timestampToIndex(getTimestamp()) === options.data.length - 1,
     getMetadata: () => ({
         samplesPerSecond: options.samplesPerSecond,
         samplingTime: options.samplingTime,
