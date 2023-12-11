@@ -1,6 +1,6 @@
 {
     "name": "pc-nrfconnect-ppk",
-    "version": "4.0.0-beta1",
+    "version": "4.0.0-beta2",
     "displayName": "Power Profiler",
     "description": "App for use with Nordic Power Profiler Kits",
     "homepage": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk",
