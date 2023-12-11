@@ -11,7 +11,7 @@ import {
     numberOfDigitalChannels,
 } from '../../../globals';
 import { always0, always1, sometimes0And1 } from '../../../utils/bitConversion';
-import bitDataAccumulator, { BitDataAccumulator } from './bitDataAccumulator';
+import bitDataAccumulator from './bitDataAccumulator';
 import {
     AmpereState,
     BitStateIndexType,
@@ -20,7 +20,6 @@ import {
     DigitalChannelStates,
     TimestampType,
 } from './dataTypes';
-import noOpBitDataProcessor from './noOpBitDataProcessor';
 
 export const calcStats = (begin?: null | number, end?: null | number) => {
     if (begin == null || end == null) {
@@ -96,9 +95,9 @@ const accumulate = (
 
     const data = DataManager().getData(begin, end);
 
-    const bitAccumulator = getDataProcessor(digitalChannelsToCompute);
-
-    bitAccumulator.initialise(digitalChannelsToCompute);
+    const bitAccumulator =
+        digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
+    bitAccumulator?.initialise(digitalChannelsToCompute);
 
     const noOfPointToRender = data.current.length / numberOfPointsPerGrouped;
     const needMinMaxLine = numberOfPointsPerGrouped !== 1;
@@ -110,8 +109,8 @@ const accumulate = (
         data.current.forEach((v, i) => {
             const timestamp = begin + i * timeGroup;
             if (!Number.isNaN(v) && data.bits && i < data.bits.length) {
-                bitAccumulator.processBits(data.bits[i]);
-                bitAccumulator.processAccumulatedBits(timestamp);
+                bitAccumulator?.processBits(data.bits[i]);
+                bitAccumulator?.processAccumulatedBits(timestamp);
             }
 
             ampereLineData[i] = {
@@ -122,7 +121,7 @@ const accumulate = (
 
         return {
             ampereLineData,
-            bitsLineData: bitAccumulator.getLineData(),
+            bitsLineData: bitAccumulator?.getLineData() ?? [],
             averageLine: ampereLineData.map(
                 d => ({ ...d, count: 1 } as AverageLine)
             ),
@@ -160,7 +159,7 @@ const accumulate = (
             if (v * 1000 < min) min = v * 1000; // uA to nA
 
             if (data.bits && index < data.bits.length) {
-                bitAccumulator.processBits(data.bits[index]);
+                bitAccumulator?.processBits(data.bits[index]);
             }
 
             averageLine[groupIndex] = {
@@ -183,14 +182,14 @@ const accumulate = (
         if (lastItemInGrp) {
             timestamp += timeGroup;
             if (min <= max) {
-                bitAccumulator.processAccumulatedBits(timestamp);
+                bitAccumulator?.processAccumulatedBits(timestamp);
             }
         }
     });
 
     return {
         ampereLineData,
-        bitsLineData: bitAccumulator.getLineData(),
+        bitsLineData: bitAccumulator?.getLineData() ?? [],
         averageLine,
     };
 };
@@ -316,8 +315,9 @@ const joinBitLines = (
     digitalChannelsToCompute: number[]
 ) => {
     const timestamp: TimestampType[] = Array(8).fill(undefined);
-    const bitDataProcessor = getDataProcessor(digitalChannelsToCompute);
-    bitDataProcessor.initialise(digitalChannelsToCompute);
+    const bitDataProcessor =
+        digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
+    bitDataProcessor?.initialise(digitalChannelsToCompute);
 
     dataLines = dataLines.filter(d => d.length > 0);
 
@@ -328,26 +328,21 @@ const joinBitLines = (
                 line.uncertaintyLine.length
             );
             for (let i = 0; i < numberOfElement; i += 1) {
-                bitDataProcessor.processBitState(
+                bitDataProcessor?.processBitState(
                     stateToIndex(line.mainLine[i].y, line.uncertaintyLine[i].y),
                     index
                 );
 
                 if (timestamp[index] !== line.mainLine[i].x) {
                     timestamp[index] = line.mainLine[i].x;
-                    bitDataProcessor.processAccumulatedBits(timestamp[index]);
+                    bitDataProcessor?.processAccumulatedBits(timestamp[index]);
                 }
             }
         });
     });
 
-    return bitDataProcessor.getLineData();
+    return bitDataProcessor?.getLineData() ?? [];
 };
-
-const getDataProcessor = (digitalChannelsToCompute: number[]) =>
-    digitalChannelsToCompute.length > 0
-        ? bitDataAccumulator()
-        : (noOpBitDataProcessor() as BitDataAccumulator); // BitDataAccumulator is not the correct type. keeping old solution for now
 
 // true is rhs has all elements from lhs
 const compareDigitalChanel = (rhs: number[], lhs: number[]) =>
