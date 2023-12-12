@@ -3,6 +3,7 @@
 ## Added
 
 -   Feedback tab
+-   Persist state of `show log` panel
 
 ## Fixed
 
