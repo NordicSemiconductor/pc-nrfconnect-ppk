@@ -74,8 +74,8 @@ const ChartTop = ({
     ].slice(maxFreqLog10 - sampleFreqLog10, maxFreqLog10 - sampleFreqLog10 + 6);
 
     return (
-        <div className="tw-flex tw-w-full tw-flex-row tw-flex-wrap tw-justify-between tw-py-2 tw-pl-[4.3rem] tw-pr-[1.8rem]">
-            <div className="tw-flex tw-h-full tw-w-1/4 tw-items-center tw-gap-x-4">
+        <div className="tw-flex tw-w-full tw-flex-row tw-flex-wrap tw-justify-between tw-gap-y-2 tw-py-2 tw-pl-[4.3rem] tw-pr-[1.8rem]">
+            <div className="tw-order-1 tw-flex tw-items-center tw-gap-x-4">
                 <button
                     className="tw-flex tw-h-5 tw-min-w-[4rem] tw-flex-row tw-gap-x-2 tw-border-none tw-bg-white tw-text-gray-700 hover:tw-bg-gray-50"
                     type="button"
@@ -84,7 +84,7 @@ const ChartTop = ({
                     <span className="mdi mdi-cog" /> <p>SETTINGS</p>
                 </button>
             </div>
-            <div className="tw-flex tw-w-2/4 tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-place-self-auto">
+            <div className="tw-order-2 tw-flex tw-w-full tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-order-1 lg:tw-w-fit lg:tw-place-self-auto">
                 {timeWindowLabels.map(label => (
                     <TimeWindowButton
                         label={label}
@@ -93,7 +93,7 @@ const ChartTop = ({
                     />
                 ))}
             </div>
-            <div className="tw-flex tw-w-1/4 tw-flex-row tw-justify-end">
+            <div className="tw-order-1 tw-flex tw-flex-row tw-justify-end">
                 <Toggle
                     label="LIVE VIEW"
                     onToggle={onLiveModeChange}
