@@ -330,16 +330,21 @@ export const getChartXAxisRange = (state: RootState) => {
         windowEndLock: state.app.chart.windowEndLock,
     };
 };
-export const getChartYAxisRange = (state: RootState) => ({
-    yMax: state.app.chart.yMax,
-    yMin:
-        state.app.chart.yMin == null ??
-        state.app.chart.latestDataTimestamp === 0
-            ? 0
-            : undefined,
-    yAxisLog: state.app.chart.yAxisLog,
-    yAxisLock: state.app.chart.yAxisLock,
-});
+export const getChartYAxisRange = (state: RootState) => {
+    let yMin = state.app.chart.yMin;
+    if (state.app.chart.yMin == null) {
+        yMin =
+            state.app.chart.latestDataTimestamp === 0
+                ? 0
+                : state.app.chart.yMin;
+    }
+    return {
+        yMax: state.app.chart.yMax,
+        yMin,
+        yAxisLog: state.app.chart.yAxisLog,
+        yAxisLock: state.app.chart.yAxisLock,
+    };
+};
 
 export const getCursorRange = (state: RootState) => ({
     cursorBegin: state.app.chart.cursorBegin,
