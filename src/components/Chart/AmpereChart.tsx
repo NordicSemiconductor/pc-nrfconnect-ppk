@@ -167,7 +167,7 @@ export default ({
             },
             yScale: {
                 type: yAxisLog ? 'logarithmic' : 'linear',
-                min: yMin != null ? yMin : 0,
+                min: yMin != null ? yMin : undefined,
                 max: yMax != null ? yMax : undefined,
                 ticks: {
                     maxTicksLimit: 7,
