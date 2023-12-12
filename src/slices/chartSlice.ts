@@ -333,7 +333,8 @@ export const getChartXAxisRange = (state: RootState) => {
 export const getChartYAxisRange = (state: RootState) => ({
     yMax: state.app.chart.yMax,
     yMin:
-        state.app.chart.yMin ?? state.app.chart.latestDataTimestamp === 0
+        state.app.chart.yMin == null ??
+        state.app.chart.latestDataTimestamp === 0
             ? 0
             : undefined,
     yAxisLog: state.app.chart.yAxisLog,
