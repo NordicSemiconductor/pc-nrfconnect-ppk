@@ -58,6 +58,8 @@ const ChartTop = ({
     const dispatch = useDispatch();
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const samplingRunning = useSelector(isSamplingRunning);
+    const { yMin, yMax } = useSelector(getChartYAxisRange);
+    const yAxisLock = yMin != null && yMax != null;
 
     const timeWindowLabels = [
         '10ms',
@@ -75,14 +77,44 @@ const ChartTop = ({
 
     return (
         <div className="tw-flex tw-w-full tw-flex-row tw-flex-wrap tw-justify-between tw-gap-y-2 tw-py-2 tw-pl-[4.3rem] tw-pr-[1.8rem]">
+            <button
+                className="tw-h-5.5 tw-absolute tw-left-8 tw-flex tw-w-fit tw-border-none tw-bg-white tw-text-gray-700 hover:tw-bg-gray-50"
+                type="button"
+                title="Y-Axis Settings"
+                onClick={() => dispatch(setShowSettings(true))}
+            >
+                <span className="mdi mdi-cog" />
+            </button>
             <div className="tw-order-1 tw-flex tw-items-center tw-gap-x-4">
-                <button
-                    className="tw-flex tw-h-5 tw-min-w-[4rem] tw-flex-row tw-gap-x-2 tw-border-none tw-bg-white tw-text-gray-700 hover:tw-bg-gray-50"
-                    type="button"
-                    onClick={() => dispatch(setShowSettings(true))}
-                >
-                    <span className="mdi mdi-cog" /> <p>SETTINGS</p>
-                </button>
+                <Toggle
+                    title="Enable in order to explicitly set the start and end of the y-axis"
+                    label="Lock Y-axis"
+                    onToggle={() => {
+                        if (yAxisLock) {
+                            dispatch(
+                                toggleYAxisLock({
+                                    yMin: null,
+                                    yMax: null,
+                                })
+                            );
+                            zoomToWindow(windowDuration);
+                        } else {
+                            const { min, max } = chartRef.current?.scales
+                                ?.yScale ?? {
+                                min: null,
+                                max: null,
+                            };
+                            dispatch(
+                                toggleYAxisLock({
+                                    yMin: min,
+                                    yMax: max,
+                                })
+                            );
+                        }
+                    }}
+                    isToggled={yMin != null && yMax != null}
+                    variant="primary"
+                />
             </div>
             <div className="tw-order-2 tw-flex tw-w-full tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-order-1 lg:tw-w-fit lg:tw-place-self-auto">
                 {timeWindowLabels.map(label => (
@@ -122,7 +154,9 @@ const ChartSettingsDialog = ({
 }) => {
     const dispatch = useDispatch();
     const showSettings = useSelector(showChartSettings);
-    const { yAxisLock, yAxisLog } = useSelector(getChartYAxisRange);
+    const { yMin, yMax, yAxisLog } = useSelector(getChartYAxisRange);
+
+    const yAxisLock = yMin != null && yMax != null;
 
     return (
         <InfoDialog
@@ -158,15 +192,20 @@ const ChartSettingsDialog = ({
                                     );
                                     zoomToWindow(windowDuration);
                                 } else {
-                                    const { min: yMin, max: yMax } = chartRef
-                                        .current?.scales?.yScale ?? {
+                                    const { min, max } = chartRef.current
+                                        ?.scales?.yScale ?? {
                                         min: null,
                                         max: null,
                                     };
-                                    dispatch(toggleYAxisLock({ yMin, yMax }));
+                                    dispatch(
+                                        toggleYAxisLock({
+                                            yMin: min,
+                                            yMax: max,
+                                        })
+                                    );
                                 }
                             }}
-                            isToggled={yAxisLock}
+                            isToggled={yMin != null && yMax != null}
                             variant="primary"
                         />
                     </div>

@@ -32,7 +32,6 @@ export interface ChartState {
     digitalChannels: booleanTupleOf8;
     digitalChannelsVisible: boolean;
     timestampsVisible: boolean;
-    yAxisLock: boolean;
     yAxisLog: boolean;
     windowBeginLock: null | number;
     windowEndLock: null | number;
@@ -53,7 +52,6 @@ const initialState = (): ChartState => ({
     digitalChannels: getDigitalChannels(),
     digitalChannelsVisible: getDigitalChannelsVisible(),
     timestampsVisible: getTimestampsVisible(),
-    yAxisLock: false,
     yAxisLog: false,
     windowBeginLock: null, // [microseconds]
     windowEndLock: null, // [microseconds]
@@ -124,16 +122,13 @@ const chartSlice = createSlice({
                 if (p0 * p1 === 0) {
                     yMin = yMin - p1 + p0;
                     yMax = yMax - p1 + p0;
-                } else {
-                    yMin = Y_MIN;
-                    yMax = Y_MAX;
                 }
             }
 
             let { windowEnd, windowDuration } = action.payload;
             let windowBegin = Math.max(0, windowEnd - windowDuration);
 
-            const { yAxisLock, windowBeginLock, windowEndLock } = state;
+            const { windowBeginLock, windowEndLock } = state;
 
             if (windowBeginLock !== null) {
                 windowBegin = Math.max(windowBeginLock, windowBegin);
@@ -152,8 +147,8 @@ const chartSlice = createSlice({
                 ...state,
                 windowEnd,
                 windowDuration,
-                yMin: yMin == null || yAxisLock ? state.yMin : yMin,
-                yMax: yMax == null || yAxisLock ? state.yMax : yMax,
+                yMin: yMin ?? state.yMin,
+                yMax: yMax ?? state.yMax,
             };
         },
         panWindow(state, { payload: windowCenter }: PayloadAction<number>) {
@@ -214,9 +209,8 @@ const chartSlice = createSlice({
         ) {
             return {
                 ...state,
-                yAxisLock: !state.yAxisLock,
-                yMin: action.payload?.yMin || null,
-                yMax: action.payload?.yMax || null,
+                yMin: action.payload?.yMin,
+                yMax: action.payload?.yMax,
             };
         },
         toggleYAxisLog: state => {
@@ -342,7 +336,7 @@ export const getChartYAxisRange = (state: RootState) => {
         yMax: state.app.chart.yMax,
         yMin,
         yAxisLog: state.app.chart.yAxisLog,
-        yAxisLock: state.app.chart.yAxisLock,
+        yAxisLock: state.app.chart.yMax != null && yMin != null,
     };
 };
 
