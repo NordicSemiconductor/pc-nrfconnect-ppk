@@ -392,11 +392,23 @@ const plugin: Plugin<'line'> = {
                 zoomPan.zoomPanCallback();
                 return;
             }
+
             if (event.shiftKey) {
                 return;
             }
 
             if (!isCanvasElement(event.target)) {
+                return;
+            }
+
+            // live mode on right click
+            if (event.button === 2) {
+                const { xScale } = chart.scales;
+                const { min: xMin, max: xMax } = xScale;
+                const windowDuration = xMax - xMin;
+                const end = DataManager().getTimestamp();
+                const begin = end - windowDuration;
+                zoomPan.zoomPanCallback(begin, end);
                 return;
             }
 
