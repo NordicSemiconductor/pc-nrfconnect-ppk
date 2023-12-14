@@ -1,4 +1,4 @@
-## 4.0.0-beta3 - Unreleased
+## 4.0.0-beta3 - 2023-12-14
 
 ## Changed
 
