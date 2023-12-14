@@ -1,3 +1,29 @@
+## 4.0.0-beta3 - 2023-12-14
+
+## Changed
+
+-   Click and Drag Navigation:
+    -   Click and drag to scroll left or right (control xAxis) with yAxis locked
+    -   Hold `alt (option ⌥ - MAC)` unlocks yAxis and click and drag to scroll
+        left or right (control xAxis) and up and down (control yAxis)
+-   Zoom Navigation:
+    -   Zoom with mouse wheel or track pad gesture to zoom on the xAxis with
+        yAxis locked
+    -   Hold `alt (option ⌥ - MAC)` unlocks yAxis and zoom with mouse wheel or
+        track pad gesture to zoom on the yAxis with xAxis locked
+    -   Hold `shift` while using track pad gesture to scroll will zoom xAxis
+        with the yAxis locked
+    -   Hold `shift` and `alt (option ⌥ - MAC)` while using track pad gesture to
+        scroll will zoom on the yAxis
+-   Track pad Panning:
+    -   Using track pad gesture to scroll with the yAxis locked
+    -   Hold `alt (option ⌥ - MAC)` unlocks yAxis and using track pad gesture to
+        scroll with both axis unlocked
+
+## Fixed
+
+-   Right click will now take you to end of the file/live mode
+
 ## 4.0.0-beta2 - 2023-12-12
 
 ## Added
