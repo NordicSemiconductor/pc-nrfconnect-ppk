@@ -1,3 +1,9 @@
+## 4.0.0-beta3 - 2024-01-02
+
+## Fixed
+
+-   App crashes when ram get to low
+
 ## 4.0.0-beta3 - 2023-12-14
 
 ## Changed
