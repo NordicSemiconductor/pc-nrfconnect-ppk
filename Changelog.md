@@ -1,8 +1,9 @@
-## 4.0.0-beta4 - 2024-01-03
+## 4.0.0-beta4 - 2024-01-04
 
 ## Fixed
 
 -   Improved stability with chart processing
+-   Window average was off by a factor of 1000
 
 ## 4.0.0-beta3 - 2023-12-14
 
