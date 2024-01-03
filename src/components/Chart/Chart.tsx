@@ -341,7 +341,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 count: 0,
             }
         );
-        const average = avgTemp.sum / avgTemp.count;
+        const average = avgTemp.sum / avgTemp.count / 1000;
         const max =
             processedData.ampereLineData.length > 0
                 ? Math.max(...processedData.ampereLineData.map(v => v.y ?? 0)) /
