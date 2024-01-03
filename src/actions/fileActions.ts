@@ -6,6 +6,7 @@
 
 import { dialog, getCurrentWindow } from '@electron/remote';
 import {
+    AppThunk,
     currentPane as currentPaneSelector,
     logger,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -25,7 +26,6 @@ import {
     setLatestDataTimestamp,
 } from '../slices/chartSlice';
 import { setDataLoggerState } from '../slices/dataLoggerSlice';
-import { TDispatch } from '../slices/thunk';
 import loadData from '../utils/loadFileHandler';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { SaveData } from '../utils/saveFileHandler';
@@ -33,7 +33,7 @@ import saveData, { SaveData } from '../utils/saveFileHandler';
 const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
-export const save = () => async (_: TDispatch, getState: () => RootState) => {
+export const save = (): AppThunk<RootState> => async (_, getState) => {
     const saveFileName = `ppk-${getTimestamp()}`;
     let { filePath: filename } = await dialog.showSaveDialog(
         getCurrentWindow(),
@@ -78,7 +78,10 @@ export const save = () => async (_: TDispatch, getState: () => RootState) => {
 };
 
 export const load =
-    (setLoading: (value: boolean) => void) => async (dispatch: TDispatch) => {
+    (
+        setLoading: (value: boolean) => void
+    ): AppThunk<RootState, Promise<void>> =>
+    async dispatch => {
         const {
             filePaths: [filename],
         } =

@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import {
+    AppThunk,
     Device,
     logger,
     usageData,
@@ -40,7 +41,6 @@ import {
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
-import { TDispatch } from '../slices/thunk';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
@@ -49,30 +49,29 @@ import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
 
-export const setupOptions =
-    () => (dispatch: TDispatch, getState: () => RootState) => {
-        if (!device) return;
-        try {
-            DataManager().reset();
-            dispatch(resetChartTime());
-            dispatch(resetMinimap());
+export const setupOptions = (): AppThunk<RootState> => (dispatch, getState) => {
+    if (!device) return;
+    try {
+        DataManager().reset();
+        dispatch(resetChartTime());
+        dispatch(resetMinimap());
 
-            const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-            DataManager().setSamplingRate(sampleFreq);
-            DataManager().initializeDataBuffer(durationSeconds);
-            DataManager().initializeBitsBuffer(durationSeconds);
-        } catch (err) {
-            logger.error(err);
-        }
-        dispatch(chartWindowUnLockAction());
-        dispatch(updateHasDigitalChannels());
-        dispatch(animationAction());
-    };
+        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
+        DataManager().setSamplingRate(sampleFreq);
+        DataManager().initializeDataBuffer(durationSeconds);
+        DataManager().initializeBitsBuffer(durationSeconds);
+    } catch (err) {
+        logger.error(err);
+    }
+    dispatch(chartWindowUnLockAction());
+    dispatch(updateHasDigitalChannels());
+    dispatch(animationAction());
+};
 
 // Only used by Data Logger Pane
 /* Start reading current measurements */
-export function samplingStart() {
-    return async (dispatch: TDispatch) => {
+export const samplingStart =
+    (): AppThunk<RootState, Promise<void>> => async dispatch => {
         usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
         // Prepare global options
@@ -83,16 +82,14 @@ export function samplingStart() {
         await device!.ppkAverageStart();
         startPreventSleep();
     };
-}
 
-export function samplingStop() {
-    return async (dispatch: TDispatch) => {
+export const samplingStop =
+    (): AppThunk<RootState, Promise<void>> => async dispatch => {
         if (!device) return;
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();
     };
-}
 
 export function triggerStop() {
     return async () => {
@@ -103,21 +100,20 @@ export function triggerStop() {
     };
 }
 
-export const updateSpikeFilter =
-    () => (_: TDispatch, getState: () => RootState) => {
-        const { spikeFilter } = getState().app;
-        persistSpikeFilter(spikeFilter);
-        device!.ppkSetSpikeFilter(spikeFilter);
-        if (getState().app.app.advancedMode) {
-            const { samples, alpha, alpha5 } = spikeFilter;
-            logger.info(
-                `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
-            );
-        }
-    };
+export const updateSpikeFilter = (): AppThunk<RootState> => (_, getState) => {
+    const { spikeFilter } = getState().app;
+    persistSpikeFilter(spikeFilter);
+    device!.ppkSetSpikeFilter(spikeFilter);
+    if (getState().app.app.advancedMode) {
+        const { samples, alpha, alpha5 } = spikeFilter;
+        logger.info(
+            `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
+        );
+    }
+};
 
-export function close() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
+export const close =
+    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
         clearInterval(updateRequestInterval);
         if (!device) {
             return;
@@ -133,9 +129,8 @@ export function close() {
         logger.info('PPK closed');
         updateTitle();
     };
-}
 
-const initGains = () => async (dispatch: TDispatch) => {
+const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
     if (!device!.capabilities.ppkSetUserGains) {
         return;
     }
@@ -158,8 +153,8 @@ const initGains = () => async (dispatch: TDispatch) => {
 };
 
 export const open =
-    (deviceInfo: Device) =>
-    async (dispatch: TDispatch, getState: () => RootState) => {
+    (deviceInfo: Device): AppThunk<RootState, Promise<void>> =>
+    async (dispatch, getState) => {
         // TODO: Check if this is right?
         // Is this suppose to be run when another device is already connected?
         // Seems like it closes old device somewhere else first, meaning this is redundant.
@@ -315,17 +310,17 @@ export const open =
         }, 30);
     };
 
-export function updateRegulator() {
-    return async (dispatch: TDispatch, getState: () => RootState) => {
+export const updateRegulator =
+    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
         const { vdd } = getState().app.voltageRegulator;
         await device!.ppkUpdateRegulator(vdd);
         logger.info(`Voltage regulator updated to ${vdd} mV`);
         dispatch(updateRegulatorAction({ currentVDD: vdd }));
     };
-}
 
 export const updateGains =
-    (index: number) => async (_: TDispatch, getState: () => RootState) => {
+    (index: number): AppThunk<RootState, Promise<void>> =>
+    async (_, getState) => {
         if (device!.ppkSetUserGains == null) {
             return;
         }
@@ -335,16 +330,17 @@ export const updateGains =
         logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
     };
 
-export function setDeviceRunning(isRunning: boolean) {
-    return async (dispatch: TDispatch) => {
+export const setDeviceRunning =
+    (isRunning: boolean): AppThunk<RootState, Promise<void>> =>
+    async dispatch => {
         await device!.ppkDeviceRunning(isRunning ? 1 : 0);
         logger.info(`DUT ${isRunning ? 'ON' : 'OFF'}`);
         dispatch(setDeviceRunningAction({ isRunning }));
     };
-}
 
-export function setPowerMode(isSmuMode: boolean) {
-    return async (dispatch: TDispatch) => {
+export const setPowerMode =
+    (isSmuMode: boolean): AppThunk<RootState, Promise<void>> =>
+    async dispatch => {
         logger.info(`Mode: ${isSmuMode ? 'Source meter' : 'Ampere meter'}`);
         if (isSmuMode) {
             await dispatch(setDeviceRunning(false));
@@ -356,4 +352,3 @@ export function setPowerMode(isSmuMode: boolean) {
             await dispatch(setDeviceRunning(true));
         }
     };
-}

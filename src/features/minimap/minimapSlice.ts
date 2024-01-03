@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { AppThunk } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { DataManager } from '../../globals';
 import type { RootState } from '../../slices/index';
-import type { TAction } from '../../slices/thunk';
 
 interface MinimapState {
     showMinimap: boolean;
@@ -37,7 +37,7 @@ const minimapSlice = createSlice({
 });
 
 export const setShowMinimapAction =
-    (showMinimap: boolean): TAction =>
+    (showMinimap: boolean): AppThunk<RootState> =>
     dispatch => {
         dispatch(setShowMinimap(showMinimap));
     };

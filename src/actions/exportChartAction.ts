@@ -4,12 +4,16 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { logger, usageData } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    AppThunk,
+    logger,
+    usageData,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
 import { DataManager, indexToTimestamp, timestampToIndex } from '../globals';
+import { RootState } from '../slices';
 import { hideExportDialog } from '../slices/appSlice';
-import { TDispatch } from '../slices/thunk';
 import EventAction from '../usageDataActions';
 import { averagedBitState } from '../utils/bitConversion';
 
@@ -81,8 +85,8 @@ export default (
         setProgress: (progress: number) => void,
         setExporting: (value: boolean) => void,
         cancel: React.RefObject<boolean>
-    ) =>
-    (dispatch: TDispatch) => {
+    ): AppThunk<RootState> =>
+    dispatch => {
         if (!filename) {
             return Promise.resolve();
         }
