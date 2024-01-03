@@ -13,7 +13,7 @@ import React, {
 } from 'react';
 import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHotKey } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { AppThunk, useHotKey } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import {
     Chart as ChartJS,
     LinearScale,
@@ -46,7 +46,6 @@ import {
     setLiveMode,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
-import { TDispatch } from '../../slices/thunk';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
@@ -145,12 +144,17 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Zoom to selected area',
         isGlobal: false,
         action: () => {
-            dispatch((_dispatch: TDispatch, getState: () => RootState) => {
-                const { cursorBegin, cursorEnd } = getCursorRange(getState());
-                if (cursorBegin != null && cursorEnd != null) {
-                    chartWindow(cursorBegin, cursorEnd);
-                }
-            });
+            const zoomToSelectedArea =
+                (): AppThunk<RootState> => (_dispatch, getState) => {
+                    const { cursorBegin, cursorEnd } = getCursorRange(
+                        getState()
+                    );
+                    if (cursorBegin != null && cursorEnd != null) {
+                        chartWindow(cursorBegin, cursorEnd);
+                    }
+                };
+
+            dispatch(zoomToSelectedArea());
         },
     });
 

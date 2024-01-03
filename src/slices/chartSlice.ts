@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { AppThunk } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { DataManager, microSecondsPerSecond } from '../globals';
@@ -18,7 +19,6 @@ import {
 } from '../utils/persistentStore';
 import type { RootState } from '.';
 import { getSampleFrequency } from './dataLoggerSlice';
-import { TAction } from './thunk';
 
 export interface ChartState {
     liveMode: boolean;
@@ -254,7 +254,7 @@ export const chartWindowAction =
         windowDuration: number,
         yMin?: number | null,
         yMax?: number | null
-    ): TAction =>
+    ): AppThunk<RootState> =>
     (dispatch, getState) => {
         const sampleFreq = getSampleFrequency(getState());
         const duration = calculateDuration(sampleFreq, windowDuration);
@@ -273,17 +273,18 @@ export const chartWindowAction =
         }
     };
 
-export const animationAction = (): TAction => (dispatch, getState) => {
-    dispatch(setLatestDataTimestamp(DataManager().getTimestamp()));
-    if (isLiveMode(getState())) {
-        dispatch(scrollToEnd());
-    }
-};
+export const animationAction =
+    (): AppThunk<RootState> => (dispatch, getState) => {
+        dispatch(setLatestDataTimestamp(DataManager().getTimestamp()));
+        if (isLiveMode(getState())) {
+            dispatch(scrollToEnd());
+        }
+    };
 
 export const resetCursor = () =>
     chartCursorAction({ cursorBegin: null, cursorEnd: null });
 
-const scrollToEnd = (): TAction => (dispatch, getState) =>
+const scrollToEnd = (): AppThunk<RootState> => (dispatch, getState) =>
     dispatch(
         chartWindowAction(
             Math.max(
@@ -295,7 +296,7 @@ const scrollToEnd = (): TAction => (dispatch, getState) =>
         )
     );
 
-export const resetCursorAndChart = (): TAction => dispatch => {
+export const resetCursorAndChart = (): AppThunk<RootState> => dispatch => {
     dispatch(scrollToEnd());
     dispatch(resetCursor());
 };
