@@ -85,7 +85,7 @@ export default (
         setProgress: (progress: number) => void,
         setExporting: (value: boolean) => void,
         cancel: React.RefObject<boolean>
-    ): AppThunk<RootState> =>
+    ): AppThunk<RootState, Promise<void>> =>
     dispatch => {
         if (!filename) {
             return Promise.resolve();
