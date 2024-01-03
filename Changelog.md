@@ -1,3 +1,9 @@
+## 4.0.0-beta4 - 2024-01-03
+
+## Fixed
+
+-   Improved stability with chart processing
+
 ## 4.0.0-beta3 - 2023-12-14
 
 ## Changed

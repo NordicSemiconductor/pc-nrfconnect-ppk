@@ -257,8 +257,30 @@ const findMissingRanges = (
         accumulatedResult.ampereLineData
             .filter(v => v.x !== undefined)
             .map(v => v.x as number) ?? [];
-    const min = Math.min(...timestamps);
-    const max = Math.max(...timestamps);
+
+    if (timestamps.length === 0) {
+        return [
+            {
+                begin,
+                end: Math.max(begin, end),
+                location: 'front',
+            },
+        ];
+    }
+
+    let min = Number.MAX_VALUE;
+    let max = -Number.MAX_VALUE;
+
+    // we can be sure min and max will be written to as timestamps.length > 0
+    timestamps.forEach(v => {
+        if (min > v) {
+            min = v;
+        }
+
+        if (max < v) {
+            max = v;
+        }
+    });
 
     const result: { begin: number; end: number; location: 'front' | 'back' }[] =
         [];
