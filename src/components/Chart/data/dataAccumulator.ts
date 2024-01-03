@@ -122,9 +122,9 @@ const accumulate = (
         return {
             ampereLineData,
             bitsLineData: bitAccumulator?.getLineData() ?? [],
-            averageLine: ampereLineData.map(
-                d => ({ ...d, count: 1 } as AverageLine)
-            ),
+            averageLine: ampereLineData
+                .filter(d => !Number.isNaN(d.y))
+                .map(d => ({ ...d, count: 1 } as AverageLine)),
         };
     }
 
