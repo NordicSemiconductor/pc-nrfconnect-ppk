@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- conservative refactoring, TODO: remove this line */
 
 import React from 'react';
-import { classNames } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { classNames, Spinner } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Unit, unit } from 'mathjs';
 
 import { formatDurationHTML } from '../../utils/duration';
@@ -45,6 +45,7 @@ interface StatBoxProperties {
     delta?: number | null;
     label: 'Window' | 'Selection';
     actionButtons?: any[];
+    processing?: boolean;
 }
 
 const StatBox = ({
@@ -53,6 +54,7 @@ const StatBox = ({
     delta = null,
     label,
     actionButtons = [],
+    processing = false,
 }: StatBoxProperties) => (
     <div className="statbox d-flex flex-column mb-1">
         <div className="statbox-header">
@@ -64,12 +66,17 @@ const StatBox = ({
                 label === 'Window' ? 'tw-bg-white' : 'tw-bg-gray-100'
             )}`}
         >
-            {delta === null && (
+            {processing && (
+                <div className="tw tw-mr-[-1px] tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-center tw-gap-2 tw-text-gray-700">
+                    Processing <Spinner size="sm" />
+                </div>
+            )}
+            {!processing && delta === null && (
                 <div className="value-box">
                     Hold SHIFT+LEFT CLICK and DRAG to make a selection
                 </div>
             )}
-            {delta !== null && (
+            {!processing && delta !== null && (
                 <>
                     <Value label="average" u={unit(average!, 'uA')} />
                     <Value label="max" u={unit(max || 0, 'uA')} />
