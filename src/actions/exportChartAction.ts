@@ -124,8 +124,8 @@ export default (
 
                                 const content = formatDataForExport(
                                     start,
-                                    data.current,
-                                    data.bits,
+                                    data.getAllCurrentData(),
+                                    data.getAllBitData(),
                                     contentSelection
                                 );
                                 fs.write(fd, content, () => {

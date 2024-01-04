@@ -5,11 +5,7 @@
  */
 
 import { dialog, getCurrentWindow } from '@electron/remote';
-import {
-    AppThunk,
-    currentPane as currentPaneSelector,
-    logger,
-} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { AppThunk, logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 import { dirname, join } from 'path';
 
@@ -20,11 +16,7 @@ import {
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
 import { setFileLoadedAction } from '../slices/appSlice';
-import {
-    resetChartTime,
-    setChartState,
-    setLatestDataTimestamp,
-} from '../slices/chartSlice';
+import { resetChartTime, setLatestDataTimestamp } from '../slices/chartSlice';
 import { setDataLoggerState } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
@@ -56,12 +48,11 @@ export const save = (): AppThunk<RootState> => async (_, getState) => {
     const metadata = DataManager().getMetadata();
 
     const dataToBeSaved: SaveData = {
-        data: data.current,
-        bits: data.bits,
+        data: data.getAllCurrentData(),
+        bits: data.getAllBitData(),
         metadata: {
             options: {
                 ...metadata,
-                currentPane: currentPaneSelector(getState()),
             },
             chartState: getState().app.chart,
             dataLoggerState: getState().app.dataLogger,
@@ -113,7 +104,6 @@ export const load =
         const { dataBuffer, bits, metadata } = result;
 
         const {
-            chartState,
             dataLoggerState,
             options: { samplingTime, samplesPerSecond, timestamp },
         } = metadata;
@@ -123,7 +113,6 @@ export const load =
         DataManager().loadData(dataBuffer, bits, timestamp);
 
         dispatch(setLatestDataTimestamp(timestamp));
-        dispatch(setChartState(chartState));
         dispatch(setFileLoadedAction({ loaded: true }));
         if (dataLoggerState !== null) {
             dispatch(setDataLoggerState({ state: dataLoggerState }));

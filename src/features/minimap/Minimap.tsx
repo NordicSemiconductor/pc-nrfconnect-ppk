@@ -126,13 +126,15 @@ const Minimap = () => {
         const nonNullRef = minimapRef.current;
 
         const newData = DataManager().getData(lastLoadedTimeStamp.current);
+        const numberOfElements = newData.getLength();
 
-        newData.current.forEach((v, i) => {
+        for (let index = 0; index < numberOfElements; index += 1) {
+            const v = newData.getCurrentData(index);
             minimapScroll.onNewData(
                 v,
-                lastLoadedTimeStamp.current + indexToTimestamp(i)
+                lastLoadedTimeStamp.current + indexToTimestamp(index)
             );
-        });
+        }
 
         lastLoadedTimeStamp.current = DataManager().getTimestamp();
 

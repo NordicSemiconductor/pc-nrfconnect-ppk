@@ -179,12 +179,6 @@ const chartSlice = createSlice({
                 windowEndLock: windowEnd,
             };
         },
-        setChartState: state => {
-            state.hasDigitalChannels = DataManager().hasBits();
-        },
-        updateHasDigitalChannels: state => {
-            state.hasDigitalChannels = DataManager().hasBits();
-        },
         setDigitalChannels(
             state,
             action: PayloadAction<{ digitalChannels: booleanTupleOf8 }>
@@ -367,7 +361,6 @@ export const {
     chartWindow,
     chartWindowLockAction,
     chartWindowUnLockAction,
-    setChartState,
     setDigitalChannels,
     setYMin,
     setYMax,
@@ -375,7 +368,6 @@ export const {
     toggleTimestamps,
     toggleYAxisLock,
     toggleYAxisLog,
-    updateHasDigitalChannels,
     setShowSettings,
     setLiveMode,
     resetChartTime,

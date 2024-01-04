@@ -37,7 +37,6 @@ import {
     chartWindowUnLockAction,
     resetChartTime,
     resetCursorAndChart,
-    updateHasDigitalChannels,
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
@@ -58,13 +57,11 @@ export const setupOptions = (): AppThunk<RootState> => (dispatch, getState) => {
 
         const { durationSeconds, sampleFreq } = getState().app.dataLogger;
         DataManager().setSamplingRate(sampleFreq);
-        DataManager().initializeDataBuffer(durationSeconds);
-        DataManager().initializeBitsBuffer(durationSeconds);
+        DataManager().initialize(durationSeconds);
     } catch (err) {
         logger.error(err);
     }
     dispatch(chartWindowUnLockAction());
-    dispatch(updateHasDigitalChannels());
     dispatch(animationAction());
 };
 
@@ -167,7 +164,7 @@ export const open =
         let nbSamples = 0;
         let nbSamplesTotal = 0;
 
-        const onSample = ({ value, bits }: SampleValues) => {
+        const onSample = async ({ value, bits }: SampleValues) => {
             const {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq, sampleFreq },
@@ -202,13 +199,13 @@ export const open =
                 nbSamples = 0;
             }
 
-            if (
-                DataManager().addData(cappedValue, b16 | prevBits).bitDataAdded
-            ) {
-                prevBits = 0;
-            }
+            await DataManager().addData(cappedValue, b16 | prevBits);
+            prevBits = 0;
 
-            if (DataManager().isBufferFull()) {
+            if (
+                DataManager().getSamplingDuration() <=
+                DataManager().getTimestamp()
+            ) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
                 }

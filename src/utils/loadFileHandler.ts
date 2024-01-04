@@ -111,9 +111,6 @@ const setupBuffer = async (filename: string) => {
 
             return chunk;
         },
-        hasBitsData() {
-            return pos >= buffer.length;
-        },
     };
 };
 
@@ -145,9 +142,7 @@ const loadData = (buffer: BufferReader) =>
     new Float32Array(new Uint8Array(buffer!.readChunk()).buffer);
 
 const loadBits = (buffer: BufferReader) =>
-    buffer!.hasBitsData()
-        ? null
-        : new Uint16Array(new Uint8Array(buffer!.readChunk()).buffer);
+    new Uint16Array(new Uint8Array(buffer!.readChunk()).buffer);
 
 export default async (filename: string) => {
     try {

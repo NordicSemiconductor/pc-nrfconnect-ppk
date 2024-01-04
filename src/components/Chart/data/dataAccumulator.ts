@@ -46,8 +46,8 @@ export const calcStats = (
             setTimeout(() => {
                 const data = DataManager().getData(b, e);
 
-                for (let n = 0; n < data.current.length; n += 1) {
-                    const v = data.current[n];
+                for (let n = 0; n < data.getLength(); n += 1) {
+                    const v = data.getCurrentData(n);
                     if (!Number.isNaN(v)) {
                         if (max === undefined || v > max) {
                             max = v;
@@ -126,25 +126,28 @@ const accumulate = (
         digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
     bitAccumulator?.initialise(digitalChannelsToCompute);
 
-    const noOfPointToRender = data.current.length / numberOfPointsPerGrouped;
+    const numberOfElements = data.getLength();
+    const noOfPointToRender = numberOfElements / numberOfPointsPerGrouped;
     const needMinMaxLine = numberOfPointsPerGrouped !== 1;
 
     if (!needMinMaxLine) {
         const ampereLineData: AmpereState[] = new Array(
             Math.ceil(noOfPointToRender)
         );
-        data.current.forEach((v, i) => {
-            const timestamp = begin + i * timeGroup;
-            if (!Number.isNaN(v) && data.bits && i < data.bits.length) {
-                bitAccumulator?.processBits(data.bits[i]);
+        for (let index = 0; index < numberOfElements; index += 1) {
+            const v = data.getCurrentData(index);
+            const bits = data.getBitData(index);
+            const timestamp = begin + index * timeGroup;
+            if (!Number.isNaN(v) && index < numberOfElements) {
+                bitAccumulator?.processBits(bits);
                 bitAccumulator?.processAccumulatedBits(timestamp);
             }
 
-            ampereLineData[i] = {
+            ampereLineData[index] = {
                 x: timestamp,
                 y: v * 1000,
             };
-        });
+        }
 
         return {
             ampereLineData,
@@ -165,7 +168,9 @@ const accumulate = (
     let max: number = -Number.MAX_VALUE;
 
     let timestamp = begin;
-    data.current.forEach((v, index) => {
+    for (let index = 0; index < numberOfElements; index += 1) {
+        const v = data.getCurrentData(index);
+        const bits = data.getBitData(index);
         const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
         const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;
         const groupIndex = Math.floor(index / numberOfPointsPerGrouped);
@@ -186,9 +191,7 @@ const accumulate = (
             if (v > max) max = v;
             if (v < min) min = v;
 
-            if (data.bits && index < data.bits.length) {
-                bitAccumulator?.processBits(data.bits[index]);
-            }
+            bitAccumulator?.processBits(bits);
 
             averageLine[groupIndex] = {
                 x: timestamp,
@@ -213,7 +216,7 @@ const accumulate = (
                 bitAccumulator?.processAccumulatedBits(timestamp);
             }
         }
-    });
+    }
 
     return {
         ampereLineData,

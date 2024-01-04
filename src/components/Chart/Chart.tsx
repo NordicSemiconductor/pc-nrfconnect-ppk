@@ -202,15 +202,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         [digitalChannels]
     );
 
-    // hasBits needs to be a dependency so digitalChannelsToCompute can update.
-    const hasBits = DataManager().hasBits();
     const digitalChannelsToCompute = useMemo(
         () =>
-            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && hasBits
+            !zoomedOutTooFarForDigitalChannels && showDigitalChannels
                 ? digitalChannelsToDisplay
                 : [],
         [
-            hasBits,
             zoomedOutTooFarForDigitalChannels,
             showDigitalChannels,
             digitalChannelsToDisplay,
