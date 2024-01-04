@@ -205,18 +205,50 @@ const removeDigitalChannelsSamplesOutsideScopes = (
     begin: number,
     end: number
 ) => {
-    if (dataChannel.length > 1) {
-        return [
-            {
-                x: begin,
-                y: dataChannel[0].y,
-            },
-            ...dataChannel.slice(1, dataChannel.length - 2),
-            {
-                x: end,
-                y: dataChannel[dataChannel.length - 1].y,
-            },
-        ];
+    if (dataChannel.length >= 2) {
+        let y = dataChannel[1].y;
+        let x = dataChannel[0].x;
+        let add = false;
+        while (x !== undefined && x < begin) {
+            add = true;
+            y = dataChannel[0].y;
+            dataChannel = dataChannel.slice(1);
+            x = dataChannel[0].x;
+        }
+
+        if (add && x !== begin) {
+            dataChannel = [
+                {
+                    x: begin,
+                    y,
+                },
+                ...dataChannel,
+            ];
+        }
+
+        let i = dataChannel.length - 1;
+        y = dataChannel[i].y;
+        x = dataChannel[i].x;
+        add = false;
+        while (x !== undefined && x > end) {
+            add = true;
+            dataChannel = dataChannel.slice(0, i);
+            i = dataChannel.length - 1;
+            y = dataChannel[i].y;
+            x = dataChannel[i].x;
+        }
+
+        if (add) {
+            dataChannel = [
+                ...dataChannel,
+                {
+                    x: end,
+                    y,
+                },
+            ];
+        }
+
+        return dataChannel;
     }
 
     return [];
