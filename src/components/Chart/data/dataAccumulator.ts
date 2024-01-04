@@ -21,11 +21,11 @@ import {
     TimestampType,
 } from './dataTypes';
 
-export const calcStats = (begin?: null | number, end?: null | number) => {
-    if (begin == null || end == null) {
-        return null;
-    }
-
+export const calcStats = (
+    onComplete: (average: number, max: number, delta: number) => void,
+    begin: number,
+    end: number
+) => {
     if (begin > end) {
         const temp = begin;
         begin = end;
@@ -35,26 +35,53 @@ export const calcStats = (begin?: null | number, end?: null | number) => {
     begin = Math.max(begin, 0);
     end = Math.min(end, DataManager().getTimestamp());
 
-    const data = DataManager().getData(begin, end);
+    const maxNumberOfSamplesToProcess = 10_000_000;
+
     let sum = 0;
     let len = 0;
-    let max;
+    let max: number | undefined;
 
-    for (let n = 0; n < data.current.length; n += 1) {
-        const v = data.current[n];
-        if (!Number.isNaN(v)) {
-            if (max === undefined || v > max) {
-                max = v;
+    const process = (b: number, e: number) =>
+        new Promise<{ begin: number; end: number }>(res => {
+            setTimeout(() => {
+                const data = DataManager().getData(b, e);
+
+                for (let n = 0; n < data.current.length; n += 1) {
+                    const v = data.current[n];
+                    if (!Number.isNaN(v)) {
+                        if (max === undefined || v > max) {
+                            max = v;
+                        }
+                        sum += v;
+                        len += 1;
+                    }
+                }
+
+                res({
+                    begin: e + indexToTimestamp(1),
+                    end: Math.min(
+                        end,
+                        e + indexToTimestamp(maxNumberOfSamplesToProcess)
+                    ),
+                });
+            });
+        }).then(range => {
+            if (range.end === end) {
+                onComplete(sum / (len || 1), max ?? 0, end - begin);
+            } else {
+                process(range.begin, range.end);
             }
-            sum += v;
-            len += 1;
-        }
-    }
-    return {
-        average: sum / (len || 1),
-        max: max ?? 0,
-        delta: end - begin,
-    };
+        });
+
+    process(
+        begin,
+        Math.min(
+            end,
+            begin +
+                indexToTimestamp(maxNumberOfSamplesToProcess) -
+                indexToTimestamp(1)
+        )
+    );
 };
 
 export interface DataAccumulator {

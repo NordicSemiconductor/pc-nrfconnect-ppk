@@ -123,7 +123,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Select all',
         isGlobal: false,
         action: () => {
-            if (DataManager().getTimestamp() > 0) {
+            if (
+                DataManager().getTimestamp() > 0 &&
+                !selectionStatsProcessingRef.current
+            ) {
                 return chartCursor(0, DataManager().getTimestamp());
             }
             return false;
@@ -135,7 +138,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Select none',
         isGlobal: false,
         action: () => {
-            resetCursor();
+            if (!selectionStatsProcessingRef.current) {
+                resetCursor();
+            }
         },
     });
 
@@ -312,13 +317,39 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         []
     );
 
-    const [windowStats, setWindowStats] =
-        useState<ReturnType<typeof calcStats>>(null);
+    const [windowStats, setWindowStats] = useState<{
+        average: number;
+        max: number;
+        delta: number;
+    } | null>(null);
 
-    const selectionStats = useMemo(
-        () => calcStats(cursorBegin, cursorEnd),
-        [cursorBegin, cursorEnd]
-    );
+    const [selectionStats, setSelectionStats] = useState<{
+        average: number;
+        max: number;
+        delta: number;
+    } | null>(null);
+
+    const [selectionStatsProcessing, setSelectionStatsProcessing] =
+        useState(false);
+    const selectionStatsProcessingRef = useRef<boolean>(false);
+
+    useEffect(() => {
+        if (cursorBegin != null && cursorEnd != null) {
+            setSelectionStatsProcessing(true);
+            selectionStatsProcessingRef.current = true;
+            calcStats(
+                (average, max, delta) => {
+                    setSelectionStats({ average, max, delta });
+                    setSelectionStatsProcessing(false);
+                    selectionStatsProcessingRef.current = false;
+                },
+                cursorBegin,
+                cursorEnd
+            );
+        } else {
+            setSelectionStats(null);
+        }
+    }, [cursorBegin, cursorEnd]);
 
     const updateChart = useCallback(() => {
         if (!isInitialised(dataProcessor)) {
@@ -400,7 +431,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             <Button
                 key="clear-selection-btn"
                 variant="secondary"
-                disabled={!chartCursorActive}
+                disabled={!chartCursorActive || selectionStatsProcessing}
                 size="sm"
                 onClick={resetCursor}
             >
@@ -412,7 +443,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             <Button
                 key="select-all-btn"
                 variant="secondary"
-                disabled={DataManager().getTotalSavedRecords() <= 0}
+                disabled={
+                    DataManager().getTotalSavedRecords() <= 0 ||
+                    selectionStatsProcessing
+                }
                 size="sm"
                 onClick={() => chartCursor(0, DataManager().getTimestamp())}
             >
@@ -424,7 +458,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 key="zoom-to-selection-btn"
                 variant="secondary"
                 size="sm"
-                disabled={cursorBegin == null || cursorEnd == null}
+                disabled={
+                    cursorBegin == null ||
+                    cursorEnd == null ||
+                    selectionStatsProcessing
+                }
                 onClick={() => {
                     if (cursorBegin != null && cursorEnd != null) {
                         chartWindow(cursorBegin, cursorEnd);
@@ -476,6 +514,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                         label="Window"
                     />
                     <StatBox
+                        processing={selectionStatsProcessing}
                         {...selectionStats}
                         label="Selection"
                         actionButtons={selectionButtons()}
