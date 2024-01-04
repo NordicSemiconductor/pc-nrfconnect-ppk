@@ -236,7 +236,7 @@ const removeDigitalChannelsSamplesOutsideScopes = (
         let y = dataChannel[1].y;
         let x = dataChannel[0].x;
         let add = false;
-        while (x !== undefined && x < begin) {
+        while (x !== undefined && x < begin && dataChannel.length >= 2) {
             add = true;
             y = dataChannel[0].y;
             dataChannel = dataChannel.slice(1);
@@ -257,7 +257,7 @@ const removeDigitalChannelsSamplesOutsideScopes = (
         y = dataChannel[i].y;
         x = dataChannel[i].x;
         add = false;
-        while (x !== undefined && x > end) {
+        while (x !== undefined && x > end && dataChannel.length >= 2) {
             add = true;
             dataChannel = dataChannel.slice(0, i);
             i = dataChannel.length - 1;
