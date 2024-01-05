@@ -182,8 +182,9 @@ const accumulate = (
         }
 
         if (!Number.isNaN(v)) {
-            if (v * 1000 > max) max = v * 1000; // uA to nA
-            if (v * 1000 < min) min = v * 1000; // uA to nA
+            v *= 1000; // uA to nA
+            if (v > max) max = v;
+            if (v < min) min = v;
 
             if (data.bits && index < data.bits.length) {
                 bitAccumulator?.processBits(data.bits[index]);

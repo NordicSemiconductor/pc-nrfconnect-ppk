@@ -1,3 +1,9 @@
+## 4.0.0-beta5 - 2024-01-05
+
+## Fixed
+
+-   Window average was off by a factor of 1000 when zoomed out
+
 ## 4.0.0-beta4 - 2024-01-04
 
 ## Fixed
