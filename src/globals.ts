@@ -7,7 +7,6 @@
 // FIXME: Will ned to remove the line under at some point.
 
 import { getCurrentWindow } from '@electron/remote';
-import usageData from '@nordicsemiconductor/pc-nrfconnect-shared/src/utils/usageData';
 import fs from 'fs';
 
 export const bufferLengthInSeconds = 60 * 5;
@@ -33,9 +32,6 @@ const options: GlobalOptions = {
     samplingTime: initialSamplingTime,
     samplesPerSecond: initialSamplesPerSecond,
 };
-
-let cachedBegin: number | undefined;
-let cashedData: Uint8Array | undefined;
 
 class FileData {
     data: Uint8Array;
@@ -95,128 +91,33 @@ class FileData {
     }
 }
 
-const loadNeededData = (
-    begin: number, // inclusive and normalized
-    end: number, // inclusive and normalized
-    getData: (fromTime: number, toTime: number) => Buffer,
-    cashed?: Uint8Array
-): Uint8Array => {
-    return getData(begin, end);
-    // if (!cashedData || cashedData.length === 0 || cachedBegin === undefined) {
-    //     return getData(begin, end);
-    // }
-
-    // const cacheEnd = cachedBegin + indexToTimestamp(cashedData.length - 1);
-
-    // if (begin > cacheEnd || cachedBegin > end) {
-    //     return getData(begin, end);
-    // }
-
-    // let usableCachedData: Uint8Array = cashed ?? Buffer.from([]);
-
-    // const cacheRange = { begin: cachedBegin, end: cacheEnd };
-
-    // const beginDelta =
-    //     timestampToIndex(begin) - timestampToIndex(cachedBegin ?? 0);
-    // if (beginDelta > 0) {
-    //     cacheRange.begin += indexToTimestamp(beginDelta);
-    //     usableCachedData = usableCachedData.subarray(beginDelta * (4 + 2));
-    // }
-
-    // const endDelta = timestampToIndex(cacheEnd ?? 0) - timestampToIndex(end);
-    // if (endDelta > 0) {
-    //     cacheRange.end -= indexToTimestamp(endDelta);
-    //     usableCachedData = usableCachedData.subarray(
-    //         0,
-    //         (usableCachedData.length - endDelta) * 4 + 2
-    //     );
-    // }
-
-    // let frontData: Buffer = Buffer.from([]);
-    // if (cacheRange.begin > begin) {
-    //     frontData = getData(begin, cacheRange.begin - indexToTimestamp(1));
-    // }
-
-    // let backData: Buffer = Buffer.from([]);
-    // if (end > cacheRange.end) {
-    //     backData = getData(cacheRange.end + indexToTimestamp(1), end);
-    // }
-
-    // const result = new Uint8Array(
-    //     frontData.length + usableCachedData.length + backData.length
-    // );
-
-    // result.set(frontData);
-    // result.set(usableCachedData, frontData.length);
-    // result.set(backData, frontData.length + usableCachedData.length);
-
-    // const timeStamp = DataManager().getTimestamp();
-
-    // const expectedDataSize =
-    //     timestampToIndex(Math.min(timeStamp, end)) -
-    //     timestampToIndex(begin) +
-    //     1;
-    // console.log(`Read ${expectedDataSize} `);
-    // if (expectedDataSize !== result.length / (4 + 2) && end <= timeStamp) {
-    //     usageData.sendErrorReport(
-    //         `Unexpected result when merging cached and read data.
-    //         begin: ${begin},
-    //         end: ${end},
-    //         frontDataRead: ${frontData.length},
-    //         cacheDataUsed: ${usableCachedData.length / (4 + 2)},
-    //         endDataRead: ${backData.length},
-    //         expectedLength: ${expectedDataSize},
-    //         resultLength: ${result.length / (4 + 2)},
-    //         cacheRange: {begin: ${cacheRange.begin}, end: ${cacheRange.end}}`
-    //     );
-    // }
-
-    // return result;
-};
-
 const getData = (fromTime: number, toTime: number) => {
-    const result = loadNeededData(
-        fromTime,
-        toTime,
-        (begin: number, end: number) => {
-            if (options.fileHandel === undefined) return Buffer.from([]);
-            const numberOfElements =
-                timestampToIndex(end) - timestampToIndex(begin) + 1;
-            const position = timestampToIndex(begin) * (4 + 2);
-            const noOfBytes = numberOfElements * (4 + 2);
-            const buffer = Buffer.alloc(noOfBytes);
-            const bytesRead = fs.readSync(
-                options.fileHandel,
-                buffer,
-                0,
-                noOfBytes,
-                position
-            );
-            return buffer.subarray(0, bytesRead);
-        },
-        cashedData
+    if (options.fileHandel === undefined) return Buffer.from([]);
+    const numberOfElements =
+        timestampToIndex(toTime) - timestampToIndex(fromTime) + 1;
+    const position = timestampToIndex(fromTime) * (4 + 2);
+    const numberOfBytes = numberOfElements * (4 + 2);
+    const buffer = Buffer.alloc(numberOfBytes);
+    const bytesRead = fs.readSync(
+        options.fileHandel,
+        buffer,
+        0,
+        numberOfBytes,
+        position
     );
-
-    const timeStamp = DataManager().getTimestamp();
-    if (timeStamp < toTime) {
-        cashedData = result.slice(
-            0,
-            (timestampToIndex(timeStamp) - timestampToIndex(fromTime) + 1) *
-                (4 + 2)
-        );
-    } else {
-        cashedData = result;
+    if (bytesRead !== numberOfBytes) {
+        console.log(`missing ${numberOfBytes - bytesRead / (4 + 2)} records`);
     }
-
-    // console.log('cashedData length', cashedData.length / (4 + 2));
-
-    return result;
+    return buffer.subarray(0, bytesRead);
 };
 const getTimestamp = () =>
     !options.timestamp ? 0 : options.timestamp - options.samplingTime;
 
 export const normalizeTime = (time: number) =>
     indexToTimestamp(timestampToIndex(time));
+
+let writeBuffer: Uint8Array = new Uint8Array();
+let writeBufferData = false;
 
 export const DataManager = () => ({
     getSamplingTime: () => options.samplingTime,
@@ -236,8 +137,6 @@ export const DataManager = () => ({
             Buffer.from(getData(fromTime, toTime).buffer)
         );
 
-        cachedBegin = indexToTimestamp(timestampToIndex(fromTime));
-
         return result;
     },
 
@@ -245,18 +144,40 @@ export const DataManager = () => ({
     addData: async (data: number, bitData: number) => {
         if (options.fileHandel === undefined) return;
 
-        await fs.appendFile(
-            options.fileHandel,
-            new Uint8Array(Float32Array.from([data]).buffer),
-            () => {}
-        );
-        await fs.appendFile(
-            options.fileHandel,
-            new Uint8Array(Uint16Array.from([bitData]).buffer),
-            () => {}
-        );
+        const writeToFile = (buffer: Uint8Array, fileHandel: number) =>
+            new Promise<void>(resolve => {
+                fs.appendFile(fileHandel, buffer, () => {
+                    options.timestamp =
+                        (options.timestamp ?? 0) +
+                        options.samplingTime * (buffer.length / (4 + 2));
+                    resolve();
+                });
+            }).then(() => {
+                if (writeBuffer.length > 0) {
+                    writeToFile(writeBuffer, fileHandel);
+                    writeBuffer = new Uint8Array();
+                } else {
+                    writeBufferData = false;
+                }
+            });
 
-        options.timestamp = (options.timestamp ?? 0) + options.samplingTime;
+        const currentBuffer = new Uint8Array(Float32Array.from([data]).buffer);
+        const bitBuffer = new Uint8Array(Uint16Array.from([bitData]).buffer);
+        const bufferToSend = new Uint8Array(
+            writeBuffer.length + currentBuffer.length + bitBuffer.length
+        );
+        bufferToSend.set(writeBuffer);
+        bufferToSend.set(currentBuffer, writeBuffer.length);
+        bufferToSend.set(bitBuffer, writeBuffer.length + currentBuffer.length);
+        if (!writeBufferData) {
+            if (options.fileHandel) {
+                writeBuffer = new Uint8Array();
+                writeBufferData = true;
+                await writeToFile(bufferToSend, options.fileHandel);
+            }
+        } else {
+            writeBuffer = bufferToSend;
+        }
     },
     reset: () => {
         if (options.fileHandel) {
@@ -267,7 +188,6 @@ export const DataManager = () => ({
         options.samplesPerSecond = initialSamplesPerSecond;
         options.samplingDuration = undefined;
         options.timestamp = 0;
-        cachedBegin = undefined;
     },
     initialize: (samplingDuration: number) => {
         options.samplingDuration = samplingDuration * microSecondsPerSecond;

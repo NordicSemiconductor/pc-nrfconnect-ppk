@@ -73,7 +73,7 @@ class SerialDevice extends Device {
 
     constructor(
         device: SharedDevice,
-        onSampleCallback: (values: SampleValues) => unknown
+        onSampleCallback: (values: SampleValues) => Promise<void>
     ) {
         super(onSampleCallback);
 
