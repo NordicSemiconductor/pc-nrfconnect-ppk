@@ -169,7 +169,7 @@ const accumulate = (
 
     let timestamp = begin;
     for (let index = 0; index < numberOfElements; index += 1) {
-        const v = data.getCurrentData(index);
+        let v = data.getCurrentData(index);
         const bits = data.getBitData(index);
         const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
         const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;

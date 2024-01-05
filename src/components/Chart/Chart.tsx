@@ -373,14 +373,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 count: 0,
             }
         );
-        const average = avgTemp.sum / avgTemp.count / 1000;
+        const average = avgTemp.sum / avgTemp.count / 1000; // nA to uA
         const max =
             processedData.ampereLineData.length > 0
                 ? Math.max(
                       ...processedData.ampereLineData
                           .filter(v => !Number.isNaN(v.y))
                           .map(v => v.y ?? 0)
-                  ) / 1000
+                  ) / 1000 // nA to uA
                 : 0;
 
         setAmpereLineData(processedData.ampereLineData);
