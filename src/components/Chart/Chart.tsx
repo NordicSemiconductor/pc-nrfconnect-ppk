@@ -377,14 +377,19 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             }
         );
         const average = avgTemp.sum / avgTemp.count / 1000;
-        const max =
-            processedData.ampereLineData.length > 0
-                ? Math.max(
-                      ...processedData.ampereLineData
-                          .filter(v => !Number.isNaN(v.y))
-                          .map(v => v.y ?? 0)
-                  ) / 1000
-                : 0;
+
+        const filteredAmpereLine = processedData.ampereLineData.filter(
+            v => v.y != null && !Number.isNaN(v.y)
+        );
+        let max = filteredAmpereLine.length > 0 ? -Number.MAX_VALUE : 0;
+
+        filteredAmpereLine.forEach(v => {
+            if (v.y != null && v.y > max) {
+                max = v.y;
+            }
+        });
+
+        max /= 1000;
 
         setAmpereLineData(processedData.ampereLineData);
         setBitsLineData(processedData.bitsLineData);

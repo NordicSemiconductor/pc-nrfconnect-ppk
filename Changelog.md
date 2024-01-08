@@ -1,3 +1,9 @@
+## 4.0.0-beta6 - 2024-01-08
+
+## Fixed
+
+-   Minor improvements to the stability of the chart rendering
+
 ## 4.0.0-beta5 - 2024-01-05
 
 ## Fixed
