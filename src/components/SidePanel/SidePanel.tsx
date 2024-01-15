@@ -13,6 +13,7 @@ import {
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import MinimapOptions from '../../features/minimap/MinimapOptions';
+import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import {
     advancedMode as advancedModeSelector,
     appState,
@@ -55,6 +56,7 @@ export default () => {
                 <Save />
                 <MinimapOptions />
                 <DeprecatedDeviceDialog />
+                <ProgressDialog />
             </SidePanel>
         );
     }
@@ -66,6 +68,7 @@ export default () => {
                 {sessionActive && <Save />}
                 <Instructions />
                 <DeprecatedDeviceDialog />
+                <ProgressDialog />
             </SidePanel>
         );
     }
@@ -86,6 +89,7 @@ export default () => {
                 </>
             )}
             <DeprecatedDeviceDialog />
+            <ProgressDialog />
         </SidePanel>
     );
 };
