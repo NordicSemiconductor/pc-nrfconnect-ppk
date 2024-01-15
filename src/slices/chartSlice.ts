@@ -28,7 +28,6 @@ export interface ChartState {
     windowDuration: number;
     yMin?: null | number;
     yMax?: null | number;
-    hasDigitalChannels: boolean;
     digitalChannels: booleanTupleOf8;
     digitalChannelsVisible: boolean;
     timestampsVisible: boolean;
@@ -49,7 +48,6 @@ const initialState = (): ChartState => ({
     windowDuration: initialWindowDuration, // [microseconds]
     yMin: null,
     yMax: null,
-    hasDigitalChannels: false,
     digitalChannels: getDigitalChannels(),
     digitalChannelsVisible: getDigitalChannelsVisible(),
     timestampsVisible: getTimestampsVisible(),
@@ -184,12 +182,6 @@ const chartSlice = createSlice({
                 windowEndLock: windowEnd,
             };
         },
-        setChartState: state => {
-            state.hasDigitalChannels = DataManager().hasBits();
-        },
-        updateHasDigitalChannels: state => {
-            state.hasDigitalChannels = DataManager().hasBits();
-        },
         setDigitalChannels(
             state,
             action: PayloadAction<{ digitalChannels: booleanTupleOf8 }>
@@ -289,7 +281,7 @@ export const animationAction =
 export const resetCursor = () =>
     chartCursorAction({ cursorBegin: null, cursorEnd: null });
 
-const scrollToEnd = (): AppThunk<RootState> => (dispatch, getState) =>
+export const scrollToEnd = (): AppThunk<RootState> => (dispatch, getState) =>
     dispatch(
         chartWindowAction(
             Math.max(
@@ -354,7 +346,6 @@ export const getCursorRange = (state: RootState) => ({
 export const getChartDigitalChannelInfo = (state: RootState) => ({
     digitalChannels: state.app.chart.digitalChannels,
     digitalChannelsVisible: state.app.chart.digitalChannelsVisible,
-    hasDigitalChannels: state.app.chart.hasDigitalChannels,
 });
 
 export const isLiveMode = (state: RootState) =>
@@ -375,7 +366,6 @@ export const {
     chartWindow,
     chartWindowLockAction,
     chartWindowUnLockAction,
-    setChartState,
     setDigitalChannels,
     setYMin,
     setYMax,
@@ -383,7 +373,6 @@ export const {
     toggleTimestamps,
     toggleYAxisLock,
     toggleYAxisLog,
-    updateHasDigitalChannels,
     setShowSettings,
     setLiveMode,
     resetChartTime,

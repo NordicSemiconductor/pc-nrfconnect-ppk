@@ -117,28 +117,30 @@ export default (
                                 if (cancel.current) {
                                     reject();
                                 }
-                                const data = DataManager().getData(
-                                    indexToTimestamp(start),
-                                    indexToTimestamp(start + len)
-                                );
-
-                                const content = formatDataForExport(
-                                    start,
-                                    data.current,
-                                    data.bits,
-                                    contentSelection
-                                );
-                                fs.write(fd, content, () => {
-                                    setProgress(
-                                        Math.round(
-                                            ((start - timestampBegin) /
-                                                (timestampEnd -
-                                                    timestampBegin)) *
-                                                100
-                                        )
-                                    );
-                                    resolve(undefined);
-                                });
+                                DataManager()
+                                    .getData(
+                                        indexToTimestamp(start),
+                                        indexToTimestamp(start + len)
+                                    )
+                                    .then(data => {
+                                        const content = formatDataForExport(
+                                            start,
+                                            data.getAllCurrentData(),
+                                            data.getAllBitData(),
+                                            contentSelection
+                                        );
+                                        fs.write(fd, content, () => {
+                                            setProgress(
+                                                Math.round(
+                                                    ((start - timestampBegin) /
+                                                        (timestampEnd -
+                                                            timestampBegin)) *
+                                                        100
+                                                )
+                                            );
+                                            resolve(undefined);
+                                        });
+                                    });
                             })
                 )
                 // @ts-expect-error dunno how to fix this at the moment.

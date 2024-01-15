@@ -18,14 +18,9 @@ const dataLoggerStatePPK2 = {
     maxFreqLog10: 5,
     sampleFreqLog10: 10,
     sampleFreq: 100_000,
-    durationSeconds: 300,
-    range: {
-        name: 'minutes',
-        multiplier: 60,
-        min: 1,
-        max: 72,
-    },
-    maxBufferSize: 200,
+    duration: 300,
+    durationUnit: 's',
+    autoStopSampling: true,
 } as DataLoggerState;
 
 const initialStatePPK2Actions = [

@@ -21,9 +21,7 @@ import DigitalChannels from './DigitalChannels';
 
 export default () => {
     const dispatch = useDispatch();
-    const { digitalChannelsVisible, hasDigitalChannels } = useSelector(
-        getChartDigitalChannelInfo
-    );
+    const { digitalChannelsVisible } = useSelector(getChartDigitalChannelInfo);
     const timestampsVisible = useSelector(isTimestampsVisible);
 
     return (
@@ -34,17 +32,16 @@ export default () => {
                 label="Timestamps"
                 variant="primary"
             />
-            {hasDigitalChannels && (
-                <>
-                    <Toggle
-                        onToggle={() => dispatch(toggleDigitalChannels())}
-                        isToggled={digitalChannelsVisible}
-                        label="Digital channels"
-                        variant="primary"
-                    />
-                    <DigitalChannels />
-                </>
-            )}
+
+            <>
+                <Toggle
+                    onToggle={() => dispatch(toggleDigitalChannels())}
+                    isToggled={digitalChannelsVisible}
+                    label="Digital channels"
+                    variant="primary"
+                />
+                <DigitalChannels />
+            </>
         </CollapsibleGroup>
     );
 };

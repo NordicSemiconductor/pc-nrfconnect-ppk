@@ -44,26 +44,31 @@ export const calcStats = (
     const process = (b: number, e: number) =>
         new Promise<{ begin: number; end: number }>(res => {
             setTimeout(() => {
-                const data = DataManager().getData(b, e);
-
-                for (let n = 0; n < data.current.length; n += 1) {
-                    const v = data.current[n];
-                    if (!Number.isNaN(v)) {
-                        if (max === undefined || v > max) {
-                            max = v;
+                DataManager()
+                    .getData(b, e)
+                    .then(data => {
+                        for (let n = 0; n < data.getLength(); n += 1) {
+                            const v = data.getCurrentData(n);
+                            if (!Number.isNaN(v)) {
+                                if (max === undefined || v > max) {
+                                    max = v;
+                                }
+                                sum += v;
+                                len += 1;
+                            }
                         }
-                        sum += v;
-                        len += 1;
-                    }
-                }
 
-                res({
-                    begin: e + indexToTimestamp(1),
-                    end: Math.min(
-                        end,
-                        e + indexToTimestamp(maxNumberOfSamplesToProcess)
-                    ),
-                });
+                        res({
+                            begin: e + indexToTimestamp(1),
+                            end: Math.min(
+                                end,
+                                e +
+                                    indexToTimestamp(
+                                        maxNumberOfSamplesToProcess
+                                    )
+                            ),
+                        });
+                    });
             });
         }).then(range => {
             if (range.end === end) {
@@ -93,11 +98,11 @@ export interface DataAccumulator {
         digitalChannelsToCompute: number[],
         len: number,
         windowDuration: number
-    ) => {
+    ) => Promise<{
         ampereLineData: AmpereState[];
         bitsLineData: DigitalChannelStates[];
         averageLine: AverageLine[];
-    };
+    }>;
 }
 
 type AverageLine = { x: TimestampType; y: number; count: number };
@@ -116,111 +121,134 @@ const accumulate = (
     timeGroup: number,
     numberOfPointsPerGrouped: number,
     digitalChannelsToCompute: number[]
-) => {
-    begin = Math.floor(begin / timeGroup) * timeGroup;
-    end = begin + Math.ceil((end - begin) / timeGroup) * timeGroup;
+) =>
+    new Promise<{
+        ampereLineData: AmpereState[];
+        bitsLineData: DigitalChannelStates[];
+        averageLine: AverageLine[];
+    }>(resolve => {
+        begin = Math.floor(begin / timeGroup) * timeGroup;
+        end = begin + Math.ceil((end - begin) / timeGroup) * timeGroup;
 
-    const data = DataManager().getData(begin, end);
-
-    const bitAccumulator =
-        digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
-    bitAccumulator?.initialise(digitalChannelsToCompute);
-
-    const noOfPointToRender = data.current.length / numberOfPointsPerGrouped;
-    const needMinMaxLine = numberOfPointsPerGrouped !== 1;
-
-    if (!needMinMaxLine) {
-        const ampereLineData: AmpereState[] = new Array(
-            Math.ceil(noOfPointToRender)
-        );
-        data.current.forEach((v, i) => {
-            const timestamp = begin + i * timeGroup;
-            if (!Number.isNaN(v) && data.bits && i < data.bits.length) {
-                bitAccumulator?.processBits(data.bits[i]);
-                bitAccumulator?.processAccumulatedBits(timestamp);
-            }
-
-            ampereLineData[i] = {
-                x: timestamp,
-                y: v * 1000,
-            };
-        });
-
-        return {
-            ampereLineData,
-            bitsLineData: bitAccumulator?.getLineData() ?? [],
-            averageLine: ampereLineData
-                .filter(d => !Number.isNaN(d.y))
-                .map(d => ({ ...d, count: 1 } as AverageLine)),
-        };
-    }
-
-    const ampereLineData: AmpereState[] = new Array(
-        Math.ceil(noOfPointToRender) * 2
-    );
-
-    const averageLine: AverageLine[] = new Array(Math.ceil(noOfPointToRender));
-
-    let min: number = Number.MAX_VALUE;
-    let max: number = -Number.MAX_VALUE;
-
-    let timestamp = begin;
-    data.current.forEach((v, index) => {
-        const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
-        const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;
-        const groupIndex = Math.floor(index / numberOfPointsPerGrouped);
-
-        if (firstItemInGrp) {
-            min = Number.MAX_VALUE;
-            max = -Number.MAX_VALUE;
-
-            averageLine[groupIndex] = {
-                x: timestamp,
-                y: 0,
-                count: 0,
-            };
+        if (end > DataManager().getTimestamp()) {
+            end -= timeGroup;
         }
 
-        if (!Number.isNaN(v)) {
-            v *= 1000; // uA to nA
-            if (v > max) max = v;
-            if (v < min) min = v;
+        DataManager()
+            .getData(begin, end)
+            .then(data => {
+                const bitAccumulator =
+                    digitalChannelsToCompute.length > 0
+                        ? bitDataAccumulator()
+                        : undefined;
+                bitAccumulator?.initialise(digitalChannelsToCompute);
 
-            if (data.bits && index < data.bits.length) {
-                bitAccumulator?.processBits(data.bits[index]);
-            }
+                const numberOfElements = data.getLength();
+                const noOfPointToRender =
+                    numberOfElements / numberOfPointsPerGrouped;
+                const needMinMaxLine = numberOfPointsPerGrouped !== 1;
 
-            averageLine[groupIndex] = {
-                x: timestamp,
-                y: averageLine[groupIndex].y + v,
-                count: averageLine[groupIndex].count + 1,
-            };
-        }
+                if (!needMinMaxLine) {
+                    const ampereLineData: AmpereState[] = new Array(
+                        Math.ceil(noOfPointToRender)
+                    );
+                    for (let index = 0; index < numberOfElements; index += 1) {
+                        const v = data.getCurrentData(index);
+                        const bits = data.getBitData(index);
+                        const timestamp = begin + index * timeGroup;
+                        if (!Number.isNaN(v) && index < numberOfElements) {
+                            bitAccumulator?.processBits(bits);
+                            bitAccumulator?.processAccumulatedBits(timestamp);
+                        }
 
-        ampereLineData[groupIndex * 2] = {
-            x: timestamp,
-            y: min > max ? undefined : min,
-        };
+                        ampereLineData[index] = {
+                            x: timestamp,
+                            y: v * 1000,
+                        };
+                    }
 
-        ampereLineData[(groupIndex + 1) * 2 - 1] = {
-            x: timestamp,
-            y: min > max ? undefined : max,
-        };
+                    resolve({
+                        ampereLineData,
+                        bitsLineData: bitAccumulator?.getLineData() ?? [],
+                        averageLine: ampereLineData
+                            .filter(d => !Number.isNaN(d.y))
+                            .map(d => ({ ...d, count: 1 } as AverageLine)),
+                    });
+                }
 
-        if (lastItemInGrp) {
-            timestamp += timeGroup;
-            if (min <= max) {
-                bitAccumulator?.processAccumulatedBits(timestamp);
-            }
-        }
+                const ampereLineData: AmpereState[] = new Array(
+                    Math.ceil(noOfPointToRender) * 2
+                );
+
+                const averageLine: AverageLine[] = new Array(
+                    Math.ceil(noOfPointToRender)
+                );
+
+                let min: number = Number.MAX_VALUE;
+                let max: number = -Number.MAX_VALUE;
+
+                let timestamp = begin;
+                for (let index = 0; index < numberOfElements; index += 1) {
+                    let v = data.getCurrentData(index);
+                    const bits = data.getBitData(index);
+                    const firstItemInGrp =
+                        index % numberOfPointsPerGrouped === 0;
+                    const lastItemInGrp =
+                        (index + 1) % numberOfPointsPerGrouped === 0;
+                    const groupIndex = Math.floor(
+                        index / numberOfPointsPerGrouped
+                    );
+
+                    if (firstItemInGrp) {
+                        min = Number.MAX_VALUE;
+                        max = -Number.MAX_VALUE;
+
+                        averageLine[groupIndex] = {
+                            x: timestamp,
+                            y: 0,
+                            count: 0,
+                        };
+                    }
+
+                    if (!Number.isNaN(v)) {
+                        v *= 1000; // uA to nA
+                        if (v > max) max = v;
+                        if (v < min) min = v;
+
+                        bitAccumulator?.processBits(bits);
+
+                        averageLine[groupIndex] = {
+                            x: timestamp,
+                            y: averageLine[groupIndex].y + v,
+                            count: averageLine[groupIndex].count + 1,
+                        };
+                    }
+
+                    ampereLineData[groupIndex * 2] = {
+                        x: timestamp,
+                        y: min > max ? undefined : min,
+                    };
+
+                    ampereLineData[(groupIndex + 1) * 2 - 1] = {
+                        x: timestamp,
+                        y: min > max ? undefined : max,
+                    };
+
+                    if (lastItemInGrp) {
+                        timestamp += timeGroup;
+                        if (min <= max) {
+                            bitAccumulator?.processAccumulatedBits(timestamp);
+                        }
+                    }
+                }
+
+                resolve({
+                    ampereLineData,
+                    bitsLineData: bitAccumulator?.getLineData() ?? [],
+                    averageLine,
+                });
+            });
     });
-
-    return {
-        ampereLineData,
-        bitsLineData: bitAccumulator?.getLineData() ?? [],
-        averageLine,
-    };
-};
 
 const removeCurrentSamplesOutsideScopes = <T extends AmpereState | AverageLine>(
     current: T[],
@@ -434,7 +462,7 @@ export type DataAccumulatorInitialiser = () => DataAccumulator;
 export default (): DataAccumulator => ({
     bitStateAccumulator: new Array(numberOfDigitalChannels),
 
-    process(
+    async process(
         begin,
         end,
         digitalChannelsToCompute,
@@ -483,7 +511,7 @@ export default (): DataAccumulator => ({
 
         end = Math.min(DataManager().getTimestamp(), end);
 
-        const getDataWithCachedResult = () => {
+        const getDataWithCachedResult = async () => {
             if (!cachedResult || DataManager().getTotalSavedRecords() === 0)
                 return accumulate(
                     begin,
@@ -534,16 +562,18 @@ export default (): DataAccumulator => ({
                 end
             );
 
-            const loadedData = rangesToLoad.map(r => ({
-                location: r.location,
-                ...accumulate(
-                    r.begin,
-                    r.end,
-                    timeGroup,
-                    numberOfPointsPerGroup,
-                    digitalChannelsToCompute
-                ),
-            }));
+            const loadedData = await Promise.all(
+                rangesToLoad.map(async r => ({
+                    location: r.location,
+                    ...(await accumulate(
+                        r.begin,
+                        r.end,
+                        timeGroup,
+                        numberOfPointsPerGroup,
+                        digitalChannelsToCompute
+                    )),
+                }))
+            );
 
             const frontData = loadedData.find(d => d.location === 'front');
             const backData = loadedData.find(d => d.location === 'back');
@@ -572,7 +602,7 @@ export default (): DataAccumulator => ({
             };
         };
 
-        cachedResult = getDataWithCachedResult();
+        cachedResult = await getDataWithCachedResult();
 
         return {
             ampereLineData: cachedResult.ampereLineData,

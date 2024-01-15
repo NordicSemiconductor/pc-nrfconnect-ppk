@@ -41,6 +41,7 @@ import {
     getChartDigitalChannelInfo,
     getChartXAxisRange,
     getCursorRange,
+    getForceRerender,
     isLiveMode,
     MAX_WINDOW_DURATION,
     setLiveMode,
@@ -82,6 +83,7 @@ const rightMargin = parseInt(rightMarginPx, 10);
 const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
     const liveMode = useSelector(isLiveMode);
+    const rerenderTrigger = useSelector(getForceRerender);
 
     const chartWindow = useCallback(
         (
@@ -163,8 +165,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         },
     });
 
-    const { digitalChannels, digitalChannelsVisible, hasDigitalChannels } =
-        useSelector(getChartDigitalChannelInfo);
+    const { digitalChannels, digitalChannelsVisible } = useSelector(
+        getChartDigitalChannelInfo
+    );
 
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
 
@@ -202,15 +205,12 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         [digitalChannels]
     );
 
-    // hasBits needs to be a dependency so digitalChannelsToCompute can update.
-    const hasBits = DataManager().hasBits();
     const digitalChannelsToCompute = useMemo(
         () =>
-            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && hasBits
+            !zoomedOutTooFarForDigitalChannels && showDigitalChannels
                 ? digitalChannelsToDisplay
                 : [],
         [
-            hasBits,
             zoomedOutTooFarForDigitalChannels,
             showDigitalChannels,
             digitalChannelsToDisplay,
@@ -351,12 +351,15 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         }
     }, [cursorBegin, cursorEnd]);
 
-    const updateChart = useCallback(() => {
-        if (!isInitialised(dataProcessor)) {
+    const updateChart = useCallback(async () => {
+        if (
+            !isInitialised(dataProcessor) ||
+            DataManager().getTotalSavedRecords() === 0
+        ) {
             return;
         }
 
-        const processedData = dataProcessor.process(
+        const processedData = await dataProcessor.process(
             begin,
             windowEnd,
             zoomedOutTooFarForDigitalChannels
@@ -411,6 +414,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
+        if (xAxisMax === 0) {
+            setAmpereLineData([]);
+            setBitsLineData([]);
+            setWindowStats(null);
+        }
+    }, [xAxisMax]);
+
+    useEffect(() => {
         if (liveMode) {
             const timeout = setTimeout(() => {
                 updateChart();
@@ -420,7 +431,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 clearTimeout(timeout);
             };
         }
-    }, [xAxisMax, liveMode, updateChart, begin, windowEnd]);
+    }, [xAxisMax, liveMode, updateChart, begin, windowEnd, rerenderTrigger]);
 
     useEffect(() => {
         if (!liveMode && DataManager().getTotalSavedRecords() > 0) {
@@ -535,7 +546,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     />
                 </div>
             </div>
-            {hasDigitalChannels && showDigitalChannels && (
+            {showDigitalChannels && (
                 <DigitalChannels
                     lineData={bitsLineData}
                     digitalChannels={digitalChannels}

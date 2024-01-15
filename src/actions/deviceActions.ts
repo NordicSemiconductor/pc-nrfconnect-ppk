@@ -21,7 +21,7 @@ import {
     resetMinimap,
 } from '../features/minimap/minimapSlice';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { DataManager, updateTitle } from '../globals';
+import { DataManager, microSecondsPerSecond, updateTitle } from '../globals';
 import { RootState } from '../slices';
 import {
     deviceClosedAction,
@@ -37,9 +37,11 @@ import {
     chartWindowUnLockAction,
     resetChartTime,
     resetCursorAndChart,
-    updateHasDigitalChannels,
 } from '../slices/chartSlice';
-import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
+import {
+    convertTimeToSeconds,
+    setSamplingAttrsAction,
+} from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
@@ -56,15 +58,13 @@ export const setupOptions = (): AppThunk<RootState> => (dispatch, getState) => {
         dispatch(resetChartTime());
         dispatch(resetMinimap());
 
-        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-        DataManager().setSamplingRate(sampleFreq);
-        DataManager().initializeDataBuffer(durationSeconds);
-        DataManager().initializeBitsBuffer(durationSeconds);
+        const { sampleFreq } = getState().app.dataLogger;
+        DataManager().setSamplesPerSecond(sampleFreq);
+        DataManager().initialize();
     } catch (err) {
         logger.error(err);
     }
     dispatch(chartWindowUnLockAction());
-    dispatch(updateHasDigitalChannels());
     dispatch(animationAction());
 };
 
@@ -86,6 +86,7 @@ export const samplingStart =
 export const samplingStop =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
         if (!device) return;
+        DataManager().flush();
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();
@@ -202,13 +203,17 @@ export const open =
                 nbSamples = 0;
             }
 
-            if (
-                DataManager().addData(cappedValue, b16 | prevBits).bitDataAdded
-            ) {
-                prevBits = 0;
-            }
+            DataManager().addData(cappedValue, b16 | prevBits);
+            prevBits = 0;
 
-            if (DataManager().isBufferFull()) {
+            if (
+                convertTimeToSeconds(
+                    getState().app.dataLogger.duration,
+                    getState().app.dataLogger.durationUnit
+                ) *
+                    microSecondsPerSecond <=
+                DataManager().getTimestamp()
+            ) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
                 }
