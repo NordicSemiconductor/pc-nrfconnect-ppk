@@ -37,6 +37,7 @@ export interface ChartState {
     windowEndLock: null | number;
     showSettings: boolean;
     latestDataTimestamp: number;
+    forceRerender: boolean;
 }
 
 const initialWindowDuration = 10 * microSecondsPerSecond;
@@ -57,6 +58,7 @@ const initialState = (): ChartState => ({
     windowEndLock: null, // [microseconds]
     showSettings: false,
     latestDataTimestamp: 0,
+    forceRerender: false,
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -76,6 +78,9 @@ const chartSlice = createSlice({
         },
         setYMin: (state, action: PayloadAction<{ yMin: number }>) => {
             state.yMin = action.payload.yMin;
+        },
+        triggerForceRerender: state => {
+            state.forceRerender = !state.forceRerender;
         },
         chartCursorAction: (
             state,
@@ -359,6 +364,9 @@ export const isTimestampsVisible = (state: RootState) =>
 export const isSessionActive = (state: RootState) =>
     state.app.chart.latestDataTimestamp !== 0;
 
+export const getForceRerender = (state: RootState) =>
+    state.app.chart.forceRerender;
+
 export const {
     setLatestDataTimestamp,
     panWindow,
@@ -379,6 +387,7 @@ export const {
     setShowSettings,
     setLiveMode,
     resetChartTime,
+    triggerForceRerender,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;
