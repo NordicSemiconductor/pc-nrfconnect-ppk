@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import fs from 'fs-extra';
+import path from 'path';
+
 export type Data = { x: number; y: number };
 
 const foldData = (data: Data[], select: (a: number, b: number) => number) => {
@@ -97,5 +100,29 @@ export class FoldingBuffer {
             .flat();
 
         return out;
+    }
+
+    saveToFile(sessionPath: string) {
+        fs.writeFileSync(
+            path.join(sessionPath, 'minimap.raw'),
+            JSON.stringify({
+                lastElementFoldCount: this.lastElementFoldCount,
+                max: this.max,
+                min: this.min,
+                maxNumberOfElements: this.maxNumberOfElements,
+                numberOfTimesToFold: this.numberOfTimesToFold,
+            })
+        );
+    }
+
+    loadFromFile(sessionPath: string) {
+        const result = JSON.parse(
+            fs.readFileSync(path.join(sessionPath, 'minimap.raw')).toString()
+        );
+        this.lastElementFoldCount = result.lastElementFoldCount;
+        this.max = result.max;
+        this.min = result.min;
+        this.maxNumberOfElements = result.maxNumberOfElements;
+        this.numberOfTimesToFold = result.numberOfTimesToFold;
     }
 }

@@ -10,7 +10,7 @@ import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { DataManager, indexToTimestamp } from '../../globals';
+import { DataManager } from '../../globals';
 import {
     getChartXAxisRange,
     getChartYAxisRange,
@@ -50,7 +50,6 @@ export interface MinimapChart extends Chart<'line'> {
 
 const Minimap = () => {
     const sessionActive = useSelector(isSessionActive);
-    const lastLoadedTimeStamp = useRef(0);
     const dispatch = useDispatch();
     const showMinimap = useSelector(getShowMinimap);
     const minimapRef = useRef<MinimapChart | null>(null);
@@ -124,19 +123,13 @@ const Minimap = () => {
         if (!minimapRef.current) return;
 
         const nonNullRef = minimapRef.current;
-
-        const newData = DataManager().getData(lastLoadedTimeStamp.current);
-
-        newData.current.forEach((v, i) => {
-            minimapScroll.onNewData(
-                v,
-                lastLoadedTimeStamp.current + indexToTimestamp(i)
-            );
+        const timeout = setTimeout(() => {
+            minimapScroll.updateMinimapData(nonNullRef);
         });
 
-        lastLoadedTimeStamp.current = DataManager().getTimestamp();
-
-        minimapScroll.updateMinimapData(nonNullRef);
+        return () => {
+            clearTimeout(timeout);
+        };
     }, [xAxisMax]);
 
     useEffect(() => {
