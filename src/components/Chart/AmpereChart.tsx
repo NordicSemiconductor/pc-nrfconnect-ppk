@@ -11,7 +11,11 @@ import type {
     ForwardedRef,
 } from 'react-chartjs-2/dist/types';
 import { useSelector } from 'react-redux';
-import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    classNames,
+    colors,
+    Spinner,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 
@@ -72,6 +76,7 @@ interface AmpereChartProperties {
     chartRef: React.MutableRefObject<null | AmpereChartJS>;
     cursorData: CursorData;
     lineData: AmpereState[];
+    processing: boolean;
 }
 
 const formatCurrent = (nA: number) =>
@@ -105,6 +110,7 @@ export default ({
     chartRef,
     cursorData: { begin, end },
     lineData,
+    processing,
 }: AmpereChartProperties) => {
     const liveMode = useSelector(isLiveMode);
     const { yMin, yMax, yAxisLog } = useSelector(getChartYAxisRange);
@@ -218,6 +224,21 @@ export default ({
 
     return (
         <div className="chart-container">
+            {processing && (
+                <div
+                    className={classNames(
+                        'tw-absolute tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pl-[4.35rem] tw-pr-[1.8rem]',
+                        timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]'
+                    )}
+                >
+                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-300 tw-bg-opacity-50 tw-px-[70px]">
+                        <Spinner
+                            size="lg"
+                            className=" tw-text-nordicBlue-900"
+                        />
+                    </div>
+                </div>
+            )}
             <Line
                 ref={chartRef as ForwardedRef<ChartJSOrUndefined<'line'>>}
                 // Need to typecast because of react-chartjs-2

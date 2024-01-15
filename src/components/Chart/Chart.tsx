@@ -408,6 +408,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         zoomedOutTooFarForDigitalChannels,
     ]);
 
+    const [processing, setProcessing] = useState(false);
+
     useEffect(() => {
         if (liveMode) {
             const timeout = setTimeout(() => {
@@ -421,16 +423,19 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     }, [xAxisMax, liveMode, updateChart, begin, windowEnd]);
 
     useEffect(() => {
-        if (!liveMode) {
+        if (!liveMode && DataManager().getTotalSavedRecords() > 0) {
             const timeout = setTimeout(() => {
-                updateChart();
-            });
+                setProcessing(true);
+                updateChart().finally(() => {
+                    setProcessing(false);
+                });
+            }, 250);
 
             return () => {
                 clearTimeout(timeout);
             };
         }
-    }, [begin, liveMode, updateChart, windowEnd]);
+    }, [begin, liveMode, updateChart, windowEnd, rerenderTrigger]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
@@ -498,6 +503,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
                 <AmpereChart
+                    processing={processing}
                     setNumberOfPixelsInWindow={setNumberOfPixelsInWindow}
                     setChartAreaWidth={setChartAreaWidth}
                     numberOfSamplesPerPixel={samplesPerPixel}
