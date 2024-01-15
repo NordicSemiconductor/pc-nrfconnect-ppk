@@ -4,15 +4,16 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { usageData } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { serialize } from 'bson';
+import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
+import archiver from 'archiver';
 import fs from 'fs';
-import { createDeflateRaw, DeflateRaw } from 'zlib';
+import path from 'path';
 
-import { GlobalOptions } from '../globals';
+import { DataManager, GlobalOptions } from '../globals';
 import { ChartState } from '../slices/chartSlice';
 import { DataLoggerState } from '../slices/dataLoggerSlice';
-import EventAction from '../usageDataActions';
+import { calcFileSize } from './fileUtils';
 
 export interface SaveData {
     data: Float32Array;
@@ -24,61 +25,64 @@ export interface SaveData {
     };
 }
 
-const CURRENT_VERSION = 1;
+export interface PPK2Metadata {
+    metadata: {
+        samplesPerSecond: number;
+        recordingDuration: number;
+    };
+}
+const CURRENT_VERSION = 2;
 
-const write = (deflateRaw: DeflateRaw) => (data: unknown) =>
-    new Promise(resolve => {
-        deflateRaw.write(data, 'binary', resolve);
+export default async (
+    filename: string,
+    metadata: PPK2Metadata,
+    sessionFolder: string,
+    onProgress: (message: string, percentage: number) => void
+) => {
+    const metaPath = path.join(sessionFolder, 'metadata.json');
+    DataManager().saveMinimap(sessionFolder);
+    fs.writeFileSync(
+        metaPath,
+        JSON.stringify({ ...metadata, formatVersion: CURRENT_VERSION })
+    );
+
+    let folderSizeInBytes = 0;
+    fs.readdirSync(sessionFolder).forEach(d => {
+        folderSizeInBytes += fs.statSync(path.join(sessionFolder, d)).size;
+    });
+    const output = fs.createWriteStream(filename);
+    const archive = archiver('zip', {
+        zlib: { level: 9 }, // Sets the compression level.
     });
 
-const writeBuffer = async (
-    data: Float32Array | Uint16Array | null,
-    fileWriter: (data: unknown) => Promise<unknown>
-) => {
-    if (!data || data.buffer == null) return;
-    const { buffer } = data;
-    const buf = Buffer.alloc(4);
-    const objbuf = Buffer.from(buffer);
-    buf.writeUInt32LE(objbuf.byteLength);
-    await fileWriter(buf);
-    await fileWriter(objbuf);
-};
+    archive.pipe(output);
 
-const initialise = (filename: string) => {
-    const file = fs.createWriteStream(filename);
-    file.on('error', err => console.log(err.stack));
-    const deflateRaw = createDeflateRaw();
-    deflateRaw.pipe(file);
-    return deflateRaw;
-};
+    archive.on('warning', err => {
+        if (err.code === 'ENOENT') {
+            logger.warn(err.message);
+        } else {
+            logger.warn(describeError(err));
+        }
+    });
+    archive.on('error', err => {
+        logger.error(describeError(err));
+    });
 
-const save = async (
-    saveData: SaveData,
-    fileWriter: (data: unknown) => Promise<unknown>
-) => {
-    fileWriter(serialize({ ...saveData.metadata, version: CURRENT_VERSION }));
+    archive.on('progress', progress => {
+        const percent = Math.round(
+            (progress.fs.processedBytes / folderSizeInBytes) * 100.0
+        );
 
-    await writeBuffer(saveData.data, fileWriter);
-    if (saveData.bits) {
-        await writeBuffer(saveData.bits, fileWriter);
-    }
-};
+        onProgress(
+            `Compressing files, processed ${calcFileSize(
+                progress.entries.processed
+            )} of ${calcFileSize(progress.entries.total)} `,
+            percent
+        );
+    });
 
-export default async (filename: string, saveData: SaveData) => {
-    const deflateRaw = initialise(filename);
-    const fileWriter = write(deflateRaw);
+    archive.directory(sessionFolder, false);
 
-    if (!saveData) return false;
-    try {
-        await save(saveData, fileWriter);
-        usageData.sendUsageData(EventAction.EXPORT_DATA, {
-            exportType: 'PPK',
-        });
-    } catch (err) {
-        usageData.sendErrorReport(`Error saving state to ${filename}`);
-        return false;
-    } finally {
-        deflateRaw.end();
-    }
-    return true;
+    await archive.finalize();
+    fs.rmSync(metaPath);
 };

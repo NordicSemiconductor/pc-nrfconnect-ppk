@@ -21,6 +21,7 @@ jest.mock('fs-extra', () => ({
                 setTimeout(() => resolve());
             })
     ),
+    fdatasyncSync: jest.fn(() => {}),
     read: jest.fn(
         (
             fd: number,

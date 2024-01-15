@@ -7,13 +7,21 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import usageData from '@nordicsemiconductor/pc-nrfconnect-shared/src/utils/usageData';
 import { deserialize, Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
 import { unit } from 'mathjs';
-import { pipeline, Writable } from 'stream';
+import os from 'os';
+import path from 'path';
+import { pipeline, Transform, Writable } from 'stream';
+import unzipper from 'unzipper';
 import { promisify } from 'util';
+import { v4 } from 'uuid';
 import { createInflateRaw } from 'zlib';
+
+import { DataManager } from '../globals';
+import saveFile, { PPK2Metadata } from './saveFileHandler';
 
 /*
         File outline .ppk v1
@@ -111,9 +119,6 @@ const setupBuffer = async (filename: string) => {
 
             return chunk;
         },
-        hasBitsData() {
-            return pos >= buffer.length;
-        },
     };
 };
 
@@ -145,19 +150,175 @@ const loadData = (buffer: BufferReader) =>
     new Float32Array(new Uint8Array(buffer!.readChunk()).buffer);
 
 const loadBits = (buffer: BufferReader) =>
-    buffer!.hasBitsData()
-        ? null
-        : new Uint16Array(new Uint8Array(buffer!.readChunk()).buffer);
+    new Uint16Array(new Uint8Array(buffer!.readChunk()).buffer);
 
-export default async (filename: string) => {
+const loadPPK2File = async (
+    filename: string,
+    onProgress: (message: string, percentage: number) => void
+) => {
+    let progress = 0;
+    let lastUpdate = 0;
+
+    const outputPath = path.join(os.tmpdir(), v4());
+    fs.mkdirSync(outputPath);
+    let totalSize = 0;
+
+    const directory = await unzipper.Open.file(filename);
+    await Promise.all(
+        directory.files.map(
+            f =>
+                new Promise((resolve, reject) => {
+                    f.stream()
+                        .prependListener('pipe', () => {
+                            totalSize += f.uncompressedSize;
+                        })
+                        .pipe(
+                            new Transform({
+                                transform: (d, _, cb) => {
+                                    progress += d.length;
+
+                                    const roundToFixedPercentage = Math.floor(
+                                        (progress / totalSize) * 100
+                                    );
+
+                                    if (roundToFixedPercentage !== lastUpdate) {
+                                        onProgress(
+                                            'Decompressing file',
+                                            (progress / totalSize) * 100
+                                        );
+                                        lastUpdate = roundToFixedPercentage;
+                                    }
+                                    cb(null, d);
+                                },
+                            })
+                        )
+                        .pipe(
+                            fs.createWriteStream(path.join(outputPath, f.path))
+                        )
+                        .on('error', reject)
+                        .on('finish', resolve);
+                })
+        )
+    );
+
+    logger.info(`Decompression session information to ${outputPath}`);
+    const metadata: PPK2Metadata = JSON.parse(
+        fs.readFileSync(path.join(outputPath, 'metadata.json')).toString()
+    );
+
+    DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
+    DataManager().loadData(metadata.metadata.recordingDuration, outputPath);
+    return metadata.metadata.recordingDuration;
+};
+
+export default async (
+    filename: string,
+    onProgress: (message: string, percentage: number) => void
+) => {
+    if (filename.endsWith('.ppk2')) {
+        return loadPPK2File(filename, onProgress);
+    }
+
+    logger.warn(`This PPK file format is deprecated.`);
+    logger.warn(
+        `Support for this format may be remove in any of the future versions.`
+    );
+
     try {
         const buffer = await setupBuffer(filename);
-        return {
+
+        onProgress('Extracting ppk file data', -1);
+        const result = {
             metadata: loadMetadata(buffer),
             dataBuffer: loadData(buffer),
             bits: loadBits(buffer),
         };
+
+        onProgress('Converting ".ppk" format to  ".ppk2"', -1);
+
+        usageData.sendUsageData('Loading deprecated ".ppk" file format', {
+            ppk: result.bits.length === 0 ? 'V1' : 'V2',
+        });
+
+        DataManager().initialize();
+        DataManager().setSamplesPerSecond(
+            result.metadata.options.samplesPerSecond
+        );
+
+        await loadPPKData(
+            result.metadata.options.samplesPerSecond,
+            result.dataBuffer,
+            result.bits,
+            onProgress
+        );
+
+        const pos = filename.lastIndexOf('.');
+        const newFilename = `${filename.substring(
+            0,
+            pos < 0 ? filename.length : pos
+        )}.ppk2`;
+
+        const sessionFolder = DataManager().getSessionFolder();
+        DataManager().flush();
+        if (!fs.existsSync(newFilename) && sessionFolder) {
+            await saveFile(
+                newFilename,
+                {
+                    metadata: {
+                        recordingDuration: DataManager().getTimestamp(),
+                        samplesPerSecond: DataManager().getSamplesPerSecond(),
+                    },
+                },
+                sessionFolder,
+                onProgress
+            );
+
+            logger.info(
+                `File was converted from ".ppk" to the latest format ".ppk2" and saved to ${newFilename}`
+            );
+        }
+
+        return DataManager().getTimestamp();
     } catch (err) {
         return false;
     }
 };
+
+const loadPPKData = (
+    samplesPerSec: number,
+    current: Float32Array,
+    bits: Uint16Array,
+    onProgress: (message: string, percentage: number) => void
+) =>
+    new Promise<void>(resolve => {
+        onProgress('Converting ".ppk" format to  ".ppk2"', 0);
+        const maxNumberOfSamplesToProcess = 100_0000;
+
+        const process = (b: number, e: number) =>
+            new Promise<{ begin: number; end: number }>(res => {
+                setTimeout(() => {
+                    for (let i = b; i < e; i += 1) {
+                        DataManager().addData(current[i], bits[i] ?? 0xaaaa); // TODO check if 0xAAAA is default when chanel are off?
+                    }
+                    res({
+                        begin: e,
+                        end: Math.min(
+                            e + maxNumberOfSamplesToProcess,
+                            current.length
+                        ),
+                    });
+                });
+            }).then(range => {
+                onProgress(
+                    'Converting ".ppk" format to  ".ppk2"',
+                    (range.end / current.length) * 100
+                );
+                if (range.end === current.length) {
+                    resolve();
+                } else {
+                    process(range.begin, range.end);
+                }
+            });
+
+        process(0, Math.min(current.length, maxNumberOfSamplesToProcess));
+    });

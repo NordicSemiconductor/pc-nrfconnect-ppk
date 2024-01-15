@@ -58,12 +58,7 @@ export default () => {
                     <span>{dialogInfo.message}</span>
                     <br />
                 </div>
-                <TimeComponent
-                    time={time}
-                    progress={
-                        dialogInfo.progress < 0 ? 100 : dialogInfo.progress
-                    }
-                />
+                <TimeComponent time={time} progress={dialogInfo.progress} />
             </div>
         </GenericDialog>
     );

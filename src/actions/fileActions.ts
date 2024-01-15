@@ -5,11 +5,8 @@
  */
 
 import { dialog, getCurrentWindow } from '@electron/remote';
-import {
-    AppThunk,
-    currentPane as currentPaneSelector,
-    logger,
-} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { AppThunk, logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import fs from 'fs';
 import { dirname, join } from 'path';
 
@@ -17,65 +14,83 @@ import {
     miniMapAnimationAction,
     resetMinimap,
 } from '../features/minimap/minimapSlice';
+import {
+    closeProgressDialog,
+    showProgressDialog,
+    updateProgress,
+} from '../features/ProgressDialog/progressSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
-import { setFileLoadedAction } from '../slices/appSlice';
 import {
     resetChartTime,
-    setChartState,
+    scrollToEnd,
     setLatestDataTimestamp,
+    setLiveMode,
+    triggerForceRerender,
 } from '../slices/chartSlice';
-import { setDataLoggerState } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
-import saveData, { SaveData } from '../utils/saveFileHandler';
+import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
 const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);
 
-export const save = (): AppThunk<RootState> => async (_, getState) => {
-    const saveFileName = `ppk-${getTimestamp()}`;
-    let { filePath: filename } = await dialog.showSaveDialog(
-        getCurrentWindow(),
-        {
-            defaultPath: join(getLastSaveDir(), saveFileName),
-            filters: [
-                {
-                    name: 'Power profiler kit',
-                    extensions: ['ppk'],
-                },
-            ],
+export const save =
+    (): AppThunk<RootState, Promise<void>> => async dispatch => {
+        const activeSessionFolder = DataManager().getSessionFolder();
+        if (!activeSessionFolder) return;
+
+        const saveFileName = `ppk2-${getTimestamp()}`;
+        let { filePath: filename } = await dialog.showSaveDialog(
+            getCurrentWindow(),
+            {
+                defaultPath: join(getLastSaveDir(), saveFileName),
+                filters: [
+                    {
+                        name: 'Power profiler kit',
+                        extensions: ['ppk2'],
+                    },
+                ],
+            }
+        );
+        if (!filename) {
+            return;
         }
-    );
-    if (!filename) {
-        return;
-    }
-    setLastSaveDir(dirname(filename));
+        setLastSaveDir(dirname(filename));
 
-    const data = DataManager().getData();
-    const metadata = DataManager().getMetadata();
-
-    const dataToBeSaved: SaveData = {
-        data: data.current,
-        bits: data.bits,
-        metadata: {
-            options: {
-                ...metadata,
-                currentPane: currentPaneSelector(getState()),
+        const dataToBeSaved: PPK2Metadata = {
+            metadata: {
+                samplesPerSecond: DataManager().getSamplesPerSecond(),
+                recordingDuration: DataManager().getTimestamp(),
             },
-            chartState: getState().app.chart,
-            dataLoggerState: getState().app.dataLogger,
-        },
-    };
+        };
 
-    if (!filename.toLocaleLowerCase().endsWith('.ppk')) {
-        filename = `${filename}.ppk`;
-    }
-    const saved = await saveData(filename, dataToBeSaved);
-    if (saved) {
-        logger.info(`State saved to: ${filename}`);
-    }
-};
+        if (!filename.toLocaleLowerCase().endsWith('.ppk2')) {
+            filename = `${filename}.ppk2`;
+        }
+
+        try {
+            dispatch(
+                showProgressDialog({
+                    title: 'Exporting',
+                    message: 'Exporting PPK File',
+                })
+            );
+            await saveData(
+                filename,
+                dataToBeSaved,
+                activeSessionFolder,
+                (message, progress) => {
+                    dispatch(updateProgress({ progress, message }));
+                }
+            );
+            dispatch(closeProgressDialog());
+
+            logger.info(`State saved to: ${filename}`);
+        } catch (error) {
+            logger.error(`Error exporting file: ${describeError(error)}`);
+        }
+    };
 
 export const load =
     (
@@ -90,7 +105,7 @@ export const load =
                 filters: [
                     {
                         name: 'Power profiler kit',
-                        extensions: ['ppk'],
+                        extensions: ['ppk', 'ppk2'],
                     },
                 ],
             })) || [];
@@ -103,34 +118,28 @@ export const load =
         DataManager().reset();
         dispatch(resetChartTime());
         dispatch(resetMinimap());
+        dispatch(setLiveMode(false));
         updateTitle(filename);
-        const result = await loadData(filename);
-        if (!result) {
-            logger.error(`Error loading from ${filename}`);
-            setLoading(false);
-            return;
-        }
-        const { dataBuffer, bits, metadata } = result;
 
-        const {
-            chartState,
-            dataLoggerState,
-            options: { samplingTime, samplesPerSecond, timestamp },
-        } = metadata;
+        dispatch(
+            showProgressDialog({
+                title: 'Importing',
+                message: 'Loading PPK File',
+            })
+        );
+        const timestamp = await loadData(filename, (message, progress) => {
+            dispatch(updateProgress({ progress, message }));
+        });
 
-        DataManager().setSamplingTime(samplingTime);
-        DataManager().setSamplesPerSecond(samplesPerSecond);
-        DataManager().loadData(dataBuffer, bits, timestamp);
+        dispatch(closeProgressDialog());
 
-        dispatch(setLatestDataTimestamp(timestamp));
-        dispatch(setChartState(chartState));
-        dispatch(setFileLoadedAction({ loaded: true }));
-        if (dataLoggerState !== null) {
-            dispatch(setDataLoggerState({ state: dataLoggerState }));
+        if (timestamp) {
+            dispatch(setLatestDataTimestamp(timestamp));
+            dispatch(scrollToEnd());
+            dispatch(triggerForceRerender());
+            dispatch(miniMapAnimationAction());
         }
 
-        logger.info(`State successfully restored`);
-        dispatch(miniMapAnimationAction());
         setLoading(false);
     };
 

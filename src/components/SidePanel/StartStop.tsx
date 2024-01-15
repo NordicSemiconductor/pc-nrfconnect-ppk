@@ -31,26 +31,14 @@ import {
     updateDurationUnit,
     updateSampleFreqLog10,
 } from '../../slices/dataLoggerSlice';
+import { calcFileSize } from '../../utils/fileUtils';
 import { TimeUnit } from '../../utils/persistentStore';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
-const calcFileSize = (sampleFreq: number, durationSeconds: number) => {
+const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
     const bytes = sampleFreq * durationSeconds * 6;
-    if (bytes > 1024 * 1024 * 1024 * 1024) {
-        return unit(bytes, 'byte').to('TB').format(fmtOpts);
-    }
-    if (bytes > 1024 * 1024 * 1024) {
-        return unit(bytes, 'byte').to('GB').format(fmtOpts);
-    }
-    if (bytes > 1024 * 1024) {
-        return unit(bytes, 'byte').to('MB').format(fmtOpts);
-    }
-    if (bytes > 1024) {
-        return unit(bytes, 'byte').to('KB').format(fmtOpts);
-    }
-
-    return unit(bytes, 'byte').to('MB').format(fmtOpts);
+    return calcFileSize(bytes, fmtOpts);
 };
 
 export default () => {
@@ -75,7 +63,7 @@ export default () => {
 
     const uintDropdownItem: DropdownItem<TimeUnit>[] = [
         { value: 's', label: 'seconds' },
-        { value: 'm', label: 'minuets' },
+        { value: 'm', label: 'minutes' },
         { value: 'h', label: 'hours' },
         { value: 'd', label: 'days' },
     ];
@@ -143,7 +131,7 @@ export default () => {
                     </div>
                     <div className="small buffer-summary">
                         Estimated disk space required{' '}
-                        {calcFileSize(
+                        {calcFileSizeString(
                             sampleFreq,
                             convertTimeToSeconds(duration, durationUnit)
                         )}
@@ -153,7 +141,10 @@ export default () => {
             {!autoStopSampling && (
                 <div className="small buffer-summary">
                     Estimated disk space required{' '}
-                    {calcFileSize(sampleFreq, convertTimeToSeconds(1, 'h'))}
+                    {calcFileSizeString(
+                        sampleFreq,
+                        convertTimeToSeconds(1, 'h')
+                    )}
                     <br />
                     per hour
                 </div>

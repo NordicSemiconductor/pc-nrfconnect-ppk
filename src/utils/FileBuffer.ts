@@ -137,6 +137,10 @@ export class FileBuffer {
     }
 
     private writeActivePage(onComplete?: () => void) {
+        if (this.writePages.length === 0) {
+            onComplete?.();
+            return;
+        }
         const activePage = this.writePages[this.writePages.length - 1];
 
         if (activePage.bytesWritten === activePage.page.length) {
@@ -468,6 +472,7 @@ export class FileBuffer {
     async flush() {
         if (this.fileHandle) {
             await this.writeActivePage();
+            fs.fdatasyncSync(this.fileHandle);
         }
     }
 
