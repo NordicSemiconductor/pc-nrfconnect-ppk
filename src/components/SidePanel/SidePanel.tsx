@@ -21,7 +21,6 @@ import {
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
-import { BufferSettings } from './BufferSettings';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
@@ -84,7 +83,6 @@ export default () => {
                 <>
                     <Gains />
                     <SpikeFilter />
-                    <BufferSettings />
                     <CapVoltageSettings />
                 </>
             )}
