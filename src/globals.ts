@@ -26,6 +26,7 @@ export interface GlobalOptions {
     timestamp?: number;
     fileBuffer?: FileBuffer;
     foldingBuffer?: FoldingBuffer;
+    systemInitialTime?: number;
 }
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
@@ -142,6 +143,18 @@ export const DataManager = () => ({
     },
 
     getTimestamp,
+    isInSync: () => {
+        const actualTimePassed =
+            performance.now() - (options.systemInitialTime ?? 0);
+        const simulationDelta = getTimestamp() / 1000;
+        if (simulationDelta > actualTimePassed) return true;
+
+        const pcAheadDelta = actualTimePassed - simulationDelta;
+        if (pcAheadDelta > getSamplingTime(options.samplesPerSecond) * 1.5) {
+            return false;
+        }
+        return true;
+    },
     addData: (current: number, bits: number) => {
         if (options.fileBuffer === undefined) return;
 
@@ -158,8 +171,13 @@ export const DataManager = () => ({
 
         options.fileBuffer.append(bufferToSend);
         options.timestamp =
-            (options.timestamp ?? 0) +
-            getSamplingTime(options.samplesPerSecond);
+            options.timestamp === undefined
+                ? 0
+                : options.timestamp + getSamplingTime(options.samplesPerSecond);
+
+        if (options.timestamp === 0) {
+            options.systemInitialTime = performance.now();
+        }
 
         options.foldingBuffer?.addData(current, options.timestamp);
     },
@@ -172,7 +190,7 @@ export const DataManager = () => ({
         options.fileBuffer = undefined;
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
-        options.timestamp = 0;
+        options.timestamp = undefined;
     },
     initialize: (fileBufferFolder?: string) => {
         const sessionFile = path.join(fileBufferFolder ?? os.tmpdir(), v4());

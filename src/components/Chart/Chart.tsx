@@ -423,6 +423,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     useEffect(() => {
         if (liveMode) {
+            if (!DataManager().isInSync()) {
+                return;
+            }
+
             const timeout = setTimeout(() => {
                 updateChart();
             });
