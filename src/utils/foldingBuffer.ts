@@ -8,38 +8,54 @@ import fs from 'fs-extra';
 import path from 'path';
 
 export type Data = { x: number; y: number };
+export type ResultData = { x: number; y: number | undefined };
+export type Collection = { length: number; min: Data[]; max: Data[] };
 
 const foldData = (data: Data[], select: (a: number, b: number) => number) => {
-    const newData = Array<Data>(data.length / 2);
-
-    for (let i = 0; i < newData.length; i += 1) {
+    for (let i = 0; i < data.length / 2; i += 1) {
         const index = i * 2;
-        newData[i] = {
+        data[i] = {
             x: (data[index].x + data[index + 1].x) / 2,
             y: select(data[index].y, data[index + 1].y),
         };
     }
-
-    return newData;
 };
 
 export class FoldingBuffer {
-    min: Data[] = [];
-    max: Data[] = [];
-    maxNumberOfElements = 10000;
+    maxNumberOfElements = 10_000;
     numberOfTimesToFold = 1;
     lastElementFoldCount = 0;
+    data: Collection;
+    out: ResultData[];
+
+    constructor() {
+        this.data = {
+            length: 0,
+            min: Array(this.maxNumberOfElements),
+            max: Array(this.maxNumberOfElements),
+        };
+        this.out = Array(this.maxNumberOfElements * 2);
+    }
 
     #addDefault(timestamp: number) {
-        this.min.push({ x: timestamp, y: Number.MAX_VALUE });
-        this.max.push({ x: timestamp, y: -Number.MAX_VALUE });
+        this.data.min[this.data.length] = {
+            x: timestamp,
+            y: Number.MAX_VALUE,
+        };
+        this.data.max[this.data.length] = {
+            x: timestamp,
+            y: -Number.MAX_VALUE,
+        };
+
+        this.data.length += 1;
     }
 
     #fold() {
         this.numberOfTimesToFold *= 2;
 
-        this.min = foldData(this.min, Math.min);
-        this.max = foldData(this.max, Math.max);
+        foldData(this.data.min, Math.min);
+        foldData(this.data.max, Math.max);
+        this.data.length /= 2;
     }
 
     addData(value: number, timestamp: number) {
@@ -56,50 +72,47 @@ export class FoldingBuffer {
 
         this.lastElementFoldCount += 1;
         const alpha = 1 / this.lastElementFoldCount;
-        this.min[this.min.length - 1] = {
+        this.data.min[this.data.length - 1] = {
             x:
                 timestamp * alpha +
-                this.min[this.min.length - 1].x * (1 - alpha),
+                this.data.min[this.data.length - 1].x * (1 - alpha),
             y: !Number.isNaN(value)
-                ? Math.min(value, this.min[this.min.length - 1].y)
-                : this.min[this.min.length - 1].y,
+                ? Math.min(value, this.data.min[this.data.length - 1].y)
+                : this.data.min[this.data.length - 1].y,
         };
 
-        this.max[this.max.length - 1] = {
+        this.data.max[this.data.length - 1] = {
             x:
                 timestamp * alpha +
-                this.max[this.max.length - 1].x * (1 - alpha),
+                this.data.max[this.data.length - 1].x * (1 - alpha),
             y: !Number.isNaN(value)
-                ? Math.max(value, this.max[this.max.length - 1].y)
-                : this.max[this.max.length - 1].y,
+                ? Math.max(value, this.data.max[this.data.length - 1].y)
+                : this.data.max[this.data.length - 1].y,
         };
 
         if (this.lastElementFoldCount === this.numberOfTimesToFold) {
             this.lastElementFoldCount = 0;
         }
 
-        if (this.min.length === this.maxNumberOfElements) {
+        if (this.data.length === this.maxNumberOfElements) {
             this.#fold();
         }
     }
 
     getData() {
-        const out = this.min
-            .map((min, i) => {
-                const isValid = this.max[i].y >= min.y;
+        for (let i = 0; i < this.data.length; i += 1) {
+            const isValid = this.data.max[i].y >= this.data.min[i].y;
 
-                // if min > max implies we are using +-Number.MAX_Value which will crash chart js
-                return [
-                    { x: min.x, y: isValid ? min.y : undefined },
-                    {
-                        x: this.max[i].x,
-                        y: isValid ? this.max[i].y : undefined,
-                    },
-                ];
-            })
-            .flat();
-
-        return out;
+            this.out[i * 2] = {
+                x: this.data.min[i].x,
+                y: isValid ? this.data.min[i].y : undefined,
+            };
+            this.out[i * 2 + 1] = {
+                x: this.data.max[i].x,
+                y: isValid ? this.data.max[i].y : undefined,
+            };
+        }
+        return this.out.slice(0, this.data.length * 2);
     }
 
     saveToFile(sessionPath: string) {
@@ -107,8 +120,7 @@ export class FoldingBuffer {
             path.join(sessionPath, 'minimap.raw'),
             JSON.stringify({
                 lastElementFoldCount: this.lastElementFoldCount,
-                max: this.max,
-                min: this.min,
+                data: this.data,
                 maxNumberOfElements: this.maxNumberOfElements,
                 numberOfTimesToFold: this.numberOfTimesToFold,
             })
@@ -120,8 +132,7 @@ export class FoldingBuffer {
             fs.readFileSync(path.join(sessionPath, 'minimap.raw')).toString()
         );
         this.lastElementFoldCount = result.lastElementFoldCount;
-        this.max = result.max;
-        this.min = result.min;
+        this.data = result.data;
         this.maxNumberOfElements = result.maxNumberOfElements;
         this.numberOfTimesToFold = result.numberOfTimesToFold;
     }
