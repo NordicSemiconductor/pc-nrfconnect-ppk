@@ -437,15 +437,42 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         }
     }, [xAxisMax, liveMode, updateChart, begin, windowEnd, rerenderTrigger]);
 
+    const lastPositions = useRef({
+        begin,
+        windowEnd,
+    });
+
     useEffect(() => {
         if (!liveMode && DataManager().getTotalSavedRecords() > 0) {
-            const timeout = setTimeout(() => {
-                setProcessing(true);
-                updateChart().finally(() => {
-                    setProcessing(false);
-                });
-            }, 250);
+            const windowRange = windowEnd - begin;
+            const previousWindowsRange =
+                lastPositions.current.windowEnd - lastPositions.current.begin;
 
+            const isZooming = previousWindowsRange !== windowRange;
+            const smallPanAction =
+                (begin > lastPositions.current.begin &&
+                    begin < lastPositions.current.windowEnd) ||
+                (windowEnd > lastPositions.current.begin &&
+                    windowEnd < lastPositions.current.windowEnd);
+
+            const timeout = setTimeout(
+                () => {
+                    if (!smallPanAction) {
+                        setProcessing(true);
+                    }
+
+                    // to aid with allowing react to re render progress spinner
+                    setTimeout(() => {
+                        updateChart().finally(() => {
+                            setProcessing(false);
+                        });
+                    });
+                },
+                !smallPanAction || isZooming ? 350 : 0
+            );
+
+            lastPositions.current.begin = begin;
+            lastPositions.current.windowEnd = windowEnd;
             return () => {
                 clearTimeout(timeout);
             };

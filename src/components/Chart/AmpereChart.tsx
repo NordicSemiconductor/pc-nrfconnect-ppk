@@ -231,7 +231,7 @@ export default ({
                         timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]'
                     )}
                 >
-                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-300 tw-bg-opacity-50 tw-px-[70px]">
+                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-300 tw-bg-opacity-20 tw-px-[70px]">
                         <Spinner
                             size="lg"
                             className=" tw-text-nordicBlue-900"
