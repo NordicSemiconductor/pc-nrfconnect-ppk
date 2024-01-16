@@ -68,17 +68,21 @@ export default async (
         logger.error(describeError(err));
     });
 
+    let lastProgress = -1;
     archive.on('progress', progress => {
         const percent = Math.round(
             (progress.fs.processedBytes / folderSizeInBytes) * 100.0
         );
 
-        onProgress(
-            `Compressing files, processed ${calcFileSize(
-                progress.entries.processed
-            )} of ${calcFileSize(progress.entries.total)} `,
-            percent
-        );
+        if (percent !== lastProgress) {
+            lastProgress = percent;
+            onProgress(
+                `Compressing files, processed ${calcFileSize(
+                    progress.entries.processed
+                )} of ${calcFileSize(progress.entries.total)} `,
+                percent
+            );
+        }
     });
 
     archive.directory(sessionFolder, false);

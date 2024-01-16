@@ -340,12 +340,12 @@ export class FileBuffer {
                 this.getAllPages().findIndex(p =>
                     fullOverlap(
                         {
-                            start: i,
-                            end: i + this.readPageSize - 1,
-                        },
-                        {
                             start: p.startAddress,
                             end: p.startAddress + p.bytesWritten - 1,
+                        },
+                        {
+                            start: i,
+                            end: i + this.readPageSize - 1,
                         }
                     )
                 ) === -1;
@@ -367,9 +367,13 @@ export class FileBuffer {
         }
     }
 
-    read(byteOffset: number, numberOfBytesToRead: number) {
+    read(buffer: Buffer, byteOffset: number, numberOfBytesToRead: number) {
+        if (buffer.length < numberOfBytesToRead) {
+            throw new Error('Buffer is too small');
+        }
+
         if (byteOffset >= this.fileSize) {
-            return Buffer.from([]);
+            return 0;
         }
 
         const pageHit = this.getAllPages().filter(p =>
@@ -385,7 +389,6 @@ export class FileBuffer {
             )
         );
 
-        const result = Buffer.alloc(numberOfBytesToRead);
         const completedRanges: { start: number; end: number }[] = [];
 
         if (pageHit.length > 0) {
@@ -406,7 +409,7 @@ export class FileBuffer {
                     end: endOffset,
                 });
 
-                result.set(subResult, startOffset - byteOffset);
+                buffer.set(subResult, startOffset - byteOffset);
             });
 
             const mergedRange = mergeRanges([...completedRanges]);
@@ -423,13 +426,13 @@ export class FileBuffer {
                     byteOffset,
                     byteOffset + numberOfBytesToRead
                 );
-                return Buffer.from(result);
+                return numberOfBytesToRead;
             }
         }
 
-        return new Promise<Buffer>(resolve => {
+        return new Promise<number>(resolve => {
             this.readRange(
-                result,
+                buffer,
                 numberOfBytesToRead,
                 byteOffset,
                 bytesRead => {
@@ -448,7 +451,7 @@ export class FileBuffer {
                         this.readPageSize
                     ) {
                         const newPage = {
-                            page: result.subarray(
+                            page: buffer.subarray(
                                 normalizedBegin,
                                 normalizedEnd
                             ),
@@ -456,13 +459,17 @@ export class FileBuffer {
                             bytesWritten: normalizedEnd - normalizedBegin + 1,
                         };
                         this.readPages.push(newPage);
-                        this.updateReadPages(normalizedBegin, normalizedEnd);
                     }
 
+                    this.updateReadPages(
+                        byteOffset,
+                        byteOffset + numberOfBytesToRead - 1
+                    );
+
                     if (bytesRead === numberOfBytesToRead) {
-                        resolve(result);
+                        resolve(numberOfBytesToRead);
                     } else {
-                        resolve(result.subarray(0, bytesRead));
+                        resolve(bytesRead);
                     }
                 }
             );

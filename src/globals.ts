@@ -19,6 +19,7 @@ const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 export const microSecondsPerSecond = 1e6;
 
+const tempBuffer = new Uint8Array(6);
 export interface GlobalOptions {
     /** The number of samples per second */
     samplesPerSecond: number;
@@ -27,6 +28,7 @@ export interface GlobalOptions {
     fileBuffer?: FileBuffer;
     foldingBuffer?: FoldingBuffer;
     systemInitialTime?: number;
+    readBuffer?: Buffer;
 }
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
@@ -34,8 +36,10 @@ const options: GlobalOptions = {
 
 class FileData {
     data: Uint8Array;
-    constructor(data: Readonly<Uint8Array>) {
+    length: number;
+    constructor(data: Readonly<Uint8Array>, length: number) {
         this.data = data;
+        this.length = length;
     }
 
     getAllCurrentData() {
@@ -52,20 +56,13 @@ class FileData {
     getCurrentData(index: number) {
         const byteOffset = index * (4 + 2);
 
-        // Create a buffer
-        const buf = new ArrayBuffer(4);
-        const view = new DataView(buf);
-
-        const data = this.data.subarray(byteOffset, byteOffset + 4);
-        if (data.length !== 4) {
+        if (this.length < byteOffset + 4) {
             throw new Error('Index out of range');
         }
 
-        data.forEach((b, i) => {
-            view.setUint8(i, b);
-        });
+        const view = new DataView(this.data.buffer);
 
-        return view.getFloat32(0, true);
+        return view.getFloat32(byteOffset, true);
     }
 
     getAllBitData() {
@@ -82,24 +79,17 @@ class FileData {
     getBitData(index: number) {
         const byteOffset = index * (4 + 2) + 4;
 
-        // Create a buffer
-        const buf = new ArrayBuffer(2);
-        const view = new DataView(buf);
-
-        const data = this.data.subarray(byteOffset, byteOffset + 2);
-        if (data.length !== 2) {
+        if (this.length < byteOffset + 2) {
             throw new Error('Index out of range');
         }
 
-        data.forEach((b, i) => {
-            view.setUint8(i, b);
-        });
+        const view = new DataView(this.data.buffer);
 
-        return view.getUint16(0, true);
+        return view.getUint16(byteOffset);
     }
 
     getLength() {
-        return this.data.length / (4 + 2);
+        return this.length / (4 + 2);
     }
 }
 
@@ -120,7 +110,7 @@ export const DataManager = () => ({
     getSessionFolder: () => options.fileBuffer?.getSessionFolder(),
     getData: async (fromTime = 0, toTime = getTimestamp()) => {
         if (options.fileBuffer === undefined) {
-            return new FileData(Buffer.from([]));
+            return new FileData(Buffer.alloc(0), 0);
         }
 
         const numberOfElements =
@@ -128,18 +118,24 @@ export const DataManager = () => ({
         const byteOffset = timestampToIndex(fromTime) * (4 + 2);
         const numberOfBytesToRead = numberOfElements * (4 + 2);
 
-        const buffer = await options.fileBuffer.read(
+        if (
+            !options.readBuffer ||
+            options.readBuffer.length < numberOfBytesToRead
+        ) {
+            options.readBuffer = Buffer.alloc(numberOfBytesToRead);
+        }
+
+        const readBytes = await options.fileBuffer.read(
+            options.readBuffer,
             byteOffset,
             numberOfBytesToRead
         );
-        if (buffer.length !== numberOfBytesToRead) {
+        if (readBytes !== numberOfBytesToRead) {
             console.log(
-                `missing ${
-                    (numberOfBytesToRead - buffer.length) / (4 + 2)
-                } records`
+                `missing ${(numberOfBytesToRead - readBytes) / (4 + 2)} records`
             );
         }
-        return new FileData(buffer);
+        return new FileData(options.readBuffer, readBytes);
     },
 
     getTimestamp,
@@ -158,18 +154,12 @@ export const DataManager = () => ({
     addData: (current: number, bits: number) => {
         if (options.fileBuffer === undefined) return;
 
-        const currentBuffer = new Uint8Array(
-            Float32Array.from([current]).buffer
-        );
-        const bitBuffer = new Uint8Array(Uint16Array.from([bits]).buffer);
-        const bufferToSend = new Uint8Array(
-            currentBuffer.length + bitBuffer.length
-        );
+        const view = new DataView(tempBuffer.buffer);
+        view.setFloat32(0, current, true);
+        view.setUint16(4, bits);
 
-        bufferToSend.set(currentBuffer);
-        bufferToSend.set(bitBuffer, currentBuffer.length);
+        options.fileBuffer.append(tempBuffer);
 
-        options.fileBuffer.append(bufferToSend);
         options.timestamp =
             options.timestamp === undefined
                 ? 0
@@ -188,6 +178,7 @@ export const DataManager = () => ({
         const temp = { ...options };
         temp.fileBuffer?.close().then(() => temp.fileBuffer?.release());
         options.fileBuffer = undefined;
+        options.readBuffer = undefined;
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
         options.timestamp = undefined;
@@ -199,6 +190,7 @@ export const DataManager = () => ({
             60 * options.samplesPerSecond * 6,
             sessionFile
         );
+        options.readBuffer = Buffer.alloc(20 * options.samplesPerSecond * 6); // we start with smaller buffer and let it grow organically
         options.foldingBuffer = new FoldingBuffer();
     },
 

@@ -63,6 +63,8 @@ const mockFsRead = (cb: (buffer: Uint8Array) => number) => {
     );
 };
 
+const readBuffer = Buffer.alloc(200);
+
 describe('WriteBuffer', () => {
     const readPageSize = 10;
     const writePageSize = 10;
@@ -146,26 +148,28 @@ describe('WriteBuffer', () => {
     });
 
     test('Reading empty buffer will not return nothing', async () => {
-        const result = await fileBuffer.read(0, 10);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 0, 10);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result.length).toEqual(0);
+        expect(numberOfBytes).toEqual(0);
     });
 
     test('Reading beyond the buffer size returns nothing', async () => {
         await fileBuffer.append(Buffer.from([0, 1, 2, 3, 4]));
-        const result = await fileBuffer.read(5, 1);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 5, 1);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result.length).toEqual(0);
+        expect(numberOfBytes).toEqual(0);
     });
 
     test('Reading return the expected bytes from active writePage', async () => {
         await fileBuffer.append(Buffer.from([0, 1, 2, 3, 4]));
-        const result = await fileBuffer.read(2, 3);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 2, 3);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result).toStrictEqual(Buffer.from([2, 3, 4]));
+        expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
+            Buffer.from([2, 3, 4])
+        );
     });
 
     test('Reading over two write buffers return the expected bytes from the writePage', async () => {
@@ -175,10 +179,12 @@ describe('WriteBuffer', () => {
                 18, 19,
             ])
         );
-        const result = await fileBuffer.read(9, 2);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 9, 2);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result).toStrictEqual(Buffer.from([9, 10]));
+        expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
+            Buffer.from([9, 10])
+        );
     });
 
     test('Reading over all three write buffers return the expected bytes from the writePage', async () => {
@@ -188,10 +194,10 @@ describe('WriteBuffer', () => {
                 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 38, 29,
             ])
         );
-        const result = await fileBuffer.read(9, 12);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 9, 12);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result).toStrictEqual(
+        expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
             Buffer.from([9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
         );
     });
@@ -200,10 +206,12 @@ describe('WriteBuffer', () => {
         await fileBuffer.append(
             Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
         );
-        const result = await fileBuffer.read(10, 5);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 10, 5);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result).toStrictEqual(Buffer.from([10, 11, 12, 13, 14]));
+        expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
+            Buffer.from([10, 11, 12, 13, 14])
+        );
     });
 });
 
@@ -220,18 +228,22 @@ describe('ReadBuffers', () => {
     });
 
     test('Reading over all three write buffers return the expected bytes from the writePage', async () => {
-        const result = await fileBuffer.read(0, 3);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 0, 3);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result).toStrictEqual(Buffer.from([0, 1, 2]));
+        expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
+            Buffer.from([0, 1, 2])
+        );
     });
 
     test('Reading over all three write buffers return the expected bytes from the writePage after write page cleared', async () => {
         await fileBuffer.append(Buffer.from([3])); // write buffer will now loose the first byte
-        const result = await fileBuffer.read(1, 3);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 1, 3);
 
         expect(fs.read).toBeCalledTimes(0);
-        expect(result).toStrictEqual(Buffer.from([1, 2, 3]));
+        expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
+            Buffer.from([1, 2, 3])
+        );
     });
 
     test('Reading over all three write buffers and one miss forcing read from file', async () => {
@@ -241,10 +253,12 @@ describe('ReadBuffers', () => {
             buffer.set(Buffer.from([0, 1, 2, 3]));
             return 4;
         });
-        const result = await fileBuffer.read(0, 4);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 0, 4);
 
         expect(fs.read).toBeCalledTimes(1);
-        expect(result).toStrictEqual(Buffer.from([0, 1, 2, 3]));
+        expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
+            Buffer.from([0, 1, 2, 3])
+        );
     });
 
     test('Buffering read exact page size reads', async () => {
@@ -258,7 +272,7 @@ describe('ReadBuffers', () => {
             Buffer.from([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
         ); // write buffer will now loose the first byte
 
-        await fileBuffer.read(6, 2);
+        await fileBuffer.read(readBuffer, 6, 2);
         expect(bufferingEvents.length).toBe(2);
         await Promise.all(bufferingEvents);
         expect(fs.read).toBeCalledTimes(3);
@@ -302,10 +316,10 @@ describe('ReadBuffers', () => {
             Buffer.from([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
         ); // write buffer will no longer covert the first few bytes
 
-        await fileBuffer.read(5, 4);
-        expect(bufferingEvents.length).toBe(2);
+        await fileBuffer.read(readBuffer, 5, 4);
+        expect(bufferingEvents.length).toBe(3);
         await Promise.all(bufferingEvents);
-        expect(fs.read).toBeCalledTimes(3);
+        expect(fs.read).toBeCalledTimes(4);
         expect(fs.read).nthCalledWith(
             1,
             1, // file handle
@@ -321,11 +335,20 @@ describe('ReadBuffers', () => {
             expect.anything(),
             0,
             readPageSize,
-            4,
+            2,
             expect.anything()
         ); // Page Before
         expect(fs.read).nthCalledWith(
             3,
+            1, // file handle
+            expect.anything(),
+            0,
+            readPageSize,
+            4,
+            expect.anything()
+        ); // Page After
+        expect(fs.read).nthCalledWith(
+            4,
             1, // file handle
             expect.anything(),
             0,
@@ -346,11 +369,11 @@ describe('ReadBuffers', () => {
             Buffer.from([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
         ); // write buffer will no longer covert the first few bytes
 
-        await fileBuffer.read(6, 2); // read and buffer from 4-9
+        await fileBuffer.read(readBuffer, 6, 2); // read and buffer from 4-9
         expect(bufferingEvents.length).toBe(2);
         await Promise.all(bufferingEvents);
         expect(fs.read).toBeCalledTimes(3);
-        await fileBuffer.read(8, 2); // read and buffer from 4-9
+        await fileBuffer.read(readBuffer, 8, 2); // read and buffer from 4-9
         expect(fs.read).toBeCalledTimes(4); // read one buffer to the right
         expect(fs.read).nthCalledWith(
             4,
