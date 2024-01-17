@@ -20,6 +20,7 @@ import { promisify } from 'util';
 import { v4 } from 'uuid';
 import { createInflateRaw } from 'zlib';
 
+import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import { DataManager } from '../globals';
 import saveFile, { PPK2Metadata } from './saveFileHandler';
 
@@ -161,6 +162,10 @@ const loadPPK2File = async (
 
     const outputPath = path.join(os.tmpdir(), v4());
     fs.mkdirSync(outputPath);
+    const cleanUp = () => {
+        fs.rmSync(outputPath, { recursive: true, force: true });
+    };
+    window.addEventListener('beforeunload', cleanUp);
     let totalSize = 0;
 
     const directory = await unzipper.Open.file(filename);
@@ -206,8 +211,10 @@ const loadPPK2File = async (
         fs.readFileSync(path.join(outputPath, 'metadata.json')).toString()
     );
 
+    window.removeEventListener('beforeunload', cleanUp);
     DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
     DataManager().loadData(metadata.metadata.recordingDuration, outputPath);
+
     return metadata.metadata.recordingDuration;
 };
 
@@ -225,6 +232,7 @@ export default async (
     );
 
     try {
+        await startPreventSleep();
         const buffer = await setupBuffer(filename);
 
         onProgress('Extracting ppk file data', -1);
@@ -278,8 +286,10 @@ export default async (
             );
         }
 
+        await stopPreventSleep();
         return DataManager().getTimestamp();
     } catch (err) {
+        await stopPreventSleep();
         return false;
     }
 };

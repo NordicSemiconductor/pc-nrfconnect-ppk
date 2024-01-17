@@ -18,7 +18,7 @@ import TimeComponent from './TimeComponent';
 export default () => {
     const dispatch = useDispatch();
     const dialogInfo = useSelector(getProgressDialogInfo);
-    const lastMsg = useRef('');
+    const lastProgress = useRef(-1);
 
     const { time, reset, pause, start } = useStopwatch({
         autoStart: true,
@@ -27,6 +27,7 @@ export default () => {
 
     useEffect(() => {
         if (!dialogInfo.show) {
+            lastProgress.current = -1;
             pause();
         } else {
             start(0);
@@ -34,11 +35,11 @@ export default () => {
     }, [dialogInfo.show, pause, start]);
 
     useEffect(() => {
-        if (dialogInfo.message !== lastMsg.current) {
-            lastMsg.current = dialogInfo.message;
+        if (dialogInfo.progress < lastProgress.current) {
+            lastProgress.current = dialogInfo.progress;
             reset();
         }
-    }, [dialogInfo.message, pause, reset]);
+    }, [dialogInfo.progress, reset]);
 
     return (
         <GenericDialog

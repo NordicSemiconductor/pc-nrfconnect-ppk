@@ -10,6 +10,7 @@ import archiver from 'archiver';
 import fs from 'fs';
 import path from 'path';
 
+import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import { DataManager, GlobalOptions } from '../globals';
 import { ChartState } from '../slices/chartSlice';
 import { DataLoggerState } from '../slices/dataLoggerSlice';
@@ -39,6 +40,7 @@ export default async (
     sessionFolder: string,
     onProgress: (message: string, percentage: number) => void
 ) => {
+    await startPreventSleep();
     const metaPath = path.join(sessionFolder, 'metadata.json');
     DataManager().saveMinimap(sessionFolder);
     fs.writeFileSync(
@@ -52,7 +54,7 @@ export default async (
     });
     const output = fs.createWriteStream(filename);
     const archive = archiver('zip', {
-        zlib: { level: 9 }, // Sets the compression level.
+        zlib: { level: 6 }, // Sets the compression level.
     });
 
     archive.pipe(output);
@@ -68,25 +70,27 @@ export default async (
         logger.error(describeError(err));
     });
 
-    let lastProgress = -1;
-    archive.on('progress', progress => {
-        const percent = Math.round(
-            (progress.fs.processedBytes / folderSizeInBytes) * 100.0
+    let processed = 0;
+
+    archive.on('data', data => {
+        processed += data.length;
+        const percent = Math.round((processed / folderSizeInBytes) * 100.0);
+
+        onProgress(
+            `Compressing Data. Processed ${calcFileSize(
+                processed
+            )} of ${calcFileSize(folderSizeInBytes)}`,
+            percent
         );
-
-        if (percent !== lastProgress) {
-            lastProgress = percent;
-            onProgress(
-                `Compressing files, processed ${calcFileSize(
-                    progress.entries.processed
-                )} of ${calcFileSize(progress.entries.total)} `,
-                percent
-            );
-        }
     });
-
     archive.directory(sessionFolder, false);
 
+    const cleanUp = () => {
+        fs.rmSync(filename, { recursive: true, force: true });
+    };
+    window.addEventListener('beforeunload', cleanUp);
     await archive.finalize();
+    window.removeEventListener('beforeunload', cleanUp);
     fs.rmSync(metaPath);
+    await stopPreventSleep();
 };
