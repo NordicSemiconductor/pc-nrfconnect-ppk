@@ -38,7 +38,7 @@ export default async (
     filename: string,
     metadata: PPK2Metadata,
     sessionFolder: string,
-    onProgress: (message: string, percentage: number) => void
+    onProgress: (message: string) => void
 ) => {
     await startPreventSleep();
     const metaPath = path.join(sessionFolder, 'metadata.json');
@@ -48,10 +48,6 @@ export default async (
         JSON.stringify({ ...metadata, formatVersion: CURRENT_VERSION })
     );
 
-    let folderSizeInBytes = 0;
-    fs.readdirSync(sessionFolder).forEach(d => {
-        folderSizeInBytes += fs.statSync(path.join(sessionFolder, d)).size;
-    });
     const output = fs.createWriteStream(filename);
     const archive = archiver('zip', {
         zlib: { level: 6 }, // Sets the compression level.
@@ -74,13 +70,9 @@ export default async (
 
     archive.on('data', data => {
         processed += data.length;
-        const percent = Math.round((processed / folderSizeInBytes) * 100.0);
 
         onProgress(
-            `Compressing Data. Processed ${calcFileSize(
-                processed
-            )} of ${calcFileSize(folderSizeInBytes)}`,
-            percent
+            `Compressing Data. Compressed file size ${calcFileSize(processed)}`
         );
     });
     archive.directory(sessionFolder, false);

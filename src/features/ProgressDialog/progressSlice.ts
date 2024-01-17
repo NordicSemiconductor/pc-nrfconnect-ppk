@@ -14,6 +14,7 @@ interface ProgressState {
     progress: number;
     complete: boolean;
     show: boolean;
+    indeterminate: boolean;
 }
 
 const initialState: ProgressState = {
@@ -22,6 +23,7 @@ const initialState: ProgressState = {
     progress: -1,
     complete: false,
     show: false,
+    indeterminate: false,
 };
 
 const progressSlice = createSlice({
@@ -41,10 +43,15 @@ const progressSlice = createSlice({
         closeProgressDialog: () => ({ ...initialState }),
         updateProgress: (
             state,
-            action: PayloadAction<{ progress?: number; message: string }>
+            action: PayloadAction<{
+                progress?: number;
+                message: string;
+                indeterminate?: boolean;
+            }>
         ) => {
             state.message = action.payload.message;
             state.progress = action.payload.progress ?? -1;
+            state.indeterminate = !!action.payload.indeterminate;
         },
     },
 });

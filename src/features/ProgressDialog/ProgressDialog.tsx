@@ -59,7 +59,11 @@ export default () => {
                     <span>{dialogInfo.message}</span>
                     <br />
                 </div>
-                <TimeComponent time={time} progress={dialogInfo.progress} />
+                <TimeComponent
+                    time={time}
+                    progress={dialogInfo.progress}
+                    indeterminate={dialogInfo.indeterminate}
+                />
             </div>
         </GenericDialog>
     );

@@ -220,7 +220,11 @@ const loadPPK2File = async (
 
 export default async (
     filename: string,
-    onProgress: (message: string, percentage: number) => void
+    onProgress: (
+        message: string,
+        percentage: number,
+        indeterminate?: boolean
+    ) => void
 ) => {
     if (filename.endsWith('.ppk2')) {
         return loadPPK2File(filename, onProgress);
@@ -278,7 +282,7 @@ export default async (
                     },
                 },
                 sessionFolder,
-                onProgress
+                message => onProgress(message, -1, true)
             );
 
             logger.info(

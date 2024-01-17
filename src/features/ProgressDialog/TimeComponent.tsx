@@ -68,10 +68,12 @@ export default ({
     time,
     progress,
     ready = false,
+    indeterminate = false,
 }: {
     time: number;
     progress: number;
     ready?: boolean;
+    indeterminate?: boolean;
 }) => {
     const eta = useRef(0);
     if (ready) progress === 100;
@@ -98,7 +100,7 @@ export default ({
     return (
         <div className="w-100">
             <ElapsedTime time={time} />
-            {!ready && (
+            {!indeterminate && !ready && (
                 <div>
                     <span>
                         {progress > 0 && progress < 100
@@ -114,7 +116,11 @@ export default ({
                     <br />
                 </div>
             )}
-            <ProgressBar now={progress} style={{ height: '4px' }} />
+            <ProgressBar
+                now={indeterminate ? 100 : progress}
+                style={{ height: '4px' }}
+                animated={indeterminate}
+            />
         </div>
     );
 };

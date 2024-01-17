@@ -81,8 +81,8 @@ export const save =
                 filename,
                 dataToBeSaved,
                 activeSessionFolder,
-                (message, progress) => {
-                    dispatch(updateProgress({ progress, message }));
+                message => {
+                    dispatch(updateProgress({ indeterminate: true, message }));
                 }
             );
             dispatch(closeProgressDialog());
@@ -128,9 +128,12 @@ export const load =
                 message: 'Loading PPK File',
             })
         );
-        const timestamp = await loadData(filename, (message, progress) => {
-            dispatch(updateProgress({ progress, message }));
-        });
+        const timestamp = await loadData(
+            filename,
+            (message, progress, indeterminate) => {
+                dispatch(updateProgress({ message, progress, indeterminate }));
+            }
+        );
 
         dispatch(closeProgressDialog());
 
