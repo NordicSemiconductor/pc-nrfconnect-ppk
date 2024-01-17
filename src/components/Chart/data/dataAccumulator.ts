@@ -97,7 +97,8 @@ export interface DataAccumulator {
         end: number,
         digitalChannelsToCompute: number[],
         len: number,
-        windowDuration: number
+        windowDuration: number,
+        onLoading?: (loading: boolean) => void
     ) => Promise<{
         ampereLineData: AmpereState[];
         bitsLineData: DigitalChannelStates[];
@@ -120,7 +121,8 @@ const accumulate = (
     end: number, // normalizeTime
     timeGroup: number,
     numberOfPointsPerGrouped: number,
-    digitalChannelsToCompute: number[]
+    digitalChannelsToCompute: number[],
+    onLoading?: (loading: boolean) => void
 ) =>
     new Promise<{
         ampereLineData: AmpereState[];
@@ -135,7 +137,7 @@ const accumulate = (
         }
 
         DataManager()
-            .getData(begin, end)
+            .getData(begin, end, onLoading)
             .then(data => {
                 const bitAccumulator =
                     digitalChannelsToCompute.length > 0
@@ -467,7 +469,8 @@ export default (): DataAccumulator => ({
         end,
         digitalChannelsToCompute,
         maxNumberOfPoints,
-        windowDuration
+        windowDuration,
+        onLoading?: (loading: boolean) => void
     ) {
         // We want an extra sample from both end to show line going out of chart
         begin = Math.max(0, normalizeTime(begin)); // normalizeTime floors
@@ -518,7 +521,8 @@ export default (): DataAccumulator => ({
                     end,
                     timeGroup,
                     numberOfPointsPerGroup,
-                    digitalChannelsToCompute
+                    digitalChannelsToCompute,
+                    onLoading
                 );
 
             const requiredEnd = Math.min(
@@ -552,7 +556,8 @@ export default (): DataAccumulator => ({
                     end,
                     timeGroup,
                     numberOfPointsPerGroup,
-                    digitalChannelsToCompute
+                    digitalChannelsToCompute,
+                    onLoading
                 );
             }
 
@@ -570,7 +575,8 @@ export default (): DataAccumulator => ({
                         r.end,
                         timeGroup,
                         numberOfPointsPerGroup,
-                        digitalChannelsToCompute
+                        digitalChannelsToCompute,
+                        onLoading
                     )),
                 }))
             );

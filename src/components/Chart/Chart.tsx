@@ -366,7 +366,8 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 ? []
                 : (digitalChannelsToCompute as number[]),
             Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
-            windowDuration
+            windowDuration,
+            setProcessing
         );
 
         const avgTemp = processedData.averageLine.reduce(
@@ -457,16 +458,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
             const timeout = setTimeout(
                 () => {
-                    if (!smallPanAction) {
-                        setProcessing(true);
-                    }
-
-                    // to aid with allowing react to re render progress spinner
-                    setTimeout(() => {
-                        updateChart().finally(() => {
-                            setProcessing(false);
-                        });
-                    });
+                    updateChart();
                 },
                 !smallPanAction || isZooming ? 350 : 0
             );

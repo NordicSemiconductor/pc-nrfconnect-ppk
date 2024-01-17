@@ -108,7 +108,11 @@ export const DataManager = () => ({
         options.samplesPerSecond = samplesPerSecond;
     },
     getSessionFolder: () => options.fileBuffer?.getSessionFolder(),
-    getData: async (fromTime = 0, toTime = getTimestamp()) => {
+    getData: async (
+        fromTime = 0,
+        toTime = getTimestamp(),
+        onLoading: (loading: boolean) => void = () => {}
+    ) => {
         if (options.fileBuffer === undefined) {
             return new FileData(Buffer.alloc(0), 0);
         }
@@ -128,7 +132,8 @@ export const DataManager = () => ({
         const readBytes = await options.fileBuffer.read(
             options.readBuffer,
             byteOffset,
-            numberOfBytesToRead
+            numberOfBytesToRead,
+            onLoading
         );
         if (readBytes !== numberOfBytesToRead) {
             console.log(

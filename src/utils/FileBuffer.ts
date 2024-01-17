@@ -367,7 +367,12 @@ export class FileBuffer {
         }
     }
 
-    read(buffer: Buffer, byteOffset: number, numberOfBytesToRead: number) {
+    read(
+        buffer: Buffer,
+        byteOffset: number,
+        numberOfBytesToRead: number,
+        onLoading?: (loading: boolean) => void
+    ) {
         if (buffer.length < numberOfBytesToRead) {
             throw new Error('Buffer is too small');
         }
@@ -430,6 +435,7 @@ export class FileBuffer {
             }
         }
 
+        onLoading?.(true);
         return new Promise<number>(resolve => {
             this.readRange(
                 buffer,
@@ -466,6 +472,7 @@ export class FileBuffer {
                         byteOffset + numberOfBytesToRead - 1
                     );
 
+                    onLoading?.(false);
                     if (bytesRead === numberOfBytesToRead) {
                         resolve(numberOfBytesToRead);
                     } else {
