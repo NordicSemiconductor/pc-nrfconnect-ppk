@@ -21,6 +21,7 @@ import {
 } from '../features/ProgressDialog/progressSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
+import { setFileLoadedAction } from '../slices/appSlice';
 import {
     resetChartTime,
     scrollToEnd,
@@ -140,6 +141,7 @@ export const load =
             dispatch(miniMapAnimationAction());
         }
 
+        dispatch(setFileLoadedAction(true));
         setLoading(false);
     };
 

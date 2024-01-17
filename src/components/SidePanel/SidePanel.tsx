@@ -47,39 +47,24 @@ export default () => {
     const { fileLoaded } = useSelector(appState);
     const sessionActive = useSelector(isSessionActive);
 
-    if (fileLoaded) {
-        return (
-            <SidePanel className="side-panel tw-mt-9">
-                <Load />
-                <DisplayOptions />
-                <Save />
-                <MinimapOptions />
-                <DeprecatedDeviceDialog />
-                <ProgressDialog />
-            </SidePanel>
-        );
-    }
-
-    if (!deviceOpen) {
-        return (
-            <SidePanel className="side-panel tw-mt-9">
-                <Load />
-                {sessionActive && <Save />}
-                <Instructions />
-                <DeprecatedDeviceDialog />
-                <ProgressDialog />
-            </SidePanel>
-        );
-    }
-
     return (
         <SidePanel className="side-panel tw-mt-9">
-            <PowerMode />
-            <StartStop />
-            <MinimapOptions />
-            <DisplayOptions />
-            <Save />
-            {advancedMode && (
+            {!deviceOpen && <Load />}
+            {!fileLoaded && !deviceOpen && <Instructions />}
+            {!fileLoaded && deviceOpen && (
+                <>
+                    <PowerMode />
+                    <StartStop />
+                </>
+            )}
+            {(fileLoaded || deviceOpen || sessionActive) && (
+                <>
+                    <DisplayOptions />
+                    <MinimapOptions />
+                    <Save />
+                </>
+            )}
+            {!fileLoaded && deviceOpen && advancedMode && (
                 <>
                     <Gains />
                     <SpikeFilter />

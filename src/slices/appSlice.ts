@@ -73,11 +73,8 @@ const appSlice = createSlice({
         hideExportDialog: state => {
             state.isExportDialogVisible = false;
         },
-        setFileLoadedAction: (
-            state,
-            action: PayloadAction<{ loaded: boolean }>
-        ) => {
-            state.fileLoaded = action.payload.loaded;
+        setFileLoadedAction: (state, action: PayloadAction<boolean>) => {
+            state.fileLoaded = action.payload;
         },
         toggleAdvancedModeAction: state => {
             state.advancedMode = !state.advancedMode;

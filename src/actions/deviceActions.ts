@@ -254,7 +254,7 @@ export const open =
             dispatch(setPowerModeAction({ isSmuMode }));
             if (!isSmuMode) dispatch(setDeviceRunning(true));
 
-            dispatch(setFileLoadedAction({ loaded: false }));
+            dispatch(setFileLoadedAction(false));
 
             logger.info('PPK started');
         } catch (err) {
