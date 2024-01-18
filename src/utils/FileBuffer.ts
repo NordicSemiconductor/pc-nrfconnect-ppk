@@ -104,6 +104,9 @@ export class FileBuffer {
     bufferingListeners: ((event: Promise<void>) => void)[] = [];
     freeWriteBuffers: Uint8Array[] = [];
     freeReadBuffers: Uint8Array[] = [];
+    bufferingRequests: Promise<void>[] = [];
+    cancelBufferOperations: WeakMap<Promise<void>, AbortController> =
+        new WeakMap();
 
     constructor(
         readBufferSize: number,
@@ -119,6 +122,19 @@ export class FileBuffer {
         if (numberOfReadPages < 1) {
             throw new Error('numberOfReadPages cannot be less then 1');
         }
+
+        this.onBuffering(buffering => {
+            this.bufferingRequests.push(buffering);
+
+            buffering.then(() => {
+                const index = this.bufferingRequests.findIndex(
+                    b => b === buffering
+                );
+                if (index !== -1) {
+                    this.bufferingRequests.splice(index);
+                }
+            });
+        });
 
         this.numberOfReadPages = numberOfReadPages;
         this.numberOfWritePages = numberOfWritePages;
@@ -297,8 +313,13 @@ export class FileBuffer {
         page: Page,
         startAddress: number,
         beforeRun?: () => void
-    ) =>
-        new Promise<void>(release => {
+    ) => {
+        const cancelOperation = new AbortController();
+        const bufferingRequest = new Promise<void>((resolve, reject) => {
+            if (cancelOperation.signal.aborted) {
+                reject();
+                return;
+            }
             this.readRange(
                 page.page,
                 page.page.length,
@@ -306,11 +327,17 @@ export class FileBuffer {
                 bytesRead => {
                     page.bytesWritten = bytesRead;
                     page.startAddress = startAddress;
-                    release();
+                    this.cancelBufferOperations.delete(bufferingRequest);
+                    resolve();
                 },
                 beforeRun
             );
         });
+
+        this.cancelBufferOperations.set(bufferingRequest, cancelOperation);
+
+        return bufferingRequest;
+    };
 
     private updateReadPages(
         beforeOffset: number,
@@ -404,11 +431,14 @@ export class FileBuffer {
                 newReadPage.page =
                     this.freeReadBuffers.pop() ??
                     Buffer.alloc(this.readPageSize);
-                const buffering = this.readPage(newReadPage, i, () => {}).then(
-                    () => {
+                const buffering = this.readPage(newReadPage, i, () => {})
+                    .then(() => {
                         this.readPages.push(newReadPage);
-                    }
-                );
+                    })
+                    .catch(() => {
+                        this.freeReadBuffers.push(newReadPage.page);
+                    });
+
                 this.bufferingListeners.forEach(cb => {
                     cb(buffering);
                 });
@@ -416,7 +446,7 @@ export class FileBuffer {
         }
     }
 
-    read(
+    async read(
         buffer: Buffer,
         byteOffset: number,
         numberOfBytesToRead: number,
@@ -431,6 +461,12 @@ export class FileBuffer {
             return 0;
         }
 
+        onLoading?.(true);
+        this.bufferingRequests.forEach(op => {
+            this.cancelBufferOperations.get(op)?.abort();
+            this.cancelBufferOperations.delete(op);
+        });
+        await Promise.all(this.bufferingRequests);
         const pageHit = this.getAllPages().filter(p =>
             overlaps(
                 {
@@ -482,11 +518,11 @@ export class FileBuffer {
                     byteOffset + numberOfBytesToRead,
                     bias
                 );
+                onLoading?.(false);
                 return numberOfBytesToRead;
             }
         }
 
-        onLoading?.(true);
         return new Promise<number>(resolve => {
             this.readRange(
                 buffer,
@@ -565,6 +601,9 @@ export class FileBuffer {
 
     onBuffering(listener: (bufferEvent: Promise<void>) => void) {
         this.bufferingListeners.push(listener);
+
+        // report existing buffering events
+        this.bufferingRequests.forEach(listener);
 
         return () => {
             const index = this.bufferingListeners.findIndex(
