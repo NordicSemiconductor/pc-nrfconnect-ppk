@@ -197,7 +197,7 @@ export const DataManager = () => ({
             10 * 100_000 * 6,
             sessionPath,
             14,
-            6
+            30
         );
         options.readBuffer = Buffer.alloc(20 * options.samplesPerSecond * 6); // we start with smaller buffer and let it grow organically
         options.foldingBuffer = new FoldingBuffer();
@@ -212,7 +212,7 @@ export const DataManager = () => ({
             10 * 100_000 * 6,
             sessionPath,
             14,
-            6
+            30
         );
         options.foldingBuffer = new FoldingBuffer();
         options.foldingBuffer.loadFromFile(sessionPath);

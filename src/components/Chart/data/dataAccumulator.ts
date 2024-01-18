@@ -579,7 +579,7 @@ export default (): DataAccumulator => ({
                         timeGroup,
                         numberOfPointsPerGroup,
                         digitalChannelsToCompute,
-                        r.location === 'back' ? 'end' : 'start',
+                        undefined,
                         onLoading
                     )),
                 }))
