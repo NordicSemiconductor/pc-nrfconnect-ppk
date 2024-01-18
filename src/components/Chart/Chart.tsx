@@ -24,6 +24,7 @@ import {
 } from 'chart.js';
 
 import Minimap from '../../features/minimap/Minimap';
+import { isPanningInAction } from '../../features/minimap/minimapSlice';
 import {
     DataManager,
     getSamplesPerSecond,
@@ -84,6 +85,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const dispatch = useDispatch();
     const liveMode = useSelector(isLiveMode);
     const rerenderTrigger = useSelector(getForceRerender);
+    const miniMapPanningInAction = useSelector(isPanningInAction);
 
     const chartWindow = useCallback(
         (
@@ -450,18 +452,18 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 lastPositions.current.windowEnd - lastPositions.current.begin;
 
             const isZooming = previousWindowsRange !== windowRange;
-            const smallPanAction =
-                (begin > lastPositions.current.begin &&
-                    begin < lastPositions.current.windowEnd) ||
-                (windowEnd > lastPositions.current.begin &&
-                    windowEnd < lastPositions.current.windowEnd);
 
-            const timeout = setTimeout(
-                () => {
-                    updateChart();
-                },
-                !smallPanAction || isZooming ? 350 : 0
-            );
+            let debounceTimeOut = 0;
+
+            if (miniMapPanningInAction) {
+                debounceTimeOut = 200;
+            } else if (isZooming) {
+                debounceTimeOut = 350;
+            }
+
+            const timeout = setTimeout(() => {
+                updateChart();
+            }, debounceTimeOut);
 
             lastPositions.current.begin = begin;
             lastPositions.current.windowEnd = windowEnd;
@@ -469,7 +471,14 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 clearTimeout(timeout);
             };
         }
-    }, [begin, liveMode, updateChart, windowEnd, rerenderTrigger]);
+    }, [
+        begin,
+        liveMode,
+        updateChart,
+        windowEnd,
+        rerenderTrigger,
+        miniMapPanningInAction,
+    ]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
