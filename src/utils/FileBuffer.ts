@@ -446,27 +446,10 @@ export class FileBuffer {
         }
     }
 
-    async read(
-        buffer: Buffer,
+    private isRequiredDataAllCached(
         byteOffset: number,
-        numberOfBytesToRead: number,
-        bias?: 'start' | 'end',
-        onLoading?: (loading: boolean) => void
+        numberOfBytesToRead: number
     ) {
-        if (buffer.length < numberOfBytesToRead) {
-            throw new Error('Buffer is too small');
-        }
-
-        if (byteOffset >= this.fileSize) {
-            return 0;
-        }
-
-        onLoading?.(true);
-        this.bufferingRequests.forEach(op => {
-            this.cancelBufferOperations.get(op)?.abort();
-            this.cancelBufferOperations.delete(op);
-        });
-        await Promise.all(this.bufferingRequests);
         const pageHit = this.getAllPages().filter(p =>
             overlaps(
                 {
@@ -489,41 +472,130 @@ export class FileBuffer {
                     page.startAddress + page.bytesWritten - 1,
                     byteOffset + numberOfBytesToRead - 1
                 );
+                completedRanges.push({
+                    start: startOffset,
+                    end: endOffset,
+                });
+            });
+
+            const mergedRange = mergeRanges([...completedRanges]);
+
+            return (
+                mergedRange.length === 1 &&
+                fullOverlap(mergedRange[0], {
+                    start: byteOffset,
+                    end: byteOffset + numberOfBytesToRead - 1,
+                })
+            );
+        }
+
+        return false;
+    }
+
+    private readFromCachedData(
+        buffer: Buffer,
+        byteOffset: number,
+        numberOfBytesToRead: number,
+        bias?: 'start' | 'end'
+    ) {
+        if (!this.isRequiredDataAllCached(byteOffset, numberOfBytesToRead)) {
+            throw new Error(
+                'Data was not cached. Method should not have been called'
+            );
+        }
+        const pageHit = this.getAllPages().filter(p =>
+            overlaps(
+                {
+                    start: p.startAddress,
+                    end: p.startAddress + p.bytesWritten - 1,
+                },
+                {
+                    start: byteOffset,
+                    end: byteOffset + numberOfBytesToRead - 1,
+                }
+            )
+        );
+
+        if (pageHit.length > 0) {
+            pageHit.forEach(page => {
+                const startOffset = Math.max(page.startAddress, byteOffset);
+                const endOffset = Math.min(
+                    page.startAddress + page.bytesWritten - 1,
+                    byteOffset + numberOfBytesToRead - 1
+                );
 
                 const subResult = page.page.subarray(
                     startOffset - page.startAddress,
                     endOffset - page.startAddress + 1
                 );
 
-                completedRanges.push({
-                    start: startOffset,
-                    end: endOffset,
-                });
-
                 buffer.set(subResult, startOffset - byteOffset);
             });
 
-            const mergedRange = mergeRanges([...completedRanges]);
-
-            const allDone =
-                mergedRange.length === 1 &&
-                fullOverlap(mergedRange[0], {
-                    start: byteOffset,
-                    end: byteOffset + numberOfBytesToRead - 1,
-                });
-
-            if (allDone) {
+            Promise.all(this.bufferingRequests).then(() =>
                 this.updateReadPages(
                     byteOffset,
                     byteOffset + numberOfBytesToRead,
                     bias
-                );
-                onLoading?.(false);
-                return numberOfBytesToRead;
-            }
+                )
+            );
+
+            return numberOfBytesToRead;
         }
 
+        throw new Error(
+            'Data was not cached. Method should not have been called'
+        );
+    }
+
+    read(
+        buffer: Buffer,
+        byteOffset: number,
+        numberOfBytesToRead: number,
+        bias?: 'start' | 'end',
+        onLoading?: (loading: boolean) => void
+    ) {
+        if (buffer.length < numberOfBytesToRead) {
+            throw new Error('Buffer is too small');
+        }
+
+        if (byteOffset >= this.fileSize) {
+            return 0;
+        }
+
+        try {
+            return this.readFromCachedData(
+                buffer,
+                byteOffset,
+                numberOfBytesToRead,
+                bias
+            );
+        } catch {
+            // cache miss we need to read
+        }
+
+        onLoading?.(true);
         return new Promise<number>(resolve => {
+            this.bufferingRequests.forEach(op => {
+                this.cancelBufferOperations.get(op)?.abort();
+                this.cancelBufferOperations.delete(op);
+            });
+            Promise.all(this.bufferingRequests);
+
+            try {
+                // retry cache again just in case buffering caught up
+                resolve(
+                    this.readFromCachedData(
+                        buffer,
+                        byteOffset,
+                        numberOfBytesToRead,
+                        bias
+                    )
+                );
+            } catch {
+                // cache miss we need to read
+            }
+
             this.readRange(
                 buffer,
                 numberOfBytesToRead,
@@ -554,10 +626,12 @@ export class FileBuffer {
                         this.readPages.push(newPage);
                     }
 
-                    this.updateReadPages(
-                        byteOffset,
-                        byteOffset + numberOfBytesToRead - 1,
-                        bias
+                    Promise.all(this.bufferingRequests).then(() =>
+                        this.updateReadPages(
+                            byteOffset,
+                            byteOffset + numberOfBytesToRead,
+                            bias
+                        )
                     );
 
                     onLoading?.(false);

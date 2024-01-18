@@ -254,7 +254,7 @@ describe('ReadBuffers', () => {
             writeBufferSize,
             sessionFolder,
             3,
-            3
+            4
         );
         await fileBuffer.append(Buffer.from([0, 1, 2])); // fill write buffers
     });
@@ -364,9 +364,9 @@ describe('ReadBuffers', () => {
         ); // write buffer will no longer covert the first few bytes
 
         await fileBuffer.read(readBuffer, 5, 4);
-        expect(bufferingEvents.length).toBe(5);
+        expect(bufferingEvents.length).toBe(6);
         await Promise.all(bufferingEvents);
-        expect(fs.read).toBeCalledTimes(6);
+        expect(fs.read).toBeCalledTimes(7);
         expect(fs.read).nthCalledWith(
             1,
             1, // file handle
@@ -419,6 +419,15 @@ describe('ReadBuffers', () => {
             0,
             readBufferSize,
             10,
+            expect.anything()
+        ); // Page After
+        expect(fs.read).nthCalledWith(
+            7,
+            1, // file handle
+            expect.anything(),
+            0,
+            readBufferSize,
+            12,
             expect.anything()
         ); // Page After
     });
