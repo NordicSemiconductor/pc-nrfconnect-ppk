@@ -120,7 +120,8 @@ export default (
                                 DataManager()
                                     .getData(
                                         indexToTimestamp(start),
-                                        indexToTimestamp(start + len)
+                                        indexToTimestamp(start + len),
+                                        'end'
                                     )
                                     .then(data => {
                                         const content = formatDataForExport(

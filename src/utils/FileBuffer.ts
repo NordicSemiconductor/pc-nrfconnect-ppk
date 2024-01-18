@@ -312,7 +312,11 @@ export class FileBuffer {
             );
         });
 
-    private updateReadPages(beforeOffset: number, afterOffset: number) {
+    private updateReadPages(
+        beforeOffset: number,
+        afterOffset: number,
+        bias?: 'start' | 'end'
+    ) {
         const writeBufferRange: Range = {
             start: Math.min(...this.writePages.map(p => p.startAddress)),
             end: Math.max(
@@ -324,7 +328,7 @@ export class FileBuffer {
             Math.floor(beforeOffset / this.readPageSize) * this.readPageSize;
         const normalizedAfterOffset =
             Math.ceil(afterOffset / this.readPageSize) * this.readPageSize - 1;
-        const idealBufferRange: Range = {
+        let idealBufferRange: Range = {
             start: Math.max(
                 0,
                 normalizedBeforeOffset -
@@ -336,6 +340,28 @@ export class FileBuffer {
                     Math.ceil(this.numberOfReadPages / 2) * this.readPageSize
             ),
         };
+
+        if (bias === 'start') {
+            idealBufferRange = {
+                start: Math.max(
+                    0,
+                    normalizedBeforeOffset -
+                        this.numberOfReadPages * this.readPageSize
+                ),
+                end: Math.min(this.fileSize - 1, normalizedAfterOffset),
+            };
+        }
+
+        if (bias === 'end') {
+            idealBufferRange = {
+                start: Math.max(0, normalizedBeforeOffset),
+                end: Math.min(
+                    this.fileSize - 1,
+                    normalizedAfterOffset +
+                        this.numberOfReadPages * this.readPageSize
+                ),
+            };
+        }
 
         if (idealBufferRange.start >= writeBufferRange.start) {
             return;
@@ -394,6 +420,7 @@ export class FileBuffer {
         buffer: Buffer,
         byteOffset: number,
         numberOfBytesToRead: number,
+        bias?: 'start' | 'end',
         onLoading?: (loading: boolean) => void
     ) {
         if (buffer.length < numberOfBytesToRead) {
@@ -452,7 +479,8 @@ export class FileBuffer {
             if (allDone) {
                 this.updateReadPages(
                     byteOffset,
-                    byteOffset + numberOfBytesToRead
+                    byteOffset + numberOfBytesToRead,
+                    bias
                 );
                 return numberOfBytesToRead;
             }
@@ -492,7 +520,8 @@ export class FileBuffer {
 
                     this.updateReadPages(
                         byteOffset,
-                        byteOffset + numberOfBytesToRead - 1
+                        byteOffset + numberOfBytesToRead - 1,
+                        bias
                     );
 
                     onLoading?.(false);

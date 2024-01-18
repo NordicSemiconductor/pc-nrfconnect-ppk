@@ -111,6 +111,7 @@ export const DataManager = () => ({
     getData: async (
         fromTime = 0,
         toTime = getTimestamp(),
+        bias: 'start' | 'end' | undefined = undefined,
         onLoading: (loading: boolean) => void = () => {}
     ) => {
         if (options.fileBuffer === undefined) {
@@ -133,6 +134,7 @@ export const DataManager = () => ({
             options.readBuffer,
             byteOffset,
             numberOfBytesToRead,
+            bias,
             onLoading
         );
         if (readBytes !== numberOfBytesToRead) {

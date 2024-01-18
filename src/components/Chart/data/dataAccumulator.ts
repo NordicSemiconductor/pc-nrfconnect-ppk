@@ -45,7 +45,7 @@ export const calcStats = (
         new Promise<{ begin: number; end: number }>(res => {
             setTimeout(() => {
                 DataManager()
-                    .getData(b, e)
+                    .getData(b, e, 'end')
                     .then(data => {
                         for (let n = 0; n < data.getLength(); n += 1) {
                             const v = data.getCurrentData(n);
@@ -122,6 +122,7 @@ const accumulate = (
     timeGroup: number,
     numberOfPointsPerGrouped: number,
     digitalChannelsToCompute: number[],
+    bias?: 'start' | 'end',
     onLoading?: (loading: boolean) => void
 ) =>
     new Promise<{
@@ -137,7 +138,7 @@ const accumulate = (
         }
 
         DataManager()
-            .getData(begin, end, onLoading)
+            .getData(begin, end, bias, onLoading)
             .then(data => {
                 const bitAccumulator =
                     digitalChannelsToCompute.length > 0
@@ -522,6 +523,7 @@ export default (): DataAccumulator => ({
                     timeGroup,
                     numberOfPointsPerGroup,
                     digitalChannelsToCompute,
+                    undefined,
                     onLoading
                 );
 
@@ -557,6 +559,7 @@ export default (): DataAccumulator => ({
                     timeGroup,
                     numberOfPointsPerGroup,
                     digitalChannelsToCompute,
+                    undefined,
                     onLoading
                 );
             }
@@ -576,6 +579,7 @@ export default (): DataAccumulator => ({
                         timeGroup,
                         numberOfPointsPerGroup,
                         digitalChannelsToCompute,
+                        r.location === 'back' ? 'end' : 'start',
                         onLoading
                     )),
                 }))
