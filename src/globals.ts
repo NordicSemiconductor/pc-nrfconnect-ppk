@@ -192,7 +192,7 @@ export const DataManager = () => ({
         const sessionFile = path.join(fileBufferFolder ?? os.tmpdir(), v4());
         options.fileBuffer = new FileBuffer(
             10 * options.samplesPerSecond * 6, // 6 bytes per sample for and 10sec buffers
-            60 * options.samplesPerSecond * 6,
+            10 * options.samplesPerSecond * 6,
             sessionFile
         );
         options.readBuffer = Buffer.alloc(20 * options.samplesPerSecond * 6); // we start with smaller buffer and let it grow organically
@@ -205,7 +205,7 @@ export const DataManager = () => ({
     loadData: (timestamp: number, sessionPath: string) => {
         options.fileBuffer = new FileBuffer(
             10 * options.samplesPerSecond * 6,
-            60 * options.samplesPerSecond * 6,
+            10 * options.samplesPerSecond * 6,
             sessionPath
         );
         options.foldingBuffer = new FoldingBuffer();

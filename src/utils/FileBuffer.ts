@@ -90,6 +90,8 @@ export class FileBuffer {
     readPages: Page[] = [];
     writePages: Page[] = [];
 
+    numberOfWritePages = 30;
+    numberOfReadPages = 20;
     fileHandle: number;
     filePath: string;
     readPageSize: number;
@@ -104,12 +106,25 @@ export class FileBuffer {
     freeReadBuffers: Uint8Array[] = [];
 
     constructor(
-        readPageSize: number,
-        writePageSize: number,
-        filePath: fs.PathLike
+        readBufferSize: number,
+        writeBufferSize: number,
+        filePath: fs.PathLike,
+        numberOfWritePages = 14,
+        numberOfReadPages = 2
     ) {
-        this.readPageSize = readPageSize;
-        this.writePageSize = writePageSize;
+        if (numberOfWritePages < 2) {
+            throw new Error('numberOfWritePages cannot be less then 2');
+        }
+
+        if (numberOfReadPages < 1) {
+            throw new Error('numberOfReadPages cannot be less then 1');
+        }
+
+        this.numberOfReadPages = numberOfReadPages;
+        this.numberOfWritePages = numberOfWritePages;
+
+        this.readPageSize = readBufferSize;
+        this.writePageSize = writeBufferSize;
 
         // loading from existing session
         this.filePath = path.join(filePath.toString(), 'session.raw');
@@ -176,7 +191,10 @@ export class FileBuffer {
             1;
 
         const idealBufferRange: Range = {
-            start: Math.max(0, 1 + normalizedEnd - 3 * this.writePageSize),
+            start: Math.max(
+                0,
+                1 + normalizedEnd - this.numberOfWritePages * this.writePageSize
+            ),
             end: normalizedEnd,
         };
 
@@ -307,10 +325,15 @@ export class FileBuffer {
         const normalizedAfterOffset =
             Math.ceil(afterOffset / this.readPageSize) * this.readPageSize - 1;
         const idealBufferRange: Range = {
-            start: Math.max(0, normalizedBeforeOffset - this.readPageSize),
+            start: Math.max(
+                0,
+                normalizedBeforeOffset -
+                    Math.ceil(this.numberOfReadPages / 2) * this.readPageSize
+            ),
             end: Math.min(
                 this.fileSize - 1,
-                normalizedAfterOffset + this.readPageSize
+                normalizedAfterOffset +
+                    Math.ceil(this.numberOfReadPages / 2) * this.readPageSize
             ),
         };
 
@@ -453,13 +476,13 @@ export class FileBuffer {
                         1;
 
                     if (
-                        normalizedEnd - normalizedBegin + 1 >=
+                        normalizedEnd + 1 - normalizedBegin >=
                         this.readPageSize
                     ) {
                         const newPage = {
                             page: buffer.subarray(
-                                normalizedBegin,
-                                normalizedEnd
+                                normalizedBegin - byteOffset,
+                                normalizedEnd + 1 - byteOffset
                             ),
                             startAddress: normalizedBegin,
                             bytesWritten: normalizedEnd - normalizedBegin + 1,

@@ -35,6 +35,10 @@ jest.mock('fs-extra', () => ({
                 buffer: Uint8Array
             ) => void
         ) => {
+            for (let i = 0; i < length; i += 1) {
+                buffer[i] = Number(position) + i;
+            }
+
             callback(null, length, buffer);
         }
     ),
@@ -43,7 +47,7 @@ jest.mock('fs-extra', () => ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const castToJest = (fn: any) => fn as jest.Mock<any, any, any>;
 
-const mockFsRead = (cb: (buffer: Uint8Array) => number) => {
+const mockFsRead = (cb?: () => number) => {
     castToJest(fs.read).mockImplementationOnce(
         (
             fd: number,
@@ -57,7 +61,11 @@ const mockFsRead = (cb: (buffer: Uint8Array) => number) => {
                 buffer: Uint8Array
             ) => void
         ) => {
-            const noOfBytesRead = cb(buffer);
+            for (let i = 0; i < length; i += 1) {
+                buffer[i] = offset + i;
+            }
+
+            const noOfBytesRead = cb?.() ?? length;
             callback(null, noOfBytesRead, buffer);
         }
     );
@@ -66,14 +74,26 @@ const mockFsRead = (cb: (buffer: Uint8Array) => number) => {
 const readBuffer = Buffer.alloc(200);
 
 describe('WriteBuffer', () => {
-    const readPageSize = 10;
-    const writePageSize = 10;
+    const readBufferSize = 10;
+    const writeBufferSize = 10;
     const sessionFolder = path.join('session', 'folder');
-    let fileBuffer = new FileBuffer(readPageSize, writePageSize, sessionFolder);
+    let fileBuffer = new FileBuffer(
+        readBufferSize,
+        writeBufferSize,
+        sessionFolder,
+        3,
+        3
+    );
     beforeEach(() => {
         // we reset virtual filesystem before each test
         jest.clearAllMocks();
-        fileBuffer = new FileBuffer(readPageSize, writePageSize, sessionFolder);
+        fileBuffer = new FileBuffer(
+            readBufferSize,
+            writeBufferSize,
+            sessionFolder,
+            3,
+            3
+        );
     });
 
     test('creates new folder for the session', () => {
@@ -216,14 +236,26 @@ describe('WriteBuffer', () => {
 });
 
 describe('ReadBuffers', () => {
-    const readPageSize = 2;
-    const writePageSize = 1;
+    const readBufferSize = 2;
+    const writeBufferSize = 1;
     const sessionFolder = path.join('session', 'folder');
-    let fileBuffer = new FileBuffer(readPageSize, writePageSize, sessionFolder);
+    let fileBuffer = new FileBuffer(
+        readBufferSize,
+        writeBufferSize,
+        sessionFolder,
+        3,
+        4
+    );
     beforeEach(async () => {
         // we reset virtual filesystem before each test
         jest.clearAllMocks();
-        fileBuffer = new FileBuffer(readPageSize, writePageSize, sessionFolder);
+        fileBuffer = new FileBuffer(
+            readBufferSize,
+            writeBufferSize,
+            sessionFolder,
+            3,
+            3
+        );
         await fileBuffer.append(Buffer.from([0, 1, 2])); // fill write buffers
     });
 
@@ -249,10 +281,7 @@ describe('ReadBuffers', () => {
     test('Reading over all three write buffers and one miss forcing read from file', async () => {
         await fileBuffer.append(Buffer.from([3])); // write buffer will now loose the first byte
 
-        mockFsRead(buffer => {
-            buffer.set(Buffer.from([0, 1, 2, 3]));
-            return 4;
-        });
+        mockFsRead();
         const numberOfBytes = await fileBuffer.read(readBuffer, 0, 4);
 
         expect(fs.read).toBeCalledTimes(1);
@@ -270,18 +299,18 @@ describe('ReadBuffers', () => {
 
         await fileBuffer.append(
             Buffer.from([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
-        ); // write buffer will now loose the first byte
+        ); // write buffer will now loose the first bytes
 
         await fileBuffer.read(readBuffer, 6, 2);
-        expect(bufferingEvents.length).toBe(2);
+        expect(bufferingEvents.length).toBe(4);
         await Promise.all(bufferingEvents);
-        expect(fs.read).toBeCalledTimes(3);
+        expect(fs.read).toBeCalledTimes(5);
         expect(fs.read).nthCalledWith(
             1,
             1, // file handle
             expect.anything(),
             0,
-            readPageSize,
+            readBufferSize,
             6,
             expect.anything()
         ); // Data we want to read
@@ -290,8 +319,8 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readPageSize,
-            4,
+            readBufferSize,
+            2,
             expect.anything()
         ); // Page Before
         expect(fs.read).nthCalledWith(
@@ -299,8 +328,26 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readPageSize,
+            readBufferSize,
+            4,
+            expect.anything()
+        ); // Page Before
+        expect(fs.read).nthCalledWith(
+            4,
+            1, // file handle
+            expect.anything(),
+            0,
+            readBufferSize,
             8,
+            expect.anything()
+        ); // Page After
+        expect(fs.read).nthCalledWith(
+            5,
+            1, // file handle
+            expect.anything(),
+            0,
+            readBufferSize,
+            10,
             expect.anything()
         ); // Page After
     });
@@ -317,9 +364,9 @@ describe('ReadBuffers', () => {
         ); // write buffer will no longer covert the first few bytes
 
         await fileBuffer.read(readBuffer, 5, 4);
-        expect(bufferingEvents.length).toBe(3);
+        expect(bufferingEvents.length).toBe(5);
         await Promise.all(bufferingEvents);
-        expect(fs.read).toBeCalledTimes(4);
+        expect(fs.read).toBeCalledTimes(6);
         expect(fs.read).nthCalledWith(
             1,
             1, // file handle
@@ -334,8 +381,8 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readPageSize,
-            2,
+            readBufferSize,
+            0,
             expect.anything()
         ); // Page Before
         expect(fs.read).nthCalledWith(
@@ -343,8 +390,8 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readPageSize,
-            4,
+            readBufferSize,
+            2,
             expect.anything()
         ); // Page After
         expect(fs.read).nthCalledWith(
@@ -352,8 +399,26 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readPageSize,
+            readBufferSize,
+            4,
+            expect.anything()
+        ); // Page Before
+        expect(fs.read).nthCalledWith(
+            5,
+            1, // file handle
+            expect.anything(),
+            0,
+            readBufferSize,
             8,
+            expect.anything()
+        ); // Page After
+        expect(fs.read).nthCalledWith(
+            6,
+            1, // file handle
+            expect.anything(),
+            0,
+            readBufferSize,
+            10,
             expect.anything()
         ); // Page After
     });
@@ -370,18 +435,54 @@ describe('ReadBuffers', () => {
         ); // write buffer will no longer covert the first few bytes
 
         await fileBuffer.read(readBuffer, 6, 2); // read and buffer from 4-9
-        expect(bufferingEvents.length).toBe(2);
+        expect(bufferingEvents.length).toBe(4);
         await Promise.all(bufferingEvents);
-        expect(fs.read).toBeCalledTimes(3);
-        await fileBuffer.read(readBuffer, 8, 2); // read and buffer from 4-9
-        expect(fs.read).toBeCalledTimes(4); // read one buffer to the right
+        expect(fs.read).nthCalledWith(
+            2,
+            1, // file handle
+            expect.anything(),
+            0,
+            2,
+            2, // offset
+            expect.anything()
+        );
+        expect(fs.read).nthCalledWith(
+            3,
+            1, // file handle
+            expect.anything(),
+            0,
+            2,
+            4, // offset
+            expect.anything()
+        );
         expect(fs.read).nthCalledWith(
             4,
             1, // file handle
             expect.anything(),
             0,
             2,
-            10,
+            8, // offset
+            expect.anything()
+        );
+        expect(fs.read).nthCalledWith(
+            5,
+            1, // file handle
+            expect.anything(),
+            0,
+            2,
+            10, // offset
+            expect.anything()
+        );
+        expect(fs.read).toBeCalledTimes(5);
+        await fileBuffer.read(readBuffer, 8, 2); // read and buffer from 4-9
+        expect(fs.read).toBeCalledTimes(6); // read one buffer to the right
+        expect(fs.read).nthCalledWith(
+            6,
+            1, // file handle
+            expect.anything(),
+            0,
+            2,
+            12, // offset
             expect.anything()
         ); // Buffer right
     });
