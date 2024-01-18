@@ -123,19 +123,6 @@ export class FileBuffer {
             throw new Error('numberOfReadPages cannot be less then 1');
         }
 
-        this.onBuffering(buffering => {
-            this.bufferingRequests.push(buffering);
-
-            buffering.then(() => {
-                const index = this.bufferingRequests.findIndex(
-                    b => b === buffering
-                );
-                if (index !== -1) {
-                    this.bufferingRequests.splice(index);
-                }
-            });
-        });
-
         this.numberOfReadPages = numberOfReadPages;
         this.numberOfWritePages = numberOfWritePages;
 
@@ -263,17 +250,21 @@ export class FileBuffer {
         }
     }
 
-    private executeFileOperation() {
+    private async executeFileOperation() {
         if (this.fileOperationTasks.length === 0 || this.fileBusy) return;
 
         const nextTask = this.fileOperationTasks[0];
         this.fileOperationTasks.splice(0, 1);
 
         this.fileBusy = true;
-        nextTask().finally(() => {
-            this.fileBusy = false;
-            this.executeFileOperation();
-        });
+        try {
+            await nextTask();
+        } catch {
+            // do nothing
+        }
+
+        this.fileBusy = false;
+        this.executeFileOperation();
     }
 
     append(data: Uint8Array) {
@@ -286,55 +277,83 @@ export class FileBuffer {
         buffer: Uint8Array,
         bytesToRead: number,
         fileOffset: number,
-        onComplete: (bytesRead: number) => void,
-        beforeRun?: () => void
-    ) => {
-        this.fileOperationTasks.push(
-            () =>
-                new Promise<void>(res => {
-                    beforeRun?.();
-                    fs.read(
-                        this.fileHandle,
-                        buffer,
-                        0,
-                        bytesToRead,
-                        fileOffset,
-                        (_, bytesRead) => {
-                            res();
-                            onComplete(bytesRead);
+        beforeRun?: () => void,
+        abortController?: AbortController
+    ) =>
+        new Promise<number>(res => {
+            this.fileOperationTasks.push(
+                () =>
+                    new Promise<void>((resolve, reject) => {
+                        if (abortController?.signal.aborted) {
+                            reject();
+                            return;
                         }
-                    );
-                })
-        );
-        this.executeFileOperation();
-    };
 
-    private readPage = (
+                        beforeRun?.();
+
+                        fs.read(
+                            this.fileHandle,
+                            buffer,
+                            0,
+                            bytesToRead,
+                            fileOffset,
+                            (_, bytesRead) => {
+                                resolve();
+                                res(bytesRead);
+                            }
+                        );
+                    })
+            );
+            this.executeFileOperation();
+        });
+
+    private bufferPage = (
         page: Page,
         startAddress: number,
         beforeRun?: () => void
     ) => {
         const cancelOperation = new AbortController();
-        const bufferingRequest = new Promise<void>((resolve, reject) => {
-            if (cancelOperation.signal.aborted) {
-                reject();
-                return;
-            }
-            this.readRange(
-                page.page,
-                page.page.length,
-                startAddress,
-                bytesRead => {
-                    page.bytesWritten = bytesRead;
-                    page.startAddress = startAddress;
-                    this.cancelBufferOperations.delete(bufferingRequest);
-                    resolve();
-                },
-                beforeRun
+
+        const bufferingRequest = this.readRange(
+            page.page,
+            page.page.length,
+            startAddress,
+            beforeRun,
+            cancelOperation
+        ).then(bytesRead => {
+            page.bytesWritten = bytesRead;
+            page.startAddress = startAddress;
+            this.cancelBufferOperations.delete(bufferingRequest);
+        });
+
+        cancelOperation.signal.addEventListener('abort', () => {
+            this.cancelBufferOperations.delete(bufferingRequest);
+
+            const index = this.bufferingRequests.findIndex(
+                r => bufferingRequest === r
             );
+
+            if (index !== -1) {
+                this.bufferingRequests.splice(index, 1);
+            }
         });
 
         this.cancelBufferOperations.set(bufferingRequest, cancelOperation);
+        this.bufferingRequests.push(bufferingRequest);
+
+        this.bufferingListeners.forEach(cb => {
+            cb(bufferingRequest);
+        });
+
+        bufferingRequest.finally(() => {
+            const index = this.bufferingRequests.findIndex(
+                r => bufferingRequest === r
+            );
+
+            if (index !== -1) {
+                this.bufferingRequests.splice(index, 1);
+            }
+        });
 
         return bufferingRequest;
     };
@@ -431,17 +450,13 @@ export class FileBuffer {
                 newReadPage.page =
                     this.freeReadBuffers.pop() ??
                     Buffer.alloc(this.readPageSize);
-                const buffering = this.readPage(newReadPage, i, () => {})
+                this.bufferPage(newReadPage, i, () => {})
                     .then(() => {
                         this.readPages.push(newReadPage);
                     })
                     .catch(() => {
                         this.freeReadBuffers.push(newReadPage.page);
                     });
-
-                this.bufferingListeners.forEach(cb => {
-                    cb(buffering);
-                });
             }
         }
     }
@@ -499,9 +514,7 @@ export class FileBuffer {
         bias?: 'start' | 'end'
     ) {
         if (!this.isRequiredDataAllCached(byteOffset, numberOfBytesToRead)) {
-            throw new Error(
-                'Data was not cached. Method should not have been called'
-            );
+            throw new Error('Data was not cached. Cannot use this method');
         }
         const pageHit = this.getAllPages().filter(p =>
             overlaps(
@@ -543,12 +556,10 @@ export class FileBuffer {
             return numberOfBytesToRead;
         }
 
-        throw new Error(
-            'Data was not cached. Method should not have been called'
-        );
+        throw new Error('Error loading data from cache');
     }
 
-    read(
+    async read(
         buffer: Buffer,
         byteOffset: number,
         numberOfBytesToRead: number,
@@ -575,74 +586,49 @@ export class FileBuffer {
         }
 
         onLoading?.(true);
-        return new Promise<number>(resolve => {
-            this.bufferingRequests.forEach(op => {
-                this.cancelBufferOperations.get(op)?.abort();
-                this.cancelBufferOperations.delete(op);
-            });
-            Promise.all(this.bufferingRequests);
 
-            try {
-                // retry cache again just in case buffering caught up
-                resolve(
-                    this.readFromCachedData(
-                        buffer,
-                        byteOffset,
-                        numberOfBytesToRead,
-                        bias
-                    )
-                );
-            } catch {
-                // cache miss we need to read
-            }
-
-            this.readRange(
-                buffer,
-                numberOfBytesToRead,
-                byteOffset,
-                bytesRead => {
-                    const normalizedBegin =
-                        Math.ceil(byteOffset / this.readPageSize) *
-                        this.readPageSize;
-                    const normalizedEnd =
-                        Math.floor(
-                            (byteOffset + bytesRead) / this.readPageSize
-                        ) *
-                            this.readPageSize -
-                        1;
-
-                    if (
-                        normalizedEnd + 1 - normalizedBegin >=
-                        this.readPageSize
-                    ) {
-                        const newPage = {
-                            page: buffer.subarray(
-                                normalizedBegin - byteOffset,
-                                normalizedEnd + 1 - byteOffset
-                            ),
-                            startAddress: normalizedBegin,
-                            bytesWritten: normalizedEnd - normalizedBegin + 1,
-                        };
-                        this.readPages.push(newPage);
-                    }
-
-                    Promise.all(this.bufferingRequests).then(() =>
-                        this.updateReadPages(
-                            byteOffset,
-                            byteOffset + numberOfBytesToRead,
-                            bias
-                        )
-                    );
-
-                    onLoading?.(false);
-                    if (bytesRead === numberOfBytesToRead) {
-                        resolve(numberOfBytesToRead);
-                    } else {
-                        resolve(bytesRead);
-                    }
-                }
-            );
+        this.bufferingRequests.forEach(op => {
+            this.cancelBufferOperations.get(op)?.abort();
         });
+
+        const bytesRead = await this.readRange(
+            buffer,
+            numberOfBytesToRead,
+            byteOffset
+        );
+
+        const normalizedBegin =
+            Math.ceil(byteOffset / this.readPageSize) * this.readPageSize;
+        const normalizedEnd =
+            Math.floor((byteOffset + bytesRead) / this.readPageSize) *
+                this.readPageSize -
+            1;
+
+        if (normalizedEnd + 1 - normalizedBegin >= this.readPageSize) {
+            const newPage = {
+                page: buffer.subarray(
+                    normalizedBegin - byteOffset,
+                    normalizedEnd + 1 - byteOffset
+                ),
+                startAddress: normalizedBegin,
+                bytesWritten: normalizedEnd - normalizedBegin + 1,
+            };
+            this.readPages.push(newPage);
+        }
+
+        Promise.all(this.bufferingRequests).then(() =>
+            this.updateReadPages(
+                byteOffset,
+                byteOffset + numberOfBytesToRead,
+                bias
+            )
+        );
+
+        onLoading?.(false);
+        if (bytesRead === numberOfBytesToRead) {
+            return numberOfBytesToRead;
+        }
+        return bytesRead;
     }
 
     async flush() {
