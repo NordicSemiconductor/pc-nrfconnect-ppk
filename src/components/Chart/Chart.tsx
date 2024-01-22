@@ -452,7 +452,7 @@ const Chart = () => {
                 clearTimeout(timeout);
             };
         }
-    }, [begin, liveMode, updateChart, windowEnd]);
+    }, [begin, liveMode, updateChart, windowEnd, rerenderTrigger]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
