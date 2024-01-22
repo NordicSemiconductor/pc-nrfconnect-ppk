@@ -76,6 +76,26 @@ export type CursorData = {
     end: number;
 };
 
+let nextUpdateRequests: (() => Promise<void>) | undefined;
+let chartUpdateInprogress = false;
+
+const executeChartUpdateOperation = async () => {
+    if (!nextUpdateRequests || chartUpdateInprogress) return;
+
+    const nextTask = nextUpdateRequests;
+    nextUpdateRequests = undefined;
+
+    chartUpdateInprogress = true;
+    try {
+        await nextTask();
+    } catch {
+        // do nothing
+    }
+
+    chartUpdateInprogress = false;
+    executeChartUpdateOperation();
+};
+
 const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
@@ -425,13 +445,8 @@ const Chart = () => {
                 return;
             }
 
-            const timeout = setTimeout(() => {
-                updateChart();
-            });
-
-            return () => {
-                clearTimeout(timeout);
-            };
+            nextUpdateRequests = () => updateChart();
+            executeChartUpdateOperation();
         }
     }, [xAxisMax, liveMode, updateChart, begin, windowEnd, rerenderTrigger]);
 
@@ -442,15 +457,11 @@ const Chart = () => {
 
     useEffect(() => {
         if (!liveMode && DataManager().getTotalSavedRecords() > 0) {
-            const timeout = setTimeout(() => {
-                updateChart();
-            });
+            nextUpdateRequests = () => updateChart();
+            executeChartUpdateOperation();
 
             lastPositions.current.begin = begin;
             lastPositions.current.windowEnd = windowEnd;
-            return () => {
-                clearTimeout(timeout);
-            };
         }
     }, [begin, liveMode, updateChart, windowEnd, rerenderTrigger]);
 

@@ -568,23 +568,35 @@ export default (): DataAccumulator => ({
                 end
             );
 
-            const loadedData = await Promise.all(
-                rangesToLoad.map(async r => ({
-                    location: r.location,
-                    ...(await accumulate(
-                        r.begin,
-                        r.end,
-                        timeGroup,
-                        numberOfPointsPerGroup,
-                        digitalChannelsToCompute,
-                        undefined,
-                        onLoading
-                    )),
-                }))
-            );
+            const frontRange = rangesToLoad.find(r => r.location === 'front');
+            const backDataRange = rangesToLoad.find(r => r.location === 'back');
 
-            const frontData = loadedData.find(d => d.location === 'front');
-            const backData = loadedData.find(d => d.location === 'back');
+            let frontData: Awaited<ReturnType<typeof accumulate>> | undefined;
+            let backData: Awaited<ReturnType<typeof accumulate>> | undefined;
+
+            if (frontRange) {
+                frontData = await accumulate(
+                    frontRange.begin,
+                    frontRange.end,
+                    timeGroup,
+                    numberOfPointsPerGroup,
+                    digitalChannelsToCompute,
+                    undefined,
+                    onLoading
+                );
+            }
+
+            if (backDataRange) {
+                backData = await accumulate(
+                    backDataRange.begin,
+                    backDataRange.end,
+                    timeGroup,
+                    numberOfPointsPerGroup,
+                    digitalChannelsToCompute,
+                    undefined,
+                    onLoading
+                );
+            }
 
             return {
                 ampereLineData: [
