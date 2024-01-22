@@ -172,7 +172,12 @@ const accumulate = (
 
                     resolve({
                         ampereLineData,
-                        bitsLineData: bitAccumulator?.getLineData() ?? [],
+                        bitsLineData:
+                            bitAccumulator?.getLineData() ??
+                            new Array(numberOfDigitalChannels).fill({
+                                mainLine: [],
+                                uncertaintyLine: [],
+                            }),
                         averageLine: ampereLineData
                             .filter(d => !Number.isNaN(d.y))
                             .map(d => ({ ...d, count: 1 } as AverageLine)),
@@ -247,7 +252,12 @@ const accumulate = (
 
                 resolve({
                     ampereLineData,
-                    bitsLineData: bitAccumulator?.getLineData() ?? [],
+                    bitsLineData:
+                        bitAccumulator?.getLineData() ??
+                        new Array(numberOfDigitalChannels).fill({
+                            mainLine: [],
+                            uncertaintyLine: [],
+                        }),
                     averageLine,
                 });
             });
@@ -454,7 +464,13 @@ const joinBitLines = (
         });
     });
 
-    return bitDataProcessor?.getLineData() ?? [];
+    return (
+        bitDataProcessor?.getLineData() ??
+        new Array(numberOfDigitalChannels).fill({
+            mainLine: [],
+            uncertaintyLine: [],
+        })
+    );
 };
 
 // true is rhs has all elements from lhs

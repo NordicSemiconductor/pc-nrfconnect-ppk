@@ -81,7 +81,7 @@ const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
-const Chart = ({ digitalChannelsEnabled = false }) => {
+const Chart = () => {
     const dispatch = useDispatch();
     const liveMode = useSelector(isLiveMode);
     const rerenderTrigger = useSelector(getForceRerender);
@@ -182,9 +182,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowEnd,
     } = useSelector(getChartXAxisRange);
 
-    const showDigitalChannels =
-        digitalChannelsVisible && digitalChannelsEnabled;
-
     const chartRef = useRef<AmpereChartJS | null>(null);
 
     const dataProcessor = useLazyInitializedRef(
@@ -203,18 +200,18 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 .map((isVisible, channelNumber) =>
                     isVisible ? channelNumber : null
                 )
-                .filter(channelNumber => channelNumber != null),
+                .filter(channelNumber => channelNumber != null) as number[],
         [digitalChannels]
     );
 
     const digitalChannelsToCompute = useMemo(
         () =>
-            !zoomedOutTooFarForDigitalChannels && showDigitalChannels
+            !zoomedOutTooFarForDigitalChannels && digitalChannelsVisible
                 ? digitalChannelsToDisplay
                 : [],
         [
             zoomedOutTooFarForDigitalChannels,
-            showDigitalChannels,
+            digitalChannelsVisible,
             digitalChannelsToDisplay,
         ]
     );
@@ -405,13 +402,13 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             delta: Math.min(windowEnd, DataManager().getTimestamp()) - begin,
         });
     }, [
-        begin,
         dataProcessor,
-        digitalChannelsToCompute,
+        begin,
         windowEnd,
+        zoomedOutTooFarForDigitalChannels,
+        digitalChannelsToCompute,
         windowDuration,
         numberOfPixelsInWindow,
-        zoomedOutTooFarForDigitalChannels,
     ]);
 
     const [processing, setProcessing] = useState(false);
@@ -578,7 +575,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     />
                 </div>
             </div>
-            {showDigitalChannels && (
+            {digitalChannelsVisible && (
                 <DigitalChannels
                     lineData={bitsLineData}
                     digitalChannels={digitalChannels}

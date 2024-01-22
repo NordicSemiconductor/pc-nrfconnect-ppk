@@ -13,5 +13,5 @@ export default ({ active }: PaneProps) => {
     if (!active) {
         return null;
     }
-    return <Chart digitalChannelsEnabled />;
+    return <Chart />;
 };
