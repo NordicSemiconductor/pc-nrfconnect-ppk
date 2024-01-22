@@ -24,7 +24,6 @@ import {
 } from 'chart.js';
 
 import Minimap from '../../features/minimap/Minimap';
-import { isPanningInAction } from '../../features/minimap/minimapSlice';
 import {
     DataManager,
     getSamplesPerSecond,
@@ -85,7 +84,6 @@ const Chart = () => {
     const dispatch = useDispatch();
     const liveMode = useSelector(isLiveMode);
     const rerenderTrigger = useSelector(getForceRerender);
-    const miniMapPanningInAction = useSelector(isPanningInAction);
 
     const chartWindow = useCallback(
         (
@@ -444,23 +442,9 @@ const Chart = () => {
 
     useEffect(() => {
         if (!liveMode && DataManager().getTotalSavedRecords() > 0) {
-            const windowRange = windowEnd - begin;
-            const previousWindowsRange =
-                lastPositions.current.windowEnd - lastPositions.current.begin;
-
-            const isZooming = previousWindowsRange !== windowRange;
-
-            let debounceTimeOut = 0;
-
-            if (miniMapPanningInAction) {
-                debounceTimeOut = 200;
-            } else if (isZooming) {
-                debounceTimeOut = 350;
-            }
-
             const timeout = setTimeout(() => {
                 updateChart();
-            }, debounceTimeOut);
+            });
 
             lastPositions.current.begin = begin;
             lastPositions.current.windowEnd = windowEnd;
@@ -468,14 +452,7 @@ const Chart = () => {
                 clearTimeout(timeout);
             };
         }
-    }, [
-        begin,
-        liveMode,
-        updateChart,
-        windowEnd,
-        rerenderTrigger,
-        miniMapPanningInAction,
-    ]);
+    }, [begin, liveMode, updateChart, windowEnd]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
