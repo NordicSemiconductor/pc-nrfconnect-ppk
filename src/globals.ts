@@ -29,9 +29,11 @@ export interface GlobalOptions {
     foldingBuffer?: FoldingBuffer;
     systemInitialTime?: number;
     readBuffer?: Buffer;
+    readingData: boolean;
 }
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
+    readingData: false,
 };
 
 class FileData {
@@ -112,6 +114,14 @@ export const DataManager = () => ({
         bias: 'start' | 'end' | undefined = undefined,
         onLoading: (loading: boolean) => void = () => {}
     ) => {
+        if (options.readingData) {
+            // given we only have file read buffer we need to consume the data
+            // before we read again otherwise data will be over written
+            throw new Error(
+                'Only one read at a time can be called. Await result of previous call'
+            );
+        }
+
         if (options.fileBuffer === undefined) {
             return new FileData(Buffer.alloc(0), 0);
         }
@@ -128,6 +138,7 @@ export const DataManager = () => ({
             options.readBuffer = Buffer.alloc(numberOfBytesToRead);
         }
 
+        options.readingData = true;
         const readBytes = await options.fileBuffer.read(
             options.readBuffer,
             byteOffset,
@@ -135,6 +146,7 @@ export const DataManager = () => ({
             bias,
             onLoading
         );
+        options.readingData = false;
         if (readBytes !== numberOfBytesToRead) {
             console.log(
                 `missing ${(numberOfBytesToRead - readBytes) / (4 + 2)} records`
@@ -187,6 +199,7 @@ export const DataManager = () => ({
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
         options.timestamp = undefined;
+        options.readingData = false;
     },
     initialize: (fileBufferFolder?: string) => {
         const sessionPath = path.join(fileBufferFolder ?? os.tmpdir(), v4());
@@ -199,6 +212,7 @@ export const DataManager = () => ({
         );
         options.readBuffer = Buffer.alloc(20 * options.samplesPerSecond * 6); // we start with smaller buffer and let it grow organically
         options.foldingBuffer = new FoldingBuffer();
+        options.readingData = false;
     },
 
     getTotalSavedRecords: () =>
