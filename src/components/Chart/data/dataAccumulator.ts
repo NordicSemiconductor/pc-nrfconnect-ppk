@@ -116,7 +116,7 @@ type AccumulatedResult = {
 
 let cachedResult: AccumulatedResult | undefined;
 
-const accumulate = (
+const accumulate = async (
     begin: number, // normalizeTime
     end: number, // normalizeTime
     timeGroup: number,
@@ -124,144 +124,126 @@ const accumulate = (
     digitalChannelsToCompute: number[],
     bias?: 'start' | 'end',
     onLoading?: (loading: boolean) => void
-) =>
-    new Promise<{
-        ampereLineData: AmpereState[];
-        bitsLineData: DigitalChannelStates[];
-        averageLine: AverageLine[];
-    }>(resolve => {
-        begin = Math.floor(begin / timeGroup) * timeGroup;
-        end = begin + Math.ceil((end - begin) / timeGroup) * timeGroup;
+) => {
+    begin = Math.floor(begin / timeGroup) * timeGroup;
+    end = begin + Math.ceil((end - begin) / timeGroup) * timeGroup;
 
-        if (end > DataManager().getTimestamp()) {
-            end -= timeGroup;
+    if (end > DataManager().getTimestamp()) {
+        end -= timeGroup;
+    }
+
+    const data = await DataManager().getData(begin, end, bias, onLoading);
+    const bitAccumulator =
+        digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
+    bitAccumulator?.initialise(digitalChannelsToCompute);
+    const numberOfElements = data.getLength();
+    const noOfPointToRender = numberOfElements / numberOfPointsPerGrouped;
+    const needMinMaxLine = numberOfPointsPerGrouped !== 1;
+
+    if (!needMinMaxLine) {
+        const ampereLineData: AmpereState[] = new Array(
+            Math.ceil(noOfPointToRender)
+        );
+        for (let index = 0; index < numberOfElements; index += 1) {
+            const v = data.getCurrentData(index);
+            const bits = data.getBitData(index);
+            const timestamp = begin + index * timeGroup;
+            if (!Number.isNaN(v) && index < numberOfElements) {
+                bitAccumulator?.processBits(bits);
+                bitAccumulator?.processAccumulatedBits(timestamp);
+            }
+
+            ampereLineData[index] = {
+                x: timestamp,
+                y: v * 1000,
+            };
         }
 
-        DataManager()
-            .getData(begin, end, bias, onLoading)
-            .then(data => {
-                const bitAccumulator =
-                    digitalChannelsToCompute.length > 0
-                        ? bitDataAccumulator()
-                        : undefined;
-                bitAccumulator?.initialise(digitalChannelsToCompute);
+        return {
+            ampereLineData,
+            bitsLineData:
+                bitAccumulator?.getLineData() ??
+                new Array(numberOfDigitalChannels).fill({
+                    mainLine: [],
+                    uncertaintyLine: [],
+                }),
+            averageLine: ampereLineData
+                .filter(d => !Number.isNaN(d.y))
+                .map(d => ({ ...d, count: 1 } as AverageLine)),
+        };
+    }
 
-                const numberOfElements = data.getLength();
-                const noOfPointToRender =
-                    numberOfElements / numberOfPointsPerGrouped;
-                const needMinMaxLine = numberOfPointsPerGrouped !== 1;
+    const ampereLineData: AmpereState[] = new Array(
+        Math.ceil(noOfPointToRender) * 2
+    );
 
-                if (!needMinMaxLine) {
-                    const ampereLineData: AmpereState[] = new Array(
-                        Math.ceil(noOfPointToRender)
-                    );
-                    for (let index = 0; index < numberOfElements; index += 1) {
-                        const v = data.getCurrentData(index);
-                        const bits = data.getBitData(index);
-                        const timestamp = begin + index * timeGroup;
-                        if (!Number.isNaN(v) && index < numberOfElements) {
-                            bitAccumulator?.processBits(bits);
-                            bitAccumulator?.processAccumulatedBits(timestamp);
-                        }
+    const averageLine: AverageLine[] = new Array(Math.ceil(noOfPointToRender));
 
-                        ampereLineData[index] = {
-                            x: timestamp,
-                            y: v * 1000,
-                        };
-                    }
+    let min: number = Number.MAX_VALUE;
+    let max: number = -Number.MAX_VALUE;
 
-                    resolve({
-                        ampereLineData,
-                        bitsLineData:
-                            bitAccumulator?.getLineData() ??
-                            new Array(numberOfDigitalChannels).fill({
-                                mainLine: [],
-                                uncertaintyLine: [],
-                            }),
-                        averageLine: ampereLineData
-                            .filter(d => !Number.isNaN(d.y))
-                            .map(d => ({ ...d, count: 1 } as AverageLine)),
-                    });
-                }
+    let timestamp = begin;
+    for (let index = 0; index < numberOfElements; index += 1) {
+        let v = data.getCurrentData(index);
+        const bits = data.getBitData(index);
+        const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
+        const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;
+        const groupIndex = Math.floor(index / numberOfPointsPerGrouped);
 
-                const ampereLineData: AmpereState[] = new Array(
-                    Math.ceil(noOfPointToRender) * 2
-                );
+        if (firstItemInGrp) {
+            min = Number.MAX_VALUE;
+            max = -Number.MAX_VALUE;
 
-                const averageLine: AverageLine[] = new Array(
-                    Math.ceil(noOfPointToRender)
-                );
+            averageLine[groupIndex] = {
+                x: timestamp,
+                y: 0,
+                count: 0,
+            };
+        }
 
-                let min: number = Number.MAX_VALUE;
-                let max: number = -Number.MAX_VALUE;
+        if (!Number.isNaN(v)) {
+            v *= 1000; // uA to nA
+            if (v > max) max = v;
+            if (v < min) min = v;
 
-                let timestamp = begin;
-                for (let index = 0; index < numberOfElements; index += 1) {
-                    let v = data.getCurrentData(index);
-                    const bits = data.getBitData(index);
-                    const firstItemInGrp =
-                        index % numberOfPointsPerGrouped === 0;
-                    const lastItemInGrp =
-                        (index + 1) % numberOfPointsPerGrouped === 0;
-                    const groupIndex = Math.floor(
-                        index / numberOfPointsPerGrouped
-                    );
+            bitAccumulator?.processBits(bits);
 
-                    if (firstItemInGrp) {
-                        min = Number.MAX_VALUE;
-                        max = -Number.MAX_VALUE;
+            averageLine[groupIndex] = {
+                x: timestamp,
+                y: averageLine[groupIndex].y + v,
+                count: averageLine[groupIndex].count + 1,
+            };
+        }
 
-                        averageLine[groupIndex] = {
-                            x: timestamp,
-                            y: 0,
-                            count: 0,
-                        };
-                    }
+        ampereLineData[groupIndex * 2] = {
+            x: timestamp,
+            y: min > max ? undefined : min,
+        };
 
-                    if (!Number.isNaN(v)) {
-                        v *= 1000; // uA to nA
-                        if (v > max) max = v;
-                        if (v < min) min = v;
+        ampereLineData[(groupIndex + 1) * 2 - 1] = {
+            x: timestamp,
+            y: min > max ? undefined : max,
+        };
 
-                        bitAccumulator?.processBits(bits);
+        if (lastItemInGrp) {
+            timestamp += timeGroup;
+            if (min <= max) {
+                bitAccumulator?.processAccumulatedBits(timestamp);
+            }
+        }
+    }
 
-                        averageLine[groupIndex] = {
-                            x: timestamp,
-                            y: averageLine[groupIndex].y + v,
-                            count: averageLine[groupIndex].count + 1,
-                        };
-                    }
-
-                    ampereLineData[groupIndex * 2] = {
-                        x: timestamp,
-                        y: min > max ? undefined : min,
-                    };
-
-                    ampereLineData[(groupIndex + 1) * 2 - 1] = {
-                        x: timestamp,
-                        y: min > max ? undefined : max,
-                    };
-
-                    if (lastItemInGrp) {
-                        timestamp += timeGroup;
-                        if (min <= max) {
-                            bitAccumulator?.processAccumulatedBits(timestamp);
-                        }
-                    }
-                }
-
-                resolve({
-                    ampereLineData,
-                    bitsLineData:
-                        bitAccumulator?.getLineData() ??
-                        new Array(numberOfDigitalChannels).fill({
-                            mainLine: [],
-                            uncertaintyLine: [],
-                        }),
-                    averageLine,
-                });
-            });
-    });
+    return {
+        ampereLineData,
+        bitsLineData:
+            bitAccumulator?.getLineData() ??
+            new Array(numberOfDigitalChannels).fill({
+                mainLine: [],
+                uncertaintyLine: [],
+            }),
+        averageLine,
+    };
+};
 
 const removeCurrentSamplesOutsideScopes = <T extends AmpereState | AverageLine>(
     current: T[],
