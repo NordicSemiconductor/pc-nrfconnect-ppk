@@ -36,10 +36,12 @@ const options: GlobalOptions = {
 
 class FileData {
     data: Uint8Array;
+    dataView: DataView;
     length: number;
     constructor(data: Readonly<Uint8Array>, length: number) {
         this.data = data;
         this.length = length;
+        this.dataView = new DataView(this.data.buffer);
     }
 
     getAllCurrentData() {
@@ -60,9 +62,7 @@ class FileData {
             throw new Error('Index out of range');
         }
 
-        const view = new DataView(this.data.buffer);
-
-        return view.getFloat32(byteOffset, true);
+        return this.dataView.getFloat32(byteOffset, true);
     }
 
     getAllBitData() {
@@ -83,9 +83,7 @@ class FileData {
             throw new Error('Index out of range');
         }
 
-        const view = new DataView(this.data.buffer);
-
-        return view.getUint16(byteOffset);
+        return this.dataView.getUint16(byteOffset);
     }
 
     getLength() {
