@@ -27,16 +27,16 @@ const timeString = (
 
 export const splitMS = (ms: number) => {
     const time = ms;
-    const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+    const days = Math.trunc(ms / (24 * 60 * 60 * 1000));
     ms -= days * 24 * 60 * 60 * 1000;
 
-    const hours = Math.floor(ms / (60 * 60 * 1000));
+    const hours = Math.trunc(ms / (60 * 60 * 1000));
     ms -= hours * 60 * 60 * 1000;
 
-    const minutes = Math.floor(ms / (60 * 1000));
+    const minutes = Math.trunc(ms / (60 * 1000));
     ms -= minutes * 60 * 1000;
 
-    const seconds = Math.floor(ms / 1000);
+    const seconds = Math.trunc(ms / 1000);
     const millisecond = ms - seconds * 60 * 1000;
 
     return {

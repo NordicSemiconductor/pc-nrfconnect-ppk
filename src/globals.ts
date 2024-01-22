@@ -237,7 +237,7 @@ export const getSamplesPerSecond = () => options.samplesPerSecond;
 export const timestampToIndex = (timestamp: number): number =>
     timestamp < 0
         ? -1
-        : Math.floor(
+        : Math.trunc(
               (timestamp * options.samplesPerSecond) / microSecondsPerSecond
           );
 

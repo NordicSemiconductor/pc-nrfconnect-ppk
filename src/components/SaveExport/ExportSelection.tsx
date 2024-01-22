@@ -70,7 +70,7 @@ export default ({
                     if (cursorBegin != null && cursorEnd != null) {
                         setExportTimestamp(
                             Math.ceil(cursorBegin),
-                            Math.floor(cursorEnd)
+                            Math.trunc(cursorEnd)
                         );
                     }
                 },

@@ -182,7 +182,7 @@ const loadPPK2File = async (
                                 transform: (d, _, cb) => {
                                     progress += d.length;
 
-                                    const roundToFixedPercentage = Math.floor(
+                                    const roundToFixedPercentage = Math.trunc(
                                         (progress / totalSize) * 100
                                     );
 

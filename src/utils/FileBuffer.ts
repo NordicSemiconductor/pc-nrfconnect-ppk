@@ -371,7 +371,7 @@ export class FileBuffer {
         };
 
         const normalizedBeforeOffset =
-            Math.floor(beforeOffset / this.readPageSize) * this.readPageSize;
+            Math.trunc(beforeOffset / this.readPageSize) * this.readPageSize;
         const normalizedAfterOffset =
             Math.ceil(afterOffset / this.readPageSize) * this.readPageSize - 1;
         let idealBufferRange: Range = {
@@ -600,7 +600,7 @@ export class FileBuffer {
         const normalizedBegin =
             Math.ceil(byteOffset / this.readPageSize) * this.readPageSize;
         const normalizedEnd =
-            Math.floor((byteOffset + bytesRead) / this.readPageSize) *
+            Math.trunc((byteOffset + bytesRead) / this.readPageSize) *
                 this.readPageSize -
             1;
 

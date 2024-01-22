@@ -125,7 +125,7 @@ const accumulate = async (
     bias?: 'start' | 'end',
     onLoading?: (loading: boolean) => void
 ) => {
-    begin = Math.floor(begin / timeGroup) * timeGroup;
+    begin = Math.trunc(begin / timeGroup) * timeGroup;
     end = begin + Math.ceil((end - begin) / timeGroup) * timeGroup;
 
     if (end > DataManager().getTimestamp()) {
@@ -188,7 +188,7 @@ const accumulate = async (
         const bits = data.getBitData(index);
         const firstItemInGrp = index % numberOfPointsPerGrouped === 0;
         const lastItemInGrp = (index + 1) % numberOfPointsPerGrouped === 0;
-        const groupIndex = Math.floor(index / numberOfPointsPerGrouped);
+        const groupIndex = Math.trunc(index / numberOfPointsPerGrouped);
 
         if (firstItemInGrp) {
             min = Number.MAX_VALUE;
@@ -530,7 +530,7 @@ export default (): DataAccumulator => ({
                 DataManager().getTimestamp()
             );
 
-            const requiredBegin = Math.floor(begin / timeGroup) * timeGroup;
+            const requiredBegin = Math.trunc(begin / timeGroup) * timeGroup;
 
             const usableCachedData: AccumulatedResult = {
                 ampereLineData: removeCurrentSamplesOutsideScopes(
