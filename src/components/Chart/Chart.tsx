@@ -145,10 +145,7 @@ const Chart = () => {
         title: 'Select all',
         isGlobal: false,
         action: () => {
-            if (
-                DataManager().getTimestamp() > 0 &&
-                !selectionStatsProcessingRef.current
-            ) {
+            if (DataManager().getTimestamp() > 0) {
                 return chartCursor(0, DataManager().getTimestamp());
             }
             return false;
@@ -160,9 +157,7 @@ const Chart = () => {
         title: 'Select none',
         isGlobal: false,
         action: () => {
-            if (!selectionStatsProcessingRef.current) {
-                resetCursor();
-            }
+            resetCursor();
         },
     });
 
@@ -246,10 +241,10 @@ const Chart = () => {
     const [numberOfPixelsInWindow, setNumberOfPixelsInWindow] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
-    const resetCursor = useCallback(
-        () => chartCursor(null, null),
-        [chartCursor]
-    );
+    const resetCursor = useCallback(() => {
+        selectionStateAbortController.current?.abort();
+        chartCursor(null, null);
+    }, [chartCursor]);
 
     const zoomPanCallback = useCallback(
         (
@@ -348,20 +343,31 @@ const Chart = () => {
 
     const [selectionStatsProcessing, setSelectionStatsProcessing] =
         useState(false);
-    const selectionStatsProcessingRef = useRef<boolean>(false);
+    const [
+        selectionStatsProcessingProgress,
+        setSelectionStatsProcessingProgress,
+    ] = useState(0);
+    const selectionStateAbortController = useRef<AbortController>();
 
     useEffect(() => {
         if (cursorBegin != null && cursorEnd != null) {
             setSelectionStatsProcessing(true);
-            selectionStatsProcessingRef.current = true;
+            selectionStateAbortController.current?.abort();
+            selectionStateAbortController.current = new AbortController();
+            setSelectionStatsProcessingProgress(0);
+            selectionStateAbortController.current.signal.addEventListener(
+                'abort',
+                () => setSelectionStatsProcessing(false)
+            );
             calcStats(
                 (average, max, delta) => {
                     setSelectionStats({ average, max, delta });
                     setSelectionStatsProcessing(false);
-                    selectionStatsProcessingRef.current = false;
                 },
                 cursorBegin,
-                cursorEnd
+                cursorEnd,
+                selectionStateAbortController.current,
+                setSelectionStatsProcessingProgress
             );
         } else {
             setSelectionStats(null);
@@ -472,11 +478,11 @@ const Chart = () => {
             <Button
                 key="clear-selection-btn"
                 variant="secondary"
-                disabled={!chartCursorActive || selectionStatsProcessing}
+                disabled={!chartCursorActive}
                 size="sm"
                 onClick={resetCursor}
             >
-                CLEAR
+                {`${selectionStatsProcessing ? 'CANCEL' : 'CLEAR'}`}
             </Button>,
         ];
 
@@ -556,6 +562,7 @@ const Chart = () => {
                         label="Window"
                     />
                     <StatBox
+                        progress={selectionStatsProcessingProgress}
                         processing={selectionStatsProcessing}
                         {...selectionStats}
                         label="Selection"

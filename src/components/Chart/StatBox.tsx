@@ -46,6 +46,7 @@ interface StatBoxProperties {
     label: 'Window' | 'Selection';
     actionButtons?: any[];
     processing?: boolean;
+    progress?: number;
 }
 
 const StatBox = ({
@@ -55,6 +56,7 @@ const StatBox = ({
     label,
     actionButtons = [],
     processing = false,
+    progress,
 }: StatBoxProperties) => (
     <div className="statbox d-flex flex-column mb-1">
         <div className="statbox-header">
@@ -68,7 +70,8 @@ const StatBox = ({
         >
             {processing && (
                 <div className="tw tw-mr-[-1px] tw-flex tw-w-full tw-flex-row tw-items-center tw-justify-center tw-gap-2 tw-text-gray-700">
-                    Processing <Spinner size="sm" />
+                    Processing {progress != null && `(${progress.toFixed(1)}%)`}
+                    <Spinner size="sm" />
                 </div>
             )}
             {!processing && delta === null && (
