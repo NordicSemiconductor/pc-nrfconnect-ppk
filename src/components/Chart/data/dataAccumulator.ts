@@ -10,6 +10,7 @@ import {
     indexToTimestamp,
     normalizeTime,
     numberOfDigitalChannels,
+    timestampToIndex,
 } from '../../../globals';
 import { always0, always1, sometimes0And1 } from '../../../utils/bitConversion';
 import bitDataAccumulator from './bitDataAccumulator';
@@ -25,7 +26,9 @@ import {
 export const calcStats = (
     onComplete: (average: number, max: number, delta: number) => void,
     begin: number,
-    end: number
+    end: number,
+    abortController?: AbortController,
+    onProgress?: (progress: number) => void
 ) => {
     if (begin > end) {
         const temp = begin;
@@ -49,6 +52,7 @@ export const calcStats = (
                 DataManager()
                     .getData(buffer, b, e, 'end')
                     .then(data => {
+                        onProgress?.((b / (end - begin)) * 100);
                         for (let n = 0; n < data.getLength(); n += 1) {
                             const v = data.getCurrentData(n);
                             if (!Number.isNaN(v)) {
@@ -73,6 +77,9 @@ export const calcStats = (
                     });
             });
         }).then(range => {
+            if (abortController?.signal.aborted) {
+                return;
+            }
             if (range.end === end) {
                 onComplete(sum / (len || 1), max ?? 0, end - begin);
             } else {
@@ -117,6 +124,7 @@ type AccumulatedResult = {
 };
 
 let cachedResult: AccumulatedResult | undefined;
+let globalReadBuffer: Buffer | undefined;
 
 const accumulate = async (
     begin: number, // normalizeTime
@@ -144,7 +152,8 @@ const accumulate = async (
         globalReadBuffer,
         begin,
         end,
-        bias
+        bias,
+        onLoading
     );
     const bitAccumulator =
         digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
