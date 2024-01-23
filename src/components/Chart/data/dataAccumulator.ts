@@ -6,6 +6,7 @@
 
 import {
     DataManager,
+    frameSize,
     indexToTimestamp,
     normalizeTime,
     numberOfDigitalChannels,
@@ -36,6 +37,7 @@ export const calcStats = (
     end = Math.min(end, DataManager().getTimestamp());
 
     const maxNumberOfSamplesToProcess = 10_000_000;
+    const buffer = Buffer.alloc(maxNumberOfSamplesToProcess * frameSize);
 
     let sum = 0;
     let len = 0;
@@ -45,7 +47,7 @@ export const calcStats = (
         new Promise<{ begin: number; end: number }>(res => {
             setTimeout(() => {
                 DataManager()
-                    .getData(b, e, 'end')
+                    .getData(buffer, b, e, 'end')
                     .then(data => {
                         for (let n = 0; n < data.getLength(); n += 1) {
                             const v = data.getCurrentData(n);
@@ -132,7 +134,18 @@ const accumulate = async (
         end -= timeGroup;
     }
 
-    const data = await DataManager().getData(begin, end, bias, onLoading);
+    const bytesToRead =
+        (timestampToIndex(end) - timestampToIndex(begin) + 1) * frameSize;
+    if (!globalReadBuffer || globalReadBuffer.length < bytesToRead) {
+        globalReadBuffer = Buffer.alloc(bytesToRead);
+    }
+
+    const data = await DataManager().getData(
+        globalReadBuffer,
+        begin,
+        end,
+        bias
+    );
     const bitAccumulator =
         digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
     bitAccumulator?.initialise(digitalChannelsToCompute);

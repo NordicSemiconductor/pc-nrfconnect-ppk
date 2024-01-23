@@ -11,7 +11,12 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
-import { DataManager, indexToTimestamp, timestampToIndex } from '../globals';
+import {
+    DataManager,
+    frameSize,
+    indexToTimestamp,
+    timestampToIndex,
+} from '../globals';
 import { RootState } from '../slices';
 import { hideExportDialog } from '../slices/appSlice';
 import EventAction from '../usageDataActions';
@@ -104,12 +109,13 @@ export default (
             )
         );
 
+        const indexBegin = timestampToIndex(timestampBegin);
+        const indexEnd = timestampToIndex(timestampEnd);
+
+        const buffer = Buffer.alloc((indexEnd - indexBegin) * frameSize);
+
         return (
-            indexer(
-                timestampToIndex(timestampBegin),
-                timestampToIndex(timestampEnd),
-                10000
-            )
+            indexer(indexBegin, indexEnd, 10000)
                 .map(
                     ([start, len]) =>
                         () =>
@@ -119,6 +125,7 @@ export default (
                                 }
                                 DataManager()
                                     .getData(
+                                        buffer,
                                         indexToTimestamp(start),
                                         indexToTimestamp(start + len),
                                         'end'
