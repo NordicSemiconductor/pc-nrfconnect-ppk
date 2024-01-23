@@ -5,7 +5,6 @@
  */
 
 import { getCurrentWindow } from '@electron/remote';
-import os from 'os';
 import path from 'path';
 import { v4 } from 'uuid';
 
@@ -195,8 +194,9 @@ export const DataManager = () => ({
         options.samplesPerSecond = initialSamplesPerSecond;
         options.timestamp = undefined;
     },
-    initialize: (fileBufferFolder?: string) => {
-        const sessionPath = path.join(fileBufferFolder ?? os.tmpdir(), v4());
+    initialize: (sessionRootPath: string) => {
+        const sessionPath = path.join(sessionRootPath, v4());
+
         options.fileBuffer = new FileBuffer(
             10 * 100_000 * 6, // 6 bytes per sample for and 1sec buffers
             10 * 100_000 * 6,

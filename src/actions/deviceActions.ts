@@ -26,6 +26,7 @@ import { RootState } from '../slices';
 import {
     deviceClosedAction,
     deviceOpenedAction,
+    getSessionRootFolder,
     samplingStartAction,
     samplingStoppedAction,
     setDeviceRunningAction,
@@ -60,7 +61,7 @@ export const setupOptions = (): AppThunk<RootState> => (dispatch, getState) => {
 
         const { sampleFreq } = getState().app.dataLogger;
         DataManager().setSamplesPerSecond(sampleFreq);
-        DataManager().initialize();
+        DataManager().initialize(getSessionRootFolder(getState()));
     } catch (err) {
         logger.error(err);
     }

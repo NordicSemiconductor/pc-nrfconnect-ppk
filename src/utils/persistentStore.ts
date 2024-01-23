@@ -113,6 +113,12 @@ export const setDuration = (maxSampleFreq: number, duration: number) => {
     store.set(`duration-${maxSampleFreq}`, duration);
 };
 
+export const getPreferredSessionLocation = (defaultValue: string) =>
+    store.get(`session-root-folder`, defaultValue);
+export const setPreferredSessionLocation = (path: string) => {
+    store.set(`session-root-folder`, path);
+};
+
 export const getDurationUnit = (
     maxSampleFreq: number,
     defaultValue: TimeUnit

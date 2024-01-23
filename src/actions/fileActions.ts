@@ -21,7 +21,7 @@ import {
 } from '../features/ProgressDialog/progressSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
-import { setFileLoadedAction } from '../slices/appSlice';
+import { getSessionRootFolder, setFileLoadedAction } from '../slices/appSlice';
 import {
     resetChartTime,
     scrollToEnd,
@@ -97,7 +97,7 @@ export const load =
     (
         setLoading: (value: boolean) => void
     ): AppThunk<RootState, Promise<void>> =>
-    async dispatch => {
+    async (dispatch, getState) => {
         const {
             filePaths: [filename],
         } =
@@ -128,12 +128,16 @@ export const load =
                 message: 'Loading PPK File',
             })
         );
-        const timestamp = await loadData(
-            filename,
-            (message, progress, indeterminate) => {
-                dispatch(updateProgress({ message, progress, indeterminate }));
-            }
-        );
+        try {
+            const timestamp = await loadData(
+                filename,
+                getSessionRootFolder(getState()),
+                (message, progress, indeterminate) => {
+                    dispatch(
+                        updateProgress({ message, progress, indeterminate })
+                    );
+                }
+            );
 
         dispatch(closeProgressDialog());
 
