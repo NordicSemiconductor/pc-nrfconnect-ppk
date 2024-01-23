@@ -5,6 +5,7 @@
  */
 
 import { dialog, getCurrentWindow } from '@electron/remote';
+import fs from 'fs/promises';
 import { FormatOptions, unit } from 'mathjs';
 
 export const calcFileSize = (
@@ -43,3 +44,21 @@ export const selectDirectoryDialog = () =>
             })
             .catch(reject);
     });
+
+export const isDiskFull = async (triggerLimit: number, dstPath: string) => {
+    const stats = await fs.statfs(dstPath);
+    const freeDiskSpaceBytes = stats.bfree * stats.bsize;
+    const freeSpaceMB = freeDiskSpaceBytes / 1024 / 1024;
+    return freeSpaceMB < triggerLimit;
+};
+
+export const canFileFit = async (
+    triggerLimit: number,
+    fileSizeBytes: number,
+    dstPath: string
+) => {
+    const stats = await fs.statfs(dstPath);
+    const freeDiskSpaceBytes =
+        stats.bfree * stats.bsize - triggerLimit * 1024 * 1024;
+    return freeDiskSpaceBytes >= fileSizeBytes;
+};

@@ -37,6 +37,7 @@ import { RootState } from '../slices';
 import {
     deviceClosedAction,
     deviceOpenedAction,
+    getDiskFullTrigger,
     getSessionRootFolder,
     samplingStartAction,
     samplingStoppedAction,
@@ -68,6 +69,7 @@ import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegul
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
+import { isDiskFull } from '../utils/fileUtils';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -198,6 +200,7 @@ export const open =
         let prevBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
+        let lastDiskFullCheck = 0;
 
         const onSample = ({ value, bits }: SampleValues) => {
             const {
@@ -280,6 +283,24 @@ export const open =
             if (durationInMicroSeconds <= DataManager().getTimestamp()) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
+                }
+
+                const shouldCheckDiskFull =
+                    performance.now() - lastDiskFullCheck > 10_000;
+
+                if (shouldCheckDiskFull) {
+                    lastDiskFullCheck = performance.now();
+                    isDiskFull(
+                        getDiskFullTrigger(getState()),
+                        getSessionRootFolder(getState())
+                    ).then(isFull => {
+                        if (isFull) {
+                            logger.warn(
+                                'Session stopped. Disk full trigger detected'
+                            );
+                            dispatch(samplingStop());
+                        }
+                    });
                 }
             }
         };

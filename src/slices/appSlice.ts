@@ -10,7 +10,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import os from 'os';
 
 import { Capabilities } from '../device/abstractDevice';
-import { getPreferredSessionLocation } from '../utils/persistentStore';
+import {
+    getDiskFullTrigger as getPersistedDiskFullTrigger,
+    getPreferredSessionLocation,
+} from '../utils/persistentStore';
 import type { RootState } from '.';
 
 interface AppState {
@@ -24,6 +27,7 @@ interface AppState {
     isSaveChoiceDialogVisible: boolean;
     isExportDialogVisible: boolean;
     fileLoaded: boolean;
+    diskFullLimitMb?: number;
     sessionFolder?: string;
 }
 
@@ -91,6 +95,9 @@ const appSlice = createSlice({
         setSessionRootFolder: (state, action: PayloadAction<string>) => {
             state.sessionFolder = action.payload;
         },
+        setDiskFullTrigger: (state, action: PayloadAction<number>) => {
+            state.diskFullLimitMb = action.payload;
+        },
     },
 });
 
@@ -102,6 +109,8 @@ export const deviceOpen = (state: RootState) =>
     Object.keys(state.app.app.capabilities).length > 0;
 export const getSessionRootFolder = (state: RootState) =>
     state.app.app.sessionFolder ?? getPreferredSessionLocation(os.tmpdir());
+export const getDiskFullTrigger = (state: RootState) =>
+    state.app.app.diskFullLimitMb ?? getPersistedDiskFullTrigger(4096);
 
 export const {
     deviceOpenedAction,
@@ -116,6 +125,7 @@ export const {
     samplingStartAction,
     samplingStoppedAction,
     setSessionRootFolder,
+    setDiskFullTrigger,
 } = appSlice.actions;
 
 export default appSlice.reducer;

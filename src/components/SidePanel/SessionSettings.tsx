@@ -9,19 +9,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
     CollapsibleGroup,
+    NumberInputSliderWithUnit,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import os from 'os';
 
 import {
+    getDiskFullTrigger,
     getSessionRootFolder,
+    setDiskFullTrigger,
     setSessionRootFolder,
 } from '../../slices/appSlice';
 import { selectDirectoryDialog } from '../../utils/fileUtils';
-import { setPreferredSessionLocation } from '../../utils/persistentStore';
+import {
+    setDiskFullTrigger as setPersistedDiskFullTrigger,
+    setPreferredSessionLocation,
+} from '../../utils/persistentStore';
 
 export default () => {
     const dispatch = useDispatch();
     const sessionRootFolder = useSelector(getSessionRootFolder);
+    const diskFullTrigger = useSelector(getDiskFullTrigger);
 
     return (
         <CollapsibleGroup heading="Session Data" defaultCollapsed={false}>
@@ -60,6 +67,21 @@ export default () => {
                     </Button>
                 </div>
             </div>
+            <NumberInputSliderWithUnit
+                label="Disk full trigger"
+                unit="MB"
+                value={diskFullTrigger}
+                range={{
+                    min: 1,
+                    max: 10240,
+                    decimals: undefined,
+                    step: undefined,
+                }}
+                onChange={(value: number) => {
+                    dispatch(setDiskFullTrigger(value));
+                    setPersistedDiskFullTrigger(value);
+                }}
+            />
         </CollapsibleGroup>
     );
 };
