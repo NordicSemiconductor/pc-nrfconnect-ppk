@@ -166,56 +166,70 @@ const loadPPK2File = async (
         fs.rmSync(sessionPath, { recursive: true, force: true });
     };
     window.addEventListener('beforeunload', cleanUp);
-    let totalSize = 0;
+    try {
+        let totalSize = 0;
 
-    const directory = await unzipper.Open.file(filename);
-    await Promise.all(
-        directory.files.map(
-            f =>
-                new Promise((resolve, reject) => {
-                    f.stream()
-                        .prependListener('pipe', () => {
-                            totalSize += f.uncompressedSize;
-                        })
-                        .pipe(
-                            new Transform({
-                                transform: (d, _, cb) => {
-                                    progress += d.length;
-
-                                    const roundToFixedPercentage = Math.trunc(
-                                        (progress / totalSize) * 100
-                                    );
-
-                                    if (roundToFixedPercentage !== lastUpdate) {
-                                        onProgress(
-                                            'Decompressing file',
-                                            (progress / totalSize) * 100
-                                        );
-                                        lastUpdate = roundToFixedPercentage;
-                                    }
-                                    cb(null, d);
-                                },
+        const directory = await unzipper.Open.file(filename);
+        await Promise.all(
+            directory.files.map(
+                f =>
+                    new Promise((resolve, reject) => {
+                        f.stream()
+                            .prependListener('pipe', () => {
+                                totalSize += f.uncompressedSize;
                             })
-                        )
-                        .pipe(
-                            fs.createWriteStream(path.join(sessionPath, f.path))
-                        )
-                        .on('error', reject)
-                        .on('finish', resolve);
-                })
-        )
-    );
+                            .pipe(
+                                new Transform({
+                                    transform: (d, _, cb) => {
+                                        progress += d.length;
 
-    logger.info(`Decompression session information to ${sessionPath}`);
-    const metadata: PPK2Metadata = JSON.parse(
-        fs.readFileSync(path.join(sessionPath, 'metadata.json')).toString()
-    );
+                                        const roundToFixedPercentage =
+                                            Math.trunc(
+                                                (progress / totalSize) * 100
+                                            );
 
-    window.removeEventListener('beforeunload', cleanUp);
-    DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
-    DataManager().loadData(metadata.metadata.recordingDuration, sessionPath);
+                                        if (
+                                            roundToFixedPercentage !==
+                                            lastUpdate
+                                        ) {
+                                            onProgress(
+                                                'Decompressing file',
+                                                (progress / totalSize) * 100
+                                            );
+                                            lastUpdate = roundToFixedPercentage;
+                                        }
+                                        cb(null, d);
+                                    },
+                                })
+                            )
+                            .pipe(
+                                fs.createWriteStream(
+                                    path.join(sessionPath, f.path)
+                                )
+                            )
+                            .on('error', reject)
+                            .on('finish', resolve);
+                    })
+            )
+        );
 
-    return metadata.metadata.recordingDuration;
+        logger.info(`Decompression session information to ${sessionPath}`);
+        const metadata: PPK2Metadata = JSON.parse(
+            fs.readFileSync(path.join(sessionPath, 'metadata.json')).toString()
+        );
+
+        DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
+        DataManager().loadData(
+            metadata.metadata.recordingDuration,
+            sessionPath
+        );
+
+        window.removeEventListener('beforeunload', cleanUp);
+        return metadata.metadata.recordingDuration;
+    } catch (error) {
+        window.removeEventListener('beforeunload', cleanUp);
+        throw error;
+    }
 };
 
 export default async (
