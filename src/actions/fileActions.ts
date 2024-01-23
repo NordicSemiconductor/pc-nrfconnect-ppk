@@ -16,6 +16,7 @@ import {
 } from '../features/minimap/minimapSlice';
 import {
     closeProgressDialog,
+    setErrorMessage,
     showProgressDialog,
     updateProgress,
 } from '../features/ProgressDialog/progressSlice';
@@ -89,6 +90,7 @@ export const save =
 
             logger.info(`State saved to: ${filename}`);
         } catch (error) {
+            dispatch(setErrorMessage(describeError(error)));
             logger.error(`Error exporting file: ${describeError(error)}`);
         }
     };
@@ -139,16 +141,20 @@ export const load =
                 }
             );
 
-        dispatch(closeProgressDialog());
+            dispatch(closeProgressDialog());
 
-        if (timestamp) {
-            dispatch(setLatestDataTimestamp(timestamp));
-            dispatch(scrollToEnd());
-            dispatch(triggerForceRerender());
-            dispatch(miniMapAnimationAction());
+            if (timestamp) {
+                dispatch(setLatestDataTimestamp(timestamp));
+                dispatch(scrollToEnd());
+                dispatch(triggerForceRerender());
+                dispatch(miniMapAnimationAction());
+            }
+
+            dispatch(setFileLoadedAction(true));
+        } catch (error) {
+            dispatch(setErrorMessage(describeError(error)));
         }
 
-        dispatch(setFileLoadedAction(true));
         setLoading(false);
     };
 
