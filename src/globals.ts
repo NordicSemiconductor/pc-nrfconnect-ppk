@@ -12,6 +12,9 @@ import { v4 } from 'uuid';
 import { FileBuffer } from './utils/FileBuffer';
 import { FoldingBuffer } from './utils/foldingBuffer';
 
+export const currentFrameSize = 4;
+export const bitFrameSize = 2; // 6 bytes, 4 current 2 buts
+export const frameSize = currentFrameSize + bitFrameSize; // 6 bytes, 4 current 2 buts
 export const bufferLengthInSeconds = 60 * 5;
 export const numberOfDigitalChannels = 8;
 
@@ -48,19 +51,22 @@ class FileData {
 
     getAllCurrentData() {
         const numberOfElements = this.getLength();
-        const result = new Uint8Array(numberOfElements * 4);
+        const result = new Uint8Array(numberOfElements * currentFrameSize);
         for (let index = 0; index < numberOfElements; index += 1) {
-            const byteOffset = index * (4 + 2);
-            result.set(result.subarray(byteOffset, byteOffset + 4), index * 4);
+            const byteOffset = index * frameSize;
+            result.set(
+                result.subarray(byteOffset, byteOffset + currentFrameSize),
+                index * currentFrameSize
+            );
         }
 
         return new Float32Array(result.buffer);
     }
 
     getCurrentData(index: number) {
-        const byteOffset = index * (4 + 2);
+        const byteOffset = index * frameSize;
 
-        if (this.length < byteOffset + 4) {
+        if (this.length < byteOffset + currentFrameSize) {
             throw new Error('Index out of range');
         }
 
@@ -71,7 +77,7 @@ class FileData {
         const numberOfElements = this.getLength();
         const result = new Uint8Array(numberOfElements * 2);
         for (let index = 0; index < numberOfElements; index += 1) {
-            const byteOffset = index * (4 + 2) + 4;
+            const byteOffset = index * frameSize + currentFrameSize;
             result.set(result.subarray(byteOffset, byteOffset + 2), index * 2);
         }
 
@@ -79,7 +85,7 @@ class FileData {
     }
 
     getBitData(index: number) {
-        const byteOffset = index * (4 + 2) + 4;
+        const byteOffset = index * frameSize + currentFrameSize;
 
         if (this.length < byteOffset + 2) {
             throw new Error('Index out of range');
@@ -89,7 +95,7 @@ class FileData {
     }
 
     getLength() {
-        return this.length / (4 + 2);
+        return this.length / frameSize;
     }
 }
 
@@ -128,8 +134,8 @@ export const DataManager = () => ({
 
         const numberOfElements =
             timestampToIndex(toTime) - timestampToIndex(fromTime) + 1;
-        const byteOffset = timestampToIndex(fromTime) * (4 + 2);
-        const numberOfBytesToRead = numberOfElements * (4 + 2);
+        const byteOffset = timestampToIndex(fromTime) * frameSize;
+        const numberOfBytesToRead = numberOfElements * frameSize;
 
         if (
             !options.readBuffer ||
@@ -149,7 +155,9 @@ export const DataManager = () => ({
         options.readingData = false;
         if (readBytes !== numberOfBytesToRead) {
             console.log(
-                `missing ${(numberOfBytesToRead - readBytes) / (4 + 2)} records`
+                `missing ${
+                    (numberOfBytesToRead - readBytes) / frameSize
+                } records`
             );
         }
         return new FileData(options.readBuffer, readBytes);
