@@ -30,6 +30,7 @@ import {
     setLiveMode,
     triggerForceRerender,
 } from '../slices/chartSlice';
+import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
@@ -145,6 +146,13 @@ export const load =
 
             if (timestamp) {
                 dispatch(setLatestDataTimestamp(timestamp));
+                dispatch(
+                    updateSampleFreqLog10({
+                        sampleFreqLog10: Math.log10(
+                            DataManager().getSamplesPerSecond()
+                        ),
+                    })
+                );
                 dispatch(scrollToEnd());
                 dispatch(triggerForceRerender());
                 dispatch(miniMapAnimationAction());
