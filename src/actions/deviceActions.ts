@@ -52,22 +52,23 @@ import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
 
-export const setupOptions = (): AppThunk<RootState> => (dispatch, getState) => {
-    if (!device) return;
-    try {
-        DataManager().reset();
-        dispatch(resetChartTime());
-        dispatch(resetMinimap());
+export const setupOptions =
+    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
+        if (!device) return;
+        try {
+            await DataManager().reset();
+            dispatch(resetChartTime());
+            dispatch(resetMinimap());
 
-        const { sampleFreq } = getState().app.dataLogger;
-        DataManager().setSamplesPerSecond(sampleFreq);
-        DataManager().initialize(getSessionRootFolder(getState()));
-    } catch (err) {
-        logger.error(err);
-    }
-    dispatch(chartWindowUnLockAction());
-    dispatch(animationAction());
-};
+            const { sampleFreq } = getState().app.dataLogger;
+            DataManager().setSamplesPerSecond(sampleFreq);
+            DataManager().initialize(getSessionRootFolder(getState()));
+        } catch (err) {
+            logger.error(err);
+        }
+        dispatch(chartWindowUnLockAction());
+        dispatch(animationAction());
+    };
 
 // Only used by Data Logger Pane
 /* Start reading current measurements */
@@ -76,7 +77,7 @@ export const samplingStart =
         usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
         // Prepare global options
-        dispatch(setupOptions());
+        await dispatch(setupOptions());
 
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());

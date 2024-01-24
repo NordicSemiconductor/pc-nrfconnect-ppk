@@ -119,7 +119,7 @@ export const load =
 
         setLoading(true);
         logger.info(`Restoring state from ${filename}`);
-        DataManager().reset();
+        await DataManager().reset();
         dispatch(resetChartTime());
         dispatch(resetMinimap());
         dispatch(setLiveMode(false));

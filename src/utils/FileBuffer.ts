@@ -94,23 +94,20 @@ export class FileBuffer {
     numberOfReadPages = 20;
     fileHandle: number;
     filePath: string;
-    readPageSize: number;
-    writePageSize: number;
+    bufferPageSize: number;
     fileOperationTasks: (() => Promise<void>)[] = [];
     fileSize = 0;
     bytesWritten = 0;
     fileBusy = false;
     beforeUnload: () => void;
     bufferingListeners: ((event: Promise<void>) => void)[] = [];
-    freeWriteBuffers: Uint8Array[] = [];
-    freeReadBuffers: Uint8Array[] = [];
+    freePageBuffers: Uint8Array[] = [];
     bufferingRequests: Promise<void>[] = [];
     cancelBufferOperations: WeakMap<Promise<void>, AbortController> =
         new WeakMap();
 
     constructor(
-        readBufferSize: number,
-        writeBufferSize: number,
+        bufferPageSize: number,
         filePath: fs.PathLike,
         numberOfWritePages = 14,
         numberOfReadPages = 2
@@ -126,8 +123,7 @@ export class FileBuffer {
         this.numberOfReadPages = numberOfReadPages;
         this.numberOfWritePages = numberOfWritePages;
 
-        this.readPageSize = readBufferSize;
-        this.writePageSize = writeBufferSize;
+        this.bufferPageSize = bufferPageSize;
 
         // loading from existing session
         this.filePath = path.join(filePath.toString(), 'session.raw');
@@ -154,52 +150,60 @@ export class FileBuffer {
         return [...this.readPages, ...this.writePages];
     }
 
-    private writeActivePage(onComplete?: () => void) {
-        if (this.writePages.length === 0) {
-            onComplete?.();
-            return;
-        }
-        const activePage = this.writePages[this.writePages.length - 1];
+    private writeActivePage() {
+        return new Promise<void>(resolve => {
+            if (this.writePages.length === 0) {
+                resolve();
+                return;
+            }
+            const activePage = this.writePages[this.writePages.length - 1];
 
-        if (activePage.bytesWritten === activePage.page.length) {
-            this.fileOperationTasks.push(() =>
-                fs
-                    .appendFile(this.fileHandle, activePage.page)
-                    .finally(onComplete)
-            );
-        } else {
-            this.fileOperationTasks.push(() =>
-                fs
-                    .appendFile(
-                        this.fileHandle,
-                        activePage.page.subarray(0, activePage.bytesWritten)
-                    )
-                    .finally(onComplete)
-            );
-            this.writePages.push({
-                startAddress: this.fileSize,
-                bytesWritten: 0,
-                page:
-                    this.freeWriteBuffers.pop() ??
-                    Buffer.alloc(this.writePageSize),
-            });
-        }
-        this.executeFileOperation();
+            if (activePage.bytesWritten === activePage.page.length) {
+                this.fileOperationTasks.push(() =>
+                    fs
+                        .appendFile(this.fileHandle, activePage.page)
+                        .finally(resolve)
+                );
+            } else {
+                this.fileOperationTasks.push(() =>
+                    fs
+                        .appendFile(
+                            this.fileHandle,
+                            activePage.page.subarray(0, activePage.bytesWritten)
+                        )
+                        .finally(resolve)
+                );
+                this.writePages.push({
+                    startAddress: this.fileSize,
+                    bytesWritten: 0,
+                    page:
+                        this.freePageBuffers.pop() ??
+                        Buffer.alloc(this.bufferPageSize),
+                });
+            }
+            this.executeFileOperation();
+        });
     }
 
-    private updateCacheWrite(data: Uint8Array, onComplete?: () => void) {
+    private calculateWriteIdealBufferRange(fileSize: number): Range {
         const normalizedEnd =
-            Math.ceil((this.fileSize + data.length) / this.writePageSize) *
-                this.writePageSize -
-            1;
+            Math.ceil(fileSize / this.bufferPageSize) * this.bufferPageSize - 1;
 
-        const idealBufferRange: Range = {
+        return {
             start: Math.max(
                 0,
-                1 + normalizedEnd - this.numberOfWritePages * this.writePageSize
+                1 +
+                    normalizedEnd -
+                    this.numberOfWritePages * this.bufferPageSize
             ),
             end: normalizedEnd,
         };
+    }
+
+    private updateCacheWrite(data: Uint8Array, onComplete?: () => void) {
+        const idealBufferRange: Range = this.calculateWriteIdealBufferRange(
+            this.fileSize + data.length
+        );
 
         this.writePages = this.writePages.filter(p => {
             const keep = overlaps(idealBufferRange, {
@@ -207,19 +211,19 @@ export class FileBuffer {
                 end: p.startAddress + p.bytesWritten - 1,
             });
 
-            if (!keep) this.freeWriteBuffers.push(p.page);
+            if (!keep) this.freePageBuffers.push(p.page);
             return keep;
         });
 
         let activePage = this.writePages[this.writePages.length - 1];
 
-        if (!activePage || activePage.bytesWritten === this.writePageSize) {
+        if (!activePage || activePage.bytesWritten === this.bufferPageSize) {
             activePage = {
                 startAddress: this.fileSize,
                 bytesWritten: 0,
                 page:
-                    this.freeWriteBuffers.pop() ??
-                    Buffer.alloc(this.writePageSize),
+                    this.freePageBuffers.pop() ??
+                    Buffer.alloc(this.bufferPageSize),
             };
             this.writePages.push(activePage);
         }
@@ -233,7 +237,7 @@ export class FileBuffer {
             this.fileSize += data.length;
 
             if (activePage.bytesWritten === activePage.page.length) {
-                this.writeActivePage(onComplete);
+                this.writeActivePage().finally(() => onComplete?.());
             } else {
                 onComplete?.();
             }
@@ -358,11 +362,11 @@ export class FileBuffer {
         return bufferingRequest;
     };
 
-    private updateReadPages(
-        beforeOffset: number,
-        afterOffset: number,
+    private calculateIdealReadBufferRange(
+        startOffset: number,
+        endOffset: number,
         bias?: 'start' | 'end'
-    ) {
+    ): Range {
         const writeBufferRange: Range = {
             start: Math.min(...this.writePages.map(p => p.startAddress)),
             end: Math.max(
@@ -371,45 +375,75 @@ export class FileBuffer {
         };
 
         const normalizedBeforeOffset =
-            Math.trunc(beforeOffset / this.readPageSize) * this.readPageSize;
+            Math.trunc(startOffset / this.bufferPageSize) * this.bufferPageSize;
         const normalizedAfterOffset =
-            Math.ceil(afterOffset / this.readPageSize) * this.readPageSize - 1;
-        let idealBufferRange: Range = {
-            start: Math.max(
-                0,
-                normalizedBeforeOffset -
-                    Math.ceil(this.numberOfReadPages / 2) * this.readPageSize
-            ),
-            end: Math.min(
-                this.fileSize - 1,
-                normalizedAfterOffset +
-                    Math.ceil(this.numberOfReadPages / 2) * this.readPageSize
-            ),
-        };
+            Math.ceil(endOffset / this.bufferPageSize) * this.bufferPageSize -
+            1;
 
         if (bias === 'start') {
-            idealBufferRange = {
+            return {
                 start: Math.max(
                     0,
-                    normalizedBeforeOffset -
-                        this.numberOfReadPages * this.readPageSize
+                    Math.min(
+                        normalizedBeforeOffset -
+                            this.numberOfReadPages * this.bufferPageSize,
+                        writeBufferRange.start
+                    )
                 ),
-                end: Math.min(this.fileSize - 1, normalizedAfterOffset),
+                end: Math.min(
+                    this.fileSize - 1,
+                    normalizedAfterOffset,
+                    writeBufferRange.start - 1
+                ),
             };
         }
 
         if (bias === 'end') {
-            idealBufferRange = {
-                start: Math.max(0, normalizedBeforeOffset),
+            return {
+                start: Math.max(
+                    0,
+                    Math.min(normalizedBeforeOffset, writeBufferRange.start)
+                ),
                 end: Math.min(
                     this.fileSize - 1,
                     normalizedAfterOffset +
-                        this.numberOfReadPages * this.readPageSize
+                        this.numberOfReadPages * this.bufferPageSize,
+                    writeBufferRange.start - 1
                 ),
             };
         }
 
-        if (idealBufferRange.start >= writeBufferRange.start) {
+        return {
+            start: Math.max(
+                0,
+                Math.min(
+                    normalizedBeforeOffset -
+                        Math.ceil(this.numberOfReadPages / 2) *
+                            this.bufferPageSize,
+                    writeBufferRange.start
+                )
+            ),
+            end: Math.min(
+                this.fileSize - 1,
+                writeBufferRange.start - 1,
+                normalizedAfterOffset +
+                    Math.ceil(this.numberOfReadPages / 2) * this.bufferPageSize
+            ),
+        };
+    }
+
+    private updateReadPages(
+        beforeOffset: number,
+        afterOffset: number,
+        bias?: 'start' | 'end'
+    ) {
+        const idealBufferRange = this.calculateIdealReadBufferRange(
+            beforeOffset,
+            afterOffset,
+            bias
+        );
+
+        if (idealBufferRange.start >= idealBufferRange.end) {
             return;
         }
 
@@ -419,8 +453,8 @@ export class FileBuffer {
                 end: p.startAddress + p.bytesWritten - 1,
             });
 
-            if (!keep && p.page.length === this.readPageSize) {
-                this.freeReadBuffers.push(p.page);
+            if (!keep && p.page.length === this.bufferPageSize) {
+                this.freePageBuffers.push(p.page);
             }
 
             return keep;
@@ -429,7 +463,7 @@ export class FileBuffer {
         for (
             let i = idealBufferRange.start;
             i < idealBufferRange.end;
-            i += this.readPageSize
+            i += this.bufferPageSize
         ) {
             const missing =
                 this.getAllPages().findIndex(p =>
@@ -440,7 +474,7 @@ export class FileBuffer {
                         },
                         {
                             start: i,
-                            end: i + this.readPageSize - 1,
+                            end: i + this.bufferPageSize - 1,
                         }
                     )
                 ) === -1;
@@ -448,14 +482,14 @@ export class FileBuffer {
             if (missing) {
                 const newReadPage = defaultPage();
                 newReadPage.page =
-                    this.freeReadBuffers.pop() ??
-                    Buffer.alloc(this.readPageSize);
+                    this.freePageBuffers.pop() ??
+                    Buffer.alloc(this.bufferPageSize);
                 this.bufferPage(newReadPage, i, () => {})
                     .then(() => {
                         this.readPages.push(newReadPage);
                     })
                     .catch(() => {
-                        this.freeReadBuffers.push(newReadPage.page);
+                        this.freePageBuffers.push(newReadPage.page);
                     });
             }
         }
@@ -598,13 +632,13 @@ export class FileBuffer {
         );
 
         const normalizedBegin =
-            Math.ceil(byteOffset / this.readPageSize) * this.readPageSize;
+            Math.ceil(byteOffset / this.bufferPageSize) * this.bufferPageSize;
         const normalizedEnd =
-            Math.trunc((byteOffset + bytesRead) / this.readPageSize) *
-                this.readPageSize -
+            Math.trunc((byteOffset + bytesRead) / this.bufferPageSize) *
+                this.bufferPageSize -
             1;
 
-        if (normalizedEnd + 1 - normalizedBegin >= this.readPageSize) {
+        if (normalizedEnd + 1 - normalizedBegin >= this.bufferPageSize) {
             const newPage = {
                 page: buffer.subarray(
                     normalizedBegin - byteOffset,

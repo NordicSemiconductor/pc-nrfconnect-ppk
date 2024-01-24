@@ -169,8 +169,8 @@ export default () => {
             <Button
                 title={startStopTitle}
                 size="lg"
-                onClick={() => {
-                    DataManager().reset();
+                onClick={async () => {
+                    await DataManager().reset();
                     dispatch(resetChartTime());
                 }}
                 variant="secondary"
