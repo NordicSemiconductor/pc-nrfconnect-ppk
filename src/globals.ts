@@ -183,9 +183,7 @@ export const DataManager = () => ({
 
         options.foldingBuffer?.addData(current, options.timestamp);
     },
-    flush: () => {
-        options.fileBuffer?.flush();
-    },
+    flush: () => options.fileBuffer?.flush,
     reset: () => {
         const temp = { ...options };
         temp.fileBuffer?.close().then(() => temp.fileBuffer?.release());
@@ -198,7 +196,7 @@ export const DataManager = () => ({
         const sessionPath = path.join(sessionRootPath, v4());
 
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * 6, // 6 bytes per sample for and 1sec buffers
+            10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             10 * 100_000 * 6,
             sessionPath,
             14,
@@ -212,7 +210,7 @@ export const DataManager = () => ({
 
     loadData: (timestamp: number, sessionPath: string) => {
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * 6, // 6 bytes per sample for and 1sec buffers
+            10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             10 * 100_000 * 6,
             sessionPath,
             14,

@@ -87,7 +87,7 @@ export const samplingStart =
 export const samplingStop =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
         if (!device) return;
-        DataManager().flush();
+        await DataManager().flush();
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();

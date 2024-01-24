@@ -286,7 +286,7 @@ export default async (
         )}.ppk2`;
 
         const sessionFolder = DataManager().getSessionFolder();
-        DataManager().flush();
+        await DataManager().flush();
         if (!fs.existsSync(newFilename) && sessionFolder) {
             await saveFile(
                 newFilename,
