@@ -90,10 +90,11 @@ const timestampToLabel = (usecs: number) => {
     const microseconds = Math.abs(usecs);
     const sign = usecs < 0 ? '-' : '';
 
-    const d = new Date(microseconds / 1e3);
-    const h = d.getUTCHours().toString().padStart(2, '0');
-    const m = d.getUTCMinutes().toString().padStart(2, '0');
-    const s = d.getUTCSeconds().toString().padStart(2, '0');
+    const date = new Date(microseconds / 1e3);
+    const d = Math.trunc(usecs / 86400000000);
+    const h = (date.getUTCHours() + d * 24).toString().padStart(2, '0');
+    const m = date.getUTCMinutes().toString().padStart(2, '0');
+    const s = date.getUTCSeconds().toString().padStart(2, '0');
 
     const time = `${sign}${h}:${m}:${s}`;
     const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
