@@ -6,7 +6,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { classNames, colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
@@ -153,31 +153,32 @@ const Minimap = () => {
 
     return (
         <div
-            className="tw-relative tw-h-28 tw-w-full tw-py-4"
-            style={{
-                display: `${showMinimap ? 'block' : 'none'}`,
-                paddingLeft: '4.3rem',
-                paddingRight: '1.8rem',
-            }}
+            className={classNames(
+                'tw-relative tw-h-28 tw-w-full tw-py-4 tw-pl-16 tw-pr-8',
+                showMinimap ? 'tw-block' : 'tw-hidden'
+            )}
         >
             {isWindowDurationFull ? null : MinimapDefaultState()}
             <canvas
                 ref={canvasRef}
                 id="minimap"
-                className="tw-max-h-20 tw-w-full tw-border tw-border-solid"
+                className={classNames(
+                    'tw-max-h-20 tw-w-full tw-border tw-border-solid',
+                    isWindowDurationFull ? 'tw-block' : 'tw-hidden'
+                )}
                 style={{
-                    borderColor: colors.gray100,
-                    display: isWindowDurationFull ? 'block' : 'none',
+                    contain: 'strict',
                 }}
             />
 
             <div
                 ref={minimapSlider}
-                className="tw-pointer-events-none tw-absolute tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50"
+                className={classNames(
+                    'tw-pointer-events-none tw-absolute tw-top-4 tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50',
+                    isWindowDurationFull ? 'tw-block' : 'tw-hidden'
+                )}
                 style={{
                     contain: 'strict',
-                    top: '1rem',
-                    display: isWindowDurationFull ? 'block' : 'none',
                 }}
             />
         </div>

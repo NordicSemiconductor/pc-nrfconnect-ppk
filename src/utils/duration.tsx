@@ -25,12 +25,12 @@ const toHTML = (
 ): ReactElement<any, any> => (
     <div className="value">
         {value}
-        <span className="unit">{unit}</span>
+        <span className="tw-text-xs">{unit}</span>
         {value2 !== null && (
             <>
                 {' '}
                 {value2}
-                <span className="unit">{unit2}</span>
+                <span className="tw-text-xs">{unit2}</span>
             </>
         )}
     </div>
