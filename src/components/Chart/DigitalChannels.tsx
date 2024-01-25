@@ -106,7 +106,7 @@ const DigitalChannels = ({
             ))}
             {zoomedOutTooFar && (
                 <div className="tw-absolute tw-bottom-0 tw-left-16 tw-right-0 tw-top-0 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-                    <p className="tw-p-4">
+                    <p className="tw-bg-white tw-p-4">
                         Zoom in on the main chart to see the digital channels
                     </p>
                 </div>
