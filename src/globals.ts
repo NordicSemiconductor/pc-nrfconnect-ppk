@@ -183,7 +183,7 @@ export const DataManager = () => ({
 
         options.foldingBuffer?.addData(current, options.timestamp);
     },
-    flush: () => options.fileBuffer?.flush,
+    flush: () => options.fileBuffer?.flush(),
     reset: async () => {
         await options.fileBuffer?.close();
         options.fileBuffer?.release();
