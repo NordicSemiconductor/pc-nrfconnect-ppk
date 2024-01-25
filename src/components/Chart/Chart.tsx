@@ -536,7 +536,7 @@ const Chart = () => {
     ];
     return (
         <div className="tw-relative tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-between tw-gap-4 tw-text-gray-600">
-            <div className="scroll-bar-white-bg tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-bg-white tw-p-2">
+            <div className="scroll-bar-white-bg tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-bg-white tw-p-2">
                 <ChartTop
                     onLiveModeChange={isLive => {
                         dispatch(setLiveMode(isLive));
