@@ -83,11 +83,11 @@ const DigitalChannels = ({
         .filter((_, i) => digitalChannels[i]);
 
     return (
-        <div className="tw-preflight tw-relative tw-flex tw-flex-col tw-gap-[1px] tw-bg-gray-200 [@media(max-height:900px)]:tw-max-h-28 [@media(max-height:900px)]:tw-overflow-y-auto">
+        <div className="scroll-bar-white-bg tw-preflight tw-relative tw-flex tw-flex-col tw-bg-white [@media(max-height:900px)]:tw-max-h-28 [@media(max-height:900px)]:tw-overflow-y-auto">
             {bitsChartData.map((_, i: number) => (
                 <div
                     key={`${i + 1}`}
-                    className="tw-flex tw-h-fit tw-flex-row tw-items-center tw-bg-white tw-py-1 tw-pr-8 tw-text-center"
+                    className="tw-flex tw-h-fit tw-flex-row tw-items-center tw-border-b tw-border-gray-200 tw-py-1 tw-pr-8 tw-text-center last:tw-border-none"
                 >
                     <span className="tw-min-w-[70px] tw-text-center">
                         {bitsChartData[i].datasets[0].label}
@@ -106,7 +106,7 @@ const DigitalChannels = ({
             ))}
             {zoomedOutTooFar && (
                 <div className="tw-absolute tw-bottom-0 tw-left-16 tw-right-0 tw-top-0 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-                    <p className="tw-bg-white tw-p-4">
+                    <p className="tw-p-4">
                         Zoom in on the main chart to see the digital channels
                     </p>
                 </div>
