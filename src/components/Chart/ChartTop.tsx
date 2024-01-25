@@ -16,6 +16,7 @@ import { BigNumber, Fraction, unit } from 'mathjs';
 import { isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
+    getLiveModeFPS,
     setShowSettings,
     showChartSettings,
     toggleYAxisLock,
@@ -58,6 +59,7 @@ const ChartTop = ({
     const dispatch = useDispatch();
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const samplingRunning = useSelector(isSamplingRunning);
+    const fps = useSelector(getLiveModeFPS);
     const { yMin, yMax } = useSelector(getChartYAxisRange);
     const yAxisLock = yMin != null && yMax != null;
 
@@ -127,7 +129,7 @@ const ChartTop = ({
             </div>
             <div className="tw-order-1 tw-flex tw-flex-row tw-justify-end">
                 <Toggle
-                    label="LIVE VIEW"
+                    label={`${live ? `(${fps} FPS) ` : ''}LIVE VIEW`}
                     onToggle={onLiveModeChange}
                     isToggled={live}
                     variant="primary"

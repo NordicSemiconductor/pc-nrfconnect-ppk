@@ -43,6 +43,7 @@ import {
     getForceRerender,
     isLiveMode,
     MAX_WINDOW_DURATION,
+    setFPS,
     setLiveMode,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
@@ -438,16 +439,43 @@ const Chart = () => {
         }
     }, [xAxisMax]);
 
+    const lastLiveRenderTime = useRef<number>(0);
+    const lastFPSUpdate = useRef<number>(performance.now());
+    const fpsCounter = useRef<number>(0);
+
     useEffect(() => {
+        const now = performance.now();
+        const forceRender = now - lastLiveRenderTime.current > 1000; // force 1 FPS
         if (liveMode) {
-            if (!DataManager().isInSync()) {
+            if (!DataManager().isInSync() && !forceRender) {
                 return;
             }
 
-            nextUpdateRequests = () => updateChart();
+            lastLiveRenderTime.current = now;
+
+            nextUpdateRequests = () => {
+                fpsCounter.current += 1;
+                return updateChart();
+            };
             executeChartUpdateOperation();
+
+            const updateFPSValue = now - lastFPSUpdate.current > 1000;
+
+            if (updateFPSValue) {
+                dispatch(setFPS(fpsCounter.current));
+                fpsCounter.current = 0;
+                lastFPSUpdate.current = now;
+            }
         }
-    }, [xAxisMax, liveMode, updateChart, begin, windowEnd, rerenderTrigger]);
+    }, [
+        xAxisMax,
+        liveMode,
+        updateChart,
+        begin,
+        windowEnd,
+        rerenderTrigger,
+        dispatch,
+    ]);
 
     const lastPositions = useRef({
         begin,
