@@ -158,7 +158,10 @@ export const DataManager = () => ({
         if (simulationDelta > actualTimePassed) return true;
 
         const pcAheadDelta = actualTimePassed - simulationDelta;
-        if (pcAheadDelta > getSamplingTime(options.samplesPerSecond) * 1.5) {
+        if (
+            pcAheadDelta >
+            Math.max(30, getSamplingTime(options.samplesPerSecond) * 1.5)
+        ) {
             return false;
         }
         return true;
