@@ -65,5 +65,8 @@
     "prettier": "@nordicsemiconductor/pc-nrfconnect-shared/config/prettier.config.js",
     "dependencies": {
         "archiver": "^6.0.1"
-    }
+    },
+    "bundledDependencies": [
+        "archiver"
+    ]
 }
