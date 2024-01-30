@@ -6,8 +6,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import usageData from '@nordicsemiconductor/pc-nrfconnect-shared/src/utils/usageData';
+import { logger, telemetry } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { deserialize, Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
@@ -21,6 +20,7 @@ import { createInflateRaw } from 'zlib';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
 import { DataManager } from '../globals';
+import { canFileFit } from './fileUtils';
 import saveFile, { PPK2Metadata } from './saveFileHandler';
 
 /*
@@ -155,6 +155,7 @@ const loadBits = (buffer: BufferReader) =>
 const loadPPK2File = async (
     filename: string,
     sessionRootPath: string,
+    minSpaceTriggerLimit: number,
     onProgress: (message: string, percentage: number) => void
 ) => {
     let progress = 0;
@@ -170,14 +171,36 @@ const loadPPK2File = async (
         let totalSize = 0;
 
         const directory = await unzipper.Open.file(filename);
+
+        await Promise.all(
+            directory.files.map(
+                f =>
+                    new Promise<void>(resolve => {
+                        f.stream().prependListener('pipe', () => {
+                            totalSize += f.uncompressedSize;
+                            resolve();
+                        });
+                    })
+            )
+        );
+
+        const willFit = await canFileFit(
+            minSpaceTriggerLimit,
+            totalSize,
+            path.parse(filename).dir
+        );
+
+        if (!willFit) {
+            throw new Error(
+                'Cannot decompress. File does not fit in the available disk space'
+            );
+        }
+
         await Promise.all(
             directory.files.map(
                 f =>
                     new Promise((resolve, reject) => {
                         f.stream()
-                            .prependListener('pipe', () => {
-                                totalSize += f.uncompressedSize;
-                            })
                             .pipe(
                                 new Transform({
                                     transform: (d, _, cb) => {
@@ -232,6 +255,7 @@ const loadPPK2File = async (
 export default async (
     filename: string,
     sessionRootFolder: string,
+    minSpaceTriggerLimit: number,
     onProgress: (
         message: string,
         percentage: number,
@@ -239,7 +263,12 @@ export default async (
     ) => void
 ) => {
     if (filename.endsWith('.ppk2')) {
-        return loadPPK2File(filename, sessionRootFolder, onProgress);
+        return loadPPK2File(
+            filename,
+            sessionRootFolder,
+            minSpaceTriggerLimit,
+            onProgress
+        );
     }
 
     logger.warn(`This PPK file format is deprecated.`);
@@ -260,7 +289,7 @@ export default async (
 
         onProgress('Converting ".ppk" format to  ".ppk2"', -1);
 
-        usageData.sendUsageData('Loading deprecated ".ppk" file format', {
+        telemetry.sendEvent('Loading deprecated ".ppk" file format', {
             ppk: result.bits.length === 0 ? 'V1' : 'V2',
         });
 

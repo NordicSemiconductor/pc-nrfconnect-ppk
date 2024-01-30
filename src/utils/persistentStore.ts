@@ -122,6 +122,12 @@ export const setPreferredSessionLocation = (path: string) => {
     store.set(`session-root-folder`, path);
 };
 
+export const getDiskFullTrigger = (defaultValue: number) =>
+    store.get(`disk-full-trigger`, defaultValue);
+export const setDiskFullTrigger = (sizeInMb: number) => {
+    store.set(`disk-full-trigger`, sizeInMb);
+};
+
 export const getSamplingMode = (defaultValue: SamplingMode) =>
     store.get(`sampling-mode`, defaultValue);
 export const setSamplingMode = (mode: SamplingMode) => {

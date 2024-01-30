@@ -7,7 +7,7 @@
 import {
     AppThunk,
     logger,
-    usageData,
+    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
@@ -158,7 +158,7 @@ export default (
                 .then(() => {
                     dispatch(hideExportDialog());
                     logger.info(`Exported CSV to: ${filename}`);
-                    usageData.sendUsageData(EventAction.EXPORT_DATA, {
+                    telemetry.sendEvent(EventAction.EXPORT_DATA, {
                         timestampBegin,
                         timestampEnd,
                         exportType: 'CSV',

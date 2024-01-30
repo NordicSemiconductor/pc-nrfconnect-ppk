@@ -23,7 +23,11 @@ import {
 } from '../features/ProgressDialog/progressSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
-import { getSessionRootFolder, setFileLoadedAction } from '../slices/appSlice';
+import {
+    getDiskFullTrigger,
+    getSessionRootFolder,
+    setFileLoadedAction,
+} from '../slices/appSlice';
 import {
     resetChartTime,
     scrollToEnd,
@@ -139,6 +143,7 @@ export const load =
             const timestamp = await loadData(
                 filename,
                 getSessionRootFolder(getState()),
+                getDiskFullTrigger(getState()),
                 (message, progress, indeterminate) => {
                     dispatch(
                         updateProgress({ message, progress, indeterminate })

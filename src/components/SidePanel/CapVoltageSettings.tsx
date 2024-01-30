@@ -11,7 +11,7 @@ import {
     CollapsibleGroup,
     NumberInlineInput,
     Slider,
-    usageData,
+    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
@@ -57,7 +57,7 @@ export const CapVoltageSettings = () => {
                         onChange={value => setNewMaxCap(value)}
                         onChangeComplete={() => {
                             updateVoltageRegulator();
-                            usageData.sendUsageData(
+                            telemetry.sendEvent(
                                 EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
                                 { maxCap: newMaxCap }
                             );
@@ -72,7 +72,7 @@ export const CapVoltageSettings = () => {
                     onChange={[value => setNewMaxCap(value)]}
                     onChangeComplete={() => {
                         updateVoltageRegulator();
-                        usageData.sendUsageData(
+                        telemetry.sendEvent(
                             EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
                             { maxCap: newMaxCap }
                         );

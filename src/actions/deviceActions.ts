@@ -11,7 +11,7 @@ import {
     AppThunk,
     Device,
     logger,
-    usageData,
+    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import { unit } from 'mathjs';
@@ -37,6 +37,7 @@ import { RootState } from '../slices';
 import {
     deviceClosedAction,
     deviceOpenedAction,
+    getDiskFullTrigger,
     getSessionRootFolder,
     samplingStartAction,
     samplingStoppedAction,
@@ -58,8 +59,10 @@ import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
     deregisterSaveEvent,
+    getAutoExportTrigger,
     registerSaveEvent,
     resetTriggerOrigin,
+    setAutoExportTrigger,
     setProgress,
     setTriggerActive,
     setTriggerOrigin,
@@ -68,6 +71,7 @@ import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegul
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
+import { isDiskFull } from '../utils/fileUtils';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -102,7 +106,7 @@ export const setupOptions =
 /* Start reading current measurements */
 export const samplingStart =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
-        usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
+        telemetry.sendEvent(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
         dispatch(setTriggerActive(false));
         dispatch(resetTriggerOrigin());
@@ -198,6 +202,7 @@ export const open =
         let prevBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
+        let lastDiskFullCheck = 0;
 
         const onSample = ({ value, bits }: SampleValues) => {
             const {
@@ -281,12 +286,30 @@ export const open =
                 if (samplingRunning) {
                     dispatch(samplingStop());
                 }
+
+                const shouldCheckDiskFull =
+                    performance.now() - lastDiskFullCheck > 10_000;
+
+                if (shouldCheckDiskFull) {
+                    lastDiskFullCheck = performance.now();
+                    isDiskFull(
+                        getDiskFullTrigger(getState()),
+                        getSessionRootFolder(getState())
+                    ).then(isFull => {
+                        if (isFull) {
+                            logger.warn(
+                                'Session stopped. Disk full trigger detected'
+                            );
+                            dispatch(samplingStop());
+                        }
+                    });
+                }
             }
         };
 
         try {
             device = new SerialDevice(deviceInfo, onSample);
-            usageData.sendUsageData(EventAction.PPK_2_SELECTED);
+            telemetry.sendEvent(EventAction.PPK_2_SELECTED);
 
             dispatch(
                 setSamplingAttrsAction({
@@ -518,9 +541,28 @@ export const processTrigger =
                     dataToBeSaved,
                     session.fileBuffer,
                     session.foldingBuffer
-                ).finally(() => {
-                    dispatch(deregisterSaveEvent());
-                });
+                )
+                    .then(async () => {
+                        if (
+                            (await isDiskFull(
+                                getDiskFullTrigger(getState()),
+                                getSessionRootFolder(getState())
+                            )) &&
+                            getAutoExportTrigger(getState())
+                        ) {
+                            telemetry.sendEvent('Auto Export', {
+                                state: false,
+                                reason: 'Disk Full',
+                            });
+                            logger.warn(
+                                'Auto export was turned off due disk being full'
+                            );
+                            dispatch(setAutoExportTrigger(false));
+                        }
+                    })
+                    .finally(() => {
+                        dispatch(deregisterSaveEvent());
+                    });
             }
 
             // Only render if this is the latest trigger.

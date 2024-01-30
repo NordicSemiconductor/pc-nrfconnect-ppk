@@ -10,7 +10,7 @@ import {
     Dropdown,
     DropdownItem,
     NumberInlineInput,
-    usageData,
+    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
@@ -84,7 +84,7 @@ const ChartOptions = () => {
         if (!yAxisLock) return;
         dispatch(storeYMin({ yMin: yMin * 1000 ** exponent }));
         setYMinExponent(exponent);
-        usageData.sendUsageData(EventAction.Y_MIN_SET_EXPLICITLY);
+        telemetry.sendEvent(EventAction.Y_MIN_SET_EXPLICITLY);
     };
 
     /**
@@ -96,7 +96,7 @@ const ChartOptions = () => {
         if (!yAxisLock) return;
         dispatch(storeYMax({ yMax: yMax * 1000 ** exponent }));
         setYMaxExponent(exponent);
-        usageData.sendUsageData(EventAction.Y_MAX_SET_EXPLICITLY);
+        telemetry.sendEvent(EventAction.Y_MAX_SET_EXPLICITLY);
     };
 
     /** Get calculated value depending on unit
