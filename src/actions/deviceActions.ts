@@ -59,8 +59,10 @@ import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
     deregisterSaveEvent,
+    getAutoExportTrigger,
     registerSaveEvent,
     resetTriggerOrigin,
+    setAutoExportTrigger,
     setProgress,
     setTriggerActive,
     setTriggerOrigin,
@@ -539,9 +541,28 @@ export const processTrigger =
                     dataToBeSaved,
                     session.fileBuffer,
                     session.foldingBuffer
-                ).finally(() => {
-                    dispatch(deregisterSaveEvent());
-                });
+                )
+                    .then(async () => {
+                        if (
+                            (await isDiskFull(
+                                getDiskFullTrigger(getState()),
+                                getSessionRootFolder(getState())
+                            )) &&
+                            getAutoExportTrigger(getState())
+                        ) {
+                            telemetry.sendEvent('Auto Export', {
+                                state: false,
+                                reason: 'Disk Full',
+                            });
+                            logger.warn(
+                                'Auto export was turned off due disk being full'
+                            );
+                            dispatch(setAutoExportTrigger(false));
+                        }
+                    })
+                    .finally(() => {
+                        dispatch(deregisterSaveEvent());
+                    });
             }
 
             // Only render if this is the latest trigger.

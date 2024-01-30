@@ -59,7 +59,7 @@ export default () => {
                 reason: 'excessive number of triggers',
             });
             logger.warn(
-                'Unable to keep up with saving triggers. Auto export was turn off due to excessive number of triggers'
+                'Unable to keep up with saving triggers. Auto export was turned off due to excessive number of triggers'
             );
         }
     }, [autoExportTrigger, dispatch, triggerSaveQueueLength]);
