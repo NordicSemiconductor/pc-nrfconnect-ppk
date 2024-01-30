@@ -11,7 +11,12 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 
-import { DataManager, indexToTimestamp, timestampToIndex } from '../globals';
+import {
+    DataManager,
+    frameSize,
+    indexToTimestamp,
+    timestampToIndex,
+} from '../globals';
 import { RootState } from '../slices';
 import { hideExportDialog } from '../slices/appSlice';
 import EventAction from '../usageDataActions';
@@ -104,12 +109,13 @@ export default (
             )
         );
 
+        const indexBegin = timestampToIndex(timestampBegin);
+        const indexEnd = timestampToIndex(timestampEnd);
+
+        const buffer = Buffer.alloc((indexEnd - indexBegin) * frameSize);
+
         return (
-            indexer(
-                timestampToIndex(timestampBegin),
-                timestampToIndex(timestampEnd),
-                10000
-            )
+            indexer(indexBegin, indexEnd, 10000)
                 .map(
                     ([start, len]) =>
                         () =>
@@ -117,28 +123,32 @@ export default (
                                 if (cancel.current) {
                                     reject();
                                 }
-                                const data = DataManager().getData(
-                                    indexToTimestamp(start),
-                                    indexToTimestamp(start + len)
-                                );
-
-                                const content = formatDataForExport(
-                                    start,
-                                    data.current,
-                                    data.bits,
-                                    contentSelection
-                                );
-                                fs.write(fd, content, () => {
-                                    setProgress(
-                                        Math.round(
-                                            ((start - timestampBegin) /
-                                                (timestampEnd -
-                                                    timestampBegin)) *
-                                                100
-                                        )
-                                    );
-                                    resolve(undefined);
-                                });
+                                DataManager()
+                                    .getData(
+                                        buffer,
+                                        indexToTimestamp(start),
+                                        indexToTimestamp(start + len),
+                                        'end'
+                                    )
+                                    .then(data => {
+                                        const content = formatDataForExport(
+                                            start,
+                                            data.getAllCurrentData(),
+                                            data.getAllBitData(),
+                                            contentSelection
+                                        );
+                                        fs.write(fd, content, () => {
+                                            setProgress(
+                                                Math.round(
+                                                    ((start - timestampBegin) /
+                                                        (timestampEnd -
+                                                            timestampBegin)) *
+                                                        100
+                                                )
+                                            );
+                                            resolve(undefined);
+                                        });
+                                    });
                             })
                 )
                 // @ts-expect-error dunno how to fix this at the moment.

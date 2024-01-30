@@ -9,6 +9,7 @@ import { combineReducers } from 'redux';
 
 import deprecatedDevices from '../features/DeprecatedDevice/DeprecatedDeviceSlice';
 import minimap from '../features/minimap/minimapSlice';
+import progressDialog from '../features/ProgressDialog/progressSlice';
 import app from './appSlice';
 import chart from './chartSlice';
 import dataLogger from './dataLoggerSlice';
@@ -29,6 +30,7 @@ const appReducer = combineReducers({
     spikeFilter,
     dataLogger,
     deprecatedDevices,
+    progressDialog,
 });
 
 export default appReducer;

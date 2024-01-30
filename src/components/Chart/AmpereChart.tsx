@@ -11,7 +11,11 @@ import type {
     ForwardedRef,
 } from 'react-chartjs-2/dist/types';
 import { useSelector } from 'react-redux';
-import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    classNames,
+    colors,
+    Spinner,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 
@@ -72,6 +76,7 @@ interface AmpereChartProperties {
     chartRef: React.MutableRefObject<null | AmpereChartJS>;
     cursorData: CursorData;
     lineData: AmpereState[];
+    processing: boolean;
 }
 
 const formatCurrent = (nA: number) =>
@@ -85,10 +90,11 @@ const timestampToLabel = (usecs: number) => {
     const microseconds = Math.abs(usecs);
     const sign = usecs < 0 ? '-' : '';
 
-    const d = new Date(microseconds / 1e3);
-    const h = d.getUTCHours().toString().padStart(2, '0');
-    const m = d.getUTCMinutes().toString().padStart(2, '0');
-    const s = d.getUTCSeconds().toString().padStart(2, '0');
+    const date = new Date(microseconds / 1e3);
+    const d = Math.trunc(usecs / 86400000000);
+    const h = (date.getUTCHours() + d * 24).toString().padStart(2, '0');
+    const m = date.getUTCMinutes().toString().padStart(2, '0');
+    const s = date.getUTCSeconds().toString().padStart(2, '0');
 
     const time = `${sign}${h}:${m}:${s}`;
     const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
@@ -105,6 +111,7 @@ export default ({
     chartRef,
     cursorData: { begin, end },
     lineData,
+    processing,
 }: AmpereChartProperties) => {
     const liveMode = useSelector(isLiveMode);
     const { yMin, yMax, yAxisLog } = useSelector(getChartYAxisRange);
@@ -218,6 +225,21 @@ export default ({
 
     return (
         <div className="chart-container">
+            {processing && (
+                <div
+                    className={classNames(
+                        'tw-absolute tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pl-[4.35rem] tw-pr-[1.8rem]',
+                        timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]'
+                    )}
+                >
+                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-300 tw-bg-opacity-20 tw-px-[70px]">
+                        <Spinner
+                            size="lg"
+                            className=" tw-text-nordicBlue-900"
+                        />
+                    </div>
+                </div>
+            )}
             <Line
                 ref={chartRef as ForwardedRef<ChartJSOrUndefined<'line'>>}
                 // Need to typecast because of react-chartjs-2

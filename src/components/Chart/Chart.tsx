@@ -41,6 +41,7 @@ import {
     getChartDigitalChannelInfo,
     getChartXAxisRange,
     getCursorRange,
+    getForceRerender,
     isLiveMode,
     MAX_WINDOW_DURATION,
     setLiveMode,
@@ -75,13 +76,34 @@ export type CursorData = {
     end: number;
 };
 
+let nextUpdateRequests: (() => Promise<void>) | undefined;
+let chartUpdateInprogress = false;
+
+const executeChartUpdateOperation = async () => {
+    if (!nextUpdateRequests || chartUpdateInprogress) return;
+
+    const nextTask = nextUpdateRequests;
+    nextUpdateRequests = undefined;
+
+    chartUpdateInprogress = true;
+    try {
+        await nextTask();
+    } catch {
+        // do nothing
+    }
+
+    chartUpdateInprogress = false;
+    executeChartUpdateOperation();
+};
+
 const { rightMarginPx } = chartCss;
 
 const rightMargin = parseInt(rightMarginPx, 10);
 
-const Chart = ({ digitalChannelsEnabled = false }) => {
+const Chart = () => {
     const dispatch = useDispatch();
     const liveMode = useSelector(isLiveMode);
+    const rerenderTrigger = useSelector(getForceRerender);
 
     const chartWindow = useCallback(
         (
@@ -123,10 +145,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Select all',
         isGlobal: false,
         action: () => {
-            if (
-                DataManager().getTimestamp() > 0 &&
-                !selectionStatsProcessingRef.current
-            ) {
+            if (DataManager().getTimestamp() > 0) {
                 return chartCursor(0, DataManager().getTimestamp());
             }
             return false;
@@ -138,9 +157,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         title: 'Select none',
         isGlobal: false,
         action: () => {
-            if (!selectionStatsProcessingRef.current) {
-                resetCursor();
-            }
+            resetCursor();
         },
     });
 
@@ -163,8 +180,9 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         },
     });
 
-    const { digitalChannels, digitalChannelsVisible, hasDigitalChannels } =
-        useSelector(getChartDigitalChannelInfo);
+    const { digitalChannels, digitalChannelsVisible } = useSelector(
+        getChartDigitalChannelInfo
+    );
 
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
 
@@ -176,9 +194,6 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
         windowBegin,
         windowEnd,
     } = useSelector(getChartXAxisRange);
-
-    const showDigitalChannels =
-        digitalChannelsVisible && digitalChannelsEnabled;
 
     const chartRef = useRef<AmpereChartJS | null>(null);
 
@@ -198,21 +213,18 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 .map((isVisible, channelNumber) =>
                     isVisible ? channelNumber : null
                 )
-                .filter(channelNumber => channelNumber != null),
+                .filter(channelNumber => channelNumber != null) as number[],
         [digitalChannels]
     );
 
-    // hasBits needs to be a dependency so digitalChannelsToCompute can update.
-    const hasBits = DataManager().hasBits();
     const digitalChannelsToCompute = useMemo(
         () =>
-            !zoomedOutTooFarForDigitalChannels && showDigitalChannels && hasBits
+            !zoomedOutTooFarForDigitalChannels && digitalChannelsVisible
                 ? digitalChannelsToDisplay
                 : [],
         [
-            hasBits,
             zoomedOutTooFarForDigitalChannels,
-            showDigitalChannels,
+            digitalChannelsVisible,
             digitalChannelsToDisplay,
         ]
     );
@@ -229,10 +241,10 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
     const [numberOfPixelsInWindow, setNumberOfPixelsInWindow] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
 
-    const resetCursor = useCallback(
-        () => chartCursor(null, null),
-        [chartCursor]
-    );
+    const resetCursor = useCallback(() => {
+        selectionStateAbortController.current?.abort();
+        chartCursor(null, null);
+    }, [chartCursor]);
 
     const zoomPanCallback = useCallback(
         (
@@ -331,39 +343,54 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
 
     const [selectionStatsProcessing, setSelectionStatsProcessing] =
         useState(false);
-    const selectionStatsProcessingRef = useRef<boolean>(false);
+    const [
+        selectionStatsProcessingProgress,
+        setSelectionStatsProcessingProgress,
+    ] = useState(0);
+    const selectionStateAbortController = useRef<AbortController>();
 
     useEffect(() => {
         if (cursorBegin != null && cursorEnd != null) {
             setSelectionStatsProcessing(true);
-            selectionStatsProcessingRef.current = true;
+            selectionStateAbortController.current?.abort();
+            selectionStateAbortController.current = new AbortController();
+            setSelectionStatsProcessingProgress(0);
+            selectionStateAbortController.current.signal.addEventListener(
+                'abort',
+                () => setSelectionStatsProcessing(false)
+            );
             calcStats(
                 (average, max, delta) => {
                     setSelectionStats({ average, max, delta });
                     setSelectionStatsProcessing(false);
-                    selectionStatsProcessingRef.current = false;
                 },
                 cursorBegin,
-                cursorEnd
+                cursorEnd,
+                selectionStateAbortController.current,
+                setSelectionStatsProcessingProgress
             );
         } else {
             setSelectionStats(null);
         }
     }, [cursorBegin, cursorEnd]);
 
-    const updateChart = useCallback(() => {
-        if (!isInitialised(dataProcessor)) {
+    const updateChart = useCallback(async () => {
+        if (
+            !isInitialised(dataProcessor) ||
+            DataManager().getTotalSavedRecords() === 0
+        ) {
             return;
         }
 
-        const processedData = dataProcessor.process(
+        const processedData = await dataProcessor.process(
             begin,
             windowEnd,
             zoomedOutTooFarForDigitalChannels
                 ? []
                 : (digitalChannelsToCompute as number[]),
             Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
-            windowDuration
+            windowDuration,
+            setProcessing
         );
 
         const avgTemp = processedData.averageLine.reduce(
@@ -399,38 +426,50 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             delta: Math.min(windowEnd, DataManager().getTimestamp()) - begin,
         });
     }, [
-        begin,
         dataProcessor,
-        digitalChannelsToCompute,
+        begin,
         windowEnd,
+        zoomedOutTooFarForDigitalChannels,
+        digitalChannelsToCompute,
         windowDuration,
         numberOfPixelsInWindow,
-        zoomedOutTooFarForDigitalChannels,
     ]);
+
+    const [processing, setProcessing] = useState(false);
+
+    useEffect(() => {
+        if (xAxisMax === 0) {
+            setAmpereLineData([]);
+            setBitsLineData([]);
+            setWindowStats(null);
+        }
+    }, [xAxisMax]);
 
     useEffect(() => {
         if (liveMode) {
-            const timeout = setTimeout(() => {
-                updateChart();
-            });
+            if (!DataManager().isInSync()) {
+                return;
+            }
 
-            return () => {
-                clearTimeout(timeout);
-            };
+            nextUpdateRequests = () => updateChart();
+            executeChartUpdateOperation();
         }
-    }, [xAxisMax, liveMode, updateChart, begin, windowEnd]);
+    }, [xAxisMax, liveMode, updateChart, begin, windowEnd, rerenderTrigger]);
+
+    const lastPositions = useRef({
+        begin,
+        windowEnd,
+    });
 
     useEffect(() => {
-        if (!liveMode) {
-            const timeout = setTimeout(() => {
-                updateChart();
-            });
+        if (!liveMode && DataManager().getTotalSavedRecords() > 0) {
+            nextUpdateRequests = () => updateChart();
+            executeChartUpdateOperation();
 
-            return () => {
-                clearTimeout(timeout);
-            };
+            lastPositions.current.begin = begin;
+            lastPositions.current.windowEnd = windowEnd;
         }
-    }, [begin, liveMode, updateChart, windowEnd]);
+    }, [begin, liveMode, updateChart, windowEnd, rerenderTrigger]);
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
@@ -439,11 +478,11 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
             <Button
                 key="clear-selection-btn"
                 variant="secondary"
-                disabled={!chartCursorActive || selectionStatsProcessing}
+                disabled={!chartCursorActive}
                 size="sm"
                 onClick={resetCursor}
             >
-                CLEAR
+                {`${selectionStatsProcessing ? 'CANCEL' : 'CLEAR'}`}
             </Button>,
         ];
 
@@ -498,6 +537,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
                 <AmpereChart
+                    processing={processing}
                     setNumberOfPixelsInWindow={setNumberOfPixelsInWindow}
                     setChartAreaWidth={setChartAreaWidth}
                     numberOfSamplesPerPixel={samplesPerPixel}
@@ -522,6 +562,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                         label="Window"
                     />
                     <StatBox
+                        progress={selectionStatsProcessingProgress}
                         processing={selectionStatsProcessing}
                         {...selectionStats}
                         label="Selection"
@@ -529,7 +570,7 @@ const Chart = ({ digitalChannelsEnabled = false }) => {
                     />
                 </div>
             </div>
-            {hasDigitalChannels && showDigitalChannels && (
+            {digitalChannelsVisible && (
                 <DigitalChannels
                     lineData={bitsLineData}
                     digitalChannels={digitalChannels}

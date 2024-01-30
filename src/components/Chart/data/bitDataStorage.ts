@@ -4,11 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion  -- temporarily added to be conservative while converting to typescript */
-
 import { numberOfDigitalChannels } from '../../../globals';
 import { lineDataForBitState } from '../../../utils/bitConversion';
-import { createEmptyArrayWithDigitalChannelStates } from './commonBitDataFunctions';
 import type {
     BitStateType,
     DigitalChannelStates,
@@ -17,7 +14,6 @@ import type {
 
 export interface BitDataStorage {
     lineData: DigitalChannelStates[];
-    bitIndexes: Array<number>;
     previousBitStates: Array<BitStateType | null>;
     digitalChannelsToCompute: number[] | undefined;
     latestTimestamp: TimestampType;
@@ -39,20 +35,14 @@ export interface BitDataStorage {
 
 export default (): BitDataStorage => ({
     lineData: [...Array(numberOfDigitalChannels)].map(() => ({
-        mainLine: createEmptyArrayWithDigitalChannelStates(),
-        uncertaintyLine: createEmptyArrayWithDigitalChannelStates(),
+        mainLine: [],
+        uncertaintyLine: [],
     })),
-    bitIndexes: new Array(numberOfDigitalChannels),
     previousBitStates: new Array(numberOfDigitalChannels),
     digitalChannelsToCompute: undefined as number[] | undefined,
     latestTimestamp: undefined as TimestampType,
 
     initialise(digitalChannelsToCompute: number[]) {
-        // .fill is slower then a normal for loop when array is large
-        for (let i = 0; i < this.bitIndexes.length; i += 1) {
-            this.bitIndexes[i] = 0;
-        }
-
         for (let i = 0; i < this.previousBitStates.length; i += 1) {
             this.previousBitStates[i] = null;
         }
@@ -63,16 +53,13 @@ export default (): BitDataStorage => ({
 
     storeEntry(timestamp, bitNumber, bitState) {
         const current = this.lineData[bitNumber];
-        const bitIndex = this.bitIndexes[bitNumber];
         const lineData = lineDataForBitState[bitState];
 
-        current.mainLine[bitIndex].x = timestamp;
-        current.mainLine[bitIndex].y = lineData.mainLine;
-
-        current.uncertaintyLine[bitIndex].x = timestamp;
-        current.uncertaintyLine[bitIndex].y = lineData.uncertaintyLine;
-
-        this.bitIndexes[bitNumber] += 1;
+        current.mainLine.push({ x: timestamp, y: lineData.mainLine });
+        current.uncertaintyLine.push({
+            x: timestamp,
+            y: lineData.uncertaintyLine,
+        });
     },
 
     storeBit(timestamp, bitNumber, bitState) {
@@ -89,17 +76,25 @@ export default (): BitDataStorage => ({
     addFinalEntries() {
         if (this.digitalChannelsToCompute) {
             this.digitalChannelsToCompute.forEach(i => {
-                const hasEntry = this.bitIndexes[i] > 0;
-                const lastEntryIsNotForLastTimestamp =
-                    this.latestTimestamp !==
-                    this.lineData[i].mainLine[this.bitIndexes[i] - 1]?.x;
+                const previousBitStates = this.previousBitStates[i];
+                const hasEntry =
+                    this.lineData[i].mainLine.length > 0 &&
+                    this.previousBitStates[i];
 
-                if (hasEntry && lastEntryIsNotForLastTimestamp) {
-                    this.storeEntry(
-                        this.latestTimestamp!,
-                        i,
-                        this.previousBitStates[i]!
-                    );
+                if (hasEntry && previousBitStates) {
+                    const lastEntryIsNotForLastTimestamp =
+                        this.latestTimestamp !==
+                        this.lineData[i].mainLine[
+                            this.lineData[i].mainLine.length - 1
+                        ]?.x;
+
+                    if (lastEntryIsNotForLastTimestamp) {
+                        this.storeEntry(
+                            this.latestTimestamp,
+                            i,
+                            previousBitStates
+                        );
+                    }
                 }
             });
         }
@@ -108,12 +103,6 @@ export default (): BitDataStorage => ({
     getLineData() {
         this.addFinalEntries();
 
-        return this.lineData.map((bitData, i) => ({
-            mainLine: bitData.mainLine.slice(0, this.bitIndexes[i]),
-            uncertaintyLine: bitData.uncertaintyLine.slice(
-                0,
-                this.bitIndexes[i]
-            ),
-        }));
+        return this.lineData;
     },
 });

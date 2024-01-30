@@ -9,9 +9,13 @@ import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
+    Dropdown,
+    DropdownItem,
     Group,
+    NumberInlineInput,
     Slider,
     StartStopButton,
+    Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { unit } from 'mathjs';
 
@@ -21,12 +25,21 @@ import { appState } from '../../slices/appSlice';
 import { isSessionActive, resetChartTime } from '../../slices/chartSlice';
 import {
     dataLoggerState,
-    updateDurationSeconds,
+    setAutoStopSampling,
+    updateDuration,
+    updateDurationUnit,
     updateSampleFreqLog10,
 } from '../../slices/dataLoggerSlice';
-import NumberWithUnit from './NumberWithUnitInput';
+import { convertTimeToSeconds } from '../../utils/duration';
+import { calcFileSize } from '../../utils/fileUtils';
+import { TimeUnit } from '../../utils/persistentStore';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
+
+const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
+    const bytes = sampleFreq * durationSeconds * 6;
+    return calcFileSize(bytes, fmtOpts);
+};
 
 export default () => {
     const dispatch = useDispatch();
@@ -36,20 +49,24 @@ export default () => {
     const {
         sampleFreqLog10,
         sampleFreq,
-        durationSeconds,
+        duration,
+        durationUnit,
+        autoStopSampling,
         maxFreqLog10,
-        range,
     } = useSelector(dataLoggerState);
 
-    const ramSize = sampleFreq * durationSeconds * 4;
-    const period = 1 / sampleFreq;
-    const formattedRamSize = unit(ramSize, 'byte').to('MB').format(fmtOpts);
-    const formattedPeriod = unit(period, 's').format(fmtOpts).replace('.0', '');
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
         .format(fmtOpts)
         .replace('.0', '')}`;
 
     const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
+
+    const uintDropdownItem: DropdownItem<TimeUnit>[] = [
+        { value: 's', label: 'seconds' },
+        { value: 'm', label: 'minutes' },
+        { value: 'h', label: 'hours' },
+        { value: 'd', label: 'days' },
+    ];
 
     return (
         <Group heading="Sampling parameters">
@@ -74,32 +91,74 @@ export default () => {
                     disabled={samplingRunning || sessionActive}
                 />
             </div>
-            <NumberWithUnit
-                label="Sample for"
-                unit={range.name}
-                multiplier={range.multiplier}
-                range={range}
-                value={durationSeconds}
-                onChange={(v: number) =>
-                    dispatch(updateDurationSeconds({ durationSeconds: v }))
-                }
-                onChangeComplete={() => {}}
-                slider
-                disabled={samplingRunning || sessionActive}
-            />
-
-            <div className="small buffer-summary">
-                Estimated RAM required {formattedRamSize}
-                <br />
-                {formattedPeriod} period
-            </div>
+            <Toggle
+                onToggle={v => dispatch(setAutoStopSampling(v))}
+                isToggled={autoStopSampling}
+            >
+                Auto stop sampling
+            </Toggle>
+            {autoStopSampling && (
+                <>
+                    <div className="tw-flex tw-grow tw-items-center">
+                        <span className="tw-w-16">Sample for</span>
+                        <NumberInlineInput
+                            className="tw-w-30"
+                            range={{
+                                min: 1,
+                                max: 9999999,
+                            }}
+                            value={duration}
+                            onChange={(v: number) =>
+                                dispatch(updateDuration(v))
+                            }
+                            onChangeComplete={() => {}}
+                            disabled={samplingRunning || sessionActive}
+                        />
+                        <div className="tw-ml-4 tw-w-20">
+                            <Dropdown
+                                className="tw-w-full"
+                                items={uintDropdownItem}
+                                onSelect={v => {
+                                    dispatch(updateDurationUnit(v.value));
+                                }}
+                                selectedItem={
+                                    uintDropdownItem.find(
+                                        v => v.value === durationUnit
+                                    ) ?? uintDropdownItem[0]
+                                }
+                            />
+                        </div>
+                    </div>
+                    <div className="small buffer-summary">
+                        Estimated disk space required{' '}
+                        {calcFileSizeString(
+                            sampleFreq,
+                            convertTimeToSeconds(duration, durationUnit)
+                        )}
+                    </div>
+                </>
+            )}
+            {!autoStopSampling && (
+                <div className="small buffer-summary">
+                    Estimated disk space required{' '}
+                    {calcFileSizeString(
+                        sampleFreq,
+                        convertTimeToSeconds(1, 'h')
+                    )}
+                    <br />
+                    per hour
+                </div>
+            )}
             <StartStopButton
                 title={startStopTitle}
                 startText="Start"
                 stopText="Stop"
                 onClick={() => {
-                    if (samplingRunning) dispatch(samplingStop());
-                    else dispatch(samplingStart());
+                    if (samplingRunning) {
+                        dispatch(samplingStop());
+                    } else {
+                        dispatch(samplingStart());
+                    }
                 }}
                 showIcon
                 variant="secondary"
@@ -110,8 +169,8 @@ export default () => {
             <Button
                 title={startStopTitle}
                 size="lg"
-                onClick={() => {
-                    DataManager().reset();
+                onClick={async () => {
+                    await DataManager().reset();
                     dispatch(resetChartTime());
                 }}
                 variant="secondary"

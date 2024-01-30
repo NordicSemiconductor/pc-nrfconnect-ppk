@@ -19,11 +19,7 @@ import { dirname, join } from 'path';
 import exportChart from '../../actions/exportChartAction';
 import { timestampToIndex } from '../../globals';
 import { appState, hideExportDialog } from '../../slices/appSlice';
-import {
-    getChartDigitalChannelInfo,
-    getChartXAxisRange,
-    getCursorRange,
-} from '../../slices/chartSlice';
+import { getChartXAxisRange, getCursorRange } from '../../slices/chartSlice';
 import { getLastSaveDir, setLastSaveDir } from '../../utils/persistentStore';
 import ExportSelection from './ExportSelection';
 
@@ -78,7 +74,6 @@ const createFileName = () => {
 
 export default () => {
     const dispatch = useDispatch();
-    const { hasDigitalChannels } = useSelector(getChartDigitalChannelInfo);
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
     const { windowEnd, windowDuration } = useSelector(getChartXAxisRange);
     const { isExportDialogVisible } = useSelector(appState);
@@ -96,7 +91,7 @@ export default () => {
     );
     const [currentToggled, CurrentToggle] = useToggledSetting(true, 'Current');
     const [bitsToggled, BitsToggle] = useToggledSetting(
-        hasDigitalChannels,
+        true,
         'Digital logic pins (single string field)'
     );
     const [bitsSeparatedToggled, BitsSeparatedToggle] = useToggledSetting(
@@ -226,12 +221,8 @@ export default () => {
                         <div className="tw-w-fit">
                             <TimestampToggle />
                             <CurrentToggle />
-                            {hasDigitalChannels && (
-                                <>
-                                    <BitsToggle />
-                                    <BitsSeparatedToggle />
-                                </>
-                            )}
+                            <BitsToggle />
+                            <BitsSeparatedToggle />
                         </div>
                     </div>
 

@@ -28,7 +28,6 @@ export interface ChartState {
     windowDuration: number;
     yMin?: null | number;
     yMax?: null | number;
-    hasDigitalChannels: boolean;
     digitalChannels: booleanTupleOf8;
     digitalChannelsVisible: boolean;
     timestampsVisible: boolean;
@@ -37,6 +36,7 @@ export interface ChartState {
     windowEndLock: null | number;
     showSettings: boolean;
     latestDataTimestamp: number;
+    forceRerender: boolean;
 }
 
 const initialWindowDuration = 10 * microSecondsPerSecond;
@@ -48,7 +48,6 @@ const initialState = (): ChartState => ({
     windowDuration: initialWindowDuration, // [microseconds]
     yMin: null,
     yMax: null,
-    hasDigitalChannels: false,
     digitalChannels: getDigitalChannels(),
     digitalChannelsVisible: getDigitalChannelsVisible(),
     timestampsVisible: getTimestampsVisible(),
@@ -57,6 +56,7 @@ const initialState = (): ChartState => ({
     windowEndLock: null, // [microseconds]
     showSettings: false,
     latestDataTimestamp: 0,
+    forceRerender: false,
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -76,6 +76,9 @@ const chartSlice = createSlice({
         },
         setYMin: (state, action: PayloadAction<{ yMin: number }>) => {
             state.yMin = action.payload.yMin;
+        },
+        triggerForceRerender: state => {
+            state.forceRerender = !state.forceRerender;
         },
         chartCursorAction: (
             state,
@@ -179,12 +182,6 @@ const chartSlice = createSlice({
                 windowEndLock: windowEnd,
             };
         },
-        setChartState: state => {
-            state.hasDigitalChannels = DataManager().hasBits();
-        },
-        updateHasDigitalChannels: state => {
-            state.hasDigitalChannels = DataManager().hasBits();
-        },
         setDigitalChannels(
             state,
             action: PayloadAction<{ digitalChannels: booleanTupleOf8 }>
@@ -284,7 +281,7 @@ export const animationAction =
 export const resetCursor = () =>
     chartCursorAction({ cursorBegin: null, cursorEnd: null });
 
-const scrollToEnd = (): AppThunk<RootState> => (dispatch, getState) =>
+export const scrollToEnd = (): AppThunk<RootState> => (dispatch, getState) =>
     dispatch(
         chartWindowAction(
             Math.max(
@@ -349,7 +346,6 @@ export const getCursorRange = (state: RootState) => ({
 export const getChartDigitalChannelInfo = (state: RootState) => ({
     digitalChannels: state.app.chart.digitalChannels,
     digitalChannelsVisible: state.app.chart.digitalChannelsVisible,
-    hasDigitalChannels: state.app.chart.hasDigitalChannels,
 });
 
 export const isLiveMode = (state: RootState) =>
@@ -359,6 +355,9 @@ export const isTimestampsVisible = (state: RootState) =>
 export const isSessionActive = (state: RootState) =>
     state.app.chart.latestDataTimestamp !== 0;
 
+export const getForceRerender = (state: RootState) =>
+    state.app.chart.forceRerender;
+
 export const {
     setLatestDataTimestamp,
     panWindow,
@@ -367,7 +366,6 @@ export const {
     chartWindow,
     chartWindowLockAction,
     chartWindowUnLockAction,
-    setChartState,
     setDigitalChannels,
     setYMin,
     setYMax,
@@ -375,10 +373,10 @@ export const {
     toggleTimestamps,
     toggleYAxisLock,
     toggleYAxisLog,
-    updateHasDigitalChannels,
     setShowSettings,
     setLiveMode,
     resetChartTime,
+    triggerForceRerender,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;

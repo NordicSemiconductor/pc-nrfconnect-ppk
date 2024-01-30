@@ -19,13 +19,7 @@ import './digital-channels.scss';
 
 export default () => {
     const dispatch = useDispatch();
-    const { digitalChannels, hasDigitalChannels } = useSelector(
-        getChartDigitalChannelInfo
-    );
-
-    if (!hasDigitalChannels) {
-        return null;
-    }
+    const { digitalChannels } = useSelector(getChartDigitalChannelInfo);
 
     const value = digitalChannels.reduce<number[]>((a, v, i) => {
         if (v) a.push(i);

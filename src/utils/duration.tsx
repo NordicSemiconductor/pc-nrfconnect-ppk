@@ -7,6 +7,8 @@
 
 import React, { ReactElement } from 'react';
 
+import { TimeUnit } from './persistentStore';
+
 const toString = (
     value: any,
     unit: any,
@@ -39,11 +41,11 @@ const format = (
     formatter: any
 ): ReactElement<any, any> | string | null => {
     if (Number.isNaN(microseconds)) return null;
-    const usec = Math.floor(microseconds);
+    const usec = Math.trunc(microseconds);
     const u = `${usec % 1000}`;
 
     if (usec < 1000) return formatter(u, '\u00B5s');
-    const t = new Date(Math.floor(usec / 1000));
+    const t = new Date(Math.trunc(usec / 1000));
     const z = `${t.getUTCMilliseconds()}`;
 
     if (usec < 10000) return formatter(`${z}.${u.padStart(3, '0')}`, 'ms');
@@ -72,7 +74,7 @@ const format = (
             'h'
         );
 
-    const d = Math.floor(usec / 86400000000);
+    const d = Math.trunc(usec / 86400000000);
     return formatter(d, 'd', `${h}:${m.padStart(2, '0')}`, 'h');
 };
 
@@ -80,3 +82,16 @@ export const formatDuration = (microseconds: number) =>
     format(microseconds, toString);
 export const formatDurationHTML = (microseconds: number) =>
     format(microseconds, toHTML);
+
+export const convertTimeToSeconds = (time: number, timeUnit: TimeUnit) => {
+    switch (timeUnit) {
+        case 's':
+            return time;
+        case 'm':
+            return time * 60;
+        case 'h':
+            return time * 60 * 60;
+        case 'd':
+            return time * 24 * 60 * 60;
+    }
+};

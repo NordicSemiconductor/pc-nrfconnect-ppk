@@ -21,11 +21,12 @@ import {
     resetMinimap,
 } from '../features/minimap/minimapSlice';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { DataManager, updateTitle } from '../globals';
+import { DataManager, microSecondsPerSecond, updateTitle } from '../globals';
 import { RootState } from '../slices';
 import {
     deviceClosedAction,
     deviceOpenedAction,
+    getSessionRootFolder,
     samplingStartAction,
     samplingStoppedAction,
     setDeviceRunningAction,
@@ -37,36 +38,35 @@ import {
     chartWindowUnLockAction,
     resetChartTime,
     resetCursorAndChart,
-    updateHasDigitalChannels,
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
+import { convertTimeToSeconds } from '../utils/duration';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
 
-export const setupOptions = (): AppThunk<RootState> => (dispatch, getState) => {
-    if (!device) return;
-    try {
-        DataManager().reset();
-        dispatch(resetChartTime());
-        dispatch(resetMinimap());
+export const setupOptions =
+    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
+        if (!device) return;
+        try {
+            await DataManager().reset();
+            dispatch(resetChartTime());
+            dispatch(resetMinimap());
 
-        const { durationSeconds, sampleFreq } = getState().app.dataLogger;
-        DataManager().setSamplingRate(sampleFreq);
-        DataManager().initializeDataBuffer(durationSeconds);
-        DataManager().initializeBitsBuffer(durationSeconds);
-    } catch (err) {
-        logger.error(err);
-    }
-    dispatch(chartWindowUnLockAction());
-    dispatch(updateHasDigitalChannels());
-    dispatch(animationAction());
-};
+            const { sampleFreq } = getState().app.dataLogger;
+            DataManager().setSamplesPerSecond(sampleFreq);
+            DataManager().initialize(getSessionRootFolder(getState()));
+        } catch (err) {
+            logger.error(err);
+        }
+        dispatch(chartWindowUnLockAction());
+        dispatch(animationAction());
+    };
 
 // Only used by Data Logger Pane
 /* Start reading current measurements */
@@ -75,7 +75,7 @@ export const samplingStart =
         usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
         // Prepare global options
-        dispatch(setupOptions());
+        await dispatch(setupOptions());
 
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
@@ -86,6 +86,7 @@ export const samplingStart =
 export const samplingStop =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
         if (!device) return;
+        await DataManager().flush();
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();
@@ -202,13 +203,15 @@ export const open =
                 nbSamples = 0;
             }
 
-            if (
-                DataManager().addData(cappedValue, b16 | prevBits).bitDataAdded
-            ) {
-                prevBits = 0;
-            }
+            DataManager().addData(cappedValue, b16 | prevBits);
+            prevBits = 0;
 
-            if (DataManager().isBufferFull()) {
+            const durationInMicroSeconds =
+                convertTimeToSeconds(
+                    getState().app.dataLogger.duration,
+                    getState().app.dataLogger.durationUnit
+                ) * microSecondsPerSecond;
+            if (durationInMicroSeconds <= DataManager().getTimestamp()) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
                 }
@@ -249,7 +252,7 @@ export const open =
             dispatch(setPowerModeAction({ isSmuMode }));
             if (!isSmuMode) dispatch(setDeviceRunning(true));
 
-            dispatch(setFileLoadedAction({ loaded: false }));
+            dispatch(setFileLoadedAction(false));
 
             logger.info('PPK started');
         } catch (err) {

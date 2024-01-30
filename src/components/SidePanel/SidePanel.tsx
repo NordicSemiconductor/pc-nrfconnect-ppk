@@ -13,6 +13,7 @@ import {
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import MinimapOptions from '../../features/minimap/MinimapOptions';
+import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import {
     advancedMode as advancedModeSelector,
     appState,
@@ -20,13 +21,13 @@ import {
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
-import { BufferSettings } from './BufferSettings';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
+import SessionSettings from './SessionSettings';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
 
@@ -47,45 +48,34 @@ export default () => {
     const { fileLoaded } = useSelector(appState);
     const sessionActive = useSelector(isSessionActive);
 
-    if (fileLoaded) {
-        return (
-            <SidePanel className="side-panel tw-mt-9">
-                <Load />
-                <DisplayOptions />
-                <Save />
-                <MinimapOptions />
-                <DeprecatedDeviceDialog />
-            </SidePanel>
-        );
-    }
-
-    if (!deviceOpen) {
-        return (
-            <SidePanel className="side-panel tw-mt-9">
-                <Load />
-                {sessionActive && <Save />}
-                <Instructions />
-                <DeprecatedDeviceDialog />
-            </SidePanel>
-        );
-    }
-
     return (
         <SidePanel className="side-panel tw-mt-9">
-            <PowerMode />
-            <StartStop />
-            <MinimapOptions />
-            <DisplayOptions />
-            <Save />
-            {advancedMode && (
+            {!deviceOpen && <Load />}
+            {!fileLoaded && !deviceOpen && <Instructions />}
+            {!fileLoaded && deviceOpen && (
                 <>
+                    <PowerMode />
+                    <StartStop />
+                </>
+            )}
+            {(fileLoaded || deviceOpen || sessionActive) && (
+                <>
+                    <DisplayOptions />
+                    <MinimapOptions />
+                    <Save />
+                </>
+            )}
+            {!fileLoaded && deviceOpen && advancedMode && (
+                <>
+                    <SessionSettings />
                     <Gains />
                     <SpikeFilter />
-                    <BufferSettings />
                     <CapVoltageSettings />
                 </>
             )}
+            {!fileLoaded && !deviceOpen && advancedMode && <SessionSettings />}
             <DeprecatedDeviceDialog />
+            <ProgressDialog />
         </SidePanel>
     );
 };

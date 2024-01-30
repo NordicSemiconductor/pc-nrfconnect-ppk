@@ -8,12 +8,9 @@ import { Plugin } from 'chart.js';
 
 import type { MinimapChart } from '../../../features/minimap/Minimap';
 import { DataManager } from '../../../globals';
-import { FoldingBuffer } from './foldingBuffer';
 
 interface MinimapScroll extends Plugin<'line'> {
-    foldingBuffer: FoldingBuffer;
     updateMinimapData: (chart: MinimapChart) => void;
-    onNewData: (value: number, timestamp: number) => void;
     clearMinimap: (chart: MinimapChart) => void;
 }
 
@@ -103,6 +100,7 @@ const pointerDown = (event: PointerEvent) => {
     // eslint-disable-next-line no-bitwise
     if ((event.buttons & 0x01) === 0x01) {
         leftClickPressed = true;
+        chartRef.miniMapScrollInUse?.(true);
         const metaData = getClickMetaData(chartRef, event.offsetX);
         if (metaData) {
             clickOnSlider = metaData.clickedOnSlider;
@@ -125,6 +123,7 @@ const pointerUp = (event: PointerEvent) => {
     // eslint-disable-next-line no-bitwise
     if ((event.buttons & 0x01) === 0x01) {
         leftClickPressed = false;
+        chartRef.miniMapScrollInUse?.(false);
     }
 };
 
@@ -144,13 +143,13 @@ const pointerMove = (event: PointerEvent) => {
         );
         if (center != null) chartRef.windowNavigateCallback?.(center);
     } else {
+        chartRef.miniMapScrollInUse?.(false);
         leftClickPressed = false;
     }
 };
 
 const plugin: MinimapScroll = {
     id: 'minimapScroll',
-    foldingBuffer: new FoldingBuffer(),
 
     beforeInit(chart: MinimapChart) {
         chartRef = chart;
@@ -178,13 +177,6 @@ const plugin: MinimapScroll = {
         // In case data already exist
         this.updateMinimapData(chart);
     },
-    onNewData(value, timestamp) {
-        this.foldingBuffer.addData(value, timestamp);
-        if (!leftClickPressed) {
-            lastSliderTimeStamp = timestamp;
-        }
-    },
-
     beforeDestroy(chart: MinimapChart) {
         const { canvas } = chart.ctx;
         canvas.removeEventListener('pointermove', pointerMove);
@@ -198,7 +190,7 @@ const plugin: MinimapScroll = {
 
     updateMinimapData(chart) {
         if (!leftClickPressed) {
-            const data = this.foldingBuffer.getData();
+            const data = DataManager().getMinimapData();
             /* @ts-expect-error Have not figured out how to handle this */
             chart.data.datasets[0].data = data;
             if (chart.options.scales?.x != null) {
@@ -211,7 +203,6 @@ const plugin: MinimapScroll = {
     },
 
     clearMinimap(chart) {
-        this.foldingBuffer = new FoldingBuffer();
         chart.data.datasets[0].data = [];
         if (chart.options.scales?.x != null) {
             chart.options.scales.x.max = DataManager().getTimestamp();

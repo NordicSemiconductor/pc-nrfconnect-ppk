@@ -1,3 +1,18 @@
+## 4.0.0-beta7 - UNRELEASED
+
+## Changed
+
+-   Changed export format to `.ppk2`. `.ppk` has been deprecated and importing
+    this format will autogenerate a `.ppk2` file next to the `.ppk` file.
+-   Exporting of data now works also when the data was loaded from file. This
+    allows partial export to `.csv`.
+-   Removed limitations for recording duration by using the disk to store the
+    collected data instead of using RAM.
+
+## Fixed
+
+-   Chart drifting when live mode and PC resources where strained.
+
 ## 4.0.0-beta6 - 2024-01-08
 
 ## Fixed

@@ -10,7 +10,7 @@ import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { DataManager, indexToTimestamp } from '../../globals';
+import { DataManager } from '../../globals';
 import {
     getChartXAxisRange,
     getChartYAxisRange,
@@ -18,7 +18,11 @@ import {
     isSessionActive,
     panWindow,
 } from '../../slices/chartSlice';
-import { getXAxisMaxTime, showMinimap as getShowMinimap } from './minimapSlice';
+import {
+    getXAxisMaxTime,
+    setPanningInAction,
+    showMinimap as getShowMinimap,
+} from './minimapSlice';
 
 export interface MinimapOptions extends ChartOptions<'line'> {
     ampereChart?: {
@@ -34,6 +38,7 @@ export interface MinimapOptions extends ChartOptions<'line'> {
 export interface MinimapChart extends Chart<'line'> {
     options: MinimapOptions;
     windowNavigateCallback?: (windowCenter: number) => void;
+    miniMapScrollInUse?: (inUse: boolean) => void;
     updateSlider?: (
         minimapRef: MinimapChart,
         windowEnd: number,
@@ -50,7 +55,6 @@ export interface MinimapChart extends Chart<'line'> {
 
 const Minimap = () => {
     const sessionActive = useSelector(isSessionActive);
-    const lastLoadedTimeStamp = useRef(0);
     const dispatch = useDispatch();
     const showMinimap = useSelector(getShowMinimap);
     const minimapRef = useRef<MinimapChart | null>(null);
@@ -66,6 +70,10 @@ const Minimap = () => {
         dispatch(panWindow(windowCenter));
     }
 
+    function scrollInUse(inUse: boolean) {
+        dispatch(setPanningInAction(inUse));
+    }
+
     minimapRef.current = initializeMinimapChart(
         minimapRef.current,
         canvasRef.current,
@@ -74,6 +82,7 @@ const Minimap = () => {
 
     if (minimapRef.current) {
         minimapRef.current.windowNavigateCallback = windowNavigateCallback;
+        minimapRef.current.miniMapScrollInUse = scrollInUse;
         minimapRef.current.updateSlider = (minimap, end, duration, live) => {
             updateSlider(minimap, minimapSlider.current, end, duration, live);
         };
@@ -124,19 +133,13 @@ const Minimap = () => {
         if (!minimapRef.current) return;
 
         const nonNullRef = minimapRef.current;
-
-        const newData = DataManager().getData(lastLoadedTimeStamp.current);
-
-        newData.current.forEach((v, i) => {
-            minimapScroll.onNewData(
-                v,
-                lastLoadedTimeStamp.current + indexToTimestamp(i)
-            );
+        const timeout = setTimeout(() => {
+            minimapScroll.updateMinimapData(nonNullRef);
         });
 
-        lastLoadedTimeStamp.current = DataManager().getTimestamp();
-
-        minimapScroll.updateMinimapData(nonNullRef);
+        return () => {
+            clearTimeout(timeout);
+        };
     }, [xAxisMax]);
 
     useEffect(() => {
