@@ -28,6 +28,11 @@ jest.mock('../../utils/persistentStore', () => ({
     getDigitalChannelsVisible: () => true,
     getTimestampsVisible: () => false,
     getSpikeFilter: () => ({ samples: 3, alpha: 0.18, alpha5: 0.06 }),
+    getSamplingMode: () => 'Live',
+    getTriggerLevel: () => 1000,
+    getRecordingLength: () => 1000,
+    getAutoExport: () => false,
+    getTriggerType: () => 'Single',
 }));
 
 const getTimestampMock = jest.fn(() => 100);
@@ -39,6 +44,7 @@ jest.mock('../../globals', () => {
         DataManager: () => ({
             ...temp,
             getTimestamp: getTimestampMock,
+            getStartSystemTime: () => 0,
         }),
     };
 });
