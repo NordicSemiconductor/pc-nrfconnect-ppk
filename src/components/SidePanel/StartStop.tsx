@@ -9,13 +9,9 @@ import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
-    Dropdown,
-    DropdownItem,
     Group,
-    NumberInlineInput,
     Slider,
     StartStopButton,
-    Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { unit } from 'mathjs';
 
@@ -25,48 +21,33 @@ import { appState } from '../../slices/appSlice';
 import { isSessionActive, resetChartTime } from '../../slices/chartSlice';
 import {
     dataLoggerState,
-    setAutoStopSampling,
-    updateDuration,
-    updateDurationUnit,
+    getSamplingMode,
     updateSampleFreqLog10,
 } from '../../slices/dataLoggerSlice';
-import { convertTimeToSeconds } from '../../utils/duration';
-import { calcFileSize } from '../../utils/fileUtils';
-import { TimeUnit } from '../../utils/persistentStore';
+import {
+    getAutoExportTrigger,
+    resetTriggerOrigin,
+    setTriggerSavePath,
+} from '../../slices/triggerSlice';
+import { selectDirectoryDialog } from '../../utils/fileUtils';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
-
-const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
-    const bytes = sampleFreq * durationSeconds * 6;
-    return calcFileSize(bytes, fmtOpts);
-};
 
 export default () => {
     const dispatch = useDispatch();
     const sessionActive = useSelector(isSessionActive);
+    const mode = useSelector(getSamplingMode);
+    const autoExport = useSelector(getAutoExportTrigger);
 
     const { samplingRunning } = useSelector(appState);
-    const {
-        sampleFreqLog10,
-        sampleFreq,
-        duration,
-        durationUnit,
-        autoStopSampling,
-        maxFreqLog10,
-    } = useSelector(dataLoggerState);
+    const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
+        useSelector(dataLoggerState);
 
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
         .format(fmtOpts)
         .replace('.0', '')}`;
 
     const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
-
-    const uintDropdownItem: DropdownItem<TimeUnit>[] = [
-        { value: 's', label: 'seconds' },
-        { value: 'm', label: 'minutes' },
-        { value: 'h', label: 'hours' },
-        { value: 'd', label: 'days' },
-    ];
 
     return (
         <Group heading="Sampling parameters">
@@ -91,74 +72,23 @@ export default () => {
                     disabled={samplingRunning || sessionActive}
                 />
             </div>
-            <Toggle
-                onToggle={v => dispatch(setAutoStopSampling(v))}
-                isToggled={autoStopSampling}
-            >
-                Auto stop sampling
-            </Toggle>
-            {autoStopSampling && (
-                <>
-                    <div className="tw-flex tw-grow tw-items-center">
-                        <span className="tw-w-16">Sample for</span>
-                        <NumberInlineInput
-                            className="tw-w-30"
-                            range={{
-                                min: 1,
-                                max: 9999999,
-                            }}
-                            value={duration}
-                            onChange={(v: number) =>
-                                dispatch(updateDuration(v))
-                            }
-                            onChangeComplete={() => {}}
-                            disabled={samplingRunning || sessionActive}
-                        />
-                        <div className="tw-ml-4 tw-w-20">
-                            <Dropdown
-                                className="tw-w-full"
-                                items={uintDropdownItem}
-                                onSelect={v => {
-                                    dispatch(updateDurationUnit(v.value));
-                                }}
-                                selectedItem={
-                                    uintDropdownItem.find(
-                                        v => v.value === durationUnit
-                                    ) ?? uintDropdownItem[0]
-                                }
-                            />
-                        </div>
-                    </div>
-                    <div className="small buffer-summary">
-                        Estimated disk space required{' '}
-                        {calcFileSizeString(
-                            sampleFreq,
-                            convertTimeToSeconds(duration, durationUnit)
-                        )}
-                    </div>
-                </>
-            )}
-            {!autoStopSampling && (
-                <div className="small buffer-summary">
-                    Estimated disk space required{' '}
-                    {calcFileSizeString(
-                        sampleFreq,
-                        convertTimeToSeconds(1, 'h')
-                    )}
-                    <br />
-                    per hour
-                </div>
-            )}
+
             <StartStopButton
                 title={startStopTitle}
                 startText="Start"
                 stopText="Stop"
-                onClick={() => {
+                onClick={async () => {
                     if (samplingRunning) {
                         dispatch(samplingStop());
-                    } else {
-                        dispatch(samplingStart());
+                        return;
                     }
+
+                    if (mode === 'Trigger' && autoExport) {
+                        const filePath = await selectDirectoryDialog();
+                        dispatch(setTriggerSavePath(filePath));
+                    }
+
+                    dispatch(samplingStart());
                 }}
                 showIcon
                 variant="secondary"
@@ -172,6 +102,7 @@ export default () => {
                 onClick={async () => {
                     await DataManager().reset();
                     dispatch(resetChartTime());
+                    dispatch(resetTriggerOrigin());
                 }}
                 variant="secondary"
                 disabled={samplingRunning || !sessionActive}
