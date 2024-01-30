@@ -79,10 +79,13 @@ export const save =
                     message: 'Exporting PPK File',
                 })
             );
+            const session = DataManager().getSessionBuffers();
+
             await saveData(
                 filename,
                 dataToBeSaved,
-                activeSessionFolder,
+                session.fileBuffer,
+                session.foldingBuffer,
                 message => {
                     dispatch(updateProgress({ indeterminate: true, message }));
                 }

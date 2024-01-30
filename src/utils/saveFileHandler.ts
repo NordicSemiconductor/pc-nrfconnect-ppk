@@ -7,14 +7,16 @@
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import archiver from 'archiver';
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { DataManager, GlobalOptions } from '../globals';
+import { GlobalOptions } from '../globals';
 import { ChartState } from '../slices/chartSlice';
 import { DataLoggerState } from '../slices/dataLoggerSlice';
+import { FileBuffer } from './FileBuffer';
 import { calcFileSize } from './fileUtils';
+import { FoldingBuffer } from './foldingBuffer';
 
 export interface SaveData {
     data: Float32Array;
@@ -37,12 +39,20 @@ const CURRENT_VERSION = 2;
 export default async (
     filename: string,
     metadata: PPK2Metadata,
-    sessionFolder: string,
-    onProgress: (message: string) => void
+    fileBuffer: FileBuffer,
+    foldingBuffer: FoldingBuffer,
+    onProgress?: (message: string) => void
 ) => {
     await startPreventSleep();
+    const sessionFolder = fileBuffer.getSessionFolder();
+    if (!fs.existsSync(sessionFolder)) {
+        fs.mkdirSync(sessionFolder);
+    }
     const metaPath = path.join(sessionFolder, 'metadata.json');
-    DataManager().saveMinimap(sessionFolder);
+
+    await fileBuffer.flush();
+    foldingBuffer.saveToFile(sessionFolder);
+
     fs.writeFileSync(
         metaPath,
         JSON.stringify({ ...metadata, formatVersion: CURRENT_VERSION })
@@ -71,7 +81,7 @@ export default async (
     archive.on('data', data => {
         processed += data.length;
 
-        onProgress(
+        onProgress?.(
             `Compressing Data. Compressed file size ${calcFileSize(processed)}`
         );
     });
