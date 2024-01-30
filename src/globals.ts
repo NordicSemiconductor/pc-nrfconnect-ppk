@@ -26,10 +26,8 @@ export interface GlobalOptions {
     /** The number of samples per second */
     samplesPerSecond: number;
     /** @var index: pointer to the index of the last sample in data array */
-    timestamp?: number;
     fileBuffer?: FileBuffer;
     foldingBuffer?: FoldingBuffer;
-    systemInitialTime?: number;
 }
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
@@ -96,9 +94,11 @@ class FileData {
 }
 
 const getTimestamp = () =>
-    !options.timestamp
+    !options.fileBuffer
         ? 0
-        : options.timestamp - getSamplingTime(options.samplesPerSecond);
+        : indexToTimestamp(
+              options.fileBuffer.getSessionInBytes() / frameSize - 1
+          );
 
 export const normalizeTime = (time: number) =>
     indexToTimestamp(timestampToIndex(time));
@@ -153,7 +153,10 @@ export const DataManager = () => ({
     getTimestamp,
     isInSync: () => {
         const actualTimePassed =
-            performance.now() - (options.systemInitialTime ?? 0);
+            performance.now() -
+            (options.writeBuffer?.getFirstWriteTime() ??
+                options.fileBuffer?.getFirstWriteTime() ??
+                0);
         const simulationDelta = getTimestamp() / 1000;
         if (simulationDelta > actualTimePassed) return true;
 
@@ -195,7 +198,6 @@ export const DataManager = () => ({
         options.fileBuffer = undefined;
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
-        options.timestamp = undefined;
     },
     initialize: (sessionRootPath: string) => {
         const sessionPath = path.join(sessionRootPath, v4());
@@ -208,11 +210,7 @@ export const DataManager = () => ({
         );
         options.foldingBuffer = new FoldingBuffer();
     },
-
-    getTotalSavedRecords: () =>
-        options.timestamp ? timestampToIndex(getTimestamp()) + 1 : 0,
-
-    loadData: (timestamp: number, sessionPath: string) => {
+    getTotalSavedRecords: () => timestampToIndex(getTimestamp()) + 1,
         options.fileBuffer = new FileBuffer(
             10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
