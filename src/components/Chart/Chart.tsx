@@ -34,6 +34,7 @@ import {
     useLazyInitializedRef,
 } from '../../hooks/useLazyInitializedRef';
 import { RootState } from '../../slices';
+import { isSamplingRunning } from '../../slices/appSlice';
 import {
     chartCursorAction,
     chartWindowAction,
@@ -46,7 +47,8 @@ import {
     setFPS,
     setLiveMode,
 } from '../../slices/chartSlice';
-import { dataLoggerState } from '../../slices/dataLoggerSlice';
+import { dataLoggerState, getSamplingMode } from '../../slices/dataLoggerSlice';
+import { getProgress } from '../../slices/triggerSlice';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
@@ -96,8 +98,18 @@ const executeChartUpdateOperation = async () => {
 
 const Chart = () => {
     const dispatch = useDispatch();
-    const liveMode = useSelector(isLiveMode);
+    const samplingMode = useSelector(getSamplingMode);
+    const liveMode = useSelector(isLiveMode) && samplingMode === 'Live';
     const rerenderTrigger = useSelector(getForceRerender);
+    const samplingRunning = useSelector(isSamplingRunning);
+    const mode = useSelector(getSamplingMode);
+    const triggerProgress = useSelector(getProgress);
+
+    const waitingForTrigger =
+        samplingRunning &&
+        mode === 'Trigger' &&
+        (DataManager().getTimestamp() === 0 ||
+            !!triggerProgress.progressMessage);
 
     const chartWindow = useCallback(
         (
@@ -446,7 +458,7 @@ const Chart = () => {
     useEffect(() => {
         const now = performance.now();
         const forceRender = now - lastLiveRenderTime.current > 1000; // force 1 FPS
-        if (liveMode) {
+        if (liveMode && samplingMode === 'Live') {
             if (!DataManager().isInSync() && !forceRender) {
                 return;
             }
@@ -475,6 +487,7 @@ const Chart = () => {
         windowEnd,
         rerenderTrigger,
         dispatch,
+        samplingMode,
     ]);
 
     const lastPositions = useRef({
@@ -548,7 +561,14 @@ const Chart = () => {
                 />
                 <TimeSpanTop width={chartAreaWidth + 1} />
                 <AmpereChart
-                    processing={processing}
+                    processing={processing || waitingForTrigger}
+                    processingMessage={
+                        waitingForTrigger
+                            ? triggerProgress.progressMessage ??
+                              'Waiting for trigger'
+                            : undefined
+                    }
+                    processingPercent={triggerProgress.progress}
                     setNumberOfPixelsInWindow={setNumberOfPixelsInWindow}
                     setChartAreaWidth={setChartAreaWidth}
                     numberOfSamplesPerPixel={samplesPerPixel}

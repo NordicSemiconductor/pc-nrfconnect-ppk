@@ -13,15 +13,26 @@ import {
     logger,
     usageData,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
+import { unit } from 'mathjs';
+import path from 'path';
 
+import { resetCache } from '../components/Chart/data/dataAccumulator';
 import SerialDevice from '../device/serialDevice';
 import { SampleValues } from '../device/types';
 import {
     miniMapAnimationAction,
     resetMinimap,
+    triggerForceRerender as triggerForceRerenderMiniMap,
 } from '../features/minimap/minimapSlice';
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { DataManager, microSecondsPerSecond, updateTitle } from '../globals';
+import {
+    DataManager,
+    frameSize,
+    indexToTimestamp,
+    microSecondsPerSecond,
+    updateTitle,
+} from '../globals';
 import { RootState } from '../slices';
 import {
     deviceClosedAction,
@@ -35,17 +46,30 @@ import {
 } from '../slices/appSlice';
 import {
     animationAction,
+    chartWindowAction,
     chartWindowUnLockAction,
     resetChartTime,
     resetCursorAndChart,
+    setLatestDataTimestamp,
+    triggerForceRerender as triggerForceRerenderMainChart,
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
+import {
+    clearProgress,
+    deregisterSaveEvent,
+    registerSaveEvent,
+    resetTriggerOrigin,
+    setProgress,
+    setTriggerActive,
+    setTriggerOrigin,
+} from '../slices/triggerSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
+import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
@@ -60,7 +84,13 @@ export const setupOptions =
 
             const { sampleFreq } = getState().app.dataLogger;
             DataManager().setSamplesPerSecond(sampleFreq);
-            DataManager().initialize(getSessionRootFolder(getState()));
+            if (getState().app.dataLogger.mode === 'Live') {
+                DataManager().initializeLiveSession(
+                    getSessionRootFolder(getState())
+                );
+            } else {
+                DataManager().initializeTriggerSession(60);
+            }
         } catch (err) {
             logger.error(err);
         }
@@ -74,6 +104,8 @@ export const samplingStart =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
         usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
+        dispatch(setTriggerActive(false));
+        dispatch(resetTriggerOrigin());
         // Prepare global options
         await dispatch(setupOptions());
 
@@ -86,7 +118,6 @@ export const samplingStart =
 export const samplingStop =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
         if (!device) return;
-        await DataManager().flush();
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();
@@ -206,6 +237,41 @@ export const open =
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
+            if (getState().app.dataLogger.mode === 'Trigger') {
+                const validTriggerValue =
+                    cappedValue >= getState().app.trigger.level;
+                if (!getState().app.trigger.active && validTriggerValue) {
+                    dispatch(setTriggerActive(true));
+                    dispatch(
+                        processTrigger(cappedValue, (progressMessage, prog) => {
+                            dispatch(
+                                setProgress({
+                                    progressMessage,
+                                    progress:
+                                        prog && prog >= 0 ? prog : undefined,
+                                })
+                            );
+                        })
+                    ).then(() => {
+                        if (!DataManager().hasPendingTriggers()) {
+                            dispatch(clearProgress());
+                        }
+                        if (
+                            samplingRunning &&
+                            getState().app.trigger.type === 'Single'
+                        ) {
+                            dispatch(samplingStop());
+                        }
+                    });
+                } else if (
+                    getState().app.trigger.active &&
+                    !validTriggerValue &&
+                    getState().app.trigger.type === 'Continuous'
+                ) {
+                    dispatch(setTriggerActive(false));
+                }
+            }
+
             const durationInMicroSeconds =
                 convertTimeToSeconds(
                     getState().app.dataLogger.duration,
@@ -284,7 +350,8 @@ export const open =
         updateRequestInterval = setInterval(() => {
             if (
                 renderIndex !== DataManager().getTotalSavedRecords() &&
-                getState().app.app.samplingRunning
+                getState().app.app.samplingRunning &&
+                getState().app.dataLogger.mode === 'Live'
             ) {
                 const timestamp = Date.now();
                 if (getState().app.chart.liveMode) {
@@ -353,5 +420,158 @@ export const setPowerMode =
             await device!.ppkSetPowerMode(false); // set to ampere mode
             dispatch(setPowerModeAction({ isSmuMode: false }));
             await dispatch(setDeviceRunning(true));
+        }
+    };
+
+let latestTrigger: Promise<unknown> | undefined;
+let releaseLastSession: (() => void) | undefined;
+
+export const processTrigger =
+    (
+        triggerValue: number,
+        onProgress?: (message: string, progress?: number) => void
+    ): AppThunk<RootState, Promise<void>> =>
+    async (dispatch, getState) => {
+        if (!DataManager().isInSync()) {
+            logger.debug('skipping trigger out of sync');
+            return;
+        }
+        const trigger = DataManager().addTimeReachedTrigger(
+            getState().app.trigger.recordingLength * 1000 // ms to uS
+        );
+
+        const triggerTime = Date.now();
+        const remainingRecordingLength =
+            getState().app.trigger.recordingLength / 2;
+
+        const updateDataCollection = () => {
+            const delta = Date.now() - triggerTime;
+            onProgress?.(
+                `Triggered with ${unit(triggerValue, 'uA').format({
+                    notation: 'fixed',
+                    precision: 2,
+                })}. Collecting data after trigger.`,
+                Math.min(100, (delta / remainingRecordingLength) * 100)
+            );
+        };
+
+        latestTrigger = trigger;
+        const timeProgressUpdate = setInterval(() => {
+            if (latestTrigger !== trigger) {
+                clearInterval(timeProgressUpdate);
+                return;
+            }
+            updateDataCollection();
+        }, 500);
+
+        trigger.finally(() => {
+            clearInterval(timeProgressUpdate);
+        });
+
+        try {
+            const info = await trigger;
+
+            const numberOfBytes =
+                info.bytesRange.end - info.bytesRange.start + 1;
+            const buffer = Buffer.alloc(numberOfBytes);
+            info.writeBuffer.readFromCachedData(
+                buffer,
+                info.bytesRange.start,
+                info.bytesRange.end - info.bytesRange.start
+            );
+
+            const recordingDuration = indexToTimestamp(
+                numberOfBytes / frameSize
+            );
+            const savePath = getState().app.trigger.savePath;
+            const shouldSave = getState().app.trigger.autoExportTrigger;
+
+            const createSessionData = DataManager().createSessionData;
+            let session:
+                | Awaited<ReturnType<typeof createSessionData>>
+                | undefined;
+            let savePromise: Promise<void> | undefined;
+
+            if (shouldSave && savePath) {
+                // createSession
+                session = await createSessionData(
+                    buffer,
+                    getSessionRootFolder(getState()),
+                    info.absoluteTime
+                );
+
+                const dataToBeSaved: PPK2Metadata = {
+                    metadata: {
+                        samplesPerSecond: DataManager().getSamplesPerSecond(),
+                        startSystemTime: info.absoluteTime,
+                    },
+                };
+
+                dispatch(registerSaveEvent());
+                savePromise = saveData(
+                    path.join(
+                        savePath,
+                        `${info.absoluteTime + info.timeRange.start} - ${
+                            info.absoluteTime + info.timeRange.end
+                        }.ppk2`
+                    ),
+                    dataToBeSaved,
+                    session.fileBuffer,
+                    session.foldingBuffer
+                ).finally(() => {
+                    dispatch(deregisterSaveEvent());
+                });
+            }
+
+            // Only render if this is the latest trigger.
+            if (latestTrigger === trigger) {
+                // createSession
+                if (!session)
+                    session = await createSessionData(
+                        buffer,
+                        getSessionRootFolder(getState()),
+                        info.absoluteTime
+                    );
+
+                dispatch(
+                    setTriggerOrigin(indexToTimestamp(info.triggerOrigin))
+                );
+
+                resetCache();
+                latestTrigger = undefined;
+                // Auto load triggered data
+                await DataManager().loadSession(
+                    session.fileBuffer,
+                    session.foldingBuffer
+                );
+                dispatch(setLatestDataTimestamp(recordingDuration));
+                dispatch(
+                    chartWindowAction(recordingDuration, recordingDuration)
+                );
+                dispatch(triggerForceRerenderMainChart());
+                dispatch(triggerForceRerenderMiniMap());
+                dispatch(miniMapAnimationAction());
+            }
+
+            if (session) {
+                releaseLastSession?.();
+                releaseLastSession = undefined;
+                releaseLastSession = async () => {
+                    try {
+                        await savePromise;
+                    } catch {
+                        // do nothing
+                    }
+
+                    try {
+                        await session?.fileBuffer.close();
+                        session?.fileBuffer.release();
+                    } catch {
+                        // do nothing
+                    }
+                };
+            }
+        } catch (e) {
+            logger.debug(describeError(e));
         }
     };

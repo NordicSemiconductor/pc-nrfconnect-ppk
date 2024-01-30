@@ -22,7 +22,7 @@ import {
     toggleYAxisLock,
     toggleYAxisLog,
 } from '../../slices/chartSlice';
-import { dataLoggerState } from '../../slices/dataLoggerSlice';
+import { dataLoggerState, getSamplingMode } from '../../slices/dataLoggerSlice';
 import { AmpereChartJS } from './AmpereChart';
 import ChartOptions from './ChartOptions';
 
@@ -60,6 +60,7 @@ const ChartTop = ({
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const samplingRunning = useSelector(isSamplingRunning);
     const fps = useSelector(getLiveModeFPS);
+    const mode = useSelector(getSamplingMode);
     const { yMin, yMax } = useSelector(getChartYAxisRange);
     const yAxisLock = yMin != null && yMax != null;
 
@@ -129,11 +130,13 @@ const ChartTop = ({
             </div>
             <div className="tw-order-1 tw-flex tw-flex-row tw-justify-end">
                 <Toggle
-                    label={`${live ? `(${fps} FPS) ` : ''}LIVE VIEW`}
+                    label={`${
+                        live && mode === 'Live' ? `(${fps} FPS) ` : ''
+                    }LIVE VIEW`}
                     onToggle={onLiveModeChange}
-                    isToggled={live}
+                    isToggled={live && mode !== 'Live'}
                     variant="primary"
-                    disabled={!samplingRunning}
+                    disabled={!samplingRunning || mode !== 'Live'}
                 />
             </div>
             <ChartSettingsDialog

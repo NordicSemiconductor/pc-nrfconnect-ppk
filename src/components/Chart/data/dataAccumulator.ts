@@ -481,6 +481,10 @@ const joinBitLines = (
 const compareDigitalChanel = (rhs: number[], lhs: number[]) =>
     lhs.every(v => rhs.findIndex(x => x === v) !== -1);
 
+export const resetCache = () => {
+    cachedResult = undefined;
+};
+
 export type DataAccumulatorInitialiser = () => DataAccumulator;
 export default (): DataAccumulator => ({
     bitStateAccumulator: new Array(numberOfDigitalChannels),
