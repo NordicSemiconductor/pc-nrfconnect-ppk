@@ -206,14 +206,12 @@ export const open =
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
-            if (
+            const durationInMicroSeconds =
                 convertTimeToSeconds(
                     getState().app.dataLogger.duration,
                     getState().app.dataLogger.durationUnit
-                ) *
-                    microSecondsPerSecond <=
-                DataManager().getTimestamp()
-            ) {
+                ) * microSecondsPerSecond;
+            if (durationInMicroSeconds <= DataManager().getTimestamp()) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
                 }
