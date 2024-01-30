@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { dialog, getCurrentWindow } from '@electron/remote';
 import {
     Button,
     CollapsibleGroup,
@@ -17,24 +16,8 @@ import {
     getSessionRootFolder,
     setSessionRootFolder,
 } from '../../slices/appSlice';
+import { selectDirectoryDialog } from '../../utils/fileUtils';
 import { setPreferredSessionLocation } from '../../utils/persistentStore';
-
-const selectDirectoryDialog = () =>
-    new Promise<string>((resolve, reject) => {
-        const dialogOptions = {
-            title: 'Select a Directory',
-            properties: ['openDirectory'],
-            // eslint-disable-next-line no-undef
-        } as Electron.OpenDialogOptions;
-        dialog
-            .showOpenDialog(getCurrentWindow(), dialogOptions)
-            .then(({ filePaths }: { filePaths: string[] }) => {
-                if (filePaths.length === 1) {
-                    resolve(filePaths[0]);
-                }
-            })
-            .catch(reject);
-    });
 
 export default () => {
     const dispatch = useDispatch();

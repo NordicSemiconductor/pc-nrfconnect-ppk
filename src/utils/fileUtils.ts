@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { dialog, getCurrentWindow } from '@electron/remote';
 import { FormatOptions, unit } from 'mathjs';
 
 export const calcFileSize = (
@@ -25,3 +26,20 @@ export const calcFileSize = (
 
     return unit(bytes, 'byte').to('MB').format(formatOptions);
 };
+
+export const selectDirectoryDialog = () =>
+    new Promise<string>((resolve, reject) => {
+        const dialogOptions = {
+            title: 'Select a Directory',
+            properties: ['openDirectory'],
+            // eslint-disable-next-line no-undef
+        } as Electron.OpenDialogOptions;
+        dialog
+            .showOpenDialog(getCurrentWindow(), dialogOptions)
+            .then(({ filePaths }: { filePaths: string[] }) => {
+                if (filePaths.length === 1) {
+                    resolve(filePaths[0]);
+                }
+            })
+            .catch(reject);
+    });
