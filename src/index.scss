@@ -27,3 +27,7 @@
 .modal {
     background-color: #00000080;
 }
+
+.scroll-bar-white-bg {
+    @include scrollbars($white);
+}

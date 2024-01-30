@@ -3,11 +3,10 @@
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
-
-@import './../chart.icss.scss';
+@import '~@nordicsemiconductor/pc-nrfconnect-shared/styles';
 
 .timespan {
-    margin-left: $yAxisWidthPx;
+    margin-left: 64px;
     height: 1rem;
     position: relative;
 

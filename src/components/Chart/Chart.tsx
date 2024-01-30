@@ -11,7 +11,6 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import Button from 'react-bootstrap/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppThunk, useHotKey } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import {
@@ -44,6 +43,7 @@ import {
     getForceRerender,
     isLiveMode,
     MAX_WINDOW_DURATION,
+    setFPS,
     setLiveMode,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
@@ -56,8 +56,6 @@ import DigitalChannels from './DigitalChannels';
 import StatBox from './StatBox';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
-
-import chartCss from './chart.icss.scss';
 
 // chart.js way of doing tree-shaking, meaning that components that will be included in the bundle
 // must be imported and registered. The registered components are used in both AmpChart and DigitalChannels.
@@ -95,10 +93,6 @@ const executeChartUpdateOperation = async () => {
     chartUpdateInprogress = false;
     executeChartUpdateOperation();
 };
-
-const { rightMarginPx } = chartCss;
-
-const rightMargin = parseInt(rightMarginPx, 10);
 
 const Chart = () => {
     const dispatch = useDispatch();
@@ -445,16 +439,43 @@ const Chart = () => {
         }
     }, [xAxisMax]);
 
+    const lastLiveRenderTime = useRef<number>(0);
+    const lastFPSUpdate = useRef<number>(performance.now());
+    const fpsCounter = useRef<number>(0);
+
     useEffect(() => {
+        const now = performance.now();
+        const forceRender = now - lastLiveRenderTime.current > 1000; // force 1 FPS
         if (liveMode) {
-            if (!DataManager().isInSync()) {
+            if (!DataManager().isInSync() && !forceRender) {
                 return;
             }
 
-            nextUpdateRequests = () => updateChart();
+            lastLiveRenderTime.current = now;
+
+            nextUpdateRequests = () => {
+                fpsCounter.current += 1;
+                return updateChart();
+            };
             executeChartUpdateOperation();
+
+            const updateFPSValue = now - lastFPSUpdate.current > 1000;
+
+            if (updateFPSValue) {
+                dispatch(setFPS(fpsCounter.current));
+                fpsCounter.current = 0;
+                lastFPSUpdate.current = now;
+            }
         }
-    }, [xAxisMax, liveMode, updateChart, begin, windowEnd, rerenderTrigger]);
+    }, [
+        xAxisMax,
+        liveMode,
+        updateChart,
+        begin,
+        windowEnd,
+        rerenderTrigger,
+        dispatch,
+    ]);
 
     const lastPositions = useRef({
         begin,
@@ -473,59 +494,49 @@ const Chart = () => {
 
     const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
 
-    const selectionButtons = () => {
-        const buttons = [
-            <Button
-                key="clear-selection-btn"
-                variant="secondary"
-                disabled={!chartCursorActive}
-                size="sm"
-                onClick={resetCursor}
-            >
-                {`${selectionStatsProcessing ? 'CANCEL' : 'CLEAR'}`}
-            </Button>,
-        ];
-
-        buttons.push(
-            <Button
-                key="select-all-btn"
-                variant="secondary"
-                disabled={
-                    DataManager().getTotalSavedRecords() <= 0 ||
-                    selectionStatsProcessing
+    const selectionButtons = [
+        <button
+            type="button"
+            className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
+            key="clear-selection-btn"
+            disabled={!chartCursorActive}
+            onClick={resetCursor}
+        >
+            CLEAR
+        </button>,
+        <button
+            type="button"
+            className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
+            key="select-all-btn"
+            disabled={
+                DataManager().getTotalSavedRecords() <= 0 ||
+                selectionStatsProcessing
+            }
+            onClick={() => chartCursor(0, DataManager().getTimestamp())}
+        >
+            SELECT ALL
+        </button>,
+        <button
+            type="button"
+            className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
+            key="zoom-to-selection-btn"
+            disabled={
+                cursorBegin == null ||
+                cursorEnd == null ||
+                selectionStatsProcessing
+            }
+            onClick={() => {
+                if (cursorBegin != null && cursorEnd != null) {
+                    chartWindow(cursorBegin, cursorEnd);
                 }
-                size="sm"
-                onClick={() => chartCursor(0, DataManager().getTimestamp())}
-            >
-                SELECT ALL
-            </Button>
-        );
-        buttons.push(
-            <Button
-                key="zoom-to-selection-btn"
-                variant="secondary"
-                size="sm"
-                disabled={
-                    cursorBegin == null ||
-                    cursorEnd == null ||
-                    selectionStatsProcessing
-                }
-                onClick={() => {
-                    if (cursorBegin != null && cursorEnd != null) {
-                        chartWindow(cursorBegin, cursorEnd);
-                    }
-                }}
-            >
-                ZOOM TO SELECTION
-            </Button>
-        );
-
-        return buttons;
-    };
-
+            }}
+        >
+            ZOOM TO SELECTION
+        </button>,
+    ];
     return (
-        <div className="chart-outer">
-            <div className="chart-current">
+        <div className="tw-relative tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-between tw-gap-4 tw-text-gray-600">
+            <div className="scroll-bar-white-bg tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-bg-white tw-p-2">
                 <ChartTop
                     onLiveModeChange={isLive => {
                         dispatch(setLiveMode(isLive));
@@ -550,11 +561,10 @@ const Chart = () => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                <Minimap />
-                <div
-                    className="chart-bottom"
-                    style={{ paddingRight: `${rightMargin}px` }}
-                >
+                <div>
+                    <Minimap />
+                </div>
+                <div className="tw-ml-16 tw-flex tw-flex-grow tw-flex-wrap tw-gap-2 tw-pr-8 tw-pt-0.5">
                     <StatBox
                         average={windowStats?.average ? windowStats.average : 0}
                         max={windowStats?.max ? windowStats.max : 0}
@@ -566,7 +576,7 @@ const Chart = () => {
                         processing={selectionStatsProcessing}
                         {...selectionStats}
                         label="Selection"
-                        actionButtons={selectionButtons()}
+                        actionButtons={selectionButtons}
                     />
                 </div>
             </div>

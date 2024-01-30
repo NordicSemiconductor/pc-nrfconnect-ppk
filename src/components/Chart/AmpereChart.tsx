@@ -33,12 +33,8 @@ import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin, { DragSelect } from './plugins/chart.dragSelect';
 import zoomPanPlugin, { ZoomPan } from './plugins/chart.zoomPan';
 
-import chartCss from './chart.icss.scss';
-
-const { rightMarginPx, yAxisWidthPx } = chartCss;
-
-const yAxisWidth = parseInt(yAxisWidthPx, 10);
-const rightMargin = parseInt(rightMarginPx, 10);
+const yAxisWidth = 64;
+const rightMargin = 32;
 const dataColor = colors.nordicBlue;
 
 interface Cursor {
@@ -224,7 +220,7 @@ export default ({
     ];
 
     return (
-        <div className="chart-container">
+        <div className="tw-relative tw-flex tw-h-full tw-min-h-[100px] tw-flex-grow">
             {processing && (
                 <div
                     className={classNames(
@@ -232,7 +228,7 @@ export default ({
                         timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]'
                     )}
                 >
-                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-300 tw-bg-opacity-20 tw-px-[70px]">
+                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-300 tw-bg-opacity-20 tw-px-16">
                         <Spinner
                             size="lg"
                             className=" tw-text-nordicBlue-900"

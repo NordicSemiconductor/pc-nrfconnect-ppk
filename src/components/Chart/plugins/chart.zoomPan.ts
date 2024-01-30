@@ -254,6 +254,9 @@ const processWheelEvents = () => {
         const dy = fy * deltaY;
         const newBeginX = Math.max(0, xMin + dx);
         let newEndX = Math.max(0, xMax + dx);
+
+        if (newEndX >= DataManager().getTimestamp() || newBeginX <= 0) return;
+
         if (newBeginX === 0) newEndX = xMax;
         const newBeginY = Math.max(0, yMin + dy);
         let newEndY = Math.max(0, yMax + dy);

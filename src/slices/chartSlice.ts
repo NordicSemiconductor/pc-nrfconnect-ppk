@@ -22,6 +22,7 @@ import { getSampleFrequency } from './dataLoggerSlice';
 
 export interface ChartState {
     liveMode: boolean;
+    fps: number;
     cursorBegin?: null | number;
     cursorEnd?: null | number;
     windowEnd: number;
@@ -42,6 +43,7 @@ export interface ChartState {
 const initialWindowDuration = 10 * microSecondsPerSecond;
 const initialState = (): ChartState => ({
     liveMode: true,
+    fps: 30,
     cursorBegin: null, // [microseconds]
     cursorEnd: null, // [microseconds]
     windowEnd: initialWindowDuration, // [microseconds]
@@ -233,6 +235,9 @@ const chartSlice = createSlice({
         setLiveMode: (state, action: PayloadAction<boolean>) => {
             state.liveMode = action.payload;
         },
+        setFPS: (state, action: PayloadAction<number>) => {
+            state.fps = action.payload;
+        },
     },
 });
 
@@ -350,6 +355,7 @@ export const getChartDigitalChannelInfo = (state: RootState) => ({
 
 export const isLiveMode = (state: RootState) =>
     state.app.chart.liveMode && state.app.app.samplingRunning;
+export const getLiveModeFPS = (state: RootState) => state.app.chart.fps;
 export const isTimestampsVisible = (state: RootState) =>
     state.app.chart.timestampsVisible;
 export const isSessionActive = (state: RootState) =>
@@ -375,6 +381,7 @@ export const {
     toggleYAxisLog,
     setShowSettings,
     setLiveMode,
+    setFPS,
     resetChartTime,
     triggerForceRerender,
 } = chartSlice.actions;
