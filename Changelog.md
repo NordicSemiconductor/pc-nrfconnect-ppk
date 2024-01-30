@@ -2,13 +2,12 @@
 
 ## Changed
 
--   Removed recording duration limitations by using the disk to keep the
-    collected data instead of RAM
--   Export format is now '.ppk2'
--   '.ppk' is deprecated and importing this format will auto generate the
-    '.ppk2' next to that same file
--   Allow exporting of data even when data was loaded from file (hence allowing
-    partial export to .csv)
+-   Changed export format to `.ppk2`. `.ppk` has been deprecated and importing
+    this format will autogenerate a `.ppk2` file next to the `.ppk` file.
+-   Exporting of data now works also when the data was loaded from file. This
+    allows partial export to `.csv`.
+-   Removed limitations for recording duration by using the disk to store the
+    collected data instead of using RAM.
 
 ## Fixed
 
