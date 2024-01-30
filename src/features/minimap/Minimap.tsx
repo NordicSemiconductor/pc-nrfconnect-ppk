@@ -10,7 +10,7 @@ import { classNames, colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { Chart, ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
-import { DataManager } from '../../globals';
+import { DataManager, indexToTimestamp } from '../../globals';
 import {
     getChartXAxisRange,
     getChartYAxisRange,
@@ -19,6 +19,7 @@ import {
     panWindow,
 } from '../../slices/chartSlice';
 import {
+    getForceRerender,
     getXAxisMaxTime,
     setPanningInAction,
     showMinimap as getShowMinimap,
@@ -64,7 +65,9 @@ const Minimap = () => {
     const liveMode = useSelector(isLiveMode);
     const xAxisMax = useSelector(getXAxisMaxTime);
     const { yAxisLog } = useSelector(getChartYAxisRange);
-    const isWindowDurationFull = DataManager().getTimestamp() > windowDuration;
+    const isWindowDurationFull =
+        DataManager().getTimestamp() + indexToTimestamp(1) >= windowDuration;
+    const forceRerender = useSelector(getForceRerender);
 
     function windowNavigateCallback(windowCenter: number) {
         dispatch(panWindow(windowCenter));
@@ -140,7 +143,7 @@ const Minimap = () => {
         return () => {
             clearTimeout(timeout);
         };
-    }, [xAxisMax]);
+    }, [xAxisMax, forceRerender]);
 
     useEffect(() => {
         if (!minimapRef.current) return;

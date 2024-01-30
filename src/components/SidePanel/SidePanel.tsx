@@ -27,6 +27,7 @@ import Gains from './Gains';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
+import SamplingModeSettings from './SamplingModeSettings';
 import SessionSettings from './SessionSettings';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
@@ -55,6 +56,7 @@ export default () => {
             {!fileLoaded && deviceOpen && (
                 <>
                     <PowerMode />
+                    <SamplingModeSettings />
                     <StartStop />
                 </>
             )}

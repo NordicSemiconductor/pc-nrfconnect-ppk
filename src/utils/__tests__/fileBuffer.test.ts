@@ -83,12 +83,14 @@ describe('WriteBuffer', () => {
         fileBuffer = new FileBuffer(pageBufferSize, sessionFolder, 3, 3);
     });
 
-    test('creates new folder for the session', () => {
+    test('creates new folder for the session when data needs to be written', () => {
+        fileBuffer.append(Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
         expect(fs.mkdirSync).toBeCalledTimes(1);
         expect(fs.mkdirSync).toBeCalledWith(sessionFolder);
     });
 
-    test('creates new session .raw file', () => {
+    test('creates new session .raw file when data needs to be written', () => {
+        fileBuffer.append(Buffer.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
         expect(fs.openSync).toBeCalledTimes(1);
         expect(fs.openSync).toBeCalledWith(
             path.join(sessionFolder, 'session.raw'),

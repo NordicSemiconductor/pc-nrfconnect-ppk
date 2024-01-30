@@ -10,6 +10,7 @@ import { v4 } from 'uuid';
 
 import { FileBuffer } from './utils/FileBuffer';
 import { FoldingBuffer } from './utils/foldingBuffer';
+import { fullOverlap, Range, WriteBuffer } from './utils/WriteBuffer';
 
 export const currentFrameSize = 4;
 export const bitFrameSize = 2; // 6 bytes, 4 current 2 buts
@@ -26,13 +27,21 @@ export interface GlobalOptions {
     /** The number of samples per second */
     samplesPerSecond: number;
     /** @var index: pointer to the index of the last sample in data array */
-    timestamp?: number;
     fileBuffer?: FileBuffer;
+    writeBuffer?: WriteBuffer;
     foldingBuffer?: FoldingBuffer;
-    systemInitialTime?: number;
+    timeReachedTriggers: {
+        timeRange: Range;
+        bytesRange: Range;
+        triggerOrigin: number;
+        onSuccess: (writeBuffer: WriteBuffer, absoluteTime: number) => void;
+        onFail: (error: Error) => void;
+    }[];
 }
+
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
+    timeReachedTriggers: [],
 };
 
 class FileData {
@@ -96,9 +105,11 @@ class FileData {
 }
 
 const getTimestamp = () =>
-    !options.timestamp
+    !options.fileBuffer
         ? 0
-        : options.timestamp - getSamplingTime(options.samplesPerSecond);
+        : indexToTimestamp(
+              options.fileBuffer.getSessionInBytes() / frameSize - 1
+          );
 
 export const normalizeTime = (time: number) =>
     indexToTimestamp(timestampToIndex(time));
@@ -153,7 +164,10 @@ export const DataManager = () => ({
     getTimestamp,
     isInSync: () => {
         const actualTimePassed =
-            performance.now() - (options.systemInitialTime ?? 0);
+            performance.now() -
+            (options.writeBuffer?.getFirstWriteTime() ??
+                options.fileBuffer?.getFirstWriteTime() ??
+                0);
         const simulationDelta = getTimestamp() / 1000;
         if (simulationDelta > actualTimePassed) return true;
 
@@ -166,67 +180,210 @@ export const DataManager = () => ({
         }
         return true;
     },
+    getStartSystemTime: () => options.fileBuffer?.getFirstWriteTime(),
+
     addData: (current: number, bits: number) => {
-        if (options.fileBuffer === undefined) return;
+        if (
+            options.fileBuffer === undefined &&
+            options.writeBuffer === undefined
+        )
+            return;
 
         const view = new DataView(tempBuffer.buffer);
         view.setFloat32(0, current, true);
         view.setUint16(4, bits);
 
-        options.fileBuffer.append(tempBuffer);
-
-        options.timestamp =
-            options.timestamp === undefined
-                ? 0
-                : options.timestamp + getSamplingTime(options.samplesPerSecond);
-
-        if (options.timestamp === 0) {
-            options.systemInitialTime = performance.now();
+        if (options.writeBuffer) {
+            options.writeBuffer.append(tempBuffer);
+        } else {
+            options.fileBuffer?.append(tempBuffer);
+            options.foldingBuffer?.addData(current, getTimestamp());
         }
 
-        options.foldingBuffer?.addData(current, options.timestamp);
+        const writeBuffer = options.writeBuffer;
+        if (writeBuffer) {
+            const timestamp = indexToTimestamp(
+                writeBuffer.getBytesWritten() / frameSize - 1
+            );
+            const readyTriggers = options.timeReachedTriggers.filter(
+                trigger => trigger.timeRange.end <= timestamp
+            );
+            readyTriggers.forEach(trigger => {
+                const bufferedRangeBytes = writeBuffer.getBufferRange();
+
+                if (fullOverlap(bufferedRangeBytes, trigger.bytesRange)) {
+                    trigger.onSuccess(
+                        writeBuffer,
+                        (writeBuffer.getFirstWriteTime() ?? 0) +
+                            trigger.timeRange.start / 1000 // micro to milli
+                    );
+                } else {
+                    trigger.onFail(
+                        new Error(
+                            'Buffer is too small, missing data from range'
+                        )
+                    );
+                }
+            });
+
+            options.timeReachedTriggers = options.timeReachedTriggers.filter(
+                trigger => trigger.timeRange.end > timestamp
+            );
+        }
     },
     flush: () => options.fileBuffer?.flush(),
     reset: async () => {
+        options.timeReachedTriggers.forEach(trigger => {
+            trigger.onFail(new Error('Trigger Aborted'));
+        });
+        options.timeReachedTriggers = [];
         await options.fileBuffer?.close();
         options.fileBuffer?.release();
         options.fileBuffer = undefined;
+        options.writeBuffer = undefined;
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
-        options.timestamp = undefined;
     },
-    initialize: (sessionRootPath: string) => {
+    initializeLiveSession: (sessionRootPath: string) => {
         const sessionPath = path.join(sessionRootPath, v4());
 
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
+            10 * 100_000 * frameSize, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
             14,
             30
         );
         options.foldingBuffer = new FoldingBuffer();
     },
+    initializeTriggerSession: (timeToRecordSeconds: number) => {
+        options.writeBuffer = new WriteBuffer(
+            timeToRecordSeconds * getSamplesPerSecond() * frameSize
+        );
+    },
+    createSessionData: async (
+        buffer: Uint8Array,
+        sessionRootPath: string,
+        startSystemTime: number,
+        onProgress?: (message: string, progress?: number) => void
+    ) => {
+        const sessionPath = path.join(sessionRootPath, v4());
 
-    getTotalSavedRecords: () =>
-        options.timestamp ? timestampToIndex(getTimestamp()) + 1 : 0,
+        const fileBuffer = new FileBuffer(
+            10 * 100_000 * frameSize, // 6 bytes per sample for and 10sec buffers at highest sampling rate
+            sessionPath,
+            2,
+            30,
+            startSystemTime
+        );
+        const foldingBuffer = new FoldingBuffer();
 
-    loadData: (timestamp: number, sessionPath: string) => {
+        const fileData = new FileData(buffer, buffer.length);
+
+        onProgress?.('Preparing Session');
+        await fileBuffer.append(buffer);
+
+        onProgress?.('Preparing Minimap', 0);
+        let progress = 0;
+        for (let i = 0; i < fileData.getLength(); i += 1) {
+            const newProgress = Math.trunc((i / fileData.getLength()) * 100);
+            if (newProgress !== progress) {
+                onProgress?.('Preparing Minimap', newProgress);
+                progress = newProgress;
+            }
+
+            foldingBuffer.addData(
+                fileData.getCurrentData(i),
+                i * getSamplingTime(options.samplesPerSecond)
+            );
+        }
+
+        return { fileBuffer, foldingBuffer };
+    },
+
+    getTotalSavedRecords: () => timestampToIndex(getTimestamp()) + 1,
+
+    loadData: (sessionPath: string, startSystemTime?: number) => {
         options.fileBuffer = new FileBuffer(
             10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
-            14,
-            30
+            2,
+            30,
+            startSystemTime
         );
         options.foldingBuffer = new FoldingBuffer();
         options.foldingBuffer.loadFromFile(sessionPath);
-        options.timestamp = timestamp;
+    },
+    loadSession: (fileBuffer: FileBuffer, foldingBuffer: FoldingBuffer) => {
+        options.fileBuffer = fileBuffer;
+        options.foldingBuffer = foldingBuffer;
     },
     getNumberOfSamplesInWindow: (windowDuration: number) =>
         timestampToIndex(windowDuration),
     getMinimapData: () => options.foldingBuffer?.getData() ?? [],
-    saveMinimap: (sessionPath: string) => {
-        options.foldingBuffer?.saveToFile(sessionPath);
+    getSessionBuffers: () => {
+        if (!options.fileBuffer || !options.foldingBuffer) {
+            throw new Error('One or buffer was missing ');
+        }
+
+        return {
+            fileBuffer: options.fileBuffer,
+            foldingBuffer: options.foldingBuffer,
+        };
     },
+    addTimeReachedTrigger: (recordingLengthMicroSeconds: number) =>
+        new Promise<{
+            writeBuffer: WriteBuffer;
+            timeRange: Range;
+            bytesRange: Range;
+            absoluteTime: number;
+            triggerOrigin: number;
+        }>((resolve, reject) => {
+            if (!options.writeBuffer) {
+                reject(new Error('No write buffer initialized'));
+                return;
+            }
+
+            const currentIndex =
+                options.writeBuffer.getBytesWritten() / frameSize - 1;
+            const timestamp = indexToTimestamp(currentIndex);
+
+            const splitRecordingLengthMicroSeconds =
+                recordingLengthMicroSeconds / 2;
+            const timeRange = {
+                start: Math.max(
+                    0,
+                    timestamp - splitRecordingLengthMicroSeconds
+                ),
+                end:
+                    timestamp +
+                    splitRecordingLengthMicroSeconds -
+                    indexToTimestamp(1), // we must exclude current sample the one that triggered all this
+            };
+
+            const bytesRange = {
+                start: timestampToIndex(timeRange.start) * frameSize,
+                end: (timestampToIndex(timeRange.end) + 1) * frameSize - 1,
+            };
+
+            const triggerOrigin =
+                currentIndex - timestampToIndex(timeRange.start);
+
+            options.timeReachedTriggers.push({
+                timeRange,
+                bytesRange,
+                triggerOrigin,
+                onSuccess: (writeBuffer, absoluteTime) =>
+                    resolve({
+                        writeBuffer,
+                        timeRange, // with respect to the write buffer
+                        bytesRange,
+                        absoluteTime,
+                        triggerOrigin,
+                    }),
+                onFail: (error: Error) => reject(error),
+            });
+        }),
+    hasPendingTriggers: () => options.timeReachedTriggers.length > 0,
 });
 
 /**

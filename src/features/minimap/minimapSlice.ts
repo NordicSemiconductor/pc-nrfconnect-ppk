@@ -14,12 +14,14 @@ interface MinimapState {
     showMinimap: boolean;
     xAxisMaxTime: number;
     panningInAction: boolean;
+    triggerForceRerender: boolean;
 }
 
 const initialState: MinimapState = {
     showMinimap: true,
     xAxisMaxTime: 0,
     panningInAction: false,
+    triggerForceRerender: false,
 };
 
 const minimapSlice = createSlice({
@@ -41,6 +43,9 @@ const minimapSlice = createSlice({
         ) => {
             state.panningInAction = inAction;
         },
+        triggerForceRerender: state => {
+            state.triggerForceRerender = !state.triggerForceRerender;
+        },
     },
 });
 
@@ -51,6 +56,8 @@ export const setShowMinimapAction =
     };
 
 export const showMinimap = (state: RootState) => state.app.minimap.showMinimap;
+export const getForceRerender = (state: RootState) =>
+    state.app.minimap.triggerForceRerender;
 export const isPanningInAction = (state: RootState) =>
     state.app.minimap.panningInAction;
 export const getXAxisMaxTime = (state: RootState) =>
@@ -60,5 +67,6 @@ export const {
     miniMapAnimationAction,
     resetMinimap,
     setPanningInAction,
+    triggerForceRerender,
 } = minimapSlice.actions;
 export default minimapSlice.reducer;

@@ -10,7 +10,7 @@ import type {
     ChartJSOrUndefined,
     ForwardedRef,
 } from 'react-chartjs-2/dist/types';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     classNames,
     colors,
@@ -19,6 +19,7 @@ import {
 import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 
+import { DataManager } from '../../globals';
 import { isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
@@ -26,11 +27,20 @@ import {
     getWindowDuration,
     isLiveMode,
     isTimestampsVisible,
+    showSystemTime,
 } from '../../slices/chartSlice';
+import { getSamplingMode } from '../../slices/dataLoggerSlice';
+import {
+    getTriggerOrigin,
+    getTriggerValue,
+    setTriggerLevel,
+} from '../../slices/triggerSlice';
 import { type CursorData } from './Chart';
 import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
 import dragSelectPlugin, { DragSelect } from './plugins/chart.dragSelect';
+import triggerLevelPlugin from './plugins/chart.triggerLevel';
+import triggerOriginPlugin from './plugins/chart.triggerOrigin';
 import zoomPanPlugin, { ZoomPan } from './plugins/chart.zoomPan';
 
 const yAxisWidth = 64;
@@ -50,6 +60,10 @@ export interface AmpereChartOptions extends ChartOptions<'line'> {
     windowDuration: number;
     cursor: Cursor;
     id?: string;
+    triggerHandleVisible: boolean;
+    triggerOrigin?: number;
+    updateTriggerLevel: (level: number) => void;
+    triggerLevel?: null | number;
 }
 
 interface AmpereChartConfigurations extends ChartConfiguration<'line'> {
@@ -73,6 +87,8 @@ interface AmpereChartProperties {
     cursorData: CursorData;
     lineData: AmpereState[];
     processing: boolean;
+    processingMessage?: string;
+    processingPercent?: number;
 }
 
 const formatCurrent = (nA: number) =>
@@ -82,8 +98,30 @@ const formatCurrent = (nA: number) =>
               .replace('u', '\u00B5')
         : (undefined as never);
 
-const timestampToLabel = (usecs: number) => {
+const padL = (nr: number, len = 2, chr = `0`) => `${nr}`.padStart(len, chr);
+
+const timestampToLabel = (usecs: number, systemTime?: number) => {
     const microseconds = Math.abs(usecs);
+
+    if (systemTime != null) {
+        const milliSeconds = Math.trunc(microseconds / 1000);
+        const time = new Date(milliSeconds + systemTime);
+        const subsecond =
+            Number(
+                ((microseconds + time.getMilliseconds() * 1000) / 1e3) % 1e3
+            ) ?? 0;
+
+        return [
+            `${time.getFullYear()}-${padL(time.getMonth() + 1)}-${padL(
+                time.getDate()
+            )} ${padL(time.getHours())}:${padL(time.getMinutes())}:${padL(
+                time.getSeconds()
+            )}`,
+            `${subsecond.toFixed(3)}`.padStart(7, '0'),
+        ];
+    }
+
+    const subsecond = Number((microseconds / 1e3) % 1e3) ?? 0;
     const sign = usecs < 0 ? '-' : '';
 
     const date = new Date(microseconds / 1e3);
@@ -93,11 +131,8 @@ const timestampToLabel = (usecs: number) => {
     const s = date.getUTCSeconds().toString().padStart(2, '0');
 
     const time = `${sign}${h}:${m}:${s}`;
-    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
-        3
-    )}`.padStart(7, '0');
 
-    return [time, subsecond];
+    return [time, `${subsecond.toFixed(3)}`.padStart(7, '0')];
 };
 
 export default ({
@@ -108,6 +143,8 @@ export default ({
     cursorData: { begin, end },
     lineData,
     processing,
+    processingMessage,
+    processingPercent,
 }: AmpereChartProperties) => {
     const liveMode = useSelector(isLiveMode);
     const { yMin, yMax, yAxisLog } = useSelector(getChartYAxisRange);
@@ -115,6 +152,10 @@ export default ({
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
     const windowDuration = useSelector(getWindowDuration);
     const samplingRunning = useSelector(isSamplingRunning);
+    const systemTime = useSelector(showSystemTime);
+    const samplingMode = useSelector(getSamplingMode);
+    const triggerLevel = useSelector(getTriggerValue);
+    const triggerOrigin = useSelector(getTriggerOrigin);
 
     const live = liveMode && samplingRunning;
     const snapping = numberOfSamplesPerPixel <= 0.16 && !live;
@@ -155,7 +196,12 @@ export default ({
                     display: timestampsVisible,
                     autoSkipPadding: 25,
                     callback: value =>
-                        timestampToLabel(Number.parseInt(value.toString(), 10)),
+                        timestampToLabel(
+                            Number.parseInt(value.toString(), 10),
+                            systemTime
+                                ? DataManager().getStartSystemTime()
+                                : undefined
+                        ),
                     maxTicksLimit: 7,
                 },
                 border: {
@@ -200,11 +246,22 @@ export default ({
         windowDuration,
         cursor: { cursorBegin, cursorEnd },
         id: 'ampereChart',
+        triggerHandleVisible: samplingMode === 'Trigger',
+        updateTriggerLevel: level => {
+            console.log(level);
+            dispatch(setTriggerLevel(level / 1000));
+        },
+        triggerOrigin,
+        triggerLevel: triggerLevel * 1000,
     };
+
+    const dispatch = useDispatch();
 
     const plugins = [
         dragSelectPlugin,
         zoomPanPlugin,
+        triggerLevelPlugin,
+        triggerOriginPlugin,
         crossHairPlugin,
         {
             id: 'notifier',
@@ -224,11 +281,18 @@ export default ({
             {processing && (
                 <div
                     className={classNames(
-                        'tw-absolute tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pl-[4.35rem] tw-pr-[1.8rem]',
+                        'tw-absolute tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pl-16 tw-pr-8',
                         timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]'
                     )}
                 >
-                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-gray-300 tw-bg-opacity-20 tw-px-16">
+                    <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-bg-gray-300 tw-bg-opacity-20 tw-px-16">
+                        {processingMessage && (
+                            <div>{`${processingMessage} ${
+                                processingPercent && processingPercent >= 0
+                                    ? `(${processingPercent?.toFixed(0)})%`
+                                    : ''
+                            }`}</div>
+                        )}
                         <Spinner
                             size="lg"
                             className=" tw-text-nordicBlue-900"

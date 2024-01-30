@@ -219,13 +219,10 @@ const loadPPK2File = async (
         );
 
         DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
-        DataManager().loadData(
-            metadata.metadata.recordingDuration,
-            sessionPath
-        );
+        DataManager().loadData(sessionPath, metadata.metadata.startSystemTime);
 
         window.removeEventListener('beforeunload', cleanUp);
-        return metadata.metadata.recordingDuration;
+        return DataManager().getTimestamp();
     } catch (error) {
         window.removeEventListener('beforeunload', cleanUp);
         throw error;
@@ -267,7 +264,7 @@ export default async (
             ppk: result.bits.length === 0 ? 'V1' : 'V2',
         });
 
-        DataManager().initialize(sessionRootFolder);
+        DataManager().initializeLiveSession(sessionRootFolder);
         DataManager().setSamplesPerSecond(
             result.metadata.options.samplesPerSecond
         );
@@ -279,24 +276,29 @@ export default async (
             onProgress
         );
 
+        DataManager().getSessionBuffers().fileBuffer.clearStartSystemTime();
+
         const pos = filename.lastIndexOf('.');
         const newFilename = `${filename.substring(
             0,
             pos < 0 ? filename.length : pos
         )}.ppk2`;
 
-        const sessionFolder = DataManager().getSessionFolder();
-        await DataManager().flush();
-        if (!fs.existsSync(newFilename) && sessionFolder) {
+        const session = DataManager().getSessionBuffers();
+
+        if (
+            !fs.existsSync(newFilename) &&
+            session.fileBuffer.getSessionFolder()
+        ) {
             await saveFile(
                 newFilename,
                 {
                     metadata: {
-                        recordingDuration: DataManager().getTimestamp(),
                         samplesPerSecond: DataManager().getSamplesPerSecond(),
                     },
                 },
-                sessionFolder,
+                session.fileBuffer,
+                session.foldingBuffer,
                 message => onProgress(message, -1, true)
             );
 

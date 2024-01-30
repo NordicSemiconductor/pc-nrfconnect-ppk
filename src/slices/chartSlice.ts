@@ -32,6 +32,7 @@ export interface ChartState {
     digitalChannels: booleanTupleOf8;
     digitalChannelsVisible: boolean;
     timestampsVisible: boolean;
+    showSystemTime: boolean;
     yAxisLog: boolean;
     windowBeginLock: null | number;
     windowEndLock: null | number;
@@ -59,6 +60,7 @@ const initialState = (): ChartState => ({
     showSettings: false,
     latestDataTimestamp: 0,
     forceRerender: false,
+    showSystemTime: false,
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -238,6 +240,9 @@ const chartSlice = createSlice({
         setFPS: (state, action: PayloadAction<number>) => {
             state.fps = action.payload;
         },
+        setShowSystemTime: (state, action: PayloadAction<boolean>) => {
+            state.showSystemTime = action.payload;
+        },
     },
 });
 
@@ -358,6 +363,9 @@ export const isLiveMode = (state: RootState) =>
 export const getLiveModeFPS = (state: RootState) => state.app.chart.fps;
 export const isTimestampsVisible = (state: RootState) =>
     state.app.chart.timestampsVisible;
+export const showSystemTime = (state: RootState) =>
+    state.app.chart.showSystemTime;
+
 export const isSessionActive = (state: RootState) =>
     state.app.chart.latestDataTimestamp !== 0;
 
@@ -384,6 +392,7 @@ export const {
     setFPS,
     resetChartTime,
     triggerForceRerender,
+    setShowSystemTime,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;

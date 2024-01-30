@@ -9,6 +9,9 @@ import {
     getPersistentStore,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
+import { type SamplingMode } from '../slices/dataLoggerSlice';
+import { type TriggerType } from '../slices/triggerSlice';
+
 const LAST_SAVE_DIR = 'lastSaveDir';
 const SPIKE_FILTER_SAMPLES = 'spikeFilter.samples';
 const SPIKE_FILTER_ALPHA = 'spikeFilter.alpha';
@@ -117,6 +120,33 @@ export const getPreferredSessionLocation = (defaultValue: string) =>
     store.get(`session-root-folder`, defaultValue);
 export const setPreferredSessionLocation = (path: string) => {
     store.set(`session-root-folder`, path);
+};
+
+export const getSamplingMode = (defaultValue: SamplingMode) =>
+    store.get(`sampling-mode`, defaultValue);
+export const setSamplingMode = (mode: SamplingMode) => {
+    store.set(`sampling-mode`, mode);
+};
+
+export const getTriggerLevel = (defaultValue: number) =>
+    store.get(`trigger-level-ua`, defaultValue);
+export const setTriggerLevel = (value: number) => {
+    store.set(`trigger-level-ua`, value);
+};
+export const getRecordingLength = (defaultValue: number) =>
+    store.get(`recording-length-ms`, defaultValue);
+export const setRecordingLength = (value: number) => {
+    store.set(`recording-length-ms`, value);
+};
+export const getAutoExport = (defaultValue: boolean) =>
+    store.get(`auto-export-trigger`, defaultValue);
+export const setAutoExport = (value: boolean) => {
+    store.set(`auto-export-trigger`, value);
+};
+export const getTriggerType = (defaultValue: TriggerType) =>
+    store.get(`trigger-mode-type`, defaultValue);
+export const setTriggerType = (value: TriggerType) => {
+    store.set(`trigger-mode-type`, value);
 };
 
 export const getDurationUnit = (

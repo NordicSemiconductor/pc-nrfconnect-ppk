@@ -13,6 +13,7 @@ import { dirname, join } from 'path';
 import {
     miniMapAnimationAction,
     resetMinimap,
+    triggerForceRerender as triggerForceRerenderMiniMap,
 } from '../features/minimap/minimapSlice';
 import {
     closeProgressDialog,
@@ -28,7 +29,7 @@ import {
     scrollToEnd,
     setLatestDataTimestamp,
     setLiveMode,
-    triggerForceRerender,
+    triggerForceRerender as triggerForceRerenderMainChart,
 } from '../slices/chartSlice';
 import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
@@ -64,7 +65,7 @@ export const save =
         const dataToBeSaved: PPK2Metadata = {
             metadata: {
                 samplesPerSecond: DataManager().getSamplesPerSecond(),
-                recordingDuration: DataManager().getTimestamp(),
+                startSystemTime: DataManager().getStartSystemTime(),
             },
         };
 
@@ -79,10 +80,13 @@ export const save =
                     message: 'Exporting PPK File',
                 })
             );
+            const session = DataManager().getSessionBuffers();
+
             await saveData(
                 filename,
                 dataToBeSaved,
-                activeSessionFolder,
+                session.fileBuffer,
+                session.foldingBuffer,
                 message => {
                     dispatch(updateProgress({ indeterminate: true, message }));
                 }
@@ -154,7 +158,8 @@ export const load =
                     })
                 );
                 dispatch(scrollToEnd());
-                dispatch(triggerForceRerender());
+                dispatch(triggerForceRerenderMainChart());
+                dispatch(triggerForceRerenderMiniMap());
                 dispatch(miniMapAnimationAction());
             }
 
