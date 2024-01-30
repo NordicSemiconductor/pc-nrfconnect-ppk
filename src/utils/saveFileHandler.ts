@@ -29,7 +29,7 @@ export interface SaveData {
 export interface PPK2Metadata {
     metadata: {
         samplesPerSecond: number;
-        recordingDuration: number;
+        startSystemTime?: number;
     };
 }
 const CURRENT_VERSION = 2;

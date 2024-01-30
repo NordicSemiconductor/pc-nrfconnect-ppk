@@ -166,6 +166,8 @@ export const DataManager = () => ({
         }
         return true;
     },
+    getStartSystemTime: () => options.fileBuffer?.getFirstWriteTime(),
+
     addData: (current: number, bits: number) => {
         if (options.fileBuffer === undefined) return;
 

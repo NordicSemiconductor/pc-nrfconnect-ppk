@@ -8,12 +8,16 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     CollapsibleGroup,
+    StateSelector,
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
+import { DataManager } from '../../globals';
 import {
     getChartDigitalChannelInfo,
     isTimestampsVisible,
+    setShowSystemTime,
+    showSystemTime,
     toggleDigitalChannels,
     toggleTimestamps,
 } from '../../slices/chartSlice';
@@ -23,6 +27,7 @@ export default () => {
     const dispatch = useDispatch();
     const { digitalChannelsVisible } = useSelector(getChartDigitalChannelInfo);
     const timestampsVisible = useSelector(isTimestampsVisible);
+    const systemTime = useSelector(showSystemTime);
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
@@ -31,6 +36,18 @@ export default () => {
                 isToggled={timestampsVisible}
                 label="Timestamps"
                 variant="primary"
+            />
+            <StateSelector
+                items={['Relative', 'Absolute']}
+                onSelect={(index: number) => {
+                    dispatch(setShowSystemTime(!!index));
+                }}
+                selectedItem={
+                    !!DataManager().getStartSystemTime() && systemTime
+                        ? 'Absolute'
+                        : 'Relative'
+                }
+                disabled={!DataManager().getStartSystemTime()}
             />
 
             <>

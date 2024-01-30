@@ -82,8 +82,30 @@ const formatCurrent = (nA: number) =>
               .replace('u', '\u00B5')
         : (undefined as never);
 
-const timestampToLabel = (usecs: number) => {
+const padL = (nr: number, len = 2, chr = `0`) => `${nr}`.padStart(len, chr);
+
+const timestampToLabel = (usecs: number, systemTime?: number) => {
     const microseconds = Math.abs(usecs);
+
+    if (systemTime != null) {
+        const milliSeconds = Math.trunc(microseconds / 1000);
+        const time = new Date(milliSeconds + systemTime);
+        const subsecond =
+            Number(
+                ((microseconds + time.getMilliseconds() * 1000) / 1e3) % 1e3
+            ) ?? 0;
+
+        return [
+            `${time.getFullYear()}-${padL(time.getMonth() + 1)}-${padL(
+                time.getDate()
+            )} ${padL(time.getHours())}:${padL(time.getMinutes())}:${padL(
+                time.getSeconds()
+            )}`,
+            `${subsecond.toFixed(3)}`.padStart(7, '0'),
+        ];
+    }
+
+    const subsecond = Number((microseconds / 1e3) % 1e3) ?? 0;
     const sign = usecs < 0 ? '-' : '';
 
     const date = new Date(microseconds / 1e3);
@@ -93,11 +115,8 @@ const timestampToLabel = (usecs: number) => {
     const s = date.getUTCSeconds().toString().padStart(2, '0');
 
     const time = `${sign}${h}:${m}:${s}`;
-    const subsecond = `${Number((microseconds / 1e3) % 1e3).toFixed(
-        3
-    )}`.padStart(7, '0');
 
-    return [time, subsecond];
+    return [time, `${subsecond.toFixed(3)}`.padStart(7, '0')];
 };
 
 export default ({
@@ -115,6 +134,7 @@ export default ({
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
     const windowDuration = useSelector(getWindowDuration);
     const samplingRunning = useSelector(isSamplingRunning);
+    const systemTime = useSelector(showSystemTime);
 
     const live = liveMode && samplingRunning;
     const snapping = numberOfSamplesPerPixel <= 0.16 && !live;
@@ -155,7 +175,12 @@ export default ({
                     display: timestampsVisible,
                     autoSkipPadding: 25,
                     callback: value =>
-                        timestampToLabel(Number.parseInt(value.toString(), 10)),
+                        timestampToLabel(
+                            Number.parseInt(value.toString(), 10),
+                            systemTime
+                                ? DataManager().getStartSystemTime()
+                                : undefined
+                        ),
                     maxTicksLimit: 7,
                 },
                 border: {

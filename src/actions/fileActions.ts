@@ -64,7 +64,7 @@ export const save =
         const dataToBeSaved: PPK2Metadata = {
             metadata: {
                 samplesPerSecond: DataManager().getSamplesPerSecond(),
-                recordingDuration: DataManager().getTimestamp(),
+                startSystemTime: DataManager().getStartSystemTime(),
             },
         };
 
