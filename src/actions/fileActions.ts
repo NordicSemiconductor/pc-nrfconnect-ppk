@@ -13,6 +13,7 @@ import { dirname, join } from 'path';
 import {
     miniMapAnimationAction,
     resetMinimap,
+    triggerForceRerender as triggerForceRerenderMiniMap,
 } from '../features/minimap/minimapSlice';
 import {
     closeProgressDialog,
@@ -28,7 +29,7 @@ import {
     scrollToEnd,
     setLatestDataTimestamp,
     setLiveMode,
-    triggerForceRerender,
+    triggerForceRerender as triggerForceRerenderMainChart,
 } from '../slices/chartSlice';
 import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
@@ -157,7 +158,8 @@ export const load =
                     })
                 );
                 dispatch(scrollToEnd());
-                dispatch(triggerForceRerender());
+                dispatch(triggerForceRerenderMainChart());
+                dispatch(triggerForceRerenderMiniMap());
                 dispatch(miniMapAnimationAction());
             }
 
