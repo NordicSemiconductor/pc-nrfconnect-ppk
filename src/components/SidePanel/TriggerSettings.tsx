@@ -10,9 +10,9 @@ import {
     logger,
     NumberInputSliderWithUnit,
     StateSelector,
+    telemetry,
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import usageData from '@nordicsemiconductor/pc-nrfconnect-shared/src/utils/usageData';
 
 import { appState } from '../../slices/appSlice';
 import {
@@ -54,7 +54,7 @@ export default () => {
     useEffect(() => {
         if (triggerSaveQueueLength >= 10 && autoExportTrigger) {
             dispatch(setAutoExportTrigger(false));
-            usageData.sendUsageData('Auto Export', {
+            telemetry.sendEvent('Auto Export', {
                 state: false,
                 reason: 'excessive number of triggers',
             });
@@ -110,7 +110,7 @@ export default () => {
                 label="Auto export"
                 disabled={samplingRunning}
                 onToggle={v => {
-                    usageData.sendUsageData('Auto Export', {
+                    telemetry.sendEvent('Auto Export', {
                         state: v,
                         reason: 'user interaction',
                     });

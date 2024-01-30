@@ -6,8 +6,7 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import usageData from '@nordicsemiconductor/pc-nrfconnect-shared/src/utils/usageData';
+import { logger, telemetry } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { deserialize, Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
@@ -171,41 +170,41 @@ const loadPPK2File = async (
     try {
         let totalSize = 0;
 
-    const directory = await unzipper.Open.file(filename);
+        const directory = await unzipper.Open.file(filename);
 
-    await Promise.all(
-        directory.files.map(
-            f =>
-                new Promise<void>(resolve => {
-                    f.stream().prependListener('pipe', () => {
-                        totalSize += f.uncompressedSize;
-                        resolve();
-                    });
-                })
-        )
-    );
-
-    const willFit = await canFileFit(
-        minSpaceTriggerLimit,
-        totalSize,
-        path.parse(filename).dir
-    );
-
-    if (!willFit) {
-        throw new Error(
-            'Cannot decompress. File does not fit in the available disk space'
+        await Promise.all(
+            directory.files.map(
+                f =>
+                    new Promise<void>(resolve => {
+                        f.stream().prependListener('pipe', () => {
+                            totalSize += f.uncompressedSize;
+                            resolve();
+                        });
+                    })
+            )
         );
-    }
 
-    await Promise.all(
-        directory.files.map(
-            f =>
-                new Promise((resolve, reject) => {
-                    f.stream()
-                        .pipe(
-                            new Transform({
-                                transform: (d, _, cb) => {
-                                    progress += d.length;
+        const willFit = await canFileFit(
+            minSpaceTriggerLimit,
+            totalSize,
+            path.parse(filename).dir
+        );
+
+        if (!willFit) {
+            throw new Error(
+                'Cannot decompress. File does not fit in the available disk space'
+            );
+        }
+
+        await Promise.all(
+            directory.files.map(
+                f =>
+                    new Promise((resolve, reject) => {
+                        f.stream()
+                            .pipe(
+                                new Transform({
+                                    transform: (d, _, cb) => {
+                                        progress += d.length;
 
                                         const roundToFixedPercentage =
                                             Math.trunc(
@@ -290,7 +289,7 @@ export default async (
 
         onProgress('Converting ".ppk" format to  ".ppk2"', -1);
 
-        usageData.sendUsageData('Loading deprecated ".ppk" file format', {
+        telemetry.sendEvent('Loading deprecated ".ppk" file format', {
             ppk: result.bits.length === 0 ? 'V1' : 'V2',
         });
 

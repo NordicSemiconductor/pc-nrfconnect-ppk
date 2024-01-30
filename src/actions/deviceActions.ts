@@ -11,7 +11,7 @@ import {
     AppThunk,
     Device,
     logger,
-    usageData,
+    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import { unit } from 'mathjs';
@@ -104,7 +104,7 @@ export const setupOptions =
 /* Start reading current measurements */
 export const samplingStart =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
-        usageData.sendUsageData(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
+        telemetry.sendEvent(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
         dispatch(setTriggerActive(false));
         dispatch(resetTriggerOrigin());
@@ -307,7 +307,7 @@ export const open =
 
         try {
             device = new SerialDevice(deviceInfo, onSample);
-            usageData.sendUsageData(EventAction.PPK_2_SELECTED);
+            telemetry.sendEvent(EventAction.PPK_2_SELECTED);
 
             dispatch(
                 setSamplingAttrsAction({
