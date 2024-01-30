@@ -27,6 +27,7 @@ import Gains from './Gains';
 import Instructions from './Instructions';
 import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
+import SessionSettings from './SessionSettings';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
 
@@ -66,11 +67,13 @@ export default () => {
             )}
             {!fileLoaded && deviceOpen && advancedMode && (
                 <>
+                    <SessionSettings />
                     <Gains />
                     <SpikeFilter />
                     <CapVoltageSettings />
                 </>
             )}
+            {!fileLoaded && !deviceOpen && advancedMode && <SessionSettings />}
             <DeprecatedDeviceDialog />
             <ProgressDialog />
         </SidePanel>

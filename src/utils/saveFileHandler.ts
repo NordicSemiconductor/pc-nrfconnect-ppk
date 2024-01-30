@@ -81,8 +81,13 @@ export default async (
         fs.rmSync(filename, { recursive: true, force: true });
     };
     window.addEventListener('beforeunload', cleanUp);
-    await archive.finalize();
-    window.removeEventListener('beforeunload', cleanUp);
-    fs.rmSync(metaPath);
-    await stopPreventSleep();
+    try {
+        await archive.finalize();
+        window.removeEventListener('beforeunload', cleanUp);
+        fs.rmSync(metaPath);
+        await stopPreventSleep();
+    } catch (error) {
+        window.removeEventListener('beforeunload', cleanUp);
+        throw error;
+    }
 };

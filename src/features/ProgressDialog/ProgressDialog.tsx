@@ -7,6 +7,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    Alert,
     DialogButton,
     GenericDialog,
     useStopwatch,
@@ -54,17 +55,21 @@ export default () => {
             }
             isVisible={dialogInfo.show}
         >
-            <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
-                <div>
-                    <span>{dialogInfo.message}</span>
-                    <br />
+            {dialogInfo.errorMessage ? (
+                <Alert variant="danger">{dialogInfo.errorMessage}</Alert>
+            ) : (
+                <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
+                    <div>
+                        <span>{dialogInfo.message}</span>
+                        <br />
+                    </div>
+                    <TimeComponent
+                        time={time}
+                        progress={dialogInfo.progress}
+                        indeterminate={dialogInfo.indeterminate}
+                    />
                 </div>
-                <TimeComponent
-                    time={time}
-                    progress={dialogInfo.progress}
-                    indeterminate={dialogInfo.indeterminate}
-                />
-            </div>
+            )}
         </GenericDialog>
     );
 };

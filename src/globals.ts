@@ -5,7 +5,6 @@
  */
 
 import { getCurrentWindow } from '@electron/remote';
-import os from 'os';
 import path from 'path';
 import { v4 } from 'uuid';
 
@@ -184,22 +183,20 @@ export const DataManager = () => ({
 
         options.foldingBuffer?.addData(current, options.timestamp);
     },
-    flush: () => {
-        options.fileBuffer?.flush();
-    },
-    reset: () => {
-        const temp = { ...options };
-        temp.fileBuffer?.close().then(() => temp.fileBuffer?.release());
+    flush: () => options.fileBuffer?.flush(),
+    reset: async () => {
+        await options.fileBuffer?.close();
+        options.fileBuffer?.release();
         options.fileBuffer = undefined;
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
         options.timestamp = undefined;
     },
-    initialize: (fileBufferFolder?: string) => {
-        const sessionPath = path.join(fileBufferFolder ?? os.tmpdir(), v4());
+    initialize: (sessionRootPath: string) => {
+        const sessionPath = path.join(sessionRootPath, v4());
+
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * 6, // 6 bytes per sample for and 1sec buffers
-            10 * 100_000 * 6,
+            10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
             14,
             30
@@ -212,8 +209,7 @@ export const DataManager = () => ({
 
     loadData: (timestamp: number, sessionPath: string) => {
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * 6, // 6 bytes per sample for and 1sec buffers
-            10 * 100_000 * 6,
+            10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
             14,
             30

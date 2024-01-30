@@ -16,12 +16,13 @@ import {
 } from '../features/minimap/minimapSlice';
 import {
     closeProgressDialog,
+    setErrorMessage,
     showProgressDialog,
     updateProgress,
 } from '../features/ProgressDialog/progressSlice';
 import { DataManager, updateTitle } from '../globals';
 import type { RootState } from '../slices';
-import { setFileLoadedAction } from '../slices/appSlice';
+import { getSessionRootFolder, setFileLoadedAction } from '../slices/appSlice';
 import {
     resetChartTime,
     scrollToEnd,
@@ -29,6 +30,7 @@ import {
     setLiveMode,
     triggerForceRerender,
 } from '../slices/chartSlice';
+import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
@@ -89,6 +91,7 @@ export const save =
 
             logger.info(`State saved to: ${filename}`);
         } catch (error) {
+            dispatch(setErrorMessage(describeError(error)));
             logger.error(`Error exporting file: ${describeError(error)}`);
         }
     };
@@ -97,7 +100,7 @@ export const load =
     (
         setLoading: (value: boolean) => void
     ): AppThunk<RootState, Promise<void>> =>
-    async dispatch => {
+    async (dispatch, getState) => {
         const {
             filePaths: [filename],
         } =
@@ -116,7 +119,7 @@ export const load =
 
         setLoading(true);
         logger.info(`Restoring state from ${filename}`);
-        DataManager().reset();
+        await DataManager().reset();
         dispatch(resetChartTime());
         dispatch(resetMinimap());
         dispatch(setLiveMode(false));
@@ -128,23 +131,38 @@ export const load =
                 message: 'Loading PPK File',
             })
         );
-        const timestamp = await loadData(
-            filename,
-            (message, progress, indeterminate) => {
-                dispatch(updateProgress({ message, progress, indeterminate }));
+        try {
+            const timestamp = await loadData(
+                filename,
+                getSessionRootFolder(getState()),
+                (message, progress, indeterminate) => {
+                    dispatch(
+                        updateProgress({ message, progress, indeterminate })
+                    );
+                }
+            );
+
+            dispatch(closeProgressDialog());
+
+            if (timestamp) {
+                dispatch(setLatestDataTimestamp(timestamp));
+                dispatch(
+                    updateSampleFreqLog10({
+                        sampleFreqLog10: Math.log10(
+                            DataManager().getSamplesPerSecond()
+                        ),
+                    })
+                );
+                dispatch(scrollToEnd());
+                dispatch(triggerForceRerender());
+                dispatch(miniMapAnimationAction());
             }
-        );
 
-        dispatch(closeProgressDialog());
-
-        if (timestamp) {
-            dispatch(setLatestDataTimestamp(timestamp));
-            dispatch(scrollToEnd());
-            dispatch(triggerForceRerender());
-            dispatch(miniMapAnimationAction());
+            dispatch(setFileLoadedAction(true));
+        } catch (error) {
+            dispatch(setErrorMessage(describeError(error)));
         }
 
-        dispatch(setFileLoadedAction(true));
         setLoading(false);
     };
 

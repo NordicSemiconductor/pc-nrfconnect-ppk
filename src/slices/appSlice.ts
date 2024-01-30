@@ -7,8 +7,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- included for conservative refactoring to typescript */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import os from 'os';
 
 import { Capabilities } from '../device/abstractDevice';
+import { getPreferredSessionLocation } from '../utils/persistentStore';
 import type { RootState } from '.';
 
 interface AppState {
@@ -22,6 +24,7 @@ interface AppState {
     isSaveChoiceDialogVisible: boolean;
     isExportDialogVisible: boolean;
     fileLoaded: boolean;
+    sessionFolder?: string;
 }
 
 const initialState = (): AppState => ({
@@ -85,6 +88,9 @@ const appSlice = createSlice({
         samplingStoppedAction: state => {
             state.samplingRunning = false;
         },
+        setSessionRootFolder: (state, action: PayloadAction<string>) => {
+            state.sessionFolder = action.payload;
+        },
     },
 });
 
@@ -94,6 +100,8 @@ export const appState = (state: RootState) => state.app.app;
 export const advancedMode = (state: RootState) => state.app.app.advancedMode;
 export const deviceOpen = (state: RootState) =>
     Object.keys(state.app.app.capabilities).length > 0;
+export const getSessionRootFolder = (state: RootState) =>
+    state.app.app.sessionFolder ?? getPreferredSessionLocation(os.tmpdir());
 
 export const {
     deviceOpenedAction,
@@ -107,6 +115,7 @@ export const {
     toggleAdvancedModeAction,
     samplingStartAction,
     samplingStoppedAction,
+    setSessionRootFolder,
 } = appSlice.actions;
 
 export default appSlice.reducer;

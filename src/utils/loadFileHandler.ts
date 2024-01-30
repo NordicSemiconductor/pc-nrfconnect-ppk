@@ -12,7 +12,6 @@ import { deserialize, Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
 import { unit } from 'mathjs';
-import os from 'os';
 import path from 'path';
 import { pipeline, Transform, Writable } from 'stream';
 import unzipper from 'unzipper';
@@ -155,71 +154,87 @@ const loadBits = (buffer: BufferReader) =>
 
 const loadPPK2File = async (
     filename: string,
+    sessionRootPath: string,
     onProgress: (message: string, percentage: number) => void
 ) => {
     let progress = 0;
     let lastUpdate = 0;
 
-    const outputPath = path.join(os.tmpdir(), v4());
-    fs.mkdirSync(outputPath);
+    const sessionPath = path.join(sessionRootPath, v4());
+    fs.mkdirSync(sessionPath);
     const cleanUp = () => {
-        fs.rmSync(outputPath, { recursive: true, force: true });
+        fs.rmSync(sessionPath, { recursive: true, force: true });
     };
     window.addEventListener('beforeunload', cleanUp);
-    let totalSize = 0;
+    try {
+        let totalSize = 0;
 
-    const directory = await unzipper.Open.file(filename);
-    await Promise.all(
-        directory.files.map(
-            f =>
-                new Promise((resolve, reject) => {
-                    f.stream()
-                        .prependListener('pipe', () => {
-                            totalSize += f.uncompressedSize;
-                        })
-                        .pipe(
-                            new Transform({
-                                transform: (d, _, cb) => {
-                                    progress += d.length;
-
-                                    const roundToFixedPercentage = Math.trunc(
-                                        (progress / totalSize) * 100
-                                    );
-
-                                    if (roundToFixedPercentage !== lastUpdate) {
-                                        onProgress(
-                                            'Decompressing file',
-                                            (progress / totalSize) * 100
-                                        );
-                                        lastUpdate = roundToFixedPercentage;
-                                    }
-                                    cb(null, d);
-                                },
+        const directory = await unzipper.Open.file(filename);
+        await Promise.all(
+            directory.files.map(
+                f =>
+                    new Promise((resolve, reject) => {
+                        f.stream()
+                            .prependListener('pipe', () => {
+                                totalSize += f.uncompressedSize;
                             })
-                        )
-                        .pipe(
-                            fs.createWriteStream(path.join(outputPath, f.path))
-                        )
-                        .on('error', reject)
-                        .on('finish', resolve);
-                })
-        )
-    );
+                            .pipe(
+                                new Transform({
+                                    transform: (d, _, cb) => {
+                                        progress += d.length;
 
-    logger.info(`Decompression session information to ${outputPath}`);
-    const metadata: PPK2Metadata = JSON.parse(
-        fs.readFileSync(path.join(outputPath, 'metadata.json')).toString()
-    );
+                                        const roundToFixedPercentage =
+                                            Math.trunc(
+                                                (progress / totalSize) * 100
+                                            );
 
-    window.removeEventListener('beforeunload', cleanUp);
-    DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
-    DataManager().loadData(metadata.metadata.recordingDuration, outputPath);
+                                        if (
+                                            roundToFixedPercentage !==
+                                            lastUpdate
+                                        ) {
+                                            onProgress(
+                                                'Decompressing file',
+                                                (progress / totalSize) * 100
+                                            );
+                                            lastUpdate = roundToFixedPercentage;
+                                        }
+                                        cb(null, d);
+                                    },
+                                })
+                            )
+                            .pipe(
+                                fs.createWriteStream(
+                                    path.join(sessionPath, f.path)
+                                )
+                            )
+                            .on('error', reject)
+                            .on('finish', resolve);
+                    })
+            )
+        );
 
-    return metadata.metadata.recordingDuration;
+        logger.info(`Decompression session information to ${sessionPath}`);
+        const metadata: PPK2Metadata = JSON.parse(
+            fs.readFileSync(path.join(sessionPath, 'metadata.json')).toString()
+        );
+
+        DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
+        DataManager().loadData(
+            metadata.metadata.recordingDuration,
+            sessionPath
+        );
+
+        window.removeEventListener('beforeunload', cleanUp);
+        return metadata.metadata.recordingDuration;
+    } catch (error) {
+        window.removeEventListener('beforeunload', cleanUp);
+        throw error;
+    }
 };
 
 export default async (
     filename: string,
+    sessionRootFolder: string,
     onProgress: (
         message: string,
         percentage: number,
@@ -227,7 +242,7 @@ export default async (
     ) => void
 ) => {
     if (filename.endsWith('.ppk2')) {
-        return loadPPK2File(filename, onProgress);
+        return loadPPK2File(filename, sessionRootFolder, onProgress);
     }
 
     logger.warn(`This PPK file format is deprecated.`);
@@ -252,7 +267,7 @@ export default async (
             ppk: result.bits.length === 0 ? 'V1' : 'V2',
         });
 
-        DataManager().initialize();
+        DataManager().initialize(sessionRootFolder);
         DataManager().setSamplesPerSecond(
             result.metadata.options.samplesPerSecond
         );
@@ -271,7 +286,7 @@ export default async (
         )}.ppk2`;
 
         const sessionFolder = DataManager().getSessionFolder();
-        DataManager().flush();
+        await DataManager().flush();
         if (!fs.existsSync(newFilename) && sessionFolder) {
             await saveFile(
                 newFilename,

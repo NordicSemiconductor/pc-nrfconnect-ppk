@@ -15,6 +15,7 @@ interface ProgressState {
     complete: boolean;
     show: boolean;
     indeterminate: boolean;
+    errorMessage?: string;
 }
 
 const initialState: ProgressState = {
@@ -53,12 +54,20 @@ const progressSlice = createSlice({
             state.progress = action.payload.progress ?? -1;
             state.indeterminate = !!action.payload.indeterminate;
         },
+        setErrorMessage: (state, action: PayloadAction<string>) => {
+            state.errorMessage = action.payload;
+            state.complete = true;
+        },
     },
 });
 
 export const getProgressDialogInfo = (state: RootState) =>
     state.app.progressDialog;
 
-export const { showProgressDialog, closeProgressDialog, updateProgress } =
-    progressSlice.actions;
+export const {
+    showProgressDialog,
+    closeProgressDialog,
+    updateProgress,
+    setErrorMessage,
+} = progressSlice.actions;
 export default progressSlice.reducer;

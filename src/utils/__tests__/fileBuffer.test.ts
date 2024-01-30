@@ -74,26 +74,13 @@ const mockFsRead = (cb?: () => number) => {
 const readBuffer = Buffer.alloc(200);
 
 describe('WriteBuffer', () => {
-    const readBufferSize = 10;
-    const writeBufferSize = 10;
+    const pageBufferSize = 10;
     const sessionFolder = path.join('session', 'folder');
-    let fileBuffer = new FileBuffer(
-        readBufferSize,
-        writeBufferSize,
-        sessionFolder,
-        3,
-        3
-    );
+    let fileBuffer = new FileBuffer(pageBufferSize, sessionFolder, 3, 3);
     beforeEach(() => {
         // we reset virtual filesystem before each test
         jest.clearAllMocks();
-        fileBuffer = new FileBuffer(
-            readBufferSize,
-            writeBufferSize,
-            sessionFolder,
-            3,
-            3
-        );
+        fileBuffer = new FileBuffer(pageBufferSize, sessionFolder, 3, 3);
     });
 
     test('creates new folder for the session', () => {
@@ -236,57 +223,44 @@ describe('WriteBuffer', () => {
 });
 
 describe('ReadBuffers', () => {
-    const readBufferSize = 2;
-    const writeBufferSize = 1;
+    const pageBufferSize = 2;
     const sessionFolder = path.join('session', 'folder');
-    let fileBuffer = new FileBuffer(
-        readBufferSize,
-        writeBufferSize,
-        sessionFolder,
-        3,
-        4
-    );
+    let fileBuffer = new FileBuffer(pageBufferSize, sessionFolder, 3, 4);
     beforeEach(async () => {
         // we reset virtual filesystem before each test
         jest.clearAllMocks();
-        fileBuffer = new FileBuffer(
-            readBufferSize,
-            writeBufferSize,
-            sessionFolder,
-            3,
-            4
-        );
-        await fileBuffer.append(Buffer.from([0, 1, 2])); // fill write buffers
+        fileBuffer = new FileBuffer(pageBufferSize, sessionFolder, 3, 4);
+        await fileBuffer.append(Buffer.from([0, 1, 2, 3, 4, 5])); // fill write buffers
     });
 
     test('Reading over all three write buffers return the expected bytes from the writePage', async () => {
-        const numberOfBytes = await fileBuffer.read(readBuffer, 0, 3);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 0, 6);
 
         expect(fs.read).toBeCalledTimes(0);
         expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
-            Buffer.from([0, 1, 2])
+            Buffer.from([0, 1, 2, 3, 4, 5])
         );
     });
 
-    test('Reading over all three write buffers return the expected bytes from the writePage after write page cleared', async () => {
-        await fileBuffer.append(Buffer.from([3])); // write buffer will now loose the first byte
-        const numberOfBytes = await fileBuffer.read(readBuffer, 1, 3);
+    test('Reading over all three write buffers after first page is cleared', async () => {
+        await fileBuffer.append(Buffer.from([6, 7])); // write buffer will now loose the first byte
+        const numberOfBytes = await fileBuffer.read(readBuffer, 2, 6);
 
         expect(fs.read).toBeCalledTimes(0);
         expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
-            Buffer.from([1, 2, 3])
+            Buffer.from([2, 3, 4, 5, 6, 7])
         );
     });
 
     test('Reading over all three write buffers and one miss forcing read from file', async () => {
-        await fileBuffer.append(Buffer.from([3])); // write buffer will now loose the first byte
+        await fileBuffer.append(Buffer.from([6])); // write buffer will now loose the first byte
 
         mockFsRead();
-        const numberOfBytes = await fileBuffer.read(readBuffer, 0, 4);
+        const numberOfBytes = await fileBuffer.read(readBuffer, 0, 7);
 
         expect(fs.read).toBeCalledTimes(1);
         expect(readBuffer.subarray(0, numberOfBytes)).toStrictEqual(
-            Buffer.from([0, 1, 2, 3])
+            Buffer.from([0, 1, 2, 3, 4, 5, 6])
         );
     });
 
@@ -298,7 +272,9 @@ describe('ReadBuffers', () => {
         });
 
         await fileBuffer.append(
-            Buffer.from([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
+            Buffer.from([
+                6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+            ])
         ); // write buffer will now loose the first bytes
 
         await fileBuffer.read(readBuffer, 6, 2);
@@ -310,7 +286,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             6,
             expect.anything()
         ); // Data we want to read
@@ -319,7 +295,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             2,
             expect.anything()
         ); // Page Before
@@ -328,7 +304,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             4,
             expect.anything()
         ); // Page Before
@@ -337,7 +313,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             8,
             expect.anything()
         ); // Page After
@@ -346,7 +322,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             10,
             expect.anything()
         ); // Page After
@@ -360,7 +336,10 @@ describe('ReadBuffers', () => {
         });
 
         await fileBuffer.append(
-            Buffer.from([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
+            Buffer.from([
+                6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                23,
+            ])
         ); // write buffer will no longer covert the first few bytes
 
         await fileBuffer.read(readBuffer, 5, 4);
@@ -381,7 +360,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             0,
             expect.anything()
         ); // Page Before
@@ -390,7 +369,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             2,
             expect.anything()
         ); // Page After
@@ -399,7 +378,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             4,
             expect.anything()
         ); // Page Before
@@ -408,7 +387,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             8,
             expect.anything()
         ); // Page After
@@ -417,7 +396,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             10,
             expect.anything()
         ); // Page After
@@ -426,7 +405,7 @@ describe('ReadBuffers', () => {
             1, // file handle
             expect.anything(),
             0,
-            readBufferSize,
+            pageBufferSize,
             12,
             expect.anything()
         ); // Page After
@@ -440,8 +419,10 @@ describe('ReadBuffers', () => {
         });
 
         await fileBuffer.append(
-            Buffer.from([3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
-        ); // write buffer will no longer covert the first few bytes
+            Buffer.from([
+                6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+            ])
+        ); // write buffer will only cover the last 4 bytes
 
         await fileBuffer.read(readBuffer, 6, 2); // read and buffer from 4-9
         expect(bufferingEvents.length).toBe(4);
