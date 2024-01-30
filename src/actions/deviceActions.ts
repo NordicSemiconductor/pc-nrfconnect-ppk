@@ -39,14 +39,12 @@ import {
     resetChartTime,
     resetCursorAndChart,
 } from '../slices/chartSlice';
-import {
-    convertTimeToSeconds,
-    setSamplingAttrsAction,
-} from '../slices/dataLoggerSlice';
+import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
+import { convertTimeToSeconds } from '../utils/duration';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 
 let device: null | SerialDevice = null;

@@ -24,13 +24,13 @@ import { DataManager } from '../../globals';
 import { appState } from '../../slices/appSlice';
 import { isSessionActive, resetChartTime } from '../../slices/chartSlice';
 import {
-    convertTimeToSeconds,
     dataLoggerState,
     setAutoStopSampling,
     updateDuration,
     updateDurationUnit,
     updateSampleFreqLog10,
 } from '../../slices/dataLoggerSlice';
+import { convertTimeToSeconds } from '../../utils/duration';
 import { calcFileSize } from '../../utils/fileUtils';
 import { TimeUnit } from '../../utils/persistentStore';
 

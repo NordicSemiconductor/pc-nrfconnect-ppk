@@ -7,6 +7,8 @@
 
 import React, { ReactElement } from 'react';
 
+import { TimeUnit } from './persistentStore';
+
 const toString = (
     value: any,
     unit: any,
@@ -80,3 +82,16 @@ export const formatDuration = (microseconds: number) =>
     format(microseconds, toString);
 export const formatDurationHTML = (microseconds: number) =>
     format(microseconds, toHTML);
+
+export const convertTimeToSeconds = (time: number, timeUnit: TimeUnit) => {
+    switch (timeUnit) {
+        case 's':
+            return time;
+        case 'm':
+            return time * 60;
+        case 'h':
+            return time * 60 * 60;
+        case 'd':
+            return time * 24 * 60 * 60;
+    }
+};

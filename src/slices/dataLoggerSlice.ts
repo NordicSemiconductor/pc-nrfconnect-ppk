@@ -19,19 +19,6 @@ import {
 } from '../utils/persistentStore';
 import type { RootState } from '.';
 
-export const convertTimeToSeconds = (time: number, timeUnit: TimeUnit) => {
-    switch (timeUnit) {
-        case 's':
-            return time;
-        case 'm':
-            return time * 60;
-        case 'h':
-            return time * 60 * 60;
-        case 'd':
-            return time * 24 * 60 * 60;
-    }
-};
-
 export interface DataLoggerState {
     samplingTime: number;
     maxFreqLog10: number;
