@@ -21,6 +21,9 @@ import {
 } from '../utils/persistentStore';
 import type { RootState } from '.';
 
+export const SamplingModeValues = ['Live', 'Trigger'] as const;
+export type SamplingMode = (typeof SamplingModeValues)[number];
+
 export interface DataLoggerState {
     samplingTime: number;
     maxFreqLog10: number;

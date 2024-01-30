@@ -16,12 +16,12 @@ import {
 import { appState } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
 import {
-    convertTimeToSeconds,
     dataLoggerState,
     setAutoStopSampling,
     updateDuration,
     updateDurationUnit,
 } from '../../slices/dataLoggerSlice';
+import { convertTimeToSeconds } from '../../utils/duration';
 import { calcFileSize } from '../../utils/fileUtils';
 import { TimeUnit } from '../../utils/persistentStore';
 
