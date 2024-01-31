@@ -378,7 +378,7 @@ const Chart = () => {
         } else {
             setSelectionStats(null);
         }
-    }, [cursorBegin, cursorEnd]);
+    }, [cursorBegin, cursorEnd, rerenderTrigger]);
 
     const updateChart = useCallback(async () => {
         if (
