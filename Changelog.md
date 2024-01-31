@@ -1,5 +1,13 @@
 ## 4.0.0-beta7 - UNRELEASED
 
+## Added
+
+-   Reintroduced triggers functionality
+-   Triggers can be automatically saved to file. If to many triggers occur the
+    application my turn off auto export to safe guard it self
+-   A configure in the advance menu to stop saving to disk when disk is running
+    low on disk space
+
 ## Changed
 
 -   Changed export format to `.ppk2`. `.ppk` has been deprecated and importing
@@ -8,10 +16,14 @@
     allows partial export to `.csv`.
 -   Removed limitations for recording duration by using the disk to store the
     collected data instead of using RAM.
+    -   Default path for the session is in the temp folder. This can be changed
+        from the advanced menu
 
 ## Fixed
 
 -   Chart drifting when live mode and PC resources where strained.
+-   UI Glitches
+-   Performance improvements
 
 ## 4.0.0-beta6 - 2024-01-08
 
