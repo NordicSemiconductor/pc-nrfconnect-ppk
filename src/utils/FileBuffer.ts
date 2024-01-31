@@ -506,9 +506,11 @@ export class FileBuffer {
     }
 
     async flush() {
-        await this.#writeActivePage();
-        if (this.#fileHandle) {
-            fs.fdatasyncSync(this.#fileHandle);
+        if (this.#writeBuffer) {
+            await this.#writeActivePage();
+            if (this.#fileHandle) {
+                fs.fdatasyncSync(this.#fileHandle);
+            }
         }
     }
 
