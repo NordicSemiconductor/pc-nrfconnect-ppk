@@ -8,6 +8,11 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
+    indexToTimestamp,
+    normalizeTimeCeil,
+    normalizeTimeFloor,
+} from '../../../globals';
+import {
     chartCursorAction,
     getChartXAxisRange,
 } from '../../../slices/chartSlice';
@@ -86,7 +91,11 @@ const TimeSpanBottom = ({
 
     const timeDelta =
         cursorBegin != null && cursorEnd != null
-            ? Math.abs(cursorEnd - cursorBegin)
+            ? Math.abs(
+                  normalizeTimeFloor(cursorEnd) -
+                      normalizeTimeCeil(cursorBegin) +
+                      indexToTimestamp(1)
+              )
             : windowDuration;
     return (
         <div className="timespan selection" style={{ width }}>
