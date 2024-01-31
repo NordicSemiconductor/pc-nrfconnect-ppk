@@ -111,8 +111,11 @@ const getTimestamp = () =>
               options.fileBuffer.getSessionInBytes() / frameSize - 1
           );
 
-export const normalizeTime = (time: number) =>
+export const normalizeTimeFloor = (time: number) =>
     indexToTimestamp(timestampToIndex(time));
+
+export const normalizeTimeCeil = (time: number) =>
+    indexToTimestamp(timestampToCeilIndex(time));
 
 export const DataManager = () => ({
     getSamplingTime: () => getSamplingTime(options.samplesPerSecond),
@@ -400,6 +403,13 @@ export const timestampToIndex = (timestamp: number): number =>
     timestamp < 0
         ? -1
         : Math.trunc(
+              (timestamp * options.samplesPerSecond) / microSecondsPerSecond
+          );
+
+export const timestampToCeilIndex = (timestamp: number): number =>
+    timestamp < 0
+        ? -1
+        : Math.ceil(
               (timestamp * options.samplesPerSecond) / microSecondsPerSecond
           );
 

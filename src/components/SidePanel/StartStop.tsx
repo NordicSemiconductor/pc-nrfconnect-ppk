@@ -18,7 +18,11 @@ import { unit } from 'mathjs';
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { DataManager } from '../../globals';
 import { appState } from '../../slices/appSlice';
-import { isSessionActive, resetChartTime } from '../../slices/chartSlice';
+import {
+    isSessionActive,
+    resetChartTime,
+    resetCursor,
+} from '../../slices/chartSlice';
 import {
     dataLoggerState,
     getSamplingMode,
@@ -103,6 +107,7 @@ export default () => {
                     await DataManager().reset();
                     dispatch(resetChartTime());
                     dispatch(resetTriggerOrigin());
+                    dispatch(resetCursor());
                 }}
                 variant="secondary"
                 disabled={samplingRunning || !sessionActive}

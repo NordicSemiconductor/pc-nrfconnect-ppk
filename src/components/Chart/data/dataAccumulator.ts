@@ -8,7 +8,8 @@ import {
     DataManager,
     frameSize,
     indexToTimestamp,
-    normalizeTime,
+    normalizeTimeCeil,
+    normalizeTimeFloor,
     numberOfDigitalChannels,
     timestampToIndex,
 } from '../../../globals';
@@ -36,15 +37,17 @@ export const calcStats = (
         end = temp;
     }
 
-    begin = Math.max(begin, 0);
-    end = Math.min(end, DataManager().getTimestamp());
+    begin = Math.max(normalizeTimeCeil(begin), 0);
+    end = Math.min(normalizeTimeFloor(end), DataManager().getTimestamp());
 
     const maxNumberOfSamplesToProcess = 10_000_000;
     const buffer = Buffer.alloc(maxNumberOfSamplesToProcess * frameSize);
 
     let sum = 0;
     let len = 0;
+    let delta = 0;
     let max: number | undefined;
+    const oneValueDelta = indexToTimestamp(1);
 
     const process = (b: number, e: number) =>
         new Promise<{ begin: number; end: number }>(res => {
@@ -64,8 +67,10 @@ export const calcStats = (
                             }
                         }
 
+                        delta += data.getLength() * oneValueDelta;
+
                         res({
-                            begin: e + indexToTimestamp(1),
+                            begin: e + oneValueDelta,
                             end: Math.min(
                                 end,
                                 e +
@@ -81,7 +86,7 @@ export const calcStats = (
                 return;
             }
             if (range.end === end) {
-                onComplete(sum / (len || 1), max ?? 0, end - begin);
+                onComplete(sum / (len || 1), max ?? 0, delta);
             } else {
                 process(range.begin, range.end);
             }
@@ -498,13 +503,13 @@ export default (): DataAccumulator => ({
         onLoading?: (loading: boolean) => void
     ) {
         // We want an extra sample from both end to show line going out of chart
-        begin = Math.max(0, normalizeTime(begin)); // normalizeTime floors
+        begin = Math.max(0, normalizeTimeFloor(begin)); // normalizeTime floors
 
         end = Math.min(
             DataManager().getTimestamp(),
-            normalizeTime(end) === end
+            normalizeTimeFloor(end) === end
                 ? end
-                : normalizeTime(end) + DataManager().getSamplingTime()
+                : normalizeTimeFloor(end) + DataManager().getSamplingTime()
         );
 
         if (maxNumberOfPoints === 0) {
