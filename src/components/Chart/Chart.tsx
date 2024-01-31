@@ -429,7 +429,12 @@ const Chart = () => {
         setWindowStats({
             max,
             average,
-            delta: Math.min(windowEnd, DataManager().getTimestamp()) - begin,
+            delta:
+                DataManager().getTotalSavedRecords() > 0
+                    ? Math.min(windowEnd, DataManager().getTimestamp()) -
+                      begin +
+                      indexToTimestamp(1)
+                    : 0,
         });
     }, [
         dataProcessor,
