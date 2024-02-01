@@ -20,7 +20,7 @@ import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 
 import { DataManager } from '../../globals';
-import { isSamplingRunning } from '../../slices/appSlice';
+import { appState, deviceOpen, isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     getCursorRange,
@@ -156,6 +156,8 @@ export default ({
     const samplingMode = useSelector(getSamplingMode);
     const triggerLevel = useSelector(getTriggerValue);
     const triggerOrigin = useSelector(getTriggerOrigin);
+    const { fileLoaded } = useSelector(appState);
+    const deviceInUse = useSelector(deviceOpen);
 
     const live = liveMode && samplingRunning;
     const snapping = numberOfSamplesPerPixel <= 0.16 && !live;
@@ -184,6 +186,9 @@ export default ({
             },
         ],
     };
+
+    const showTriggerItems =
+        samplingMode === 'Trigger' && !fileLoaded && deviceInUse;
 
     const chartOptions: AmpereChartOptions = {
         scales: {
@@ -246,12 +251,12 @@ export default ({
         windowDuration,
         cursor: { cursorBegin, cursorEnd },
         id: 'ampereChart',
-        triggerHandleVisible: samplingMode === 'Trigger',
+        triggerHandleVisible: showTriggerItems,
         updateTriggerLevel: level => {
             console.log(level);
             dispatch(setTriggerLevel(level / 1000));
         },
-        triggerOrigin,
+        triggerOrigin: showTriggerItems ? triggerOrigin : undefined,
         triggerLevel: triggerLevel * 1000,
     };
 
