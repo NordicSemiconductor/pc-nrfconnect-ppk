@@ -12,8 +12,6 @@
 
 -   Changed export format to `.ppk2`. `.ppk` has been deprecated and importing
     this format will autogenerate a `.ppk2` file next to the `.ppk` file.
--   Exporting of data now works also when the data was loaded from file. This
-    allows partial export to `.csv`.
 -   Removed limitations for recording duration by using the disk to store the
     collected data instead of using RAM.
     -   Default path for the session is in the temp folder. This can be changed
