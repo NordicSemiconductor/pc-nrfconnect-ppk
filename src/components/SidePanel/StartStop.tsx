@@ -101,7 +101,6 @@ export default () => {
             />
 
             <Button
-                title={startStopTitle}
                 size="lg"
                 onClick={async () => {
                     await DataManager().reset();
