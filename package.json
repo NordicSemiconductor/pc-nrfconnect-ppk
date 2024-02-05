@@ -20,7 +20,7 @@
         }
     },
     "engines": {
-        "nrfconnect": ">=5.0.0"
+        "nrfconnect": ">=4.4.0"
     },
     "files": [
         "dist/",
