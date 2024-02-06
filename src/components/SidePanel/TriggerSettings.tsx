@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     logger,
@@ -28,18 +28,23 @@ import {
     TriggerTypeValues,
 } from '../../slices/triggerSlice';
 
-const useSynchronizationIfChangedFromOutside = <T,>(
-    externalValue: T,
-    setInternalValue: (value: T) => void
-) => {
-    const previousExternalValue = useRef(externalValue);
-    useEffect(() => {
-        if (previousExternalValue.current !== externalValue) {
-            setInternalValue(externalValue);
-            previousExternalValue.current = externalValue;
-        }
-    });
-    return previousExternalValue.current;
+type CurrentUnit = 'mA' | '\u00B5A';
+const getMin = (unit: CurrentUnit) => {
+    switch (unit) {
+        case 'mA':
+            return 1;
+        case '\u00B5A':
+            return 0.2;
+    }
+};
+
+const convertToMicroAmps = (unit: CurrentUnit, value: number) => {
+    switch (unit) {
+        case 'mA':
+            return value * 1000;
+        case '\u00B5A':
+            return value;
+    }
 };
 
 export default () => {
@@ -50,6 +55,8 @@ export default () => {
     const autoExport = useSelector(getAutoExportTrigger);
     const triggerSaveQueueLength = useSelector(getSavingEventQueueLength);
     const autoExportTrigger = useSelector(getAutoExportTrigger);
+
+    const [levelUnit, setLevelUnit] = useState<CurrentUnit>('µA');
 
     useEffect(() => {
         if (triggerSaveQueueLength >= 10 && autoExportTrigger) {
@@ -69,10 +76,15 @@ export default () => {
     const [internalTriggerValue, setInternalTriggerValue] =
         useState(triggerValue);
 
-    useSynchronizationIfChangedFromOutside(
-        triggerValue,
-        setInternalTriggerValue
-    );
+    useEffect(() => {
+        if (triggerValue > 1000) {
+            setLevelUnit('mA');
+            setInternalTriggerValue(Number((triggerValue / 1000).toFixed(4)));
+        } else {
+            setLevelUnit('µA');
+            setInternalTriggerValue(Number(triggerValue.toFixed(3)));
+        }
+    }, [triggerValue]);
 
     return (
         <>
@@ -92,17 +104,19 @@ export default () => {
             />
             <NumberInputSliderWithUnit
                 range={{
-                    min: 0.4,
-                    max: 1000000,
-                    decimals: 3,
+                    min: getMin(levelUnit),
+                    max: levelUnit === 'µA' ? 2000 : 1000,
+                    decimals: levelUnit === 'µA' ? 3 : 4,
                     step: 0.001,
                 }}
                 value={internalTriggerValue}
                 onChange={v => setInternalTriggerValue(v)}
                 onChangeComplete={(value: number) => {
-                    dispatch(setTriggerLevel(value));
+                    dispatch(
+                        setTriggerLevel(convertToMicroAmps(levelUnit, value))
+                    );
                 }}
-                unit="uA"
+                unit={levelUnit}
                 label="Level"
             />
             <Toggle

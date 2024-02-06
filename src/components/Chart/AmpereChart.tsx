@@ -252,8 +252,7 @@ export default ({
         id: 'ampereChart',
         triggerHandleVisible: showTriggerItems,
         updateTriggerLevel: level => {
-            console.log(level);
-            dispatch(setTriggerLevel(level / 1000));
+            dispatch(setTriggerLevel(Math.max(0.2, level / 1000)));
         },
         triggerOrigin: showTriggerItems ? triggerOrigin : undefined,
         triggerLevel: triggerLevel * 1000,
