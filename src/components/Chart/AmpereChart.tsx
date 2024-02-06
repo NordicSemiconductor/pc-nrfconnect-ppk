@@ -269,6 +269,8 @@ export default ({
         {
             id: 'notifier',
             afterLayout(chart: Chart) {
+                if (chart.chartArea.width <= 0) return;
+
                 const { chartArea, width } = chart;
                 chartArea.right = width - rightMargin;
                 const { left, right } = chart.chartArea;
