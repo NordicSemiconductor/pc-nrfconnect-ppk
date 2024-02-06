@@ -459,6 +459,12 @@ export const processTrigger =
             logger.debug('skipping trigger out of sync');
             return;
         }
+
+        if (latestTrigger !== undefined) {
+            logger.debug('Still recording active trigger');
+            return;
+        }
+
         const trigger = DataManager().addTimeReachedTrigger(
             getState().app.trigger.recordingLength * 1000 // ms to uS
         );
@@ -480,10 +486,6 @@ export const processTrigger =
 
         latestTrigger = trigger;
         const timeProgressUpdate = setInterval(() => {
-            if (latestTrigger !== trigger) {
-                clearInterval(timeProgressUpdate);
-                return;
-            }
             updateDataCollection();
         }, 500);
 
@@ -565,35 +567,28 @@ export const processTrigger =
                     });
             }
 
-            // Only render if this is the latest trigger.
-            if (latestTrigger === trigger) {
-                // createSession
-                if (!session)
-                    session = await createSessionData(
-                        buffer,
-                        getSessionRootFolder(getState()),
-                        info.absoluteTime
-                    );
-
-                dispatch(
-                    setTriggerOrigin(indexToTimestamp(info.triggerOrigin))
+            // createSession
+            if (!session)
+                session = await createSessionData(
+                    buffer,
+                    getSessionRootFolder(getState()),
+                    info.absoluteTime
                 );
 
-                resetCache();
-                latestTrigger = undefined;
-                // Auto load triggered data
-                await DataManager().loadSession(
-                    session.fileBuffer,
-                    session.foldingBuffer
-                );
-                dispatch(setLatestDataTimestamp(recordingDuration));
-                dispatch(
-                    chartWindowAction(recordingDuration, recordingDuration)
-                );
-                dispatch(triggerForceRerenderMainChart());
-                dispatch(triggerForceRerenderMiniMap());
-                dispatch(miniMapAnimationAction());
-            }
+            dispatch(setTriggerOrigin(indexToTimestamp(info.triggerOrigin)));
+
+            resetCache();
+            latestTrigger = undefined;
+            // Auto load triggered data
+            await DataManager().loadSession(
+                session.fileBuffer,
+                session.foldingBuffer
+            );
+            dispatch(setLatestDataTimestamp(recordingDuration));
+            dispatch(chartWindowAction(recordingDuration, recordingDuration));
+            dispatch(triggerForceRerenderMainChart());
+            dispatch(triggerForceRerenderMiniMap());
+            dispatch(miniMapAnimationAction());
 
             if (session) {
                 releaseLastSession?.();
