@@ -91,7 +91,7 @@ export default () => {
             <NumberInputSliderWithUnit
                 range={{
                     min: 1,
-                    max: 10000,
+                    max: 1000,
                     decimals: 2,
                     step: 0.01,
                 }}
