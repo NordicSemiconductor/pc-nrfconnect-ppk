@@ -63,6 +63,8 @@ const progressSlice = createSlice({
 
 export const getProgressDialogInfo = (state: RootState) =>
     state.app.progressDialog;
+export const getShowProgressDialog = (state: RootState) =>
+    state.app.progressDialog.show;
 
 export const {
     showProgressDialog,
