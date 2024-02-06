@@ -14,6 +14,7 @@ import {
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import MinimapOptions from '../../features/minimap/MinimapOptions';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
+import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
 import {
     advancedMode as advancedModeSelector,
     appState,
@@ -48,6 +49,7 @@ export default () => {
     const deviceOpen = useSelector(deviceOpenSelector);
     const { fileLoaded } = useSelector(appState);
     const sessionActive = useSelector(isSessionActive);
+    const showProgressDialog = useSelector(getShowProgressDialog);
 
     return (
         <SidePanel className="side-panel tw-mt-9">
@@ -77,7 +79,7 @@ export default () => {
             )}
             {!fileLoaded && !deviceOpen && advancedMode && <SessionSettings />}
             <DeprecatedDeviceDialog />
-            <ProgressDialog />
+            {showProgressDialog && <ProgressDialog />}
         </SidePanel>
     );
 };
