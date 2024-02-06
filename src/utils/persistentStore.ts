@@ -9,7 +9,6 @@ import {
     getPersistentStore,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { type SamplingMode } from '../slices/dataLoggerSlice';
 import { type TriggerType } from '../slices/triggerSlice';
 
 const LAST_SAVE_DIR = 'lastSaveDir';
@@ -126,12 +125,6 @@ export const getDiskFullTrigger = (defaultValue: number) =>
     store.get(`disk-full-trigger`, defaultValue);
 export const setDiskFullTrigger = (sizeInMb: number) => {
     store.set(`disk-full-trigger`, sizeInMb);
-};
-
-export const getSamplingMode = (defaultValue: SamplingMode) =>
-    store.get(`sampling-mode`, defaultValue);
-export const setSamplingMode = (mode: SamplingMode) => {
-    store.set(`sampling-mode`, mode);
 };
 
 export const getTriggerLevel = (defaultValue: number) =>

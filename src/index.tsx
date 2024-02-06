@@ -11,7 +11,7 @@ import {
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import DataLogger from './components/DataLogger/DataLogger';
+import Chart from './components/Chart/Chart';
 import DeviceSelector from './components/DeviceSelector';
 import SidePanel from './components/SidePanel/SidePanel';
 import reducers from './slices';
@@ -26,6 +26,9 @@ render(
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
         feedback
-        panes={[{ name: 'Data Logger', Main: DataLogger }]}
+        panes={[
+            { name: 'Data Logger', Main: Chart },
+            { name: 'Real Time', Main: Chart },
+        ]}
     />
 );

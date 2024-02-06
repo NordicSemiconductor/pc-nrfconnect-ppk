@@ -22,7 +22,8 @@ import {
     toggleYAxisLock,
     toggleYAxisLog,
 } from '../../slices/chartSlice';
-import { dataLoggerState, getSamplingMode } from '../../slices/dataLoggerSlice';
+import { dataLoggerState } from '../../slices/dataLoggerSlice';
+import { isDataLoggerPane } from '../../utils/panes';
 import { AmpereChartJS } from './AmpereChart';
 import ChartOptions from './ChartOptions';
 
@@ -60,7 +61,7 @@ const ChartTop = ({
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const samplingRunning = useSelector(isSamplingRunning);
     const fps = useSelector(getLiveModeFPS);
-    const mode = useSelector(getSamplingMode);
+    const dataLogger = useSelector(isDataLoggerPane);
     const { yMin, yMax } = useSelector(getChartYAxisRange);
     const yAxisLock = yMin != null && yMax != null;
 
@@ -88,7 +89,7 @@ const ChartTop = ({
             >
                 <span className="mdi mdi-cog" />
             </button>
-            <div className="tw-order-1 tw-flex tw-items-center tw-gap-x-4">
+            <div className="tw-order-1 tw-flex tw-w-28 tw-items-center tw-gap-x-4">
                 <Toggle
                     title="Enable in order to explicitly set the start and end of the y-axis"
                     label="Lock Y-axis"
@@ -128,17 +129,19 @@ const ChartTop = ({
                     />
                 ))}
             </div>
-            <div className="tw-order-1 tw-flex tw-flex-row tw-justify-end">
-                <Toggle
-                    label={`${
-                        live && mode === 'Live' ? `(${fps} FPS) ` : ''
-                    }LIVE VIEW`}
-                    onToggle={onLiveModeChange}
-                    isToggled={live && mode === 'Live'}
-                    variant="primary"
-                    disabled={!samplingRunning || mode !== 'Live'}
-                />
+
+            <div className="tw-order-1 tw-flex tw-w-28 tw-flex-row tw-justify-end">
+                {dataLogger && (
+                    <Toggle
+                        label={`${live ? `(${fps} FPS) ` : ''}LIVE VIEW`}
+                        onToggle={onLiveModeChange}
+                        isToggled={live}
+                        variant="primary"
+                        disabled={!samplingRunning}
+                    />
+                )}
             </div>
+
             <ChartSettingsDialog
                 zoomToWindow={zoomToWindow}
                 chartRef={chartRef}
