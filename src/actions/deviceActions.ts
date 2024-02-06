@@ -463,7 +463,6 @@ export const processTrigger =
         }
 
         if (latestTrigger !== undefined) {
-            logger.debug('Still recording active trigger');
             return;
         }
 
