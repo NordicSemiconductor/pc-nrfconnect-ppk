@@ -14,7 +14,6 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { appState } from '../../slices/appSlice';
-import { isSessionActive } from '../../slices/chartSlice';
 import {
     dataLoggerState,
     setAutoStopSampling,
@@ -34,7 +33,6 @@ const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
 
 export default () => {
     const dispatch = useDispatch();
-    const sessionActive = useSelector(isSessionActive);
 
     const { samplingRunning } = useSelector(appState);
     const { sampleFreq, duration, durationUnit, autoStopSampling } =
@@ -69,8 +67,7 @@ export default () => {
                             onChange={(v: number) =>
                                 dispatch(updateDuration(v))
                             }
-                            onChangeComplete={() => {}}
-                            disabled={samplingRunning || sessionActive}
+                            disabled={samplingRunning}
                         />
                         <div className="tw-ml-4 tw-w-20">
                             <Dropdown
@@ -84,6 +81,7 @@ export default () => {
                                         v => v.value === durationUnit
                                     ) ?? uintDropdownItem[0]
                                 }
+                                disabled={samplingRunning}
                             />
                         </div>
                     </div>
