@@ -237,14 +237,20 @@ const Chart = () => {
         ]
     );
 
-    const begin = Math.max(0, windowEnd - windowDuration);
+    const begin = useMemo(
+        () => Math.max(0, windowEnd - windowDuration),
+        [windowDuration, windowEnd]
+    );
 
-    const cursorData: CursorData = {
-        cursorBegin,
-        cursorEnd,
-        begin,
-        end: windowEnd,
-    };
+    const cursorData: CursorData = useMemo(
+        () => ({
+            cursorBegin,
+            cursorEnd,
+            begin,
+            end: windowEnd,
+        }),
+        [begin, cursorBegin, cursorEnd, windowEnd]
+    );
 
     const [numberOfPixelsInWindow, setNumberOfPixelsInWindow] = useState(0);
     const [chartAreaWidth, setChartAreaWidth] = useState(0);
@@ -332,16 +338,17 @@ const Chart = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dataLoggerPane, realTimePane]);
 
-    const samplesInWindowView = timestampToIndex(windowDuration);
-    const samplesPerPixel =
-        numberOfPixelsInWindow === 0
+    const samplesPerPixel = useMemo(() => {
+        const samplesInWindowView = timestampToIndex(windowDuration);
+        return numberOfPixelsInWindow === 0
             ? 2
             : samplesInWindowView / numberOfPixelsInWindow;
+    }, [numberOfPixelsInWindow, windowDuration]);
 
-    const [ampereLineData, setAmpereLineData] = useState<AmpereState[]>([]);
-    const [bitsLineData, setBitsLineData] = useState<DigitalChannelStates[]>(
-        []
-    );
+    const [data, setData] = useState<{
+        ampereLineData: AmpereState[];
+        bitsLineData: DigitalChannelStates[];
+    }>({ ampereLineData: [], bitsLineData: [] });
 
     const [windowStats, setWindowStats] = useState<{
         average: number;
@@ -432,8 +439,11 @@ const Chart = () => {
 
         max /= 1000;
 
-        setAmpereLineData(processedData.ampereLineData);
-        setBitsLineData(processedData.bitsLineData);
+        setData({
+            ampereLineData: processedData.ampereLineData,
+            bitsLineData: processedData.bitsLineData,
+        });
+
         setWindowStats({
             max,
             average,
@@ -458,8 +468,7 @@ const Chart = () => {
 
     useEffect(() => {
         if (xAxisMax === 0) {
-            setAmpereLineData([]);
-            setBitsLineData([]);
+            setData({ ampereLineData: [], bitsLineData: [] });
             setWindowStats(null);
         }
     }, [xAxisMax]);
@@ -518,48 +527,63 @@ const Chart = () => {
         }
     }, [begin, liveMode, updateChart, windowEnd, rerenderTrigger]);
 
-    const chartCursorActive = cursorBegin !== null || cursorEnd !== null;
+    const chartCursorActive = useMemo(
+        () => cursorBegin !== null || cursorEnd !== null,
+        [cursorBegin, cursorEnd]
+    );
 
-    const selectionButtons = [
-        <button
-            type="button"
-            className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
-            key="clear-selection-btn"
-            disabled={!chartCursorActive}
-            onClick={resetCursor}
-        >
-            CLEAR
-        </button>,
-        <button
-            type="button"
-            className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
-            key="select-all-btn"
-            disabled={
-                DataManager().getTotalSavedRecords() <= 0 ||
-                selectionStatsProcessing
-            }
-            onClick={() => chartCursor(0, DataManager().getTimestamp())}
-        >
-            SELECT ALL
-        </button>,
-        <button
-            type="button"
-            className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
-            key="zoom-to-selection-btn"
-            disabled={
-                cursorBegin == null ||
-                cursorEnd == null ||
-                selectionStatsProcessing
-            }
-            onClick={() => {
-                if (cursorBegin != null && cursorEnd != null) {
-                    chartWindow(cursorBegin, cursorEnd);
+    const selectionButtons = useMemo(
+        () => [
+            <button
+                type="button"
+                className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
+                key="clear-selection-btn"
+                disabled={!chartCursorActive}
+                onClick={resetCursor}
+            >
+                CLEAR
+            </button>,
+            <button
+                type="button"
+                className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
+                key="select-all-btn"
+                disabled={
+                    DataManager().getTotalSavedRecords() <= 0 ||
+                    selectionStatsProcessing
                 }
-            }}
-        >
-            ZOOM TO SELECTION
-        </button>,
-    ];
+                onClick={() => chartCursor(0, DataManager().getTimestamp())}
+            >
+                SELECT ALL
+            </button>,
+            <button
+                type="button"
+                className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
+                key="zoom-to-selection-btn"
+                disabled={
+                    cursorBegin == null ||
+                    cursorEnd == null ||
+                    selectionStatsProcessing
+                }
+                onClick={() => {
+                    if (cursorBegin != null && cursorEnd != null) {
+                        chartWindow(cursorBegin, cursorEnd);
+                    }
+                }}
+            >
+                ZOOM TO SELECTION
+            </button>,
+        ],
+        [
+            chartCursor,
+            chartCursorActive,
+            chartWindow,
+            cursorBegin,
+            cursorEnd,
+            resetCursor,
+            selectionStatsProcessing,
+        ]
+    );
+
     return (
         <div className="tw-relative tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-between tw-gap-4 tw-text-gray-600">
             <div className="scroll-bar-white-bg tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-bg-white tw-p-2">
@@ -587,7 +611,7 @@ const Chart = () => {
                     numberOfSamplesPerPixel={samplesPerPixel}
                     chartRef={chartRef}
                     cursorData={cursorData}
-                    lineData={ampereLineData}
+                    lineData={data.ampereLineData}
                 />
                 <TimeSpanBottom
                     cursorBegin={cursorBegin}
@@ -615,7 +639,7 @@ const Chart = () => {
             </div>
             {digitalChannelsVisible && (
                 <DigitalChannels
-                    lineData={bitsLineData}
+                    lineData={data.bitsLineData}
                     digitalChannels={digitalChannels}
                     zoomedOutTooFar={zoomedOutTooFarForDigitalChannels}
                     /* ts-expect-error -- temporary */
