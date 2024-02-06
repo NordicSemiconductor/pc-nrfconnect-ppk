@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    Button,
+    ConfirmationDialog,
     Group,
     Slider,
     StartStopButton,
@@ -34,6 +34,10 @@ import {
 } from '../../slices/triggerSlice';
 import { selectDirectoryDialog } from '../../utils/fileUtils';
 import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import {
+    getDoNotAskStartAndClear,
+    setDoNotAskStartAndClear,
+} from '../../utils/persistentStore';
 import LiveModeSettings from './LiveModeSettings';
 import TriggerSettings from './TriggerSettings';
 
@@ -56,68 +60,91 @@ export default () => {
 
     const startStopTitle = !samplingRunning ? startButtonTooltip : undefined;
 
+    const [showDialog, setShowDialog] = useState(false);
+
+    const startAndClear = async () => {
+        if (realTimePane && autoExport) {
+            const filePath = await selectDirectoryDialog();
+            dispatch(setTriggerSavePath(filePath));
+        }
+
+        await DataManager().reset();
+        dispatch(resetChartTime());
+        dispatch(resetTriggerOrigin());
+        dispatch(resetCursor());
+
+        dispatch(samplingStart());
+        setShowDialog(false);
+    };
+
     return (
-        <Group heading="Sampling parameters">
-            {dataLogger && <LiveModeSettings />}
-            {realTime && <TriggerSettings />}
-            <div className="sample-frequency-group">
-                <Form.Label htmlFor="data-logger-sampling-frequency">
-                    {sampleFreq.toLocaleString('en')} samples per second
-                </Form.Label>
-                <Slider
-                    ticks
-                    id="data-logger-sampling-frequency"
-                    values={[sampleFreqLog10]}
-                    range={{ min: 0, max: maxFreqLog10 }}
-                    onChange={[
-                        v =>
-                            dispatch(
-                                updateSampleFreqLog10({
-                                    sampleFreqLog10: v,
-                                })
-                            ),
-                    ]}
-                    onChangeComplete={() => {}}
-                    disabled={samplingRunning || sessionActive}
+        <>
+            <Group heading="Sampling parameters">
+                {dataLogger && <LiveModeSettings />}
+                {realTime && <TriggerSettings />}
+                <div className="sample-frequency-group">
+                    <Form.Label htmlFor="data-logger-sampling-frequency">
+                        {sampleFreq.toLocaleString('en')} samples per second
+                    </Form.Label>
+                    <Slider
+                        ticks
+                        id="data-logger-sampling-frequency"
+                        values={[sampleFreqLog10]}
+                        range={{ min: 0, max: maxFreqLog10 }}
+                        onChange={[
+                            v =>
+                                dispatch(
+                                    updateSampleFreqLog10({
+                                        sampleFreqLog10: v,
+                                    })
+                                ),
+                        ]}
+                        onChangeComplete={() => {}}
+                        disabled={samplingRunning || sessionActive}
+                    />
+                </div>
+
+                <StartStopButton
+                    title={startStopTitle}
+                    startText="Start"
+                    stopText="Stop"
+                    onClick={async () => {
+                        if (samplingRunning) {
+                            dispatch(samplingStop());
+                            return;
+                        }
+
+                        if (
+                            DataManager().getTimestamp() > 0 &&
+                            !getDoNotAskStartAndClear(false)
+                        ) {
+                            setShowDialog(true);
+                        } else {
+                            await startAndClear();
+                        }
+                    }}
+                    showIcon
+                    variant="secondary"
+                    started={samplingRunning}
                 />
-            </div>
-
-            <StartStopButton
-                title={startStopTitle}
-                startText="Start"
-                stopText="Stop"
-                onClick={async () => {
-                    if (samplingRunning) {
-                        dispatch(samplingStop());
-                        return;
-                    }
-
-                    if (realTimePane && autoExport) {
-                        const filePath = await selectDirectoryDialog();
-                        dispatch(setTriggerSavePath(filePath));
-                    }
-
-                    dispatch(samplingStart());
+            </Group>
+            <ConfirmationDialog
+                confirmLabel="Yes"
+                cancelLabel="No"
+                onConfirm={startAndClear}
+                onCancel={() => {
+                    setShowDialog(false);
                 }}
-                showIcon
-                variant="secondary"
-                started={samplingRunning}
-                disabled={!samplingRunning && sessionActive}
-            />
-
-            <Button
-                size="lg"
-                onClick={async () => {
-                    await DataManager().reset();
-                    dispatch(resetChartTime());
-                    dispatch(resetTriggerOrigin());
-                    dispatch(resetCursor());
+                onOptional={async () => {
+                    setDoNotAskStartAndClear(true);
+                    await startAndClear();
                 }}
-                variant="secondary"
-                disabled={samplingRunning || !sessionActive}
+                optionalLabel="Yes, Don't ask again"
+                isVisible={showDialog}
             >
-                Clear session data
-            </Button>
-        </Group>
+                You have unsaved data and this will be lost. Are you sure you
+                want to proceed?
+            </ConfirmationDialog>
+        </>
     );
 };

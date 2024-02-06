@@ -168,3 +168,10 @@ export const getVoltageRegulatorMaxCapPPK2 = (defaultMaxCap: number) =>
     store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK2 = (maxCap: number) =>
     store.set(VOLTAGE_REGULATOR_MAX_CAP_PPK2, maxCap);
+
+export const getDoNotAskStartAndClear = (defaultValue: boolean) =>
+    store.get(`start-and-clear-data`, defaultValue);
+
+export const setDoNotAskStartAndClear = (value: boolean) => {
+    store.set(`start-and-clear-data`, value);
+};
