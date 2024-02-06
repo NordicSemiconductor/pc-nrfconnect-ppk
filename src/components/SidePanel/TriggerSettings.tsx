@@ -75,6 +75,8 @@ export default () => {
 
     const [internalTriggerValue, setInternalTriggerValue] =
         useState(triggerValue);
+    const [internalTriggerLength, setInternalTriggerLength] =
+        useState(recordingLength);
 
     useEffect(() => {
         if (triggerValue > 1000) {
@@ -86,6 +88,10 @@ export default () => {
         }
     }, [triggerValue]);
 
+    useEffect(() => {
+        setInternalTriggerLength(recordingLength);
+    }, [recordingLength]);
+
     return (
         <>
             <NumberInputSliderWithUnit
@@ -95,8 +101,9 @@ export default () => {
                     decimals: 2,
                     step: 0.01,
                 }}
-                value={recordingLength}
-                onChange={(value: number) => {
+                value={internalTriggerLength}
+                onChange={setInternalTriggerLength}
+                onChangeComplete={(value: number) => {
                     dispatch(setTriggerRecordingLength(value));
                 }}
                 unit="ms"
