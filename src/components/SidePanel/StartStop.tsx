@@ -18,11 +18,7 @@ import { unit } from 'mathjs';
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { DataManager } from '../../globals';
 import { appState } from '../../slices/appSlice';
-import {
-    isSessionActive,
-    resetChartTime,
-    resetCursor,
-} from '../../slices/chartSlice';
+import { resetChartTime, resetCursor } from '../../slices/chartSlice';
 import {
     dataLoggerState,
     updateSampleFreqLog10,
@@ -45,7 +41,6 @@ const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
 export default () => {
     const dispatch = useDispatch();
-    const sessionActive = useSelector(isSessionActive);
     const realTimePane = useSelector(isRealTimePane);
     const autoExport = useSelector(getAutoExportTrigger);
     const realTime = useSelector(isRealTimePane);
@@ -100,7 +95,7 @@ export default () => {
                                 ),
                         ]}
                         onChangeComplete={() => {}}
-                        disabled={samplingRunning || sessionActive}
+                        disabled={samplingRunning}
                     />
                 </div>
 
