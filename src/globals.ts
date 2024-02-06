@@ -137,6 +137,10 @@ export const DataManager = () => ({
             return new FileData(Buffer.alloc(0), 0);
         }
 
+        if (options.fileBuffer.getSessionInBytes() === 0) {
+            return new FileData(Buffer.alloc(0), 0);
+        }
+
         const numberOfElements =
             timestampToIndex(toTime) - timestampToIndex(fromTime) + 1;
         const byteOffset = timestampToIndex(fromTime) * frameSize;
