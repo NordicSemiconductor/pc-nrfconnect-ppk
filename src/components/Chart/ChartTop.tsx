@@ -134,7 +134,7 @@ const ChartTop = ({
                         live && mode === 'Live' ? `(${fps} FPS) ` : ''
                     }LIVE VIEW`}
                     onToggle={onLiveModeChange}
-                    isToggled={live && mode !== 'Live'}
+                    isToggled={live && mode === 'Live'}
                     variant="primary"
                     disabled={!samplingRunning || mode !== 'Live'}
                 />
