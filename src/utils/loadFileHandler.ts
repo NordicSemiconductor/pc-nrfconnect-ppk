@@ -19,7 +19,7 @@ import { v4 } from 'uuid';
 import { createInflateRaw } from 'zlib';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { DataManager } from '../globals';
+import { DataManager, timestampToIndex } from '../globals';
 import { canFileFit } from './fileUtils';
 import saveFile, { PPK2Metadata } from './saveFileHandler';
 
@@ -299,7 +299,7 @@ export default async (
         );
 
         await loadPPKData(
-            result.metadata.options.samplesPerSecond,
+            result.metadata.options.timestamp,
             result.dataBuffer,
             result.bits,
             onProgress
@@ -345,40 +345,41 @@ export default async (
 };
 
 const loadPPKData = (
-    samplesPerSec: number,
+    duration: number,
     current: Float32Array,
     bits: Uint16Array,
     onProgress: (message: string, percentage: number) => void
 ) =>
     new Promise<void>(resolve => {
         onProgress('Converting ".ppk" format to  ".ppk2"', 0);
+        const maxIndex = Math.min(current.length, timestampToIndex(duration));
         const maxNumberOfSamplesToProcess = 100_0000;
 
         const process = (b: number, e: number) =>
             new Promise<{ begin: number; end: number }>(res => {
                 setTimeout(() => {
                     for (let i = b; i < e; i += 1) {
-                        DataManager().addData(current[i], bits[i] ?? 0xaaaa); // TODO check if 0xAAAA is default when chanel are off?
+                        DataManager().addData(current[i], bits[i] ?? 0xaaaa); // 0xAAAA is default when chanel are off used to mock old PPK1 kits
                     }
                     res({
                         begin: e,
                         end: Math.min(
                             e + maxNumberOfSamplesToProcess,
-                            current.length
+                            maxIndex
                         ),
                     });
                 });
             }).then(range => {
                 onProgress(
                     'Converting ".ppk" format to  ".ppk2"',
-                    (range.end / current.length) * 100
+                    (range.end / maxIndex) * 100
                 );
-                if (range.end === current.length) {
+                if (range.end === maxIndex) {
                     resolve();
                 } else {
                     process(range.begin, range.end);
                 }
             });
 
-        process(0, Math.min(current.length, maxNumberOfSamplesToProcess));
+        process(0, Math.min(maxIndex, maxNumberOfSamplesToProcess));
     });

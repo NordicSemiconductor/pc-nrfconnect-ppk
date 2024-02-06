@@ -230,7 +230,10 @@ function drawSlider(
             Math.max(0, windowEnd - windowDuration)
         );
 
-        const endWithoutOffset = xScale.getPixelForValue(windowEnd);
+        const endWithoutOffset = Math.min(
+            canvasRectangle.width + offsetLeft,
+            xScale.getPixelForValue(windowEnd)
+        );
 
         const beginWithOffset =
             beginWithoutOffset > 0
