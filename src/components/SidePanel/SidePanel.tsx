@@ -28,13 +28,11 @@ import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
 import Instructions from './Instructions';
-import LiveModeSettings from './LiveModeSettings';
 import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
 import SessionSettings from './SessionSettings';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
-import TriggerSettings from './TriggerSettings';
 
 import './sidepanel.scss';
 
