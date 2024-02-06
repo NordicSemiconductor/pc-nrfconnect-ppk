@@ -89,7 +89,7 @@ const ChartTop = ({
             >
                 <span className="mdi mdi-cog" />
             </button>
-            <div className="tw-order-1 tw-flex tw-w-28 tw-items-center tw-gap-x-4">
+            <div className="tw-w-38 tw-order-1 tw-flex tw-items-center tw-gap-x-4">
                 <Toggle
                     title="Enable in order to explicitly set the start and end of the y-axis"
                     label="Lock Y-axis"
@@ -120,7 +120,7 @@ const ChartTop = ({
                     variant="primary"
                 />
             </div>
-            <div className="tw-order-2 tw-flex tw-w-full tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start lg:tw-order-1 lg:tw-w-fit lg:tw-place-self-auto">
+            <div className="tw-order-2 tw-flex tw-w-full tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start xl:tw-order-1 xl:tw-w-fit xl:tw-place-self-auto">
                 {timeWindowLabels.map(label => (
                     <TimeWindowButton
                         label={label}
@@ -130,7 +130,7 @@ const ChartTop = ({
                 ))}
             </div>
 
-            <div className="tw-order-1 tw-flex tw-w-28 tw-flex-row tw-justify-end">
+            <div className="tw-w-38 tw-order-1 tw-flex tw-flex-row tw-justify-end">
                 {dataLogger && (
                     <Toggle
                         label={`${live ? `(${fps} FPS) ` : ''}LIVE VIEW`}
