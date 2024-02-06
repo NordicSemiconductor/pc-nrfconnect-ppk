@@ -122,6 +122,7 @@ export const samplingStart =
 
 export const samplingStop =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
+        latestTrigger = undefined;
         if (!device) return;
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
@@ -462,7 +463,6 @@ export const processTrigger =
         }
 
         if (latestTrigger !== undefined) {
-            logger.debug('Still recording active trigger');
             return;
         }
 

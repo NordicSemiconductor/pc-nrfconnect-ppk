@@ -284,7 +284,7 @@ export default ({
             {processing && (
                 <div
                     className={classNames(
-                        'tw-absolute tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pl-16 tw-pr-8',
+                        'tw-pointer-events-none tw-absolute tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pl-16 tw-pr-8',
                         timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]'
                     )}
                 >
