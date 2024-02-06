@@ -25,7 +25,6 @@ import {
 } from '../../slices/chartSlice';
 import {
     dataLoggerState,
-    getSamplingMode,
     updateSampleFreqLog10,
 } from '../../slices/dataLoggerSlice';
 import {
@@ -34,15 +33,19 @@ import {
     setTriggerSavePath,
 } from '../../slices/triggerSlice';
 import { selectDirectoryDialog } from '../../utils/fileUtils';
+import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import LiveModeSettings from './LiveModeSettings';
+import TriggerSettings from './TriggerSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
 export default () => {
     const dispatch = useDispatch();
     const sessionActive = useSelector(isSessionActive);
-    const mode = useSelector(getSamplingMode);
+    const realTimePane = useSelector(isRealTimePane);
     const autoExport = useSelector(getAutoExportTrigger);
-
+    const realTime = useSelector(isRealTimePane);
+    const dataLogger = useSelector(isDataLoggerPane);
     const { samplingRunning } = useSelector(appState);
     const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
         useSelector(dataLoggerState);
@@ -55,6 +58,8 @@ export default () => {
 
     return (
         <Group heading="Sampling parameters">
+            {dataLogger && <LiveModeSettings />}
+            {realTime && <TriggerSettings />}
             <div className="sample-frequency-group">
                 <Form.Label htmlFor="data-logger-sampling-frequency">
                     {sampleFreq.toLocaleString('en')} samples per second
@@ -87,7 +92,7 @@ export default () => {
                         return;
                     }
 
-                    if (mode === 'Trigger' && autoExport) {
+                    if (realTimePane && autoExport) {
                         const filePath = await selectDirectoryDialog();
                         dispatch(setTriggerSavePath(filePath));
                     }

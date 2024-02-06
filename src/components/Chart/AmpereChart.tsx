@@ -29,12 +29,12 @@ import {
     isTimestampsVisible,
     showSystemTime,
 } from '../../slices/chartSlice';
-import { getSamplingMode } from '../../slices/dataLoggerSlice';
 import {
     getTriggerOrigin,
     getTriggerValue,
     setTriggerLevel,
 } from '../../slices/triggerSlice';
+import { isRealTimePane } from '../../utils/panes';
 import { type CursorData } from './Chart';
 import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
@@ -153,11 +153,11 @@ export default ({
     const windowDuration = useSelector(getWindowDuration);
     const samplingRunning = useSelector(isSamplingRunning);
     const systemTime = useSelector(showSystemTime);
-    const samplingMode = useSelector(getSamplingMode);
     const triggerLevel = useSelector(getTriggerValue);
     const triggerOrigin = useSelector(getTriggerOrigin);
     const { fileLoaded } = useSelector(appState);
     const deviceInUse = useSelector(deviceOpen);
+    const realTimePane = useSelector(isRealTimePane);
 
     const live = liveMode && samplingRunning;
     const snapping = numberOfSamplesPerPixel <= 0.16 && !live;
@@ -187,8 +187,7 @@ export default ({
         ],
     };
 
-    const showTriggerItems =
-        samplingMode === 'Trigger' && !fileLoaded && deviceInUse;
+    const showTriggerItems = realTimePane && !fileLoaded && deviceInUse;
 
     const chartOptions: AmpereChartOptions = {
         scales: {

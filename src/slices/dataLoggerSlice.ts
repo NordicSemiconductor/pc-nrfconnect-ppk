@@ -11,18 +11,13 @@ import {
     getDuration,
     getDurationUnit,
     getSampleFreq,
-    getSamplingMode as getPersistedSamplingMode,
     setAutoStopSampling as persistAutoStopSampling,
     setDuration as persistDuration,
     setDurationUnit as persistDurationUnit,
     setSampleFreq as persistSampleFreq,
-    setSamplingMode as persistSamplingMode,
     TimeUnit,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
-
-export const SamplingModeValues = ['Live', 'Trigger'] as const;
-export type SamplingMode = (typeof SamplingModeValues)[number];
 
 export interface DataLoggerState {
     samplingTime: number;
@@ -33,7 +28,6 @@ export interface DataLoggerState {
     duration: number;
     durationUnit: TimeUnit;
     autoStopSampling: boolean;
-    mode: SamplingMode;
 }
 
 const initialFreqLog10 = 5;
@@ -46,7 +40,6 @@ const initialState = (): DataLoggerState => ({
     duration: 300,
     durationUnit: 's',
     autoStopSampling: true,
-    mode: getPersistedSamplingMode('Live'),
 });
 
 const dataLoggerSlice = createSlice({
@@ -114,17 +107,12 @@ const dataLoggerSlice = createSlice({
             state,
             action: PayloadAction<{ state: DataLoggerState }>
         ) => ({ ...state, ...action.payload.state }),
-        setSamplingMode: (state, action: PayloadAction<SamplingMode>) => {
-            state.mode = action.payload;
-            persistSamplingMode(action.payload);
-        },
     },
 });
 
 export const dataLoggerState = (state: RootState) => state.app.dataLogger;
 export const getSampleFrequency = (state: RootState) =>
     state.app.dataLogger.sampleFreq;
-export const getSamplingMode = (state: RootState) => state.app.dataLogger.mode;
 
 export const {
     setSamplingAttrsAction,
@@ -133,7 +121,6 @@ export const {
     updateDurationUnit,
     setDataLoggerState,
     setAutoStopSampling,
-    setSamplingMode,
 } = dataLoggerSlice.actions;
 
 export default dataLoggerSlice.reducer;
