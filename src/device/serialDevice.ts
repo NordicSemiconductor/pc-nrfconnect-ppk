@@ -363,18 +363,6 @@ class SerialDevice extends Device {
         this.resetDataLossCounter();
         return super.ppkAverageStart();
     }
-
-    ppkTriggerSet() {
-        return this.ppkAverageStart();
-    }
-
-    ppkTriggerStop() {
-        return this.ppkAverageStop();
-    }
-
-    ppkTriggerSingleSet() {
-        return this.ppkAverageStart();
-    }
 }
 
 export default SerialDevice;
