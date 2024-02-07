@@ -27,6 +27,7 @@ import {
     getDiskFullTrigger,
     getSessionRootFolder,
     setFileLoadedAction,
+    setSavePending,
 } from '../slices/appSlice';
 import {
     resetChartTime,
@@ -95,6 +96,8 @@ export const save =
                     dispatch(updateProgress({ indeterminate: true, message }));
                 }
             );
+
+            dispatch(setSavePending(false));
             dispatch(closeProgressDialog());
 
             logger.info(`State saved to: ${filename}`);

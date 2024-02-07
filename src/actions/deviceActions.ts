@@ -39,11 +39,13 @@ import {
     deviceOpenedAction,
     getDiskFullTrigger,
     getSessionRootFolder,
+    isSavePending,
     samplingStartAction,
     samplingStoppedAction,
     setDeviceRunningAction,
     setFileLoadedAction,
     setPowerModeAction,
+    setSavePending,
 } from '../slices/appSlice';
 import {
     animationAction,
@@ -232,6 +234,9 @@ export const open =
                 nbSamples = 0;
             }
 
+            if (!isSavePending(getState())) {
+                dispatch(setSavePending(true));
+            }
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 

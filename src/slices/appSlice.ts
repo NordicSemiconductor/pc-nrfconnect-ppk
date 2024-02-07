@@ -29,6 +29,7 @@ interface AppState {
     fileLoaded: boolean;
     diskFullLimitMb?: number;
     sessionFolder?: string;
+    savePending: boolean;
 }
 
 const initialState = (): AppState => ({
@@ -41,7 +42,7 @@ const initialState = (): AppState => ({
     samplingRunning: false,
     isSaveChoiceDialogVisible: false,
     isExportDialogVisible: false,
-    fileLoaded: false,
+    savePending: false,
 });
 
 const appSlice = createSlice({
@@ -98,6 +99,9 @@ const appSlice = createSlice({
         setDiskFullTrigger: (state, action: PayloadAction<number>) => {
             state.diskFullLimitMb = action.payload;
         },
+        setSavePending: (state, action: PayloadAction<boolean>) => {
+            state.savePending = action.payload;
+        },
     },
 });
 
@@ -111,6 +115,7 @@ export const getSessionRootFolder = (state: RootState) =>
     state.app.app.sessionFolder ?? getPreferredSessionLocation(os.tmpdir());
 export const getDiskFullTrigger = (state: RootState) =>
     state.app.app.diskFullLimitMb ?? getPersistedDiskFullTrigger(4096);
+export const isSavePending = (state: RootState) => state.app.app.savePending;
 
 export const {
     deviceOpenedAction,
@@ -126,6 +131,7 @@ export const {
     samplingStoppedAction,
     setSessionRootFolder,
     setDiskFullTrigger,
+    setSavePending,
 } = appSlice.actions;
 
 export default appSlice.reducer;
