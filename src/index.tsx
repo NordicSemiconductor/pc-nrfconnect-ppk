@@ -23,7 +23,7 @@ import './index.scss';
 
 telemetry.enableTelemetry();
 
-const ChartWrapper = () => {
+const ChartWrapper: React.FC<{ active: boolean }> = ({ active }) => {
     const currentMode = useSelector(getRecordingMode);
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const realTimePane = useSelector(isRealTimePane);
@@ -43,7 +43,7 @@ const ChartWrapper = () => {
             </div>
         );
 
-    return <Chart />;
+    return active ? <Chart /> : null;
 };
 
 render(
