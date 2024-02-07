@@ -15,10 +15,12 @@ import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDe
 import MinimapOptions from '../../features/minimap/MinimapOptions';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
+import { updateTitle } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
     appState,
     deviceOpen as deviceOpenSelector,
+    getFileLoaded,
     isFileLoaded,
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
@@ -37,9 +39,36 @@ import StartStop from './StartStop';
 
 import './sidepanel.scss';
 
+const useAppTitle = () => {
+    const device = useSelector(selectedDevice);
+    const fileName = useSelector(getFileLoaded);
+    const pendingSave = useSelector(isSavePending);
+
+    useEffect(() => {
+        if (fileName) {
+            updateTitle(fileName);
+            return;
+        }
+
+        let title = '';
+        if (device?.serialNumber) {
+            title += device.serialNumber;
+        }
+
+        if (pendingSave) {
+            title += ' - Unsaved data*';
+        }
+
+        updateTitle(title);
+    });
+
+    return null;
+};
+
 export default () => {
     const dispatch = useDispatch();
 
+    useAppTitle();
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
     const fileLoaded = useSelector(isFileLoaded);

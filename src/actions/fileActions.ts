@@ -21,7 +21,7 @@ import {
     showProgressDialog,
     updateProgress,
 } from '../features/ProgressDialog/progressSlice';
-import { DataManager, updateTitle } from '../globals';
+import { DataManager } from '../globals';
 import type { RootState } from '../slices';
 import {
     getDiskFullTrigger,
@@ -134,7 +134,6 @@ export const load =
         dispatch(resetChartTime());
         dispatch(resetMinimap());
         dispatch(setLiveMode(false));
-        updateTitle(filename);
 
         dispatch(
             showProgressDialog({

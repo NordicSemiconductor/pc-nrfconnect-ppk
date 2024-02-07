@@ -31,7 +31,6 @@ import {
     frameSize,
     indexToTimestamp,
     microSecondsPerSecond,
-    updateTitle,
 } from '../globals';
 import { RootState } from '../slices';
 import {
@@ -158,7 +157,6 @@ export const close =
         device = null;
         dispatch(deviceClosedAction());
         logger.info('PPK closed');
-        updateTitle();
     };
 
 const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
@@ -356,7 +354,6 @@ export const open =
         );
 
         logger.info('PPK opened');
-        updateTitle(deviceInfo.serialNumber);
 
         device!.on('error', (message, error) => {
             logger.error(message);
