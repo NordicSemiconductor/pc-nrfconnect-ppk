@@ -5,7 +5,11 @@
  */
 
 import { dialog, getCurrentWindow } from '@electron/remote';
-import { AppThunk, logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    AppThunk,
+    logger,
+    setCurrentPane,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import fs from 'fs';
 import { dirname, join } from 'path';
@@ -38,6 +42,7 @@ import {
 } from '../slices/chartSlice';
 import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
+import { DATA_LOGGER } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -153,6 +158,7 @@ export const load =
                 }
             );
 
+            dispatch(setCurrentPane(DATA_LOGGER));
             dispatch(closeProgressDialog());
 
             if (timestamp) {
