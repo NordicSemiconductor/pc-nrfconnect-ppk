@@ -26,7 +26,7 @@ interface AppState {
     samplingRunning: boolean;
     isSaveChoiceDialogVisible: boolean;
     isExportDialogVisible: boolean;
-    fileLoaded: boolean;
+    fileLoadedName?: string;
     diskFullLimitMb?: number;
     sessionFolder?: string;
     savePending: boolean;
@@ -81,8 +81,11 @@ const appSlice = createSlice({
         hideExportDialog: state => {
             state.isExportDialogVisible = false;
         },
-        setFileLoadedAction: (state, action: PayloadAction<boolean>) => {
-            state.fileLoaded = action.payload;
+        setFileLoadedAction: (state, action: PayloadAction<string>) => {
+            state.fileLoadedName = action.payload;
+        },
+        clearFileLoadedAction: state => {
+            state.fileLoadedName = undefined;
         },
         toggleAdvancedModeAction: state => {
             state.advancedMode = !state.advancedMode;
@@ -116,6 +119,9 @@ export const getSessionRootFolder = (state: RootState) =>
 export const getDiskFullTrigger = (state: RootState) =>
     state.app.app.diskFullLimitMb ?? getPersistedDiskFullTrigger(4096);
 export const isSavePending = (state: RootState) => state.app.app.savePending;
+export const getFileLoaded = (state: RootState) => state.app.app.fileLoadedName;
+export const isFileLoaded = (state: RootState) =>
+    !!state.app.app.fileLoadedName;
 
 export const {
     deviceOpenedAction,
@@ -132,6 +138,7 @@ export const {
     setSessionRootFolder,
     setDiskFullTrigger,
     setSavePending,
+    clearFileLoadedAction,
 } = appSlice.actions;
 
 export default appSlice.reducer;

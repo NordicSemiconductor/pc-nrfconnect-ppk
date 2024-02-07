@@ -171,7 +171,7 @@ export const load =
                 dispatch(miniMapAnimationAction());
             }
 
-            dispatch(setFileLoadedAction(true));
+            dispatch(setFileLoadedAction(filename));
         } catch (error) {
             dispatch(setErrorMessage(describeError(error)));
         }

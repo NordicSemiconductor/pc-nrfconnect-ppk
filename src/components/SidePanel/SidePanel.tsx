@@ -19,6 +19,7 @@ import {
     advancedMode as advancedModeSelector,
     appState,
     deviceOpen as deviceOpenSelector,
+    isFileLoaded,
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
@@ -41,7 +42,7 @@ export default () => {
 
     const advancedMode = useSelector(advancedModeSelector);
     const deviceOpen = useSelector(deviceOpenSelector);
-    const { fileLoaded } = useSelector(appState);
+    const fileLoaded = useSelector(isFileLoaded);
     const sessionActive = useSelector(isSessionActive);
     const showProgressDialog = useSelector(getShowProgressDialog);
     const realTime = useSelector(isRealTimePane);

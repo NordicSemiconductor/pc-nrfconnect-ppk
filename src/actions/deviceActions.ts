@@ -35,6 +35,7 @@ import {
 } from '../globals';
 import { RootState } from '../slices';
 import {
+    clearFileLoadedAction,
     deviceClosedAction,
     deviceOpenedAction,
     getDiskFullTrigger,
@@ -43,7 +44,6 @@ import {
     samplingStartAction,
     samplingStoppedAction,
     setDeviceRunningAction,
-    setFileLoadedAction,
     setPowerModeAction,
     setSavePending,
 } from '../slices/appSlice';
@@ -339,7 +339,7 @@ export const open =
             dispatch(setPowerModeAction({ isSmuMode }));
             if (!isSmuMode) dispatch(setDeviceRunning(true));
 
-            dispatch(setFileLoadedAction(false));
+            dispatch(clearFileLoadedAction());
 
             logger.info('PPK started');
         } catch (err) {
