@@ -22,7 +22,6 @@ import {
     Title,
 } from 'chart.js';
 
-import { samplingStop } from '../../actions/deviceActions';
 import Minimap from '../../features/minimap/Minimap';
 import {
     DataManager,
@@ -43,6 +42,7 @@ import {
     getChartXAxisRange,
     getCursorRange,
     getForceRerender,
+    getRecordingMode,
     isLiveMode,
     MAX_WINDOW_DURATION,
     setFPS,
@@ -50,7 +50,6 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { getProgress } from '../../slices/triggerSlice';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
@@ -100,16 +99,15 @@ const executeChartUpdateOperation = async () => {
 
 const Chart = () => {
     const dispatch = useDispatch();
-    const dataLoggerPane = useSelector(isDataLoggerPane);
-    const realTimePane = useSelector(isRealTimePane);
-    const liveMode = useSelector(isLiveMode) && dataLoggerPane;
+    const recordingMode = useSelector(getRecordingMode);
+    const liveMode = useSelector(isLiveMode) && recordingMode === 'DataLogger';
     const rerenderTrigger = useSelector(getForceRerender);
     const samplingRunning = useSelector(isSamplingRunning);
     const triggerProgress = useSelector(getProgress);
 
     const waitingForTrigger =
         samplingRunning &&
-        realTimePane &&
+        recordingMode === 'RealTime' &&
         (DataManager().getTimestamp() === 0 ||
             !!triggerProgress.progressMessage);
 
@@ -332,12 +330,6 @@ const Chart = () => {
         }
     }, [chartCursor, zoomPanCallback]);
 
-    useEffect(() => {
-        dispatch(samplingStop());
-        setProcessing(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dataLoggerPane, realTimePane]);
-
     const samplesPerPixel = useMemo(() => {
         const samplesInWindowView = timestampToIndex(windowDuration);
         return numberOfPixelsInWindow === 0
@@ -480,7 +472,7 @@ const Chart = () => {
     useEffect(() => {
         const now = performance.now();
         const forceRender = now - lastLiveRenderTime.current > 1000; // force 1 FPS
-        if (liveMode && dataLoggerPane) {
+        if (liveMode) {
             if (!DataManager().isInSync() && !forceRender) {
                 return;
             }
@@ -509,7 +501,6 @@ const Chart = () => {
         windowEnd,
         rerenderTrigger,
         dispatch,
-        dataLoggerPane,
     ]);
 
     const lastPositions = useRef({

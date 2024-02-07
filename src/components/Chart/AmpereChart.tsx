@@ -24,6 +24,7 @@ import { appState, deviceOpen, isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     getCursorRange,
+    getRecordingMode,
     getWindowDuration,
     isLiveMode,
     isTimestampsVisible,
@@ -34,7 +35,6 @@ import {
     getTriggerValue,
     setTriggerLevel,
 } from '../../slices/triggerSlice';
-import { isRealTimePane } from '../../utils/panes';
 import { type CursorData } from './Chart';
 import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
@@ -157,7 +157,7 @@ export default ({
     const triggerOrigin = useSelector(getTriggerOrigin);
     const { fileLoaded } = useSelector(appState);
     const deviceInUse = useSelector(deviceOpen);
-    const realTimePane = useSelector(isRealTimePane);
+    const recordingMode = useSelector(getRecordingMode);
 
     const live = liveMode && samplingRunning;
     const snapping = numberOfSamplesPerPixel <= 0.16 && !live;
@@ -187,7 +187,8 @@ export default ({
         ],
     };
 
-    const showTriggerItems = realTimePane && !fileLoaded && deviceInUse;
+    const showTriggerItems =
+        recordingMode === 'RealTime' && !fileLoaded && deviceInUse;
 
     const chartOptions: AmpereChartOptions = {
         scales: {

@@ -17,13 +17,13 @@ import { isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     getLiveModeFPS,
+    getRecordingMode,
     setShowSettings,
     showChartSettings,
     toggleYAxisLock,
     toggleYAxisLog,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
-import { isDataLoggerPane } from '../../utils/panes';
 import { AmpereChartJS } from './AmpereChart';
 import ChartOptions from './ChartOptions';
 
@@ -61,7 +61,7 @@ const ChartTop = ({
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const samplingRunning = useSelector(isSamplingRunning);
     const fps = useSelector(getLiveModeFPS);
-    const dataLogger = useSelector(isDataLoggerPane);
+    const recordingMode = useSelector(getRecordingMode);
     const { yMin, yMax } = useSelector(getChartYAxisRange);
     const yAxisLock = yMin != null && yMax != null;
 
@@ -131,7 +131,7 @@ const ChartTop = ({
             </div>
 
             <div className="tw-w-38 tw-order-1 tw-flex tw-flex-row tw-justify-end">
-                {dataLogger && (
+                {recordingMode === 'DataLogger' && (
                     <Toggle
                         label={`${live ? `(${fps} FPS) ` : ''}LIVE VIEW`}
                         onToggle={onLiveModeChange}

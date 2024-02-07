@@ -14,6 +14,7 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { appState } from '../../slices/appSlice';
+import { getRecordingMode } from '../../slices/chartSlice';
 import {
     getAutoExportTrigger,
     getSavingEventQueueLength,
@@ -53,6 +54,9 @@ export default () => {
     const triggerType = useSelector(getTriggerType);
     const triggerSaveQueueLength = useSelector(getSavingEventQueueLength);
     const autoExportTrigger = useSelector(getAutoExportTrigger);
+    const { samplingRunning } = useSelector(appState);
+    const dataLoggerActive =
+        useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
 
     const [levelUnit, setLevelUnit] = useState<CurrentUnit>('µA');
 
@@ -68,8 +72,6 @@ export default () => {
             );
         }
     }, [autoExportTrigger, dispatch, triggerSaveQueueLength]);
-
-    const { samplingRunning } = useSelector(appState);
 
     const [internalTriggerValue, setInternalTriggerValue] =
         useState(triggerValue);
@@ -106,6 +108,7 @@ export default () => {
                 }}
                 unit="ms"
                 label="Length"
+                disabled={dataLoggerActive}
             />
             <NumberInputSliderWithUnit
                 range={{
@@ -123,6 +126,7 @@ export default () => {
                 }}
                 unit={levelUnit}
                 label="Level"
+                disabled={dataLoggerActive}
             />
             <StateSelector
                 items={[...TriggerTypeValues]}

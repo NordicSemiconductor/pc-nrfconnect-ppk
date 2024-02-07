@@ -51,6 +51,7 @@ import {
     chartWindowAction,
     chartWindowUnLockAction,
     clearRecordingMode,
+    getRecordingMode,
     RecordingMode,
     resetChartTime,
     resetCursorAndChart,
@@ -76,7 +77,7 @@ import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
-import { isDataLoggerPane, isRealTimePane } from '../utils/panes';
+import { isDataLoggerPane } from '../utils/panes';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -251,7 +252,7 @@ export const open =
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
-            if (isRealTimePane(getState())) {
+            if (getRecordingMode(getState()) === 'RealTime') {
                 const validTriggerValue =
                     cappedValue >= getState().app.trigger.level;
                 if (!getState().app.trigger.active && validTriggerValue) {

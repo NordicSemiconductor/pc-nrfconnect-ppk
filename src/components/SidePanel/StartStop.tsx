@@ -43,8 +43,7 @@ export default () => {
     const dispatch = useDispatch();
     const realTimePane = useSelector(isRealTimePane);
     const autoExport = useSelector(getAutoExportTrigger);
-    const realTime = useSelector(isRealTimePane);
-    const dataLogger = useSelector(isDataLoggerPane);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
     const { samplingRunning } = useSelector(appState);
     const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
         useSelector(dataLoggerState);
