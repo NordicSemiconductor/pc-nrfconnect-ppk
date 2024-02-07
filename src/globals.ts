@@ -258,7 +258,7 @@ export const DataManager = () => ({
             10 * 100_000 * frameSize, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
             14,
-            30
+            14
         );
         options.foldingBuffer = new FoldingBuffer();
     },
