@@ -11,7 +11,6 @@ import {
     NumberInputSliderWithUnit,
     StateSelector,
     telemetry,
-    Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { appState } from '../../slices/appSlice';
@@ -52,7 +51,6 @@ export default () => {
     const recordingLength = useSelector(getTriggerRecordingLength);
     const triggerValue = useSelector(getTriggerValue);
     const triggerType = useSelector(getTriggerType);
-    const autoExport = useSelector(getAutoExportTrigger);
     const triggerSaveQueueLength = useSelector(getSavingEventQueueLength);
     const autoExportTrigger = useSelector(getAutoExportTrigger);
 
@@ -125,18 +123,6 @@ export default () => {
                 }}
                 unit={levelUnit}
                 label="Level"
-            />
-            <Toggle
-                isToggled={autoExport}
-                label="Auto export"
-                disabled={samplingRunning}
-                onToggle={v => {
-                    telemetry.sendEvent('Auto Export', {
-                        state: v,
-                        reason: 'user interaction',
-                    });
-                    dispatch(setAutoExportTrigger(v));
-                }}
             />
             <StateSelector
                 items={[...TriggerTypeValues]}
