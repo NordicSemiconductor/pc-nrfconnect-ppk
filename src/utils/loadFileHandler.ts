@@ -273,7 +273,7 @@ export default async (
 
     logger.warn(`This PPK file format is deprecated.`);
     logger.warn(
-        `Support for this format may be remove in any of the future versions.`
+        `Support for this format may be removed in any of the future versions.`
     );
 
     try {

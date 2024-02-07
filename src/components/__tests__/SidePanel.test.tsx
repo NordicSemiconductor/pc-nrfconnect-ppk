@@ -33,6 +33,8 @@ jest.mock('../../utils/persistentStore', () => ({
     getRecordingLength: () => 1000,
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
+    getPreferredSessionLocation: () => '/tmp',
+    getDiskFullTrigger: () => 4096,
 }));
 
 const getTimestampMock = jest.fn(() => 100);
@@ -48,6 +50,12 @@ jest.mock('../../globals', () => {
         }),
     };
 });
+
+jest.mock('os', () => ({
+    tmpdir: () => '/tmp',
+    release: () => '',
+    type: () => 'win',
+}));
 
 describe('SidePanel', () => {
     it('should have Load present at startup', () => {

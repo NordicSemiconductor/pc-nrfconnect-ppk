@@ -20,6 +20,8 @@ import {
 import type { RootState } from '.';
 import { getSampleFrequency } from './dataLoggerSlice';
 
+export type RecordingMode = 'DataLogger' | 'RealTime';
+
 export interface ChartState {
     liveMode: boolean;
     fps: number;
@@ -39,6 +41,7 @@ export interface ChartState {
     showSettings: boolean;
     latestDataTimestamp: number;
     forceRerender: boolean;
+    recordingMode?: RecordingMode;
 }
 
 const initialWindowDuration = 10 * microSecondsPerSecond;
@@ -243,6 +246,12 @@ const chartSlice = createSlice({
         setShowSystemTime: (state, action: PayloadAction<boolean>) => {
             state.showSystemTime = action.payload;
         },
+        setRecordingMode: (state, action: PayloadAction<RecordingMode>) => {
+            state.recordingMode = action.payload;
+        },
+        clearRecordingMode: state => {
+            state.recordingMode = undefined;
+        },
     },
 });
 
@@ -372,6 +381,9 @@ export const isSessionActive = (state: RootState) =>
 export const getForceRerender = (state: RootState) =>
     state.app.chart.forceRerender;
 
+export const getRecordingMode = (state: RootState) =>
+    state.app.chart.recordingMode;
+
 export const {
     setLatestDataTimestamp,
     panWindow,
@@ -393,6 +405,8 @@ export const {
     resetChartTime,
     triggerForceRerender,
     setShowSystemTime,
+    setRecordingMode,
+    clearRecordingMode,
 } = chartSlice.actions;
 
 export default chartSlice.reducer;

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Dropdown,
@@ -13,15 +13,19 @@ import {
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { appState } from '../../slices/appSlice';
+import {
+    appState,
+    getDiskFullTrigger,
+    getSessionRootFolder,
+} from '../../slices/appSlice';
 import {
     dataLoggerState,
-    setAutoStopSampling,
+    setSampleIndefinitely,
     updateDuration,
     updateDurationUnit,
 } from '../../slices/dataLoggerSlice';
 import { convertTimeToSeconds } from '../../utils/duration';
-import { calcFileSize } from '../../utils/fileUtils';
+import { calcFileSize, getFreeSpace } from '../../utils/fileUtils';
 import { TimeUnit } from '../../utils/persistentStore';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
@@ -34,8 +38,10 @@ const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
 export default () => {
     const dispatch = useDispatch();
 
+    const sessionFolder = useSelector(getSessionRootFolder);
+    const diskFullTrigger = useSelector(getDiskFullTrigger);
     const { samplingRunning } = useSelector(appState);
-    const { sampleFreq, duration, durationUnit, autoStopSampling } =
+    const { sampleFreq, duration, durationUnit, sampleIndefinitely } =
         useSelector(dataLoggerState);
 
     const uintDropdownItem: DropdownItem<TimeUnit>[] = [
@@ -45,15 +51,30 @@ export default () => {
         { value: 'd', label: 'days' },
     ];
 
+    const [freeSpace, setFreeSpace] = useState<number>(0);
+
+    useEffect(() => {
+        const action = () => {
+            getFreeSpace(diskFullTrigger, sessionFolder).then(space => {
+                setFreeSpace(space);
+            });
+        };
+        action();
+        const timerId = setTimeout(action, 5000);
+        return () => {
+            clearTimeout(timerId);
+        };
+    }, [diskFullTrigger, sessionFolder]);
+
     return (
         <>
             <Toggle
-                onToggle={v => dispatch(setAutoStopSampling(v))}
-                isToggled={autoStopSampling}
+                onToggle={v => dispatch(setSampleIndefinitely(v))}
+                isToggled={sampleIndefinitely}
             >
-                Auto stop sampling
+                Sample indefinitely
             </Toggle>
-            {autoStopSampling && (
+            {!sampleIndefinitely && (
                 <>
                     <div className="tw-flex tw-grow tw-items-center">
                         <span className="tw-w-16">Sample for</span>
@@ -91,10 +112,11 @@ export default () => {
                             sampleFreq,
                             convertTimeToSeconds(duration, durationUnit)
                         )}
+                        . Current Available space {calcFileSize(freeSpace)}
                     </div>
                 </>
             )}
-            {!autoStopSampling && (
+            {sampleIndefinitely && (
                 <div className="small buffer-summary">
                     Estimated disk space required{' '}
                     {calcFileSizeString(
@@ -102,7 +124,7 @@ export default () => {
                         convertTimeToSeconds(1, 'h')
                     )}
                     <br />
-                    per hour
+                    per hour. Current Available space {calcFileSize(freeSpace)}
                 </div>
             )}
         </>

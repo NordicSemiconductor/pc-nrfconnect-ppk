@@ -36,7 +36,6 @@ export interface Capabilities {
     ppkSetUserGains?: boolean;
     ppkTriggerSet?: boolean;
     ppkTriggerSingleSet?: boolean;
-    ppkTriggerStop?: boolean;
     ppkUpdateRegulator?: boolean;
     prePostTriggering?: boolean;
     samplingTimeUs?: number;

@@ -12,7 +12,12 @@ import {
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
+import {
+    setShowMinimapAction,
+    showMinimap as getShowMinimap,
+} from '../../features/minimap/minimapSlice';
 import { DataManager } from '../../globals';
+import { deviceOpen as isDeviceOpen } from '../../slices/appSlice';
 import {
     getChartDigitalChannelInfo,
     isTimestampsVisible,
@@ -21,6 +26,7 @@ import {
     toggleDigitalChannels,
     toggleTimestamps,
 } from '../../slices/chartSlice';
+import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
 
 export default () => {
@@ -28,6 +34,9 @@ export default () => {
     const { digitalChannelsVisible } = useSelector(getChartDigitalChannelInfo);
     const timestampsVisible = useSelector(isTimestampsVisible);
     const systemTime = useSelector(showSystemTime);
+    const showMinimap = useSelector(getShowMinimap);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
+    const deviceOpen = useSelector(isDeviceOpen);
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
@@ -37,18 +46,21 @@ export default () => {
                 label="Timestamps"
                 variant="primary"
             />
-            <StateSelector
-                items={['Relative', 'Absolute']}
-                onSelect={(index: number) => {
-                    dispatch(setShowSystemTime(!!index));
-                }}
-                selectedItem={
-                    !!DataManager().getStartSystemTime() && systemTime
-                        ? 'Absolute'
-                        : 'Relative'
-                }
-                disabled={!DataManager().getStartSystemTime()}
-            />
+            {timestampsVisible &&
+                (DataManager().getStartSystemTime() || deviceOpen) && (
+                    <StateSelector
+                        items={['Relative', 'Absolute']}
+                        onSelect={(index: number) => {
+                            dispatch(setShowSystemTime(!!index));
+                        }}
+                        selectedItem={
+                            !!DataManager().getStartSystemTime() && systemTime
+                                ? 'Absolute'
+                                : 'Relative'
+                        }
+                        disabled={!timestampsVisible}
+                    />
+                )}
 
             <>
                 <Toggle
@@ -57,8 +69,22 @@ export default () => {
                     label="Digital channels"
                     variant="primary"
                 />
-                <DigitalChannels />
+                {digitalChannelsVisible && <DigitalChannels />}
             </>
+            {dataLoggerPane && (
+                <Toggle
+                    label="Show Minimap"
+                    title={`Click in order to ${
+                        showMinimap ? 'hide' : 'show'
+                    } a navigable minimap`}
+                    onToggle={() =>
+                        dispatch(setShowMinimapAction(!showMinimap))
+                    }
+                    isToggled={showMinimap}
+                >
+                    Show Minimap
+                </Toggle>
+            )}
         </CollapsibleGroup>
     );
 };

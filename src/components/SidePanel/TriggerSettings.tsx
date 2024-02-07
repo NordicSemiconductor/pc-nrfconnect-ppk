@@ -11,10 +11,10 @@ import {
     NumberInputSliderWithUnit,
     StateSelector,
     telemetry,
-    Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { appState } from '../../slices/appSlice';
+import { getRecordingMode } from '../../slices/chartSlice';
 import {
     getAutoExportTrigger,
     getSavingEventQueueLength,
@@ -52,9 +52,11 @@ export default () => {
     const recordingLength = useSelector(getTriggerRecordingLength);
     const triggerValue = useSelector(getTriggerValue);
     const triggerType = useSelector(getTriggerType);
-    const autoExport = useSelector(getAutoExportTrigger);
     const triggerSaveQueueLength = useSelector(getSavingEventQueueLength);
     const autoExportTrigger = useSelector(getAutoExportTrigger);
+    const { samplingRunning } = useSelector(appState);
+    const dataLoggerActive =
+        useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
 
     const [levelUnit, setLevelUnit] = useState<CurrentUnit>('µA');
 
@@ -70,8 +72,6 @@ export default () => {
             );
         }
     }, [autoExportTrigger, dispatch, triggerSaveQueueLength]);
-
-    const { samplingRunning } = useSelector(appState);
 
     const [internalTriggerValue, setInternalTriggerValue] =
         useState(triggerValue);
@@ -108,6 +108,7 @@ export default () => {
                 }}
                 unit="ms"
                 label="Length"
+                disabled={dataLoggerActive}
             />
             <NumberInputSliderWithUnit
                 range={{
@@ -125,18 +126,7 @@ export default () => {
                 }}
                 unit={levelUnit}
                 label="Level"
-            />
-            <Toggle
-                isToggled={autoExport}
-                label="Auto export"
-                disabled={samplingRunning}
-                onToggle={v => {
-                    telemetry.sendEvent('Auto Export', {
-                        state: v,
-                        reason: 'user interaction',
-                    });
-                    dispatch(setAutoExportTrigger(v));
-                }}
+                disabled={dataLoggerActive}
             />
             <StateSelector
                 items={[...TriggerTypeValues]}

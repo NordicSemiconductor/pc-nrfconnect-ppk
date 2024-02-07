@@ -24,6 +24,7 @@ import {
     setDiskFullTrigger as setPersistedDiskFullTrigger,
     setPreferredSessionLocation,
 } from '../../utils/persistentStore';
+import DiskSpaceUsage from './DiskSpaceUsage';
 
 export default () => {
     const dispatch = useDispatch();
@@ -31,16 +32,19 @@ export default () => {
     const diskFullTrigger = useSelector(getDiskFullTrigger);
 
     return (
-        <CollapsibleGroup heading="Session Data" defaultCollapsed={false}>
+        <CollapsibleGroup heading="Session Data">
+            <DiskSpaceUsage />
             <div className="tw-flex tw-flex-col tw-justify-between tw-gap-2">
                 <div className="tw-flex tw-flex-col tw-justify-between tw-gap-1">
                     <span>Root directory</span>
-                    <span
-                        title={sessionRootFolder}
-                        className="tw-block tw-overflow-hidden tw-text-ellipsis"
-                    >
-                        {sessionRootFolder}
-                    </span>
+                    <div className="tw-inline-block tw-overflow-hidden tw-text-ellipsis">
+                        <span
+                            className="tw-whitespace-nowrap"
+                            title={sessionRootFolder}
+                        >
+                            {sessionRootFolder}
+                        </span>
+                    </div>
                 </div>
                 <div className="tw-flex tw-gap-2">
                     <Button

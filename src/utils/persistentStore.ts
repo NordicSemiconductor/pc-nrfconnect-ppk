@@ -156,10 +156,10 @@ export const setDurationUnit = (maxSampleFreq: number, timeUnit: TimeUnit) => {
     store.set(`durationUnit-${maxSampleFreq}`, timeUnit);
 };
 
-export const getAutoStopSampling = (defaultValue: boolean) =>
-    store.get(`autoStopSampling`, defaultValue);
-export const setAutoStopSampling = (autoStop: boolean) =>
-    store.set(`autoStopSampling`, autoStop);
+export const getSampleIndefinitely = (defaultValue: boolean) =>
+    store.get(`sampleIndefinitely`, defaultValue);
+export const setSampleIndefinitely = (autoStop: boolean) =>
+    store.set(`sampleIndefinitely`, autoStop);
 export const getVoltageRegulatorMaxCapPPK1 = (defaultMaxCap: number) =>
     store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK1, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK1 = (maxCap: number) =>

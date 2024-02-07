@@ -31,27 +31,32 @@ import {
     frameSize,
     indexToTimestamp,
     microSecondsPerSecond,
-    updateTitle,
 } from '../globals';
 import { RootState } from '../slices';
 import {
+    clearFileLoadedAction,
     deviceClosedAction,
     deviceOpenedAction,
     getDiskFullTrigger,
     getSessionRootFolder,
+    isSavePending,
     samplingStartAction,
     samplingStoppedAction,
     setDeviceRunningAction,
-    setFileLoadedAction,
     setPowerModeAction,
+    setSavePending,
 } from '../slices/appSlice';
 import {
     animationAction,
     chartWindowAction,
     chartWindowUnLockAction,
+    clearRecordingMode,
+    getRecordingMode,
+    RecordingMode,
     resetChartTime,
     resetCursorAndChart,
     setLatestDataTimestamp,
+    setRecordingMode,
     triggerForceRerender as triggerForceRerenderMainChart,
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
@@ -72,7 +77,7 @@ import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
-import { isDataLoggerPane, isRealTimePane } from '../utils/panes';
+import { isDataLoggerPane } from '../utils/panes';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -80,7 +85,8 @@ let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
 
 export const setupOptions =
-    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
+    (recordingMode: RecordingMode): AppThunk<RootState, Promise<void>> =>
+    async (dispatch, getState) => {
         if (!device) return;
         try {
             await DataManager().reset();
@@ -89,12 +95,15 @@ export const setupOptions =
 
             const { sampleFreq } = getState().app.dataLogger;
             DataManager().setSamplesPerSecond(sampleFreq);
-            if (isDataLoggerPane(getState())) {
-                DataManager().initializeLiveSession(
-                    getSessionRootFolder(getState())
-                );
-            } else {
-                DataManager().initializeTriggerSession(60);
+            switch (recordingMode) {
+                case 'DataLogger':
+                    DataManager().initializeLiveSession(
+                        getSessionRootFolder(getState())
+                    );
+                    break;
+                case 'RealTime':
+                    DataManager().initializeTriggerSession(60);
+                    break;
             }
         } catch (err) {
             logger.error(err);
@@ -106,13 +115,18 @@ export const setupOptions =
 // Only used by Data Logger Pane
 /* Start reading current measurements */
 export const samplingStart =
-    (): AppThunk<RootState, Promise<void>> => async dispatch => {
+    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
         telemetry.sendEvent(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
+        const mode: RecordingMode = isDataLoggerPane(getState())
+            ? 'DataLogger'
+            : 'RealTime';
+
+        dispatch(setRecordingMode(mode));
         dispatch(setTriggerActive(false));
         dispatch(resetTriggerOrigin());
         // Prepare global options
-        await dispatch(setupOptions());
+        await dispatch(setupOptions(mode));
 
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
@@ -124,19 +138,11 @@ export const samplingStop =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
         latestTrigger = undefined;
         if (!device) return;
+        dispatch(clearRecordingMode());
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();
     };
-
-export function triggerStop() {
-    return async () => {
-        if (!device) return;
-        logger.info('Stopping trigger');
-        await device.ppkTriggerStop();
-        stopPreventSleep();
-    };
-}
 
 export const updateSpikeFilter = (): AppThunk<RootState> => (_, getState) => {
     const { spikeFilter } = getState().app;
@@ -165,7 +171,6 @@ export const close =
         device = null;
         dispatch(deviceClosedAction());
         logger.info('PPK closed');
-        updateTitle();
     };
 
 const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
@@ -241,10 +246,13 @@ export const open =
                 nbSamples = 0;
             }
 
+            if (!isSavePending(getState())) {
+                dispatch(setSavePending(true));
+            }
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
-            if (isRealTimePane(getState())) {
+            if (getRecordingMode(getState()) === 'RealTime') {
                 const validTriggerValue =
                     cappedValue >= getState().app.trigger.level;
                 if (!getState().app.trigger.active && validTriggerValue) {
@@ -343,7 +351,7 @@ export const open =
             dispatch(setPowerModeAction({ isSmuMode }));
             if (!isSmuMode) dispatch(setDeviceRunning(true));
 
-            dispatch(setFileLoadedAction(false));
+            dispatch(clearFileLoadedAction());
 
             logger.info('PPK started');
         } catch (err) {
@@ -360,7 +368,6 @@ export const open =
         );
 
         logger.info('PPK opened');
-        updateTitle(deviceInfo.serialNumber);
 
         device!.on('error', (message, error) => {
             logger.error(message);

@@ -22,7 +22,6 @@ import {
     Title,
 } from 'chart.js';
 
-import { samplingStop } from '../../actions/deviceActions';
 import Minimap from '../../features/minimap/Minimap';
 import {
     DataManager,
@@ -43,6 +42,7 @@ import {
     getChartXAxisRange,
     getCursorRange,
     getForceRerender,
+    getRecordingMode,
     isLiveMode,
     MAX_WINDOW_DURATION,
     setFPS,
@@ -50,7 +50,7 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { getProgress } from '../../slices/triggerSlice';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import { isDataLoggerPane } from '../../utils/panes';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
@@ -100,16 +100,16 @@ const executeChartUpdateOperation = async () => {
 
 const Chart = () => {
     const dispatch = useDispatch();
-    const dataLoggerPane = useSelector(isDataLoggerPane);
-    const realTimePane = useSelector(isRealTimePane);
-    const liveMode = useSelector(isLiveMode) && dataLoggerPane;
+    const recordingMode = useSelector(getRecordingMode);
+    const liveMode = useSelector(isLiveMode) && recordingMode === 'DataLogger';
     const rerenderTrigger = useSelector(getForceRerender);
     const samplingRunning = useSelector(isSamplingRunning);
     const triggerProgress = useSelector(getProgress);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
 
     const waitingForTrigger =
         samplingRunning &&
-        realTimePane &&
+        recordingMode === 'RealTime' &&
         (DataManager().getTimestamp() === 0 ||
             !!triggerProgress.progressMessage);
 
@@ -332,12 +332,6 @@ const Chart = () => {
         }
     }, [chartCursor, zoomPanCallback]);
 
-    useEffect(() => {
-        dispatch(samplingStop());
-        setProcessing(false);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dataLoggerPane, realTimePane]);
-
     const samplesPerPixel = useMemo(() => {
         const samplesInWindowView = timestampToIndex(windowDuration);
         return numberOfPixelsInWindow === 0
@@ -480,7 +474,7 @@ const Chart = () => {
     useEffect(() => {
         const now = performance.now();
         const forceRender = now - lastLiveRenderTime.current > 1000; // force 1 FPS
-        if (liveMode && dataLoggerPane) {
+        if (liveMode) {
             if (!DataManager().isInSync() && !forceRender) {
                 return;
             }
@@ -509,7 +503,6 @@ const Chart = () => {
         windowEnd,
         rerenderTrigger,
         dispatch,
-        dataLoggerPane,
     ]);
 
     const lastPositions = useRef({
@@ -618,23 +611,30 @@ const Chart = () => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                <div>
-                    <Minimap />
-                </div>
-                <div className="tw-ml-16 tw-flex tw-flex-grow tw-flex-wrap tw-gap-2 tw-pr-8 tw-pt-0.5">
-                    <StatBox
-                        average={windowStats?.average ? windowStats.average : 0}
-                        max={windowStats?.max ? windowStats.max : 0}
-                        delta={windowStats?.delta ? windowStats.delta : 0}
-                        label="Window"
-                    />
-                    <StatBox
-                        progress={selectionStatsProcessingProgress}
-                        processing={selectionStatsProcessing}
-                        {...selectionStats}
-                        label="Selection"
-                        actionButtons={selectionButtons}
-                    />
+
+                <div className="tw-flex tw-flex-col tw-gap-4 tw-py-4 tw-pl-16 tw-pr-8">
+                    {dataLoggerPane && (
+                        <div>
+                            <Minimap />
+                        </div>
+                    )}
+                    <div className="tw-flex tw-flex-grow tw-flex-wrap tw-gap-2">
+                        <StatBox
+                            average={
+                                windowStats?.average ? windowStats.average : 0
+                            }
+                            max={windowStats?.max ? windowStats.max : 0}
+                            delta={windowStats?.delta ? windowStats.delta : 0}
+                            label="Window"
+                        />
+                        <StatBox
+                            progress={selectionStatsProcessingProgress}
+                            processing={selectionStatsProcessing}
+                            {...selectionStats}
+                            label="Selection"
+                            actionButtons={selectionButtons}
+                        />
+                    </div>
                 </div>
             </div>
             {digitalChannelsVisible && (

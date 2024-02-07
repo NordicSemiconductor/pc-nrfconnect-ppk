@@ -20,7 +20,7 @@ const dataLoggerStatePPK2 = {
     sampleFreq: 100_000,
     duration: 300,
     durationUnit: 's',
-    autoStopSampling: true,
+    sampleIndefinitely: true,
 } as DataLoggerState;
 
 const initialStatePPK2Actions = [

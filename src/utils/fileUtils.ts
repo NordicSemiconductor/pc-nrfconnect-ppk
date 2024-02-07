@@ -8,6 +8,8 @@ import { dialog, getCurrentWindow } from '@electron/remote';
 import fs from 'fs/promises';
 import { FormatOptions, unit } from 'mathjs';
 
+import { frameSize, indexToTimestamp } from '../globals';
+
 export const calcFileSize = (
     bytes: number,
     formatOptions: FormatOptions = { notation: 'fixed' as const, precision: 1 }
@@ -48,9 +50,19 @@ export const selectDirectoryDialog = () =>
 export const isDiskFull = async (triggerLimit: number, dstPath: string) => {
     const stats = await fs.statfs(dstPath);
     const freeDiskSpaceBytes = stats.bfree * stats.bsize;
-    const freeSpaceMB = freeDiskSpaceBytes / 1024 / 1024;
-    return freeSpaceMB < triggerLimit;
+    const freeSpaceBytes = freeDiskSpaceBytes;
+    return freeSpaceBytes < triggerLimit * 1024 * 1024;
 };
+
+export const getFreeSpace = async (triggerLimit: number, dstPath: string) => {
+    const stats = await fs.statfs(dstPath);
+    const freeDiskSpaceBytes = stats.bfree * stats.bsize;
+    const freeSpaceBytes = freeDiskSpaceBytes;
+    return freeSpaceBytes - triggerLimit * 1024 * 1024;
+};
+
+export const remainingTime = (freeSpaceMB: number) =>
+    indexToTimestamp(freeSpaceMB / frameSize);
 
 export const canFileFit = async (
     triggerLimit: number,

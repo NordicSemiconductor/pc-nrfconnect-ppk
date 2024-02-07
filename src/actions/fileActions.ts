@@ -5,7 +5,11 @@
  */
 
 import { dialog, getCurrentWindow } from '@electron/remote';
-import { AppThunk, logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    AppThunk,
+    logger,
+    setCurrentPane,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import fs from 'fs';
 import { dirname, join } from 'path';
@@ -21,12 +25,13 @@ import {
     showProgressDialog,
     updateProgress,
 } from '../features/ProgressDialog/progressSlice';
-import { DataManager, updateTitle } from '../globals';
+import { DataManager } from '../globals';
 import type { RootState } from '../slices';
 import {
     getDiskFullTrigger,
     getSessionRootFolder,
     setFileLoadedAction,
+    setSavePending,
 } from '../slices/appSlice';
 import {
     resetChartTime,
@@ -37,6 +42,7 @@ import {
 } from '../slices/chartSlice';
 import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
+import { DATA_LOGGER } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -95,6 +101,8 @@ export const save =
                     dispatch(updateProgress({ indeterminate: true, message }));
                 }
             );
+
+            dispatch(setSavePending(false));
             dispatch(closeProgressDialog());
 
             logger.info(`State saved to: ${filename}`);
@@ -126,12 +134,12 @@ export const load =
         }
 
         setLoading(true);
+        dispatch(setSavePending(false));
         logger.info(`Restoring state from ${filename}`);
         await DataManager().reset();
         dispatch(resetChartTime());
         dispatch(resetMinimap());
         dispatch(setLiveMode(false));
-        updateTitle(filename);
 
         dispatch(
             showProgressDialog({
@@ -151,6 +159,7 @@ export const load =
                 }
             );
 
+            dispatch(setCurrentPane(DATA_LOGGER));
             dispatch(closeProgressDialog());
 
             if (timestamp) {
@@ -168,7 +177,7 @@ export const load =
                 dispatch(miniMapAnimationAction());
             }
 
-            dispatch(setFileLoadedAction(true));
+            dispatch(setFileLoadedAction(filename));
         } catch (error) {
             dispatch(setErrorMessage(describeError(error)));
         }

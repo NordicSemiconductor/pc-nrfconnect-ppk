@@ -17,7 +17,7 @@ import { unit } from 'mathjs';
 
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { DataManager } from '../../globals';
-import { appState } from '../../slices/appSlice';
+import { appState, isSavePending } from '../../slices/appSlice';
 import { resetChartTime, resetCursor } from '../../slices/chartSlice';
 import {
     dataLoggerState,
@@ -35,6 +35,7 @@ import {
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import LiveModeSettings from './LiveModeSettings';
+import SessionSettings from './SessionSettings';
 import TriggerSettings from './TriggerSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
@@ -43,11 +44,11 @@ export default () => {
     const dispatch = useDispatch();
     const realTimePane = useSelector(isRealTimePane);
     const autoExport = useSelector(getAutoExportTrigger);
-    const realTime = useSelector(isRealTimePane);
-    const dataLogger = useSelector(isDataLoggerPane);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
     const { samplingRunning } = useSelector(appState);
     const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
         useSelector(dataLoggerState);
+    const savePending = useSelector(isSavePending);
 
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
         .format(fmtOpts)
@@ -75,8 +76,6 @@ export default () => {
     return (
         <>
             <Group heading="Sampling parameters">
-                {dataLogger && <LiveModeSettings />}
-                {realTime && <TriggerSettings />}
                 <div className="sample-frequency-group">
                     <Form.Label htmlFor="data-logger-sampling-frequency">
                         {sampleFreq.toLocaleString('en')} samples per second
@@ -98,7 +97,8 @@ export default () => {
                         disabled={samplingRunning}
                     />
                 </div>
-
+                {dataLoggerPane && <LiveModeSettings />}
+                {realTimePane && <TriggerSettings />}
                 <StartStopButton
                     title={startStopTitle}
                     startText="Start"
@@ -111,7 +111,8 @@ export default () => {
 
                         if (
                             DataManager().getTimestamp() > 0 &&
-                            !getDoNotAskStartAndClear(false)
+                            !getDoNotAskStartAndClear(false) &&
+                            savePending
                         ) {
                             setShowDialog(true);
                         } else {
@@ -123,6 +124,7 @@ export default () => {
                     started={samplingRunning}
                 />
             </Group>
+            {dataLoggerPane && <SessionSettings />}
             <ConfirmationDialog
                 confirmLabel="Yes"
                 cancelLabel="No"
@@ -134,7 +136,7 @@ export default () => {
                     setDoNotAskStartAndClear(true);
                     await startAndClear();
                 }}
-                optionalLabel="Yes, Don't ask again"
+                optionalLabel="Yes, don't ask again"
                 isVisible={showDialog}
             >
                 You have unsaved data and this will be lost. Are you sure you
