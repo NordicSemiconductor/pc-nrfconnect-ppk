@@ -14,7 +14,6 @@ const PPKCommands = {
     AverageStop: 0x07,
     RangeSet: 0x08, // (no-firmware)
     LCDSet: 0x09, // (no-firmware)
-    TriggerStop: 0x0a,
     DeviceRunningSet: 0x0c,
     RegulatorSet: 0x0d,
     SwitchPointDown: 0x0e,

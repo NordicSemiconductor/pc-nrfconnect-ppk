@@ -129,15 +129,6 @@ export const samplingStop =
         stopPreventSleep();
     };
 
-export function triggerStop() {
-    return async () => {
-        if (!device) return;
-        logger.info('Stopping trigger');
-        await device.ppkTriggerStop();
-        stopPreventSleep();
-    };
-}
-
 export const updateSpikeFilter = (): AppThunk<RootState> => (_, getState) => {
     const { spikeFilter } = getState().app;
     persistSpikeFilter(spikeFilter);
