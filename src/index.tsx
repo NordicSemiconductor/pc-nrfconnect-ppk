@@ -47,7 +47,7 @@ const AppTitleHook = () => {
         }
 
         updateTitle(title);
-    });
+    }, [device, fileName, pendingSave]);
 
     return null;
 };

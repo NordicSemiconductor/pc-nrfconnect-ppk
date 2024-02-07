@@ -59,7 +59,10 @@ const appSlice = createSlice({
             state.portName = action.payload.portName;
             state.capabilities = action.payload.capabilities;
         },
-        deviceClosedAction: () => initialState(),
+        deviceClosedAction: state => ({
+            ...initialState(),
+            savePending: state.savePending,
+        }),
         setDeviceRunningAction: (
             state,
             action: PayloadAction<{ isRunning: boolean }>
