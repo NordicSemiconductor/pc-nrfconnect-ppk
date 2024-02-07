@@ -12,7 +12,12 @@ import {
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
+import {
+    setShowMinimapAction,
+    showMinimap as getShowMinimap,
+} from '../../features/minimap/minimapSlice';
 import { DataManager } from '../../globals';
+import { deviceOpen as isDeviceOpen } from '../../slices/appSlice';
 import {
     getChartDigitalChannelInfo,
     isTimestampsVisible,
@@ -31,6 +36,7 @@ export default () => {
     const systemTime = useSelector(showSystemTime);
     const showMinimap = useSelector(getShowMinimap);
     const dataLoggerPane = useSelector(isDataLoggerPane);
+    const deviceOpen = useSelector(isDeviceOpen);
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
@@ -40,18 +46,21 @@ export default () => {
                 label="Timestamps"
                 variant="primary"
             />
-            <StateSelector
-                items={['Relative', 'Absolute']}
-                onSelect={(index: number) => {
-                    dispatch(setShowSystemTime(!!index));
-                }}
-                selectedItem={
-                    !!DataManager().getStartSystemTime() && systemTime
-                        ? 'Absolute'
-                        : 'Relative'
-                }
-                disabled={!DataManager().getStartSystemTime()}
-            />
+            {timestampsVisible &&
+                (DataManager().getStartSystemTime() || deviceOpen) && (
+                    <StateSelector
+                        items={['Relative', 'Absolute']}
+                        onSelect={(index: number) => {
+                            dispatch(setShowSystemTime(!!index));
+                        }}
+                        selectedItem={
+                            !!DataManager().getStartSystemTime() && systemTime
+                                ? 'Absolute'
+                                : 'Relative'
+                        }
+                        disabled={!timestampsVisible}
+                    />
+                )}
 
             <>
                 <Toggle
@@ -60,7 +69,7 @@ export default () => {
                     label="Digital channels"
                     variant="primary"
                 />
-                <DigitalChannels />
+                {digitalChannelsVisible && <DigitalChannels />}
             </>
             {dataLoggerPane && (
                 <Toggle
