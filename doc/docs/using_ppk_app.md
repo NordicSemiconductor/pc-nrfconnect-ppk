@@ -9,21 +9,14 @@ The Power Profiler Kit II (PPK2) must be connected to your computer and powered 
 
 1. Click **Select Device** (in the top left corner) and select the PPK2 from the list.
 
-1. Do one of the following:
-
-    - If the PPK2 is set up to measure in Ampere Meter mode (see [Measuring current in Ampere Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_ampere_meter.html)), select **Ampere meter**.
-
-        !!! note "Note"
-            The power output is enabled by default in the Ampere Meter mode.
-
-    - If the PPK2 is set up to measure in Source Meter mode (see [Measuring current in Source Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_source_meter.html)), select **Source meter**.
-
-        !!! note "Note"
-            You can change the voltage output to the Device Under Test (DUT, a manufactured product undergoing testing) by using the slider or typing the required voltage.
-
-1. Click **Start**.
+1. In the device panel's **Mode**, select [**Source meter**](./overview.md#mode) or [**Ampere meter**](./overview.md#mode).
+1. Select the [**Data logger**](./overview.md#sampling-tabs) or [**Real time**](./overview.md#sampling-tabs) mode.
+1. Set the desired [**Sampling parameters**](./overview.md#sampling-parameters).
+1. Click **Start** to start sampling.</br>
+   The Power Profiler app checks if the PPK2 has the required firmware and shows a firmware upgrade dialog if needed.
 1. Toggle **Enable power output** to enable power to the DUT.
+1. Click **Stop** to stop sampling.
 
 You can start measuring current when the connection is established.
 
-The Power Profiler app checks if the PPK2 has the required firmware and shows a firmware upgrade dialog if needed.
+At the end of the sampling, you can click [**Save/Export**](./overview.md) to save the sampling data to a `.ppk2` file.
