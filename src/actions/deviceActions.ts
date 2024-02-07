@@ -50,9 +50,12 @@ import {
     animationAction,
     chartWindowAction,
     chartWindowUnLockAction,
+    clearRecordingMode,
+    RecordingMode,
     resetChartTime,
     resetCursorAndChart,
     setLatestDataTimestamp,
+    setRecordingMode,
     triggerForceRerender as triggerForceRerenderMainChart,
 } from '../slices/chartSlice';
 import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
@@ -81,7 +84,8 @@ let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
 
 export const setupOptions =
-    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
+    (recordingMode: RecordingMode): AppThunk<RootState, Promise<void>> =>
+    async (dispatch, getState) => {
         if (!device) return;
         try {
             await DataManager().reset();
@@ -90,12 +94,15 @@ export const setupOptions =
 
             const { sampleFreq } = getState().app.dataLogger;
             DataManager().setSamplesPerSecond(sampleFreq);
-            if (isDataLoggerPane(getState())) {
-                DataManager().initializeLiveSession(
-                    getSessionRootFolder(getState())
-                );
-            } else {
-                DataManager().initializeTriggerSession(60);
+            switch (recordingMode) {
+                case 'DataLogger':
+                    DataManager().initializeLiveSession(
+                        getSessionRootFolder(getState())
+                    );
+                    break;
+                case 'RealTime':
+                    DataManager().initializeTriggerSession(60);
+                    break;
             }
         } catch (err) {
             logger.error(err);
@@ -107,13 +114,18 @@ export const setupOptions =
 // Only used by Data Logger Pane
 /* Start reading current measurements */
 export const samplingStart =
-    (): AppThunk<RootState, Promise<void>> => async dispatch => {
+    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
         telemetry.sendEvent(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
 
+        const mode: RecordingMode = isDataLoggerPane(getState())
+            ? 'DataLogger'
+            : 'RealTime';
+
+        dispatch(setRecordingMode(mode));
         dispatch(setTriggerActive(false));
         dispatch(resetTriggerOrigin());
         // Prepare global options
-        await dispatch(setupOptions());
+        await dispatch(setupOptions(mode));
 
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
@@ -125,6 +137,7 @@ export const samplingStop =
     (): AppThunk<RootState, Promise<void>> => async dispatch => {
         latestTrigger = undefined;
         if (!device) return;
+        dispatch(clearRecordingMode());
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();
