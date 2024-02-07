@@ -7,25 +7,25 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    selectedDevice,
     SidePanel,
+    Spinner,
     useHotKey,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
-import MinimapOptions from '../../features/minimap/MinimapOptions';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
 import { updateTitle } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
-    appState,
     deviceOpen as deviceOpenSelector,
     getFileLoaded,
     isFileLoaded,
+    isSavePending,
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
-import { resetTriggerOrigin } from '../../slices/triggerSlice';
 import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
@@ -70,12 +70,13 @@ export default () => {
 
     useAppTitle();
     const advancedMode = useSelector(advancedModeSelector);
+    const deviceConnected = useSelector(selectedDevice);
     const deviceOpen = useSelector(deviceOpenSelector);
     const fileLoaded = useSelector(isFileLoaded);
     const sessionActive = useSelector(isSessionActive);
     const showProgressDialog = useSelector(getShowProgressDialog);
-    const realTime = useSelector(isRealTimePane);
-    const dataLogger = useSelector(isDataLoggerPane);
+    const realTimePane = useSelector(isRealTimePane);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
 
     useHotKey({
         hotKey: 'alt+ctrl+shift+a',
@@ -84,36 +85,45 @@ export default () => {
         action: () => dispatch(toggleAdvancedModeAction()),
     });
 
-    useEffect(() => {
-        dispatch(resetTriggerOrigin());
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [realTime]);
+    const connecting = deviceConnected && !deviceOpen;
 
     return (
         <SidePanel className="side-panel tw-mt-9">
-            {!deviceOpen && dataLogger && <Load />}
-            {!fileLoaded && !deviceOpen && <Instructions />}
-            {!fileLoaded && deviceOpen && (
+            {connecting && (
+                <div className="tw-text-center tw-text-base">
+                    <span>Connecting...</span> <Spinner size="sm" />
+                </div>
+            )}
+            {!deviceConnected && (
+                <>
+                    <Load />
+                    <SessionSettings />
+                </>
+            )}
+            {!fileLoaded && !deviceConnected && !sessionActive && (
+                <Instructions />
+            )}
+            {!fileLoaded && deviceOpen && (realTimePane || dataLoggerPane) && (
                 <>
                     <PowerMode />
                     <StartStop />
                 </>
             )}
-            {(fileLoaded || deviceOpen || sessionActive) && (
-                <>
-                    <DisplayOptions />
-                    <Save />
-                </>
-            )}
+            {!connecting &&
+                (fileLoaded || deviceOpen || sessionActive) &&
+                (realTimePane || dataLoggerPane) && (
+                    <>
+                        <DisplayOptions />
+                        <Save />
+                    </>
+                )}
             {!fileLoaded && deviceOpen && advancedMode && (
                 <>
-                    <SessionSettings />
                     <Gains />
                     <SpikeFilter />
                     <CapVoltageSettings />
                 </>
             )}
-            {!fileLoaded && !deviceOpen && advancedMode && <SessionSettings />}
             <DeprecatedDeviceDialog />
             {showProgressDialog && <ProgressDialog />}
         </SidePanel>

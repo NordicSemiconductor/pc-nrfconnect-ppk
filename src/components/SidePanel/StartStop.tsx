@@ -35,6 +35,7 @@ import {
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import LiveModeSettings from './LiveModeSettings';
+import SessionSettings from './SessionSettings';
 import TriggerSettings from './TriggerSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
@@ -75,8 +76,6 @@ export default () => {
     return (
         <>
             <Group heading="Sampling parameters">
-                {dataLogger && <LiveModeSettings />}
-                {realTime && <TriggerSettings />}
                 <div className="sample-frequency-group">
                     <Form.Label htmlFor="data-logger-sampling-frequency">
                         {sampleFreq.toLocaleString('en')} samples per second
@@ -98,7 +97,8 @@ export default () => {
                         disabled={samplingRunning}
                     />
                 </div>
-
+                {dataLoggerPane && <LiveModeSettings />}
+                {realTimePane && <TriggerSettings />}
                 <StartStopButton
                     title={startStopTitle}
                     startText="Start"
@@ -124,6 +124,7 @@ export default () => {
                     started={samplingRunning}
                 />
             </Group>
+            {dataLoggerPane && <SessionSettings />}
             <ConfirmationDialog
                 confirmLabel="Yes"
                 cancelLabel="No"
