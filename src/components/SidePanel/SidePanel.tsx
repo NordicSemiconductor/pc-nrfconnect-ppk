@@ -72,7 +72,6 @@ export default () => {
             {(fileLoaded || deviceOpen || sessionActive) && (
                 <>
                     <DisplayOptions />
-                    <MinimapOptions />
                     <Save />
                 </>
             )}

@@ -21,6 +21,7 @@ import {
     toggleDigitalChannels,
     toggleTimestamps,
 } from '../../slices/chartSlice';
+import { isDataLoggerPane } from '../../utils/panes';
 import DigitalChannels from './DigitalChannels';
 
 export default () => {
@@ -28,6 +29,8 @@ export default () => {
     const { digitalChannelsVisible } = useSelector(getChartDigitalChannelInfo);
     const timestampsVisible = useSelector(isTimestampsVisible);
     const systemTime = useSelector(showSystemTime);
+    const showMinimap = useSelector(getShowMinimap);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
@@ -59,6 +62,20 @@ export default () => {
                 />
                 <DigitalChannels />
             </>
+            {dataLoggerPane && (
+                <Toggle
+                    label="Show Minimap"
+                    title={`Click in order to ${
+                        showMinimap ? 'hide' : 'show'
+                    } a navigable minimap`}
+                    onToggle={() =>
+                        dispatch(setShowMinimapAction(!showMinimap))
+                    }
+                    isToggled={showMinimap}
+                >
+                    Show Minimap
+                </Toggle>
+            )}
         </CollapsibleGroup>
     );
 };
