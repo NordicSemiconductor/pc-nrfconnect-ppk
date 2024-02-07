@@ -134,6 +134,7 @@ export const load =
         }
 
         setLoading(true);
+        dispatch(setSavePending(false));
         logger.info(`Restoring state from ${filename}`);
         await DataManager().reset();
         dispatch(resetChartTime());
