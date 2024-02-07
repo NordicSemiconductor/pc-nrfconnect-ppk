@@ -20,7 +20,11 @@ import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 
 import { DataManager } from '../../globals';
-import { appState, deviceOpen, isSamplingRunning } from '../../slices/appSlice';
+import {
+    deviceOpen,
+    isFileLoaded,
+    isSamplingRunning,
+} from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     getCursorRange,
@@ -155,7 +159,7 @@ export default ({
     const systemTime = useSelector(showSystemTime);
     const triggerLevel = useSelector(getTriggerValue);
     const triggerOrigin = useSelector(getTriggerOrigin);
-    const { fileLoaded } = useSelector(appState);
+    const fileLoaded = useSelector(isFileLoaded);
     const deviceInUse = useSelector(deviceOpen);
     const recordingMode = useSelector(getRecordingMode);
 
