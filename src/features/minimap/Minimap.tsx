@@ -157,7 +157,7 @@ const Minimap = () => {
     return (
         <div
             className={classNames(
-                'tw-relative tw-h-28 tw-w-full tw-py-4 tw-pl-16 tw-pr-8',
+                'tw-relative tw-h-20 tw-w-full',
                 showMinimap ? 'tw-block' : 'tw-hidden'
             )}
         >
@@ -177,7 +177,7 @@ const Minimap = () => {
             <div
                 ref={minimapSlider}
                 className={classNames(
-                    'tw-pointer-events-none tw-absolute tw-top-4 tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50',
+                    'tw-pointer-events-none tw-absolute tw-top-0 tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50',
                     isWindowDurationFull ? 'tw-block' : 'tw-hidden'
                 )}
                 style={{

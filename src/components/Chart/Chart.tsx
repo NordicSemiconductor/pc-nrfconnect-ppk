@@ -50,6 +50,7 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { getProgress } from '../../slices/triggerSlice';
+import { isDataLoggerPane } from '../../utils/panes';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
@@ -104,6 +105,7 @@ const Chart = () => {
     const rerenderTrigger = useSelector(getForceRerender);
     const samplingRunning = useSelector(isSamplingRunning);
     const triggerProgress = useSelector(getProgress);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
 
     const waitingForTrigger =
         samplingRunning &&
@@ -609,23 +611,30 @@ const Chart = () => {
                     cursorEnd={cursorEnd}
                     width={chartAreaWidth + 1}
                 />
-                <div>
-                    <Minimap />
-                </div>
-                <div className="tw-ml-16 tw-flex tw-flex-grow tw-flex-wrap tw-gap-2 tw-pr-8 tw-pt-0.5">
-                    <StatBox
-                        average={windowStats?.average ? windowStats.average : 0}
-                        max={windowStats?.max ? windowStats.max : 0}
-                        delta={windowStats?.delta ? windowStats.delta : 0}
-                        label="Window"
-                    />
-                    <StatBox
-                        progress={selectionStatsProcessingProgress}
-                        processing={selectionStatsProcessing}
-                        {...selectionStats}
-                        label="Selection"
-                        actionButtons={selectionButtons}
-                    />
+
+                <div className="tw-flex tw-flex-col tw-gap-4 tw-py-4 tw-pl-16 tw-pr-8">
+                    {dataLoggerPane && (
+                        <div>
+                            <Minimap />
+                        </div>
+                    )}
+                    <div className="tw-flex tw-flex-grow tw-flex-wrap tw-gap-2">
+                        <StatBox
+                            average={
+                                windowStats?.average ? windowStats.average : 0
+                            }
+                            max={windowStats?.max ? windowStats.max : 0}
+                            delta={windowStats?.delta ? windowStats.delta : 0}
+                            label="Window"
+                        />
+                        <StatBox
+                            progress={selectionStatsProcessingProgress}
+                            processing={selectionStatsProcessing}
+                            {...selectionStats}
+                            label="Selection"
+                            actionButtons={selectionButtons}
+                        />
+                    </div>
                 </div>
             </div>
             {digitalChannelsVisible && (
