@@ -7,14 +7,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
-    getAutoStopSampling,
     getDuration,
     getDurationUnit,
     getSampleFreq,
-    setAutoStopSampling as persistAutoStopSampling,
+    getSampleIndefinitely,
     setDuration as persistDuration,
     setDurationUnit as persistDurationUnit,
     setSampleFreq as persistSampleFreq,
+    setSampleIndefinitely as persistSampleIndefinitely,
     TimeUnit,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
@@ -27,7 +27,7 @@ export interface DataLoggerState {
     maxSampleFreq: number;
     duration: number;
     durationUnit: TimeUnit;
-    autoStopSampling: boolean;
+    sampleIndefinitely: boolean;
 }
 
 const initialFreqLog10 = 5;
@@ -39,7 +39,7 @@ const initialState = (): DataLoggerState => ({
     maxSampleFreq: 10 ** initialFreqLog10,
     duration: 300,
     durationUnit: 's',
-    autoStopSampling: true,
+    sampleIndefinitely: false,
 });
 
 const dataLoggerSlice = createSlice({
@@ -59,8 +59,8 @@ const dataLoggerSlice = createSlice({
                 maxSampleFreq,
                 state.durationUnit
             );
-            const savedAutoStopSampling = getAutoStopSampling(
-                state.autoStopSampling
+            const savedSampleIndefinitely = getSampleIndefinitely(
+                state.sampleIndefinitely
             );
 
             return {
@@ -72,7 +72,7 @@ const dataLoggerSlice = createSlice({
                 sampleFreqLog10: Math.ceil(Math.log10(sampleFreq)),
                 duration: savedDuration,
                 durationUnit: savedDurationUnit,
-                autoStopSampling: savedAutoStopSampling,
+                autoStopSampling: savedSampleIndefinitely,
             };
         },
         updateSampleFreqLog10: (
@@ -99,9 +99,9 @@ const dataLoggerSlice = createSlice({
             persistDurationUnit(state.maxSampleFreq, action.payload);
             state.durationUnit = action.payload;
         },
-        setAutoStopSampling: (state, action: PayloadAction<boolean>) => {
-            persistAutoStopSampling(action.payload);
-            state.autoStopSampling = action.payload;
+        setSampleIndefinitely: (state, action: PayloadAction<boolean>) => {
+            persistSampleIndefinitely(action.payload);
+            state.sampleIndefinitely = action.payload;
         },
         setDataLoggerState: (
             state,
@@ -120,7 +120,7 @@ export const {
     updateDuration,
     updateDurationUnit,
     setDataLoggerState,
-    setAutoStopSampling,
+    setSampleIndefinitely,
 } = dataLoggerSlice.actions;
 
 export default dataLoggerSlice.reducer;

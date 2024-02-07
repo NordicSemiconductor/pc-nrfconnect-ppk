@@ -16,7 +16,7 @@ import {
 import { appState } from '../../slices/appSlice';
 import {
     dataLoggerState,
-    setAutoStopSampling,
+    setSampleIndefinitely,
     updateDuration,
     updateDurationUnit,
 } from '../../slices/dataLoggerSlice';
@@ -35,7 +35,7 @@ export default () => {
     const dispatch = useDispatch();
 
     const { samplingRunning } = useSelector(appState);
-    const { sampleFreq, duration, durationUnit, autoStopSampling } =
+    const { sampleFreq, duration, durationUnit, sampleIndefinitely } =
         useSelector(dataLoggerState);
 
     const uintDropdownItem: DropdownItem<TimeUnit>[] = [
@@ -48,12 +48,12 @@ export default () => {
     return (
         <>
             <Toggle
-                onToggle={v => dispatch(setAutoStopSampling(v))}
-                isToggled={autoStopSampling}
+                onToggle={v => dispatch(setSampleIndefinitely(v))}
+                isToggled={sampleIndefinitely}
             >
-                Auto stop sampling
+                Sample indefinitely
             </Toggle>
-            {autoStopSampling && (
+            {!sampleIndefinitely && (
                 <>
                     <div className="tw-flex tw-grow tw-items-center">
                         <span className="tw-w-16">Sample for</span>
@@ -94,7 +94,7 @@ export default () => {
                     </div>
                 </>
             )}
-            {!autoStopSampling && (
+            {sampleIndefinitely && (
                 <div className="small buffer-summary">
                     Estimated disk space required{' '}
                     {calcFileSizeString(
