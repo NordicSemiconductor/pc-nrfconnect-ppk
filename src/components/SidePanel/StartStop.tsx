@@ -17,7 +17,7 @@ import { unit } from 'mathjs';
 
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { DataManager } from '../../globals';
-import { appState } from '../../slices/appSlice';
+import { appState, isSavePending } from '../../slices/appSlice';
 import { resetChartTime, resetCursor } from '../../slices/chartSlice';
 import {
     dataLoggerState,
@@ -47,6 +47,7 @@ export default () => {
     const { samplingRunning } = useSelector(appState);
     const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
         useSelector(dataLoggerState);
+    const savePending = useSelector(isSavePending);
 
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
         .format(fmtOpts)
@@ -110,7 +111,8 @@ export default () => {
 
                         if (
                             DataManager().getTimestamp() > 0 &&
-                            !getDoNotAskStartAndClear(false)
+                            !getDoNotAskStartAndClear(false) &&
+                            savePending
                         ) {
                             setShowDialog(true);
                         } else {
@@ -133,7 +135,7 @@ export default () => {
                     setDoNotAskStartAndClear(true);
                     await startAndClear();
                 }}
-                optionalLabel="Yes, Don't ask again"
+                optionalLabel="Yes, don't ask again"
                 isVisible={showDialog}
             >
                 You have unsaved data and this will be lost. Are you sure you
