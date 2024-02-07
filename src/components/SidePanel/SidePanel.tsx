@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     selectedDevice,
@@ -16,13 +16,10 @@ import {
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
-import { updateTitle } from '../../globals';
 import {
     advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
-    getFileLoaded,
     isFileLoaded,
-    isSavePending,
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
@@ -39,36 +36,9 @@ import StartStop from './StartStop';
 
 import './sidepanel.scss';
 
-const useAppTitle = () => {
-    const device = useSelector(selectedDevice);
-    const fileName = useSelector(getFileLoaded);
-    const pendingSave = useSelector(isSavePending);
-
-    useEffect(() => {
-        if (fileName) {
-            updateTitle(fileName);
-            return;
-        }
-
-        let title = '';
-        if (device?.serialNumber) {
-            title += device.serialNumber;
-        }
-
-        if (pendingSave) {
-            title += ' - Unsaved data*';
-        }
-
-        updateTitle(title);
-    });
-
-    return null;
-};
-
 export default () => {
     const dispatch = useDispatch();
 
-    useAppTitle();
     const advancedMode = useSelector(advancedModeSelector);
     const deviceConnected = useSelector(selectedDevice);
     const deviceOpen = useSelector(deviceOpenSelector);
