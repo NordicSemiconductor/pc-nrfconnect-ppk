@@ -60,9 +60,9 @@ export default () => {
             });
         };
         action();
-        const timerId = setTimeout(action, 5000);
+        const timerId = setInterval(action, 5000);
         return () => {
-            clearTimeout(timerId);
+            clearInterval(timerId);
         };
     }, [diskFullTrigger, sessionFolder]);
 
