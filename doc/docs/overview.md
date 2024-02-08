@@ -69,7 +69,7 @@ The following table lists all available Real time parameters.
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
 | **Length**                        | Total time before and after the **Level** current value is reached. The application will try to record the trigger at the middle of the provided value.  |
 | **Level**                         | The current value at which the trigger takes place. The trigger always happens at the rising edge. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.png "Arrow for setting Level value")        |
-| **Auto export**                   | Enable this option to automatically export the session data that are going to be recorded to a `.ppk2` file. You can select the export directory when you enable this option and start sampling.       |
+| **Auto export**                   | Enable this option to automatically export the session data that are going to be recorded to a `.ppk2` file. You can select the export directory when you enable this option and start sampling.</br></br>If the number of triggers becomes excessive to save or the [disk limit is reached](#session-data), the auto export will be automatically turned off and an appropriate message will be displayed in the log.       |
 | **Single**                        | Select this option to stop sampling after one trigger event takes place.       |
 | **Continuous**                    | Select this option to continue sampling after one trigger event, and display trigger events until you click **Stop**.       |
 
@@ -97,29 +97,66 @@ The following options are only available when you log sampling data.
 
 nRF Connect Power Profiler comes with two sampling modes: **Data logger** and **Real time**.
 
-The **Data logger** mode lets you examine the power continuously over a period of time.
+- The **Data logger** sampling mode lets you examine the power continuously over a period of time.
+  It has its own [sampling parameters](#data-logger-parameters) and lets you use the **Live Now** toggle to jump back to displaying the live measurement.
 
-![Data logger mode at work](./screenshots/ppk2_logger_tab.png "Data logger mode at work")
+    ![Data logger mode at work](./screenshots/ppk2_logger_tab.png "Data logger mode at work")
 
-The **Real time** mode lets you sample only when the values specified for the **Length** and **Level** [sampling parameters](#real-time-parameters) have been reached.
+- The **Real time** sampling mode lets you sample only when the values specified for the **Length** and **Level** [sampling parameters](#real-time-parameters) have been reached.
+  You can use the blue slider on the Y-axis to dynamically select the value of the **Level** parameter.
 
-![Real time mode at work](./screenshots/ppk2_logger_tab.png "Real time mode at work")
+    ![Real time mode at work](./screenshots/ppk2_realtime_tab.png "Real time mode at work")
 
-Both modes have their own [sampling parameters](#sampling-parameters), but share most of the sampling UI, explained in the following sections.
+Both modes have their own [sampling parameters](#sampling-parameters), but share most of the sampling chart UI, explained in the following sections.
 
 ### Sampling chart
 
+This is the area where you can track and inspect the measurements being recorded.
+
+The following actions are common to both sampling modes:
+
+- Hover over the chart to display detailed measurement values.
+- Click and hold the left mouse button over the chart and drag the mouse to scroll the chart right and left.
+- Toggle **Lock Y-axis** to prevent the Y-axis changing its values dynamically when you scroll the chart. You can also manually set the values for locking Y-axis in [chart settings](#chart-settings).
+- Use the time frame value buttons to scale the X-axis size.
+- Make [selection](#window-and-selection) of a specific fragment of the measurement.
+
+![Measurement chart](./screenshots/ppk2_chart.png "Measurement chart")
+
 #### Chart settings
+
+You can access the chart settings by clicking the gear icon in the top left corner, next to the **Lock Y-axis** toggle.
+Here you can set the values for locking the Y-axis and enable the logarithmic Y-axis.
+
+![Chart settings](./screenshots/ppk2_chart_settings.png "Chart settings")
 
 #### Minimap
 
+This is the summary of the whole measurement for scrolling and search, both in Y-axis and [logarithmic Y-axis](#chart-settings).
+
+![Minimap scrolling](./screenshots/minimap_live_view_gif.gif "Minimap scrolling")
+
 #### Window and selection
+
+The bottom sections of the sampling chart display the average and maximum measurement values for the selected time interval:
+
+- **Window** displays values for the measurement from start to finish. Selecting a different time frame value changes the values shown.
+
+    ![Window section](./screenshots/ppk2_window.png "Window section")
+
+- **Selection** displays values for a part of the measurements.
+
+    ![Selection section](./screenshots/ppk2_selection_zoom.png "Selection section")
+
+    You can make a selection in the measurement chart by pressing **Shift** and dragging the left mouse button. The selected part is highlighted in grey and included between two grey sliders.
+
+    ![Example of selection](./screenshots/ppk2_measurement_chart.png "Example of selection")
 
 ### Digital channels
 
 The digital signals are visible in the charting section below the current measurement.
 
-![Digital channels](./screenshots/ppk2_logger_tab.png "Digital channels")
+![Digital channels](./screenshots/ppk2_digital_channels.png "Digital channels")
 
 The digital signals are connected to the PPK2's Logic port as described in [Logic port](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/logic_port.html). To view the digital values, enable digital channels and zoom in on the main chart until the values are visible.
 
@@ -127,15 +164,24 @@ The digital signals are connected to the PPK2's Logic port as described in [Logi
 
 The advanced control panel gives you access to filter tuning and lets you adjust gains for all individual ranges.
 
-Press **CTRL-ALT-SHIFT-A** to access the advanced control panel.
+Press **CTRL-ALT-SHIFT-A** to access the advanced control area of the device panel.
 
-![Advanced controls in the Device panel](./screenshots/ppk2_device_panel_mode.png "Advanced controls in the Device panel")
+#### Session data
+
+![Advanced controls for session data](./screenshots/ppk2_advanced_session_data.png "Advanced controls for session data")
+
+Here you can set the root directory where the sampling file will be saved by default and define how much HDD space you want to keep free when you start sampling.
+The sampling will automatically stop when the sampling temporary file would become so big as to have to take space from the defined amount.
 
 #### Gains
+
+![Advanced controls for gains](./screenshots/ppk2_advanced_gains.png "Advanced controls for gains")
 
 If any of the ranges (see [Measurement resolution](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/ppk_measure_resolution.html#ppk_measure_resolution__table_b3l_3ty_bdb)) has an offset, use these controls to add a positive or negative gain to the calculated measurement values.
 
 #### Spike filter
+
+![Advanced controls for spike filter](./screenshots/ppk2_advanced_spike.png "Advanced controls for spike filter")
 
 Whenever a dynamic range switching occurs, induced inductance may cause the first samples to be higher than the actual value.
 
@@ -144,6 +190,12 @@ Use the sliders to set the following:
 - Samples to smooth - The number of samples after a dynamic range switch to apply the filer.
 - Coefficient for range 1–4 - The magnitude of the spike filter for range 1–4. The higher the value, the more filtering will be applied.
 - Coefficient for range 5 - The magnitude of the spike filter for range 5. The higher the value, the more filtering will be applied.
+
+#### Voltage limit
+
+![Advanced controls for voltage limit](./screenshots/ppk2_advanced_voltage.png "Advanced controls for voltage limit")
+
+Use this control to set the voltage limit for the measurement.
 
 ## Feedback tab
 
