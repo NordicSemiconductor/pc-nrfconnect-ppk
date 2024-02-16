@@ -16,6 +16,4 @@ The Power Profiler Kit II (PPK2) must be connected to your computer and powered 
 1. Toggle **Enable power output** to enable power to the DUT.
 1. Click **Stop** to stop sampling.
 
-You can start measuring current when the connection is established.
-
-At the end of the sampling, you can click [**Save/Export**](./overview.md) to save the sampling data to a `.ppk2` file.
+At the end of the sampling, you can click [**Save/Export**](./overview.md) to save the sampling data to a `.ppk2` or `.csv` file.
