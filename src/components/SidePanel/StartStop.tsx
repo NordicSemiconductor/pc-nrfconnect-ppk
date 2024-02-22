@@ -19,7 +19,11 @@ import { unit } from 'mathjs';
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { DataManager } from '../../globals';
 import { appState, isSavePending } from '../../slices/appSlice';
-import { resetChartTime, resetCursor } from '../../slices/chartSlice';
+import {
+    getRecordingMode,
+    resetChartTime,
+    resetCursor,
+} from '../../slices/chartSlice';
 import {
     dataLoggerState,
     updateSampleFreqLog10,
@@ -30,7 +34,7 @@ import {
     setTriggerSavePath,
 } from '../../slices/triggerSlice';
 import { selectDirectoryDialog } from '../../utils/fileUtils';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 import {
     getDoNotAskStartAndClear,
     setDoNotAskStartAndClear,
@@ -43,9 +47,10 @@ const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
 export default () => {
     const dispatch = useDispatch();
-    const realTimePane = useSelector(isRealTimePane);
+    const scopePane = useSelector(isScopePane);
     const autoExport = useSelector(getAutoExportTrigger);
     const dataLoggerPane = useSelector(isDataLoggerPane);
+    const recordingMode = useSelector(getRecordingMode);
     const { samplingRunning } = useSelector(appState);
     const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
         useSelector(dataLoggerState);
@@ -60,7 +65,7 @@ export default () => {
     const [showDialog, setShowDialog] = useState(false);
 
     const startAndClear = async () => {
-        if (realTimePane && autoExport) {
+        if (scopePane && autoExport) {
             const filePath = await selectDirectoryDialog();
             dispatch(setTriggerSavePath(filePath));
         }
@@ -103,7 +108,7 @@ export default () => {
                     />
                 </div>
                 {dataLoggerPane && <LiveModeSettings />}
-                {realTimePane && <TriggerSettings />}
+                {scopePane && <TriggerSettings />}
                 <StartStopButton
                     title={startStopTitle}
                     startText="Start"

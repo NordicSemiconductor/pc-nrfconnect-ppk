@@ -109,7 +109,7 @@ const Chart = () => {
 
     const waitingForTrigger =
         samplingRunning &&
-        recordingMode === 'RealTime' &&
+        recordingMode === 'Scope' &&
         (DataManager().getTimestamp() === 0 ||
             !!triggerProgress.progressMessage);
 

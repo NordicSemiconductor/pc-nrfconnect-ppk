@@ -23,7 +23,7 @@ import {
     toggleAdvancedModeAction,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
@@ -45,7 +45,7 @@ export default () => {
     const fileLoaded = useSelector(isFileLoaded);
     const sessionActive = useSelector(isSessionActive);
     const showProgressDialog = useSelector(getShowProgressDialog);
-    const realTimePane = useSelector(isRealTimePane);
+    const scopePane = useSelector(isScopePane);
     const dataLoggerPane = useSelector(isDataLoggerPane);
 
     useHotKey({
@@ -73,7 +73,7 @@ export default () => {
             {!fileLoaded && !deviceConnected && !sessionActive && (
                 <Instructions />
             )}
-            {!fileLoaded && deviceOpen && (realTimePane || dataLoggerPane) && (
+            {!fileLoaded && deviceOpen && (scopePane || dataLoggerPane) && (
                 <>
                     <PowerMode />
                     <StartStop />
@@ -81,7 +81,7 @@ export default () => {
             )}
             {!connecting &&
                 (fileLoaded || deviceOpen || sessionActive) &&
-                (realTimePane || dataLoggerPane) && (
+                (scopePane || dataLoggerPane) && (
                     <>
                         <DisplayOptions />
                         <Save />

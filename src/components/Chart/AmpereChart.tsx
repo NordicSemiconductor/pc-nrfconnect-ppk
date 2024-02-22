@@ -192,7 +192,7 @@ export default ({
     };
 
     const showTriggerItems =
-        recordingMode === 'RealTime' && !fileLoaded && deviceInUse;
+        recordingMode === 'Scope' && !fileLoaded && deviceInUse;
 
     const chartOptions: AmpereChartOptions = {
         scales: {

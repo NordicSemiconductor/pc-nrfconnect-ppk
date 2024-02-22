@@ -20,7 +20,7 @@ import { updateTitle } from './globals';
 import reducers from './slices';
 import { getFileLoaded, isSavePending } from './slices/appSlice';
 import { getRecordingMode } from './slices/chartSlice';
-import { isDataLoggerPane, isRealTimePane } from './utils/panes';
+import { isDataLoggerPane, isScopePane } from './utils/panes';
 
 import './index.scss';
 
@@ -55,12 +55,12 @@ const AppTitleHook = () => {
 const ChartWrapper: React.FC<{ active: boolean }> = ({ active }) => {
     const currentMode = useSelector(getRecordingMode);
     const dataLoggerPane = useSelector(isDataLoggerPane);
-    const realTimePane = useSelector(isRealTimePane);
-    const paneName = currentMode === 'DataLogger' ? 'Data Logger' : 'Real Time';
+    const scopePane = useSelector(isScopePane);
+    const paneName = currentMode === 'DataLogger' ? 'Data Logger' : 'Scope';
 
     if (
         (currentMode === 'DataLogger' && !dataLoggerPane) ||
-        (currentMode === 'RealTime' && !realTimePane)
+        (currentMode === 'Scope' && !scopePane)
     )
         return (
             <div className="tw-flex tw-h-full tw-items-center tw-justify-center">
@@ -83,7 +83,7 @@ render(
         feedback
         panes={[
             { name: 'Data Logger', Main: ChartWrapper },
-            { name: 'Real Time', Main: ChartWrapper },
+            { name: 'Scope', Main: ChartWrapper },
         ]}
     >
         <AppTitleHook />

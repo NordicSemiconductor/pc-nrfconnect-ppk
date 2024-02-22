@@ -100,7 +100,7 @@ export const setupOptions =
                         getSessionRootFolder(getState())
                     );
                     break;
-                case 'RealTime':
+                case 'Scope':
                     DataManager().initializeTriggerSession(60);
                     break;
             }
@@ -117,7 +117,7 @@ export const samplingStart =
     (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
         const mode: RecordingMode = isDataLoggerPane(getState())
             ? 'DataLogger'
-            : 'RealTime';
+            : 'Scope';
 
         dispatch(setRecordingMode(mode));
         dispatch(setTriggerActive(false));
@@ -249,7 +249,7 @@ export const open =
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
-            if (getRecordingMode(getState()) === 'RealTime') {
+            if (getRecordingMode(getState()) === 'Scope') {
                 const validTriggerValue =
                     cappedValue >= getState().app.trigger.level;
                 if (!getState().app.trigger.active && validTriggerValue) {
