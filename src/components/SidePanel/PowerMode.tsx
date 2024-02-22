@@ -22,7 +22,11 @@ export default () => {
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
 
     return (
-        <Group heading={`${capabilities.ppkSetPowerMode ? 'Mode' : ''}`}>
+        <Group
+            heading={`${
+                capabilities.ppkSetPowerMode ? 'Power Supply Mode' : ''
+            }`}
+        >
             {capabilities.ppkSetPowerMode && (
                 <ButtonGroup
                     className={`power-mode w-100 ${
