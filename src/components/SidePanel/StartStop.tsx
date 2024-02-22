@@ -12,6 +12,7 @@ import {
     Group,
     Slider,
     StartStopButton,
+    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { unit } from 'mathjs';
 
@@ -69,6 +70,10 @@ export default () => {
         dispatch(resetTriggerOrigin());
         dispatch(resetCursor());
 
+        telemetry.sendEvent('StartSampling', {
+            mode: recordingMode,
+            samplesPerSecond: DataManager().getSamplesPerSecond(),
+        });
         dispatch(samplingStart());
         setShowDialog(false);
     };
@@ -106,6 +111,10 @@ export default () => {
                     onClick={async () => {
                         if (samplingRunning) {
                             dispatch(samplingStop());
+                            telemetry.sendEvent('StopSampling', {
+                                mode: recordingMode,
+                                duration: DataManager().getTimestamp(),
+                            });
                             return;
                         }
 

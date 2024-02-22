@@ -73,7 +73,6 @@ import {
     setTriggerOrigin,
 } from '../slices/triggerSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
-import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
@@ -116,8 +115,6 @@ export const setupOptions =
 /* Start reading current measurements */
 export const samplingStart =
     (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
-        telemetry.sendEvent(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
-
         const mode: RecordingMode = isDataLoggerPane(getState())
             ? 'DataLogger'
             : 'RealTime';
@@ -319,7 +316,6 @@ export const open =
 
         try {
             device = new SerialDevice(deviceInfo, onSample);
-            telemetry.sendEvent(EventAction.PPK_2_SELECTED);
 
             dispatch(
                 setSamplingAttrsAction({
