@@ -7,10 +7,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    Dropdown,
     DropdownItem,
-    NumberInlineInput,
-    Toggle,
+    NumberInput,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
@@ -20,7 +18,6 @@ import {
 } from '../../slices/appSlice';
 import {
     dataLoggerState,
-    setSampleIndefinitely,
     updateDuration,
     updateDurationUnit,
 } from '../../slices/dataLoggerSlice';
@@ -41,14 +38,15 @@ export default () => {
     const sessionFolder = useSelector(getSessionRootFolder);
     const diskFullTrigger = useSelector(getDiskFullTrigger);
     const { samplingRunning } = useSelector(appState);
-    const { sampleFreq, duration, durationUnit, sampleIndefinitely } =
-        useSelector(dataLoggerState);
+    const { sampleFreq, duration, durationUnit } = useSelector(dataLoggerState);
+    const sampleIndefinitely = durationUnit === 'inf';
 
     const uintDropdownItem: DropdownItem<TimeUnit>[] = [
         { value: 's', label: 'seconds' },
         { value: 'm', label: 'minutes' },
         { value: 'h', label: 'hours' },
         { value: 'd', label: 'days' },
+        { value: 'inf', label: 'forever' },
     ];
 
     const [freeSpace, setFreeSpace] = useState<number>(0);
@@ -68,53 +66,41 @@ export default () => {
 
     return (
         <>
-            <Toggle
-                onToggle={v => dispatch(setSampleIndefinitely(v))}
-                isToggled={sampleIndefinitely}
-            >
-                Sample indefinitely
-            </Toggle>
+            <NumberInput
+                label="Sample for"
+                range={
+                    sampleIndefinitely
+                        ? [Infinity]
+                        : {
+                              min: 1,
+                              max: 60 * 60,
+                          }
+                }
+                value={sampleIndefinitely ? Infinity : duration}
+                onChange={(v: number) => dispatch(updateDuration(v))}
+                unit={{
+                    selectedItem:
+                        uintDropdownItem.find(v => v.value === durationUnit) ??
+                        uintDropdownItem[0],
+                    items: uintDropdownItem,
+                    onUnitChange: v => {
+                        dispatch(updateDurationUnit(v.value));
+                    },
+                }}
+                disabled={samplingRunning}
+                showSlider
+                minWidth
+            />
+
             {!sampleIndefinitely && (
-                <>
-                    <div className="tw-flex tw-grow tw-items-center">
-                        <span className="tw-w-16">Sample for</span>
-                        <NumberInlineInput
-                            className="tw-w-30"
-                            range={{
-                                min: 1,
-                                max: 9999999,
-                            }}
-                            value={duration}
-                            onChange={(v: number) =>
-                                dispatch(updateDuration(v))
-                            }
-                            disabled={samplingRunning}
-                        />
-                        <div className="tw-ml-4 tw-w-20">
-                            <Dropdown
-                                className="tw-w-full"
-                                items={uintDropdownItem}
-                                onSelect={v => {
-                                    dispatch(updateDurationUnit(v.value));
-                                }}
-                                selectedItem={
-                                    uintDropdownItem.find(
-                                        v => v.value === durationUnit
-                                    ) ?? uintDropdownItem[0]
-                                }
-                                disabled={samplingRunning}
-                            />
-                        </div>
-                    </div>
-                    <div className="small buffer-summary">
-                        Estimated disk space required{' '}
-                        {calcFileSizeString(
-                            sampleFreq,
-                            convertTimeToSeconds(duration, durationUnit)
-                        )}
-                        . Current Available space {calcFileSize(freeSpace)}
-                    </div>
-                </>
+                <div className="small buffer-summary">
+                    Estimated disk space required{' '}
+                    {calcFileSizeString(
+                        sampleFreq,
+                        convertTimeToSeconds(duration, durationUnit)
+                    )}
+                    . Current Available space {calcFileSize(freeSpace)}
+                </div>
             )}
             {sampleIndefinitely && (
                 <div className="small buffer-summary">

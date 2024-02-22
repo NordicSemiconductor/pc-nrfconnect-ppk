@@ -49,7 +49,7 @@ export type booleanTupleOf8 = [
     boolean
 ];
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
+export type TimeUnit = 's' | 'm' | 'h' | 'd' | 'inf';
 
 interface StoreSchema {
     [LAST_SAVE_DIR]: string;
@@ -156,10 +156,6 @@ export const setDurationUnit = (maxSampleFreq: number, timeUnit: TimeUnit) => {
     store.set(`durationUnit-${maxSampleFreq}`, timeUnit);
 };
 
-export const getSampleIndefinitely = (defaultValue: boolean) =>
-    store.get(`sampleIndefinitely`, defaultValue);
-export const setSampleIndefinitely = (autoStop: boolean) =>
-    store.set(`sampleIndefinitely`, autoStop);
 export const getVoltageRegulatorMaxCapPPK1 = (defaultMaxCap: number) =>
     store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK1, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK1 = (maxCap: number) =>

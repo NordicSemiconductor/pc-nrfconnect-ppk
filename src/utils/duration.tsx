@@ -93,5 +93,7 @@ export const convertTimeToSeconds = (time: number, timeUnit: TimeUnit) => {
             return time * 60 * 60;
         case 'd':
             return time * 24 * 60 * 60;
+        case 'inf':
+            return Infinity;
     }
 };
