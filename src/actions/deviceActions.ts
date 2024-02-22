@@ -145,11 +145,6 @@ export const updateSpikeFilter = (): AppThunk<RootState> => (_, getState) => {
     const { spikeFilter } = getState().app;
     persistSpikeFilter(spikeFilter);
     device!.ppkSetSpikeFilter(spikeFilter);
-
-    const { samples, alpha, alpha5 } = spikeFilter;
-    logger.info(
-        `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
-    );
 };
 
 export const close =
@@ -425,6 +420,20 @@ export const updateGains =
         const gain = gains[index] / 100;
         await device!.ppkSetUserGains(index, gain);
         logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
+    };
+
+export const updateAllGains =
+    (): AppThunk<RootState, Promise<void>> => async (_, getState) => {
+        if (device!.ppkSetUserGains == null) {
+            return;
+        }
+        const { gains } = getState().app;
+
+        for (let i = 0; i < gains.length; i += 1) {
+            // eslint-disable-next-line no-await-in-loop
+            await device!.ppkSetUserGains(i, gains[i] / 100);
+            logger.info(`Gain multiplier #${i + 1} updated to ${i}`);
+        }
     };
 
 export const setDeviceRunning =

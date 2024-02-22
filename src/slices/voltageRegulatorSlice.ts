@@ -21,13 +21,14 @@ interface VoltageRegulatorState {
     maxCapPPK2: number;
 }
 
+const maxCapPPK2 = 5000;
 const initialState = (): VoltageRegulatorState => ({
     vdd: 3000, // [1800 .. 3600] mV
     currentVDD: 3000,
     min: 1850,
     max: 3600,
-    maxCap: getVoltageRegulatorMaxCapPPK2(5000),
-    maxCapPPK2: getVoltageRegulatorMaxCapPPK2(5000),
+    maxCap: getVoltageRegulatorMaxCapPPK2(maxCapPPK2),
+    maxCapPPK2: getVoltageRegulatorMaxCapPPK2(maxCapPPK2),
 });
 
 const voltageRegulatorSlice = createSlice({
@@ -66,6 +67,11 @@ const voltageRegulatorSlice = createSlice({
             state.maxCap = newMaxCap;
             state.maxCapPPK2 = newMaxCap;
         },
+        resetVoltageRegulatorMaxCapPPK2(state) {
+            persistVoltageRegulatorMaxCapPPK2(maxCapPPK2);
+            state.maxCap = maxCapPPK2;
+            state.maxCapPPK2 = maxCapPPK2;
+        },
     },
 });
 
@@ -76,6 +82,7 @@ export const {
     updateRegulator,
     moveVoltageRegulatorVdd,
     updateVoltageRegulatorMaxCapPPK2,
+    resetVoltageRegulatorMaxCapPPK2,
 } = voltageRegulatorSlice.actions;
 
 export default voltageRegulatorSlice.reducer;

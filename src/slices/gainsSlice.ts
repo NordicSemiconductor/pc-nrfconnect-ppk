@@ -26,11 +26,14 @@ const gainsSlice = createSlice({
                 range === action.payload.range ? value : oldValue
             ) as GainsState;
         },
+        resetGainsToDefaults() {
+            return initialState();
+        },
     },
 });
 
 export const gainsState = (state: RootState) => state.app.gains;
 
-export const { updateGainsAction } = gainsSlice.actions;
+export const { updateGainsAction, resetGainsToDefaults } = gainsSlice.actions;
 
 export default gainsSlice.reducer;

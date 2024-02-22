@@ -14,7 +14,7 @@ import {
     Spinner,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { updateSpikeFilter } from '../../actions/deviceActions';
+import { updateAllGains, updateSpikeFilter } from '../../actions/deviceActions';
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
@@ -23,7 +23,9 @@ import {
     isFileLoaded,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
+import { resetGainsToDefaults } from '../../slices/gainsSlice';
 import { resetSpikeFilterToDefaults } from '../../slices/spikeFilterSlice';
+import { resetVoltageRegulatorMaxCapPPK2 } from '../../slices/voltageRegulatorSlice';
 import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
@@ -87,7 +89,12 @@ export default () => {
                     <Button
                         onClick={() => {
                             dispatch(resetSpikeFilterToDefaults());
-                            dispatch(updateSpikeFilter());
+                            dispatch(updateSpikeFilter()); // send to device
+
+                            dispatch(resetGainsToDefaults());
+                            dispatch(updateAllGains()); // send to device
+
+                            dispatch(resetVoltageRegulatorMaxCapPPK2());
                         }}
                         variant="secondary"
                     >

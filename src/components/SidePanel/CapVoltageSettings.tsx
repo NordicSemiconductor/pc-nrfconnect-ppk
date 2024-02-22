@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Group,
@@ -19,6 +19,20 @@ import {
     voltageRegulatorState,
 } from '../../slices/voltageRegulatorSlice';
 import EventAction from '../../usageDataActions';
+
+export const useSynchronizationIfChangedFromOutside = <T,>(
+    externalValue: T,
+    setInternalValue: (value: T) => void
+) => {
+    const previousExternalValue = useRef(externalValue);
+    useEffect(() => {
+        if (previousExternalValue.current !== externalValue) {
+            setInternalValue(externalValue);
+            previousExternalValue.current = externalValue;
+        }
+    });
+    return previousExternalValue.current;
+};
 
 export const CapVoltageSettings = () => {
     const { min, max, vdd, maxCap } = useSelector(voltageRegulatorState);
@@ -35,6 +49,8 @@ export const CapVoltageSettings = () => {
             dispatch(updateRegulator());
         }
     };
+
+    useSynchronizationIfChangedFromOutside(maxCap, setNewMaxCap);
 
     return (
         <Group
