@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
     CollapsibleGroup,
-    NumberInputSliderWithUnit,
+    NumberInput,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import os from 'os';
 
@@ -71,7 +71,7 @@ export default () => {
                     </Button>
                 </div>
             </div>
-            <NumberInputSliderWithUnit
+            <NumberInput
                 label="Disk full trigger"
                 unit="MB"
                 value={diskFullTrigger}
@@ -85,6 +85,7 @@ export default () => {
                     dispatch(setDiskFullTrigger(value));
                     setPersistedDiskFullTrigger(value);
                 }}
+                showSlider
             />
         </CollapsibleGroup>
     );

@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     logger,
-    NumberInputSliderWithUnit,
+    NumberInput,
     StateSelector,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -94,13 +94,14 @@ export default () => {
 
     return (
         <>
-            <NumberInputSliderWithUnit
+            <NumberInput
                 range={{
                     min: 1,
                     max: 1000,
                     decimals: 2,
                     step: 0.01,
                 }}
+                title="Duration of trigger window"
                 value={internalTriggerLength}
                 onChange={setInternalTriggerLength}
                 onChangeComplete={(value: number) => {
@@ -109,14 +110,16 @@ export default () => {
                 unit="ms"
                 label="Length"
                 disabled={dataLoggerActive}
+                showSlider
             />
-            <NumberInputSliderWithUnit
+            <NumberInput
                 range={{
                     min: getMin(levelUnit),
                     max: levelUnit === 'µA' ? 2000 : 1000,
                     decimals: levelUnit === 'µA' ? 3 : 4,
                     step: 0.001,
                 }}
+                title="Rising edge level to run trigger"
                 value={internalTriggerValue}
                 onChange={v => setInternalTriggerValue(v)}
                 onChangeComplete={(value: number) => {
@@ -127,6 +130,7 @@ export default () => {
                 unit={levelUnit}
                 label="Level"
                 disabled={dataLoggerActive}
+                showSlider
             />
             <StateSelector
                 items={[...TriggerTypeValues]}
