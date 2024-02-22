@@ -7,22 +7,23 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    Button,
+    CollapsibleGroup,
     selectedDevice,
     SidePanel,
     Spinner,
-    useHotKey,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
+import { updateSpikeFilter } from '../../actions/deviceActions';
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
 import {
-    advancedMode as advancedModeSelector,
     deviceOpen as deviceOpenSelector,
     isFileLoaded,
-    toggleAdvancedModeAction,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
+import { resetSpikeFilterToDefaults } from '../../slices/spikeFilterSlice';
 import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
@@ -38,8 +39,6 @@ import './sidepanel.scss';
 
 export default () => {
     const dispatch = useDispatch();
-
-    const advancedMode = useSelector(advancedModeSelector);
     const deviceConnected = useSelector(selectedDevice);
     const deviceOpen = useSelector(deviceOpenSelector);
     const fileLoaded = useSelector(isFileLoaded);
@@ -47,13 +46,6 @@ export default () => {
     const showProgressDialog = useSelector(getShowProgressDialog);
     const scopePane = useSelector(isScopePane);
     const dataLoggerPane = useSelector(isDataLoggerPane);
-
-    useHotKey({
-        hotKey: 'alt+ctrl+shift+a',
-        title: 'Show advanced config',
-        isGlobal: false,
-        action: () => dispatch(toggleAdvancedModeAction()),
-    });
 
     const connecting = deviceConnected && !deviceOpen;
 
@@ -87,12 +79,21 @@ export default () => {
                         <Save />
                     </>
                 )}
-            {!fileLoaded && deviceOpen && advancedMode && (
-                <>
+            {!fileLoaded && deviceOpen && (
+                <CollapsibleGroup heading="Advanced Configuration">
                     <Gains />
                     <SpikeFilter />
                     <CapVoltageSettings />
-                </>
+                    <Button
+                        onClick={() => {
+                            dispatch(resetSpikeFilterToDefaults());
+                            dispatch(updateSpikeFilter());
+                        }}
+                        variant="secondary"
+                    >
+                        Reset to default Configuration
+                    </Button>
+                </CollapsibleGroup>
             )}
             <DeprecatedDeviceDialog />
             {showProgressDialog && <ProgressDialog />}

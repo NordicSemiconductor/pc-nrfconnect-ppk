@@ -7,10 +7,7 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    CollapsibleGroup,
-    Slider,
-} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { Group, Slider } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';
@@ -34,7 +31,7 @@ const Gains = () => {
 
     const range = { min: 90, max: 110 };
     return (
-        <CollapsibleGroup
+        <Group
             heading="Gains"
             title="Adjust gains to correct potential measurement errors"
         >
@@ -62,7 +59,7 @@ const Gains = () => {
                     />
                 </React.Fragment>
             ))}
-        </CollapsibleGroup>
+        </Group>
     );
 };
 

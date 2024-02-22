@@ -9,14 +9,13 @@ import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
-    CollapsibleGroup,
+    Group,
     Slider,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';
 import {
-    resetSpikeFilterToDefaults,
     spikeFilterState,
     updateSpikeFilterAction,
 } from '../../slices/spikeFilterSlice';
@@ -29,7 +28,7 @@ const SpikeFilter = () => {
         return null;
     }
     return (
-        <CollapsibleGroup
+        <Group
             heading="Spike filter"
             title="Adjust how the software filters current spikes"
         >
@@ -99,17 +98,7 @@ const SpikeFilter = () => {
                 ]}
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
-            <Button
-                onClick={() => {
-                    dispatch(resetSpikeFilterToDefaults());
-                    dispatch(updateSpikeFilter());
-                }}
-                variant="secondary"
-                className="tw-w-3/4"
-            >
-                Defaults
-            </Button>
-        </CollapsibleGroup>
+        </Group>
     );
 };
 

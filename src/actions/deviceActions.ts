@@ -145,12 +145,11 @@ export const updateSpikeFilter = (): AppThunk<RootState> => (_, getState) => {
     const { spikeFilter } = getState().app;
     persistSpikeFilter(spikeFilter);
     device!.ppkSetSpikeFilter(spikeFilter);
-    if (getState().app.app.advancedMode) {
-        const { samples, alpha, alpha5 } = spikeFilter;
-        logger.info(
-            `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
-        );
-    }
+
+    const { samples, alpha, alpha5 } = spikeFilter;
+    logger.info(
+        `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
+    );
 };
 
 export const close =
