@@ -18,7 +18,6 @@ const SPIKE_FILTER_ALPHA5 = 'spikeFilter.alpha5';
 const DIGITAL_CHANNELS_VISIBLE = 'digitalChannelsVisible';
 const DIGITAL_CHANNELS = 'digitalChannels';
 const TIMESTAMPS_VISIBLE = 'timestampsVisible';
-const VOLTAGE_REGULATOR_MAX_CAP_PPK1 = 'voltageRegulatorMaxCapPPK1';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
 
 const store = getPersistentStore<StoreSchema>({
@@ -156,10 +155,6 @@ export const setDurationUnit = (maxSampleFreq: number, timeUnit: TimeUnit) => {
     store.set(`durationUnit-${maxSampleFreq}`, timeUnit);
 };
 
-export const getVoltageRegulatorMaxCapPPK1 = (defaultMaxCap: number) =>
-    store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK1, defaultMaxCap);
-export const setVoltageRegulatorMaxCapPPK1 = (maxCap: number) =>
-    store.set(VOLTAGE_REGULATOR_MAX_CAP_PPK1, maxCap);
 export const getVoltageRegulatorMaxCapPPK2 = (defaultMaxCap: number) =>
     store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK2 = (maxCap: number) =>
