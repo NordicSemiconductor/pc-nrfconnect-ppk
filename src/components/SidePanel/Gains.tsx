@@ -36,8 +36,7 @@ export default () => {
             {gains.map((gain, index) => (
                 <NumberInput
                     key={`${index + 1}`}
-                    title={gainTitles[index]}
-                    label={`Range ${index + 1}`}
+                    label={`Range ${index + 1} (${gainTitles[index]})`}
                     value={gain / 100}
                     range={{ min: 0.9, max: 1.1, decimals: 2 }}
                     onChange={value => {
