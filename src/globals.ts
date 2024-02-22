@@ -403,12 +403,13 @@ const getSamplingTime = (samplingRate: number): number =>
 
 export const getSamplesPerSecond = () => options.samplesPerSecond;
 
-export const timestampToIndex = (timestamp: number): number =>
+export const timestampToIndex = (
+    timestamp: number,
+    samplesPerSecond: number = options.samplesPerSecond
+): number =>
     timestamp < 0
         ? -1
-        : Math.trunc(
-              (timestamp * options.samplesPerSecond) / microSecondsPerSecond
-          );
+        : Math.trunc((timestamp * samplesPerSecond) / microSecondsPerSecond);
 
 export const timestampToCeilIndex = (timestamp: number): number =>
     timestamp < 0
@@ -417,8 +418,11 @@ export const timestampToCeilIndex = (timestamp: number): number =>
               (timestamp * options.samplesPerSecond) / microSecondsPerSecond
           );
 
-export const indexToTimestamp = (index: number): number =>
-    index >= 0 ? (microSecondsPerSecond * index) / options.samplesPerSecond : 0;
+export const indexToTimestamp = (
+    index: number,
+    samplesPerSecond: number = options.samplesPerSecond
+): number =>
+    index >= 0 ? (microSecondsPerSecond * index) / samplesPerSecond : 0;
 
 export const updateTitle = (info?: string | null) => {
     const title = getCurrentWindow().getTitle().split(':')[0].trim();
