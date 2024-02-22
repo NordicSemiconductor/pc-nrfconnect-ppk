@@ -61,8 +61,8 @@ export const getFreeSpace = async (triggerLimit: number, dstPath: string) => {
     return freeSpaceBytes - triggerLimit * 1024 * 1024;
 };
 
-export const remainingTime = (freeSpaceMB: number) =>
-    indexToTimestamp(freeSpaceMB / frameSize);
+export const remainingTime = (freeSpaceMB: number, samplesPerSecond: number) =>
+    indexToTimestamp(freeSpaceMB / frameSize, samplesPerSecond);
 
 export const canFileFit = async (
     triggerLimit: number,

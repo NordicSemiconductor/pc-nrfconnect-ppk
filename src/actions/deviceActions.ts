@@ -92,8 +92,6 @@ export const setupOptions =
             dispatch(resetChartTime());
             dispatch(resetMinimap());
 
-            const { sampleFreq } = getState().app.dataLogger;
-            DataManager().setSamplesPerSecond(sampleFreq);
             switch (recordingMode) {
                 case 'DataLogger':
                     DataManager().initializeLiveSession(
@@ -127,6 +125,17 @@ export const samplingStart =
 
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
+
+        const { sampleFreq } = getState().app.dataLogger;
+
+        switch (mode) {
+            case 'DataLogger':
+                DataManager().setSamplesPerSecond(sampleFreq);
+                break;
+            case 'Scope':
+                DataManager().setSamplesPerSecond(100_000);
+                break;
+        }
         await device!.ppkAverageStart();
         startPreventSleep();
     };

@@ -40,29 +40,30 @@ export default () => {
 
     return (
         <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <Toggle
-                onToggle={() => dispatch(toggleTimestamps())}
-                isToggled={timestampsVisible}
-                label="Timestamps"
-                variant="primary"
-            />
-            {timestampsVisible &&
-                (DataManager().getStartSystemTime() || deviceOpen) && (
-                    <StateSelector
-                        items={['Relative', 'Absolute']}
-                        onSelect={(index: number) => {
-                            dispatch(setShowSystemTime(!!index));
-                        }}
-                        selectedItem={
-                            !!DataManager().getStartSystemTime() && systemTime
-                                ? 'Absolute'
-                                : 'Relative'
-                        }
-                        disabled={!timestampsVisible}
-                    />
-                )}
+            <div className="tw-flex tw-flex-col tw-gap-4">
+                <Toggle
+                    onToggle={() => dispatch(toggleTimestamps())}
+                    isToggled={timestampsVisible}
+                    label="Timestamps"
+                    variant="primary"
+                />
+                {timestampsVisible &&
+                    (DataManager().getStartSystemTime() || deviceOpen) && (
+                        <StateSelector
+                            items={['Relative', 'Absolute']}
+                            onSelect={(index: number) => {
+                                dispatch(setShowSystemTime(!!index));
+                            }}
+                            selectedItem={
+                                !!DataManager().getStartSystemTime() &&
+                                systemTime
+                                    ? 'Absolute'
+                                    : 'Relative'
+                            }
+                            disabled={!timestampsVisible}
+                        />
+                    )}
 
-            <>
                 <Toggle
                     onToggle={() => dispatch(toggleDigitalChannels())}
                     isToggled={digitalChannelsVisible}
@@ -70,21 +71,22 @@ export default () => {
                     variant="primary"
                 />
                 {digitalChannelsVisible && <DigitalChannels />}
-            </>
-            {dataLoggerPane && (
-                <Toggle
-                    label="Show Minimap"
-                    title={`Click in order to ${
-                        showMinimap ? 'hide' : 'show'
-                    } a navigable minimap`}
-                    onToggle={() =>
-                        dispatch(setShowMinimapAction(!showMinimap))
-                    }
-                    isToggled={showMinimap}
-                >
-                    Show Minimap
-                </Toggle>
-            )}
+
+                {dataLoggerPane && (
+                    <Toggle
+                        label="Show Minimap"
+                        title={`Click in order to ${
+                            showMinimap ? 'hide' : 'show'
+                        } a navigable minimap`}
+                        onToggle={() =>
+                            dispatch(setShowMinimapAction(!showMinimap))
+                        }
+                        isToggled={showMinimap}
+                    >
+                        Show Minimap
+                    </Toggle>
+                )}
+            </div>
         </CollapsibleGroup>
     );
 };

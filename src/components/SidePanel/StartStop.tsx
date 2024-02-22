@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
@@ -17,7 +17,12 @@ import { unit } from 'mathjs';
 
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { DataManager } from '../../globals';
-import { appState, isSavePending } from '../../slices/appSlice';
+import {
+    appState,
+    getDiskFullTrigger,
+    getSessionRootFolder,
+    isSavePending,
+} from '../../slices/appSlice';
 import {
     getRecordingMode,
     resetChartTime,
@@ -32,7 +37,13 @@ import {
     resetTriggerOrigin,
     setTriggerSavePath,
 } from '../../slices/triggerSlice';
-import { selectDirectoryDialog } from '../../utils/fileUtils';
+import { convertTimeToSeconds, formatDuration } from '../../utils/duration';
+import {
+    calcFileSize,
+    getFreeSpace,
+    remainingTime as calcRemainingTime,
+    selectDirectoryDialog,
+} from '../../utils/fileUtils';
 import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 import {
     getDoNotAskStartAndClear,
@@ -44,6 +55,11 @@ import TriggerSettings from './TriggerSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
+const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
+    const bytes = sampleFreq * durationSeconds * 6;
+    return calcFileSize(bytes, fmtOpts);
+};
+
 export default () => {
     const dispatch = useDispatch();
     const scopePane = useSelector(isScopePane);
@@ -51,9 +67,18 @@ export default () => {
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const recordingMode = useSelector(getRecordingMode);
     const { samplingRunning } = useSelector(appState);
-    const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
-        useSelector(dataLoggerState);
+    const {
+        sampleFreqLog10,
+        sampleFreq,
+        maxFreqLog10,
+        duration,
+        durationUnit,
+    } = useSelector(dataLoggerState);
     const savePending = useSelector(isSavePending);
+    const sessionFolder = useSelector(getSessionRootFolder);
+    const diskFullTrigger = useSelector(getDiskFullTrigger);
+
+    const sampleIndefinitely = durationUnit === 'inf';
 
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
         .format(fmtOpts)
@@ -82,32 +107,58 @@ export default () => {
         setShowDialog(false);
     };
 
+    const [freeSpace, setFreeSpace] = useState<number>(0);
+
+    useEffect(() => {
+        if (!dataLoggerPane) return;
+
+        const action = () => {
+            getFreeSpace(diskFullTrigger, sessionFolder).then(space => {
+                setFreeSpace(space);
+            });
+        };
+        action();
+        const timerId = setInterval(action, 5000);
+        return () => {
+            clearInterval(timerId);
+        };
+    }, [dataLoggerPane, diskFullTrigger, sessionFolder]);
+
+    const [remainingTime, setRemainingTime] = useState<number>(0);
+
+    useEffect(() => {
+        setRemainingTime(calcRemainingTime(freeSpace, sampleFreq));
+    }, [freeSpace, sampleFreq]);
+
     return (
         <>
             <Group heading="Sampling parameters">
-                <div className="tw-flex tw-flex-col tw-gap-1 tw-text-xs">
-                    <div>
-                        {sampleFreq.toLocaleString('en')} samples per second
+                <div className="tw-flex tw-flex-col tw-gap-4">
+                    <div className="tw-flex tw-flex-col tw-gap-1 tw-text-xs">
+                        <div>
+                            {sampleFreq.toLocaleString('en')} samples per second
+                        </div>
+                        <Slider
+                            id="data-logger-sampling-frequency"
+                            values={[sampleFreqLog10]}
+                            range={{ min: 0, max: maxFreqLog10 }}
+                            onChange={[
+                                v =>
+                                    dispatch(
+                                        updateSampleFreqLog10({
+                                            sampleFreqLog10: v,
+                                        })
+                                    ),
+                            ]}
+                            onChangeComplete={() => {}}
+                            disabled={samplingRunning}
+                        />
                     </div>
-                    <Slider
-                        ticks
-                        id="data-logger-sampling-frequency"
-                        values={[sampleFreqLog10]}
-                        range={{ min: 0, max: maxFreqLog10 }}
-                        onChange={[
-                            v =>
-                                dispatch(
-                                    updateSampleFreqLog10({
-                                        sampleFreqLog10: v,
-                                    })
-                                ),
-                        ]}
-                        onChangeComplete={() => {}}
-                        disabled={samplingRunning}
-                    />
+                    {dataLoggerPane && <LiveModeSettings />}
+                    {scopePane && <TriggerSettings />}
                 </div>
-                {dataLoggerPane && <LiveModeSettings />}
-                {scopePane && <TriggerSettings />}
+            </Group>
+            <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton
                     title={startStopTitle}
                     startText="Start"
@@ -136,7 +187,33 @@ export default () => {
                     variant="secondary"
                     started={samplingRunning}
                 />
-            </Group>
+                {dataLoggerPane && (
+                    <div className="tw-border tw-border-solid tw-border-gray-400 tw-p-2 tw-text-[10px] tw-text-gray-400">
+                        {!sampleIndefinitely && (
+                            <div>
+                                {`Estimated disk space required ${calcFileSizeString(
+                                    sampleFreq,
+                                    convertTimeToSeconds(duration, durationUnit)
+                                )}. Current Available space ${calcFileSize(
+                                    freeSpace
+                                )}`}
+                            </div>
+                        )}
+                        {sampleIndefinitely && (
+                            <div>
+                                {`Estimated space limit ${formatDuration(
+                                    remainingTime
+                                )} at ${calcFileSizeString(
+                                    sampleFreq,
+                                    convertTimeToSeconds(1, 'h')
+                                )}/h. Available disk space ${calcFileSize(
+                                    freeSpace
+                                )}`}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
             {dataLoggerPane && <SessionSettings />}
             <ConfirmationDialog
                 confirmLabel="Yes"
