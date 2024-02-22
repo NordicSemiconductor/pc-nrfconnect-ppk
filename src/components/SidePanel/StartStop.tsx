@@ -5,7 +5,6 @@
  */
 
 import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
@@ -86,10 +85,10 @@ export default () => {
     return (
         <>
             <Group heading="Sampling parameters">
-                <div className="sample-frequency-group">
-                    <Form.Label htmlFor="data-logger-sampling-frequency">
+                <div className="tw-flex tw-flex-col tw-gap-1 tw-text-xs">
+                    <div>
                         {sampleFreq.toLocaleString('en')} samples per second
-                    </Form.Label>
+                    </div>
                     <Slider
                         ticks
                         id="data-logger-sampling-frequency"

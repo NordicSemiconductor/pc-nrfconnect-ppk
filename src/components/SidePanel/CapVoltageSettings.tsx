@@ -5,12 +5,10 @@
  */
 
 import React, { useState } from 'react';
-import FormLabel from 'react-bootstrap/FormLabel';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Group,
-    NumberInlineInput,
-    Slider,
+    NumberInput,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -44,40 +42,21 @@ export const CapVoltageSettings = () => {
             title="Adjust to limit voltage supply"
             className="cap-voltage-regulator-container"
         >
-            <div
-                className="voltage-regulator"
+            <NumberInput
                 title="Supply voltage to the device will be capped to this value"
-            >
-                <FormLabel htmlFor="cap-slider-vdd">
-                    <span className="flex-fill">Set max supply voltage to</span>
-                    <NumberInlineInput
-                        value={newMaxCap}
-                        range={{ min, max }}
-                        onChange={value => setNewMaxCap(value)}
-                        onChangeComplete={() => {
-                            updateVoltageRegulator();
-                            telemetry.sendEvent(
-                                EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                                { maxCap: newMaxCap }
-                            );
-                        }}
-                    />
-                    &nbsp;mV
-                </FormLabel>
-                <Slider
-                    id="cap-slider-vdd"
-                    values={[newMaxCap]}
-                    range={{ min, max }}
-                    onChange={[value => setNewMaxCap(value)]}
-                    onChangeComplete={() => {
-                        updateVoltageRegulator();
-                        telemetry.sendEvent(
-                            EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                            { maxCap: newMaxCap }
-                        );
-                    }}
-                />
-            </div>
+                label="Set max supply voltage to"
+                value={newMaxCap}
+                range={{ min, max }}
+                onChange={value => setNewMaxCap(value)}
+                onChangeComplete={() => {
+                    updateVoltageRegulator();
+                    telemetry.sendEvent(EventAction.VOLTAGE_MAX_LIMIT_CHANGED, {
+                        maxCap: newMaxCap,
+                    });
+                }}
+                showSlider
+                unit="mV"
+            />
         </Group>
     );
 };

@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import FormLabel from 'react-bootstrap/FormLabel';
 
 type DiskSpaceUsageBoxProps = {
     label: string;
@@ -17,7 +16,7 @@ type DiskSpaceUsageBoxProps = {
 export default ({ label, value, actions, title }: DiskSpaceUsageBoxProps) => (
     <div className="tw-flex tw-max-w-[100%] tw-grow tw-flex-row tw-items-center tw-justify-between tw-gap-2 tw-border tw-border-gray-200 tw-px-2 tw-py-1 tw-text-gray-400">
         <div className="tw tw-flex tw-flex-col tw-gap-1 tw-overflow-hidden">
-            <FormLabel>{label}</FormLabel>
+            <div>{label}</div>
             <div
                 title={title}
                 className="tw-overflow-hidden tw-text-ellipsis tw-text-sm tw-text-gray-700"

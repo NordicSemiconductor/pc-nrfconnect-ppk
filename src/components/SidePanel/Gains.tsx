@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { Group, Slider } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { Group, NumberInput } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateGains } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';
@@ -21,7 +20,7 @@ const gainTitles = [
     '~60mA - 1A',
 ];
 
-const Gains = () => {
+export default () => {
     const dispatch = useDispatch();
     const gains = useSelector(gainsState);
     const { capabilities } = useSelector(appState);
@@ -29,38 +28,30 @@ const Gains = () => {
         return null;
     }
 
-    const range = { min: 90, max: 110 };
     return (
         <Group
             heading="Gains"
             title="Adjust gains to correct potential measurement errors"
         >
             {gains.map((gain, index) => (
-                <React.Fragment key={`${index + 1}`}>
-                    <Form.Label
-                        title={gainTitles[index]}
-                        className="d-flex justify-content-between flex-row"
-                    >
-                        <span>Range {index + 1}</span>
-                        <span>{(gain / 100).toFixed(2)}</span>
-                    </Form.Label>
-                    <Slider
-                        id={`slider-gains-${index}`}
-                        title={gainTitles[index]}
-                        values={[gain]}
-                        range={range}
-                        onChange={[
-                            value =>
-                                dispatch(
-                                    updateGainsAction({ value, range: index })
-                                ),
-                        ]}
-                        onChangeComplete={() => dispatch(updateGains(index))}
-                    />
-                </React.Fragment>
+                <NumberInput
+                    key={`${index + 1}`}
+                    title={gainTitles[index]}
+                    label={`Range ${index + 1}`}
+                    value={gain / 100}
+                    range={{ min: 0.9, max: 1.1, decimals: 2 }}
+                    onChange={value => {
+                        dispatch(
+                            updateGainsAction({
+                                value: value * 100,
+                                range: index,
+                            })
+                        );
+                    }}
+                    onChangeComplete={() => dispatch(updateGains(index))}
+                    showSlider
+                />
             ))}
         </Group>
     );
 };
-
-export default Gains;

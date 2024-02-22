@@ -5,13 +5,8 @@
  */
 
 import React from 'react';
-import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    Button,
-    Group,
-    Slider,
-} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { Group, NumberInput } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateSpikeFilter } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';
@@ -20,7 +15,7 @@ import {
     updateSpikeFilterAction,
 } from '../../slices/spikeFilterSlice';
 
-const SpikeFilter = () => {
+export default () => {
     const dispatch = useDispatch();
     const { samples, alpha, alpha5 } = useSelector(spikeFilterState);
     const { capabilities } = useSelector(appState);
@@ -32,74 +27,51 @@ const SpikeFilter = () => {
             heading="Spike filter"
             title="Adjust how the software filters current spikes"
         >
-            <Form.Label
-                title="Number of samples after a dynamic range switch to apply filter"
-                className="d-flex justify-content-between flex-row"
-            >
-                <span>Samples to smooth</span>
-                <span>{samples}</span>
-            </Form.Label>
-            <Slider
-                id="slider-spike-samples"
-                title="Number of samples after a dynamic range switch to apply filter"
-                values={[samples]}
+            <NumberInput
+                label="Samples to smooth"
                 range={{ min: 1, max: 10 }}
-                onChange={[
-                    value =>
-                        dispatch(
-                            updateSpikeFilterAction({
-                                spikeFilter: { samples: value },
-                            })
-                        ),
-                ]}
+                title="Number of samples after a dynamic range switch to apply filter"
+                value={samples}
+                onChange={value => {
+                    dispatch(
+                        updateSpikeFilterAction({
+                            spikeFilter: { samples: value },
+                        })
+                    );
+                }}
+                showSlider
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
-            <Form.Label
-                title="Higher values filter more aggressively"
-                className="d-flex justify-content-between flex-row"
-            >
-                <span>Coefficient for range 1-4</span>
-                <span>{alpha}</span>
-            </Form.Label>
-            <Slider
-                id="slider-spike-alpha"
-                title="Higher values filter more aggressively"
-                values={[alpha]}
+            <NumberInput
+                label="Coefficient for range 1-4"
                 range={{ min: 0, max: 0.5, decimals: 2 }}
-                onChange={[
-                    value =>
-                        dispatch(
-                            updateSpikeFilterAction({
-                                spikeFilter: { alpha: value },
-                            })
-                        ),
-                ]}
+                title="Higher values filter more aggressively"
+                value={alpha}
+                onChange={value => {
+                    dispatch(
+                        updateSpikeFilterAction({
+                            spikeFilter: { alpha: value },
+                        })
+                    );
+                }}
+                showSlider
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
-            <Form.Label
-                title="Higher values filter more aggressively"
-                className="d-flex justify-content-between flex-row"
-            >
-                <span>Coefficient for range 5</span>
-                <span>{alpha5}</span>
-            </Form.Label>
-            <Slider
-                id="slider-spike-alpha5"
-                title="Higher values filter more aggressively"
-                values={[alpha5]}
+            <NumberInput
+                label="Coefficient for range 5"
                 range={{ min: 0, max: 0.5, decimals: 2 }}
-                onChange={[
-                    value =>
-                        dispatch(
-                            updateSpikeFilterAction({
-                                spikeFilter: { alpha5: value },
-                            })
-                        ),
-                ]}
+                title="Higher values filter more aggressively"
+                value={alpha5}
+                onChange={value => {
+                    dispatch(
+                        updateSpikeFilterAction({
+                            spikeFilter: { alpha5: value },
+                        })
+                    );
+                }}
+                showSlider
                 onChangeComplete={() => dispatch(updateSpikeFilter())}
             />
         </Group>
     );
 };
-
-export default SpikeFilter;

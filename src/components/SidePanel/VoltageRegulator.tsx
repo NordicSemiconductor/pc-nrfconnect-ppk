@@ -5,13 +5,8 @@
  */
 
 import React, { useEffect } from 'react';
-import BootstrapCollapse from 'react-bootstrap/Collapse';
-import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    NumberInlineInput,
-    Slider,
-} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { NumberInput } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateRegulator } from '../../actions/deviceActions';
 import { appState } from '../../slices/appSlice';
@@ -20,7 +15,7 @@ import {
     voltageRegulatorState,
 } from '../../slices/voltageRegulatorSlice';
 
-const VoltageRegulator = () => {
+export default () => {
     const dispatch = useDispatch();
     const { vdd, min, maxCap: max } = useSelector(voltageRegulatorState);
     const {
@@ -36,36 +31,17 @@ const VoltageRegulator = () => {
         }
     }, [vdd, max, dispatch]);
 
-    return (
-        <BootstrapCollapse in={isVoltageSettable}>
-            {/* Wrap in a div so that bootstrap collapse calculates the height correctly, this avoids a jitter when collapsing */}
-            <div>
-                <div className="tw-pt-2">
-                    <Form.Label htmlFor="slider-vdd">
-                        <span className="flex-fill">Set supply voltage to</span>
-                        <NumberInlineInput
-                            value={vdd}
-                            range={{ min, max }}
-                            onChange={value =>
-                                dispatch(moveVoltageRegulatorVdd(value))
-                            }
-                            onChangeComplete={() => dispatch(updateRegulator())}
-                        />{' '}
-                        mV
-                    </Form.Label>
-                    <Slider
-                        id="slider-vdd"
-                        values={[vdd]}
-                        range={{ min, max }}
-                        onChange={[
-                            value => dispatch(moveVoltageRegulatorVdd(value)),
-                        ]}
-                        onChangeComplete={() => dispatch(updateRegulator())}
-                    />
-                </div>
-            </div>
-        </BootstrapCollapse>
-    );
+    return isVoltageSettable ? (
+        <NumberInput
+            label="Set supply voltage to"
+            value={vdd}
+            showSlider
+            unit="mV"
+            range={{ min, max }}
+            onChange={value => {
+                dispatch(moveVoltageRegulatorVdd(value));
+            }}
+            onChangeComplete={() => dispatch(updateRegulator())}
+        />
+    ) : null;
 };
-
-export default VoltageRegulator;
