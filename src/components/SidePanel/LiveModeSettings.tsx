@@ -15,6 +15,7 @@ import {
 import { appState } from '../../slices/appSlice';
 import {
     dataLoggerState,
+    getSampleFrequency,
     updateDuration,
     updateDurationUnit,
     updateSampleFreqLog10,
@@ -25,13 +26,10 @@ export default () => {
     const dispatch = useDispatch();
 
     const { samplingRunning } = useSelector(appState);
-    const {
-        duration,
-        durationUnit,
-        sampleFreqLog10,
-        sampleFreq,
-        maxFreqLog10,
-    } = useSelector(dataLoggerState);
+    const { duration, durationUnit, sampleFreqLog10, maxFreqLog10 } =
+        useSelector(dataLoggerState);
+
+    const sampleFreq = useSelector(getSampleFrequency);
 
     const sampleIndefinitely = durationUnit === 'inf';
 

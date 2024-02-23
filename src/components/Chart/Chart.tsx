@@ -48,7 +48,6 @@ import {
     setFPS,
     setLiveMode,
 } from '../../slices/chartSlice';
-import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { getProgress } from '../../slices/triggerSlice';
 import { isDataLoggerPane } from '../../utils/panes';
 import type { AmpereChartJS } from './AmpereChart';
@@ -209,7 +208,7 @@ const Chart = () => {
         dataAccumulatorInitialiser
     ).current;
 
-    const { sampleFreq } = useSelector(dataLoggerState);
+    const sampleFreq = useSelector(getSamplesPerSecond);
 
     const digitalChannelsWindowLimit = 3e12 / sampleFreq;
     const zoomedOutTooFarForDigitalChannels =

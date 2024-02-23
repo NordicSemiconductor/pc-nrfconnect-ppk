@@ -27,7 +27,10 @@ import {
     resetChartTime,
     resetCursor,
 } from '../../slices/chartSlice';
-import { dataLoggerState } from '../../slices/dataLoggerSlice';
+import {
+    dataLoggerState,
+    getSampleFrequency,
+} from '../../slices/dataLoggerSlice';
 import {
     getAutoExportTrigger,
     resetTriggerOrigin,
@@ -63,7 +66,8 @@ export default () => {
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const recordingMode = useSelector(getRecordingMode);
     const { samplingRunning } = useSelector(appState);
-    const { sampleFreq, duration, durationUnit } = useSelector(dataLoggerState);
+    const { duration, durationUnit } = useSelector(dataLoggerState);
+    const sampleFreq = useSelector(getSampleFrequency);
     const savePending = useSelector(isSavePending);
     const sessionFolder = useSelector(getSessionRootFolder);
     const diskFullTrigger = useSelector(getDiskFullTrigger);

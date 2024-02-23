@@ -6,6 +6,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+import { isScopePane } from '../utils/panes';
 import {
     getDuration,
     getDurationUnit,
@@ -100,7 +101,7 @@ const dataLoggerSlice = createSlice({
 
 export const dataLoggerState = (state: RootState) => state.app.dataLogger;
 export const getSampleFrequency = (state: RootState) =>
-    state.app.dataLogger.sampleFreq;
+    isScopePane(state) ? 100_000 : state.app.dataLogger.sampleFreq;
 
 export const {
     setSamplingAttrsAction,

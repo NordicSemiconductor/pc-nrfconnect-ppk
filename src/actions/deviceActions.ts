@@ -59,7 +59,10 @@ import {
     setRecordingMode,
     triggerForceRerender as triggerForceRerenderMainChart,
 } from '../slices/chartSlice';
-import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
+import {
+    getSampleFrequency,
+    setSamplingAttrsAction,
+} from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
@@ -126,7 +129,7 @@ export const samplingStart =
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
 
-        const { sampleFreq } = getState().app.dataLogger;
+        const sampleFreq = getSampleFrequency(getState());
 
         switch (mode) {
             case 'DataLogger':
@@ -214,8 +217,9 @@ export const open =
         const onSample = ({ value, bits }: SampleValues) => {
             const {
                 app: { samplingRunning },
-                dataLogger: { maxSampleFreq, sampleFreq },
+                dataLogger: { maxSampleFreq },
             } = getState().app;
+            const sampleFreq = getSampleFrequency(getState());
             if (!samplingRunning) {
                 return;
             }
