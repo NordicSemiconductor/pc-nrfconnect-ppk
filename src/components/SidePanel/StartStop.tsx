@@ -49,7 +49,6 @@ import {
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import LiveModeSettings from './LiveModeSettings';
-import SessionSettings from './SessionSettings';
 import TriggerSettings from './TriggerSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
@@ -188,7 +187,6 @@ export default () => {
                     </div>
                 )}
             </div>
-            {dataLoggerPane && <SessionSettings />}
             <ConfirmationDialog
                 confirmLabel="Yes"
                 cancelLabel="No"

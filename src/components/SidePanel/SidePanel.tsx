@@ -49,19 +49,19 @@ export default () => {
 
     const connecting = deviceConnected && !deviceOpen;
 
-    return (
-        <SidePanel className="side-panel tw-mt-9">
-            {connecting && (
+    if (connecting) {
+        return (
+            <SidePanel className="side-panel tw-mt-9">
                 <div className="tw-text-center tw-text-base">
                     <span>Connecting...</span> <Spinner size="sm" />
                 </div>
-            )}
-            {!deviceConnected && (
-                <>
-                    <Load />
-                    <SessionSettings />
-                </>
-            )}
+            </SidePanel>
+        );
+    }
+
+    return (
+        <SidePanel className="side-panel tw-mt-9">
+            {!deviceConnected && <Load />}
             {!fileLoaded && !deviceConnected && !sessionActive && (
                 <Instructions />
             )}
@@ -71,15 +71,15 @@ export default () => {
                     <StartStop />
                 </>
             )}
-            {!connecting &&
-                (fileLoaded || deviceOpen || sessionActive) &&
+            {(fileLoaded || deviceOpen || sessionActive) &&
                 (scopePane || dataLoggerPane) && (
                     <>
-                        <DisplayOptions />
                         <Save />
+                        <DisplayOptions />
                     </>
                 )}
-            {!fileLoaded && deviceOpen && (
+            {(dataLoggerPane || !deviceConnected) && <SessionSettings />}
+            {!fileLoaded && deviceOpen && (dataLoggerPane || scopePane) && (
                 <CollapsibleGroup heading="Advanced Configuration">
                     <div className="tw-flex tw-flex-col tw-gap-8">
                         <div className="tw-border tw-border-solid tw-border-gray-400 tw-p-2 tw-text-[10px] tw-text-gray-400">

@@ -31,7 +31,7 @@ export default () => {
     const diskFullTrigger = useSelector(getDiskFullTrigger);
 
     return (
-        <CollapsibleGroup heading="Session Data">
+        <CollapsibleGroup heading="Temp Disk">
             <div className="tw-flex tw-flex-col tw-gap-4">
                 <div className="tw-flex tw-flex-col tw-justify-between tw-gap-2">
                     <div className="tw-flex tw-flex-col tw-justify-between tw-gap-1">
