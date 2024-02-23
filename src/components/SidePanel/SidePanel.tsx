@@ -56,7 +56,7 @@ const useConfirmBeforeClose = () => {
         } else {
             dispatch(clearConfirmBeforeClose('unsavedData'));
         }
-    }, [pendingSave]);
+    }, [dispatch, pendingSave]);
 };
 
 export default () => {
