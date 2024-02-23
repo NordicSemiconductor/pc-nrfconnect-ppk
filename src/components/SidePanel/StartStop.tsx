@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
     Group,
-    Slider,
     StartStopButton,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -28,10 +27,7 @@ import {
     resetChartTime,
     resetCursor,
 } from '../../slices/chartSlice';
-import {
-    dataLoggerState,
-    updateSampleFreqLog10,
-} from '../../slices/dataLoggerSlice';
+import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import {
     getAutoExportTrigger,
     resetTriggerOrigin,
@@ -67,13 +63,7 @@ export default () => {
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const recordingMode = useSelector(getRecordingMode);
     const { samplingRunning } = useSelector(appState);
-    const {
-        sampleFreqLog10,
-        sampleFreq,
-        maxFreqLog10,
-        duration,
-        durationUnit,
-    } = useSelector(dataLoggerState);
+    const { sampleFreq, duration, durationUnit } = useSelector(dataLoggerState);
     const savePending = useSelector(isSavePending);
     const sessionFolder = useSelector(getSessionRootFolder);
     const diskFullTrigger = useSelector(getDiskFullTrigger);
@@ -134,26 +124,6 @@ export default () => {
         <>
             <Group heading="Sampling parameters">
                 <div className="tw-flex tw-flex-col tw-gap-4">
-                    <div className="tw-flex tw-flex-col tw-gap-1 tw-text-xs">
-                        <div>
-                            {sampleFreq.toLocaleString('en')} samples per second
-                        </div>
-                        <Slider
-                            id="data-logger-sampling-frequency"
-                            values={[sampleFreqLog10]}
-                            range={{ min: 0, max: maxFreqLog10 }}
-                            onChange={[
-                                v =>
-                                    dispatch(
-                                        updateSampleFreqLog10({
-                                            sampleFreqLog10: v,
-                                        })
-                                    ),
-                            ]}
-                            onChangeComplete={() => {}}
-                            disabled={samplingRunning}
-                        />
-                    </div>
                     {dataLoggerPane && <LiveModeSettings />}
                     {scopePane && <TriggerSettings />}
                 </div>
