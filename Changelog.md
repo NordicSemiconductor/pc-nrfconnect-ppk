@@ -1,4 +1,4 @@
-## 4.0.0-beta7 - UNRELEASED
+## 4.0.0 - UNRELEASED
 
 ## Changed
 
