@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    DropdownItem,
     logger,
     NumberInput,
     StateSelector,
@@ -28,7 +29,9 @@ import {
     TriggerTypeValues,
 } from '../../slices/triggerSlice';
 
-type CurrentUnit = 'mA' | '\u00B5A';
+const CurrentUnitValues = ['mA', '\u00B5A'] as const;
+type CurrentUnit = (typeof CurrentUnitValues)[number];
+
 const getMin = (unit: CurrentUnit) => {
     switch (unit) {
         case 'mA':
@@ -59,6 +62,11 @@ export default () => {
         useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
 
     const [levelUnit, setLevelUnit] = useState<CurrentUnit>('µA');
+
+    const items: DropdownItem<CurrentUnit>[] = CurrentUnitValues.map(value => ({
+        value,
+        label: value,
+    }));
 
     useEffect(() => {
         if (triggerSaveQueueLength >= 10 && autoExportTrigger) {
@@ -127,7 +135,20 @@ export default () => {
                         setTriggerLevel(convertToMicroAmps(levelUnit, value))
                     );
                 }}
-                unit={levelUnit}
+                unit={{
+                    items,
+                    onUnitChange: unit => {
+                        dispatch(
+                            setTriggerLevel(
+                                convertToMicroAmps(
+                                    unit.value,
+                                    internalTriggerValue
+                                )
+                            )
+                        );
+                    },
+                    selectedItem: items.find(item => item.value === levelUnit),
+                }}
                 label="Level"
                 disabled={dataLoggerActive}
                 showSlider
