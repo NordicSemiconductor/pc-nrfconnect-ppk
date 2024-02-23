@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    addConfirmBeforeClose,
     Button,
+    clearConfirmBeforeClose,
     CollapsibleGroup,
     selectedDevice,
     SidePanel,
@@ -21,6 +23,7 @@ import { getShowProgressDialog } from '../../features/ProgressDialog/progressSli
 import {
     deviceOpen as deviceOpenSelector,
     isFileLoaded,
+    isSavePending,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
 import { resetGainsToDefaults } from '../../slices/gainsSlice';
@@ -37,6 +40,25 @@ import SessionSettings from './SessionSettings';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
 
+const useConfirmBeforeClose = () => {
+    const pendingSave = useSelector(isSavePending);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (pendingSave) {
+            dispatch(
+                addConfirmBeforeClose({
+                    id: 'unsavedData',
+                    message:
+                        'You have unsaved data. if you close the application this data will be lost. Are you sure you want to close?',
+                })
+            );
+        } else {
+            dispatch(clearConfirmBeforeClose('unsavedData'));
+        }
+    }, [pendingSave]);
+};
+
 export default () => {
     const dispatch = useDispatch();
     const deviceConnected = useSelector(selectedDevice);
@@ -46,6 +68,8 @@ export default () => {
     const showProgressDialog = useSelector(getShowProgressDialog);
     const scopePane = useSelector(isScopePane);
     const dataLoggerPane = useSelector(isDataLoggerPane);
+
+    useConfirmBeforeClose();
 
     const connecting = deviceConnected && !deviceOpen;
 
