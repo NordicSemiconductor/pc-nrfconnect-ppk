@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
 import { useDispatch, useSelector } from 'react-redux';
+import { classNames } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
     getChartDigitalChannelInfo,
@@ -21,11 +20,6 @@ export default () => {
     const dispatch = useDispatch();
     const { digitalChannels } = useSelector(getChartDigitalChannelInfo);
 
-    const value = digitalChannels.reduce<number[]>((a, v, i) => {
-        if (v) a.push(i);
-        return a;
-    }, []);
-
     const toggle = (i: number) => {
         const channels: booleanTupleOf8 = [...digitalChannels];
         channels[i] = !channels[i];
@@ -33,24 +27,23 @@ export default () => {
     };
 
     return (
-        <ToggleButtonGroup
-            className="digital-channels"
-            type="checkbox"
-            value={value}
-        >
+        <div className="tw-flex tw-flex-row tw-gap-0.5">
             {digitalChannels.map((channel, i) => (
-                <ToggleButton
+                <button
+                    type="button"
                     key={`d${i + 1}`}
-                    checked={channel}
-                    variant={channel ? 'set' : 'unset'}
-                    className="channel"
+                    className={classNames(
+                        'tw-h-6 tw-grow tw-border tw-border-solid tw-border-gray-700 tw-leading-none',
+                        channel
+                            ? 'tw-bg-white tw-text-gray-700'
+                            : 'tw-bg-gray-700 tw-text-white'
+                    )}
                     value={i}
-                    onChange={() => toggle(i)}
-                    active
+                    onClick={() => toggle(i)}
                 >
                     {i}
-                </ToggleButton>
+                </button>
             ))}
-        </ToggleButtonGroup>
+        </div>
     );
 };

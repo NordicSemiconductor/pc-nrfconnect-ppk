@@ -37,8 +37,6 @@ import SessionSettings from './SessionSettings';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
 
-import './sidepanel.scss';
-
 export default () => {
     const dispatch = useDispatch();
     const deviceConnected = useSelector(selectedDevice);
