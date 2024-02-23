@@ -161,7 +161,7 @@ export default () => {
                     started={samplingRunning}
                 />
                 {dataLoggerPane && (
-                    <div className="tw-border tw-border-solid tw-border-gray-400 tw-p-2 tw-text-[10px] tw-text-gray-400">
+                    <div className="tw-border tw-border-solid tw-border-gray-200 tw-p-2 tw-text-[10px] tw-text-gray-400">
                         {!sampleIndefinitely && (
                             <div>
                                 {`Estimated disk space required ${calcFileSizeString(
@@ -174,7 +174,7 @@ export default () => {
                         )}
                         {sampleIndefinitely && (
                             <div>
-                                {`Estimated space limit ${formatDuration(
+                                {`Estimated space limit ~${formatDuration(
                                     remainingTime
                                 )} at ${calcFileSizeString(
                                     sampleFreq,
