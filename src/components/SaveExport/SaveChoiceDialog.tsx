@@ -37,10 +37,10 @@ export default () => {
             isVisible={isSaveChoiceDialogVisible}
             onHide={close}
         >
-            <div className="tw-flex tw-flex-row tw-gap-4">
+            <div className="tw-flex tw-flex-row tw-gap-8 tw-px-4">
                 <div className="tw-h-full tw-w-full">
-                    <div className="tw-flex tw-flex-col tw-gap-2 tw-border tw-border-b-0 tw-border-gray-200 tw-p-4">
-                        <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                    <div className="tw-flex tw-flex-col tw-gap-4 tw-border tw-border-b-0 tw-border-gray-200 tw-p-4">
+                        <p className="tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                             Save session data
                         </p>
                         <p>
@@ -65,8 +65,8 @@ export default () => {
                 </div>
 
                 <div className="tw-h-full tw-w-full">
-                    <div className="tw-flex tw-flex-col tw-gap-2 tw-border tw-border-b-0 tw-border-gray-200 tw-p-4">
-                        <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                    <div className="tw-flex tw-flex-col tw-gap-4 tw-border tw-border-b-0 tw-border-gray-200 tw-p-4">
+                        <p className="tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                             Export selected range
                         </p>
                         <p>

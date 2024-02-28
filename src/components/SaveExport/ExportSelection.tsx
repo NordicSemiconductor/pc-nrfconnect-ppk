@@ -119,7 +119,7 @@ export default ({
 
     return (
         <>
-            <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-wider tw-text-gray-400">
+            <p className=" tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                 Area to export
             </p>
             <StateSelector

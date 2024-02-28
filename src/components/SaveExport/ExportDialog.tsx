@@ -215,7 +215,7 @@ export default () => {
                             cursorEnd={cursorEnd}
                             windowDuration={windowDuration}
                         />
-                        <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                        <p className=" tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                             Export fields
                         </p>
                         <div className="tw-w-fit">
@@ -228,7 +228,7 @@ export default () => {
 
                     <div className="tw-flex-1 tw-grow tw-border tw-border-gray-200 ">
                         <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4">
-                            <p className="tw-pt-8 tw-text-xs tw-uppercase tw-tracking-widest tw-text-gray-400">
+                            <p className="tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                                 Estimation
                             </p>
                             <p>{numberOfRecords} records</p>
