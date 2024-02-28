@@ -17,13 +17,13 @@ import { isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     getLiveModeFPS,
-    getRecordingMode,
     setShowSettings,
     showChartSettings,
     toggleYAxisLock,
     toggleYAxisLog,
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
+import { isDataLoggerPane } from '../../utils/panes';
 import { AmpereChartJS } from './AmpereChart';
 import ChartOptions from './ChartOptions';
 
@@ -61,7 +61,7 @@ const ChartTop = ({
     const { maxFreqLog10, sampleFreqLog10 } = useSelector(dataLoggerState);
     const samplingRunning = useSelector(isSamplingRunning);
     const fps = useSelector(getLiveModeFPS);
-    const recordingMode = useSelector(getRecordingMode);
+    const dataLoggerPane = useSelector(isDataLoggerPane);
     const { yMin, yMax } = useSelector(getChartYAxisRange);
     const yAxisLock = yMin != null && yMax != null;
 
@@ -120,27 +120,29 @@ const ChartTop = ({
                     variant="primary"
                 />
             </div>
-            <div className="tw-order-2 tw-flex tw-w-full tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start xl:tw-order-1 xl:tw-w-fit xl:tw-place-self-auto">
-                {timeWindowLabels.map(label => (
-                    <TimeWindowButton
-                        label={label}
-                        key={label}
-                        zoomToWindow={zoomToWindow}
-                    />
-                ))}
-            </div>
 
-            <div className="tw-w-38 tw-order-1 tw-flex tw-flex-row tw-justify-end">
-                {recordingMode === 'DataLogger' && (
-                    <Toggle
-                        label={`${live ? `(${fps} FPS) ` : ''}LIVE VIEW`}
-                        onToggle={onLiveModeChange}
-                        isToggled={live}
-                        variant="primary"
-                        disabled={!samplingRunning}
-                    />
-                )}
-            </div>
+            {dataLoggerPane && (
+                <>
+                    <div className="tw-order-2 tw-flex tw-w-full tw-flex-row tw-justify-center tw-gap-x-2 tw-place-self-start xl:tw-order-1 xl:tw-w-fit xl:tw-place-self-auto">
+                        {timeWindowLabels.map(label => (
+                            <TimeWindowButton
+                                label={label}
+                                key={label}
+                                zoomToWindow={zoomToWindow}
+                            />
+                        ))}
+                    </div>
+                    <div className="tw-w-38 tw-order-1 tw-flex tw-flex-row tw-justify-end">
+                        <Toggle
+                            label={`${live ? `(${fps} FPS) ` : ''}LIVE VIEW`}
+                            onToggle={onLiveModeChange}
+                            isToggled={live}
+                            variant="primary"
+                            disabled={!samplingRunning}
+                        />
+                    </div>
+                </>
+            )}
 
             <ChartSettingsDialog
                 zoomToWindow={zoomToWindow}
