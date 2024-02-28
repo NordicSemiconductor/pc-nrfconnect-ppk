@@ -167,7 +167,7 @@ export default () => {
                                 {`Estimated disk space required ${calcFileSizeString(
                                     sampleFreq,
                                     convertTimeToSeconds(duration, durationUnit)
-                                )}. Current Available space ${calcFileSize(
+                                )}. Current available space ${calcFileSize(
                                     freeSpace
                                 )}`}
                             </div>
