@@ -8,7 +8,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
-    CollapsibleGroup,
+    Group,
     NumberInput,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import os from 'os';
@@ -31,62 +31,60 @@ export default () => {
     const diskFullTrigger = useSelector(getDiskFullTrigger);
 
     return (
-        <CollapsibleGroup heading="Temp Disk">
-            <div className="tw-flex tw-flex-col tw-gap-4">
-                <div className="tw-flex tw-flex-col tw-justify-between tw-gap-2">
-                    <div className="tw-flex tw-flex-col tw-justify-between tw-gap-1">
-                        <span>Root directory</span>
-                        <div className="tw-inline-block tw-overflow-hidden tw-text-ellipsis">
-                            <span
-                                className="tw-whitespace-nowrap"
-                                title={sessionRootFolder}
-                            >
-                                {sessionRootFolder}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="tw-flex tw-gap-2">
-                        <Button
-                            className="tw-w-full"
-                            variant="secondary"
-                            onClick={() => {
-                                selectDirectoryDialog().then(filePath => {
-                                    dispatch(setSessionRootFolder(filePath));
-                                    setPreferredSessionLocation(filePath);
-                                });
-                            }}
+        <Group heading="Temp Disk" collapsible gap={4}>
+            <div className="tw-flex tw-flex-col tw-justify-between tw-gap-2">
+                <div className="tw-flex tw-flex-col tw-justify-between tw-gap-1">
+                    <span>Root directory</span>
+                    <div className="tw-inline-block tw-overflow-hidden tw-text-ellipsis">
+                        <span
+                            className="tw-whitespace-nowrap"
+                            title={sessionRootFolder}
                         >
-                            Change
-                        </Button>
-                        <Button
-                            className="tw-w-full"
-                            variant="secondary"
-                            onClick={() => {
-                                dispatch(setSessionRootFolder(os.tmpdir()));
-                                setPreferredSessionLocation(os.tmpdir());
-                            }}
-                        >
-                            Reset
-                        </Button>
+                            {sessionRootFolder}
+                        </span>
                     </div>
                 </div>
-                <NumberInput
-                    label="Disk full trigger"
-                    unit="MB"
-                    value={diskFullTrigger}
-                    range={{
-                        min: 1,
-                        max: 10240,
-                        decimals: undefined,
-                        step: undefined,
-                    }}
-                    onChange={(value: number) => {
-                        dispatch(setDiskFullTrigger(value));
-                        setPersistedDiskFullTrigger(value);
-                    }}
-                    showSlider
-                />
+                <div className="tw-flex tw-gap-2">
+                    <Button
+                        className="tw-w-full"
+                        variant="secondary"
+                        onClick={() => {
+                            selectDirectoryDialog().then(filePath => {
+                                dispatch(setSessionRootFolder(filePath));
+                                setPreferredSessionLocation(filePath);
+                            });
+                        }}
+                    >
+                        Change
+                    </Button>
+                    <Button
+                        className="tw-w-full"
+                        variant="secondary"
+                        onClick={() => {
+                            dispatch(setSessionRootFolder(os.tmpdir()));
+                            setPreferredSessionLocation(os.tmpdir());
+                        }}
+                    >
+                        Reset
+                    </Button>
+                </div>
             </div>
-        </CollapsibleGroup>
+            <NumberInput
+                label="Disk full trigger"
+                unit="MB"
+                value={diskFullTrigger}
+                range={{
+                    min: 1,
+                    max: 10240,
+                    decimals: undefined,
+                    step: undefined,
+                }}
+                onChange={(value: number) => {
+                    dispatch(setDiskFullTrigger(value));
+                    setPersistedDiskFullTrigger(value);
+                }}
+                showSlider
+            />
+        </Group>
     );
 };

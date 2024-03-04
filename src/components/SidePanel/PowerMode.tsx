@@ -57,29 +57,26 @@ export default () => {
             heading={`${
                 capabilities.ppkSetPowerMode ? 'Power Supply Mode' : ''
             }`}
+            gap={4}
         >
-            <div className="tw-flex tw-flex-col tw-gap-4">
-                {capabilities.ppkSetPowerMode && (
-                    <StateSelector
-                        items={items}
-                        onSelect={togglePowerMode}
-                        selectedItem={items[isSmuMode ? 0 : 1]}
-                        disabled={samplingRunning}
-                    />
-                )}
-                <VoltageRegulator />
-                {capabilities.ppkDeviceRunning && (
-                    <Toggle
-                        title="Turn power on/off for device under test"
-                        onToggle={() =>
-                            dispatch(setDeviceRunning(!deviceRunning))
-                        }
-                        isToggled={deviceRunning}
-                        label="Enable power output"
-                        variant="primary"
-                    />
-                )}
-            </div>
+            {capabilities.ppkSetPowerMode && (
+                <StateSelector
+                    items={items}
+                    onSelect={togglePowerMode}
+                    selectedItem={items[isSmuMode ? 0 : 1]}
+                    disabled={samplingRunning}
+                />
+            )}
+            <VoltageRegulator />
+            {capabilities.ppkDeviceRunning && (
+                <Toggle
+                    title="Turn power on/off for device under test"
+                    onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
+                    isToggled={deviceRunning}
+                    label="Enable power output"
+                    variant="primary"
+                />
+            )}
         </Group>
     );
 };

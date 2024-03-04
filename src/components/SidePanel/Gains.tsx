@@ -32,27 +32,26 @@ export default () => {
         <Group
             heading="Gains"
             title="Adjust gains to correct potential measurement errors"
+            gap={4}
         >
-            <div className="tw-flex tw-flex-col tw-gap-4">
-                {gains.map((gain, index) => (
-                    <NumberInput
-                        key={`${index + 1}`}
-                        label={`Range ${index + 1} (${gainTitles[index]})`}
-                        value={gain / 100}
-                        range={{ min: 0.9, max: 1.1, decimals: 2 }}
-                        onChange={value => {
-                            dispatch(
-                                updateGainsAction({
-                                    value: value * 100,
-                                    range: index,
-                                })
-                            );
-                        }}
-                        onChangeComplete={() => dispatch(updateGains(index))}
-                        showSlider
-                    />
-                ))}
-            </div>
+            {gains.map((gain, index) => (
+                <NumberInput
+                    key={`${index + 1}`}
+                    label={`Range ${index + 1} (${gainTitles[index]})`}
+                    value={gain / 100}
+                    range={{ min: 0.9, max: 1.1, decimals: 2 }}
+                    onChange={value => {
+                        dispatch(
+                            updateGainsAction({
+                                value: value * 100,
+                                range: index,
+                            })
+                        );
+                    }}
+                    onChangeComplete={() => dispatch(updateGains(index))}
+                    showSlider
+                />
+            ))}
         </Group>
     );
 };
