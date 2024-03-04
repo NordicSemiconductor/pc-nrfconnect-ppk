@@ -71,13 +71,11 @@ export default () => {
                     }}
                     buttonText="SAVE TO .PPK2"
                     content={
-                        <>
-                            <p>
-                                When you want to reopen the data in this
-                                application. PPK files are not supported by other software.
-                            </p>
-                            <p>.PPK</p>
-                        </>
+                        <p>
+                            When you want to reopen the data in this
+                            application. PPK files are not supported by other
+                            software.
+                        </p>
                     }
                 />
                 <Option
@@ -88,14 +86,10 @@ export default () => {
                     }}
                     buttonText="EXPORT TO .CSV"
                     content={
-                        <>
-                            <p>
-                                When you want to use your data in
-                                other software. CSV files are not supported by this
-                                application.
-                            </p>
-                            <p>.CSV</p>
-                        </>
+                        <p>
+                            When you want to use your data in other software.
+                            CSV files are not supported by this application.
+                        </p>
                     }
                 />
             </div>
