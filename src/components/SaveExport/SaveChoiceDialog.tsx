@@ -81,7 +81,7 @@ export default () => {
                     }
                 />
                 <Option
-                    heading="Export session data"
+                    heading="Export selected range"
                     onClick={() => {
                         close();
                         dispatch(showExportDialog());
