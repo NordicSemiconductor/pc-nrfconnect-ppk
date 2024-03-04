@@ -69,12 +69,12 @@ export default () => {
                         close();
                         dispatch(save());
                     }}
-                    buttonText="SAVE"
+                    buttonText="SAVE TO .PPK2"
                     content={
                         <>
                             <p>
-                                Great if you want to view the data again in this
-                                application. Not usable by other software.
+                                When you want to reopen the data in this
+                                application. PPK files are not supported by other software.
                             </p>
                             <p>.PPK</p>
                         </>
@@ -86,12 +86,12 @@ export default () => {
                         close();
                         dispatch(showExportDialog());
                     }}
-                    buttonText="EXPORT"
+                    buttonText="EXPORT TO .CSV"
                     content={
                         <>
                             <p>
-                                Great if you want to manipulate your data in
-                                other software. Can not be opened by this
+                                When you want to use your data in
+                                other software. CSV files are not supported by this
                                 application.
                             </p>
                             <p>.CSV</p>
