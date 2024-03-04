@@ -10,7 +10,7 @@ import {
     addConfirmBeforeClose,
     Button,
     clearConfirmBeforeClose,
-    CollapsibleGroup,
+    Group,
     selectedDevice,
     SidePanel,
     Spinner,
@@ -104,31 +104,29 @@ export default () => {
                 )}
             {(dataLoggerPane || !deviceConnected) && <SessionSettings />}
             {!fileLoaded && deviceOpen && (dataLoggerPane || scopePane) && (
-                <CollapsibleGroup heading="Advanced Configuration">
-                    <div className="tw-flex tw-flex-col tw-gap-8">
-                        <div className="tw-border tw-border-solid tw-border-gray-400 tw-p-2 tw-text-[10px] tw-text-gray-400">
-                            WARNING Only change values if you know what you are
-                            doing
-                        </div>
-                        <Gains />
-                        <SpikeFilter />
-                        <CapVoltageSettings />
-                        <Button
-                            onClick={() => {
-                                dispatch(resetSpikeFilterToDefaults());
-                                dispatch(updateSpikeFilter()); // send to device
-
-                                dispatch(resetGainsToDefaults());
-                                dispatch(updateAllGains()); // send to device
-
-                                dispatch(resetVoltageRegulatorMaxCapPPK2());
-                            }}
-                            variant="secondary"
-                        >
-                            Reset to default Configuration
-                        </Button>
+                <Group collapsible heading="Advanced Configuration" gap={8}>
+                    <div className="tw-border tw-border-solid tw-border-gray-400 tw-p-2 tw-text-[10px] tw-text-gray-400">
+                        WARNING Only change values if you know what you are
+                        doing
                     </div>
-                </CollapsibleGroup>
+                    <Gains />
+                    <SpikeFilter />
+                    <CapVoltageSettings />
+                    <Button
+                        onClick={() => {
+                            dispatch(resetSpikeFilterToDefaults());
+                            dispatch(updateSpikeFilter()); // send to device
+
+                            dispatch(resetGainsToDefaults());
+                            dispatch(updateAllGains()); // send to device
+
+                            dispatch(resetVoltageRegulatorMaxCapPPK2());
+                        }}
+                        variant="secondary"
+                    >
+                        Reset to default Configuration
+                    </Button>
+                </Group>
             )}
             <DeprecatedDeviceDialog />
             {showProgressDialog && <ProgressDialog />}

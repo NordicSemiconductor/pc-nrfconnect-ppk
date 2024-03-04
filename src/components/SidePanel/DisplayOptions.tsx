@@ -7,7 +7,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    CollapsibleGroup,
+    Group,
     StateSelector,
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -39,54 +39,52 @@ export default () => {
     const deviceOpen = useSelector(isDeviceOpen);
 
     return (
-        <CollapsibleGroup heading="Display options" defaultCollapsed={false}>
-            <div className="tw-flex tw-flex-col tw-gap-4">
-                <Toggle
-                    onToggle={() => dispatch(toggleTimestamps())}
-                    isToggled={timestampsVisible}
-                    label="Timestamps"
-                    variant="primary"
-                />
-                {timestampsVisible &&
-                    (DataManager().getStartSystemTime() || deviceOpen) && (
-                        <StateSelector
-                            items={['Relative', 'Absolute']}
-                            onSelect={(index: number) => {
-                                dispatch(setShowSystemTime(!!index));
-                            }}
-                            selectedItem={
-                                !!DataManager().getStartSystemTime() &&
-                                systemTime
-                                    ? 'Absolute'
-                                    : 'Relative'
-                            }
-                            disabled={!timestampsVisible}
-                        />
-                    )}
-
-                <Toggle
-                    onToggle={() => dispatch(toggleDigitalChannels())}
-                    isToggled={digitalChannelsVisible}
-                    label="Digital channels"
-                    variant="primary"
-                />
-                {digitalChannelsVisible && <DigitalChannels />}
-
-                {dataLoggerPane && (
-                    <Toggle
-                        label="Show Minimap"
-                        title={`Click in order to ${
-                            showMinimap ? 'hide' : 'show'
-                        } a navigable minimap`}
-                        onToggle={() =>
-                            dispatch(setShowMinimapAction(!showMinimap))
-                        }
-                        isToggled={showMinimap}
-                    >
-                        Show Minimap
-                    </Toggle>
+        <Group
+            heading="Display options"
+            collapsible
+            defaultCollapsed={false}
+            gap={4}
+        >
+            <Toggle
+                onToggle={() => dispatch(toggleTimestamps())}
+                isToggled={timestampsVisible}
+                label="Timestamps"
+                variant="primary"
+            />
+            {timestampsVisible &&
+                (DataManager().getStartSystemTime() || deviceOpen) && (
+                    <StateSelector
+                        items={['Relative', 'Absolute']}
+                        onSelect={(index: number) => {
+                            dispatch(setShowSystemTime(!!index));
+                        }}
+                        selectedItem={systemTime ? 'Absolute' : 'Relative'}
+                        disabled={!timestampsVisible}
+                    />
                 )}
-            </div>
-        </CollapsibleGroup>
+
+            <Toggle
+                onToggle={() => dispatch(toggleDigitalChannels())}
+                isToggled={digitalChannelsVisible}
+                label="Digital channels"
+                variant="primary"
+            />
+            {digitalChannelsVisible && <DigitalChannels />}
+
+            {dataLoggerPane && (
+                <Toggle
+                    label="Show Minimap"
+                    title={`Click in order to ${
+                        showMinimap ? 'hide' : 'show'
+                    } a navigable minimap`}
+                    onToggle={() =>
+                        dispatch(setShowMinimapAction(!showMinimap))
+                    }
+                    isToggled={showMinimap}
+                >
+                    Show Minimap
+                </Toggle>
+            )}
+        </Group>
     );
 };

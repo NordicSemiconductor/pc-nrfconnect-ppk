@@ -125,11 +125,9 @@ export default () => {
 
     return (
         <>
-            <Group heading="Sampling parameters">
-                <div className="tw-flex tw-flex-col tw-gap-4">
-                    {dataLoggerPane && <LiveModeSettings />}
-                    {scopePane && <TriggerSettings />}
-                </div>
+            <Group heading="Sampling parameters" gap={4}>
+                {dataLoggerPane && <LiveModeSettings />}
+                {scopePane && <TriggerSettings />}
             </Group>
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton

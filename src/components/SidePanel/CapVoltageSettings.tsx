@@ -57,27 +57,23 @@ export const CapVoltageSettings = () => {
             heading="Voltage Limit"
             title="Adjust to limit voltage supply"
             className="cap-voltage-regulator-container"
+            gap={4}
         >
-            <div className="tw-flex tw-flex-col tw-gap-4">
-                <NumberInput
-                    title="Supply voltage to the device will be capped to this value"
-                    label="Set max supply voltage to"
-                    value={newMaxCap}
-                    range={{ min, max }}
-                    onChange={value => setNewMaxCap(value)}
-                    onChangeComplete={() => {
-                        updateVoltageRegulator();
-                        telemetry.sendEvent(
-                            EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                            {
-                                maxCap: newMaxCap,
-                            }
-                        );
-                    }}
-                    showSlider
-                    unit="mV"
-                />
-            </div>
+            <NumberInput
+                title="Supply voltage to the device will be capped to this value"
+                label="Set max supply voltage to"
+                value={newMaxCap}
+                range={{ min, max }}
+                onChange={value => setNewMaxCap(value)}
+                onChangeComplete={() => {
+                    updateVoltageRegulator();
+                    telemetry.sendEvent(EventAction.VOLTAGE_MAX_LIMIT_CHANGED, {
+                        maxCap: newMaxCap,
+                    });
+                }}
+                showSlider
+                unit="mV"
+            />
         </Group>
     );
 };

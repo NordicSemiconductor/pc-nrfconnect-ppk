@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
     ConfirmationDialog,
-    Group,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { load, screenshot } from '../../actions/fileActions';
@@ -81,31 +80,27 @@ export const Save = () => {
 
     return (
         <>
-            <Group>
-                <div className="tw-flex tw-flex-col tw-gap-2">
-                    <Button
-                        className="w-100"
-                        title={
-                            disabled
-                                ? 'Stop sampling to save or export'
-                                : undefined
-                        }
-                        variant="secondary"
-                        disabled={disabled}
-                        onClick={() => dispatch(toggleSaveChoiceDialog())}
-                    >
-                        Save / Export
-                    </Button>
-                    <Button
-                        className="w-100"
-                        variant="secondary"
-                        disabled={disabled}
-                        onClick={() => dispatch(screenshot())}
-                    >
-                        Screenshot
-                    </Button>
-                </div>
-            </Group>
+            <div className="tw-flex tw-flex-col tw-gap-2">
+                <Button
+                    className="w-100"
+                    title={
+                        disabled ? 'Stop sampling to save or export' : undefined
+                    }
+                    variant="secondary"
+                    disabled={disabled}
+                    onClick={() => dispatch(toggleSaveChoiceDialog())}
+                >
+                    Save / Export
+                </Button>
+                <Button
+                    className="w-100"
+                    variant="secondary"
+                    disabled={disabled}
+                    onClick={() => dispatch(screenshot())}
+                >
+                    Screenshot
+                </Button>
+            </div>
             <SaveChoiceDialog />
             <ExportDialog />
         </>

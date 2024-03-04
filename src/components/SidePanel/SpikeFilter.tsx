@@ -26,54 +26,53 @@ export default () => {
         <Group
             heading="Spike filter"
             title="Adjust how the software filters current spikes"
+            gap={4}
         >
-            <div className="tw-flex tw-flex-col tw-gap-4">
-                <NumberInput
-                    label="Samples to smooth"
-                    range={{ min: 1, max: 10 }}
-                    title="Number of samples after a dynamic range switch to apply filter"
-                    value={samples}
-                    onChange={value => {
-                        dispatch(
-                            updateSpikeFilterAction({
-                                spikeFilter: { samples: value },
-                            })
-                        );
-                    }}
-                    showSlider
-                    onChangeComplete={() => dispatch(updateSpikeFilter())}
-                />
-                <NumberInput
-                    label="Coefficient for range 1-4"
-                    range={{ min: 0, max: 0.5, decimals: 2 }}
-                    title="Higher values filter more aggressively"
-                    value={alpha}
-                    onChange={value => {
-                        dispatch(
-                            updateSpikeFilterAction({
-                                spikeFilter: { alpha: value },
-                            })
-                        );
-                    }}
-                    showSlider
-                    onChangeComplete={() => dispatch(updateSpikeFilter())}
-                />
-                <NumberInput
-                    label="Coefficient for range 5"
-                    range={{ min: 0, max: 0.5, decimals: 2 }}
-                    title="Higher values filter more aggressively"
-                    value={alpha5}
-                    onChange={value => {
-                        dispatch(
-                            updateSpikeFilterAction({
-                                spikeFilter: { alpha5: value },
-                            })
-                        );
-                    }}
-                    showSlider
-                    onChangeComplete={() => dispatch(updateSpikeFilter())}
-                />
-            </div>
+            <NumberInput
+                label="Samples to smooth"
+                range={{ min: 1, max: 10 }}
+                title="Number of samples after a dynamic range switch to apply filter"
+                value={samples}
+                onChange={value => {
+                    dispatch(
+                        updateSpikeFilterAction({
+                            spikeFilter: { samples: value },
+                        })
+                    );
+                }}
+                showSlider
+                onChangeComplete={() => dispatch(updateSpikeFilter())}
+            />
+            <NumberInput
+                label="Coefficient for range 1-4"
+                range={{ min: 0, max: 0.5, decimals: 2 }}
+                title="Higher values filter more aggressively"
+                value={alpha}
+                onChange={value => {
+                    dispatch(
+                        updateSpikeFilterAction({
+                            spikeFilter: { alpha: value },
+                        })
+                    );
+                }}
+                showSlider
+                onChangeComplete={() => dispatch(updateSpikeFilter())}
+            />
+            <NumberInput
+                label="Coefficient for range 5"
+                range={{ min: 0, max: 0.5, decimals: 2 }}
+                title="Higher values filter more aggressively"
+                value={alpha5}
+                onChange={value => {
+                    dispatch(
+                        updateSpikeFilterAction({
+                            spikeFilter: { alpha5: value },
+                        })
+                    );
+                }}
+                showSlider
+                onChangeComplete={() => dispatch(updateSpikeFilter())}
+            />
         </Group>
     );
 };
