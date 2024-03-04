@@ -2,6 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Build:dev with Local Shared",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "build:dev"
+            ],
+            "preLaunchTask": "Install Local Shared",
+        },
+        {
             "name": "Build Launcher",
             "type": "node",
             "request": "launch",

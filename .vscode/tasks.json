@@ -6,5 +6,33 @@
         "type": "npm",
         "script": "build:dev",
       },
+      {
+        "label": "Clean Packed Shared",
+        "type": "shell",
+        "command": "rm nordicsemiconductor-pc-nrfconnect-shared-*.tgz || echo 0",
+        "windows": {
+          "command": "(rm nordicsemiconductor-pc-nrfconnect-shared.tgz) -and (echo 0)",
+        },
+      },
+      {
+        "label": "Pack Shared",
+        "type": "shell",
+        "command": "npm pack ${SharedWorkspace}",
+        "windows": {
+          "command": "(npm pack $Env:SharedWorkspace) -and (mv ./nordicsemiconductor-pc-nrfconnect-shared-*.tgz nordicsemiconductor-pc-nrfconnect-shared.tgz)",
+        },
+      },
+      {
+        "label": "Install Shared",
+        "type": "shell",
+        "command": "npm i nordicsemiconductor-pc-nrfconnect-shared-*.tgz",
+        "windows": {
+          "command": "(npm i ./nordicsemiconductor-pc-nrfconnect-shared.tgz)",
+        },
+      },
+      {
+        "label": "Install Local Shared",
+        "dependsOn": ["Clean Packed Shared", "Pack Shared", "Install Shared"] 
+      }
     ]
   }
