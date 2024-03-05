@@ -81,6 +81,7 @@ export default () => {
                 disabled={samplingRunning}
                 showSlider={!sampleIndefinitely}
                 minWidth
+                inputMinSize={sampleIndefinitely ? 4 : undefined}
             />
         </>
     );
