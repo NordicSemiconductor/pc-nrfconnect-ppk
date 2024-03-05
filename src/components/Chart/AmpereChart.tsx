@@ -20,15 +20,10 @@ import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
 import { unit } from 'mathjs';
 
 import { DataManager } from '../../globals';
-import {
-    deviceOpen,
-    isFileLoaded,
-    isSamplingRunning,
-} from '../../slices/appSlice';
+import { isFileLoaded, isSamplingRunning } from '../../slices/appSlice';
 import {
     getChartYAxisRange,
     getCursorRange,
-    getRecordingMode,
     getWindowDuration,
     isLiveMode,
     isTimestampsVisible,
@@ -39,6 +34,7 @@ import {
     getTriggerValue,
     setTriggerLevel,
 } from '../../slices/triggerSlice';
+import { isScopePane } from '../../utils/panes';
 import { type CursorData } from './Chart';
 import { AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
@@ -160,8 +156,7 @@ export default ({
     const triggerLevel = useSelector(getTriggerValue);
     const triggerOrigin = useSelector(getTriggerOrigin);
     const fileLoaded = useSelector(isFileLoaded);
-    const deviceInUse = useSelector(deviceOpen);
-    const recordingMode = useSelector(getRecordingMode);
+    const scopePane = useSelector(isScopePane);
 
     const live = liveMode && samplingRunning;
     const snapping = numberOfSamplesPerPixel <= 0.16 && !live;
@@ -191,8 +186,7 @@ export default ({
         ],
     };
 
-    const showTriggerItems =
-        recordingMode === 'RealTime' && !fileLoaded && deviceInUse;
+    const showTriggerItems = scopePane && !fileLoaded;
 
     const chartOptions: AmpereChartOptions = {
         scales: {

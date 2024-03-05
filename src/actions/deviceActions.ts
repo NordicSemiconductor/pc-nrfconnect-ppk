@@ -59,7 +59,10 @@ import {
     setRecordingMode,
     triggerForceRerender as triggerForceRerenderMainChart,
 } from '../slices/chartSlice';
-import { setSamplingAttrsAction } from '../slices/dataLoggerSlice';
+import {
+    getSampleFrequency,
+    setSamplingAttrsAction,
+} from '../slices/dataLoggerSlice';
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
@@ -73,7 +76,6 @@ import {
     setTriggerOrigin,
 } from '../slices/triggerSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
-import EventAction from '../usageDataActions';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
@@ -93,15 +95,13 @@ export const setupOptions =
             dispatch(resetChartTime());
             dispatch(resetMinimap());
 
-            const { sampleFreq } = getState().app.dataLogger;
-            DataManager().setSamplesPerSecond(sampleFreq);
             switch (recordingMode) {
                 case 'DataLogger':
                     DataManager().initializeLiveSession(
                         getSessionRootFolder(getState())
                     );
                     break;
-                case 'RealTime':
+                case 'Scope':
                     DataManager().initializeTriggerSession(60);
                     break;
             }
@@ -116,11 +116,9 @@ export const setupOptions =
 /* Start reading current measurements */
 export const samplingStart =
     (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
-        telemetry.sendEvent(EventAction.SAMPLE_STARTED_WITH_PPK2_SELECTED);
-
         const mode: RecordingMode = isDataLoggerPane(getState())
             ? 'DataLogger'
-            : 'RealTime';
+            : 'Scope';
 
         dispatch(setRecordingMode(mode));
         dispatch(setTriggerActive(false));
@@ -130,6 +128,17 @@ export const samplingStart =
 
         dispatch(resetCursorAndChart());
         dispatch(samplingStartAction());
+
+        const sampleFreq = getSampleFrequency(getState());
+
+        switch (mode) {
+            case 'DataLogger':
+                DataManager().setSamplesPerSecond(sampleFreq);
+                break;
+            case 'Scope':
+                DataManager().setSamplesPerSecond(100_000);
+                break;
+        }
         await device!.ppkAverageStart();
         startPreventSleep();
     };
@@ -148,12 +157,6 @@ export const updateSpikeFilter = (): AppThunk<RootState> => (_, getState) => {
     const { spikeFilter } = getState().app;
     persistSpikeFilter(spikeFilter);
     device!.ppkSetSpikeFilter(spikeFilter);
-    if (getState().app.app.advancedMode) {
-        const { samples, alpha, alpha5 } = spikeFilter;
-        logger.info(
-            `Spike filter: smooth ${samples} samples with ${alpha} coefficient (${alpha5} in range 5)`
-        );
-    }
 };
 
 export const close =
@@ -214,8 +217,9 @@ export const open =
         const onSample = ({ value, bits }: SampleValues) => {
             const {
                 app: { samplingRunning },
-                dataLogger: { maxSampleFreq, sampleFreq },
+                dataLogger: { maxSampleFreq },
             } = getState().app;
+            const sampleFreq = getSampleFrequency(getState());
             if (!samplingRunning) {
                 return;
             }
@@ -252,7 +256,7 @@ export const open =
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
-            if (getRecordingMode(getState()) === 'RealTime') {
+            if (getRecordingMode(getState()) === 'Scope') {
                 const validTriggerValue =
                     cappedValue >= getState().app.trigger.level;
                 if (!getState().app.trigger.active && validTriggerValue) {
@@ -319,7 +323,6 @@ export const open =
 
         try {
             device = new SerialDevice(deviceInfo, onSample);
-            telemetry.sendEvent(EventAction.PPK_2_SELECTED);
 
             dispatch(
                 setSamplingAttrsAction({
@@ -430,6 +433,20 @@ export const updateGains =
         const gain = gains[index] / 100;
         await device!.ppkSetUserGains(index, gain);
         logger.info(`Gain multiplier #${index + 1} updated to ${gain}`);
+    };
+
+export const updateAllGains =
+    (): AppThunk<RootState, Promise<void>> => async (_, getState) => {
+        if (device!.ppkSetUserGains == null) {
+            return;
+        }
+        const { gains } = getState().app;
+
+        for (let i = 0; i < gains.length; i += 1) {
+            // eslint-disable-next-line no-await-in-loop
+            await device!.ppkSetUserGains(i, gains[i] / 100);
+            logger.info(`Gain multiplier #${i + 1} updated to ${i}`);
+        }
     };
 
 export const setDeviceRunning =

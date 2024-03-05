@@ -7,9 +7,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
-    getVoltageRegulatorMaxCapPPK1,
     getVoltageRegulatorMaxCapPPK2,
-    setVoltageRegulatorMaxCapPPK1 as persistVoltageRegulatorMaxCapPPK1,
     setVoltageRegulatorMaxCapPPK2 as persistVoltageRegulatorMaxCapPPK2,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
@@ -20,18 +18,17 @@ interface VoltageRegulatorState {
     min: number;
     max: number;
     maxCap: number;
-    maxCapPPK1: number;
     maxCapPPK2: number;
 }
 
+const maxCapPPK2 = 5000;
 const initialState = (): VoltageRegulatorState => ({
     vdd: 3000, // [1800 .. 3600] mV
     currentVDD: 3000,
     min: 1850,
     max: 3600,
-    maxCap: getVoltageRegulatorMaxCapPPK2(5000),
-    maxCapPPK1: getVoltageRegulatorMaxCapPPK1(3600),
-    maxCapPPK2: getVoltageRegulatorMaxCapPPK2(5000),
+    maxCap: getVoltageRegulatorMaxCapPPK2(maxCapPPK2),
+    maxCapPPK2: getVoltageRegulatorMaxCapPPK2(maxCapPPK2),
 });
 
 const voltageRegulatorSlice = createSlice({
@@ -55,28 +52,11 @@ const voltageRegulatorSlice = createSlice({
             state.max = max || state.max;
             // state.maxCap = state.maxCapPPK2 || max!;
         },
-        updateMaxCapOnDeviceSelected(
-            state,
-            {
-                payload: { isRTTDevice },
-            }: PayloadAction<{ isRTTDevice: boolean }>
-        ) {
-            state.maxCap =
-                isRTTDevice === true ? state.maxCapPPK1 : state.maxCapPPK2;
-        },
         moveVoltageRegulatorVdd(
             state,
             { payload: vdd }: PayloadAction<number>
         ) {
             state.vdd = vdd;
-        },
-        updateVoltageRegulatorMaxCapPPK1(
-            state,
-            { payload: newMaxCap }: PayloadAction<number>
-        ) {
-            persistVoltageRegulatorMaxCapPPK1(newMaxCap);
-            state.maxCap = newMaxCap;
-            state.maxCapPPK2 = newMaxCap;
         },
 
         updateVoltageRegulatorMaxCapPPK2(
@@ -87,6 +67,11 @@ const voltageRegulatorSlice = createSlice({
             state.maxCap = newMaxCap;
             state.maxCapPPK2 = newMaxCap;
         },
+        resetVoltageRegulatorMaxCapPPK2(state) {
+            persistVoltageRegulatorMaxCapPPK2(maxCapPPK2);
+            state.maxCap = maxCapPPK2;
+            state.maxCapPPK2 = maxCapPPK2;
+        },
     },
 });
 
@@ -95,10 +80,9 @@ export const voltageRegulatorState = (state: RootState) =>
 
 export const {
     updateRegulator,
-    updateMaxCapOnDeviceSelected,
     moveVoltageRegulatorVdd,
-    updateVoltageRegulatorMaxCapPPK1,
     updateVoltageRegulatorMaxCapPPK2,
+    resetVoltageRegulatorMaxCapPPK2,
 } = voltageRegulatorSlice.actions;
 
 export default voltageRegulatorSlice.reducer;

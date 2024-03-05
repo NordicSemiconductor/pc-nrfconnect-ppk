@@ -7,8 +7,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    DropdownItem,
     logger,
-    NumberInputSliderWithUnit,
+    NumberInput,
     StateSelector,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -28,7 +29,9 @@ import {
     TriggerTypeValues,
 } from '../../slices/triggerSlice';
 
-type CurrentUnit = 'mA' | '\u00B5A';
+const CurrentUnitValues = ['mA', '\u00B5A'] as const;
+type CurrentUnit = (typeof CurrentUnitValues)[number];
+
 const getMin = (unit: CurrentUnit) => {
     switch (unit) {
         case 'mA':
@@ -59,6 +62,11 @@ export default () => {
         useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
 
     const [levelUnit, setLevelUnit] = useState<CurrentUnit>('µA');
+
+    const items: DropdownItem<CurrentUnit>[] = CurrentUnitValues.map(value => ({
+        value,
+        label: value,
+    }));
 
     useEffect(() => {
         if (triggerSaveQueueLength >= 10 && autoExportTrigger) {
@@ -94,13 +102,14 @@ export default () => {
 
     return (
         <>
-            <NumberInputSliderWithUnit
+            <NumberInput
                 range={{
                     min: 1,
                     max: 1000,
                     decimals: 2,
                     step: 0.01,
                 }}
+                title="Duration of trigger window"
                 value={internalTriggerLength}
                 onChange={setInternalTriggerLength}
                 onChangeComplete={(value: number) => {
@@ -109,14 +118,16 @@ export default () => {
                 unit="ms"
                 label="Length"
                 disabled={dataLoggerActive}
+                showSlider
             />
-            <NumberInputSliderWithUnit
+            <NumberInput
                 range={{
                     min: getMin(levelUnit),
                     max: levelUnit === 'µA' ? 2000 : 1000,
                     decimals: levelUnit === 'µA' ? 3 : 4,
                     step: 0.001,
                 }}
+                title="Rising edge level to run trigger"
                 value={internalTriggerValue}
                 onChange={v => setInternalTriggerValue(v)}
                 onChangeComplete={(value: number) => {
@@ -124,9 +135,23 @@ export default () => {
                         setTriggerLevel(convertToMicroAmps(levelUnit, value))
                     );
                 }}
-                unit={levelUnit}
+                unit={{
+                    items,
+                    onUnitChange: unit => {
+                        dispatch(
+                            setTriggerLevel(
+                                convertToMicroAmps(
+                                    unit.value,
+                                    internalTriggerValue
+                                )
+                            )
+                        );
+                    },
+                    selectedItem: items.find(item => item.value === levelUnit),
+                }}
                 label="Level"
                 disabled={dataLoggerActive}
+                showSlider
             />
             <StateSelector
                 items={[...TriggerTypeValues]}

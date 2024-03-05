@@ -18,7 +18,6 @@ const SPIKE_FILTER_ALPHA5 = 'spikeFilter.alpha5';
 const DIGITAL_CHANNELS_VISIBLE = 'digitalChannelsVisible';
 const DIGITAL_CHANNELS = 'digitalChannels';
 const TIMESTAMPS_VISIBLE = 'timestampsVisible';
-const VOLTAGE_REGULATOR_MAX_CAP_PPK1 = 'voltageRegulatorMaxCapPPK1';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
 
 const store = getPersistentStore<StoreSchema>({
@@ -49,7 +48,7 @@ export type booleanTupleOf8 = [
     boolean
 ];
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
+export type TimeUnit = 's' | 'm' | 'h' | 'd' | 'inf';
 
 interface StoreSchema {
     [LAST_SAVE_DIR]: string;
@@ -156,14 +155,6 @@ export const setDurationUnit = (maxSampleFreq: number, timeUnit: TimeUnit) => {
     store.set(`durationUnit-${maxSampleFreq}`, timeUnit);
 };
 
-export const getSampleIndefinitely = (defaultValue: boolean) =>
-    store.get(`sampleIndefinitely`, defaultValue);
-export const setSampleIndefinitely = (autoStop: boolean) =>
-    store.set(`sampleIndefinitely`, autoStop);
-export const getVoltageRegulatorMaxCapPPK1 = (defaultMaxCap: number) =>
-    store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK1, defaultMaxCap);
-export const setVoltageRegulatorMaxCapPPK1 = (maxCap: number) =>
-    store.set(VOLTAGE_REGULATOR_MAX_CAP_PPK1, maxCap);
 export const getVoltageRegulatorMaxCapPPK2 = (defaultMaxCap: number) =>
     store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK2 = (maxCap: number) =>

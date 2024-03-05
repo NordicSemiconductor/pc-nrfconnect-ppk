@@ -4,16 +4,17 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { logger, telemetry } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import archiver from 'archiver';
 import fs from 'fs-extra';
 import path from 'path';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { GlobalOptions } from '../globals';
+import { frameSize, GlobalOptions, indexToTimestamp } from '../globals';
 import { ChartState } from '../slices/chartSlice';
 import { DataLoggerState } from '../slices/dataLoggerSlice';
+import EventAction from '../usageDataActions';
 import { FileBuffer } from './FileBuffer';
 import { calcFileSize } from './fileUtils';
 import { FoldingBuffer } from './foldingBuffer';
@@ -95,6 +96,14 @@ export default async (
         await archive.finalize();
         window.removeEventListener('beforeunload', cleanUp);
         fs.rmSync(metaPath);
+        telemetry.sendEvent(EventAction.EXPORT_DATA, {
+            timestampBegin: 0,
+            timestampEnd: indexToTimestamp(
+                fileBuffer.getSessionInBytes() / frameSize - 1,
+                metadata.metadata.samplesPerSecond
+            ),
+            exportType: 'ppk2',
+        });
         await stopPreventSleep();
     } catch (error) {
         window.removeEventListener('beforeunload', cleanUp);

@@ -5,9 +5,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    logger,
+    StateSelector,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { DataManager } from '../../globals';
 
@@ -109,35 +110,23 @@ export default ({
         }
     }, [cursorBegin, isExportDialogVisible, updateRadioSelected]);
 
+    const items = exportSelection
+        .filter(radio => radio.value !== 2 || cursorBegin != null)
+        .map(radio => ({
+            key: radio.id,
+            renderItem: radio.name,
+        }));
+
     return (
         <>
-            <p className=" tw-pt-8 tw-text-xs tw-uppercase tw-tracking-wider tw-text-gray-400">
+            <p className=" tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                 Area to export
             </p>
-            <ToggleButtonGroup
-                type="radio"
-                name="radio-export"
-                className="radio-export"
-                value={radioValue}
-            >
-                {exportSelection
-                    .filter(radio => radio.value !== 2 || cursorBegin != null)
-                    .map(radio => (
-                        <ToggleButton
-                            id={radio.id}
-                            key={radio.id}
-                            value={radio.value}
-                            type="radio"
-                            variant={
-                                radioValue === radio.value ? 'set' : 'unset'
-                            }
-                            checked={radioValue === radio.value}
-                            onChange={() => updateRadioSelected(radio.value)}
-                        >
-                            {radio.name}
-                        </ToggleButton>
-                    ))}
-            </ToggleButtonGroup>
+            <StateSelector
+                items={items}
+                onSelect={updateRadioSelected}
+                selectedItem={items[radioValue]}
+            />
         </>
     );
 };

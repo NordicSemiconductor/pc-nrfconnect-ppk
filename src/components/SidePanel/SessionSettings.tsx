@@ -8,8 +8,8 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
-    CollapsibleGroup,
-    NumberInputSliderWithUnit,
+    Group,
+    NumberInput,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import os from 'os';
 
@@ -24,7 +24,6 @@ import {
     setDiskFullTrigger as setPersistedDiskFullTrigger,
     setPreferredSessionLocation,
 } from '../../utils/persistentStore';
-import DiskSpaceUsage from './DiskSpaceUsage';
 
 export default () => {
     const dispatch = useDispatch();
@@ -32,8 +31,7 @@ export default () => {
     const diskFullTrigger = useSelector(getDiskFullTrigger);
 
     return (
-        <CollapsibleGroup heading="Session Data">
-            <DiskSpaceUsage />
+        <Group heading="Temp Disk" collapsible gap={4}>
             <div className="tw-flex tw-flex-col tw-justify-between tw-gap-2">
                 <div className="tw-flex tw-flex-col tw-justify-between tw-gap-1">
                     <span>Root directory</span>
@@ -71,7 +69,7 @@ export default () => {
                     </Button>
                 </div>
             </div>
-            <NumberInputSliderWithUnit
+            <NumberInput
                 label="Disk full trigger"
                 unit="MB"
                 value={diskFullTrigger}
@@ -85,7 +83,8 @@ export default () => {
                     dispatch(setDiskFullTrigger(value));
                     setPersistedDiskFullTrigger(value);
                 }}
+                showSlider
             />
-        </CollapsibleGroup>
+        </Group>
     );
 };

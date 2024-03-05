@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
     ConfirmationDialog,
-    Group,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { load, screenshot } from '../../actions/fileActions';
@@ -81,7 +80,7 @@ export const Save = () => {
 
     return (
         <>
-            <Group>
+            <div className="tw-flex tw-flex-col tw-gap-2">
                 <Button
                     className="w-100"
                     title={
@@ -101,7 +100,7 @@ export const Save = () => {
                 >
                     Screenshot
                 </Button>
-            </Group>
+            </div>
             <SaveChoiceDialog />
             <ExportDialog />
         </>

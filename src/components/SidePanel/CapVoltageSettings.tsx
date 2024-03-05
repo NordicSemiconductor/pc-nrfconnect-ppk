@@ -4,13 +4,11 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useState } from 'react';
-import FormLabel from 'react-bootstrap/FormLabel';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    CollapsibleGroup,
-    NumberInlineInput,
-    Slider,
+    Group,
+    NumberInput,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -21,6 +19,20 @@ import {
     voltageRegulatorState,
 } from '../../slices/voltageRegulatorSlice';
 import EventAction from '../../usageDataActions';
+
+export const useSynchronizationIfChangedFromOutside = <T,>(
+    externalValue: T,
+    setInternalValue: (value: T) => void
+) => {
+    const previousExternalValue = useRef(externalValue);
+    useEffect(() => {
+        if (previousExternalValue.current !== externalValue) {
+            setInternalValue(externalValue);
+            previousExternalValue.current = externalValue;
+        }
+    });
+    return previousExternalValue.current;
+};
 
 export const CapVoltageSettings = () => {
     const { min, max, vdd, maxCap } = useSelector(voltageRegulatorState);
@@ -38,47 +50,30 @@ export const CapVoltageSettings = () => {
         }
     };
 
+    useSynchronizationIfChangedFromOutside(maxCap, setNewMaxCap);
+
     return (
-        <CollapsibleGroup
+        <Group
             heading="Voltage Limit"
             title="Adjust to limit voltage supply"
             className="cap-voltage-regulator-container"
-            defaultCollapsed={false}
+            gap={4}
         >
-            <div
-                className="voltage-regulator"
+            <NumberInput
                 title="Supply voltage to the device will be capped to this value"
-            >
-                <FormLabel htmlFor="cap-slider-vdd">
-                    <span className="flex-fill">Set max supply voltage to</span>
-                    <NumberInlineInput
-                        value={newMaxCap}
-                        range={{ min, max }}
-                        onChange={value => setNewMaxCap(value)}
-                        onChangeComplete={() => {
-                            updateVoltageRegulator();
-                            telemetry.sendEvent(
-                                EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                                { maxCap: newMaxCap }
-                            );
-                        }}
-                    />
-                    &nbsp;mV
-                </FormLabel>
-                <Slider
-                    id="cap-slider-vdd"
-                    values={[newMaxCap]}
-                    range={{ min, max }}
-                    onChange={[value => setNewMaxCap(value)]}
-                    onChangeComplete={() => {
-                        updateVoltageRegulator();
-                        telemetry.sendEvent(
-                            EventAction.VOLTAGE_MAX_LIMIT_CHANGED,
-                            { maxCap: newMaxCap }
-                        );
-                    }}
-                />
-            </div>
-        </CollapsibleGroup>
+                label="Set max supply voltage to"
+                value={newMaxCap}
+                range={{ min, max }}
+                onChange={value => setNewMaxCap(value)}
+                onChangeComplete={() => {
+                    updateVoltageRegulator();
+                    telemetry.sendEvent(EventAction.VOLTAGE_MAX_LIMIT_CHANGED, {
+                        maxCap: newMaxCap,
+                    });
+                }}
+                showSlider
+                unit="mV"
+            />
+        </Group>
     );
 };

@@ -6,15 +6,14 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+import { isScopePane } from '../utils/panes';
 import {
     getDuration,
     getDurationUnit,
     getSampleFreq,
-    getSampleIndefinitely,
     setDuration as persistDuration,
     setDurationUnit as persistDurationUnit,
     setSampleFreq as persistSampleFreq,
-    setSampleIndefinitely as persistSampleIndefinitely,
     TimeUnit,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
@@ -27,7 +26,6 @@ export interface DataLoggerState {
     maxSampleFreq: number;
     duration: number;
     durationUnit: TimeUnit;
-    sampleIndefinitely: boolean;
 }
 
 const initialFreqLog10 = 5;
@@ -38,8 +36,7 @@ const initialState = (): DataLoggerState => ({
     sampleFreq: 10 ** initialFreqLog10,
     maxSampleFreq: 10 ** initialFreqLog10,
     duration: 300,
-    durationUnit: 's',
-    sampleIndefinitely: false,
+    durationUnit: 'inf',
 });
 
 const dataLoggerSlice = createSlice({
@@ -59,9 +56,6 @@ const dataLoggerSlice = createSlice({
                 maxSampleFreq,
                 state.durationUnit
             );
-            const savedSampleIndefinitely = getSampleIndefinitely(
-                state.sampleIndefinitely
-            );
 
             return {
                 ...state,
@@ -72,7 +66,6 @@ const dataLoggerSlice = createSlice({
                 sampleFreqLog10: Math.ceil(Math.log10(sampleFreq)),
                 duration: savedDuration,
                 durationUnit: savedDurationUnit,
-                autoStopSampling: savedSampleIndefinitely,
             };
         },
         updateSampleFreqLog10: (
@@ -99,10 +92,6 @@ const dataLoggerSlice = createSlice({
             persistDurationUnit(state.maxSampleFreq, action.payload);
             state.durationUnit = action.payload;
         },
-        setSampleIndefinitely: (state, action: PayloadAction<boolean>) => {
-            persistSampleIndefinitely(action.payload);
-            state.sampleIndefinitely = action.payload;
-        },
         setDataLoggerState: (
             state,
             action: PayloadAction<{ state: DataLoggerState }>
@@ -112,7 +101,7 @@ const dataLoggerSlice = createSlice({
 
 export const dataLoggerState = (state: RootState) => state.app.dataLogger;
 export const getSampleFrequency = (state: RootState) =>
-    state.app.dataLogger.sampleFreq;
+    isScopePane(state) ? 100_000 : state.app.dataLogger.sampleFreq;
 
 export const {
     setSamplingAttrsAction,
@@ -120,7 +109,6 @@ export const {
     updateDuration,
     updateDurationUnit,
     setDataLoggerState,
-    setSampleIndefinitely,
 } = dataLoggerSlice.actions;
 
 export default dataLoggerSlice.reducer;

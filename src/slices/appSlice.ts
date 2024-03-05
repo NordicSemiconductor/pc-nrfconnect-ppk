@@ -21,7 +21,6 @@ interface AppState {
     metadata: any[];
     isSmuMode: boolean;
     deviceRunning: boolean;
-    advancedMode: boolean;
     capabilities: Capabilities;
     samplingRunning: boolean;
     isSaveChoiceDialogVisible: boolean;
@@ -37,7 +36,6 @@ const initialState = (): AppState => ({
     metadata: [],
     isSmuMode: false,
     deviceRunning: false,
-    advancedMode: false,
     capabilities: {},
     samplingRunning: false,
     isSaveChoiceDialogVisible: false,
@@ -90,9 +88,6 @@ const appSlice = createSlice({
         clearFileLoadedAction: state => {
             state.fileLoadedName = undefined;
         },
-        toggleAdvancedModeAction: state => {
-            state.advancedMode = !state.advancedMode;
-        },
         samplingStartAction: state => {
             state.samplingRunning = true;
         },
@@ -114,7 +109,6 @@ const appSlice = createSlice({
 export const isSamplingRunning = (state: RootState) =>
     state.app.app.samplingRunning;
 export const appState = (state: RootState) => state.app.app;
-export const advancedMode = (state: RootState) => state.app.app.advancedMode;
 export const deviceOpen = (state: RootState) =>
     Object.keys(state.app.app.capabilities).length > 0;
 export const getSessionRootFolder = (state: RootState) =>
@@ -135,7 +129,6 @@ export const {
     showExportDialog,
     hideExportDialog,
     setFileLoadedAction,
-    toggleAdvancedModeAction,
     samplingStartAction,
     samplingStoppedAction,
     setSessionRootFolder,

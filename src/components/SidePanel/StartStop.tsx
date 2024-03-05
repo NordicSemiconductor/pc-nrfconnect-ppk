@@ -4,51 +4,74 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
     Group,
-    Slider,
     StartStopButton,
+    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { unit } from 'mathjs';
 
 import { samplingStart, samplingStop } from '../../actions/deviceActions';
 import { DataManager } from '../../globals';
-import { appState, isSavePending } from '../../slices/appSlice';
-import { resetChartTime, resetCursor } from '../../slices/chartSlice';
+import {
+    appState,
+    getDiskFullTrigger,
+    getSessionRootFolder,
+    isSavePending,
+} from '../../slices/appSlice';
+import {
+    getRecordingMode,
+    resetChartTime,
+    resetCursor,
+} from '../../slices/chartSlice';
 import {
     dataLoggerState,
-    updateSampleFreqLog10,
+    getSampleFrequency,
 } from '../../slices/dataLoggerSlice';
 import {
     getAutoExportTrigger,
     resetTriggerOrigin,
     setTriggerSavePath,
 } from '../../slices/triggerSlice';
-import { selectDirectoryDialog } from '../../utils/fileUtils';
-import { isDataLoggerPane, isRealTimePane } from '../../utils/panes';
+import { convertTimeToSeconds, formatDuration } from '../../utils/duration';
+import {
+    calcFileSize,
+    getFreeSpace,
+    remainingTime as calcRemainingTime,
+    selectDirectoryDialog,
+} from '../../utils/fileUtils';
+import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 import {
     getDoNotAskStartAndClear,
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import LiveModeSettings from './LiveModeSettings';
-import SessionSettings from './SessionSettings';
 import TriggerSettings from './TriggerSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
+const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
+    const bytes = sampleFreq * durationSeconds * 6;
+    return calcFileSize(bytes, fmtOpts);
+};
+
 export default () => {
     const dispatch = useDispatch();
-    const realTimePane = useSelector(isRealTimePane);
+    const scopePane = useSelector(isScopePane);
     const autoExport = useSelector(getAutoExportTrigger);
     const dataLoggerPane = useSelector(isDataLoggerPane);
+    const recordingMode = useSelector(getRecordingMode);
     const { samplingRunning } = useSelector(appState);
-    const { sampleFreqLog10, sampleFreq, maxFreqLog10 } =
-        useSelector(dataLoggerState);
+    const { duration, durationUnit } = useSelector(dataLoggerState);
+    const sampleFreq = useSelector(getSampleFrequency);
     const savePending = useSelector(isSavePending);
+    const sessionFolder = useSelector(getSessionRootFolder);
+    const diskFullTrigger = useSelector(getDiskFullTrigger);
+
+    const sampleIndefinitely = durationUnit === 'inf';
 
     const startButtonTooltip = `Start sampling at ${unit(sampleFreq, 'Hz')
         .format(fmtOpts)
@@ -59,7 +82,7 @@ export default () => {
     const [showDialog, setShowDialog] = useState(false);
 
     const startAndClear = async () => {
-        if (realTimePane && autoExport) {
+        if (scopePane && autoExport) {
             const filePath = await selectDirectoryDialog();
             dispatch(setTriggerSavePath(filePath));
         }
@@ -69,36 +92,44 @@ export default () => {
         dispatch(resetTriggerOrigin());
         dispatch(resetCursor());
 
+        telemetry.sendEvent('StartSampling', {
+            mode: recordingMode,
+            samplesPerSecond: DataManager().getSamplesPerSecond(),
+        });
         dispatch(samplingStart());
         setShowDialog(false);
     };
 
+    const [freeSpace, setFreeSpace] = useState<number>(0);
+
+    useEffect(() => {
+        if (!dataLoggerPane) return;
+
+        const action = () => {
+            getFreeSpace(diskFullTrigger, sessionFolder).then(space => {
+                setFreeSpace(space);
+            });
+        };
+        action();
+        const timerId = setInterval(action, 5000);
+        return () => {
+            clearInterval(timerId);
+        };
+    }, [dataLoggerPane, diskFullTrigger, sessionFolder]);
+
+    const [remainingTime, setRemainingTime] = useState<number>(0);
+
+    useEffect(() => {
+        setRemainingTime(calcRemainingTime(freeSpace, sampleFreq));
+    }, [freeSpace, sampleFreq]);
+
     return (
         <>
-            <Group heading="Sampling parameters">
-                <div className="sample-frequency-group">
-                    <Form.Label htmlFor="data-logger-sampling-frequency">
-                        {sampleFreq.toLocaleString('en')} samples per second
-                    </Form.Label>
-                    <Slider
-                        ticks
-                        id="data-logger-sampling-frequency"
-                        values={[sampleFreqLog10]}
-                        range={{ min: 0, max: maxFreqLog10 }}
-                        onChange={[
-                            v =>
-                                dispatch(
-                                    updateSampleFreqLog10({
-                                        sampleFreqLog10: v,
-                                    })
-                                ),
-                        ]}
-                        onChangeComplete={() => {}}
-                        disabled={samplingRunning}
-                    />
-                </div>
+            <Group heading="Sampling parameters" gap={4}>
                 {dataLoggerPane && <LiveModeSettings />}
-                {realTimePane && <TriggerSettings />}
+                {scopePane && <TriggerSettings />}
+            </Group>
+            <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton
                     title={startStopTitle}
                     startText="Start"
@@ -106,6 +137,10 @@ export default () => {
                     onClick={async () => {
                         if (samplingRunning) {
                             dispatch(samplingStop());
+                            telemetry.sendEvent('StopSampling', {
+                                mode: recordingMode,
+                                duration: DataManager().getTimestamp(),
+                            });
                             return;
                         }
 
@@ -123,8 +158,33 @@ export default () => {
                     variant="secondary"
                     started={samplingRunning}
                 />
-            </Group>
-            {dataLoggerPane && <SessionSettings />}
+                {dataLoggerPane && (
+                    <div className="tw-border tw-border-solid tw-border-gray-200 tw-p-2 tw-text-[10px] tw-text-gray-400">
+                        {!sampleIndefinitely && (
+                            <div>
+                                {`Estimated disk space required ${calcFileSizeString(
+                                    sampleFreq,
+                                    convertTimeToSeconds(duration, durationUnit)
+                                )}. Current available space ${calcFileSize(
+                                    freeSpace
+                                )}`}
+                            </div>
+                        )}
+                        {sampleIndefinitely && (
+                            <div>
+                                {`Estimated space limit ~${formatDuration(
+                                    remainingTime
+                                )} at ${calcFileSizeString(
+                                    sampleFreq,
+                                    convertTimeToSeconds(1, 'h')
+                                )}/h. Available disk space ${calcFileSize(
+                                    freeSpace
+                                )}`}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
             <ConfirmationDialog
                 confirmLabel="Yes"
                 cancelLabel="No"
