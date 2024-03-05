@@ -14,7 +14,7 @@ import {
 
 const urls = {
     ppk2UserGuide:
-        'https://infocenter.nordicsemi.com/topic/ug_ppk2/UG/ppk/PPK_user_guide_Intro.html',
+        'https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/PPK_user_guide_Intro.html',
     purchase:
         'https://www.nordicsemi.com/About-us/BuyOnline?search_token=nRF-PPK2',
 };
@@ -22,7 +22,7 @@ const urls = {
 export default () => (
     <Group heading="Instructions">
         <p>
-            The Power Profiler Kit (PPK) is an affordable, flexible tool that
+            The Power Profiler Kit II (PPK2) is an affordable, flexible tool that
             measures real-time power consumption of your designs.
         </p>
         <p>

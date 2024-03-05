@@ -10,7 +10,7 @@ The Power Profiler Kit II (PPK2) must be connected to your computer and powered 
 1. Click **Select Device** (in the top left corner) and select the PPK2 from the list.</br>
    The Power Profiler app checks if the PPK2 has the required firmware and shows a firmware upgrade dialog if needed.
 1. In the device panel's **Mode**, select [**Source meter**](./overview.md#mode) or [**Ampere meter**](./overview.md#mode).
-1. Select the [**Data logger**](./overview.md#sampling-tabs) or [**Real time**](./overview.md#sampling-tabs) mode.
+1. Select the [**Data logger**](./overview.md#sampling-tabs) or [**Scope**](./overview.md#sampling-tabs) mode.
 1. Set the desired [**Sampling parameters**](./overview.md#sampling-parameters).
 1. Click **Start** to start sampling.
 1. Toggle **Enable power output** to enable power to the DUT.

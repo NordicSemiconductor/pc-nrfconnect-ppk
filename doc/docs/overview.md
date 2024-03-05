@@ -16,7 +16,13 @@ You can access the following options by selecting the arrow under the device nam
 
 ## Device panel sections
 
-Before you select a device, this section lets you only **Load** a `.ppk2` or a `.ppk` power profiler file.
+Before you select a device, you can only load a power profiler file, open a link to an online purchase page, check documentation, or configure temporary disk data.
+
+More options become available after selecting a device. Some options are specific to the chosen sampling mode.
+
+### Load
+
+The **Load** button lets you open a `.ppk2` or a `.ppk` power profiler file.
 
 !!! note "Note"
       Loading a `.ppk` file will automatically convert it to a `.ppk2` file.
@@ -24,20 +30,18 @@ Before you select a device, this section lets you only **Load** a `.ppk2` or a `
 
       Support for converting `.ppk` files will be removed in the future.
 
-More options become available after selecting a device. Some options are specific to the chosen sampling mode.
+### Temp disk
 
-### Session data
+![Temp disk data controls](./screenshots/ppk2_temp_disk_data.png "Temp disk data controls")
 
-![Session data controls](./screenshots/ppk2_advanced_session_data.png "Session data controls")
-
-These options only appear before selecting device and for the **Data logger** sampling mode.
+These options only appear before selecting the device and for the **Data logger** sampling mode.
 
 Here you can set the root directory where the sampling file will be saved by default and define how much hard drive space you want to keep free when you start sampling.
 The sampling will automatically stop when the hard drive has less than the defined amount.
 
-### Mode
+### Power supply mode
 
-![Mode options in the Device panel](./screenshots/ppk2_device_panel_mode.png "Mode options in the Device panel")
+![Power supply mode options in the Device panel](./screenshots/ppk2_device_panel_mode.png "Power supply mode options in the Device panel")
 
 Here you can select one of the power supply modes for the PPK2, depending on your hardware setup:
 
@@ -52,10 +56,9 @@ Both modes let you **Enable power output** on or off, which turns DUT on or off.
 
 Here you can select the sampling parameters. The parameters are different depending on the sampling mode.
 
-This is also where you can **Start** sampling and select the amount of samples per second that will be recorded.
-The slider lets you select different values up to 100 000 samples per second (100 kHz).
+This is also where you can **Start** sampling.
 
-![Start and sampling value slider](./screenshots/ppk2_device_panel_sampling_start.PNG "Start and sampling value slider")
+![Start button](./screenshots/ppk2_device_panel_sampling_start.PNG "Start button")
 
 After sampling starts, the **Start** button changes to **Stop**.
 Before you can start sampling again, [**Save/Export**](#other-options) the session data or take a [**Screenshot**](#other-options)
@@ -65,20 +68,23 @@ If you don't, you will be prompted about saving any unsaved sampling data before
 
 ![Sampling parameters for Data logger](./screenshots/ppk2_device_panel_sampling_live.png "Sampling parameters for Data logger")
 
-When sampling in the **Data logger** mode, the sampling lasts by default from the moment in which you click **Start** to the moment the **Auto stop sampling** sample time value is reached.
+When sampling in the **Data logger** mode, you can select the amount of samples per second that will be recorded.
+The slider lets you select different values up to 100 000 samples per second (100 kHz).
+You can also specify how long the sampling is supposed to last.
+
+After pressing **Start**, the sampling lasts to the moment the sampling time value is reached.
 If you disable **Auto stop sampling**, the sampling will last until you **Stop** it.
 
 Based on the chosen options, the Power Profiler application estimates the disk space usage.
 
-#### Real time parameters
+#### Scope parameters
 
-![Sampling parameters for Real time](./screenshots/ppk2_device_panel_sampling_trigger.png "Sampling parameters for Real time")
+![Sampling parameters for Scope](./screenshots/ppk2_device_panel_sampling_trigger.png "Sampling parameters for Scope")
 
-When sampling in the **Real time** mode, the sampling starts only when the specified **Length** and **Level** values are reached.
-
+When sampling in the **Scope** mode, the sampling starts only when the specified **Length** and **Level** values are reached.
 The sampling always happens at 100 000 samples per second (100 kHz).
 
-The following table lists all available Real time parameters.
+The following table lists all available Scope parameters.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
@@ -96,6 +102,7 @@ The following table lists the available display options.
 | **Timestamps**                    | Show or hide the timestamps at the bottom of the sampling chart.                                     |
 | **Relative** and **Absolute**     | Select how the time value of the **Timestamps** is to be displayed: relative to the start of the sampling or using machine time (UTC, adjusted per time zone of the machine settings).<br/><br/>If you [**Load**](#device-panel-sections) an old `.ppk` file, the timestamp value will not be shown because of the lack of metadata.         |
 | **Digital channels**              | Show or hide the [digital channels](#digital-channels) under the sampling chart.                     |
+| **Show Minimap**                  | Toggle to show or hide the navigable minimap under the **Data logger**'s chart. You can use the minimap to inspect the logged sampling results. |
 
 ### Other options
 
@@ -103,23 +110,50 @@ The following options are only available when you log sampling data.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Show Minimap**                  | Toggle to show or hide the navigable minimap under the **Data logger**'s chart. You can use the minimap to inspect the logged sampling results. |
 | **Save/Export**                   | Available only after sampling is stopped. Saves the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of nRF Connect Power Profiler. |
-| **Screenshot**                    | Saves the current data from either the **Data logger** or the **Real time** view as a PNG image.                                          |
+| **Screenshot**                    | Saves the current data from either the **Data logger** or the **Scope** view as a PNG image.                                          |
+
+### Advanced configuration
+
+The advanced configuration panel gives you access to filter tuning and lets you adjust gains for all individual ranges.
+
+#### Gains
+
+![Advanced configuration for gains](./screenshots/ppk2_advanced_gains.PNG "Advanced controls for gains")
+
+If any of the ranges (see [Measurement resolution](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/ppk_measure_resolution.html#ppk_measure_resolution__table_b3l_3ty_bdb)) has an offset, use these configuration options to add a positive or negative gain to the calculated measurement values.
+
+#### Spike filter
+
+![Advanced configuration for spike filter](./screenshots/ppk2_advanced_spike.PNG "Advanced controls for spike filter")
+
+Whenever a dynamic range switching occurs, induced inductance may cause the first samples to be higher than the actual value.
+
+Use the sliders to set the following:
+
+- Samples to smooth - The number of samples after a dynamic range switch to apply the filer.
+- Coefficient for range 1–4 - The magnitude of the spike filter for range 1–4. The higher the value, the more filtering will be applied.
+- Coefficient for range 5 - The magnitude of the spike filter for range 5. The higher the value, the more filtering will be applied.
+
+#### Voltage limit
+
+![Advanced configuration for voltage limit](./screenshots/ppk2_advanced_voltage.PNG "Advanced controls for voltage limit")
+
+Use this control to set the voltage limit for the measurement.
 
 ## Sampling tabs
 
-nRF Connect Power Profiler comes with two sampling modes: **Data logger** and **Real time**.
+nRF Connect Power Profiler comes with two sampling modes: **Data logger** and **Scope**.
 
 - The **Data logger** sampling mode lets you examine the power continuously over a period of time.
   It has its own [sampling parameters](#data-logger-parameters) and lets you use the **Live Now** toggle to jump back to displaying the live measurement.
 
     ![Data logger mode at work](./screenshots/ppk2_logger_tab.PNG "Data logger mode at work")
 
-- The **Real time** sampling mode lets you sample only when the values specified for the **Length** and **Level** [sampling parameters](#real-time-parameters) have been reached.
+- The **Scope** sampling mode lets you sample only when the values specified for the **Length** and **Level** [sampling parameters](#real-time-parameters) have been reached.
   You can use the blue slider on the Y-axis to dynamically select the value of the **Level** parameter.
 
-    ![Real time mode at work](./screenshots/ppk2_realtime_tab.PNG "Real time mode at work")
+    ![Scope mode at work](./screenshots/ppk2_scope_tab.PNG "Scope mode at work")
 
 Both modes have their own [sampling parameters](#sampling-parameters), but share most of the sampling chart UI, explained in the following sections.
 
@@ -175,33 +209,7 @@ The digital signals are visible in the charting section below the current measur
 
 The digital signals are connected to the PPK2's Logic port as described in [Logic port](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/logic_port.html). To view the digital values, enable digital channels and zoom in on the main chart until the values are visible.
 
-### Advanced controls
-
-The advanced control panel gives you access to filter tuning and lets you adjust gains for all individual ranges.
-
-#### Gains
-
-![Advanced controls for gains](./screenshots/ppk2_advanced_gains.PNG "Advanced controls for gains")
-
-If any of the ranges (see [Measurement resolution](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/ppk_measure_resolution.html#ppk_measure_resolution__table_b3l_3ty_bdb)) has an offset, use these controls to add a positive or negative gain to the calculated measurement values.
-
-#### Spike filter
-
-![Advanced controls for spike filter](./screenshots/ppk2_advanced_spike.PNG "Advanced controls for spike filter")
-
-Whenever a dynamic range switching occurs, induced inductance may cause the first samples to be higher than the actual value.
-
-Use the sliders to set the following:
-
-- Samples to smooth - The number of samples after a dynamic range switch to apply the filer.
-- Coefficient for range 1–4 - The magnitude of the spike filter for range 1–4. The higher the value, the more filtering will be applied.
-- Coefficient for range 5 - The magnitude of the spike filter for range 5. The higher the value, the more filtering will be applied.
-
-#### Voltage limit
-
-![Advanced controls for voltage limit](./screenshots/ppk2_advanced_voltage.PNG "Advanced controls for voltage limit")
-
-Use this control to set the voltage limit for the measurement.
+To select which digital channels you see, use the **Digital channels** menu in [**Display options**](#display-options).
 
 ## Feedback tab
 
