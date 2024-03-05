@@ -20,7 +20,7 @@
         }
     },
     "engines": {
-        "nrfconnect": ">=4.4.0"
+        "nrfconnect": ">=4.4.1"
     },
     "files": [
         "dist/",
@@ -67,9 +67,6 @@
         "archiver": "^6.0.1"
     },
     "bundledDependencies": [
-        "archiver"
-    ],
-    "bundleDependencies": [
         "archiver"
     ]
 }
