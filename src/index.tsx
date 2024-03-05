@@ -15,6 +15,7 @@ import {
 
 import Chart from './components/Chart/Chart';
 import DeviceSelector from './components/DeviceSelector';
+import DocumentationSections from './components/DocumentationSections';
 import SidePanel from './components/SidePanel/SidePanel';
 import { updateTitle } from './globals';
 import reducers from './slices';
@@ -81,6 +82,7 @@ render(
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
         feedback
+        documentation={DocumentationSections}
         panes={[
             { name: 'Data Logger', Main: ChartWrapper },
             { name: 'Scope', Main: ChartWrapper },
