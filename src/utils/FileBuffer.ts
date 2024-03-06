@@ -374,6 +374,8 @@ export class FileBuffer {
             return keep;
         });
 
+        const endOffFileOffset = this.getSessionInBytes() - 1;
+
         for (
             let i = idealBufferRange.start;
             i < idealBufferRange.end;
@@ -388,7 +390,10 @@ export class FileBuffer {
                         },
                         {
                             start: i,
-                            end: i + this.#bufferPageSize - 1,
+                            end: Math.min(
+                                i + this.#bufferPageSize - 1,
+                                endOffFileOffset
+                            ),
                         }
                     )
                 ) === -1;
