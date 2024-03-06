@@ -74,10 +74,10 @@ If you don't, you will be prompted about saving any unsaved sampling data before
 
 When sampling in the **Data logger** mode, you can select the amount of samples per second that will be recorded.
 The slider lets you select different values up to 100 000 samples per second (100 kHz).
-You can also specify how long the sampling is supposed to last (**300** seconds by default).
+You can also specify how long the sampling is supposed to last (**forever** by default).
 
 After pressing **Start**, the sampling lasts to the moment the sampling time value is reached.
-If you specified the sampling to last **forever**, the sampling will last until you manually **Stop** it.
+If you specified the sampling to last **forever**, the sampling will last until you manually **Stop** it or until the [**Disk full trigger**](#temp-disk) limit is reached.
 
 Based on the chosen options, the Power Profiler application estimates the disk space usage.
 
