@@ -100,7 +100,6 @@ const pointerDown = (event: PointerEvent) => {
     // eslint-disable-next-line no-bitwise
     if ((event.buttons & 0x01) === 0x01) {
         leftClickPressed = true;
-        chartRef.miniMapScrollInUse?.(true);
         const metaData = getClickMetaData(chartRef, event.offsetX);
         if (metaData) {
             clickOnSlider = metaData.clickedOnSlider;
@@ -123,7 +122,6 @@ const pointerUp = (event: PointerEvent) => {
     // eslint-disable-next-line no-bitwise
     if ((event.buttons & 0x01) === 0x01) {
         leftClickPressed = false;
-        chartRef.miniMapScrollInUse?.(false);
     }
 };
 
@@ -143,7 +141,6 @@ const pointerMove = (event: PointerEvent) => {
         );
         if (center != null) chartRef.windowNavigateCallback?.(center);
     } else {
-        chartRef.miniMapScrollInUse?.(false);
         leftClickPressed = false;
     }
 };
@@ -208,6 +205,11 @@ const plugin: MinimapScroll = {
             chart.options.scales.x.max = DataManager().getTimestamp();
         }
         chart.update();
+
+        leftClickPressed = false;
+        clickOnSlider = false;
+        lastSliderTimeStamp = 0;
+        lastClickDeltaFromCenter = 0;
     },
 };
 

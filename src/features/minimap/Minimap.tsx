@@ -21,7 +21,6 @@ import {
 import {
     getForceRerender,
     getXAxisMaxTime,
-    setPanningInAction,
     showMinimap as getShowMinimap,
 } from './minimapSlice';
 
@@ -39,7 +38,6 @@ export interface MinimapOptions extends ChartOptions<'line'> {
 export interface MinimapChart extends Chart<'line'> {
     options: MinimapOptions;
     windowNavigateCallback?: (windowCenter: number) => void;
-    miniMapScrollInUse?: (inUse: boolean) => void;
     updateSlider?: (
         minimapRef: MinimapChart,
         windowEnd: number,
@@ -73,10 +71,6 @@ const Minimap = () => {
         dispatch(panWindow(windowCenter));
     }
 
-    function scrollInUse(inUse: boolean) {
-        dispatch(setPanningInAction(inUse));
-    }
-
     minimapRef.current = initializeMinimapChart(
         minimapRef.current,
         canvasRef.current,
@@ -85,7 +79,6 @@ const Minimap = () => {
 
     if (minimapRef.current) {
         minimapRef.current.windowNavigateCallback = windowNavigateCallback;
-        minimapRef.current.miniMapScrollInUse = scrollInUse;
         minimapRef.current.updateSlider = (minimap, end, duration, live) => {
             updateSlider(minimap, minimapSlider.current, end, duration, live);
         };
