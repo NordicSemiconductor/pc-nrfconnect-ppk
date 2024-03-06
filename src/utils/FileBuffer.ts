@@ -17,12 +17,6 @@ import {
     WriteBuffer,
 } from './WriteBuffer';
 
-const defaultPage = () => ({
-    page: new Uint8Array(),
-    startAddress: 0,
-    bytesWritten: 0,
-});
-
 export class FileBuffer {
     #readPages: Page[] = [];
 
@@ -78,7 +72,7 @@ export class FileBuffer {
                 {
                     push: (buffer: Uint8Array) =>
                         this.#freePageBuffers.push(buffer),
-                    pop: () => this.#freePageBuffers.pop(),
+                    get: () => this.#getFreeBufferPage(),
                 },
                 0,
                 firstWriteTime
@@ -225,18 +219,14 @@ export class FileBuffer {
             this.#executeFileOperation();
         });
 
-    #bufferPage = (
-        page: Page,
-        startAddress: number,
-        beforeRun?: () => void
-    ) => {
+    #bufferPage = (page: Page, startAddress: number) => {
         const cancelOperation = new AbortController();
 
         const bufferingRequest = this.#readRange(
             page.page,
             page.page.length,
             startAddress,
-            beforeRun,
+            undefined,
             cancelOperation
         ).then(bytesRead => {
             page.bytesWritten = bytesRead;
@@ -374,6 +364,8 @@ export class FileBuffer {
             return keep;
         });
 
+        const endOffFileOffset = this.getSessionInBytes() - 1;
+
         for (
             let i = idealBufferRange.start;
             i < idealBufferRange.end;
@@ -388,17 +380,21 @@ export class FileBuffer {
                         },
                         {
                             start: i,
-                            end: i + this.#bufferPageSize - 1,
+                            end: Math.min(
+                                i + this.#bufferPageSize - 1,
+                                endOffFileOffset
+                            ),
                         }
                     )
                 ) === -1;
 
             if (missing) {
-                const newReadPage = defaultPage();
-                newReadPage.page =
-                    this.#freePageBuffers.pop() ??
-                    Buffer.alloc(this.#bufferPageSize);
-                this.#bufferPage(newReadPage, i, () => {})
+                const newReadPage = {
+                    page: this.#getFreeBufferPage(),
+                    startAddress: 0,
+                    bytesWritten: 0,
+                };
+                this.#bufferPage(newReadPage, i)
                     .then(() => {
                         this.#readPages.push(newReadPage);
                     })
@@ -407,6 +403,12 @@ export class FileBuffer {
                     });
             }
         }
+    }
+
+    #getFreeBufferPage() {
+        return (
+            this.#freePageBuffers.pop() ?? Buffer.alloc(this.#bufferPageSize)
+        );
     }
 
     #readFromCachedData(
@@ -422,7 +424,7 @@ export class FileBuffer {
             numberOfBytesToRead
         );
 
-        Promise.all(this.#bufferingRequests).then(() =>
+        Promise.allSettled(this.#bufferingRequests).then(() =>
             this.#updateReadPages(
                 byteOffset,
                 byteOffset + numberOfBytesToRead,
@@ -479,18 +481,33 @@ export class FileBuffer {
             1;
 
         if (normalizedEnd + 1 - normalizedBegin >= this.#bufferPageSize) {
-            const newPage = {
-                page: buffer.subarray(
-                    normalizedBegin - byteOffset,
-                    normalizedEnd + 1 - byteOffset
-                ),
-                startAddress: normalizedBegin,
-                bytesWritten: normalizedEnd - normalizedBegin + 1,
-            };
-            this.#readPages.push(newPage);
+            const offset = normalizedBegin - byteOffset;
+
+            // split read data into pages
+            for (
+                let i = normalizedBegin;
+                i < normalizedEnd;
+                i += this.#bufferPageSize
+            ) {
+                const page = this.#getFreeBufferPage();
+
+                buffer.copy(
+                    page,
+                    0,
+                    offset + i - normalizedBegin,
+                    offset + i + this.#bufferPageSize - normalizedBegin - 1
+                );
+
+                const newPage = {
+                    page,
+                    startAddress: i,
+                    bytesWritten: this.#bufferPageSize,
+                };
+                this.#readPages.push(newPage);
+            }
         }
 
-        Promise.all(this.#bufferingRequests).then(() =>
+        Promise.allSettled(this.#bufferingRequests).then(() =>
             this.#updateReadPages(
                 byteOffset,
                 byteOffset + numberOfBytesToRead,
@@ -499,9 +516,7 @@ export class FileBuffer {
         );
 
         onLoading?.(false);
-        if (bytesRead === numberOfBytesToRead) {
-            return numberOfBytesToRead;
-        }
+
         return bytesRead;
     }
 

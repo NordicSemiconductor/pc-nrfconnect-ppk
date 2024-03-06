@@ -176,7 +176,7 @@ export class WriteBuffer {
     #writeActivePage: () => Promise<void>;
     #pageBufferAllocator: {
         push: (page: Uint8Array) => void;
-        pop: () => Uint8Array | undefined;
+        get: () => Uint8Array;
     };
     #bytesWritten = 0;
     #firstWriteTime?: number;
@@ -189,7 +189,9 @@ export class WriteBuffer {
             push: (buffer: Uint8Array) => {
                 this.#freePageBuffers.push(buffer);
             },
-            pop: () => this.#freePageBuffers.pop(),
+            get: () =>
+                this.#freePageBuffers.pop() ??
+                Buffer.alloc(this.#bufferPageSize),
         },
         fileSize: number | undefined = undefined,
         firstWriteTime: number | undefined = undefined
@@ -247,9 +249,7 @@ export class WriteBuffer {
             activePage = {
                 startAddress: this.getBytesWritten(),
                 bytesWritten: 0,
-                page:
-                    this.#pageBufferAllocator.pop() ??
-                    Buffer.alloc(this.#bufferPageSize),
+                page: this.#pageBufferAllocator.get(),
             };
             this.#pages.push(activePage);
         }
@@ -297,9 +297,7 @@ export class WriteBuffer {
         this.#pages.push({
             startAddress: this.getBytesWritten(),
             bytesWritten: 0,
-            page:
-                this.#pageBufferAllocator.pop() ??
-                Buffer.alloc(this.#bufferPageSize),
+            page: this.#pageBufferAllocator.get(),
         });
     }
 
