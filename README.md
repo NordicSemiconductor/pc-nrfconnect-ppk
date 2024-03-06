@@ -11,8 +11,7 @@ user application.
 
 ![screenshot](resources/screenshot.png)
 
-The application also supports the
-[older, first version of the Power Profiler Kit](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit).
+The support for [Power Profiler Kit (PPK1)](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit) has been deprecated since the [nRF Connect Power Profiler v4.0.0-beta1](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md). The last application version to support PPK1 is [v3.5.5](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md) with [nRF Connect for Desktop v4.4.0](https://github.com/NordicSemiconductor/pc-nrfconnect-launcher/blob/main/Changelog.md).
 
 ## Installation
 

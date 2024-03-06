@@ -14,11 +14,9 @@ You can access the following options by selecting the arrow under the device nam
 - Rename the device.
 - View device COM ports.
 
-## Device panel sections
+## Device panel sections before device selection
 
 Before you select a device, you can only load a power profiler file, open a link to an online purchase page, check documentation, or configure temporary disk data.
-
-More options become available after selecting a device. Some options are specific to the chosen sampling mode.
 
 ### Load
 
@@ -34,10 +32,16 @@ The **Load** button lets you open a `.ppk2` or a `.ppk` power profiler file.
 
 ![Temp disk data controls](./screenshots/ppk2_temp_disk_data.png "Temp disk data controls")
 
-These options only appear before selecting the device and for the **Data logger** sampling mode.
+These options only appear before selecting the device or when the device is selected and in the [**Data logger** sampling mode](#sampling-tabs).
 
 Here you can set the root directory where the sampling file will be saved by default and define how much hard drive space you want to keep free when you start sampling.
 The sampling will automatically stop when the hard drive has less than the defined amount.
+
+## Device panel sections after device selection
+
+More options become available after selecting a device. Some options are specific to the chosen sampling mode.
+
+![nRF Connect Power Profiler default view after selecting a device](./screenshots/ppk2_standard_view_connected.png "nRF Connect Power Profiler default view after selecting a device")
 
 ### Power supply mode
 
@@ -70,10 +74,10 @@ If you don't, you will be prompted about saving any unsaved sampling data before
 
 When sampling in the **Data logger** mode, you can select the amount of samples per second that will be recorded.
 The slider lets you select different values up to 100 000 samples per second (100 kHz).
-You can also specify how long the sampling is supposed to last.
+You can also specify how long the sampling is supposed to last (**300** seconds by default).
 
 After pressing **Start**, the sampling lasts to the moment the sampling time value is reached.
-If you disable **Auto stop sampling**, the sampling will last until you **Stop** it.
+If you specified the sampling to last **forever**, the sampling will last until you manually **Stop** it.
 
 Based on the chosen options, the Power Profiler application estimates the disk space usage.
 
@@ -89,7 +93,7 @@ The following table lists all available Scope parameters.
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
 | **Length**                        | Total time before and after the **Level** current value is reached. The application will try to record the trigger at the middle of the provided value.  |
-| **Level**                         | The current value at which the trigger takes place. The trigger always happens at the rising edge. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.png "Arrow for setting Level value")        |
+| **Level**                         | The current value at which the trigger takes place. The trigger always happens at the rising edge. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.PNG "Arrow for setting Level value")        |
 | **Single**                        | Select this option to stop sampling after one trigger event takes place.       |
 | **Continuous**                    | Select this option to continue sampling after one trigger event, and display trigger events until you click **Stop**. The first trigger must be fulfilled for the specified **Length** before another trigger can be displayed.       |
 
@@ -102,11 +106,11 @@ The following table lists the available display options.
 | **Timestamps**                    | Show or hide the timestamps at the bottom of the sampling chart.                                     |
 | **Relative** and **Absolute**     | Select how the time value of the **Timestamps** is to be displayed: relative to the start of the sampling or using machine time (UTC, adjusted per time zone of the machine settings).<br/><br/>If you [**Load**](#device-panel-sections) an old `.ppk` file, the timestamp value will not be shown because of the lack of metadata.         |
 | **Digital channels**              | Show or hide the [digital channels](#digital-channels) under the sampling chart.                     |
-| **Show Minimap**                  | Toggle to show or hide the navigable minimap under the **Data logger**'s chart. You can use the minimap to inspect the logged sampling results. |
+| **Show Minimap**                  | Toggle to show or hide the navigable minimap under the **Data logger**'s chart. You can use the minimap to inspect the logged sampling results and navigate quickly in the time range of the recording. |
 
-### Other options
+### Save options
 
-The following options are only available when you log sampling data.
+The following options let you save the results of the sampling. They are only available for selection after you start logging sampling data.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
@@ -141,7 +145,7 @@ Use the sliders to set the following:
 
 Use this control to set the voltage limit for the measurement.
 
-## Sampling tabs
+## Sampling mode tabs
 
 nRF Connect Power Profiler comes with two sampling modes: **Data logger** and **Scope**.
 
@@ -157,7 +161,7 @@ nRF Connect Power Profiler comes with two sampling modes: **Data logger** and **
 
 Both modes have their own [sampling parameters](#sampling-parameters), but share most of the sampling chart UI, explained in the following sections.
 
-### Sampling chart
+## Sampling chart
 
 This is the area where you can track and inspect the measurements being recorded.
 
@@ -171,21 +175,21 @@ The following actions are common to both sampling modes:
 
 ![Measurement chart](./screenshots/ppk2_chart.PNG "Measurement chart")
 
-#### Chart settings
+### Chart settings
 
 You can access the chart settings by clicking the gear icon in the top left corner, next to the **Lock Y-axis** toggle.
 Here you can set the values for locking the Y-axis and enable the logarithmic Y-axis.
 
 ![Chart settings](./screenshots/ppk2_chart_settings.PNG "Chart settings")
 
-#### Minimap
+### Minimap
 
 This is the summary of the whole measurement for scrolling and search, both in Y-axis and [logarithmic Y-axis](#chart-settings).
 It is only available in the **Data logger** sampling mode.
 
 ![Minimap scrolling](./screenshots/minimap_live_view_gif.gif "Minimap scrolling")
 
-#### Window and selection
+### Window and selection
 
 The bottom sections of the sampling chart display the average and maximum measurement values for the selected time interval:
 
@@ -199,7 +203,7 @@ The bottom sections of the sampling chart display the average and maximum measur
 
     You can make a selection in the measurement chart by pressing **Shift** and dragging the left mouse button. The selected part is highlighted in grey and included between two grey sliders.
 
-    ![Example of selection](./screenshots/ppk2_measurement_chart.PNG "Example of selection")
+    ![Example of selection](./screenshots/ppk2_selection.PNG "Example of selection")
 
 ### Digital channels
 
