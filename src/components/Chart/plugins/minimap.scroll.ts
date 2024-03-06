@@ -205,6 +205,11 @@ const plugin: MinimapScroll = {
             chart.options.scales.x.max = DataManager().getTimestamp();
         }
         chart.update();
+
+        leftClickPressed = false;
+        clickOnSlider = false;
+        lastSliderTimeStamp = 0;
+        lastClickDeltaFromCenter = 0;
     },
 };
 
