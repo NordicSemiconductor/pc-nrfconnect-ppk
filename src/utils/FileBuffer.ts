@@ -420,7 +420,7 @@ export class FileBuffer {
             numberOfBytesToRead
         );
 
-        Promise.all(this.#bufferingRequests).then(() =>
+        Promise.allSettled(this.#bufferingRequests).then(() =>
             this.#updateReadPages(
                 byteOffset,
                 byteOffset + numberOfBytesToRead,
@@ -488,7 +488,7 @@ export class FileBuffer {
             this.#readPages.push(newPage);
         }
 
-        Promise.all(this.#bufferingRequests).then(() =>
+        Promise.allSettled(this.#bufferingRequests).then(() =>
             this.#updateReadPages(
                 byteOffset,
                 byteOffset + numberOfBytesToRead,
