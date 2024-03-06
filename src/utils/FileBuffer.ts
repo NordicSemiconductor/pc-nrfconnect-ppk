@@ -17,12 +17,6 @@ import {
     WriteBuffer,
 } from './WriteBuffer';
 
-const defaultPage = () => ({
-    page: new Uint8Array(),
-    startAddress: 0,
-    bytesWritten: 0,
-});
-
 export class FileBuffer {
     #readPages: Page[] = [];
 
@@ -225,18 +219,14 @@ export class FileBuffer {
             this.#executeFileOperation();
         });
 
-    #bufferPage = (
-        page: Page,
-        startAddress: number,
-        beforeRun?: () => void
-    ) => {
+    #bufferPage = (page: Page, startAddress: number) => {
         const cancelOperation = new AbortController();
 
         const bufferingRequest = this.#readRange(
             page.page,
             page.page.length,
             startAddress,
-            beforeRun,
+            undefined,
             cancelOperation
         ).then(bytesRead => {
             page.bytesWritten = bytesRead;
@@ -399,11 +389,14 @@ export class FileBuffer {
                 ) === -1;
 
             if (missing) {
-                const newReadPage = defaultPage();
-                newReadPage.page =
-                    this.#freePageBuffers.pop() ??
-                    Buffer.alloc(this.#bufferPageSize);
-                this.#bufferPage(newReadPage, i, () => {})
+                const newReadPage = {
+                    page:
+                        this.#freePageBuffers.pop() ??
+                        Buffer.alloc(this.#bufferPageSize),
+                    startAddress: 0,
+                    bytesWritten: 0,
+                };
+                this.#bufferPage(newReadPage, i)
                     .then(() => {
                         this.#readPages.push(newReadPage);
                     })
