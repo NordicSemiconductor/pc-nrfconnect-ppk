@@ -593,6 +593,7 @@ const Chart = () => {
                 }
                 onClick={() => {
                     if (cursorBegin != null && cursorEnd != null) {
+                        dispatch(setLiveMode(false));
                         chartWindow(cursorBegin, cursorEnd);
                     }
                 }}
@@ -606,6 +607,7 @@ const Chart = () => {
             chartWindow,
             cursorBegin,
             cursorEnd,
+            dispatch,
             resetCursor,
             selectionStatsProcessing,
         ]
