@@ -80,7 +80,7 @@ const ChartTop = ({
     ].slice(maxFreqLog10 - sampleFreqLog10, maxFreqLog10 - sampleFreqLog10 + 6);
 
     return (
-        <div className="tw-flex tw-w-full tw-flex-row tw-flex-wrap tw-justify-between tw-gap-y-2 tw-py-2 tw-pl-[4.3rem] tw-pr-[1.8rem]">
+        <div className="tw-relative tw-flex tw-w-full tw-flex-row tw-flex-wrap tw-justify-between tw-gap-y-2 tw-py-2 tw-pl-[4.3rem] tw-pr-[1.8rem]">
             <button
                 className="tw-h-5.5 tw-absolute tw-left-8 tw-flex tw-w-fit tw-border-none tw-bg-white tw-text-gray-700 hover:tw-bg-gray-50"
                 type="button"
