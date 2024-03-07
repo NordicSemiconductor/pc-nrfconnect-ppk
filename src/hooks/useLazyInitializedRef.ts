@@ -13,6 +13,10 @@ import {
 
 const uninitialisedToken = Symbol('uninitialisedToken');
 
+export type DataAccumulatorInstance =
+    | DataAccumulator
+    | typeof uninitialisedToken;
+
 export const useLazyInitializedRef = (
     initialiser: DataAccumulatorInitialiser
 ) => {
