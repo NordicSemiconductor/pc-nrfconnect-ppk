@@ -5,7 +5,7 @@
  */
 
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { CoreScaleOptions, Plugin, Scale } from 'chart.js';
+import { Chart, CoreScaleOptions, Plugin, Scale } from 'chart.js';
 
 import { DataManager, getSamplesPerSecond } from '../../../globals';
 import {
@@ -362,6 +362,11 @@ const processPointerMoveEvents = () => {
     zoomPanCallback(xNewStart, xNewEnd, yNewStart, yNewEnd);
 };
 
+const isInChartArea = (chart: Chart, x: number, y: number) => {
+    const ca = chart.chartArea;
+    return x >= ca.left && x <= ca.right && y >= ca.top && y <= ca.bottom;
+};
+
 const plugin: Plugin<'line'> = {
     id: 'zoomPan',
 
@@ -372,6 +377,9 @@ const plugin: Plugin<'line'> = {
         const { canvas } = chart.ctx;
 
         zoomPan.wheelHandler = event => {
+            if (!isInChartArea(chart, event.offsetX, event.offsetY)) {
+                return;
+            }
             wheelEventToProcess = {
                 event,
                 scales: chart.scales,
@@ -383,6 +391,8 @@ const plugin: Plugin<'line'> = {
                 processingWheelEvents = true;
                 requestAnimationFrame(processWheelEvents);
             }
+
+            event.preventDefault();
         };
         canvas.addEventListener('wheel', zoomPan.wheelHandler);
 
