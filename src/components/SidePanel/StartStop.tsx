@@ -31,17 +31,12 @@ import {
     dataLoggerState,
     getSampleFrequency,
 } from '../../slices/dataLoggerSlice';
-import {
-    getAutoExportTrigger,
-    resetTriggerOrigin,
-    setTriggerSavePath,
-} from '../../slices/triggerSlice';
+import { resetTriggerOrigin } from '../../slices/triggerSlice';
 import { convertTimeToSeconds, formatDuration } from '../../utils/duration';
 import {
     calcFileSize,
     getFreeSpace,
     remainingTime as calcRemainingTime,
-    selectDirectoryDialog,
 } from '../../utils/fileUtils';
 import { isDataLoggerPane, isScopePane } from '../../utils/panes';
 import {
@@ -61,7 +56,6 @@ const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
 export default () => {
     const dispatch = useDispatch();
     const scopePane = useSelector(isScopePane);
-    const autoExport = useSelector(getAutoExportTrigger);
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const recordingMode = useSelector(getRecordingMode);
     const { samplingRunning } = useSelector(appState);
@@ -82,11 +76,6 @@ export default () => {
     const [showDialog, setShowDialog] = useState(false);
 
     const startAndClear = async () => {
-        if (scopePane && autoExport) {
-            const filePath = await selectDirectoryDialog();
-            dispatch(setTriggerSavePath(filePath));
-        }
-
         await DataManager().reset();
         dispatch(resetChartTime());
         dispatch(resetTriggerOrigin());

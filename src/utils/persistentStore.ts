@@ -136,11 +136,6 @@ export const getRecordingLength = (defaultValue: number) =>
 export const setRecordingLength = (value: number) => {
     store.set(`recording-length-ms`, value);
 };
-export const getAutoExport = (defaultValue: boolean) =>
-    store.get(`auto-export-trigger`, defaultValue);
-export const setAutoExport = (value: boolean) => {
-    store.set(`auto-export-trigger`, value);
-};
 export const getTriggerType = (defaultValue: TriggerType) =>
     store.get(`trigger-mode-type`, defaultValue);
 export const setTriggerType = (value: TriggerType) => {

@@ -8,21 +8,16 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     DropdownItem,
-    logger,
     NumberInput,
     StateSelector,
-    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { appState } from '../../slices/appSlice';
 import { getRecordingMode } from '../../slices/chartSlice';
 import {
-    getAutoExportTrigger,
-    getSavingEventQueueLength,
     getTriggerRecordingLength,
     getTriggerType,
     getTriggerValue,
-    setAutoExportTrigger,
     setTriggerLevel,
     setTriggerRecordingLength,
     setTriggerType,
@@ -55,8 +50,6 @@ export default () => {
     const recordingLength = useSelector(getTriggerRecordingLength);
     const triggerValue = useSelector(getTriggerValue);
     const triggerType = useSelector(getTriggerType);
-    const triggerSaveQueueLength = useSelector(getSavingEventQueueLength);
-    const autoExportTrigger = useSelector(getAutoExportTrigger);
     const { samplingRunning } = useSelector(appState);
     const dataLoggerActive =
         useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
@@ -67,19 +60,6 @@ export default () => {
         value,
         label: value,
     }));
-
-    useEffect(() => {
-        if (triggerSaveQueueLength >= 10 && autoExportTrigger) {
-            dispatch(setAutoExportTrigger(false));
-            telemetry.sendEvent('Auto Export', {
-                state: false,
-                reason: 'excessive number of triggers',
-            });
-            logger.warn(
-                'Unable to keep up with saving triggers. Auto export was turned off due to excessive number of triggers'
-            );
-        }
-    }, [autoExportTrigger, dispatch, triggerSaveQueueLength]);
 
     const [internalTriggerValue, setInternalTriggerValue] =
         useState(triggerValue);

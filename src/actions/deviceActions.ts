@@ -11,11 +11,9 @@ import {
     AppThunk,
     Device,
     logger,
-    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import { unit } from 'mathjs';
-import path from 'path';
 
 import { resetCache } from '../components/Chart/data/dataAccumulator';
 import SerialDevice from '../device/serialDevice';
@@ -66,11 +64,7 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
-    deregisterSaveEvent,
-    getAutoExportTrigger,
-    registerSaveEvent,
     resetTriggerOrigin,
-    setAutoExportTrigger,
     setProgress,
     setTriggerActive,
     setTriggerOrigin,
@@ -81,7 +75,6 @@ import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
 import { isDataLoggerPane } from '../utils/panes';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
-import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
@@ -535,72 +528,13 @@ export const processTrigger =
             const recordingDuration = indexToTimestamp(
                 numberOfBytes / frameSize
             );
-            const savePath = getState().app.trigger.savePath;
-            const shouldSave = getState().app.trigger.autoExportTrigger;
 
             const createSessionData = DataManager().createSessionData;
-            let session:
-                | Awaited<ReturnType<typeof createSessionData>>
-                | undefined;
-            let savePromise: Promise<void> | undefined;
-
-            if (shouldSave && savePath) {
-                // createSession
-                session = await createSessionData(
-                    buffer,
-                    getSessionRootFolder(getState()),
-                    info.absoluteTime
-                );
-
-                const dataToBeSaved: PPK2Metadata = {
-                    metadata: {
-                        samplesPerSecond: DataManager().getSamplesPerSecond(),
-                        startSystemTime: info.absoluteTime,
-                    },
-                };
-
-                dispatch(registerSaveEvent());
-                savePromise = saveData(
-                    path.join(
-                        savePath,
-                        `${info.absoluteTime + info.timeRange.start} - ${
-                            info.absoluteTime + info.timeRange.end
-                        }.ppk2`
-                    ),
-                    dataToBeSaved,
-                    session.fileBuffer,
-                    session.foldingBuffer
-                )
-                    .then(async () => {
-                        if (
-                            (await isDiskFull(
-                                getDiskFullTrigger(getState()),
-                                getSessionRootFolder(getState())
-                            )) &&
-                            getAutoExportTrigger(getState())
-                        ) {
-                            telemetry.sendEvent('Auto Export', {
-                                state: false,
-                                reason: 'Disk Full',
-                            });
-                            logger.warn(
-                                'Auto export was turned off due disk being full'
-                            );
-                            dispatch(setAutoExportTrigger(false));
-                        }
-                    })
-                    .finally(() => {
-                        dispatch(deregisterSaveEvent());
-                    });
-            }
-
-            // createSession
-            if (!session)
-                session = await createSessionData(
-                    buffer,
-                    getSessionRootFolder(getState()),
-                    info.absoluteTime
-                );
+            const session = await createSessionData(
+                buffer,
+                getSessionRootFolder(getState()),
+                info.absoluteTime
+            );
 
             dispatch(setTriggerOrigin(indexToTimestamp(info.triggerOrigin)));
 
@@ -621,12 +555,6 @@ export const processTrigger =
                 releaseLastSession?.();
                 releaseLastSession = undefined;
                 releaseLastSession = async () => {
-                    try {
-                        await savePromise;
-                    } catch {
-                        // do nothing
-                    }
-
                     try {
                         await session?.fileBuffer.close();
                         session?.fileBuffer.release();
