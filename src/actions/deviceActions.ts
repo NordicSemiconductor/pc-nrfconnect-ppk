@@ -203,6 +203,7 @@ export const open =
         }
 
         let prevValue = 0;
+        let prevCappedValue: number | undefined;
         let prevBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
@@ -249,7 +250,11 @@ export const open =
 
             if (getRecordingMode(getState()) === 'Scope') {
                 const validTriggerValue =
+                    prevCappedValue != null &&
+                    prevCappedValue < getState().app.trigger.level &&
                     cappedValue >= getState().app.trigger.level;
+                prevCappedValue = cappedValue;
+
                 if (!getState().app.trigger.active && validTriggerValue) {
                     if (latestTrigger !== undefined) {
                         return;
