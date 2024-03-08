@@ -112,7 +112,7 @@ export default (
         const indexBegin = timestampToIndex(timestampBegin);
         const indexEnd = timestampToIndex(timestampEnd);
 
-        const buffer = Buffer.alloc((indexEnd - indexBegin) * frameSize);
+        const buffer = Buffer.alloc((indexEnd - indexBegin + 1) * frameSize);
 
         return (
             indexer(indexBegin, indexEnd, 10000)
