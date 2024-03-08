@@ -188,6 +188,11 @@ export default ({
 
     const showTriggerItems = scopePane && !fileLoaded;
 
+    let min = yMin ?? undefined;
+    if (min == null && yAxisLog) {
+        min = 1;
+    }
+
     const chartOptions: AmpereChartOptions = {
         scales: {
             xScale: {
@@ -219,7 +224,7 @@ export default ({
             },
             yScale: {
                 type: yAxisLog ? 'logarithmic' : 'linear',
-                min: yMin != null ? yMin : undefined,
+                min,
                 max: yMax != null ? yMax : undefined,
                 ticks: {
                     maxTicksLimit: 7,
