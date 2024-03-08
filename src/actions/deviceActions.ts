@@ -250,9 +250,6 @@ export const open =
                 nbSamples = 0;
             }
 
-            if (!isSavePending(getState())) {
-                dispatch(setSavePending(true));
-            }
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
@@ -260,6 +257,9 @@ export const open =
                 const validTriggerValue =
                     cappedValue >= getState().app.trigger.level;
                 if (!getState().app.trigger.active && validTriggerValue) {
+                    if (!isSavePending(getState())) {
+                        dispatch(setSavePending(true));
+                    }
                     dispatch(setTriggerActive(true));
                     dispatch(
                         processTrigger(cappedValue, (progressMessage, prog) => {
@@ -289,6 +289,8 @@ export const open =
                 ) {
                     dispatch(setTriggerActive(false));
                 }
+            } else if (!isSavePending(getState())) {
+                dispatch(setSavePending(true));
             }
 
             const durationInMicroSeconds =
