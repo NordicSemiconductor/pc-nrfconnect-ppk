@@ -529,7 +529,7 @@ export const processTrigger =
             info.writeBuffer.readFromCachedData(
                 buffer,
                 info.bytesRange.start,
-                info.bytesRange.end - info.bytesRange.start
+                info.bytesRange.end - info.bytesRange.start + 1
             );
 
             const recordingDuration = indexToTimestamp(
