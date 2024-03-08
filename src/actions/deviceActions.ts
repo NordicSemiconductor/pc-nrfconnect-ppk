@@ -11,11 +11,9 @@ import {
     AppThunk,
     Device,
     logger,
-    telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
 import { unit } from 'mathjs';
-import path from 'path';
 
 import { resetCache } from '../components/Chart/data/dataAccumulator';
 import SerialDevice from '../device/serialDevice';
@@ -66,11 +64,8 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
-    deregisterSaveEvent,
-    getAutoExportTrigger,
-    registerSaveEvent,
+    getTriggerRecordingLength,
     resetTriggerOrigin,
-    setAutoExportTrigger,
     setProgress,
     setTriggerActive,
     setTriggerOrigin,
@@ -81,7 +76,6 @@ import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
 import { isDataLoggerPane } from '../utils/panes';
 import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
-import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
@@ -209,6 +203,7 @@ export const open =
         }
 
         let prevValue = 0;
+        let prevCappedValue: number | undefined;
         let prevBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
@@ -255,22 +250,36 @@ export const open =
 
             if (getRecordingMode(getState()) === 'Scope') {
                 const validTriggerValue =
+                    prevCappedValue != null &&
+                    prevCappedValue < getState().app.trigger.level &&
                     cappedValue >= getState().app.trigger.level;
+                prevCappedValue = cappedValue;
+
                 if (!getState().app.trigger.active && validTriggerValue) {
+                    if (latestTrigger !== undefined) {
+                        return;
+                    }
+
                     if (!isSavePending(getState())) {
                         dispatch(setSavePending(true));
                     }
                     dispatch(setTriggerActive(true));
                     dispatch(
-                        processTrigger(cappedValue, (progressMessage, prog) => {
-                            dispatch(
-                                setProgress({
-                                    progressMessage,
-                                    progress:
-                                        prog && prog >= 0 ? prog : undefined,
-                                })
-                            );
-                        })
+                        processTrigger(
+                            cappedValue,
+                            getTriggerRecordingLength(getState()) * 1000, // ms to uS
+                            (progressMessage, prog) => {
+                                dispatch(
+                                    setProgress({
+                                        progressMessage,
+                                        progress:
+                                            prog && prog >= 0
+                                                ? prog
+                                                : undefined,
+                                    })
+                                );
+                            }
+                        )
                     ).then(() => {
                         if (!DataManager().hasPendingTriggers()) {
                             dispatch(clearProgress());
@@ -480,6 +489,7 @@ let releaseLastSession: (() => void) | undefined;
 export const processTrigger =
     (
         triggerValue: number,
+        triggerLength: number,
         onProgress?: (message: string, progress?: number) => void
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
@@ -488,17 +498,10 @@ export const processTrigger =
             return;
         }
 
-        if (latestTrigger !== undefined) {
-            return;
-        }
-
-        const trigger = DataManager().addTimeReachedTrigger(
-            getState().app.trigger.recordingLength * 1000 // ms to uS
-        );
+        const trigger = DataManager().addTimeReachedTrigger(triggerLength);
 
         const triggerTime = Date.now();
-        const remainingRecordingLength =
-            getState().app.trigger.recordingLength / 2;
+        const remainingRecordingLength = triggerLength / 2;
 
         const updateDataCollection = () => {
             const delta = Date.now() - triggerTime;
@@ -535,72 +538,13 @@ export const processTrigger =
             const recordingDuration = indexToTimestamp(
                 numberOfBytes / frameSize
             );
-            const savePath = getState().app.trigger.savePath;
-            const shouldSave = getState().app.trigger.autoExportTrigger;
 
             const createSessionData = DataManager().createSessionData;
-            let session:
-                | Awaited<ReturnType<typeof createSessionData>>
-                | undefined;
-            let savePromise: Promise<void> | undefined;
-
-            if (shouldSave && savePath) {
-                // createSession
-                session = await createSessionData(
-                    buffer,
-                    getSessionRootFolder(getState()),
-                    info.absoluteTime
-                );
-
-                const dataToBeSaved: PPK2Metadata = {
-                    metadata: {
-                        samplesPerSecond: DataManager().getSamplesPerSecond(),
-                        startSystemTime: info.absoluteTime,
-                    },
-                };
-
-                dispatch(registerSaveEvent());
-                savePromise = saveData(
-                    path.join(
-                        savePath,
-                        `${info.absoluteTime + info.timeRange.start} - ${
-                            info.absoluteTime + info.timeRange.end
-                        }.ppk2`
-                    ),
-                    dataToBeSaved,
-                    session.fileBuffer,
-                    session.foldingBuffer
-                )
-                    .then(async () => {
-                        if (
-                            (await isDiskFull(
-                                getDiskFullTrigger(getState()),
-                                getSessionRootFolder(getState())
-                            )) &&
-                            getAutoExportTrigger(getState())
-                        ) {
-                            telemetry.sendEvent('Auto Export', {
-                                state: false,
-                                reason: 'Disk Full',
-                            });
-                            logger.warn(
-                                'Auto export was turned off due disk being full'
-                            );
-                            dispatch(setAutoExportTrigger(false));
-                        }
-                    })
-                    .finally(() => {
-                        dispatch(deregisterSaveEvent());
-                    });
-            }
-
-            // createSession
-            if (!session)
-                session = await createSessionData(
-                    buffer,
-                    getSessionRootFolder(getState()),
-                    info.absoluteTime
-                );
+            const session = await createSessionData(
+                buffer,
+                getSessionRootFolder(getState()),
+                info.absoluteTime
+            );
 
             dispatch(setTriggerOrigin(indexToTimestamp(info.triggerOrigin)));
 
@@ -621,12 +565,6 @@ export const processTrigger =
                 releaseLastSession?.();
                 releaseLastSession = undefined;
                 releaseLastSession = async () => {
-                    try {
-                        await savePromise;
-                    } catch {
-                        // do nothing
-                    }
-
                     try {
                         await session?.fileBuffer.close();
                         session?.fileBuffer.release();
