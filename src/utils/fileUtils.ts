@@ -30,11 +30,12 @@ export const calcFileSize = (
     return unit(bytes, 'byte').to('MB').format(formatOptions);
 };
 
-export const selectDirectoryDialog = () =>
+export const selectDirectoryDialog = (defaultPath?: string) =>
     new Promise<string>((resolve, reject) => {
         const dialogOptions = {
             title: 'Select a Directory',
             properties: ['openDirectory'],
+            defaultPath,
             // eslint-disable-next-line no-undef
         } as Electron.OpenDialogOptions;
         dialog

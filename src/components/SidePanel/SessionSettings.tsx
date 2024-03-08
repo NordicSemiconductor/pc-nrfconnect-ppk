@@ -49,10 +49,12 @@ export default () => {
                         className="tw-w-full"
                         variant="secondary"
                         onClick={() => {
-                            selectDirectoryDialog().then(filePath => {
-                                dispatch(setSessionRootFolder(filePath));
-                                setPreferredSessionLocation(filePath);
-                            });
+                            selectDirectoryDialog(sessionRootFolder).then(
+                                filePath => {
+                                    dispatch(setSessionRootFolder(filePath));
+                                    setPreferredSessionLocation(filePath);
+                                }
+                            );
                         }}
                     >
                         Change
