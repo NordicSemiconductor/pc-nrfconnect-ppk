@@ -64,6 +64,7 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
+    getTriggerRecordingLength,
     resetTriggerOrigin,
     setProgress,
     setTriggerActive,
@@ -250,20 +251,30 @@ export const open =
                 const validTriggerValue =
                     cappedValue >= getState().app.trigger.level;
                 if (!getState().app.trigger.active && validTriggerValue) {
+                    if (latestTrigger !== undefined) {
+                        return;
+                    }
+
                     if (!isSavePending(getState())) {
                         dispatch(setSavePending(true));
                     }
                     dispatch(setTriggerActive(true));
                     dispatch(
-                        processTrigger(cappedValue, (progressMessage, prog) => {
-                            dispatch(
-                                setProgress({
-                                    progressMessage,
-                                    progress:
-                                        prog && prog >= 0 ? prog : undefined,
-                                })
-                            );
-                        })
+                        processTrigger(
+                            cappedValue,
+                            getTriggerRecordingLength(getState()) * 1000, // ms to uS
+                            (progressMessage, prog) => {
+                                dispatch(
+                                    setProgress({
+                                        progressMessage,
+                                        progress:
+                                            prog && prog >= 0
+                                                ? prog
+                                                : undefined,
+                                    })
+                                );
+                            }
+                        )
                     ).then(() => {
                         if (!DataManager().hasPendingTriggers()) {
                             dispatch(clearProgress());
@@ -473,6 +484,7 @@ let releaseLastSession: (() => void) | undefined;
 export const processTrigger =
     (
         triggerValue: number,
+        triggerLength: number,
         onProgress?: (message: string, progress?: number) => void
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
@@ -481,17 +493,10 @@ export const processTrigger =
             return;
         }
 
-        if (latestTrigger !== undefined) {
-            return;
-        }
-
-        const trigger = DataManager().addTimeReachedTrigger(
-            getState().app.trigger.recordingLength * 1000 // ms to uS
-        );
+        const trigger = DataManager().addTimeReachedTrigger(triggerLength);
 
         const triggerTime = Date.now();
-        const remainingRecordingLength =
-            getState().app.trigger.recordingLength / 2;
+        const remainingRecordingLength = triggerLength / 2;
 
         const updateDataCollection = () => {
             const delta = Date.now() - triggerTime;
