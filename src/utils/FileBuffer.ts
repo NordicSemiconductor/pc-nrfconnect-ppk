@@ -27,7 +27,7 @@ export class FileBuffer {
     #bufferPageSize: number;
     fileOperationTasks: (() => Promise<void>)[] = [];
     #fileBusy = false;
-    #beforeUnload: () => Promise<void>;
+    #beforeUnload: (event: BeforeUnloadEvent) => Promise<void>;
     #bufferingListeners: ((event: Promise<void>) => void)[] = [];
     #freePageBuffers: Uint8Array[] = [];
     #bufferingRequests: Promise<void>[] = [];
@@ -79,7 +79,8 @@ export class FileBuffer {
             );
         }
 
-        this.#beforeUnload = async () => {
+        this.#beforeUnload = async (event: BeforeUnloadEvent) => {
+            if (event.returnValue) return;
             await this.close();
             this.release();
         };
