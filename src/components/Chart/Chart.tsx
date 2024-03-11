@@ -55,6 +55,7 @@ import {
 } from '../../slices/chartSlice';
 import { getProgress } from '../../slices/triggerSlice';
 import { isDataLoggerPane } from '../../utils/panes';
+import { type booleanTupleOf8 } from '../../utils/persistentStore';
 import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
@@ -102,106 +103,101 @@ const executeChartUpdateOperation = async () => {
     executeChartUpdateOperation();
 };
 
-const updateChart =
-    (
-        dataProcessor: DataAccumulatorInstance,
-        numberOfPixelsInWindow: number,
-        setData: (data: {
-            ampereLineData: AmpereState[];
-            bitsLineData: DigitalChannelStates[];
-        }) => void,
-        setProcessing: (processing: boolean) => void,
-        setWindowStats: (
-            state: {
-                average: number;
-                max: number;
-                delta: number;
-            } | null
-        ) => void
-    ): AppThunk<RootState, Promise<void>> =>
-    async (_, getState) => {
-        if (
-            !isInitialised(dataProcessor) ||
-            DataManager().getTotalSavedRecords() === 0
-        ) {
-            return;
+const updateChart = async (
+    dataProcessor: DataAccumulatorInstance,
+    numberOfPixelsInWindow: number,
+    digitalChannels: booleanTupleOf8,
+    digitalChannelsVisible: boolean,
+    windowBegin: number,
+    windowDuration: number,
+    windowEnd: number,
+    setData: (data: {
+        ampereLineData: AmpereState[];
+        bitsLineData: DigitalChannelStates[];
+    }) => void,
+    setProcessing: (processing: boolean) => void,
+    setWindowStats: (
+        state: {
+            average: number;
+            max: number;
+            delta: number;
+        } | null
+    ) => void
+) => {
+    if (
+        !isInitialised(dataProcessor) ||
+        DataManager().getTotalSavedRecords() === 0
+    ) {
+        return;
+    }
+
+    const sampleFreq = getSamplesPerSecond();
+
+    const digitalChannelsWindowLimit = 3e12 / sampleFreq;
+    const zoomedOutTooFarForDigitalChannels =
+        windowDuration > digitalChannelsWindowLimit;
+
+    const digitalChannelsToDisplay = digitalChannels
+        .map((isVisible, channelNumber) => (isVisible ? channelNumber : null))
+        .filter(channelNumber => channelNumber != null) as number[];
+
+    const digitalChannelsToCompute =
+        !zoomedOutTooFarForDigitalChannels && digitalChannelsVisible
+            ? digitalChannelsToDisplay
+            : [];
+
+    const processedData = await dataProcessor.process(
+        windowBegin,
+        windowEnd,
+        zoomedOutTooFarForDigitalChannels
+            ? []
+            : (digitalChannelsToCompute as number[]),
+        Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
+        windowDuration,
+        setProcessing
+    );
+
+    const avgTemp = processedData.averageLine.reduce(
+        (previousValue, currentValue) => ({
+            sum: previousValue.sum + currentValue.y,
+            count: previousValue.count + currentValue.count,
+        }),
+        {
+            sum: 0,
+            count: 0,
         }
+    );
+    const average = avgTemp.sum / avgTemp.count / 1000;
 
-        const { windowBegin, windowDuration, windowEnd } = getChartXAxisRange(
-            getState()
-        );
-        const { digitalChannels, digitalChannelsVisible } =
-            getChartDigitalChannelInfo(getState());
+    const filteredAmpereLine = processedData.ampereLineData.filter(
+        v => v.y != null && !Number.isNaN(v.y)
+    );
+    let max = filteredAmpereLine.length > 0 ? -Number.MAX_VALUE : 0;
 
-        const sampleFreq = getSamplesPerSecond();
+    filteredAmpereLine.forEach(v => {
+        if (v.y != null && v.y > max) {
+            max = v.y;
+        }
+    });
 
-        const digitalChannelsWindowLimit = 3e12 / sampleFreq;
-        const zoomedOutTooFarForDigitalChannels =
-            windowDuration > digitalChannelsWindowLimit;
+    max /= 1000;
 
-        const digitalChannelsToDisplay = digitalChannels
-            .map((isVisible, channelNumber) =>
-                isVisible ? channelNumber : null
-            )
-            .filter(channelNumber => channelNumber != null) as number[];
+    setData({
+        ampereLineData: processedData.ampereLineData,
+        bitsLineData: processedData.bitsLineData,
+    });
 
-        const digitalChannelsToCompute =
-            !zoomedOutTooFarForDigitalChannels && digitalChannelsVisible
-                ? digitalChannelsToDisplay
-                : [];
-
-        const processedData = await dataProcessor.process(
-            windowBegin,
-            windowEnd,
-            zoomedOutTooFarForDigitalChannels
-                ? []
-                : (digitalChannelsToCompute as number[]),
-            Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
-            windowDuration,
-            setProcessing
-        );
-
-        const avgTemp = processedData.averageLine.reduce(
-            (previousValue, currentValue) => ({
-                sum: previousValue.sum + currentValue.y,
-                count: previousValue.count + currentValue.count,
-            }),
-            {
-                sum: 0,
-                count: 0,
-            }
-        );
-        const average = avgTemp.sum / avgTemp.count / 1000;
-
-        const filteredAmpereLine = processedData.ampereLineData.filter(
-            v => v.y != null && !Number.isNaN(v.y)
-        );
-        let max = filteredAmpereLine.length > 0 ? -Number.MAX_VALUE : 0;
-
-        filteredAmpereLine.forEach(v => {
-            if (v.y != null && v.y > max) {
-                max = v.y;
-            }
-        });
-
-        max /= 1000;
-
-        setData({
-            ampereLineData: processedData.ampereLineData,
-            bitsLineData: processedData.bitsLineData,
-        });
-
-        setWindowStats({
-            max,
-            average,
-            delta:
-                DataManager().getTotalSavedRecords() > 0
-                    ? Math.min(windowEnd, DataManager().getTimestamp()) -
-                      windowBegin +
-                      indexToTimestamp(1)
-                    : 0,
-        });
-    };
+    setWindowStats({
+        max,
+        average,
+        delta:
+            DataManager().getTotalSavedRecords() > 0
+                ? Math.min(windowEnd, DataManager().getTimestamp()) -
+                  windowBegin +
+                  indexToTimestamp(1)
+                : 0,
+    });
+};
 const Chart = () => {
     const dispatch = useDispatch<AppDispatch>();
     const recordingMode = useSelector(getRecordingMode);
@@ -491,14 +487,17 @@ const Chart = () => {
 
             nextUpdateRequests = () => {
                 fpsCounter.current += 1;
-                return dispatch(
-                    updateChart(
-                        dataProcessor,
-                        numberOfPixelsInWindow,
-                        setData,
-                        setProcessing,
-                        setWindowStats
-                    )
+                return updateChart(
+                    dataProcessor,
+                    numberOfPixelsInWindow,
+                    digitalChannels,
+                    digitalChannelsVisible,
+                    windowBegin,
+                    windowDuration,
+                    windowEnd,
+                    setData,
+                    setProcessing,
+                    setWindowStats
                 );
             };
             executeChartUpdateOperation();
@@ -520,6 +519,9 @@ const Chart = () => {
         dispatch,
         dataProcessor,
         numberOfPixelsInWindow,
+        digitalChannels,
+        digitalChannelsVisible,
+        windowDuration,
     ]);
 
     const lastPositions = useRef({
@@ -530,14 +532,17 @@ const Chart = () => {
     useEffect(() => {
         if (!liveMode && DataManager().getTotalSavedRecords() > 0) {
             nextUpdateRequests = () =>
-                dispatch(
-                    updateChart(
-                        dataProcessor,
-                        numberOfPixelsInWindow,
-                        setData,
-                        setProcessing,
-                        setWindowStats
-                    )
+                updateChart(
+                    dataProcessor,
+                    numberOfPixelsInWindow,
+                    digitalChannels,
+                    digitalChannelsVisible,
+                    windowBegin,
+                    windowDuration,
+                    windowEnd,
+                    setData,
+                    setProcessing,
+                    setWindowStats
                 );
             executeChartUpdateOperation();
 
@@ -552,6 +557,9 @@ const Chart = () => {
         dispatch,
         dataProcessor,
         numberOfPixelsInWindow,
+        digitalChannels,
+        digitalChannelsVisible,
+        windowDuration,
     ]);
 
     const chartCursorActive = useMemo(
