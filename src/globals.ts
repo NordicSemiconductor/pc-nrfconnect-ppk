@@ -60,7 +60,7 @@ class FileData {
         for (let index = 0; index < numberOfElements; index += 1) {
             const byteOffset = index * frameSize;
             result.set(
-                result.subarray(byteOffset, byteOffset + currentFrameSize),
+                this.data.subarray(byteOffset, byteOffset + currentFrameSize),
                 index * currentFrameSize
             );
         }
@@ -83,7 +83,10 @@ class FileData {
         const result = new Uint8Array(numberOfElements * 2);
         for (let index = 0; index < numberOfElements; index += 1) {
             const byteOffset = index * frameSize + currentFrameSize;
-            result.set(result.subarray(byteOffset, byteOffset + 2), index * 2);
+            result.set(
+                this.data.subarray(byteOffset, byteOffset + 2),
+                index * 2
+            );
         }
 
         return new Uint16Array(result.buffer);
