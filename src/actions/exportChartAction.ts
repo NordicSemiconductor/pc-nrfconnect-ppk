@@ -27,7 +27,7 @@ const indexer = (indexBegin: number, indexEnd: number, length: number) => {
     let movingIndex = indexBegin;
     const buffer = [];
     while (length < indexEnd - movingIndex) {
-        buffer.push([movingIndex, length]);
+        buffer.push([movingIndex, length - 1]);
         movingIndex += length;
     }
     if (movingIndex < indexEnd) {
