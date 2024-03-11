@@ -304,9 +304,8 @@ export const scrollToEnd = (): AppThunk<RootState> => (dispatch, getState) =>
     dispatch(
         chartWindowAction(
             Math.max(
-                DataManager().getTimestamp() -
-                    getState().app.chart.windowDuration,
-                getState().app.chart.windowDuration
+                DataManager().getTimestamp(),
+                getWindowDuration(getState())
             ),
             getWindowDuration(getState())
         )
