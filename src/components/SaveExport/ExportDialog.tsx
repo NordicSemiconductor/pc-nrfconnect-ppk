@@ -191,7 +191,13 @@ export default () => {
                     <DialogButton
                         variant="primary"
                         onClick={saveFile}
-                        disabled={exporting}
+                        disabled={
+                            exporting ||
+                            (!timestampToggled &&
+                                !currentToggled &&
+                                !bitsToggled &&
+                                !bitsSeparatedToggled)
+                        }
                     >
                         Save
                     </DialogButton>
