@@ -3,9 +3,7 @@
 ## Added
 
 -   Reintroduced triggers functionality
--   Triggers can be automatically saved to file. If to many triggers occur the
-    application my turn off auto export to safe guard it self
--   A configure in the advance menu to stop saving to disk when disk is running
+-   A configure in the advance menu to stop writing to disk when disk is running
     low on disk space
 
 ## Changed
@@ -19,7 +17,7 @@
 
 ## Fixed
 
--   Chart drifting when live mode and PC resources where strained.
+-   Some cases of chart drifting when live mode and PC resources where strained.
 -   UI Glitches
 -   Performance improvements
 
