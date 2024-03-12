@@ -22,8 +22,8 @@ const urls = {
 export default () => (
     <Group heading="Instructions">
         <p>
-            The Power Profiler Kit II (PPK2) is an affordable, flexible tool that
-            measures real-time power consumption of your designs.
+            The Power Profiler Kit II (PPK2) is an affordable, flexible tool
+            that measures real-time power consumption of your designs.
         </p>
         <p>
             Select a PPK2 device to sample real-time measurements or load an

@@ -11,12 +11,19 @@ user application.
 
 ![screenshot](resources/screenshot.png)
 
-The support for [Power Profiler Kit (PPK1)](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit) has been deprecated since the [nRF Connect Power Profiler v4.0.0-beta1](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md). The last application version to support PPK1 is [v3.5.5](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md) with [nRF Connect for Desktop v4.4.0](https://github.com/NordicSemiconductor/pc-nrfconnect-launcher/blob/main/Changelog.md).
+The support for
+[Power Profiler Kit (PPK1)](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit)
+has been deprecated since the
+[nRF Connect Power Profiler v4.0.0-beta1](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md).
+The last application version to support PPK1 is
+[v3.5.5](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md)
+with
+[nRF Connect for Desktop v4.4.0](https://github.com/NordicSemiconductor/pc-nrfconnect-launcher/blob/main/Changelog.md).
 
 ## Installation
 
-nRF Connect Power Profiler is installed from nRF Connect from Desktop. For detailed
-steps, see
+nRF Connect Power Profiler is installed from nRF Connect from Desktop. For
+detailed steps, see
 [Installing nRF Connect for Desktop apps](https://docs.nordicsemi.com/bundle/nrf-connect-desktop/page/installing_apps.html)
 in the nRF Connect from Desktop documentation.
 
@@ -26,7 +33,8 @@ Read the
 [nRF Connect Power Profiler](https://docs.nordicsemi.com/bundle/nrf-connect-ppk/page/index.html)
 official documentation for information about its UI and features.
 
-(The documentation is valid for PPK2. If you use the first version of the hardware, see the
+(The documentation is valid for PPK2. If you use the first version of the
+hardware, see the
 [online documentation for PPK1](https://docs.nordicsemi.com/bundle/ug_ppk/page/UG/ppk/PPK_user_guide_Intro.html)).
 
 ## Development
