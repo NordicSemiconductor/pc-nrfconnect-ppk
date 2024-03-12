@@ -8,8 +8,6 @@
 
 ### Changed
 
-## Changed
-
 -   Changed export format to `.ppk2`. `.ppk` has been deprecated and importing
     this format will autogenerate a `.ppk2` file next to the `.ppk` file.
 -   Removed limitations for recording duration by using the disk to store the
