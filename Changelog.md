@@ -2,9 +2,7 @@
 
 ### Added
 
--   Reintroduced triggers functionality. Triggers can be automatically saved to
-    the file. If too many triggers occur the application may turn off auto
-    export to safeguard itself.
+-   Reintroduced triggers functionality.
 -   The configuration in the advance menu to stop saving to disk when disk is
     running low on disk space.
 
