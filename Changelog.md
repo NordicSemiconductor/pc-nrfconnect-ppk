@@ -2,12 +2,12 @@
 
 ### Added
 
--   Reintroduced triggers functionality.
--   Triggers can be automatically saved to the file. If too many triggers occur the
-    application my turn off auto export to safe guard it self
--   A configure in the advance menu to stop saving to disk when disk is running
-    low on disk space
-- 
+-   Reintroduced triggers functionality. Triggers can be automatically saved to
+    the file. If too many triggers occur the application may turn off auto
+    export to safeguard itself.
+-   The configuration in the advance menu to stop saving to disk when disk is
+    running low on disk space.
+
 ### Changed
 
 ## Changed
@@ -17,8 +17,8 @@
 -   Removed limitations for recording duration by using the disk to store the
     collected data instead of using RAM.
 -   Performance improvements.
-    -   Default path for the session is in the temp folder. This can be changed
-        from the advanced menu.
+-   Default path for the session is in the temp folder. This can be changed from
+    the advanced menu.
 
 ### Fixed
 
