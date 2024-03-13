@@ -1,34 +1,43 @@
-## 4.0.0 - UNRELEASED
+## 4.0.0 - 2024-03-13
 
-## Changed
+### Added
+
+-   Reintroduced triggers functionality.
+-   Configuration in the advanced settings menu to stop saving to hard disk when
+    the HDD space is running low.
+-   The default path for the session can be changed from the advanced settings
+    menu.
+
+### Changed
 
 -   Changed export format to `.ppk2`. `.ppk` has been deprecated and importing
     this format will autogenerate a `.ppk2` file next to the `.ppk` file.
--   Exporting of data now works also when the data was loaded from file. This
-    allows partial export to `.csv`.
 -   Removed limitations for recording duration by using the disk to store the
     collected data instead of using RAM.
+-   Performance improvements.
+-   The advanced settings menu are always visible on the side panel.
 
-## Fixed
+### Fixed
 
--   Chart drifting when live mode and PC resources where strained.
+-   Some cases when chart was drifting in the live mode.
+-   UI glitches.
 
 ## 4.0.0-beta6 - 2024-01-08
 
-## Fixed
+### Fixed
 
 -   Minor improvements to the stability of the chart rendering
 
 ## 4.0.0-beta5 - 2024-01-05
 
-## Fixed
+### Fixed
 
 -   Window average was off by a factor of 1000 when zoomed out
 -   Duplicate Azure insights event
 
 ## 4.0.0-beta4 - 2024-01-04
 
-## Fixed
+### Fixed
 
 -   Improved stability with chart processing
 -   Window stats drop to zeros when zoomed in and at the end of chart
@@ -39,7 +48,7 @@
 
 ## 4.0.0-beta3 - 2023-12-14
 
-## Changed
+### Changed
 
 -   Click and Drag Navigation:
     -   Click and drag to scroll left or right (control xAxis) with yAxis locked
@@ -59,18 +68,18 @@
     -   Hold `alt (option ⌥ - MAC)` unlocks yAxis and using track pad gesture to
         scroll with both axis unlocked
 
-## Fixed
+### Fixed
 
 -   Right click will now take you to end of the file/live mode
 
 ## 4.0.0-beta2 - 2023-12-12
 
-## Added
+### Added
 
 -   Feedback tab
 -   Persist state of `show log` panel
 
-## Fixed
+### Fixed
 
 -   Error when recording data exceed buffer size by one sample resulting in
     error in console.
@@ -78,7 +87,7 @@
 
 ## 4.0.0-beta1 - 2023-12-07
 
-## Added
+### Added
 
 -   Navigable minimap, which will display a zoomed-out map of the entire sample.
     In order to navigate the sample, simply click on the location where you want
@@ -87,7 +96,7 @@
     selected area. Hotkey is ALT+Z.
 -   Option to toggle logarithmic scale on the Y Axis, by @danielkucera.
 
-## Changed
+### Changed
 
 -   The Y axis settings are now moved into a dialog. To open the settings
     dialog, press SETTINGS, in the top left corner of the graph. The dialog
@@ -97,7 +106,7 @@
 -   Backend for interacting with devices from **nrf-device-lib-js** to **nrfutil
     device**.
 
-## Removed
+### Removed
 
 -   Support for Power Profiler Kit (PPK1). From this release, Power Profiler app
     will only be usable for Power Profiler Kit II (PPK2). In order to use a
@@ -108,7 +117,7 @@
     useful Trigger feature will be re-introduced in the _Data Logger_ pane in an
     upcoming release.
 
-## Fixed
+### Fixed
 
 -   PPK2 would create noise in the measurement when the LED was pulsing (i.e.
     PWM), a new firmware (power_profiler_2 1_1_0) has been added and will make
