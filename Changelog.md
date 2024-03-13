@@ -19,7 +19,7 @@
 
 ### Fixed
 
--   Chart drifting in live mode.
+-   Some cases when chart was drifting in the live mode.
 -   UI glitches.
 
 ## 4.0.0-beta6 - 2024-01-08
