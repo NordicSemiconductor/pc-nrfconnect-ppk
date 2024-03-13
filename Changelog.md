@@ -4,7 +4,7 @@
 
 -   Reintroduced triggers functionality.
 -   The configuration in the advance menu to stop saving to disk when disk is
-    running low on disk space.
+    is running low.
 
 ### Changed
 
