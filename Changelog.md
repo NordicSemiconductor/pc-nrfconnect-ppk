@@ -3,8 +3,8 @@
 ### Added
 
 -   Reintroduced triggers functionality.
--   Configuration in the advanced settings menu to stop saving to hard disk
-    when the HDD space is running low.
+-   Configuration in the advanced settings menu to stop saving to hard disk when
+    the HDD space is running low.
 -   The default path for the session can be changed from the advanced settings
     menu.
 
