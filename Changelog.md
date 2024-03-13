@@ -3,7 +3,7 @@
 ### Added
 
 -   Reintroduced triggers functionality.
--   The configuration in the advance menu to stop saving to disk when disk is
+-   The configuration in the advanced settings menu to stop saving to hard disk when the HDD space is
     is running low.
 
 ### Changed
