@@ -3,8 +3,10 @@
 ### Added
 
 -   Reintroduced triggers functionality.
--   The configuration in the advanced settings menu to stop saving to hard disk when the HDD space is
-    is running low.
+-   The configuration in the advanced settings menu to stop saving to hard disk
+    when the HDD space is running low.
+-   The default path for the session can be changed from the advanced settings
+    menu.
 
 ### Changed
 
@@ -13,8 +15,6 @@
 -   Removed limitations for recording duration by using the disk to store the
     collected data instead of using RAM.
 -   Performance improvements.
--   Default path for the session is in the temp folder. This can be changed from
-    the advanced settings menu.
 
 ### Fixed
 
