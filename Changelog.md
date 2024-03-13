@@ -14,7 +14,7 @@
     collected data instead of using RAM.
 -   Performance improvements.
 -   Default path for the session is in the temp folder. This can be changed from
-    the advanced menu.
+    the advanced settings menu.
 
 ### Fixed
 
