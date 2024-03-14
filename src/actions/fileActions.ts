@@ -34,6 +34,8 @@ import {
     setSavePending,
 } from '../slices/appSlice';
 import {
+    chartWindowAction,
+    getWindowDuration,
     resetChartTime,
     scrollToEnd,
     setLatestDataTimestamp,
@@ -171,7 +173,16 @@ export const load =
                         ),
                     })
                 );
-                dispatch(scrollToEnd());
+                if (
+                    DataManager().getTimestamp() <=
+                    getWindowDuration(getState())
+                ) {
+                    dispatch(
+                        chartWindowAction(0, DataManager().getTimestamp())
+                    );
+                } else {
+                    dispatch(scrollToEnd());
+                }
                 dispatch(triggerForceRerenderMainChart());
                 dispatch(triggerForceRerenderMiniMap());
                 dispatch(miniMapAnimationAction());
