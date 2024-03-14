@@ -24,6 +24,7 @@ import {
 } from '../../slices/appSlice';
 import {
     getRecordingMode,
+    RecordingMode,
     resetChartTime,
     resetCursor,
 } from '../../slices/chartSlice';
@@ -81,8 +82,10 @@ export default () => {
         dispatch(resetTriggerOrigin());
         dispatch(resetCursor());
 
+        const mode: RecordingMode = scopePane ? 'Scope' : 'DataLogger';
+
         telemetry.sendEvent('StartSampling', {
-            mode: recordingMode,
+            mode,
             samplesPerSecond: DataManager().getSamplesPerSecond(),
         });
         dispatch(samplingStart());
@@ -129,6 +132,8 @@ export default () => {
                             telemetry.sendEvent('StopSampling', {
                                 mode: recordingMode,
                                 duration: DataManager().getTimestamp(),
+                                samplesPerSecond:
+                                    DataManager().getSamplesPerSecond(),
                             });
                             return;
                         }
