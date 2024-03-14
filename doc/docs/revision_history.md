@@ -2,6 +2,7 @@
 
 | Date       | Description                                                                                          |
 |------------|------------------------------------------------------------------------------------------------------|
+| 2024-03-06 | Updated the documentation for the nRF Connect Power Profiler [v4.0.0](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md).    |
 | 2024-02-07 | Separated the application documentation from the [PPK2 hardware documentation](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/PPK_user_guide_Intro.html).    |
 | 2022-08-16 | Updated the following topics based on nRF9160 DK v0.9.0 or later:</br></br>- Quick start</br></br>- [Measuring current in Source Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_source_meter.html)</br></br>- [Measuring current in Ampere Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_ampere_meter.html) |
 | 2021-11-01 | - Updated [Measuring current in Ampere Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_ampere_meter.html)</br></br>- Editorial changes     |
