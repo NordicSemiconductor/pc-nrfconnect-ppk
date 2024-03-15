@@ -45,17 +45,33 @@ process.on('message', msg => {
             baudRate: 115200,
         });
 
-        let data = Buffer.alloc(0);
-        port.on('data', buf => {
-            data = Buffer.concat([data, buf]);
-        });
-        setInterval(() => {
-            if (data.length === 0) return;
-            process.send(data.slice(), err => {
+        const data = Buffer.alloc(4 * 100_000 * 0.06);
+        let t = Date.now();
+        let index = 0;
+        let timeout;
+
+        const send = () => {
+            clearTimeout(timeout);
+            t = Date.now();
+            const dataToSend = data.subarray(0, index);
+            process.send(dataToSend, err => {
                 if (err) console.log(err);
             });
-            data = Buffer.alloc(0);
-        }, 30);
+            index = 0;
+        };
+
+        port.on('data', buf => {
+            clearTimeout(timeout);
+
+            buf.copy(data, index);
+            index += buf.length;
+
+            if (Date.now() - t >= 30) {
+                send();
+            }
+
+            timeout = setTimeout(send, 30);
+        });
         port.open(err => {
             if (err) {
                 process.send({ error: err.toString() });
