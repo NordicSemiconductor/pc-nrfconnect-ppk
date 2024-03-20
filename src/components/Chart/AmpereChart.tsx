@@ -244,6 +244,7 @@ export default ({
                 },
             },
         },
+        devicePixelRatio: 1,
         parsing: false,
         maintainAspectRatio: false,
         animation: false,
