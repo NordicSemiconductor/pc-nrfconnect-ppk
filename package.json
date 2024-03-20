@@ -53,7 +53,7 @@
         "@types/redux-mock-store": "^1.0.3",
         "@types/unzipper": "^0.10.9",
         "bson": "4.6.5",
-        "chart.js": "^4.3.3",
+        "chart.js": "^4.4.2",
         "mathjs": "^10.6.3",
         "react-chartjs-2": "^5.2.0",
         "redux-mock-store": "^1.5.4",
