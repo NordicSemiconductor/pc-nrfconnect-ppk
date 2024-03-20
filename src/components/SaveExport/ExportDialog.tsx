@@ -4,7 +4,13 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { useDispatch, useSelector } from 'react-redux';
 import { dialog, getCurrentWindow } from '@electron/remote';
@@ -149,12 +155,14 @@ export default () => {
                 .replace('u', '\u00B5')
         );
     }, [duration]);
-    const filename = createFileName();
-    const close = () => {
+
+    const close = useCallback(() => {
         cancel.current = true;
         dispatch(hideExportDialog());
-    };
+    }, [dispatch]);
+
     const saveFile = async () => {
+        const filename = createFileName();
         const { filePath: fn } = await dialog.showSaveDialog(
             getCurrentWindow(),
             {
