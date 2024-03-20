@@ -1,3 +1,9 @@
+## 4.0.1 - UNRELEASED
+
+### Fixed
+
+-   Performance improvements for Retina Displays.
+
 ## 4.0.0 - 2024-03-13
 
 ### Added
