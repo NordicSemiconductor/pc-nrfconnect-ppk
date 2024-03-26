@@ -2,7 +2,7 @@
 
 ### Fixed
 
--   Performance improvements for Retina Displays.
+-   Performance improvements for Retina displays.
 
 ## 4.0.0 - 2024-03-13
 
