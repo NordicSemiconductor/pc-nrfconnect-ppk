@@ -184,13 +184,10 @@ export const DataManager = () => ({
         if (simulationDelta > actualTimePassed) return true;
 
         const pcAheadDelta = actualTimePassed - simulationDelta;
-        if (
-            pcAheadDelta >
-            Math.max(30, getSamplingTime(options.samplesPerSecond) * 1.5)
-        ) {
-            return false;
-        }
-        return true;
+
+        // We get serial data every 30 ms regardless of sampling rate.
+        // If PC is ahead by more then 1.5 samples we are not in sync
+        return pcAheadDelta <= 45;
     },
     getStartSystemTime: () => options.fileBuffer?.getFirstWriteTime(),
 
