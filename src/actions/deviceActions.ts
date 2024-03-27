@@ -428,7 +428,7 @@ export const open =
                 });
                 renderIndex = DataManager().getTotalSavedRecords();
             }
-        }, 30);
+        }, Math.max(30, DataManager().getSamplingTime() / 1000));
     };
 
 export const updateRegulator =
