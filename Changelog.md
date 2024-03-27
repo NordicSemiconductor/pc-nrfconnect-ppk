@@ -1,5 +1,10 @@
 ## 4.0.1 - UNRELEASED
 
+### Changed
+
+-   Moved feedback tab to a dialog which can be opened by going to the about tab
+    and click **Give Feedback**
+
 ### Fixed
 
 -   Chart frame trotting for slower machines
