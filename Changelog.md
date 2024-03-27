@@ -2,7 +2,7 @@
 
 ### Fixed
 
--   Performance improvements for Retina displays.
+-   Chart frame trotting for slower machines
 
 ## 4.0.0 - 2024-03-13
 
