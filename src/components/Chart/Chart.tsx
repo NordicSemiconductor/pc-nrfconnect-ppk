@@ -471,20 +471,12 @@ const Chart = () => {
         }
     }, [xAxisMax]);
 
-    const lastLiveRenderTime = useRef<number>(0);
     const lastFPSUpdate = useRef<number>(performance.now());
     const fpsCounter = useRef<number>(0);
 
     useEffect(() => {
         const now = performance.now();
-        const forceRender = now - lastLiveRenderTime.current > 1000; // force 1 FPS
         if (liveMode) {
-            if (!DataManager().isInSync() && !forceRender) {
-                return;
-            }
-
-            lastLiveRenderTime.current = now;
-
             nextUpdateRequests = () => {
                 fpsCounter.current += 1;
                 return updateChart(

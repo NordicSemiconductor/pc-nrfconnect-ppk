@@ -81,7 +81,6 @@ render(
         appReducer={reducers}
         deviceSelect={<DeviceSelector />}
         sidePanel={<SidePanel />}
-        feedback
         documentation={DocumentationSections}
         panes={[
             { name: 'Data Logger', Main: ChartWrapper },

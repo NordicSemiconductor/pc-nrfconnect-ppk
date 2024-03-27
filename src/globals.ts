@@ -23,6 +23,8 @@ const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 export const microSecondsPerSecond = 1e6;
 
 const tempBuffer = new Uint8Array(6);
+const tempView = new DataView(tempBuffer.buffer);
+
 export interface GlobalOptions {
     /** The number of samples per second */
     samplesPerSecond: number;
@@ -174,7 +176,7 @@ export const DataManager = () => ({
     getTimestamp,
     isInSync: () => {
         const actualTimePassed =
-            performance.now() -
+            Date.now() -
             (options.writeBuffer?.getFirstWriteTime() ??
                 options.fileBuffer?.getFirstWriteTime() ??
                 0);
@@ -182,13 +184,10 @@ export const DataManager = () => ({
         if (simulationDelta > actualTimePassed) return true;
 
         const pcAheadDelta = actualTimePassed - simulationDelta;
-        if (
-            pcAheadDelta >
-            Math.max(30, getSamplingTime(options.samplesPerSecond) * 1.5)
-        ) {
-            return false;
-        }
-        return true;
+
+        // We get serial data every 30 ms regardless of sampling rate.
+        // If PC is ahead by more then 1.5 samples we are not in sync
+        return pcAheadDelta <= 45;
     },
     getStartSystemTime: () => options.fileBuffer?.getFirstWriteTime(),
 
@@ -199,9 +198,8 @@ export const DataManager = () => ({
         )
             return;
 
-        const view = new DataView(tempBuffer.buffer);
-        view.setFloat32(0, current, true);
-        view.setUint16(4, bits);
+        tempView.setFloat32(0, current, true);
+        tempView.setUint16(4, bits);
 
         if (options.writeBuffer) {
             options.writeBuffer.append(tempBuffer);
