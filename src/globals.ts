@@ -176,7 +176,7 @@ export const DataManager = () => ({
     getTimestamp,
     isInSync: () => {
         const actualTimePassed =
-            performance.now() -
+            Date.now() -
             (options.writeBuffer?.getFirstWriteTime() ??
                 options.fileBuffer?.getFirstWriteTime() ??
                 0);
