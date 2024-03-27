@@ -23,6 +23,8 @@ const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 export const microSecondsPerSecond = 1e6;
 
 const tempBuffer = new Uint8Array(6);
+const tempView = new DataView(tempBuffer.buffer);
+
 export interface GlobalOptions {
     /** The number of samples per second */
     samplesPerSecond: number;
@@ -199,9 +201,8 @@ export const DataManager = () => ({
         )
             return;
 
-        const view = new DataView(tempBuffer.buffer);
-        view.setFloat32(0, current, true);
-        view.setUint16(4, bits);
+        tempView.setFloat32(0, current, true);
+        tempView.setUint16(4, bits);
 
         if (options.writeBuffer) {
             options.writeBuffer.append(tempBuffer);
