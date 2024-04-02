@@ -393,13 +393,18 @@ export const open =
 
         clearInterval(updateRequestInterval);
         let renderIndex: number;
+        let lastRenderRequestTime = 0;
         updateRequestInterval = setInterval(() => {
+            const now = Date.now();
             if (
                 renderIndex !== DataManager().getTotalSavedRecords() &&
                 getState().app.app.samplingRunning &&
-                isDataLoggerPane(getState())
+                isDataLoggerPane(getState()) &&
+                (DataManager().isInSync() ||
+                    now - lastRenderRequestTime >= 1000) // force 1 FPS
             ) {
-                const timestamp = Date.now();
+                const timestamp = now;
+                lastRenderRequestTime = now;
                 if (getState().app.chart.liveMode) {
                     requestAnimationFrame(() => {
                         /*
@@ -423,7 +428,7 @@ export const open =
                 });
                 renderIndex = DataManager().getTotalSavedRecords();
             }
-        }, 30);
+        }, Math.max(30, DataManager().getSamplingTime() / 1000));
     };
 
 export const updateRegulator =

@@ -332,6 +332,7 @@ function initializeMinimapChart(
                 ],
             },
             options: {
+                parsing: false,
                 animation: false,
                 layout: {
                     autoPadding: false,
