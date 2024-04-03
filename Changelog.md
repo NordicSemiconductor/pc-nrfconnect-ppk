@@ -3,11 +3,12 @@
 ### Changed
 
 -   Moved feedback tab to a dialog which can be opened by going to the about tab
-    and click **Give Feedback**
+    and click **Give Feedback**.
 
 ### Fixed
 
--   Chart frame trotting for slower machines
+-   Chart frame trotting for slower machines.
+-   Session files were not always cleared on close in some special cases.
 
 ## 4.0.0 - 2024-03-13
 

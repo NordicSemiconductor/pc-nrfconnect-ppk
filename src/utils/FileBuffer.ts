@@ -81,7 +81,7 @@ export class FileBuffer {
 
         this.#beforeUnload = async (event: BeforeUnloadEvent) => {
             if (event.returnValue) return;
-            await this.close();
+            await this.close(false);
             this.release();
         };
         window.addEventListener('beforeunload', this.#beforeUnload);
@@ -530,9 +530,9 @@ export class FileBuffer {
         }
     }
 
-    async close() {
+    async close(flush = true) {
         if (this.#fileHandle) {
-            await this.flush();
+            if (flush) await this.flush();
             fs.closeSync(this.#fileHandle);
             this.#fileHandle = undefined;
         }
