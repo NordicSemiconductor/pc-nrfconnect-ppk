@@ -8,7 +8,7 @@
 ### Fixed
 
 -   Chart frame trotting for slower machines.
--   Session files were not always cleared on close in some special cases.
+-   Clearing session files on close in some special cases.
 
 ## 4.0.0 - 2024-03-13
 
