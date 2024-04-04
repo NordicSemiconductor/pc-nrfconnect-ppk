@@ -99,7 +99,7 @@ export default () => {
 
         const action = () => {
             getFreeSpace(diskFullTrigger, sessionFolder).then(space => {
-                setFreeSpace(space);
+                setFreeSpace(Math.max(0, space));
             });
         };
         action();
