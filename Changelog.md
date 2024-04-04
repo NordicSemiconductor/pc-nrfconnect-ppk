@@ -9,8 +9,8 @@
 
 -   Chart frame trotting for slower machines.
 -   Clearing session files on close in some special cases.
--   When recording indefinitely **Disk full trigger** stop recording when disk
-    is full
+-   Behavior of **Disk full trigger** when recording for an indefinite period of
+    time. It now correctly stops sampling when the disk is full.
 
 ## 4.0.0 - 2024-03-13
 

@@ -109,7 +109,7 @@ export const setupOptions =
                 ).then(isFull => {
                     if (isFull) {
                         logger.warn(
-                            'Session stopped. Disk full trigger detected'
+                            'Session stopped. Disk full trigger value reached.'
                         );
                         dispatch(samplingStop());
                     }

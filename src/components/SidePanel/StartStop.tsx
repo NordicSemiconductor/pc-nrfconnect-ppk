@@ -100,7 +100,9 @@ export default () => {
         setFreeSpace(space);
 
         if (space === 0) {
-            logger.warn('Disk is full. Unable to start new session');
+            logger.warn(
+                'Disk is full. Unable to start sampling. Change the disk full trigger threshold or free up disk memory.'
+            );
             setShowDialog(false);
             return;
         }
