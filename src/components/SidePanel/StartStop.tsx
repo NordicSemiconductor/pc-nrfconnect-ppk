@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
     Group,
+    logger,
     StartStopButton,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -88,6 +89,20 @@ export default () => {
             mode,
             samplesPerSecond: DataManager().getSamplesPerSecond(),
         });
+
+        const space = Math.max(
+            0,
+            await getFreeSpace(diskFullTrigger, sessionFolder)
+        );
+
+        setFreeSpace(space);
+
+        if (space === 0) {
+            logger.warn('Disk is full. Unable to start new session');
+            setShowDialog(false);
+            return;
+        }
+
         dispatch(samplingStart());
         setShowDialog(false);
     };
