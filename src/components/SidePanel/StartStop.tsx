@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
@@ -57,6 +57,8 @@ const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
 
 export default () => {
     const dispatch = useDispatch();
+
+    const onWriteListener = useRef<() => void>();
     const scopePane = useSelector(isScopePane);
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const recordingMode = useSelector(getRecordingMode);
@@ -103,8 +105,14 @@ export default () => {
             return;
         }
 
-        dispatch(samplingStart());
         setShowDialog(false);
+        await dispatch(samplingStart());
+        onWriteListener.current?.();
+        onWriteListener.current = DataManager().onFileWrite(() => {
+            getFreeSpace(diskFullTrigger, sessionFolder).then(s => {
+                setFreeSpace(Math.max(0, s));
+            });
+        });
     };
 
     const [freeSpace, setFreeSpace] = useState<number>(0);
@@ -143,6 +151,7 @@ export default () => {
                     stopText="Stop"
                     onClick={async () => {
                         if (samplingRunning) {
+                            onWriteListener.current?.();
                             dispatch(samplingStop());
                             telemetry.sendEvent('StopSampling', {
                                 mode: recordingMode,
