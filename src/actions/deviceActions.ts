@@ -302,6 +302,24 @@ export const open =
                 dispatch(setSavePending(true));
             }
 
+            const shouldCheckDiskFull =
+                performance.now() - lastDiskFullCheck > 10_000;
+
+            if (shouldCheckDiskFull) {
+                lastDiskFullCheck = performance.now();
+                isDiskFull(
+                    getDiskFullTrigger(getState()),
+                    getSessionRootFolder(getState())
+                ).then(isFull => {
+                    if (isFull) {
+                        logger.warn(
+                            'Session stopped. Disk full trigger detected'
+                        );
+                        dispatch(samplingStop());
+                    }
+                });
+            }
+
             const durationInMicroSeconds =
                 convertTimeToSeconds(
                     getState().app.dataLogger.duration,
@@ -310,24 +328,6 @@ export const open =
             if (durationInMicroSeconds <= DataManager().getTimestamp()) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
-                }
-
-                const shouldCheckDiskFull =
-                    performance.now() - lastDiskFullCheck > 10_000;
-
-                if (shouldCheckDiskFull) {
-                    lastDiskFullCheck = performance.now();
-                    isDiskFull(
-                        getDiskFullTrigger(getState()),
-                        getSessionRootFolder(getState())
-                    ).then(isFull => {
-                        if (isFull) {
-                            logger.warn(
-                                'Session stopped. Disk full trigger detected'
-                            );
-                            dispatch(samplingStop());
-                        }
-                    });
                 }
             }
         };
