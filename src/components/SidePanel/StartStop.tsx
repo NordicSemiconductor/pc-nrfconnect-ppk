@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
     Group,
+    logger,
     StartStopButton,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -56,6 +57,8 @@ const calcFileSizeString = (sampleFreq: number, durationSeconds: number) => {
 
 export default () => {
     const dispatch = useDispatch();
+
+    const onWriteListener = useRef<() => void>();
     const scopePane = useSelector(isScopePane);
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const recordingMode = useSelector(getRecordingMode);
@@ -88,8 +91,30 @@ export default () => {
             mode,
             samplesPerSecond: DataManager().getSamplesPerSecond(),
         });
-        dispatch(samplingStart());
+
+        const space = Math.max(
+            0,
+            await getFreeSpace(diskFullTrigger, sessionFolder)
+        );
+
+        setFreeSpace(space);
+
+        if (space === 0) {
+            logger.warn(
+                'Disk is full. Unable to start sampling. Change the disk full trigger threshold or free up disk memory.'
+            );
+            setShowDialog(false);
+            return;
+        }
+
         setShowDialog(false);
+        await dispatch(samplingStart());
+        onWriteListener.current?.();
+        onWriteListener.current = DataManager().onFileWrite(() => {
+            getFreeSpace(diskFullTrigger, sessionFolder).then(s => {
+                setFreeSpace(Math.max(0, s));
+            });
+        });
     };
 
     const [freeSpace, setFreeSpace] = useState<number>(0);
@@ -99,7 +124,7 @@ export default () => {
 
         const action = () => {
             getFreeSpace(diskFullTrigger, sessionFolder).then(space => {
-                setFreeSpace(space);
+                setFreeSpace(Math.max(0, space));
             });
         };
         action();
@@ -128,6 +153,7 @@ export default () => {
                     stopText="Stop"
                     onClick={async () => {
                         if (samplingRunning) {
+                            onWriteListener.current?.();
                             dispatch(samplingStop());
                             telemetry.sendEvent('StopSampling', {
                                 mode: recordingMode,

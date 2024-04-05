@@ -392,6 +392,8 @@ export const DataManager = () => ({
             });
         }),
     hasPendingTriggers: () => options.timeReachedTriggers.length > 0,
+    onFileWrite: (listener: () => void) =>
+        options.fileBuffer?.onFileWrite(listener),
 });
 
 /**
