@@ -92,19 +92,21 @@ export default () => {
             samplesPerSecond: DataManager().getSamplesPerSecond(),
         });
 
-        const space = Math.max(
-            0,
-            await getFreeSpace(diskFullTrigger, sessionFolder)
-        );
-
-        setFreeSpace(space);
-
-        if (space === 0) {
-            logger.warn(
-                'Disk is full. Unable to start sampling. Change the disk full trigger threshold or free up disk memory.'
+        if (mode === 'DataLogger') {
+            const space = Math.max(
+                0,
+                await getFreeSpace(diskFullTrigger, sessionFolder)
             );
-            setShowDialog(false);
-            return;
+
+            setFreeSpace(space);
+
+            if (space === 0) {
+                logger.warn(
+                    'Disk is full. Unable to start sampling. Change the disk full trigger threshold or free up disk memory.'
+                );
+                setShowDialog(false);
+                return;
+            }
         }
 
         setShowDialog(false);
