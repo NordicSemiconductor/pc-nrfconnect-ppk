@@ -96,7 +96,7 @@ export default () => {
         if (mode === 'DataLogger') {
             if (!fs.existsSync(sessionFolder)) {
                 logger.error(
-                    `Temp Disk root folder '${sessionFolder}' does not exists. Change the root directory from the 'Temp Disk' settings in the side panel`
+                    `Temp Disk root folder '${sessionFolder}' does not exists. Change the root directory in the Temp Disk settings on the side panel.`
                 );
                 setShowDialog(false);
                 return;
