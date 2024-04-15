@@ -208,7 +208,7 @@ export const DataManager = () => ({
         }
 
         // If Data is lost in the serial and this was not detected we need to resync the timers so we do not get stuck rendering at 1 FPS
-        // NOTE this is temporary fix until PPK protocol can handel data loss better
+        // NOTE: this is temporary fix until PPK protocol can handle data loss better
         if (Date.now() - options.lastInSyncTime >= 1000) {
             options.lastInSyncTime = Date.now();
             options.inSyncOffset = actualTimePassed - simulationDelta;
