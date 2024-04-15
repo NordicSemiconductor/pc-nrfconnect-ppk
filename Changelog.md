@@ -7,7 +7,7 @@
 
 ### Fixed
 
--   Chart frame trotting for slower machines.
+-   Chart frame throttling for slower machines.
 -   Clearing session files on close in some special cases.
 -   Behavior of **Disk full trigger** when recording for an indefinite period of
     time. It now correctly stops sampling when the disk is full.
