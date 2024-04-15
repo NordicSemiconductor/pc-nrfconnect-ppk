@@ -39,11 +39,15 @@ export interface GlobalOptions {
         onSuccess: (writeBuffer: WriteBuffer, absoluteTime: number) => void;
         onFail: (error: Error) => void;
     }[];
+    inSyncOffset: number;
+    lastInSyncTime: number;
 }
 
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
     timeReachedTriggers: [],
+    inSyncOffset: 0,
+    lastInSyncTime: 0,
 };
 
 class FileData {
@@ -175,11 +179,14 @@ export const DataManager = () => ({
 
     getTimestamp,
     isInSync: () => {
-        const actualTimePassed =
-            Date.now() -
-            (options.writeBuffer?.getFirstWriteTime() ??
-                options.fileBuffer?.getFirstWriteTime() ??
-                0);
+        const firstWriteTime =
+            options.writeBuffer?.getFirstWriteTime() ??
+            options.fileBuffer?.getFirstWriteTime() ??
+            0;
+
+        if (firstWriteTime === 0) return true;
+
+        const actualTimePassed = Date.now() - firstWriteTime;
 
         const processedBytes =
             options.writeBuffer?.getBytesWritten() ??
@@ -194,7 +201,21 @@ export const DataManager = () => ({
 
         // We get serial data every 30 ms regardless of sampling rate.
         // If PC is ahead by more then 1.5 samples we are not in sync
-        return pcAheadDelta <= 45;
+        let inSync = pcAheadDelta - options.inSyncOffset <= 45;
+
+        if (inSync) {
+            options.lastInSyncTime = Date.now();
+        }
+
+        // If Data is lost in the serial and this was not detected we need to resync the timers so we do not get stuck rendering at 1 FPS
+        // NOTE: this is temporary fix until PPK protocol can handle data loss better
+        if (Date.now() - options.lastInSyncTime >= 1000) {
+            options.lastInSyncTime = Date.now();
+            options.inSyncOffset = actualTimePassed - simulationDelta;
+            inSync = true;
+        }
+
+        return inSync;
     },
     getStartSystemTime: () => options.fileBuffer?.getFirstWriteTime(),
 
@@ -258,6 +279,7 @@ export const DataManager = () => ({
         options.writeBuffer = undefined;
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
+        options.inSyncOffset = 0;
     },
     initializeLiveSession: (sessionRootPath: string) => {
         const sessionPath = path.join(sessionRootPath, v4());
