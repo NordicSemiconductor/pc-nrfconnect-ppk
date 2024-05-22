@@ -21,7 +21,7 @@ import { updateTitle } from './globals';
 import reducers from './slices';
 import { getFileLoaded, isSavePending } from './slices/appSlice';
 import { getRecordingMode } from './slices/chartSlice';
-import { isDataLoggerPane, isScopePane } from './utils/panes';
+import { isDataLoggerPane, isScopePane, Panes } from './utils/panes';
 
 import './index.scss';
 
@@ -83,8 +83,8 @@ render(
         sidePanel={<SidePanel />}
         documentation={DocumentationSections}
         panes={[
-            { name: 'Data Logger', Main: ChartWrapper },
-            { name: 'Scope', Main: ChartWrapper },
+            { name: Panes.DATA_LOGGER, Main: ChartWrapper },
+            { name: Panes.SCOPE, Main: ChartWrapper },
         ]}
     >
         <AppTitleHook />

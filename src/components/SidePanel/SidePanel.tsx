@@ -67,7 +67,7 @@ export default () => {
     const sessionActive = useSelector(isSessionActive);
     const showProgressDialog = useSelector(getShowProgressDialog);
     const scopePane = useSelector(isScopePane);
-    const dataLoggerPane = useSelector(isDataLoggerPane);
+    const dataLoggerPane = !scopePane; // todo: revert
 
     useConfirmBeforeClose();
 

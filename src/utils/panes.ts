@@ -17,3 +17,5 @@ export const isScopePane = (state: RootState) =>
     currentPane(state) === Panes.SCOPE;
 export const isDataLoggerPane = (state: RootState) =>
     currentPane(state) === Panes.DATA_LOGGER;
+
+export const getState = (state: RootState) => state;
