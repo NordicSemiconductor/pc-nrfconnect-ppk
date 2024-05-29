@@ -39,6 +39,11 @@ jest.mock('../../utils/persistentStore', () => ({
 
 const getTimestampMock = jest.fn(() => 100);
 
+jest.mock('../../utils/panes', () => ({
+    isDataLoggerPane: jest.fn(() => true),
+    isScopePane: jest.fn(() => false),
+}));
+
 jest.mock('../../globals', () => {
     const temp = jest.requireActual('../../globals');
     return {
@@ -63,7 +68,7 @@ describe('SidePanel', () => {
         expect(screen.getByText('Load')).toBeDefined();
     });
 
-    xit('successfully opens SaveChoiceDialog when clicking Save / Export button', () => {
+    it('successfully opens SaveChoiceDialog when clicking Save / Export button', () => {
         render(<SidePanel />, [setLatestDataTimestamp(1000)]);
 
         const saveButton = screen.getByText('Save / Export');
