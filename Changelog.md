@@ -1,3 +1,9 @@
+## 4.1.1 - 2024-05-30
+
+### Added
+
+-   Support for Apple silicon.
+
 ## 4.1.0 - 2024-04-15
 
 ### Changed

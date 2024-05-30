@@ -44,7 +44,7 @@ import {
 } from '../slices/chartSlice';
 import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
-import { DATA_LOGGER } from '../utils/panes';
+import { Panes } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -161,7 +161,7 @@ export const load =
                 }
             );
 
-            dispatch(setCurrentPane(DATA_LOGGER));
+            dispatch(setCurrentPane(Panes.DATA_LOGGER));
             dispatch(closeProgressDialog());
 
             if (timestamp) {
