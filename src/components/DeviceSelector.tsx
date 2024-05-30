@@ -10,6 +10,7 @@ import {
     DeviceSelector,
     DeviceSetupConfig,
     getAppFile,
+    isDeviceInDFUBootloader,
     logger,
     sdfuDeviceSetup,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -35,7 +36,14 @@ export const deviceSetupConfig: DeviceSetupConfig = {
                     params: {},
                 },
             ],
-            false
+            false,
+            d =>
+                !isDeviceInDFUBootloader(d) &&
+                !!d.serialPorts &&
+                d.serialPorts.length > 0 &&
+                !!d.traits.nordicUsb &&
+                !!d.usb &&
+                d.usb.device.descriptor.idProduct === 0xc00a
         ),
     ],
 };
