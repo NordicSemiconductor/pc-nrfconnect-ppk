@@ -2,6 +2,7 @@
 
 ### Fixed
 
+-   Digital channel will now render correctly after a short session.
 -   Chart automatically detects sample density on the chart and enables/disables
     point and snapping when changing the sampling rate.
 -   Selection windows now process all the selected data.
