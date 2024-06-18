@@ -1,3 +1,9 @@
+## 4.1.2 - Unreleased
+
+### Fixed
+
+-   PPK 1 deprecation dialog content now adapts to the screen windows size.
+
 ## 4.1.1 - 2024-05-30
 
 ### Added
