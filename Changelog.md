@@ -1,3 +1,9 @@
+## 4.1.2 - Unreleased
+
+### Fixed
+
+-   Selection windows now process all the selected data.
+
 ## 4.1.1 - 2024-05-30
 
 ### Added

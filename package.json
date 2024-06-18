@@ -1,6 +1,6 @@
 {
     "name": "pc-nrfconnect-ppk",
-    "version": "4.1.1",
+    "version": "4.1.2",
     "displayName": "Power Profiler",
     "description": "App for use with Nordic Power Profiler Kits",
     "homepage": "https://github.com/NordicSemiconductor/pc-nrfconnect-ppk",
@@ -47,7 +47,7 @@
         "nordic-publish": "node ./dist/nordic-publish.js"
     },
     "devDependencies": {
-        "@nordicsemiconductor/pc-nrfconnect-shared": "^177.0.0",
+        "@nordicsemiconductor/pc-nrfconnect-shared": "^178.0.0",
         "@types/archiver": "^6.0.2",
         "@types/fs-extra": "^11.0.4",
         "@types/redux-mock-store": "^1.0.3",
