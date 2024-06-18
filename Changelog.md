@@ -1,3 +1,10 @@
+## 4.1.2 - Unreleased
+
+### Fixed
+
+-   Chart automatically detects sample density on the chart and enables/disables
+    point and snapping when changing the sampling rate.
+
 ## 4.1.1 - 2024-05-30
 
 ### Added
