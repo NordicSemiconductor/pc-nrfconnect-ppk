@@ -406,11 +406,14 @@ const Chart = () => {
     }, [chartCursor, zoomPanCallback]);
 
     const samplesPerPixel = useMemo(() => {
-        const samplesInWindowView = timestampToIndex(windowDuration);
+        const samplesInWindowView = timestampToIndex(
+            windowDuration,
+            sampleFreq
+        );
         return numberOfPixelsInWindow === 0
             ? 2
             : samplesInWindowView / numberOfPixelsInWindow;
-    }, [numberOfPixelsInWindow, windowDuration]);
+    }, [numberOfPixelsInWindow, windowDuration, sampleFreq]);
 
     const [data, setData] = useState<{
         ampereLineData: AmpereState[];

@@ -29,9 +29,9 @@ const DeprecatedDeviceDialog = () => {
             size="xl"
             footer={<DialogButton onClick={hide}>Close</DialogButton>}
         >
-            <div className="tw-flex tw-gap-14">
+            <div className="tw-flex tw-flex-col tw-gap-2 lg:tw-flex-row lg:tw-gap-14">
                 <div>
-                    <h4>We recommned using Power Profiler Kit II</h4>
+                    <h4>We recommend using Power Profiler Kit II</h4>
                     <p>
                         From version 4.0.0 we no longer support the first
                         version of Power Profiler Kits. Instead, we recommend
@@ -74,11 +74,13 @@ const DeprecatedDeviceDialog = () => {
                         with Power Profiler v3.5.5.
                     </p>
                 </div>
-                <img
-                    className="w-50"
-                    src={installSpecificVersionGif}
-                    alt="How to install specific app version"
-                />
+                <div>
+                    <img
+                        className="tw-w-full"
+                        src={installSpecificVersionGif}
+                        alt="How to install specific app version"
+                    />
+                </div>
             </div>
         </GenericDialog>
     );

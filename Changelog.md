@@ -3,6 +3,10 @@
 ### Fixed
 
 -   Digital channel will now render correctly after a short session.
+-   Chart automatically detects sample density on the chart and enables/disables
+    point and snapping when changing the sampling rate.
+-   Selection windows now process all the selected data.
+-   PPK 1 deprecation dialog content now adapts to the screen windows size.
 
 ## 4.1.1 - 2024-05-30
 
