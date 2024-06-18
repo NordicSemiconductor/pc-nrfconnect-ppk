@@ -46,6 +46,7 @@ import {
     getDoNotAskStartAndClear,
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
+import { resetCache } from '../Chart/data/dataAccumulator';
 import LiveModeSettings from './LiveModeSettings';
 import TriggerSettings from './TriggerSettings';
 
@@ -85,6 +86,7 @@ export default () => {
         dispatch(resetChartTime());
         dispatch(resetTriggerOrigin());
         dispatch(resetCursor());
+        resetCache();
 
         const mode: RecordingMode = scopePane ? 'Scope' : 'DataLogger';
 

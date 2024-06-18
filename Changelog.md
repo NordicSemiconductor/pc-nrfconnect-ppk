@@ -1,3 +1,9 @@
+## 4.1.2 - Unreleased
+
+### Fixed
+
+-   Digital channel will now render correctly after a short session.
+
 ## 4.1.1 - 2024-05-30
 
 ### Added
