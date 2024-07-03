@@ -1,3 +1,9 @@
+## 4.1.3 - Unreleased
+
+### Fixed
+
+-   Digital channels are exported correctly to csv.
+
 ## 4.1.2 - 2024-06-20
 
 ### Fixed
