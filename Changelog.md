@@ -2,7 +2,7 @@
 
 ### Fixed
 
--   Digital channels are exported correctly to csv.
+-   Digital channels are now exported correctly to CSV files.
 
 ## 4.1.2 - 2024-06-20
 
