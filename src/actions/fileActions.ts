@@ -14,6 +14,7 @@ import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging
 import fs from 'fs';
 import { dirname, join } from 'path';
 
+import { resetCache } from '../components/Chart/data/dataAccumulator';
 import {
     miniMapAnimationAction,
     resetMinimap,
@@ -138,6 +139,7 @@ export const load =
         setLoading(true);
         dispatch(setSavePending(false));
         logger.info(`Restoring state from ${filename}`);
+        resetCache();
         await DataManager().reset();
         dispatch(resetChartTime());
         dispatch(resetMinimap());
