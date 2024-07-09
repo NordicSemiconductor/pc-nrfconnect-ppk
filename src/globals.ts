@@ -88,11 +88,9 @@ class FileData {
         const numberOfElements = this.getLength();
         const result = new Uint8Array(numberOfElements * 2);
         for (let index = 0; index < numberOfElements; index += 1) {
-            const byteOffset = index * frameSize + currentFrameSize;
-            result.set(
-                this.data.subarray(byteOffset, byteOffset + 2),
-                index * 2
-            );
+            const bitValue = this.getBitData(index);
+            // eslint-disable-next-line no-bitwise
+            result.set([bitValue & 0xff, (bitValue >> 8) & 0xff], index * 2);
         }
 
         return new Uint16Array(result.buffer);
