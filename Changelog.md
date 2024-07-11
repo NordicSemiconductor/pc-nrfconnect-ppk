@@ -1,3 +1,9 @@
+## 4.2.0 - Unreleased
+
+### Changed
+
+-   Updated PPK 2 Firmware to 1.2.0
+
 ## 4.1.3 - Unreleased
 
 ### Fixed
