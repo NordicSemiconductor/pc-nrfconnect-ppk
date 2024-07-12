@@ -3,6 +3,8 @@
 ### Fixed
 
 -   Digital channels are now exported correctly to CSV files.
+-   Performance improvements.
+-   Selection windows states now updated data consistently after select all.
 
 ## 4.1.2 - 2024-06-20
 
