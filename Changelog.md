@@ -7,7 +7,13 @@
     -   Improved accuracy in some scenarios.
     -   Added COM port for shell access.
 
-## 4.1.3 - Unreleased
+### Fixed
+
+-   Improve performance when selecting big samples on the chart.
+-   Selection windows states now updated data consistently after select all.
+-   Clear selection when loading PPK2 file.
+
+## 4.1.3 - 2024-07-15
 
 ### Fixed
 
