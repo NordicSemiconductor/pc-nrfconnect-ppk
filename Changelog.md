@@ -3,7 +3,7 @@
 ### Fixed
 
 -   Digital channels are now exported correctly to CSV files.
--   Performance improvements.
+-   Improve performance when selecting big samples on the chart.
 -   Selection windows states now updated data consistently after select all.
 
 ## 4.1.2 - 2024-06-20
