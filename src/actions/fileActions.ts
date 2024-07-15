@@ -38,6 +38,7 @@ import {
     chartWindowAction,
     getWindowDuration,
     resetChartTime,
+    resetCursor,
     scrollToEnd,
     setLatestDataTimestamp,
     setLiveMode,
@@ -144,6 +145,7 @@ export const load =
         dispatch(resetChartTime());
         dispatch(resetMinimap());
         dispatch(setLiveMode(false));
+        dispatch(resetCursor());
 
         dispatch(
             showProgressDialog({

@@ -3,6 +3,7 @@
 ### Fixed
 
 -   Digital channels are now exported correctly to CSV files.
+-   Clear selection when loading PPK2 file.
 
 ## 4.1.2 - 2024-06-20
 
