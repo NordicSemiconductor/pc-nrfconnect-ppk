@@ -3,6 +3,8 @@
 ### Fixed
 
 -   Digital channels are now exported correctly to CSV files.
+-   Improve performance when selecting big samples on the chart.
+-   Selection windows states now updated data consistently after select all.
 -   Clear selection when loading PPK2 file.
 
 ## 4.1.2 - 2024-06-20
