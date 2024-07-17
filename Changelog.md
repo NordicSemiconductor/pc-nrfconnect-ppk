@@ -1,15 +1,13 @@
-## 4.2.0 - Unreleased
+## 4.2.0 - 2024-07-17
 
 ### Changed
 
--   Updated PPK 2 Firmware to 1.2.0:
-    -   Improved stability.
-    -   Improved accuracy in some scenarios.
-    -   Added COM port for shell access.
+-   Updated PPK2 firmware to v1.2.0, which adds COM port for shell access and
+    improves stability and accuracy (in some scenarios).
 
 ### Fixed
 
--   Improve performance when selecting big samples on the chart.
+-   Deteriorating performance when selecting big samples on the chart.
 -   Selection windows states now updated data consistently after select all.
 -   Clear selection when loading PPK2 file.
 
