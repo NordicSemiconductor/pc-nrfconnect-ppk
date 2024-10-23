@@ -1,3 +1,9 @@
+## 4.3.0 - Unreleased
+
+### Fixed
+
+-   Floating point ranges in Advanced Configuration are now rounded correctly when initialized
+
 ## 4.2.0 - 2024-07-17
 
 ### Changed
