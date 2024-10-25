@@ -146,7 +146,6 @@ export default () => {
             <StateSelector
                 items={[...TriggerEdgeValues]}
                 onSelect={m => {
-                    console.log(m);
                     dispatch(setTriggerEdge(TriggerEdgeValues[m]));
                 }}
                 selectedItem={triggerEdge}
