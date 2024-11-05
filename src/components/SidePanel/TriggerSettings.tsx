@@ -72,6 +72,9 @@ export default () => {
     const [internalTriggerLength, setInternalTriggerLength] =
         useState(recordingLength);
     const [triggerBiasValue, setTriggerBiasValue] = useState(triggerBias);
+    const [computedBias, setComputedBias] = useState(
+        calculateBiasTime(internalTriggerLength, triggerBias)
+    );
 
     useEffect(() => {
         if (triggerValue > 1000) {
@@ -105,6 +108,7 @@ export default () => {
                 onChange={setInternalTriggerLength}
                 onChangeComplete={(value: number) => {
                     dispatch(setTriggerRecordingLength(value));
+                    setComputedBias(calculateBiasTime(value, triggerBias));
                 }}
                 unit="ms"
                 label="Length"
@@ -123,12 +127,18 @@ export default () => {
                 onChange={setTriggerBiasValue}
                 onChangeComplete={(value: number) => {
                     dispatch(setTriggerBias(value));
+                    setComputedBias(
+                        calculateBiasTime(internalTriggerLength, value)
+                    );
                 }}
                 unit="%"
                 label="Bias"
                 disabled={dataLoggerActive}
                 showSlider
             />
+            <span className="tw-mb-2 tw-text-sm tw-text-gray-500">
+                Computed bias: {computedBias} ms
+            </span>
             <NumberInput
                 range={{
                     min: getMin(levelUnit),

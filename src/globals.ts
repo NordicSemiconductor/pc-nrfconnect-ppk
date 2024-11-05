@@ -365,7 +365,10 @@ export const DataManager = () => ({
             foldingBuffer: options.foldingBuffer,
         };
     },
-    addTimeReachedTrigger: (recordingLengthMicroSeconds: number) =>
+    addTimeReachedTrigger: (
+        recordingLengthMicroSeconds: number,
+        biasPercent = 10
+    ) =>
         new Promise<{
             writeBuffer: WriteBuffer;
             timeRange: Range;
@@ -382,17 +385,14 @@ export const DataManager = () => ({
                 options.writeBuffer.getBytesWritten() / frameSize - 1;
             const timestamp = indexToTimestamp(currentIndex);
 
-            const splitRecordingLengthMicroSeconds =
-                recordingLengthMicroSeconds / 2;
+            const beforeTrigger =
+                (recordingLengthMicroSeconds * biasPercent) / 100;
+            const afterTrigger = recordingLengthMicroSeconds - beforeTrigger;
+
+            // const splitRecordingLengthMicroSeconds = recordingLengthMicroSeconds / 2;
             const timeRange = {
-                start: Math.max(
-                    0,
-                    timestamp - splitRecordingLengthMicroSeconds
-                ),
-                end:
-                    timestamp +
-                    splitRecordingLengthMicroSeconds -
-                    indexToTimestamp(1), // we must exclude current sample the one that triggered all this
+                start: Math.max(0, timestamp - beforeTrigger),
+                end: timestamp + afterTrigger - indexToTimestamp(1), // we must exclude current sample the one that triggered all this
             };
 
             const bytesRange = {

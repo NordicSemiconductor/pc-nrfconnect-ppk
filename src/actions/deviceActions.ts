@@ -64,6 +64,7 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
+    getTriggerBias,
     getTriggerRecordingLength,
     resetTriggerOrigin,
     setProgress,
@@ -284,10 +285,13 @@ export const open =
                         dispatch(setSavePending(true));
                     }
                     dispatch(setTriggerActive(true));
+                    const biasPercentage = getTriggerBias(getState());
+                    console.log('biasPercentage', biasPercentage);
                     dispatch(
                         processTrigger(
                             cappedValue,
                             getTriggerRecordingLength(getState()) * 1000, // ms to uS
+                            biasPercentage,
                             (progressMessage, prog) => {
                                 dispatch(
                                     setProgress({
@@ -497,10 +501,14 @@ export const processTrigger =
     (
         triggerValue: number,
         triggerLength: number,
+        biasPercentage: number,
         onProgress?: (message: string, progress?: number) => void
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
-        const trigger = DataManager().addTimeReachedTrigger(triggerLength);
+        const trigger = DataManager().addTimeReachedTrigger(
+            triggerLength,
+            biasPercentage
+        );
 
         const triggerTime = Date.now();
         const remainingRecordingLength = triggerLength / 2;
