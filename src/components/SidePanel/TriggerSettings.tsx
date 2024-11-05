@@ -15,9 +15,11 @@ import {
 import { appState } from '../../slices/appSlice';
 import { getRecordingMode } from '../../slices/chartSlice';
 import {
+    getTriggerBias,
     getTriggerRecordingLength,
     getTriggerType,
     getTriggerValue,
+    setTriggerBias,
     setTriggerLevel,
     setTriggerRecordingLength,
     setTriggerType,
@@ -45,9 +47,13 @@ const convertToMicroAmps = (unit: CurrentUnit, value: number) => {
     }
 };
 
+const calculateBiasTime = (recordingLength: number, bias: number) =>
+    Number((recordingLength * (bias / 100)).toFixed(2));
+
 export default () => {
     const dispatch = useDispatch();
     const recordingLength = useSelector(getTriggerRecordingLength);
+    const triggerBias = useSelector(getTriggerBias);
     const triggerValue = useSelector(getTriggerValue);
     const triggerType = useSelector(getTriggerType);
     const { samplingRunning } = useSelector(appState);
@@ -65,6 +71,7 @@ export default () => {
         useState(triggerValue);
     const [internalTriggerLength, setInternalTriggerLength] =
         useState(recordingLength);
+    const [triggerBiasValue, setTriggerBiasValue] = useState(triggerBias);
 
     useEffect(() => {
         if (triggerValue > 1000) {
@@ -79,6 +86,10 @@ export default () => {
     useEffect(() => {
         setInternalTriggerLength(recordingLength);
     }, [recordingLength]);
+
+    useEffect(() => {
+        setTriggerBiasValue(triggerBias);
+    }, [triggerBias]);
 
     return (
         <>
@@ -97,6 +108,24 @@ export default () => {
                 }}
                 unit="ms"
                 label="Length"
+                disabled={dataLoggerActive}
+                showSlider
+            />
+            <NumberInput
+                range={{
+                    min: 0,
+                    max: 100,
+                    decimals: 0,
+                    step: 1,
+                }}
+                title='Trigger bias from "Start of trigger window"'
+                value={triggerBiasValue}
+                onChange={setTriggerBiasValue}
+                onChangeComplete={(value: number) => {
+                    dispatch(setTriggerBias(value));
+                }}
+                unit="%"
+                label="Bias"
                 disabled={dataLoggerActive}
                 showSlider
             />

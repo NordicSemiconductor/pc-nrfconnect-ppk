@@ -136,6 +136,11 @@ export const getRecordingLength = (defaultValue: number) =>
 export const setRecordingLength = (value: number) => {
     store.set(`recording-length-ms`, value);
 };
+export const getTriggerBias = (defaultValue: number) =>
+    store.get(`trigger-bias-ms`, defaultValue);
+export const setTriggerBias = (value: number) => {
+    store.set(`trigger-bias-ms`, value);
+};
 export const getTriggerType = (defaultValue: TriggerType) =>
     store.get(`trigger-mode-type`, defaultValue);
 export const setTriggerType = (value: TriggerType) => {
