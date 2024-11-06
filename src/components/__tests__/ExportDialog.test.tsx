@@ -37,6 +37,7 @@ jest.mock('../../utils/persistentStore', () => ({
     getTriggerBias: () => 50,
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
+    getTriggerEdge: () => 'Raising Edge',
 }));
 
 const getTimestampMock = jest.fn(() => 0);

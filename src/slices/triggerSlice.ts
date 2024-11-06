@@ -9,10 +9,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
     getRecordingLength as getPersistedRecordingLength,
     getTriggerBias as getPersistedTriggerBias,
+    getTriggerEdge as getPersistedTriggerEdge,
     getTriggerLevel as getPersistedTriggerLevel,
     getTriggerType as getPersistedTriggerType,
     setRecordingLength as persistRecordingLength,
     setTriggerBias as persistTriggerBias,
+    setTriggerEdge as persistTriggerEdge,
     setTriggerLevel as persistTriggerLevel,
     setTriggerType as persistTriggerType,
 } from '../utils/persistentStore';
@@ -20,6 +22,8 @@ import type { RootState } from '.';
 
 export const TriggerTypeValues = ['Single', 'Continuous'] as const;
 export type TriggerType = (typeof TriggerTypeValues)[number];
+export const TriggerEdgeValues = ['Raising Edge', 'Lowering Edge'] as const;
+export type TriggerEdge = (typeof TriggerEdgeValues)[number];
 
 export interface DataLoggerState {
     level: number;
@@ -27,6 +31,7 @@ export interface DataLoggerState {
     bias: number;
     active: boolean;
     type: TriggerType;
+    edge: TriggerEdge;
     progressMessage?: string;
     progress?: number;
     triggerOrigin?: number;
@@ -38,6 +43,7 @@ const initialState = (): DataLoggerState => ({
     bias: getPersistedTriggerBias(0),
     active: false,
     type: getPersistedTriggerType('Single'),
+    edge: getPersistedTriggerEdge('Raising Edge'),
 });
 
 const triggerSlice = createSlice({
@@ -63,6 +69,10 @@ const triggerSlice = createSlice({
         setTriggerType: (state, action: PayloadAction<TriggerType>) => {
             state.type = action.payload;
             persistTriggerType(action.payload);
+        },
+        setTriggerEdge: (state, action: PayloadAction<TriggerEdge>) => {
+            state.edge = action.payload;
+            persistTriggerEdge(action.payload);
         },
         setProgress: (
             state,
@@ -92,6 +102,7 @@ export const getTriggerRecordingLength = (state: RootState) =>
 export const getTriggerBias = (state: RootState) => state.app.trigger.bias;
 export const getTriggerActive = (state: RootState) => state.app.trigger.active;
 export const getTriggerType = (state: RootState) => state.app.trigger.type;
+export const getTriggerEdge = (state: RootState) => state.app.trigger.edge;
 export const getProgress = (state: RootState) => ({
     progressMessage: state.app.trigger.progressMessage,
     progress: state.app.trigger.progress,
@@ -105,6 +116,7 @@ export const {
     setTriggerBias,
     setTriggerActive,
     setTriggerType,
+    setTriggerEdge,
     setProgress,
     clearProgress,
     setTriggerOrigin,
