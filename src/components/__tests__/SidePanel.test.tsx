@@ -39,6 +39,11 @@ jest.mock('../../utils/persistentStore', () => ({
 
 const getTimestampMock = jest.fn(() => 100);
 
+jest.mock('../../utils/panes', () => ({
+    isDataLoggerPane: jest.fn(() => true),
+    isScopePane: jest.fn(() => false),
+}));
+
 jest.mock('../../globals', () => {
     const temp = jest.requireActual('../../globals');
     return {

@@ -29,6 +29,7 @@ export class FileBuffer {
     #fileBusy = false;
     #beforeUnload: (event: BeforeUnloadEvent) => Promise<void>;
     #bufferingListeners: ((event: Promise<void>) => void)[] = [];
+    #fileWriteListeners: (() => void)[] = [];
     #freePageBuffers: Uint8Array[] = [];
     #bufferingRequests: Promise<void>[] = [];
     #cancelBufferOperations: WeakMap<Promise<void>, AbortController> =
@@ -81,7 +82,7 @@ export class FileBuffer {
 
         this.#beforeUnload = async (event: BeforeUnloadEvent) => {
             if (event.returnValue) return;
-            await this.close();
+            await this.close(false);
             this.release();
         };
         window.addEventListener('beforeunload', this.#beforeUnload);
@@ -125,7 +126,10 @@ export class FileBuffer {
                         throw new Error('Invalid File handle');
                     return fs
                         .appendFile(this.#fileHandle, activePage.page)
-                        .finally(resolve);
+                        .finally(() => {
+                            this.#fileWriteListeners.forEach(l => l());
+                            resolve();
+                        });
                 });
             } else {
                 this.fileOperationTasks.push(() => {
@@ -137,7 +141,10 @@ export class FileBuffer {
                             this.#fileHandle,
                             activePage.page.subarray(0, activePage.bytesWritten)
                         )
-                        .finally(resolve);
+                        .finally(() => {
+                            this.#fileWriteListeners.forEach(l => l());
+                            resolve();
+                        });
                 });
 
                 writeBuffer.switchPage();
@@ -530,9 +537,9 @@ export class FileBuffer {
         }
     }
 
-    async close() {
+    async close(flush = true) {
         if (this.#fileHandle) {
-            await this.flush();
+            if (flush) await this.flush();
             fs.closeSync(this.#fileHandle);
             this.#fileHandle = undefined;
         }
@@ -574,6 +581,20 @@ export class FileBuffer {
 
             if (index !== -1) {
                 this.#bufferingListeners.splice(index, 1);
+            }
+        };
+    }
+
+    onFileWrite(listener: () => void) {
+        this.#fileWriteListeners.push(listener);
+
+        return () => {
+            const index = this.#fileWriteListeners.findIndex(
+                l => l === listener
+            );
+
+            if (index !== -1) {
+                this.#fileWriteListeners.splice(index, 1);
             }
         };
     }

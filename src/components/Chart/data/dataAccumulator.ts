@@ -70,7 +70,7 @@ export const calcStats = (
                         delta += data.getLength() * oneValueDelta;
 
                         res({
-                            begin: e + oneValueDelta,
+                            begin: Math.min(end, e + oneValueDelta),
                             end: Math.min(
                                 end,
                                 e +
@@ -85,7 +85,7 @@ export const calcStats = (
             if (abortController?.signal.aborted) {
                 return;
             }
-            if (range.end === end) {
+            if (range.begin === end) {
                 onComplete(sum / (len || 1), max ?? 0, delta);
             } else {
                 process(range.begin, range.end);

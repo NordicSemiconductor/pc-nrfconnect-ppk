@@ -76,7 +76,7 @@ export default () => {
                 unit="MB"
                 value={diskFullTrigger}
                 range={{
-                    min: 1,
+                    min: 10, // 4 * 100_000 * 10 bytes ~= 5.7 MB per page
                     max: 10240,
                     decimals: undefined,
                     step: undefined,

@@ -23,6 +23,8 @@ const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 export const microSecondsPerSecond = 1e6;
 
 const tempBuffer = new Uint8Array(6);
+const tempView = new DataView(tempBuffer.buffer);
+
 export interface GlobalOptions {
     /** The number of samples per second */
     samplesPerSecond: number;
@@ -37,11 +39,15 @@ export interface GlobalOptions {
         onSuccess: (writeBuffer: WriteBuffer, absoluteTime: number) => void;
         onFail: (error: Error) => void;
     }[];
+    inSyncOffset: number;
+    lastInSyncTime: number;
 }
 
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
     timeReachedTriggers: [],
+    inSyncOffset: 0,
+    lastInSyncTime: 0,
 };
 
 class FileData {
@@ -82,11 +88,9 @@ class FileData {
         const numberOfElements = this.getLength();
         const result = new Uint8Array(numberOfElements * 2);
         for (let index = 0; index < numberOfElements; index += 1) {
-            const byteOffset = index * frameSize + currentFrameSize;
-            result.set(
-                this.data.subarray(byteOffset, byteOffset + 2),
-                index * 2
-            );
+            const bitValue = this.getBitData(index);
+            // eslint-disable-next-line no-bitwise
+            result.set([bitValue & 0xff, (bitValue >> 8) & 0xff], index * 2);
         }
 
         return new Uint16Array(result.buffer);
@@ -173,22 +177,43 @@ export const DataManager = () => ({
 
     getTimestamp,
     isInSync: () => {
-        const actualTimePassed =
-            performance.now() -
-            (options.writeBuffer?.getFirstWriteTime() ??
-                options.fileBuffer?.getFirstWriteTime() ??
-                0);
-        const simulationDelta = getTimestamp() / 1000;
+        const firstWriteTime =
+            options.writeBuffer?.getFirstWriteTime() ??
+            options.fileBuffer?.getFirstWriteTime() ??
+            0;
+
+        if (firstWriteTime === 0) return true;
+
+        const actualTimePassed = Date.now() - firstWriteTime;
+
+        const processedBytes =
+            options.writeBuffer?.getBytesWritten() ??
+            options.fileBuffer?.getSessionInBytes() ??
+            0;
+
+        const simulationDelta =
+            indexToTimestamp(processedBytes / frameSize - 1) / 1000;
         if (simulationDelta > actualTimePassed) return true;
 
         const pcAheadDelta = actualTimePassed - simulationDelta;
-        if (
-            pcAheadDelta >
-            Math.max(30, getSamplingTime(options.samplesPerSecond) * 1.5)
-        ) {
-            return false;
+
+        // We get serial data every 30 ms regardless of sampling rate.
+        // If PC is ahead by more then 1.5 samples we are not in sync
+        let inSync = pcAheadDelta - options.inSyncOffset <= 45;
+
+        if (inSync) {
+            options.lastInSyncTime = Date.now();
         }
-        return true;
+
+        // If Data is lost in the serial and this was not detected we need to resync the timers so we do not get stuck rendering at 1 FPS
+        // NOTE: this is temporary fix until PPK protocol can handle data loss better
+        if (Date.now() - options.lastInSyncTime >= 1000) {
+            options.lastInSyncTime = Date.now();
+            options.inSyncOffset = actualTimePassed - simulationDelta;
+            inSync = true;
+        }
+
+        return inSync;
     },
     getStartSystemTime: () => options.fileBuffer?.getFirstWriteTime(),
 
@@ -199,9 +224,8 @@ export const DataManager = () => ({
         )
             return;
 
-        const view = new DataView(tempBuffer.buffer);
-        view.setFloat32(0, current, true);
-        view.setUint16(4, bits);
+        tempView.setFloat32(0, current, true);
+        tempView.setUint16(4, bits);
 
         if (options.writeBuffer) {
             options.writeBuffer.append(tempBuffer);
@@ -253,6 +277,7 @@ export const DataManager = () => ({
         options.writeBuffer = undefined;
         options.foldingBuffer = undefined;
         options.samplesPerSecond = initialSamplesPerSecond;
+        options.inSyncOffset = 0;
     },
     initializeLiveSession: (sessionRootPath: string) => {
         const sessionPath = path.join(sessionRootPath, v4());
@@ -394,6 +419,8 @@ export const DataManager = () => ({
             });
         }),
     hasPendingTriggers: () => options.timeReachedTriggers.length > 0,
+    onFileWrite: (listener: () => void) =>
+        options.fileBuffer?.onFileWrite(listener),
 });
 
 /**

@@ -401,8 +401,14 @@ const plugin: Plugin<'line'> = {
                 return;
             }
             if (event.button === 1) {
-                // reset min-max window
-                zoomPan.zoomPanCallback();
+                const { xScale } = chart.scales;
+                const { min: xMin, max: xMax } = xScale;
+                const windowDuration = xMax - xMin;
+                const end = Math.min(
+                    windowDuration,
+                    DataManager().getTimestamp()
+                );
+                zoomPan.zoomPanCallback(0, end);
                 return;
             }
 

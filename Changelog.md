@@ -1,3 +1,64 @@
+## 4.2.1 - 2024-11-11
+
+### Changed
+
+-   Updated `nrfutil device` to v2.6.4.
+
+### Fixed
+
+-   Floating point ranges in Advanced Configuration are now rounded correctly
+    when initialized.
+
+## 4.2.0 - 2024-07-17
+
+### Changed
+
+-   Updated PPK2 firmware to v1.2.0, which adds COM port for shell access and
+    improves stability and accuracy (in some scenarios).
+
+### Fixed
+
+-   Deteriorating performance when selecting big samples on the chart.
+-   Selection windows states now updated data consistently after select all.
+-   Clear selection when loading PPK2 file.
+
+## 4.1.3 - 2024-07-15
+
+### Fixed
+
+-   Digital channels are now exported correctly to CSV files.
+
+## 4.1.2 - 2024-06-20
+
+### Fixed
+
+-   The digital channel will now render correctly after a short session.
+-   The chart now automatically detects the sample density on the chart and
+    enables or disables point and snapping when changing the sampling rate.
+-   The selection windows now process all the selected data.
+-   The PPK1 deprecation dialog content now adapts to the screen windows size.
+
+## 4.1.1 - 2024-05-30
+
+### Added
+
+-   Support for Apple silicon.
+
+## 4.1.0 - 2024-04-15
+
+### Changed
+
+-   Moved feedback tab to a dialog which can be opened by going to the about tab
+    and click **Give Feedback**.
+
+### Fixed
+
+-   Chart frame throttling for slower machines.
+-   Clearing session files on close in some special cases.
+-   Behavior of **Disk full trigger** when recording for an indefinite period of
+    time. It now correctly stops sampling when the disk is full.
+-   Starting sampling in the scope mode when the disk is full.
+
 ## 4.0.0 - 2024-03-13
 
 ### Added

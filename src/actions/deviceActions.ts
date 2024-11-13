@@ -79,6 +79,7 @@ import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
+let releaseFileWriteListener: (() => void) | undefined;
 
 export const setupOptions =
     (recordingMode: RecordingMode): AppThunk<RootState, Promise<void>> =>
@@ -99,6 +100,21 @@ export const setupOptions =
                     DataManager().initializeTriggerSession(60);
                     break;
             }
+
+            releaseFileWriteListener?.();
+            releaseFileWriteListener = DataManager().onFileWrite?.(() => {
+                isDiskFull(
+                    getDiskFullTrigger(getState()),
+                    getSessionRootFolder(getState())
+                ).then(isFull => {
+                    if (isFull) {
+                        logger.warn(
+                            'Session stopped. Disk full trigger value reached.'
+                        );
+                        dispatch(samplingStop());
+                    }
+                });
+            });
         } catch (err) {
             logger.error(err);
         }
@@ -145,6 +161,7 @@ export const samplingStop =
         dispatch(samplingStoppedAction());
         await device.ppkAverageStop();
         stopPreventSleep();
+        releaseFileWriteListener?.();
     };
 
 export const updateSpikeFilter = (): AppThunk<RootState> => (_, getState) => {
@@ -207,7 +224,6 @@ export const open =
         let prevBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
-        let lastDiskFullCheck = 0;
 
         const onSample = ({ value, bits }: SampleValues) => {
             const {
@@ -254,6 +270,10 @@ export const open =
                     prevCappedValue < getState().app.trigger.level &&
                     cappedValue >= getState().app.trigger.level;
                 prevCappedValue = cappedValue;
+
+                if (!DataManager().isInSync()) {
+                    return;
+                }
 
                 if (!getState().app.trigger.active && validTriggerValue) {
                     if (latestTrigger !== undefined) {
@@ -310,24 +330,6 @@ export const open =
             if (durationInMicroSeconds <= DataManager().getTimestamp()) {
                 if (samplingRunning) {
                     dispatch(samplingStop());
-                }
-
-                const shouldCheckDiskFull =
-                    performance.now() - lastDiskFullCheck > 10_000;
-
-                if (shouldCheckDiskFull) {
-                    lastDiskFullCheck = performance.now();
-                    isDiskFull(
-                        getDiskFullTrigger(getState()),
-                        getSessionRootFolder(getState())
-                    ).then(isFull => {
-                        if (isFull) {
-                            logger.warn(
-                                'Session stopped. Disk full trigger detected'
-                            );
-                            dispatch(samplingStop());
-                        }
-                    });
                 }
             }
         };
@@ -393,13 +395,18 @@ export const open =
 
         clearInterval(updateRequestInterval);
         let renderIndex: number;
+        let lastRenderRequestTime = 0;
         updateRequestInterval = setInterval(() => {
+            const now = Date.now();
             if (
                 renderIndex !== DataManager().getTotalSavedRecords() &&
                 getState().app.app.samplingRunning &&
-                isDataLoggerPane(getState())
+                isDataLoggerPane(getState()) &&
+                (DataManager().isInSync() ||
+                    now - lastRenderRequestTime >= 1000) // force 1 FPS
             ) {
-                const timestamp = Date.now();
+                const timestamp = now;
+                lastRenderRequestTime = now;
                 if (getState().app.chart.liveMode) {
                     requestAnimationFrame(() => {
                         /*
@@ -423,7 +430,7 @@ export const open =
                 });
                 renderIndex = DataManager().getTotalSavedRecords();
             }
-        }, 30);
+        }, Math.max(30, DataManager().getSamplingTime() / 1000));
     };
 
 export const updateRegulator =
@@ -493,11 +500,6 @@ export const processTrigger =
         onProgress?: (message: string, progress?: number) => void
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
-        if (!DataManager().isInSync()) {
-            logger.debug('skipping trigger out of sync');
-            return;
-        }
-
         const trigger = DataManager().addTimeReachedTrigger(triggerLength);
 
         const triggerTime = Date.now();

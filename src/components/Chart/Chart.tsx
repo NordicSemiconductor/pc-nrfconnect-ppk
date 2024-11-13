@@ -62,9 +62,10 @@ import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser, { calcStats } from './data/dataAccumulator';
 import { AmpereState, DigitalChannelStates } from './data/dataTypes';
 import DigitalChannels from './DigitalChannels';
-import StatBox from './StatBox';
+import SelectionStatBox from './SelectionStatBox';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';
 import TimeSpanTop from './TimeSpan/TimeSpanTop';
+import WindowStatBox from './WindowStatBox';
 
 // chart.js way of doing tree-shaking, meaning that components that will be included in the bundle
 // must be imported and registered. The registered components are used in both AmpChart and DigitalChannels.
@@ -406,11 +407,14 @@ const Chart = () => {
     }, [chartCursor, zoomPanCallback]);
 
     const samplesPerPixel = useMemo(() => {
-        const samplesInWindowView = timestampToIndex(windowDuration);
+        const samplesInWindowView = timestampToIndex(
+            windowDuration,
+            sampleFreq
+        );
         return numberOfPixelsInWindow === 0
             ? 2
             : samplesInWindowView / numberOfPixelsInWindow;
-    }, [numberOfPixelsInWindow, windowDuration]);
+    }, [numberOfPixelsInWindow, windowDuration, sampleFreq]);
 
     const [data, setData] = useState<{
         ampereLineData: AmpereState[];
@@ -439,27 +443,34 @@ const Chart = () => {
 
     useEffect(() => {
         if (cursorBegin != null && cursorEnd != null) {
-            setSelectionStatsProcessing(true);
             selectionStateAbortController.current?.abort();
+            setSelectionStatsProcessing(true);
             selectionStateAbortController.current = new AbortController();
             setSelectionStatsProcessingProgress(0);
             selectionStateAbortController.current.signal.addEventListener(
                 'abort',
                 () => setSelectionStatsProcessing(false)
             );
-            calcStats(
-                (average, max, delta) => {
-                    setSelectionStats({ average, max, delta });
-                    setSelectionStatsProcessing(false);
-                },
-                cursorBegin,
-                cursorEnd,
-                selectionStateAbortController.current,
-                setSelectionStatsProcessingProgress
+            const debounce = setTimeout(
+                () =>
+                    calcStats(
+                        (average, max, delta) => {
+                            setSelectionStats({ average, max, delta });
+                            setSelectionStatsProcessing(false);
+                        },
+                        cursorBegin,
+                        cursorEnd,
+                        selectionStateAbortController.current,
+                        setSelectionStatsProcessingProgress
+                    ),
+                300
             );
-        } else {
-            setSelectionStats(null);
+            return () => {
+                clearTimeout(debounce);
+            };
         }
+
+        setSelectionStats(null);
     }, [cursorBegin, cursorEnd, rerenderTrigger]);
 
     const [processing, setProcessing] = useState(false);
@@ -471,20 +482,12 @@ const Chart = () => {
         }
     }, [xAxisMax]);
 
-    const lastLiveRenderTime = useRef<number>(0);
     const lastFPSUpdate = useRef<number>(performance.now());
     const fpsCounter = useRef<number>(0);
 
     useEffect(() => {
         const now = performance.now();
-        const forceRender = now - lastLiveRenderTime.current > 1000; // force 1 FPS
         if (liveMode) {
-            if (!DataManager().isInSync() && !forceRender) {
-                return;
-            }
-
-            lastLiveRenderTime.current = now;
-
             nextUpdateRequests = () => {
                 fpsCounter.current += 1;
                 return updateChart(
@@ -562,65 +565,6 @@ const Chart = () => {
         windowDuration,
     ]);
 
-    const chartCursorActive = useMemo(
-        () => cursorBegin !== null || cursorEnd !== null,
-        [cursorBegin, cursorEnd]
-    );
-
-    const selectionButtons = useMemo(
-        () => [
-            <button
-                type="button"
-                className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
-                key="clear-selection-btn"
-                disabled={!chartCursorActive}
-                onClick={resetCursor}
-            >
-                CLEAR
-            </button>,
-            <button
-                type="button"
-                className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
-                key="select-all-btn"
-                disabled={
-                    DataManager().getTotalSavedRecords() <= 0 ||
-                    selectionStatsProcessing
-                }
-                onClick={() => chartCursor(0, DataManager().getTimestamp())}
-            >
-                SELECT ALL
-            </button>,
-            <button
-                type="button"
-                className="tw-float-right tw-border tw-border-gray-200 tw-bg-white tw-px-0.5 tw-text-[10px] tw-leading-3 active:enabled:tw-bg-gray-50"
-                key="zoom-to-selection-btn"
-                disabled={
-                    cursorBegin == null ||
-                    cursorEnd == null ||
-                    selectionStatsProcessing
-                }
-                onClick={() => {
-                    if (cursorBegin != null && cursorEnd != null) {
-                        dispatch(setLiveMode(false));
-                        chartWindow(cursorBegin, cursorEnd);
-                    }
-                }}
-            >
-                ZOOM TO SELECTION
-            </button>,
-        ],
-        [
-            chartCursor,
-            chartCursorActive,
-            chartWindow,
-            cursorBegin,
-            cursorEnd,
-            dispatch,
-            resetCursor,
-            selectionStatsProcessing,
-        ]
-    );
-
     return (
         <div className="tw-relative tw-flex tw-h-full tw-w-full tw-flex-col tw-justify-between tw-gap-4 tw-text-gray-600">
             <div className="scroll-bar-white-bg tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-bg-white tw-p-2">
@@ -663,20 +607,19 @@ const Chart = () => {
                         </div>
                     )}
                     <div className="tw-flex tw-flex-grow tw-flex-wrap tw-gap-2">
-                        <StatBox
+                        <WindowStatBox
                             average={
                                 windowStats?.average ? windowStats.average : 0
                             }
                             max={windowStats?.max ? windowStats.max : 0}
                             delta={windowStats?.delta ? windowStats.delta : 0}
-                            label="Window"
                         />
-                        <StatBox
+                        <SelectionStatBox
+                            resetCursor={resetCursor}
                             progress={selectionStatsProcessingProgress}
                             processing={selectionStatsProcessing}
+                            chartWindow={chartWindow}
                             {...selectionStats}
-                            label="Selection"
-                            actionButtons={selectionButtons}
                         />
                     </div>
                 </div>

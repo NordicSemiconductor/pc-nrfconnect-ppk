@@ -14,6 +14,7 @@ import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging
 import fs from 'fs';
 import { dirname, join } from 'path';
 
+import { resetCache } from '../components/Chart/data/dataAccumulator';
 import {
     miniMapAnimationAction,
     resetMinimap,
@@ -37,6 +38,7 @@ import {
     chartWindowAction,
     getWindowDuration,
     resetChartTime,
+    resetCursor,
     scrollToEnd,
     setLatestDataTimestamp,
     setLiveMode,
@@ -44,7 +46,7 @@ import {
 } from '../slices/chartSlice';
 import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
-import { DATA_LOGGER } from '../utils/panes';
+import { Panes } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
 import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
 
@@ -138,10 +140,12 @@ export const load =
         setLoading(true);
         dispatch(setSavePending(false));
         logger.info(`Restoring state from ${filename}`);
+        resetCache();
         await DataManager().reset();
         dispatch(resetChartTime());
         dispatch(resetMinimap());
         dispatch(setLiveMode(false));
+        dispatch(resetCursor());
 
         dispatch(
             showProgressDialog({
@@ -161,7 +165,7 @@ export const load =
                 }
             );
 
-            dispatch(setCurrentPane(DATA_LOGGER));
+            dispatch(setCurrentPane(Panes.DATA_LOGGER));
             dispatch(closeProgressDialog());
 
             if (timestamp) {

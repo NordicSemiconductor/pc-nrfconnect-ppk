@@ -10,6 +10,7 @@ import {
     DeviceSelector,
     DeviceSetupConfig,
     getAppFile,
+    isDeviceInDFUBootloader,
     logger,
     sdfuDeviceSetup,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -30,12 +31,21 @@ export const deviceSetupConfig: DeviceSetupConfig = {
             [
                 {
                     key: 'ppk2',
-                    application: getAppFile('firmware/pca63100_ppk2_1_1_0.hex'),
-                    semver: 'power_profiler_kit_2 1.1.0-',
+                    application: getAppFile(
+                        'firmware/pca63100_ppk2_1.2.0_97a781b.hex'
+                    ),
+                    semver: 'power_profiler_kit_2 1.2.0-97a781b',
                     params: {},
                 },
             ],
-            false
+            false,
+            d =>
+                !isDeviceInDFUBootloader(d) &&
+                !!d.serialPorts &&
+                d.serialPorts.length > 0 &&
+                !!d.traits.nordicUsb &&
+                !!d.usb &&
+                d.usb.device.descriptor.idProduct === 0xc00a
         ),
     ],
 };
