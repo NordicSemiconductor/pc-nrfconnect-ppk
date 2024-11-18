@@ -15,16 +15,23 @@ import {
 import { appState } from '../../slices/appSlice';
 import { getRecordingMode } from '../../slices/chartSlice';
 import {
+    DigitalChannelTriggerState,
+    DigitalChannelTriggerStatesEnum,
+    getDigitalChannelsTriggersStates,
     getTriggerBias,
+    getTriggerCategory,
     getTriggerEdge,
     getTriggerRecordingLength,
     getTriggerType,
     getTriggerValue,
+    setDigitalChannelsTriggersStates,
     setTriggerBias,
+    setTriggerCategory,
     setTriggerEdge,
     setTriggerLevel,
     setTriggerRecordingLength,
     setTriggerType,
+    TriggerCategoryValues,
     TriggerEdgeValues,
     TriggerTypeValues,
 } from '../../slices/triggerSlice';
@@ -58,11 +65,28 @@ export default () => {
     const recordingLength = useSelector(getTriggerRecordingLength);
     const triggerBias = useSelector(getTriggerBias);
     const triggerValue = useSelector(getTriggerValue);
+    const triggerCategory = useSelector(getTriggerCategory);
     const triggerType = useSelector(getTriggerType);
     const triggerEdge = useSelector(getTriggerEdge);
     const { samplingRunning } = useSelector(appState);
     const dataLoggerActive =
         useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
+    const digitalChannelTriggerStates = useSelector(
+        getDigitalChannelsTriggersStates
+    );
+
+    const handleDigitalChannelsTriggerStateChange = (
+        index: number,
+        state: DigitalChannelTriggerState
+    ) => {
+        const newStates = [...digitalChannelTriggerStates];
+        newStates[index] = state;
+        dispatch(
+            setDigitalChannelsTriggersStates({
+                digitalChannelsTriggers: newStates,
+            })
+        );
+    };
 
     const [levelUnit, setLevelUnit] = useState<CurrentUnit>('µA');
 
@@ -100,6 +124,14 @@ export default () => {
 
     return (
         <>
+            <StateSelector
+                items={[...TriggerCategoryValues]}
+                onSelect={m =>
+                    dispatch(setTriggerCategory(TriggerCategoryValues[m]))
+                }
+                selectedItem={triggerCategory}
+                disabled={samplingRunning}
+            />
             <NumberInput
                 range={{
                     min: 1,
@@ -190,6 +222,41 @@ export default () => {
                 selectedItem={triggerEdge}
                 disabled={samplingRunning}
             />
+            <div className="tw-flex tw-flex-col tw-gap-0.5">
+                {digitalChannelTriggerStates.map((state, index) => (
+                    <div
+                        key={`d-trigger-${index + 1}`}
+                        className="tw-flex tw-flex-row tw-gap-3"
+                    >
+                        <span>{`Digital channel ${index}:`}</span>
+                        <select
+                            value={state}
+                            onChange={e => {
+                                handleDigitalChannelsTriggerStateChange(
+                                    index,
+                                    e.target.value as DigitalChannelTriggerState
+                                );
+                            }}
+                        >
+                            <option
+                                value={DigitalChannelTriggerStatesEnum.Active}
+                            >
+                                {DigitalChannelTriggerStatesEnum.Active}
+                            </option>
+                            <option
+                                value={DigitalChannelTriggerStatesEnum.Inactive}
+                            >
+                                {DigitalChannelTriggerStatesEnum.Inactive}
+                            </option>
+                            <option
+                                value={DigitalChannelTriggerStatesEnum.DontCare}
+                            >
+                                {DigitalChannelTriggerStatesEnum.DontCare}
+                            </option>
+                        </select>
+                    </div>
+                ))}
+            </div>
         </>
     );
 };
