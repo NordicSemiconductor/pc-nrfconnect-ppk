@@ -1,8 +1,8 @@
 # Overview and user interface
 
-The nRF Connect Power Profiler app has two views that provide detailed power consumption information.
+The {{app_name}} has two views that provide detailed power consumption information.
 
-![nRF Connect Power Profiler default view at startup](./screenshots/ppk2_standard_view.png "nRF Connect Power Profiler default view at startup")
+![{{app_name}} default view at startup](./screenshots/ppk2_standard_view.png "{{app_name}} default view at startup")
 
 ## Select Device
 
@@ -41,7 +41,7 @@ The sampling will automatically stop when the hard drive has less than the defin
 
 More options become available after selecting a device. Some options are specific to the chosen sampling mode.
 
-![nRF Connect Power Profiler default view after selecting a device](./screenshots/ppk2_standard_view_connected.png "nRF Connect Power Profiler default view after selecting a device")
+![{{app_name}} default view after selecting a device](./screenshots/ppk2_standard_view_connected.png "{{app_name}} default view after selecting a device")
 
 ### Power supply mode
 
@@ -114,7 +114,7 @@ The following options let you save the results of the sampling. They are only av
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Save/Export**                   | Available only after sampling is stopped. Saves the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of nRF Connect Power Profiler. |
+| **Save/Export**                   | Available only after sampling is stopped. Saves the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of the {{app_name}}. |
 | **Screenshot**                    | Saves the current data from either the **Data logger** or the **Scope** view as a PNG image.                                          |
 
 ### Advanced configuration
@@ -147,7 +147,7 @@ Use this control to set the voltage limit for the measurement.
 
 ## Sampling mode tabs
 
-nRF Connect Power Profiler comes with two sampling modes: **Data logger** and **Scope**.
+The {{app_name}} comes with two sampling modes: **Data logger** and **Scope**.
 
 - The **Data logger** sampling mode lets you examine the power continuously over a period of time.
   It has its own [sampling parameters](#data-logger-parameters) and lets you use the **Live Now** toggle to jump back to displaying the live measurement.
@@ -217,13 +217,13 @@ To select which digital channels you see, use the **Digital channels** menu in [
 
 ## Feedback tab
 
-The Feedback tab lets you send feedback about nRF Connect Power Profiler application to the application development team.
+The Feedback tab lets you send feedback about the {{app_name}} to the application development team.
 
 ## About tab
 
 Here you can view application information, restore settings to default, access source code, and documentation. You also can find information on the selected device, access support tools, and enable verbose logging.
 
-![nRF Connect for Desktop Power Profiler About tab](./screenshots/ppk2_about_tab.png "nRF Connect for Desktop Power Profiler About tab")
+![{{app_name}} About tab](./screenshots/ppk2_about_tab.png "{{app_name}} About tab")
 
 ## Log
 
