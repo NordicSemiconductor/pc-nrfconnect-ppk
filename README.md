@@ -1,6 +1,6 @@
-# nRF Connect Power Profiler
+# Power Profiler app
 
-nRF Connect Power Profiler is a tool to communicate with the
+The Power Profiler app is a tool to communicate with the
 [Power Profiler Kit II (PPK2)](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit-2),
 an affordable and flexible tool to obtain real-time current measurements of your
 designs.
@@ -14,7 +14,7 @@ user application.
 The support for
 [Power Profiler Kit (PPK1)](https://www.nordicsemi.com/Software-and-tools/Development-Tools/Power-Profiler-Kit)
 has been deprecated since the
-[nRF Connect Power Profiler v4.0.0-beta1](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md).
+[Power Profiler app v4.0.0-beta1](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md).
 The last application version to support PPK1 is
 [v3.5.5](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md)
 with
@@ -22,7 +22,7 @@ with
 
 ## Installation
 
-nRF Connect Power Profiler is installed from nRF Connect from Desktop. For
+The Power Profiler app is installed from nRF Connect from Desktop. For
 detailed steps, see
 [Installing nRF Connect for Desktop apps](https://docs.nordicsemi.com/bundle/nrf-connect-desktop/page/installing_apps.html)
 in the nRF Connect from Desktop documentation.
@@ -30,7 +30,7 @@ in the nRF Connect from Desktop documentation.
 ## Documentation
 
 Read the
-[nRF Connect Power Profiler](https://docs.nordicsemi.com/bundle/nrf-connect-ppk/page/index.html)
+[Power Profiler app](https://docs.nordicsemi.com/bundle/nrf-connect-ppk/page/index.html)
 official documentation for information about its UI and features.
 
 (The documentation is valid for PPK2. If you use the first version of the

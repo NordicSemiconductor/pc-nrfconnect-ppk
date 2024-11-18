@@ -1,9 +1,13 @@
-## 4.3.0 - Unreleased
+## 4.2.1 - 2024-11-11
+
+### Changed
+
+-   Updated `nrfutil device` to v2.6.4.
 
 ### Fixed
 
 -   Floating point ranges in Advanced Configuration are now rounded correctly
-    when initialized
+    when initialized.
 
 ## 4.2.0 - 2024-07-17
 
