@@ -38,6 +38,17 @@ jest.mock('../../utils/persistentStore', () => ({
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
     getTriggerEdge: () => 'Raising Edge',
+    getTriggerCategory: () => 'Analog',
+    getDigitalChannelsTriggers: () => [
+        'Active',
+        'Active',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+    ],
 }));
 
 const getTimestampMock = jest.fn(() => 0);

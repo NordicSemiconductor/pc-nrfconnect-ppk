@@ -7,15 +7,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
-    digitalChannelStateTupleOf8,
-    getDigitslChanelTriggers as getPersistedDigitalChannelsTriggers,
+    getDigitalChannelsTriggers as getPersistedDigitalChannelsTriggers,
     getRecordingLength as getPersistedRecordingLength,
     getTriggerBias as getPersistedTriggerBias,
     getTriggerCategory as getPersistedTriggerCategory,
     getTriggerEdge as getPersistedTriggerEdge,
     getTriggerLevel as getPersistedTriggerLevel,
     getTriggerType as getPersistedTriggerType,
-    setDigitalChannelTriggers as persistDigitalChannelsTriggers,
+    setDigitalChannelsTriggers as persistDigitalChannelsTriggers,
     setRecordingLength as persistRecordingLength,
     setTriggerBias as persistTriggerBias,
     setTriggerCategory as persistTriggerCategory,

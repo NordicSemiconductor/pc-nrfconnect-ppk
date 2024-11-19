@@ -175,7 +175,7 @@ export const getTriggerEdge = (defaultValue: TriggerEdge) =>
 export const setTriggerEdge = (value: TriggerEdge) => {
     store.set(`trigger-edge`, value);
 };
-export const getDigitslChanelTriggers = () =>
+export const getDigitalChannelsTriggers = () =>
     store.get(DIGITAL_CHANNELS_TRIGGERS, [
         'Inactive',
         'Inactive',
@@ -186,7 +186,7 @@ export const getDigitslChanelTriggers = () =>
         'Inactive',
         'Inactive',
     ]);
-export const setDigitalChannelTriggers = (
+export const setDigitalChannelsTriggers = (
     triggers: DigitalChannelTriggerState[]
 ) => store.set(DIGITAL_CHANNELS_TRIGGERS, triggers);
 

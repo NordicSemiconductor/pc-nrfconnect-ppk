@@ -37,6 +37,17 @@ jest.mock('../../utils/persistentStore', () => ({
     getTriggerEdge: () => 'Raising Edge',
     getPreferredSessionLocation: () => '/tmp',
     getDiskFullTrigger: () => 4096,
+    getTriggerCategory: () => 'Analog',
+    getDigitalChannelsTriggers: () => [
+        'Active',
+        'Active',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+    ],
 }));
 
 const getTimestampMock = jest.fn(() => 100);
