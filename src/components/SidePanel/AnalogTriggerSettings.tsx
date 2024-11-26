@@ -15,12 +15,8 @@ import {
 import { appState } from '../../slices/appSlice';
 import { getRecordingMode } from '../../slices/chartSlice';
 import {
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerStatesEnum,
-    getDigitalChannelsTriggersStates,
     getTriggerEdge,
     getTriggerValue,
-    setDigitalChannelsTriggersStates,
     setTriggerEdge,
     setTriggerLevel,
     TriggerEdgeValues,
@@ -54,22 +50,6 @@ export default () => {
     const { samplingRunning } = useSelector(appState);
     const dataLoggerActive =
         useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
-    const digitalChannelTriggerStates = useSelector(
-        getDigitalChannelsTriggersStates
-    );
-
-    const handleDigitalChannelsTriggerStateChange = (
-        index: number,
-        state: DigitalChannelTriggerState
-    ) => {
-        const newStates = [...digitalChannelTriggerStates];
-        newStates[index] = state;
-        dispatch(
-            setDigitalChannelsTriggersStates({
-                digitalChannelsTriggers: newStates,
-            })
-        );
-    };
 
     const [levelUnit, setLevelUnit] = useState<CurrentUnit>('µA');
 
@@ -134,41 +114,6 @@ export default () => {
                 selectedItem={triggerEdge}
                 disabled={samplingRunning}
             />
-            <div className="tw-flex tw-flex-col tw-gap-0.5">
-                {digitalChannelTriggerStates.map((state, index) => (
-                    <div
-                        key={`d-trigger-${index + 1}`}
-                        className="tw-flex tw-flex-row tw-gap-3"
-                    >
-                        <span>{`Digital channel ${index}:`}</span>
-                        <select
-                            value={state}
-                            onChange={e => {
-                                handleDigitalChannelsTriggerStateChange(
-                                    index,
-                                    e.target.value as DigitalChannelTriggerState
-                                );
-                            }}
-                        >
-                            <option
-                                value={DigitalChannelTriggerStatesEnum.Active}
-                            >
-                                {DigitalChannelTriggerStatesEnum.Active}
-                            </option>
-                            <option
-                                value={DigitalChannelTriggerStatesEnum.Inactive}
-                            >
-                                {DigitalChannelTriggerStatesEnum.Inactive}
-                            </option>
-                            <option
-                                value={DigitalChannelTriggerStatesEnum.DontCare}
-                            >
-                                {DigitalChannelTriggerStatesEnum.DontCare}
-                            </option>
-                        </select>
-                    </div>
-                ))}
-            </div>
         </>
     );
 };

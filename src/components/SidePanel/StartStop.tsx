@@ -53,9 +53,10 @@ import {
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import { resetCache } from '../Chart/data/dataAccumulator';
+import AnalogTriggerSettings from './AnalogTriggerSettings';
+import DigitalTriggerSettings from './DigitalTriggerSettings';
 import LiveModeSettings from './LiveModeSettings';
 import SamplingSettings from './SamplingSettings';
-import TriggerSettings from './TriggerSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
@@ -178,7 +179,12 @@ export default () => {
                 {scopePane && <SamplingSettings />}
             </Group>
             <Group heading="Trigger settings" gap={4}>
-                {scopePane && <TriggerSettings />}
+                {scopePane && triggerCategory === 'Analog' && (
+                    <AnalogTriggerSettings />
+                )}
+                {scopePane && triggerCategory === 'Digital' && (
+                    <DigitalTriggerSettings />
+                )}
             </Group>
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton
