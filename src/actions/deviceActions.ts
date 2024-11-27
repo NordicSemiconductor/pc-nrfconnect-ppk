@@ -70,6 +70,7 @@ import {
     setProgress,
     setTriggerActive,
     setTriggerOrigin,
+    TriggerEdge,
 } from '../slices/triggerSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import { convertBits16 } from '../utils/bitConversion';
@@ -210,6 +211,69 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
     );
 };
 
+function createBitmask(channelTriggerStatuses: string[]): {
+    activeMask: number;
+    inactiveMask: number;
+} {
+    let activeMask = 0;
+    let inactiveMask = 0;
+
+    for (let i = 0; i < channelTriggerStatuses.length; i += 1) {
+        if (channelTriggerStatuses[i] === 'Active') {
+            activeMask |= 1 << i;
+        } else if (channelTriggerStatuses[i] === 'Inactive') {
+            inactiveMask |= 1 << i;
+        }
+        // "DontCare" bits are ignored
+    }
+
+    return { activeMask, inactiveMask };
+}
+
+function checkDigitalTriggerValidity(
+    unsignedBits: number,
+    previousUnsignedBits: number,
+    channelTriggerStatuses: string[]
+): boolean {
+    const { activeMask, inactiveMask } = createBitmask(channelTriggerStatuses);
+
+    // Check if previous bits do not meet the active trigger condition
+    if ((previousUnsignedBits & activeMask) === activeMask) {
+        return false;
+    }
+
+    // Check if all active bits are set in unsignedBits
+    if ((unsignedBits & activeMask) !== activeMask) {
+        return false;
+    }
+
+    // Check if all inactive bits are not set in unsignedBits
+    if ((unsignedBits & inactiveMask) !== 0) {
+        return false;
+    }
+
+    return true;
+}
+
+function checkAnalogTriggerValidity(
+    cappedValue: number,
+    prevCappedValue: number | undefined,
+    triggerLevel: number,
+    triggerEdge: TriggerEdge
+): boolean {
+    const isRaisingEdge = triggerEdge === 'Raising Edge';
+    const isLoweringEdge = triggerEdge === 'Lowering Edge';
+    const validTriggerValue =
+        prevCappedValue != null &&
+        ((isRaisingEdge &&
+            prevCappedValue < triggerLevel &&
+            cappedValue >= triggerLevel) ||
+            (isLoweringEdge &&
+                prevCappedValue > triggerLevel &&
+                cappedValue <= triggerLevel));
+    return validTriggerValue;
+}
+
 export const open =
     (deviceInfo: Device): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
@@ -223,6 +287,7 @@ export const open =
         let prevValue = 0;
         let prevCappedValue: number | undefined;
         let prevBits = 0;
+        let prevUnsignedBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
 
@@ -243,6 +308,9 @@ export const open =
                 cappedValue = 0;
             }
 
+            const channelTriggerStatuses =
+                state.app.trigger.digitalChannelsTriggersStates;
+            const unsignedBits = bits !== undefined ? bits & 0xff : 0;
             const b16 = convertBits16(bits!);
 
             if (samplingRunning && sampleFreq < maxSampleFreq) {
@@ -267,20 +335,24 @@ export const open =
             prevBits = 0;
 
             if (getRecordingMode(state) === 'Scope') {
-                const isRaisingEdge = state.app.trigger.edge === 'Raising Edge';
-                const isLoweringEdge =
-                    state.app.trigger.edge === 'Lowering Edge';
+                const triggerCategory = state.app.trigger.category;
 
                 const validTriggerValue =
-                    prevCappedValue != null &&
-                    ((isRaisingEdge &&
-                        prevCappedValue < state.app.trigger.level &&
-                        cappedValue >= state.app.trigger.level) ||
-                        (isLoweringEdge &&
-                            prevCappedValue > state.app.trigger.level &&
-                            cappedValue <= state.app.trigger.level));
+                    triggerCategory === 'Analog'
+                        ? checkAnalogTriggerValidity(
+                              cappedValue,
+                              prevCappedValue,
+                              state.app.trigger.level,
+                              state.app.trigger.edge
+                          )
+                        : checkDigitalTriggerValidity(
+                              unsignedBits,
+                              prevUnsignedBits,
+                              channelTriggerStatuses
+                          );
 
                 prevCappedValue = cappedValue;
+                prevUnsignedBits = unsignedBits;
 
                 if (!DataManager().isInSync()) {
                     return;
@@ -296,7 +368,6 @@ export const open =
                     }
                     dispatch(setTriggerActive(true));
                     const biasPercentage = getTriggerBias(getState());
-                    console.log('biasPercentage', biasPercentage);
                     dispatch(
                         processTrigger(
                             cappedValue,

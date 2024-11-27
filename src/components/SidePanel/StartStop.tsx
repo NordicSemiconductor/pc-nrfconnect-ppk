@@ -171,7 +171,6 @@ export default () => {
                         dispatch(setTriggerCategory(TriggerCategoryValues[m]))
                     }
                     selectedItem={triggerCategory}
-                    disabled={samplingRunning}
                 />
             )}
             <Group heading="Sampling parameters" gap={4}>
