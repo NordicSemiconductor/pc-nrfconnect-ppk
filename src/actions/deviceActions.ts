@@ -211,10 +211,11 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
     );
 };
 
-function createBitmask(channelTriggerStatuses: string[]): {
-    activeMask: number;
-    inactiveMask: number;
-} {
+function checkDigitalTriggerValidity(
+    unsignedBits: number,
+    previousUnsignedBits: number,
+    channelTriggerStatuses: string[]
+): boolean {
     let activeMask = 0;
     let inactiveMask = 0;
 
@@ -226,16 +227,6 @@ function createBitmask(channelTriggerStatuses: string[]): {
         }
         // "DontCare" bits are ignored
     }
-
-    return { activeMask, inactiveMask };
-}
-
-function checkDigitalTriggerValidity(
-    unsignedBits: number,
-    previousUnsignedBits: number,
-    channelTriggerStatuses: string[]
-): boolean {
-    const { activeMask, inactiveMask } = createBitmask(channelTriggerStatuses);
 
     // Check if previous bits do not meet the active trigger condition
     if ((previousUnsignedBits & activeMask) === activeMask) {
