@@ -6,6 +6,10 @@
 
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import {
+    Dropdown,
+    DropdownItem,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
     DigitalChannelTriggerState,
@@ -13,6 +17,21 @@ import {
     getDigitalChannelsTriggersStates,
     setDigitalChannelsTriggersStates,
 } from '../../slices/triggerSlice';
+
+const dropdownItems: DropdownItem[] = [
+    {
+        value: DigitalChannelTriggerStatesEnum.Active,
+        label: DigitalChannelTriggerStatesEnum.Active,
+    },
+    {
+        value: DigitalChannelTriggerStatesEnum.Inactive,
+        label: DigitalChannelTriggerStatesEnum.Inactive,
+    },
+    {
+        value: DigitalChannelTriggerStatesEnum.DontCare,
+        label: DigitalChannelTriggerStatesEnum.DontCare,
+    },
+];
 
 export default () => {
     const dispatch = useDispatch();
@@ -34,36 +53,26 @@ export default () => {
     };
 
     return (
-        <div className="tw-flex tw-flex-col tw-gap-0.5">
+        <div className="tw-flex tw-flex-col tw-gap-3">
             {digitalChannelTriggerStates.map((state, index) => (
                 <div
                     key={`d-trigger-${index + 1}`}
                     className="tw-flex tw-flex-row tw-gap-3"
                 >
-                    <span>{`Digital channel ${index}:`}</span>
-                    <select
-                        value={state}
-                        onChange={e => {
+                    <div>{`Digital channel ${index}:`}</div>
+                    <Dropdown
+                        onSelect={value => {
                             handleDigitalChannelsTriggerStateChange(
                                 index,
-                                e.target.value as DigitalChannelTriggerState
+                                value.value as DigitalChannelTriggerState
                             );
                         }}
-                    >
-                        <option value={DigitalChannelTriggerStatesEnum.Active}>
-                            {DigitalChannelTriggerStatesEnum.Active}
-                        </option>
-                        <option
-                            value={DigitalChannelTriggerStatesEnum.Inactive}
-                        >
-                            {DigitalChannelTriggerStatesEnum.Inactive}
-                        </option>
-                        <option
-                            value={DigitalChannelTriggerStatesEnum.DontCare}
-                        >
-                            {DigitalChannelTriggerStatesEnum.DontCare}
-                        </option>
-                    </select>
+                        items={dropdownItems}
+                        selectedItem={
+                            dropdownItems.find(item => item.value === state) ??
+                            dropdownItems[0]
+                        }
+                    />
                 </div>
             ))}
         </div>
