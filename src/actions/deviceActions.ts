@@ -216,34 +216,23 @@ function checkDigitalTriggerValidity(
     previousUnsignedBits: number,
     channelTriggerStatuses: string[]
 ): boolean {
-    let activeMask = 0;
-    let inactiveMask = 0;
+    const isTriggerValid = (bits: number) =>
+        channelTriggerStatuses.every((status, index) => {
+            const bit = (bits >> index) & 0x01;
 
-    for (let i = 0; i < channelTriggerStatuses.length; i += 1) {
-        if (channelTriggerStatuses[i] === 'Active') {
-            activeMask |= 1 << i;
-        } else if (channelTriggerStatuses[i] === 'Inactive') {
-            inactiveMask |= 1 << i;
-        }
-        // "DontCare" bits are ignored
-    }
+            if (
+                (status === 'Active' && bit !== 1) ||
+                (status === 'Inactive' && bit !== 0)
+            ) {
+                return false;
+            }
 
-    // Check if previous bits do not meet the active trigger condition
-    if ((previousUnsignedBits & activeMask) === activeMask) {
-        return false;
-    }
+            return true;
+        });
 
-    // Check if all active bits are set in unsignedBits
-    if ((unsignedBits & activeMask) !== activeMask) {
-        return false;
-    }
-
-    // Check if all inactive bits are not set in unsignedBits
-    if ((unsignedBits & inactiveMask) !== 0) {
-        return false;
-    }
-
-    return true;
+    return (
+        !isTriggerValid(previousUnsignedBits) && isTriggerValid(unsignedBits)
+    );
 }
 
 function checkAnalogTriggerValidity(
@@ -336,7 +325,8 @@ export const open =
                               state.app.trigger.level,
                               state.app.trigger.edge
                           )
-                        : checkDigitalTriggerValidity(
+                        : prevUnsignedBits !== unsignedBits &&
+                          checkDigitalTriggerValidity(
                               unsignedBits,
                               prevUnsignedBits,
                               channelTriggerStatuses
