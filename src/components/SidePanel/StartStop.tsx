@@ -177,7 +177,7 @@ export default () => {
                 {dataLoggerPane && <LiveModeSettings />}
                 {scopePane && <SamplingSettings />}
             </Group>
-            <Group heading="Trigger settings" gap={4}>
+            <Group heading="Trigger settings" gap={4} collapsible>
                 {scopePane && triggerCategory === 'Analog' && (
                     <AnalogTriggerSettings />
                 )}
