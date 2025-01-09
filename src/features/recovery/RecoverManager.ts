@@ -13,14 +13,14 @@ import {
     frameSize,
     getSamplingTime,
     GlobalOptions,
-} from '../globals';
-import { FileBuffer } from './FileBuffer';
-import { FoldingBuffer } from './foldingBuffer';
+} from '../../globals';
+import { FileBuffer } from '../../utils/FileBuffer';
+import { FoldingBuffer } from '../../utils/foldingBuffer';
 
 // TODO: Get possible rates from the defined rates somewhere in the project.
 const possibleRates = [1, 10, 100, 1000, 10000, 100000];
 
-const pageSize = 10 * 100 * frameSize; // 6 bytes per sample for and 10sec buffers at highest sampling rate
+const pageSize = 10 * 100_000 * frameSize; // 6 bytes per sample for and 10sec buffers at highest sampling rate
 const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
 
