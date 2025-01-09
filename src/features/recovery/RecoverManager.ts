@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
+import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
@@ -16,6 +17,7 @@ import {
 } from '../../globals';
 import { FileBuffer } from '../../utils/FileBuffer';
 import { FoldingBuffer } from '../../utils/foldingBuffer';
+import { ReadSessions, Session } from './SessionsListFileHandler';
 
 // TODO: Get possible rates from the defined rates somewhere in the project.
 const possibleRates = [1, 10, 100, 1000, 10000, 100000];
@@ -23,8 +25,12 @@ const possibleRates = [1, 10, 100, 1000, 10000, 100000];
 const pageSize = 10 * 100_000 * frameSize; // 6 bytes per sample for and 10sec buffers at highest sampling rate
 const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
+const currentProcessName = process.argv[0].split(path.sep)[
+    process.argv[0].split(path.sep).length - 1
+];
 
 const stat = promisify(fs.stat);
+const execAsync = promisify(exec);
 
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
@@ -112,7 +118,49 @@ function processBuffer(buffer: Buffer, bytesRead: number, records: number) {
     return records;
 }
 
-export const RecoverManager = () => ({
+async function getProcessInfo(
+    processId: number
+): Promise<{ processName: string; pid: string } | null> {
+    const platform = process.platform;
+    let command: string;
+
+    if (platform === 'win32') {
+        command = `wmic process where ProcessId=${processId} get name,processid`;
+    } else if (platform === 'linux' || platform === 'darwin') {
+        // Use `ps` to get process details on Linux/macOS
+        command = `ps -p ${processId} -o comm=`;
+    } else {
+        throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    try {
+        const { stdout, stderr } = await execAsync(command);
+        if (stderr) {
+            console.error(`Error fetching process details: ${stderr}`);
+            return null;
+        }
+
+        const lines = stdout.trim().split('\n');
+        if (lines.length >= 1) {
+            // For Windows, split process details; for Linux/macOS, return process name directly
+            if (platform === 'win32') {
+                const [processName, pid] = lines[1]?.trim().split(/\s+/) || [];
+                return { processName, pid };
+            }
+
+            return {
+                processName: lines[0].trim(),
+                pid: processId.toString(),
+            };
+        }
+    } catch (error) {
+        return null;
+    }
+
+    return null;
+}
+
+export const RecoveryManager = () => ({
     async recoverSession(
         sessionPath: string,
         onProgress: (progress: number) => void,
@@ -183,5 +231,43 @@ export const RecoverManager = () => ({
         };
 
         queueMicrotask(processChunk);
+    },
+    async searchOrphanedSessions(
+        onProgress: (progress: number) => void,
+        onComplete: (orphanedSessions: Session[]) => void
+    ) {
+        const orphanedSessions: Session[] = [];
+        const sessions = await ReadSessions();
+
+        const checkSession = async (
+            session: Session,
+            index: number
+        ): Promise<void> => {
+            await getProcessInfo(parseInt(session.pid, 10))
+                .then(processInfo => {
+                    if (processInfo) {
+                        const { processName, pid } = processInfo;
+                        if (
+                            pid === session.pid &&
+                            processName !== currentProcessName
+                        ) {
+                            orphanedSessions.push(session);
+                        }
+                    } else {
+                        orphanedSessions.push(session);
+                    }
+                })
+                .finally(() => {
+                    onProgress(((index + 1) / sessions.length) * 100);
+                });
+        };
+
+        await Promise.all(
+            sessions.map(async (session, index) => {
+                await checkSession(session, index);
+            })
+        );
+
+        onComplete(orphanedSessions);
     },
 });
