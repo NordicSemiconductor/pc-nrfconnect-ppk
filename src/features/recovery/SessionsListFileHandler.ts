@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ */
+
 import { getAppDataDir } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 import path from 'path';
