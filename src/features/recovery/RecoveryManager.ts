@@ -239,7 +239,13 @@ export const RecoveryManager = () => ({
         const orphanedSessions: Session[] = [];
         const sessions = await ReadSessions();
 
-        const checkSession = (session: Session, index: number) => {
+        const checkSession = (index: number) => {
+            if (index === sessions.length - 1) {
+                onComplete(orphanedSessions);
+                return;
+            }
+
+            const session = sessions[index];
             const processInfo = getProcessInfo(parseInt(session.pid, 10));
 
             if (processInfo) {
@@ -252,17 +258,9 @@ export const RecoveryManager = () => ({
             }
 
             onProgress(((index + 1) / sessions.length) * 100);
+            setTimeout(() => checkSession(index + 1), 0);
         };
 
-        const processSessions = () => {
-            sessions.forEach((session, index) => {
-                checkSession(session, index);
-            });
-
-            onComplete(orphanedSessions);
-        };
-
-        queueMicrotask(processSessions);
-        console.log('Test');
+        setTimeout(() => checkSession(0), 0);
     },
 });

@@ -98,7 +98,7 @@ export default () => {
                     The following orphan sessions were found. Whould you like to
                     recover?
                 </div>
-                <div className="tw-flex tw-max-h-96 tw-flex-col tw-gap-1 tw-overflow-y-auto">
+                <div className="core19-app tw-flex tw-max-h-96 tw-flex-col tw-gap-1 tw-overflow-y-auto">
                     <ItemizedOption orphanedSessions={orphanedSessions} />
                 </div>
             </GenericDialog>

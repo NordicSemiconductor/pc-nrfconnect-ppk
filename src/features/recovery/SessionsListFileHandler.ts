@@ -10,11 +10,12 @@ import path from 'path';
 
 const appDataFolder = getAppDataDir();
 const sessionsListFilePath = path.join(appDataFolder, 'sessions.txt');
+const lineFormatRegex = /^[^\t]+\t.+$/;
 
-export interface Session {
+export type Session = {
     pid: string;
     directory: string;
-}
+};
 
 export const ReadSessions = async (): Promise<Session[]> => {
     if (!fs.existsSync(sessionsListFilePath)) {
@@ -25,10 +26,16 @@ export const ReadSessions = async (): Promise<Session[]> => {
         encoding: 'utf8',
     });
 
-    return sessionsList.split('\n').map(session => {
-        const [pid, directory] = session.split('\t');
-        return { pid, directory };
-    });
+    const lines = sessionsList.split(/\r?\n/);
+
+    const validLines: Session[] = lines
+        .filter(line => line.trim() !== '' && lineFormatRegex.test(line))
+        .map(line => {
+            const [pid, directory] = line.split('\t');
+            return { pid, directory };
+        });
+
+    return validLines;
 };
 
 export const WriteSessions = async (sessions: Session[]) => {
