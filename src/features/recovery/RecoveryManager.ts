@@ -30,7 +30,6 @@ const currentProcessName = process.argv[0].split(path.sep)[
 ];
 
 const stat = promisify(fs.stat);
-const execAsync = promisify(exec);
 
 const options: GlobalOptions = {
     samplesPerSecond: initialSamplesPerSecond,
@@ -118,9 +117,7 @@ function processBuffer(buffer: Buffer, bytesRead: number, records: number) {
     return records;
 }
 
-async function getProcessInfo(
-    processId: number
-): Promise<{ processName: string; pid: string } | null> {
+function getProcessInfo(processId: number) {
     const platform = process.platform;
     let command: string;
 
@@ -133,14 +130,19 @@ async function getProcessInfo(
         throw new Error(`Unsupported platform: ${platform}`);
     }
 
-    try {
-        const { stdout, stderr } = await execAsync(command);
+    exec(command, (error, stdout, stderr) => {
         if (stderr) {
-            console.error(`Error fetching process details: ${stderr}`);
+            // console.error(`Error fetching process details: ${stderr}`);
+            return null;
+        }
+
+        if (error) {
+            // TODO: Should we consider the session as orphaned as the error is raised by the command itself, but not the process?
             return null;
         }
 
         const lines = stdout.trim().split('\n');
+
         if (lines.length >= 1) {
             // For Windows, split process details; for Linux/macOS, return process name directly
             if (platform === 'win32') {
@@ -153,9 +155,7 @@ async function getProcessInfo(
                 pid: processId.toString(),
             };
         }
-    } catch (error) {
-        return null;
-    }
+    });
 
     return null;
 }
@@ -239,35 +239,30 @@ export const RecoveryManager = () => ({
         const orphanedSessions: Session[] = [];
         const sessions = await ReadSessions();
 
-        const checkSession = async (
-            session: Session,
-            index: number
-        ): Promise<void> => {
-            await getProcessInfo(parseInt(session.pid, 10))
-                .then(processInfo => {
-                    if (processInfo) {
-                        const { processName, pid } = processInfo;
-                        if (
-                            pid === session.pid &&
-                            processName !== currentProcessName
-                        ) {
-                            orphanedSessions.push(session);
-                        }
-                    } else {
-                        orphanedSessions.push(session);
-                    }
-                })
-                .finally(() => {
-                    onProgress(((index + 1) / sessions.length) * 100);
-                });
+        const checkSession = (session: Session, index: number) => {
+            const processInfo = getProcessInfo(parseInt(session.pid, 10));
+
+            if (processInfo) {
+                const { processName, pid } = processInfo;
+                if (pid === session.pid && processName !== currentProcessName) {
+                    orphanedSessions.push(session);
+                }
+            } else {
+                orphanedSessions.push(session);
+            }
+
+            onProgress(((index + 1) / sessions.length) * 100);
         };
 
-        await Promise.all(
-            sessions.map(async (session, index) => {
-                await checkSession(session, index);
-            })
-        );
+        const processSessions = () => {
+            sessions.forEach((session, index) => {
+                checkSession(session, index);
+            });
 
-        onComplete(orphanedSessions);
+            onComplete(orphanedSessions);
+        };
+
+        queueMicrotask(processSessions);
+        console.log('Test');
     },
 });

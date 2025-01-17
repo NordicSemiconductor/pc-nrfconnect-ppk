@@ -40,7 +40,9 @@ const ItemizedOption = ({
     <div className="tw-flex tw-flex-col tw-gap-1">
         {orphanedSessions.map(session => (
             <Option
-                key={session.directory}
+                key={
+                    session.directory + Math.random().toString(36).substr(2, 9)
+                }
                 onClick={() => {}}
                 buttonText={session.directory}
             />
@@ -64,6 +66,7 @@ export default () => {
                             console.log(progress);
                         },
                         (orphanSessions: Session[]) => {
+                            console.log('Completed');
                             setOrphanedSessions(orphanSessions);
                             if (orphanSessions.length > 0) {
                                 setIsDialogVisible(true);
