@@ -7,45 +7,54 @@
 import React, { useEffect } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import {
+    Button,
     DialogButton,
     GenericDialog,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
+import { formatDuration, formatTimestamp } from '../../utils/formatters';
 import { RecoveryManager } from './RecoveryManager';
 import { Session } from './SessionsListFileHandler';
 
-const Option = ({
-    onClick,
-    buttonText,
-}: {
-    onClick: () => void;
-    buttonText: string;
-}) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="tw-group tw-h-full tw-w-full tw-text-gray-700"
-    >
-        <div className="tw-flex tw-h-8 tw-w-full tw-flex-row tw-items-center tw-border tw-border-gray-50 tw-bg-gray-50 tw-ps-3 tw-text-xs group-hover:tw-bg-primary group-hover:tw-text-white">
-            {buttonText}
+const SessionItem = ({ session }: { session: Session }) => (
+    <div className="tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
+        <div>
+            <div className="tw-text-xs">Start time</div>
+            <div>{formatTimestamp(session.startTime)}</div>
         </div>
-    </button>
+        <div>
+            <div className="tw-text-xs">Duration</div>
+            <div>
+                {formatDuration(
+                    session.samplingDuration ? session.samplingDuration : 0
+                )}
+            </div>
+        </div>
+        <div>
+            <div className="tw-text-xs">Sampling rate</div>
+            <div>{session.samplingRate}</div>
+        </div>
+        <div className="tw-content-center tw-align-middle">
+            <div className="tw-flex tw-flex-row tw-gap-2">
+                <Button variant="danger" onClick={() => {}}>
+                    Delete
+                </Button>
+                <Button variant="secondary" onClick={() => {}}>
+                    Recover
+                </Button>
+            </div>
+        </div>
+    </div>
 );
 
-const ItemizedOption = ({
+const ItemizedSessions = ({
     orphanedSessions,
 }: {
     orphanedSessions: Session[];
 }) => (
-    <div className="tw-flex tw-flex-col tw-gap-1">
+    <div className="tw-flex tw-flex-col tw-gap-2">
         {orphanedSessions.map(session => (
-            <Option
-                key={
-                    session.directory + Math.random().toString(36).substr(2, 9)
-                }
-                onClick={() => {}}
-                buttonText={session.directory}
-            />
+            <SessionItem key={Math.random().toString(36)} session={session} />
         ))}
     </div>
 );
@@ -135,7 +144,7 @@ export default () => {
                         }}
                         disabled={isSearching}
                     >
-                        Close
+                        Cancel
                     </DialogButton>
                 }
                 isVisible={isSessionsListDialogVisible}
@@ -154,14 +163,12 @@ export default () => {
 
                 {!isSearching && (
                     <>
-                        <div>
+                        <div className="tw-mb-4">
                             The following orphan sessions were found. Whould you
                             like to recover?
                         </div>
-                        <div className="core19-app tw-flex tw-max-h-96 tw-flex-col tw-gap-1 tw-overflow-y-auto">
-                            <ItemizedOption
-                                orphanedSessions={orphanedSessions}
-                            />
+                        <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
+                            {ItemizedSessions({ orphanedSessions })}
                         </div>
                     </>
                 )}
