@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 
 const appDataFolder = getAppDataDir();
-const sessionsListFilePath = path.join(appDataFolder, 'sessions.txt');
+const sessionsListFilePath = path.join(appDataFolder, 'sessions.ppksess');
 const lineFormatRegex = /^[^\t]+\t.+$/;
 
 export type Session = {
@@ -21,6 +21,7 @@ export type Session = {
 
 export const ReadSessions = async (): Promise<Session[]> => {
     if (!fs.existsSync(sessionsListFilePath)) {
+        await fs.promises.writeFile(sessionsListFilePath, '');
         return [];
     }
 
@@ -47,7 +48,6 @@ export const ReadSessions = async (): Promise<Session[]> => {
         await WriteSessions(validSessions);
     }
 
-    console.log(validSessions);
     return validSessions;
 };
 

@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 import {
-    Button,
     DialogButton,
     GenericDialog,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -51,32 +51,79 @@ const ItemizedOption = ({
 );
 
 export default () => {
-    const [isDialogVisible, setIsDialogVisible] = React.useState(false);
+    const [isSessionsFoundDialogVisible, setIsSessionsFoundDialogVisible] =
+        React.useState(false);
+    const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
+        React.useState(false);
     const [orphanedSessions, setOrphanedSessions] = React.useState<Session[]>(
         []
     );
 
+    const [isSearching, setIsSearching] = React.useState(false);
+    const [sessionSearchProgress, setSessionSearchProgress] = React.useState(0);
+
+    useEffect(() => {
+        RecoveryManager().searchOrphanedSessions(
+            () => {},
+            (orphanSessions: Session[]) => {
+                if (orphanSessions.length > 0) {
+                    setIsSessionsFoundDialogVisible(true);
+                }
+            },
+            true
+        );
+    }, []);
+
     return (
         <>
-            <Button
-                variant="secondary"
-                onClick={() => {
-                    RecoveryManager().searchOrphanedSessions(
-                        (progress: number) => {
-                            console.log(progress);
-                        },
-                        (orphanSessions: Session[]) => {
-                            console.log('Completed');
-                            setOrphanedSessions(orphanSessions);
-                            if (orphanSessions.length > 0) {
-                                setIsDialogVisible(true);
-                            }
-                        }
-                    );
-                }}
+            <GenericDialog
+                className="tw-preflight tw-max-h-screen"
+                title="Session Recovery"
+                footer={
+                    <>
+                        <DialogButton
+                            variant="success"
+                            onClick={() => {
+                                setIsSessionsFoundDialogVisible(false);
+                                setIsSessionsListDialogVisible(true);
+                                setIsSearching(true);
+                                RecoveryManager().searchOrphanedSessions(
+                                    (progress: number) => {
+                                        setSessionSearchProgress(progress);
+                                    },
+                                    (orphanSessions: Session[]) => {
+                                        setIsSearching(false);
+                                        setOrphanedSessions(orphanSessions);
+                                        if (orphanSessions.length > 0) {
+                                            setIsSessionsListDialogVisible(
+                                                true
+                                            );
+                                        }
+                                    }
+                                );
+                            }}
+                        >
+                            Yes
+                        </DialogButton>
+                        <DialogButton
+                            variant="danger"
+                            onClick={() => {
+                                setIsSessionsFoundDialogVisible(false);
+                            }}
+                        >
+                            No
+                        </DialogButton>
+                    </>
+                }
+                isVisible={isSessionsFoundDialogVisible}
+                closeOnEsc
+                closeOnUnfocus
             >
-                There are orphaned sessions. Click to recover.
-            </Button>
+                <div>
+                    There are orphaned sessions found. Would you like to recover
+                    some of them?
+                </div>
+            </GenericDialog>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
                 title="Session Recovery"
@@ -84,23 +131,40 @@ export default () => {
                     <DialogButton
                         variant="secondary"
                         onClick={() => {
-                            setIsDialogVisible(false);
+                            setIsSessionsListDialogVisible(false);
                         }}
+                        disabled={isSearching}
                     >
                         Close
                     </DialogButton>
                 }
-                isVisible={isDialogVisible}
+                isVisible={isSessionsListDialogVisible}
                 closeOnEsc
                 closeOnUnfocus
             >
-                <div className="tw-mb-3">
-                    The following orphan sessions were found. Whould you like to
-                    recover?
-                </div>
-                <div className="core19-app tw-flex tw-max-h-96 tw-flex-col tw-gap-1 tw-overflow-y-auto">
-                    <ItemizedOption orphanedSessions={orphanedSessions} />
-                </div>
+                {isSearching && (
+                    <>
+                        <div>
+                            We are searching for oephaned sessions on your
+                            system. Please wait.
+                        </div>
+                        <ProgressBar now={sessionSearchProgress} animated />
+                    </>
+                )}
+
+                {!isSearching && (
+                    <>
+                        <div>
+                            The following orphan sessions were found. Whould you
+                            like to recover?
+                        </div>
+                        <div className="core19-app tw-flex tw-max-h-96 tw-flex-col tw-gap-1 tw-overflow-y-auto">
+                            <ItemizedOption
+                                orphanedSessions={orphanedSessions}
+                            />
+                        </div>
+                    </>
+                )}
             </GenericDialog>
         </>
     );

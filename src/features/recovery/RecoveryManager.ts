@@ -234,7 +234,8 @@ export const RecoveryManager = () => ({
     },
     async searchOrphanedSessions(
         onProgress: (progress: number) => void,
-        onComplete: (orphanedSessions: Session[]) => void
+        onComplete: (orphanedSessions: Session[]) => void,
+        findOnlyOne = false
     ) {
         const orphanedSessions: Session[] = [];
         const sessions = await ReadSessions();
@@ -253,6 +254,11 @@ export const RecoveryManager = () => ({
             }
 
             onProgress(((index + 1) / sessions.length) * 100);
+
+            if (findOnlyOne && orphanedSessions.length > 0) {
+                onComplete(orphanedSessions);
+                return;
+            }
 
             if (index < sessions.length - 1) {
                 setTimeout(() => checkSession(index + 1), 0);
