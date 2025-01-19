@@ -14,6 +14,8 @@ const lineFormatRegex = /^[^\t]+\t.+$/;
 
 export type Session = {
     pid: string;
+    startTime: number;
+    samplingRate: number;
     directory: string;
 };
 
@@ -31,11 +33,35 @@ export const ReadSessions = async (): Promise<Session[]> => {
     const validLines: Session[] = lines
         .filter(line => line.trim() !== '' && lineFormatRegex.test(line))
         .map(line => {
-            const [pid, directory] = line.split('\t');
-            return { pid, directory };
+            const [pid, startTime, samplingRate, directory] = line.split('\t');
+            return {
+                pid,
+                startTime: Number(startTime),
+                samplingRate: Number(samplingRate),
+                directory,
+            };
         });
 
-    return validLines;
+    const validSessions = ValidateExistance(validLines);
+    if (validSessions.length !== validLines.length) {
+        await WriteSessions(validSessions);
+    }
+
+    console.log(validSessions);
+    return validSessions;
+};
+
+export const ValidateExistance = (sessions: Session[]) => {
+    const validSessions: Session[] = [];
+
+    for (let i = 0; i < sessions.length; i += 1) {
+        const session = sessions[i];
+        if (fs.existsSync(session.directory)) {
+            validSessions.push(session);
+        }
+    }
+
+    return validSessions;
 };
 
 export const WriteSessions = async (sessions: Session[]) => {
@@ -46,9 +72,15 @@ export const WriteSessions = async (sessions: Session[]) => {
     await fs.promises.writeFile(sessionsListFilePath, sessionsList);
 };
 
-export const AddSession = async (directory: string) => {
+export const AddSession = async (
+    startTime: number,
+    samplingRate: number,
+    directory: string
+) => {
     const session: Session = {
         pid: process.pid.toString(),
+        startTime,
+        samplingRate,
         directory,
     };
 

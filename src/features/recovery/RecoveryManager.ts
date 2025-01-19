@@ -240,11 +240,6 @@ export const RecoveryManager = () => ({
         const sessions = await ReadSessions();
 
         const checkSession = (index: number) => {
-            if (index === sessions.length - 1) {
-                onComplete(orphanedSessions);
-                return;
-            }
-
             const session = sessions[index];
             const processInfo = getProcessInfo(parseInt(session.pid, 10));
 
@@ -258,7 +253,13 @@ export const RecoveryManager = () => ({
             }
 
             onProgress(((index + 1) / sessions.length) * 100);
-            setTimeout(() => checkSession(index + 1), 0);
+
+            if (index < sessions.length - 1) {
+                setTimeout(() => checkSession(index + 1), 0);
+                return;
+            }
+
+            onComplete(orphanedSessions);
         };
 
         setTimeout(() => checkSession(0), 0);
