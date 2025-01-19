@@ -17,7 +17,11 @@ import {
 } from '../../globals';
 import { FileBuffer } from '../../utils/FileBuffer';
 import { FoldingBuffer } from '../../utils/foldingBuffer';
-import { ReadSessions, Session } from './SessionsListFileHandler';
+import {
+    ReadSessions,
+    Session,
+    WriteSessions,
+} from './SessionsListFileHandler';
 
 // TODO: Get possible rates from the defined rates somewhere in the project.
 const possibleRates = [1, 10, 100, 1000, 10000, 100000];
@@ -63,6 +67,14 @@ function calculateSamplesPerSecond(
             ? curr
             : prev
     );
+}
+
+function getSamplingDurationInSec(filePath: string) {
+    const stats = fs.statSync(filePath);
+    const startTime = stats.birthtimeMs;
+    const endTime = stats.mtimeMs;
+
+    return Math.floor((endTime - startTime) / 1000);
 }
 
 async function finalizeRecovery(
@@ -239,10 +251,34 @@ export const RecoveryManager = () => ({
     ) {
         const orphanedSessions: Session[] = [];
         const sessions = await ReadSessions();
+        let nonExistingFile = false;
 
         const checkSession = (index: number) => {
+            if (
+                index >= sessions.length ||
+                (findOnlyOne && orphanedSessions.length === 1)
+            ) {
+                if (nonExistingFile) {
+                    WriteSessions(sessions);
+                }
+                onComplete(orphanedSessions);
+                return;
+            }
+
             const session = sessions[index];
+
+            if (!fs.existsSync(session.directory)) {
+                nonExistingFile = true;
+                sessions.splice(index, 1);
+                setTimeout(() => checkSession(index), 0);
+                return;
+            }
+
             const processInfo = getProcessInfo(parseInt(session.pid, 10));
+
+            session.samplingDuration = getSamplingDurationInSec(
+                session.directory
+            );
 
             if (processInfo) {
                 const { processName, pid } = processInfo;
@@ -255,17 +291,7 @@ export const RecoveryManager = () => ({
 
             onProgress(((index + 1) / sessions.length) * 100);
 
-            if (findOnlyOne && orphanedSessions.length > 0) {
-                onComplete(orphanedSessions);
-                return;
-            }
-
-            if (index < sessions.length - 1) {
-                setTimeout(() => checkSession(index + 1), 0);
-                return;
-            }
-
-            onComplete(orphanedSessions);
+            setTimeout(() => checkSession(index + 1), 0);
         };
 
         setTimeout(() => checkSession(0), 0);

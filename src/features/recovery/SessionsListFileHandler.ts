@@ -17,6 +17,7 @@ export type Session = {
     startTime: number;
     samplingRate: number;
     directory: string;
+    samplingDuration?: number;
 };
 
 export const ReadSessions = async (): Promise<Session[]> => {
@@ -43,30 +44,15 @@ export const ReadSessions = async (): Promise<Session[]> => {
             };
         });
 
-    const validSessions = ValidateExistance(validLines);
-    if (validSessions.length !== validLines.length) {
-        await WriteSessions(validSessions);
-    }
-
-    return validSessions;
-};
-
-export const ValidateExistance = (sessions: Session[]) => {
-    const validSessions: Session[] = [];
-
-    for (let i = 0; i < sessions.length; i += 1) {
-        const session = sessions[i];
-        if (fs.existsSync(session.directory)) {
-            validSessions.push(session);
-        }
-    }
-
-    return validSessions;
+    return validLines;
 };
 
 export const WriteSessions = async (sessions: Session[]) => {
     const sessionsList = sessions
-        .map(session => `${session.pid}\t${session.directory}`)
+        .map(
+            session =>
+                `${session.pid}\t${session.startTime}\t${session.samplingRate}\t${session.directory}`
+        )
         .join('\n');
 
     await fs.promises.writeFile(sessionsListFilePath, sessionsList);
