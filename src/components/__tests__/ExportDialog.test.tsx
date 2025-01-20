@@ -13,6 +13,11 @@ import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
 import { fireEvent, render, screen } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 
+jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
+    ReadSessions: jest.fn(() => []),
+    WriteSessions: jest.fn(),
+}));
+
 jest.mock('../../utils/persistentStore', () => ({
     getLastSaveDir: () => 'mocked/save/dir',
     getMaxBufferSize: () => 200,
