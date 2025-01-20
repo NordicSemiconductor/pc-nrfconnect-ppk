@@ -9,6 +9,10 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import {
+    AddSession,
+    RemoveSessionByDirectory,
+} from '../features/recovery/SessionsListFileHandler';
+import {
     fullOverlap,
     overlaps,
     Page,
@@ -36,6 +40,7 @@ export class FileBuffer {
         new WeakMap();
     #firstWriteTime: number | undefined; // only needed for read only
     #fileSize: number | undefined; // only needed for read only
+    samplingRate: number | undefined;
 
     constructor(
         bufferPageSize: number,
@@ -111,6 +116,12 @@ export class FileBuffer {
                     }`
                 );
                 this.#fileHandle = fs.openSync(this.#filePath, 'as+');
+
+                AddSession(
+                    Date.now(),
+                    this.samplingRate ? this.samplingRate : 100000,
+                    this.#filePath
+                );
             }
 
             const writePages = writeBuffer.getPages();
@@ -552,6 +563,7 @@ export class FileBuffer {
             logger.debug(`Deleting temporary ppk session at ${dir}`);
             fs.unlinkSync(this.#filePath);
             fs.rmSync(dir, { recursive: true, force: true });
+            RemoveSessionByDirectory(dir);
         }
     }
 

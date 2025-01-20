@@ -10,7 +10,7 @@ import path from 'path';
 
 const appDataFolder = getAppDataDir();
 const sessionsListFilePath = path.join(appDataFolder, 'sessions.ppksess');
-const lineFormatRegex = /^[^\t]+\t.+$/;
+const lineFormatRegex = /^\d+\t\d+(\.\d+)?\t\d+\t.+$/;
 
 export type Session = {
     pid: string;
@@ -75,10 +75,23 @@ export const AddSession = async (
     await WriteSessions(sessions);
 };
 
-export const RemoveSession = async (position: number) => {
+export const RemoveSessionByIndex = async (index: number) => {
     const sessions = await ReadSessions();
-    sessions.splice(position, 1);
+    sessions.splice(index, 1);
     await WriteSessions(sessions);
+};
+
+export const RemoveSessionByDirectory = async (directory: string) => {
+    const filePath = path.join(directory, 'session.raw');
+    const sessions = await ReadSessions();
+    const sessionIndex = sessions.findIndex(
+        session => session.directory === filePath
+    );
+
+    if (sessionIndex !== -1) {
+        sessions.splice(sessionIndex, 1);
+        await WriteSessions(sessions);
+    }
 };
 
 export const ClearSessions = async () => {

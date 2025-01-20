@@ -288,6 +288,7 @@ export const DataManager = () => ({
             14,
             14
         );
+        options.fileBuffer.samplingRate = options.samplesPerSecond;
         options.foldingBuffer = new FoldingBuffer();
     },
     initializeTriggerSession: (timeToRecordSeconds: number) => {

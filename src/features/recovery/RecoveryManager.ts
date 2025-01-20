@@ -23,9 +23,6 @@ import {
     WriteSessions,
 } from './SessionsListFileHandler';
 
-// TODO: Get possible rates from the defined rates somewhere in the project.
-const possibleRates = [1, 10, 100, 1000, 10000, 100000];
-
 const pageSize = 10 * 100_000 * frameSize; // 6 bytes per sample for and 10sec buffers at highest sampling rate
 const initialSamplingTime = 10;
 const initialSamplesPerSecond = 1e6 / initialSamplingTime;
@@ -41,33 +38,6 @@ const options: GlobalOptions = {
     inSyncOffset: 0,
     lastInSyncTime: 0,
 };
-
-function calculateSamplesPerSecond(
-    sessionStartTime: number,
-    sessionEndTime: number,
-    fileSize: number
-) {
-    if (sessionEndTime <= sessionStartTime) {
-        throw new Error('Invalid session times');
-    }
-
-    const durationInSeconds = Math.floor(
-        (sessionEndTime - sessionStartTime) / 1000
-    );
-
-    if (durationInSeconds <= 0) {
-        throw new Error('Invalid duration of session');
-    }
-
-    const totalSamples = fileSize / frameSize;
-    const samplesPerSecond = totalSamples / durationInSeconds;
-
-    return possibleRates.reduce((prev, curr) =>
-        Math.abs(curr - samplesPerSecond) < Math.abs(prev - samplesPerSecond)
-            ? curr
-            : prev
-    );
-}
 
 function getSamplingDurationInSec(filePath: string) {
     const stats = fs.statSync(filePath);
@@ -174,30 +144,26 @@ function getProcessInfo(processId: number) {
 
 export const RecoveryManager = () => ({
     async recoverSession(
-        sessionPath: string,
+        session: Session,
         onProgress: (progress: number) => void,
         onComplete: () => void,
         onError: (error: Error) => void
     ) {
-        const sessionFilePath = path.join(sessionPath, 'session.raw');
+        const sessionFilePath = session.directory;
+        const sessionPath = path.dirname(sessionFilePath);
+
         const stats = await stat(sessionFilePath);
 
-        const startTime = stats.birthtimeMs;
         const fileSize = stats.size;
-        const endTime = stats.mtimeMs;
 
-        options.samplesPerSecond = calculateSamplesPerSecond(
-            startTime,
-            endTime,
-            fileSize
-        );
+        options.samplesPerSecond = session.samplingRate;
 
         options.fileBuffer = new FileBuffer(
             pageSize,
             sessionPath,
             2,
             30,
-            startTime
+            session.startTime
         );
 
         options.foldingBuffer = new FoldingBuffer();
@@ -212,7 +178,7 @@ export const RecoveryManager = () => ({
                     await finalizeRecovery(
                         sessionPath,
                         options.samplesPerSecond,
-                        startTime
+                        session.startTime
                     );
                     onComplete();
                     return;

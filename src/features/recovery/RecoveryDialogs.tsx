@@ -16,7 +16,19 @@ import { formatDuration, formatTimestamp } from '../../utils/formatters';
 import { RecoveryManager } from './RecoveryManager';
 import { Session } from './SessionsListFileHandler';
 
-const SessionItem = ({ session }: { session: Session }) => (
+const SessionItem = ({
+    session,
+    setIsRecovering,
+    setIsSessionsListDialogVisible,
+    setRecoveryProgress,
+}: {
+    session: Session;
+    setIsRecovering: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsSessionsListDialogVisible: React.Dispatch<
+        React.SetStateAction<boolean>
+    >;
+    setRecoveryProgress: React.Dispatch<React.SetStateAction<number>>;
+}) => (
     <div className="tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
         <div>
             <div className="tw-text-xs">Start time</div>
@@ -39,7 +51,25 @@ const SessionItem = ({ session }: { session: Session }) => (
                 <Button variant="danger" onClick={() => {}}>
                     Delete
                 </Button>
-                <Button variant="secondary" onClick={() => {}}>
+                <Button
+                    variant="secondary"
+                    onClick={() => {
+                        setIsSessionsListDialogVisible(false);
+                        setIsRecovering(true);
+                        RecoveryManager().recoverSession(
+                            session,
+                            (progress: number) => {
+                                setRecoveryProgress(progress);
+                            },
+                            () => {
+                                console.log('Recovery complete');
+                            },
+                            (error: Error) => {
+                                console.error('Recovery error:', error);
+                            }
+                        );
+                    }}
+                >
                     Recover
                 </Button>
             </div>
@@ -49,12 +79,26 @@ const SessionItem = ({ session }: { session: Session }) => (
 
 const ItemizedSessions = ({
     orphanedSessions,
+    setIsRecovering,
+    setIsSessionsListDialogVisible,
+    setRecoveryProgress,
 }: {
     orphanedSessions: Session[];
+    setIsRecovering: React.Dispatch<React.SetStateAction<boolean>>;
+    setIsSessionsListDialogVisible: React.Dispatch<
+        React.SetStateAction<boolean>
+    >;
+    setRecoveryProgress: React.Dispatch<React.SetStateAction<number>>;
 }) => (
     <div className="tw-flex tw-flex-col tw-gap-2">
         {orphanedSessions.map(session => (
-            <SessionItem key={Math.random().toString(36)} session={session} />
+            <SessionItem
+                key={Math.random().toString(36)}
+                session={session}
+                setIsRecovering={setIsRecovering}
+                setIsSessionsListDialogVisible={setIsSessionsListDialogVisible}
+                setRecoveryProgress={setRecoveryProgress}
+            />
         ))}
     </div>
 );
@@ -70,6 +114,9 @@ export default () => {
 
     const [isSearching, setIsSearching] = React.useState(false);
     const [sessionSearchProgress, setSessionSearchProgress] = React.useState(0);
+
+    const [isRecovering, setIsRecovering] = React.useState(false);
+    const [recoveryProgress, setRecoveryProgress] = React.useState(0);
 
     useEffect(() => {
         RecoveryManager().searchOrphanedSessions(
@@ -96,6 +143,7 @@ export default () => {
                                 setIsSessionsFoundDialogVisible(false);
                                 setIsSessionsListDialogVisible(true);
                                 setIsSearching(true);
+                                setSessionSearchProgress(0);
                                 RecoveryManager().searchOrphanedSessions(
                                     (progress: number) => {
                                         setSessionSearchProgress(progress);
@@ -157,7 +205,7 @@ export default () => {
                             We are searching for oephaned sessions on your
                             system. Please wait.
                         </div>
-                        <ProgressBar now={sessionSearchProgress} animated />
+                        <ProgressBar now={sessionSearchProgress} />
                     </>
                 )}
 
@@ -168,10 +216,36 @@ export default () => {
                             like to recover?
                         </div>
                         <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
-                            {ItemizedSessions({ orphanedSessions })}
+                            {ItemizedSessions({
+                                orphanedSessions,
+                                setIsRecovering,
+                                setIsSessionsListDialogVisible,
+                                setRecoveryProgress,
+                            })}
                         </div>
                     </>
                 )}
+            </GenericDialog>
+            <GenericDialog
+                className="tw-preflight tw-max-h-screen"
+                title="Session Recovery"
+                footer={
+                    <DialogButton
+                        variant="secondary"
+                        onClick={() => {
+                            setIsRecovering(false);
+                        }}
+                    >
+                        Cancel
+                    </DialogButton>
+                }
+                isVisible={isRecovering}
+            >
+                <div className="tw-mb-4">
+                    The following orphan sessions were found. Whould you like to
+                    recover?
+                </div>
+                <ProgressBar now={recoveryProgress} />
             </GenericDialog>
         </>
     );
