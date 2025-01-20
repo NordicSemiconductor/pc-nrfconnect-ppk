@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import {
     Button,
+    ConfirmationDialog,
     DialogButton,
     GenericDialog,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -18,16 +19,12 @@ import { Session } from './SessionsListFileHandler';
 
 const SessionItem = ({
     session,
-    setIsRecovering,
-    setIsSessionsListDialogVisible,
-    setRecoveryProgress,
+    onRecoverClick,
+    onRemoveClick,
 }: {
     session: Session;
-    setIsRecovering: React.Dispatch<React.SetStateAction<boolean>>;
-    setIsSessionsListDialogVisible: React.Dispatch<
-        React.SetStateAction<boolean>
-    >;
-    setRecoveryProgress: React.Dispatch<React.SetStateAction<number>>;
+    onRecoverClick: (session: Session) => void;
+    onRemoveClick: (session: Session) => void;
 }) => (
     <div className="tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
         <div>
@@ -48,26 +45,18 @@ const SessionItem = ({
         </div>
         <div className="tw-content-center tw-align-middle">
             <div className="tw-flex tw-flex-row tw-gap-2">
-                <Button variant="danger" onClick={() => {}}>
+                <Button
+                    variant="danger"
+                    onClick={() => {
+                        onRemoveClick(session);
+                    }}
+                >
                     Delete
                 </Button>
                 <Button
                     variant="secondary"
                     onClick={() => {
-                        setIsSessionsListDialogVisible(false);
-                        setIsRecovering(true);
-                        RecoveryManager().recoverSession(
-                            session,
-                            (progress: number) => {
-                                setRecoveryProgress(progress);
-                            },
-                            () => {
-                                console.log('Recovery complete');
-                            },
-                            (error: Error) => {
-                                console.error('Recovery error:', error);
-                            }
-                        );
+                        onRecoverClick(session);
                     }}
                 >
                     Recover
@@ -79,25 +68,20 @@ const SessionItem = ({
 
 const ItemizedSessions = ({
     orphanedSessions,
-    setIsRecovering,
-    setIsSessionsListDialogVisible,
-    setRecoveryProgress,
+    onRecoverClick,
+    onRemoveClick,
 }: {
     orphanedSessions: Session[];
-    setIsRecovering: React.Dispatch<React.SetStateAction<boolean>>;
-    setIsSessionsListDialogVisible: React.Dispatch<
-        React.SetStateAction<boolean>
-    >;
-    setRecoveryProgress: React.Dispatch<React.SetStateAction<number>>;
+    onRecoverClick: (session: Session) => void;
+    onRemoveClick: (session: Session) => void;
 }) => (
     <div className="tw-flex tw-flex-col tw-gap-2">
         {orphanedSessions.map(session => (
             <SessionItem
                 key={Math.random().toString(36)}
                 session={session}
-                setIsRecovering={setIsRecovering}
-                setIsSessionsListDialogVisible={setIsSessionsListDialogVisible}
-                setRecoveryProgress={setRecoveryProgress}
+                onRecoverClick={onRecoverClick}
+                onRemoveClick={onRemoveClick}
             />
         ))}
     </div>
@@ -114,6 +98,11 @@ export default () => {
 
     const [isSearching, setIsSearching] = React.useState(false);
     const [sessionSearchProgress, setSessionSearchProgress] = React.useState(0);
+
+    const [isConfirmationDialogVisible, setIsConfirmationDialogVisible] =
+        React.useState(false);
+    const [sessionToRecover, setSessionToRecover] =
+        React.useState<Session | null>(null);
 
     const [isRecovering, setIsRecovering] = React.useState(false);
     const [recoveryProgress, setRecoveryProgress] = React.useState(0);
@@ -132,55 +121,36 @@ export default () => {
 
     return (
         <>
-            <GenericDialog
-                className="tw-preflight tw-max-h-screen"
-                title="Session Recovery"
-                footer={
-                    <>
-                        <DialogButton
-                            variant="success"
-                            onClick={() => {
-                                setIsSessionsFoundDialogVisible(false);
-                                setIsSessionsListDialogVisible(true);
-                                setIsSearching(true);
-                                setSessionSearchProgress(0);
-                                RecoveryManager().searchOrphanedSessions(
-                                    (progress: number) => {
-                                        setSessionSearchProgress(progress);
-                                    },
-                                    (orphanSessions: Session[]) => {
-                                        setIsSearching(false);
-                                        setOrphanedSessions(orphanSessions);
-                                        if (orphanSessions.length > 0) {
-                                            setIsSessionsListDialogVisible(
-                                                true
-                                            );
-                                        }
-                                    }
-                                );
-                            }}
-                        >
-                            Yes
-                        </DialogButton>
-                        <DialogButton
-                            variant="danger"
-                            onClick={() => {
-                                setIsSessionsFoundDialogVisible(false);
-                            }}
-                        >
-                            No
-                        </DialogButton>
-                    </>
-                }
+            <ConfirmationDialog
+                title="Recover Session"
                 isVisible={isSessionsFoundDialogVisible}
-                closeOnEsc
-                closeOnUnfocus
+                onConfirm={() => {
+                    setIsSessionsFoundDialogVisible(false);
+                    setIsSessionsListDialogVisible(true);
+                    setIsSearching(true);
+                    setSessionSearchProgress(0);
+                    RecoveryManager().searchOrphanedSessions(
+                        (progress: number) => {
+                            setSessionSearchProgress(progress);
+                        },
+                        (orphanSessions: Session[]) => {
+                            setIsSearching(false);
+                            setOrphanedSessions(orphanSessions);
+                            if (orphanSessions.length > 0) {
+                                setIsSessionsListDialogVisible(true);
+                            }
+                        }
+                    );
+                }}
+                onCancel={() => {
+                    setIsSessionsFoundDialogVisible(false);
+                }}
             >
                 <div>
-                    There are orphaned sessions found. Would you like to recover
-                    some of them?
+                    There are sessions that were not properly closed on your
+                    system. Would you like to recover them?
                 </div>
-            </GenericDialog>
+            </ConfirmationDialog>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
                 title="Session Recovery"
@@ -202,8 +172,8 @@ export default () => {
                 {isSearching && (
                     <>
                         <div>
-                            We are searching for oephaned sessions on your
-                            system. Please wait.
+                            Searching for sessions that can be recovered. Please
+                            wait.
                         </div>
                         <ProgressBar now={sessionSearchProgress} />
                     </>
@@ -218,14 +188,57 @@ export default () => {
                         <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
                             {ItemizedSessions({
                                 orphanedSessions,
-                                setIsRecovering,
-                                setIsSessionsListDialogVisible,
-                                setRecoveryProgress,
+                                onRecoverClick: session => {
+                                    setSessionToRecover(session);
+                                    setIsConfirmationDialogVisible(true);
+                                },
+                                onRemoveClick: () => {},
                             })}
                         </div>
                     </>
                 )}
             </GenericDialog>
+            <ConfirmationDialog
+                title="Recover Session"
+                isVisible={isConfirmationDialogVisible}
+                onConfirm={() => {
+                    setIsConfirmationDialogVisible(false);
+                    setIsSessionsListDialogVisible(false);
+                    setIsRecovering(true);
+
+                    if (sessionToRecover) {
+                        RecoveryManager().recoverSession(
+                            sessionToRecover,
+                            (progress: number) => {
+                                setRecoveryProgress(progress);
+                            },
+                            () => {
+                                console.log('Recovery complete');
+                            },
+                            (error: Error) => {
+                                console.error('Recovery error:', error);
+                            }
+                        );
+                    }
+                }}
+                onCancel={() => {
+                    setIsConfirmationDialogVisible(false);
+                }}
+            >
+                <div>
+                    Do you want to recover the session started at{' '}
+                    {formatTimestamp(
+                        sessionToRecover?.startTime
+                            ? sessionToRecover.startTime
+                            : 0
+                    )}
+                    ?
+                </div>
+                <div>
+                    You will be able to recover the other sessions afterwards as
+                    well.
+                </div>
+            </ConfirmationDialog>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
                 title="Session Recovery"
@@ -242,8 +255,7 @@ export default () => {
                 isVisible={isRecovering}
             >
                 <div className="tw-mb-4">
-                    The following orphan sessions were found. Whould you like to
-                    recover?
+                    The session is being recovered. Please wait.
                 </div>
                 <ProgressBar now={recoveryProgress} />
             </GenericDialog>
