@@ -15,7 +15,11 @@ import {
 
 import { formatDuration, formatTimestamp } from '../../utils/formatters';
 import { RecoveryManager } from './RecoveryManager';
-import { Session } from './SessionsListFileHandler';
+import {
+    DeleteAllSessions,
+    RemoveSessionByFilePath,
+    Session,
+} from './SessionsListFileHandler';
 
 const SessionItem = ({
     session,
@@ -155,15 +159,36 @@ export default () => {
                 className="tw-preflight tw-max-h-screen"
                 title="Session Recovery"
                 footer={
-                    <DialogButton
-                        variant="secondary"
-                        onClick={() => {
-                            setIsSessionsListDialogVisible(false);
-                        }}
-                        disabled={isSearching}
-                    >
-                        Cancel
-                    </DialogButton>
+                    <>
+                        <DialogButton
+                            variant="secondary"
+                            onClick={() => {
+                                setIsSessionsListDialogVisible(false);
+                            }}
+                            disabled={isSearching}
+                        >
+                            Close
+                        </DialogButton>
+                        <DialogButton
+                            variant="secondary"
+                            onClick={() => {
+                                DeleteAllSessions(
+                                    (progress: number) => {
+                                        console.log(
+                                            'Deleting progress:',
+                                            progress
+                                        );
+                                    },
+                                    () => {
+                                        setOrphanedSessions([]);
+                                    }
+                                );
+                            }}
+                            disabled={isSearching}
+                        >
+                            Delete All
+                        </DialogButton>
+                    </>
                 }
                 isVisible={isSessionsListDialogVisible}
                 closeOnEsc
@@ -192,8 +217,24 @@ export default () => {
                                     setSessionToRecover(session);
                                     setIsConfirmationDialogVisible(true);
                                 },
-                                onRemoveClick: () => {},
+                                onRemoveClick: session => {
+                                    RemoveSessionByFilePath(
+                                        session.filePath,
+                                        () => {
+                                            const sessions =
+                                                orphanedSessions.filter(
+                                                    s =>
+                                                        s.filePath !==
+                                                        session.filePath
+                                                );
+                                            setOrphanedSessions(sessions);
+                                        }
+                                    );
+                                },
                             })}
+                            {orphanedSessions.length === 0 && (
+                                <div>No sessions found</div>
+                            )}
                         </div>
                     </>
                 )}

@@ -16,7 +16,7 @@ export type Session = {
     pid: string;
     startTime: number;
     samplingRate: number;
-    directory: string;
+    filePath: string;
     samplingDuration?: number;
 };
 
@@ -35,12 +35,12 @@ export const ReadSessions = async (): Promise<Session[]> => {
     const validLines: Session[] = lines
         .filter(line => line.trim() !== '' && lineFormatRegex.test(line))
         .map(line => {
-            const [pid, startTime, samplingRate, directory] = line.split('\t');
+            const [pid, startTime, samplingRate, filePath] = line.split('\t');
             return {
                 pid,
                 startTime: Number(startTime),
                 samplingRate: Number(samplingRate),
-                directory,
+                filePath,
             };
         });
 
@@ -51,7 +51,7 @@ export const WriteSessions = async (sessions: Session[]) => {
     const sessionsList = sessions
         .map(
             session =>
-                `${session.pid}\t${session.startTime}\t${session.samplingRate}\t${session.directory}`
+                `${session.pid}\t${session.startTime}\t${session.samplingRate}\t${session.filePath}`
         )
         .join('\n');
 
@@ -61,13 +61,13 @@ export const WriteSessions = async (sessions: Session[]) => {
 export const AddSession = async (
     startTime: number,
     samplingRate: number,
-    directory: string
+    filePath: string
 ) => {
     const session: Session = {
         pid: process.pid.toString(),
         startTime,
         samplingRate,
-        directory,
+        filePath,
     };
 
     const sessions = await ReadSessions();
@@ -75,25 +75,53 @@ export const AddSession = async (
     await WriteSessions(sessions);
 };
 
-export const RemoveSessionByIndex = async (index: number) => {
-    const sessions = await ReadSessions();
-    sessions.splice(index, 1);
-    await WriteSessions(sessions);
-};
-
-export const RemoveSessionByDirectory = async (directory: string) => {
-    const filePath = path.join(directory, 'session.raw');
+export const RemoveSessionByFilePath = async (
+    filePath: string,
+    onComplete: () => void
+) => {
+    const directory = path.dirname(filePath);
     const sessions = await ReadSessions();
     const sessionIndex = sessions.findIndex(
-        session => session.directory === filePath
+        session => session.filePath === filePath
     );
 
     if (sessionIndex !== -1) {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            fs.rmSync(directory, { recursive: true, force: true });
+        }
+
         sessions.splice(sessionIndex, 1);
         await WriteSessions(sessions);
+        onComplete();
     }
 };
 
-export const ClearSessions = async () => {
-    await fs.promises.unlink(sessionsListFilePath);
+export const DeleteAllSessions = async (
+    onProgress: (progress: number) => void,
+    onComplete: () => void
+) => {
+    const sessions = await ReadSessions();
+    const totalSessions = sessions.length;
+
+    const deleteSession = (index: number) => {
+        if (index >= totalSessions) {
+            WriteSessions([]).then(() => onComplete());
+            return;
+        }
+
+        const session = sessions[index];
+        const directory = path.dirname(session.filePath);
+
+        if (fs.existsSync(session.filePath)) {
+            fs.unlinkSync(session.filePath);
+            fs.rmSync(directory, { recursive: true, force: true });
+        }
+
+        onProgress(((index + 1) / totalSessions) * 100);
+
+        setTimeout(() => deleteSession(index + 1), 0);
+    };
+
+    deleteSession(0);
 };

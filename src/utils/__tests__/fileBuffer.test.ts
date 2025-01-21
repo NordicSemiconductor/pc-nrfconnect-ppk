@@ -13,8 +13,7 @@ jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
     ReadSessions: jest.fn(() => []),
     WriteSessions: jest.fn(),
     AddSession: jest.fn(),
-    RemoveSessionByIndex: jest.fn(),
-    RemoveSessionByDirectory: jest.fn(),
+    RemoveSessionByFilePath: jest.fn(),
     ClearSessions: jest.fn(),
 }));
 

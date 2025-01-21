@@ -10,7 +10,7 @@ import path from 'path';
 
 import {
     AddSession,
-    RemoveSessionByDirectory,
+    RemoveSessionByFilePath,
 } from '../features/recovery/SessionsListFileHandler';
 import {
     fullOverlap,
@@ -563,7 +563,7 @@ export class FileBuffer {
             logger.debug(`Deleting temporary ppk session at ${dir}`);
             fs.unlinkSync(this.#filePath);
             fs.rmSync(dir, { recursive: true, force: true });
-            RemoveSessionByDirectory(dir);
+            RemoveSessionByFilePath(this.#filePath, () => {});
         }
     }
 

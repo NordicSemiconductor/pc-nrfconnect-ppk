@@ -149,7 +149,7 @@ export const RecoveryManager = () => ({
         onComplete: () => void,
         onError: (error: Error) => void
     ) {
-        const sessionFilePath = session.directory;
+        const sessionFilePath = session.filePath;
         const sessionPath = path.dirname(sessionFilePath);
 
         const stats = await stat(sessionFilePath);
@@ -233,7 +233,7 @@ export const RecoveryManager = () => ({
 
             const session = sessions[index];
 
-            if (!fs.existsSync(session.directory)) {
+            if (!fs.existsSync(session.filePath)) {
                 nonExistingFile = true;
                 sessions.splice(index, 1);
                 setTimeout(() => checkSession(index), 0);
@@ -243,7 +243,7 @@ export const RecoveryManager = () => ({
             const processInfo = getProcessInfo(parseInt(session.pid, 10));
 
             session.samplingDuration = getSamplingDurationInSec(
-                session.directory
+                session.filePath
             );
 
             if (processInfo) {
