@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { useDispatch } from 'react-redux';
 import {
@@ -12,10 +12,12 @@ import {
     ConfirmationDialog,
     DialogButton,
     GenericDialog,
+    useStopwatch,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { setSessionRecoveryPending } from '../../slices/appSlice';
 import { formatDuration, formatTimestamp } from '../../utils/formatters';
+import TimeComponent from '../ProgressDialog/TimeComponent';
 import { RecoveryManager } from './RecoveryManager';
 import {
     DeleteAllSessions,
@@ -107,9 +109,6 @@ export default () => {
 
     const [isRecovering, setIsRecovering] = React.useState(false);
     const [recoveryProgress, setRecoveryProgress] = React.useState(0);
-    const [sessionToBeRecovered, setSessionToBeRecovered] = React.useState<
-        Session | undefined
-    >(undefined);
 
     const [confirmationDialogConfig, setConfirmationDialogConfig] = useState({
         isVisible: false,
@@ -127,6 +126,29 @@ export default () => {
             isVisible: false,
         }));
     };
+
+    const lastProgress = useRef(-1);
+
+    const { time, reset, pause, start } = useStopwatch({
+        autoStart: true,
+        resolution: 1000,
+    });
+
+    useEffect(() => {
+        if (!isRecovering) {
+            lastProgress.current = -1;
+            pause();
+        } else {
+            start(0);
+        }
+    }, [isRecovering, pause, start]);
+
+    useEffect(() => {
+        if (recoveryProgress < lastProgress.current) {
+            lastProgress.current = recoveryProgress;
+            reset();
+        }
+    }, [recoveryProgress, reset]);
 
     useEffect(() => {
         RecoveryManager().searchOrphanedSessions(
@@ -197,22 +219,15 @@ export default () => {
                                     cancelText: 'Cancel',
                                     onConfirm: () => {
                                         DeleteAllSessions(
-                                            (progress: number) => {
-                                                console.log(
-                                                    'Deleting progress:',
-                                                    progress
-                                                );
-                                            },
+                                            () => {},
                                             () => {
+                                                closeConfirmationDialog();
                                                 setOrphanedSessions([]);
                                             }
                                         );
                                     },
                                     onCancel: () => {
-                                        setConfirmationDialogConfig({
-                                            ...confirmationDialogConfig,
-                                            isVisible: false,
-                                        });
+                                        closeConfirmationDialog();
                                     },
                                 });
                             }}
@@ -232,7 +247,11 @@ export default () => {
                             Searching for sessions that can be recovered. Please
                             wait.
                         </div>
-                        <ProgressBar now={sessionSearchProgress} />
+                        <ProgressBar
+                            now={sessionSearchProgress}
+                            style={{ height: '4px' }}
+                            animated={false}
+                        />
                     </>
                 )}
 
@@ -259,7 +278,6 @@ export default () => {
                                             setIsSessionsListDialogVisible(
                                                 false
                                             );
-                                            setSessionToBeRecovered(session);
                                             dispatch(
                                                 setSessionRecoveryPending(true)
                                             );
@@ -346,16 +364,19 @@ export default () => {
                 }
                 isVisible={isRecovering}
             >
-                <div className="tw-mb-4">
-                    The session from{' '}
-                    {formatTimestamp(sessionToBeRecovered?.startTime || 0)} with
-                    a duration of{' '}
-                    {formatDuration(
-                        sessionToBeRecovered?.samplingDuration || 0
-                    )}{' '}
-                    is being recovered.
+                <div className="tw-flex tw-w-full tw-flex-col tw-gap-2">
+                    <div>
+                        <span>
+                            The session is being recovered. Please wait.
+                        </span>
+                        <br />
+                    </div>
+                    <TimeComponent
+                        time={time}
+                        progress={recoveryProgress}
+                        indeterminate={false}
+                    />
                 </div>
-                <ProgressBar now={recoveryProgress} />
             </GenericDialog>
             <ConfirmationDialog
                 title={confirmationDialogConfig.title}
