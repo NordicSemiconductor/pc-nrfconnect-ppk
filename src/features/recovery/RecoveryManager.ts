@@ -163,7 +163,8 @@ export const RecoveryManager = () => ({
             sessionPath,
             2,
             30,
-            session.startTime
+            session.startTime,
+            false
         );
 
         options.foldingBuffer = new FoldingBuffer();

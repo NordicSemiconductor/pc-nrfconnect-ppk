@@ -6,6 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
+import { useDispatch } from 'react-redux';
 import {
     Button,
     ConfirmationDialog,
@@ -13,6 +14,7 @@ import {
     GenericDialog,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
+import { setSessionRecoveryPending } from '../../slices/appSlice';
 import { formatDuration, formatTimestamp } from '../../utils/formatters';
 import { RecoveryManager } from './RecoveryManager';
 import {
@@ -92,6 +94,8 @@ const ItemizedSessions = ({
 );
 
 export default () => {
+    const dispatch = useDispatch();
+
     const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
         React.useState(false);
     const [orphanedSessions, setOrphanedSessions] = React.useState<Session[]>(
@@ -103,6 +107,9 @@ export default () => {
 
     const [isRecovering, setIsRecovering] = React.useState(false);
     const [recoveryProgress, setRecoveryProgress] = React.useState(0);
+    const [sessionToBeRecovered, setSessionToBeRecovered] = React.useState<
+        Session | undefined
+    >(undefined);
 
     const [confirmationDialogConfig, setConfirmationDialogConfig] = useState({
         isVisible: false,
@@ -252,6 +259,10 @@ export default () => {
                                             setIsSessionsListDialogVisible(
                                                 false
                                             );
+                                            setSessionToBeRecovered(session);
+                                            dispatch(
+                                                setSessionRecoveryPending(true)
+                                            );
                                             RecoveryManager().recoverSession(
                                                 session,
                                                 (progress: number) => {
@@ -260,6 +271,11 @@ export default () => {
                                                     );
                                                 },
                                                 () => {
+                                                    dispatch(
+                                                        setSessionRecoveryPending(
+                                                            false
+                                                        )
+                                                    );
                                                     console.log(
                                                         'Recovery complete'
                                                     );
@@ -331,7 +347,13 @@ export default () => {
                 isVisible={isRecovering}
             >
                 <div className="tw-mb-4">
-                    The session is being recovered. Please wait.
+                    The session from{' '}
+                    {formatTimestamp(sessionToBeRecovered?.startTime || 0)} with
+                    a duration of{' '}
+                    {formatDuration(
+                        sessionToBeRecovered?.samplingDuration || 0
+                    )}{' '}
+                    is being recovered.
                 </div>
                 <ProgressBar now={recoveryProgress} />
             </GenericDialog>
