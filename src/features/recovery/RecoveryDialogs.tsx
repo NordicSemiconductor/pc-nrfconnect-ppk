@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import {
     Button,
@@ -50,7 +50,7 @@ const SessionItem = ({
         <div className="tw-content-center tw-align-middle">
             <div className="tw-flex tw-flex-row tw-gap-2">
                 <Button
-                    variant="danger"
+                    variant="secondary"
                     onClick={() => {
                         onRemoveClick(session);
                     }}
@@ -58,7 +58,7 @@ const SessionItem = ({
                     Delete
                 </Button>
                 <Button
-                    variant="secondary"
+                    variant="primary"
                     onClick={() => {
                         onRecoverClick(session);
                     }}
@@ -92,8 +92,6 @@ const ItemizedSessions = ({
 );
 
 export default () => {
-    const [isSessionsFoundDialogVisible, setIsSessionsFoundDialogVisible] =
-        React.useState(false);
     const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
         React.useState(false);
     const [orphanedSessions, setOrphanedSessions] = React.useState<Session[]>(
@@ -103,20 +101,61 @@ export default () => {
     const [isSearching, setIsSearching] = React.useState(false);
     const [sessionSearchProgress, setSessionSearchProgress] = React.useState(0);
 
-    const [isConfirmationDialogVisible, setIsConfirmationDialogVisible] =
-        React.useState(false);
-    const [sessionToRecover, setSessionToRecover] =
-        React.useState<Session | null>(null);
-
     const [isRecovering, setIsRecovering] = React.useState(false);
     const [recoveryProgress, setRecoveryProgress] = React.useState(0);
+
+    const [confirmationDialogConfig, setConfirmationDialogConfig] = useState({
+        isVisible: false,
+        title: '',
+        message: '',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel',
+        onConfirm: () => {},
+        onCancel: () => {},
+    });
+
+    const closeConfirmationDialog = () => {
+        setConfirmationDialogConfig(c => ({
+            ...c,
+            isVisible: false,
+        }));
+    };
 
     useEffect(() => {
         RecoveryManager().searchOrphanedSessions(
             () => {},
             (orphanSessions: Session[]) => {
                 if (orphanSessions.length > 0) {
-                    setIsSessionsFoundDialogVisible(true);
+                    console.log('Orphaned sessions found:', orphanSessions);
+                    setConfirmationDialogConfig({
+                        isVisible: true,
+                        title: 'Recover Session',
+                        message:
+                            'There are sessions that were not properly closed on your system. Would you like to recover them?',
+                        confirmText: 'Confirm',
+                        cancelText: 'Cancel',
+                        onConfirm: () => {
+                            setIsSessionsListDialogVisible(true);
+                            setIsSearching(true);
+                            setSessionSearchProgress(0);
+                            RecoveryManager().searchOrphanedSessions(
+                                (progress: number) => {
+                                    setSessionSearchProgress(progress);
+                                },
+                                (sessions: Session[]) => {
+                                    setIsSearching(false);
+                                    setOrphanedSessions(sessions);
+                                    if (sessions.length > 0) {
+                                        setIsSessionsListDialogVisible(true);
+                                    }
+                                }
+                            );
+                            closeConfirmationDialog();
+                        },
+                        onCancel: () => {
+                            closeConfirmationDialog();
+                        },
+                    });
                 }
             },
             true
@@ -125,36 +164,6 @@ export default () => {
 
     return (
         <>
-            <ConfirmationDialog
-                title="Recover Session"
-                isVisible={isSessionsFoundDialogVisible}
-                onConfirm={() => {
-                    setIsSessionsFoundDialogVisible(false);
-                    setIsSessionsListDialogVisible(true);
-                    setIsSearching(true);
-                    setSessionSearchProgress(0);
-                    RecoveryManager().searchOrphanedSessions(
-                        (progress: number) => {
-                            setSessionSearchProgress(progress);
-                        },
-                        (orphanSessions: Session[]) => {
-                            setIsSearching(false);
-                            setOrphanedSessions(orphanSessions);
-                            if (orphanSessions.length > 0) {
-                                setIsSessionsListDialogVisible(true);
-                            }
-                        }
-                    );
-                }}
-                onCancel={() => {
-                    setIsSessionsFoundDialogVisible(false);
-                }}
-            >
-                <div>
-                    There are sessions that were not properly closed on your
-                    system. Would you like to recover them?
-                </div>
-            </ConfirmationDialog>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
                 title="Session Recovery"
@@ -172,17 +181,33 @@ export default () => {
                         <DialogButton
                             variant="secondary"
                             onClick={() => {
-                                DeleteAllSessions(
-                                    (progress: number) => {
-                                        console.log(
-                                            'Deleting progress:',
-                                            progress
+                                setConfirmationDialogConfig({
+                                    isVisible: true,
+                                    title: 'Delete All Sessions',
+                                    message:
+                                        'Are you sure you want to delete all sessions? This action cannot be undone.',
+                                    confirmText: 'Delete',
+                                    cancelText: 'Cancel',
+                                    onConfirm: () => {
+                                        DeleteAllSessions(
+                                            (progress: number) => {
+                                                console.log(
+                                                    'Deleting progress:',
+                                                    progress
+                                                );
+                                            },
+                                            () => {
+                                                setOrphanedSessions([]);
+                                            }
                                         );
                                     },
-                                    () => {
-                                        setOrphanedSessions([]);
-                                    }
-                                );
+                                    onCancel: () => {
+                                        setConfirmationDialogConfig({
+                                            ...confirmationDialogConfig,
+                                            isVisible: false,
+                                        });
+                                    },
+                                });
                             }}
                             disabled={isSearching}
                         >
@@ -207,29 +232,80 @@ export default () => {
                 {!isSearching && (
                     <>
                         <div className="tw-mb-4">
-                            The following orphan sessions were found. Whould you
-                            like to recover?
+                            The following sessions can be recovered:
                         </div>
                         <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
                             {ItemizedSessions({
                                 orphanedSessions,
                                 onRecoverClick: session => {
-                                    setSessionToRecover(session);
-                                    setIsConfirmationDialogVisible(true);
+                                    setConfirmationDialogConfig({
+                                        isVisible: true,
+                                        title: 'Recover Session',
+                                        message: `Do you want to recover the session started at ${formatTimestamp(
+                                            session.startTime
+                                        )}? You will be able to recover the other sessions afterwards as well.`,
+                                        confirmText: 'Recover',
+                                        cancelText: 'Cancel',
+                                        onConfirm: () => {
+                                            closeConfirmationDialog();
+                                            setIsRecovering(true);
+                                            setIsSessionsListDialogVisible(
+                                                false
+                                            );
+                                            RecoveryManager().recoverSession(
+                                                session,
+                                                (progress: number) => {
+                                                    setRecoveryProgress(
+                                                        progress
+                                                    );
+                                                },
+                                                () => {
+                                                    console.log(
+                                                        'Recovery complete'
+                                                    );
+                                                },
+                                                (error: Error) => {
+                                                    console.error(
+                                                        'Recovery error:',
+                                                        error
+                                                    );
+                                                }
+                                            );
+                                        },
+                                        onCancel: () => {
+                                            closeConfirmationDialog();
+                                        },
+                                    });
                                 },
                                 onRemoveClick: session => {
-                                    RemoveSessionByFilePath(
-                                        session.filePath,
-                                        () => {
-                                            const sessions =
-                                                orphanedSessions.filter(
-                                                    s =>
-                                                        s.filePath !==
-                                                        session.filePath
-                                                );
-                                            setOrphanedSessions(sessions);
-                                        }
-                                    );
+                                    setConfirmationDialogConfig({
+                                        isVisible: true,
+                                        title: 'Delete Session',
+                                        message: `Are you sure you want to delete the session started at ${formatTimestamp(
+                                            session.startTime
+                                        )}? This action cannot be undone.`,
+                                        confirmText: 'Delete',
+                                        cancelText: 'Cancel',
+                                        onConfirm: () => {
+                                            RemoveSessionByFilePath(
+                                                session.filePath,
+                                                () => {
+                                                    const sessions =
+                                                        orphanedSessions.filter(
+                                                            s =>
+                                                                s.filePath !==
+                                                                session.filePath
+                                                        );
+                                                    setOrphanedSessions(
+                                                        sessions
+                                                    );
+                                                }
+                                            );
+                                        },
+                                        onCancel: () => {
+                                            closeConfirmationDialog();
+                                        },
+                                    });
                                 },
                             })}
                             {orphanedSessions.length === 0 && (
@@ -239,47 +315,6 @@ export default () => {
                     </>
                 )}
             </GenericDialog>
-            <ConfirmationDialog
-                title="Recover Session"
-                isVisible={isConfirmationDialogVisible}
-                onConfirm={() => {
-                    setIsConfirmationDialogVisible(false);
-                    setIsSessionsListDialogVisible(false);
-                    setIsRecovering(true);
-
-                    if (sessionToRecover) {
-                        RecoveryManager().recoverSession(
-                            sessionToRecover,
-                            (progress: number) => {
-                                setRecoveryProgress(progress);
-                            },
-                            () => {
-                                console.log('Recovery complete');
-                            },
-                            (error: Error) => {
-                                console.error('Recovery error:', error);
-                            }
-                        );
-                    }
-                }}
-                onCancel={() => {
-                    setIsConfirmationDialogVisible(false);
-                }}
-            >
-                <div>
-                    Do you want to recover the session started at{' '}
-                    {formatTimestamp(
-                        sessionToRecover?.startTime
-                            ? sessionToRecover.startTime
-                            : 0
-                    )}
-                    ?
-                </div>
-                <div>
-                    You will be able to recover the other sessions afterwards as
-                    well.
-                </div>
-            </ConfirmationDialog>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
                 title="Session Recovery"
@@ -300,6 +335,16 @@ export default () => {
                 </div>
                 <ProgressBar now={recoveryProgress} />
             </GenericDialog>
+            <ConfirmationDialog
+                title={confirmationDialogConfig.title}
+                isVisible={confirmationDialogConfig.isVisible}
+                confirmLabel={confirmationDialogConfig.confirmText}
+                cancelLabel={confirmationDialogConfig.cancelText}
+                onConfirm={confirmationDialogConfig.onConfirm}
+                onCancel={confirmationDialogConfig.onCancel}
+            >
+                {confirmationDialogConfig.message}
+            </ConfirmationDialog>
         </>
     );
 };
