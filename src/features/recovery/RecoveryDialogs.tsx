@@ -17,7 +17,6 @@ import {
     useStopwatch,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { setSessionRecoveryPending } from '../../slices/appSlice';
 import { formatDuration, formatTimestamp } from '../../utils/formatters';
 import TimeComponent from '../ProgressDialog/TimeComponent';
 import { RecoveryManager } from './RecoveryManager';
@@ -140,10 +139,6 @@ export default () => {
         autoStart: true,
         resolution: 1000,
     });
-
-    const setRecoveryPending = (status: boolean) => {
-        dispatch(setSessionRecoveryPending(status));
-    };
 
     useEffect(() => {
         if (!isRecovering) {
@@ -288,35 +283,34 @@ export default () => {
                                             setIsSessionsListDialogVisible(
                                                 false
                                             );
-                                            dispatch(
-                                                setSessionRecoveryPending(true)
-                                            );
                                             setRecoveryProgress(0);
                                             setRecoveryError(null);
                                             reset();
-                                            recoveryManager.recoverSession(
-                                                session,
-                                                (progress: number) => {
-                                                    setRecoveryProgress(
-                                                        progress
-                                                    );
-                                                },
-                                                () => {
-                                                    pause();
-                                                    setRecoveryPending(false);
-                                                },
-                                                (error: Error) => {
-                                                    pause();
-                                                    setRecoveryPending(false);
-                                                    setRecoveryError(
-                                                        error.message
-                                                    );
-                                                    logger.error(error.message);
-                                                },
-                                                () => {
-                                                    pause();
-                                                    setRecoveryPending(false);
-                                                }
+                                            dispatch(
+                                                recoveryManager.recoverSession(
+                                                    session,
+                                                    (progress: number) => {
+                                                        setRecoveryProgress(
+                                                            progress
+                                                        );
+                                                    },
+                                                    () => {
+                                                        pause();
+                                                        setIsRecovering(false);
+                                                    },
+                                                    (error: Error) => {
+                                                        pause();
+                                                        setRecoveryError(
+                                                            error.message
+                                                        );
+                                                        logger.error(
+                                                            error.message
+                                                        );
+                                                    },
+                                                    () => {
+                                                        pause();
+                                                    }
+                                                )
                                             );
                                         },
                                         onCancel: () => {
