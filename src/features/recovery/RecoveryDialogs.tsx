@@ -8,10 +8,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar';
 import { useDispatch } from 'react-redux';
 import {
+    Alert,
     Button,
     ConfirmationDialog,
     DialogButton,
     GenericDialog,
+    logger,
     useStopwatch,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -98,6 +100,8 @@ const ItemizedSessions = ({
 export default () => {
     const dispatch = useDispatch();
 
+    const recoveryManager = RecoveryManager.getInstance();
+
     const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
         React.useState(false);
     const [orphanedSessions, setOrphanedSessions] = React.useState<Session[]>(
@@ -109,6 +113,9 @@ export default () => {
 
     const [isRecovering, setIsRecovering] = React.useState(false);
     const [recoveryProgress, setRecoveryProgress] = React.useState(0);
+    const [recoveryError, setRecoveryError] = React.useState<string | null>(
+        null
+    );
 
     const [confirmationDialogConfig, setConfirmationDialogConfig] = useState({
         isVisible: false,
@@ -134,6 +141,10 @@ export default () => {
         resolution: 1000,
     });
 
+    const setRecoveryPending = (status: boolean) => {
+        dispatch(setSessionRecoveryPending(status));
+    };
+
     useEffect(() => {
         if (!isRecovering) {
             lastProgress.current = -1;
@@ -151,11 +162,10 @@ export default () => {
     }, [recoveryProgress, reset]);
 
     useEffect(() => {
-        RecoveryManager().searchOrphanedSessions(
+        recoveryManager.searchOrphanedSessions(
             () => {},
             (orphanSessions: Session[]) => {
                 if (orphanSessions.length > 0) {
-                    console.log('Orphaned sessions found:', orphanSessions);
                     setConfirmationDialogConfig({
                         isVisible: true,
                         title: 'Recover Session',
@@ -167,7 +177,7 @@ export default () => {
                             setIsSessionsListDialogVisible(true);
                             setIsSearching(true);
                             setSessionSearchProgress(0);
-                            RecoveryManager().searchOrphanedSessions(
+                            recoveryManager.searchOrphanedSessions(
                                 (progress: number) => {
                                     setSessionSearchProgress(progress);
                                 },
@@ -189,7 +199,7 @@ export default () => {
             },
             true
         );
-    }, []);
+    }, [recoveryManager]);
 
     return (
         <>
@@ -231,7 +241,9 @@ export default () => {
                                     },
                                 });
                             }}
-                            disabled={isSearching}
+                            disabled={
+                                isSearching || orphanedSessions.length === 0
+                            }
                         >
                             Delete All
                         </DialogButton>
@@ -267,9 +279,7 @@ export default () => {
                                     setConfirmationDialogConfig({
                                         isVisible: true,
                                         title: 'Recover Session',
-                                        message: `Do you want to recover the session started at ${formatTimestamp(
-                                            session.startTime
-                                        )}? You will be able to recover the other sessions afterwards as well.`,
+                                        message: `Do you want to recover the session? You will be able to recover the other sessions afterwards as well.`,
                                         confirmText: 'Recover',
                                         cancelText: 'Cancel',
                                         onConfirm: () => {
@@ -281,7 +291,10 @@ export default () => {
                                             dispatch(
                                                 setSessionRecoveryPending(true)
                                             );
-                                            RecoveryManager().recoverSession(
+                                            setRecoveryProgress(0);
+                                            setRecoveryError(null);
+                                            reset();
+                                            recoveryManager.recoverSession(
                                                 session,
                                                 (progress: number) => {
                                                     setRecoveryProgress(
@@ -289,20 +302,20 @@ export default () => {
                                                     );
                                                 },
                                                 () => {
-                                                    dispatch(
-                                                        setSessionRecoveryPending(
-                                                            false
-                                                        )
-                                                    );
-                                                    console.log(
-                                                        'Recovery complete'
-                                                    );
+                                                    pause();
+                                                    setRecoveryPending(false);
                                                 },
                                                 (error: Error) => {
-                                                    console.error(
-                                                        'Recovery error:',
-                                                        error
+                                                    pause();
+                                                    setRecoveryPending(false);
+                                                    setRecoveryError(
+                                                        error.message
                                                     );
+                                                    logger.error(error.message);
+                                                },
+                                                () => {
+                                                    pause();
+                                                    setRecoveryPending(false);
                                                 }
                                             );
                                         },
@@ -315,9 +328,7 @@ export default () => {
                                     setConfirmationDialogConfig({
                                         isVisible: true,
                                         title: 'Delete Session',
-                                        message: `Are you sure you want to delete the session started at ${formatTimestamp(
-                                            session.startTime
-                                        )}? This action cannot be undone.`,
+                                        message: `Are you sure you want to delete the session? This action cannot be undone.`,
                                         confirmText: 'Delete',
                                         cancelText: 'Cancel',
                                         onConfirm: () => {
@@ -333,6 +344,7 @@ export default () => {
                                                     setOrphanedSessions(
                                                         sessions
                                                     );
+                                                    closeConfirmationDialog();
                                                 }
                                             );
                                         },
@@ -356,7 +368,11 @@ export default () => {
                     <DialogButton
                         variant="secondary"
                         onClick={() => {
+                            if (!recoveryError) {
+                                recoveryManager.cancelRecoveryProcess();
+                            }
                             setIsRecovering(false);
+                            setIsSessionsListDialogVisible(true);
                         }}
                     >
                         Cancel
@@ -376,6 +392,9 @@ export default () => {
                         progress={recoveryProgress}
                         indeterminate={false}
                     />
+                    {recoveryError && (
+                        <Alert variant="danger">{recoveryError}</Alert>
+                    )}
                 </div>
             </GenericDialog>
             <ConfirmationDialog

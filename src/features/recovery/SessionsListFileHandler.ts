@@ -71,7 +71,7 @@ export const AddSession = async (
     };
 
     const sessions = await ReadSessions();
-    sessions.push(session);
+    sessions.unshift(session);
     await WriteSessions(sessions);
 };
 
