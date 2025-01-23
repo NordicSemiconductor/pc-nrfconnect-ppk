@@ -127,6 +127,7 @@ export class FileBuffer {
                 AddSession(
                     Date.now(),
                     this.samplingRate ? this.samplingRate : 100000,
+                    false,
                     this.#filePath
                 );
             }

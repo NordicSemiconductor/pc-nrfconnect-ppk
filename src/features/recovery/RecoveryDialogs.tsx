@@ -35,22 +35,34 @@ const SessionItem = ({
     onRecoverClick: (session: Session) => void;
     onRemoveClick: (session: Session) => void;
 }) => (
-    <div className="tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
-        <div>
-            <div className="tw-text-xs">Start time</div>
-            <div>{formatTimestamp(session.startTime)}</div>
-        </div>
-        <div>
-            <div className="tw-text-xs">Duration</div>
-            <div>
-                {formatDuration(
-                    session.samplingDuration ? session.samplingDuration : 0
-                )}
+    <div className="tw-flex tw-flex-row tw-justify-end tw-gap-11 tw-bg-gray-800 tw-p-3 tw-text-white">
+        <div className="tw-flex tw-flex-grow tw-flex-col tw-justify-between tw-gap-2">
+            <div className="tw-flex tw-flex-row tw-justify-between">
+                <div>
+                    <div className="tw-text-xs">Start time</div>
+                    <div>{formatTimestamp(session.startTime)}</div>
+                </div>
+                <div>
+                    <div className="tw-text-xs">Duration</div>
+                    <div>
+                        {formatDuration(
+                            session.samplingDuration
+                                ? session.samplingDuration
+                                : 0
+                        )}
+                    </div>
+                </div>
+                <div>
+                    <div className="tw-text-xs">Sampling rate</div>
+                    <div>{session.samplingRate}</div>
+                </div>
             </div>
-        </div>
-        <div>
-            <div className="tw-text-xs">Sampling rate</div>
-            <div>{session.samplingRate}</div>
+            {session.alreadyRecovered && (
+                <div className="tw-text-xs tw-text-red-500">
+                    This session has already been recovered or loaded from a
+                    ppk2 file.
+                </div>
+            )}
         </div>
         <div className="tw-content-center tw-align-middle">
             <div className="tw-flex tw-flex-row tw-gap-2">
@@ -64,11 +76,12 @@ const SessionItem = ({
                 </Button>
                 <Button
                     variant="primary"
+                    className="tw-w-[60px]"
                     onClick={() => {
                         onRecoverClick(session);
                     }}
                 >
-                    Recover
+                    {session.alreadyRecovered ? 'Load' : 'Recover'}
                 </Button>
             </div>
         </div>
@@ -271,6 +284,16 @@ export default () => {
                             {ItemizedSessions({
                                 orphanedSessions,
                                 onRecoverClick: session => {
+                                    if (session.alreadyRecovered) {
+                                        dispatch(
+                                            RecoveryManager.renderSessionData(
+                                                session
+                                            )
+                                        );
+                                        setIsSessionsListDialogVisible(false);
+                                        return;
+                                    }
+
                                     setConfirmationDialogConfig({
                                         isVisible: true,
                                         title: 'Recover Session',

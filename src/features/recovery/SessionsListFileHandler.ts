@@ -16,6 +16,7 @@ export type Session = {
     pid: string;
     startTime: number;
     samplingRate: number;
+    alreadyRecovered: boolean;
     filePath: string;
     samplingDuration?: number;
 };
@@ -35,11 +36,13 @@ export const ReadSessions = async (): Promise<Session[]> => {
     const validLines: Session[] = lines
         .filter(line => line.trim() !== '' && lineFormatRegex.test(line))
         .map(line => {
-            const [pid, startTime, samplingRate, filePath] = line.split('\t');
+            const [pid, startTime, samplingRate, alreadyRecovered, filePath] =
+                line.split('\t');
             return {
                 pid,
                 startTime: Number(startTime),
                 samplingRate: Number(samplingRate),
+                alreadyRecovered: alreadyRecovered === '1',
                 filePath,
             };
         });
@@ -51,7 +54,9 @@ export const WriteSessions = async (sessions: Session[]) => {
     const sessionsList = sessions
         .map(
             session =>
-                `${session.pid}\t${session.startTime}\t${session.samplingRate}\t${session.filePath}`
+                `${session.pid}\t${session.startTime}\t${
+                    session.samplingRate
+                }\t${Number(session.alreadyRecovered)}\t${session.filePath}`
         )
         .join('\n');
 
@@ -61,12 +66,14 @@ export const WriteSessions = async (sessions: Session[]) => {
 export const AddSession = async (
     startTime: number,
     samplingRate: number,
+    alreadyRecovered: boolean,
     filePath: string
 ) => {
     const session: Session = {
         pid: process.pid.toString(),
         startTime,
         samplingRate,
+        alreadyRecovered,
         filePath,
     };
 
@@ -124,4 +131,19 @@ export const DeleteAllSessions = async (
     };
 
     deleteSession(0);
+};
+
+export const ChangeSessionStatus = async (
+    filePath: string,
+    status: boolean
+) => {
+    const sessions = await ReadSessions();
+    const sessionIndex = sessions.findIndex(
+        session => session.filePath === filePath
+    );
+
+    if (sessionIndex !== -1) {
+        sessions[sessionIndex].alreadyRecovered = status;
+        await WriteSessions(sessions);
+    }
 };

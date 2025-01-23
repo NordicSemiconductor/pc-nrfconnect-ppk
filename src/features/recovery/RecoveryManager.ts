@@ -24,8 +24,11 @@ import { setSessionRecoveryPending } from '../../slices/appSlice';
 import {
     chartWindowAction,
     getWindowDuration,
+    resetChartTime,
+    resetCursor,
     scrollToEnd,
     setLatestDataTimestamp,
+    setLiveMode,
     triggerForceRerender as triggerForceRerenderMainChart,
 } from '../../slices/chartSlice';
 import { updateSampleFreqLog10 } from '../../slices/dataLoggerSlice';
@@ -34,9 +37,11 @@ import { FoldingBuffer } from '../../utils/foldingBuffer';
 import { Panes } from '../../utils/panes';
 import {
     miniMapAnimationAction,
+    resetMinimap,
     triggerForceRerender as triggerForceRerenderMiniMap,
 } from '../minimap/minimapSlice';
 import {
+    ChangeSessionStatus,
     ReadSessions,
     Session,
     WriteSessions,
@@ -86,53 +91,64 @@ export class RecoveryManager {
         return Math.floor((endTime - startTime) / 1000);
     }
 
-    #finalizeRecovery =
-        (
-            sessionPath: string,
-            samplesPerSecond: number,
-            startTime: number
-        ): AppThunk<RootState, Promise<void>> =>
+    static renderSessionData =
+        (session: Session): AppThunk<RootState, Promise<void>> =>
         async (dispatch, getState) => {
+            const sessionPath = path.dirname(session.filePath);
+
+            await DataManager().reset();
+            dispatch(resetChartTime());
+            dispatch(resetMinimap());
+            dispatch(setLiveMode(false));
+            dispatch(resetCursor());
+
+            await DataManager().setSamplesPerSecond(session.samplingRate);
+            await DataManager().loadData(sessionPath, session.startTime);
+
+            const timestamp = DataManager().getTimestamp();
+
+            dispatch(setCurrentPane(Panes.DATA_LOGGER));
+
+            if (timestamp) {
+                dispatch(setLatestDataTimestamp(timestamp));
+                dispatch(
+                    updateSampleFreqLog10({
+                        sampleFreqLog10: Math.log10(
+                            DataManager().getSamplesPerSecond()
+                        ),
+                    })
+                );
+                if (
+                    DataManager().getTimestamp() <=
+                    getWindowDuration(getState())
+                ) {
+                    dispatch(
+                        chartWindowAction(0, DataManager().getTimestamp())
+                    );
+                } else {
+                    dispatch(scrollToEnd());
+                }
+                dispatch(triggerForceRerenderMainChart());
+                dispatch(triggerForceRerenderMiniMap());
+                dispatch(miniMapAnimationAction());
+            }
+        };
+
+    #finalizeRecovery =
+        (session: Session): AppThunk<RootState, Promise<void>> =>
+        async dispatch => {
             try {
+                const sessionPath = path.dirname(session.filePath);
                 await this.#foldingBuffer?.saveToFile(sessionPath);
                 await RecoveryManager.#saveMetadataToFile(
                     sessionPath,
-                    samplesPerSecond,
-                    startTime
+                    session.samplingRate,
+                    session.startTime
                 );
 
-                // const timestamp = loadDecompressedData(sessionPath);
+                ChangeSessionStatus(session.filePath, true);
 
-                DataManager().setSamplesPerSecond(this.#samplesPerSecond);
-                DataManager().loadData(sessionPath, this.#initialSamplingTime);
-
-                const timestamp = DataManager().getTimestamp();
-
-                dispatch(setCurrentPane(Panes.DATA_LOGGER));
-
-                if (timestamp) {
-                    dispatch(setLatestDataTimestamp(timestamp));
-                    dispatch(
-                        updateSampleFreqLog10({
-                            sampleFreqLog10: Math.log10(
-                                DataManager().getSamplesPerSecond()
-                            ),
-                        })
-                    );
-                    if (
-                        DataManager().getTimestamp() <=
-                        getWindowDuration(getState())
-                    ) {
-                        dispatch(
-                            chartWindowAction(0, DataManager().getTimestamp())
-                        );
-                    } else {
-                        dispatch(scrollToEnd());
-                    }
-                    dispatch(triggerForceRerenderMainChart());
-                    dispatch(triggerForceRerenderMiniMap());
-                    dispatch(miniMapAnimationAction());
-                }
+                await dispatch(RecoveryManager.renderSessionData(session));
             } catch (error) {
                 throw new Error(`Error finalizing recovery: ${error}`);
             }
@@ -274,18 +290,22 @@ export class RecoveryManager {
                     }
 
                     if (offset >= fileSize) {
-                        dispatch(
-                            await this.#finalizeRecovery(
-                                sessionPath,
-                                this.#samplesPerSecond,
-                                session.startTime
-                            )
-                        );
-
-                        this.#releaseBuffers();
-
-                        dispatch(setSessionRecoveryPending(false));
-                        onComplete();
+                        try {
+                            await dispatch(this.#finalizeRecovery(session));
+                            this.#releaseBuffers();
+                            dispatch(setSessionRecoveryPending(false));
+                            onComplete();
+                        } catch (finalizeError) {
+                            if (finalizeError instanceof Error) {
+                                onFail(finalizeError);
+                            } else {
+                                onFail(
+                                    new Error(
+                                        'Unknown error during finalizeRecovery.'
+                                    )
+                                );
+                            }
+                        }
                         return;
                     }
 

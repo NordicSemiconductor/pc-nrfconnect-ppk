@@ -19,6 +19,7 @@ import { v4 } from 'uuid';
 import { createInflateRaw } from 'zlib';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
+import { AddSession } from '../features/recovery/SessionsListFileHandler';
 import { DataManager, timestampToIndex } from '../globals';
 import { canFileFit } from './fileUtils';
 import saveFile, { PPK2Metadata } from './saveFileHandler';
@@ -239,6 +240,15 @@ const loadPPK2File = async (
         logger.info(`Decompression session information to ${sessionPath}`);
         const metadata: PPK2Metadata = JSON.parse(
             fs.readFileSync(path.join(sessionPath, 'metadata.json')).toString()
+        );
+
+        const sessionFilePath = path.join(sessionPath, 'session.raw');
+
+        AddSession(
+            metadata.metadata.startSystemTime ?? Date.now(),
+            metadata.metadata.samplesPerSecond,
+            true,
+            sessionFilePath
         );
 
         DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
