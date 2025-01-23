@@ -20,12 +20,10 @@ import { updateAllGains, updateSpikeFilter } from '../../actions/deviceActions';
 import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
-import RecoveryDialogs from '../../features/recovery/RecoveryDialogs';
 import {
     deviceOpen as deviceOpenSelector,
     isFileLoaded,
     isSavePending,
-    isSessionRecoveryPending,
 } from '../../slices/appSlice';
 import { isSessionActive } from '../../slices/chartSlice';
 import { resetGainsToDefaults } from '../../slices/gainsSlice';
@@ -44,7 +42,6 @@ import StartStop from './StartStop';
 
 const useConfirmBeforeClose = () => {
     const pendingSave = useSelector(isSavePending);
-    const pendingRecovery = useSelector(isSessionRecoveryPending);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -60,20 +57,6 @@ const useConfirmBeforeClose = () => {
             dispatch(clearConfirmBeforeClose('unsavedData'));
         }
     }, [dispatch, pendingSave]);
-
-    useEffect(() => {
-        if (pendingRecovery) {
-            dispatch(
-                addConfirmBeforeClose({
-                    id: 'unsavedData',
-                    message:
-                        'There is a session recovery in progress. If you close the application the recovery progress will be lost and the session will remain in the recovery list. Are you sure you want to close?',
-                })
-            );
-        } else {
-            dispatch(clearConfirmBeforeClose('unsavedData'));
-        }
-    }, [dispatch, pendingRecovery]);
 };
 
 export default () => {
@@ -147,7 +130,6 @@ export default () => {
             )}
             <DeprecatedDeviceDialog />
             {showProgressDialog && <ProgressDialog />}
-            <RecoveryDialogs />
         </SidePanel>
     );
 };

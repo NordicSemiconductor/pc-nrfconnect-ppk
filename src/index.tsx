@@ -17,6 +17,7 @@ import Chart from './components/Chart/Chart';
 import DeviceSelector from './components/DeviceSelector';
 import DocumentationSections from './components/DocumentationSections';
 import SidePanel from './components/SidePanel/SidePanel';
+import RecoveryDialogs from './features/recovery/RecoveryDialogs';
 import { updateTitle } from './globals';
 import reducers from './slices';
 import { getFileLoaded, isSavePending } from './slices/appSlice';
@@ -87,6 +88,7 @@ render(
             { name: Panes.SCOPE, Main: ChartWrapper },
         ]}
     >
+        <RecoveryDialogs />
         <AppTitleHook />
     </App>
 );
