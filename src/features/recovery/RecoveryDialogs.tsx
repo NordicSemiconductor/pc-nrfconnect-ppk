@@ -16,6 +16,7 @@ import {
     DialogButton,
     GenericDialog,
     logger,
+    Overlay,
     useStopwatch,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -55,10 +56,25 @@ const SessionItem = ({
                 </div>
             </div>
             {session.alreadyRecovered && (
-                <div className="tw-text-xs tw-text-red-500">
-                    This session has already been recovered or loaded from a
-                    ppk2 file.
-                </div>
+                <Overlay
+                    tooltipChildren={
+                        <span>
+                            The session has already been recovered or loaded by
+                            using a ppk2 file. You can load it again or delete
+                            it.
+                        </span>
+                    }
+                    keepShowingOnHoverTooltip
+                    tooltipId="test"
+                    placement="bottom"
+                >
+                    <div className="tw-flex tw-flex-row tw-gap-1 tw-text-orange-400">
+                        <span className="mdi mdi-information-outline info-icon ml-1" />
+                        <span className="tw-grid tw-items-center tw-text-xs">
+                            This session has already been recovered.
+                        </span>
+                    </div>
+                </Overlay>
             )}
         </div>
         <div className="tw-content-center tw-align-middle">
