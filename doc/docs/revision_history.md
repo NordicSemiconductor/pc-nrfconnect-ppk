@@ -2,6 +2,7 @@
 
 | Date       | Description                                                                                          |
 |------------|------------------------------------------------------------------------------------------------------|
+| January 2025 | Added the [Application source code](./index.md#application-source-code) section on the [Home](./index.md) page |
 | November 2024 | Editorial changes   |
 | March 2024 | Updated the documentation for the {{app_name}} [v4.0.0](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md)    |
 | February 2024 | Separated the application documentation from the [PPK2 hardware documentation](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/PPK_user_guide_Intro.html)    |
