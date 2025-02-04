@@ -271,14 +271,19 @@ export const open =
                 const isLoweringEdge =
                     state.app.trigger.edge === 'Lowering Edge';
 
-                const validTriggerValue =
-                    prevCappedValue != null &&
-                    ((isRaisingEdge &&
+                let validTriggerValue = false;
+
+                if (isRaisingEdge) {
+                    validTriggerValue =
+                        prevCappedValue != null &&
                         prevCappedValue < state.app.trigger.level &&
-                        cappedValue >= state.app.trigger.level) ||
-                        (isLoweringEdge &&
-                            prevCappedValue > state.app.trigger.level &&
-                            cappedValue <= state.app.trigger.level));
+                        cappedValue >= state.app.trigger.level;
+                } else if (isLoweringEdge) {
+                    validTriggerValue =
+                        prevCappedValue != null &&
+                        prevCappedValue > state.app.trigger.level &&
+                        cappedValue <= state.app.trigger.level;
+                }
 
                 prevCappedValue = cappedValue;
 

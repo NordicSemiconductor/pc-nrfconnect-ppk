@@ -3,6 +3,7 @@
 ### Added
 
 -   Option for cooshing a trigger bias level.
+-   Option for choosing the triggering edge.
 
 ## 4.2.1 - 2024-11-11
 
