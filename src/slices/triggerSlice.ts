@@ -7,6 +7,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
+    digitalChannelStateTupleOf8,
     getDigitalChannelsTriggers as getPersistedDigitalChannelsTriggers,
     getRecordingLength as getPersistedRecordingLength,
     getTriggerBias as getPersistedTriggerBias,
@@ -31,12 +32,10 @@ export type TriggerType = (typeof TriggerTypeValues)[number];
 export const TriggerEdgeValues = ['Raising Edge', 'Lowering Edge'] as const;
 export type TriggerEdge = (typeof TriggerEdgeValues)[number];
 export enum DigitalChannelTriggerStatesEnum {
-    Active = 'Active',
-    Inactive = 'Inactive',
-    DontCare = "Don't care",
+    Active = '1',
+    Inactive = '0',
+    DoNotCare = 'X',
 }
-export type DigitalChannelTriggerState =
-    keyof typeof DigitalChannelTriggerStatesEnum;
 
 export interface DataLoggerState {
     level: number;
@@ -49,7 +48,7 @@ export interface DataLoggerState {
     progressMessage?: string;
     progress?: number;
     triggerOrigin?: number;
-    digitalChannelsTriggersStates: DigitalChannelTriggerState[];
+    digitalChannelsTriggersStates: digitalChannelStateTupleOf8;
 }
 
 const initialState = (): DataLoggerState => ({
@@ -60,7 +59,9 @@ const initialState = (): DataLoggerState => ({
     category: getPersistedTriggerCategory('Analog'),
     type: getPersistedTriggerType('Single'),
     edge: getPersistedTriggerEdge('Raising Edge'),
-    digitalChannelsTriggersStates: getPersistedDigitalChannelsTriggers(),
+    digitalChannelsTriggersStates: getPersistedDigitalChannelsTriggers(
+        [] as unknown as digitalChannelStateTupleOf8
+    ),
 });
 
 const triggerSlice = createSlice({
@@ -98,7 +99,7 @@ const triggerSlice = createSlice({
         setDigitalChannelsTriggersStates: (
             state,
             action: PayloadAction<{
-                digitalChannelsTriggers: DigitalChannelTriggerState[];
+                digitalChannelsTriggers: digitalChannelStateTupleOf8;
             }>
         ) => {
             state.digitalChannelsTriggersStates =

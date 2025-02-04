@@ -10,7 +10,7 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    type DigitalChannelTriggerState,
+    type DigitalChannelTriggerStatesEnum,
     type TriggerCategory,
     type TriggerEdge,
     type TriggerType,
@@ -55,14 +55,14 @@ export type booleanTupleOf8 = [
 ];
 
 export type digitalChannelStateTupleOf8 = [
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerState,
-    DigitalChannelTriggerState
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum
 ];
 
 export type TimeUnit = 's' | 'm' | 'h' | 'd' | 'inf';
@@ -175,19 +175,11 @@ export const getTriggerEdge = (defaultValue: TriggerEdge) =>
 export const setTriggerEdge = (value: TriggerEdge) => {
     store.set(`trigger-edge`, value);
 };
-export const getDigitalChannelsTriggers = () =>
-    store.get(DIGITAL_CHANNELS_TRIGGERS, [
-        'Inactive',
-        'Inactive',
-        'Inactive',
-        'Inactive',
-        'Inactive',
-        'Inactive',
-        'Inactive',
-        'Inactive',
-    ]);
+export const getDigitalChannelsTriggers = (
+    defaultValue: digitalChannelStateTupleOf8
+) => store.get(DIGITAL_CHANNELS_TRIGGERS, defaultValue);
 export const setDigitalChannelsTriggers = (
-    triggers: DigitalChannelTriggerState[]
+    triggers: digitalChannelStateTupleOf8
 ) => store.set(DIGITAL_CHANNELS_TRIGGERS, triggers);
 
 export const getDurationUnit = (

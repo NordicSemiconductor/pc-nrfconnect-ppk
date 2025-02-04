@@ -64,6 +64,7 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
+    DigitalChannelTriggerStatesEnum,
     getTriggerBias,
     getTriggerRecordingLength,
     resetTriggerOrigin,
@@ -77,7 +78,10 @@ import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
 import { isDataLoggerPane } from '../utils/panes';
-import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
+import {
+    digitalChannelStateTupleOf8,
+    setSpikeFilter as persistSpikeFilter,
+} from '../utils/persistentStore';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
@@ -214,21 +218,34 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
 function checkDigitalTriggerValidity(
     unsignedBits: number,
     previousUnsignedBits: number,
-    channelTriggerStatuses: string[]
+    channelTriggerStatuses: digitalChannelStateTupleOf8
 ): boolean {
+    const channelTriggerStatusesReversed = [
+        ...channelTriggerStatuses,
+    ].reverse();
+
+    const doNotCareMask = Number.parseInt(
+        channelTriggerStatusesReversed
+            .map(status =>
+                status === DigitalChannelTriggerStatesEnum.DoNotCare ? '0' : '1'
+            )
+            .join(''),
+        2
+    );
+
+    const validMask = Number.parseInt(
+        channelTriggerStatusesReversed
+            .map(status =>
+                status === DigitalChannelTriggerStatesEnum.DoNotCare
+                    ? '0'
+                    : status
+            )
+            .join(''),
+        2
+    );
+
     const isTriggerValid = (bits: number) =>
-        channelTriggerStatuses.every((status, index) => {
-            const bit = (bits >> index) & 0x01;
-
-            if (
-                (status === 'Active' && bit !== 1) ||
-                (status === 'Inactive' && bit !== 0)
-            ) {
-                return false;
-            }
-
-            return true;
-        });
+        ((bits & doNotCareMask) ^ validMask) === 0;
 
     return (
         !isTriggerValid(previousUnsignedBits) && isTriggerValid(unsignedBits)

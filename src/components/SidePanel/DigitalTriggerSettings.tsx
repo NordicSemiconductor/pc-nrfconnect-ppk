@@ -12,24 +12,24 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    DigitalChannelTriggerState,
     DigitalChannelTriggerStatesEnum,
     getDigitalChannelsTriggersStates,
     setDigitalChannelsTriggersStates,
 } from '../../slices/triggerSlice';
+import { digitalChannelStateTupleOf8 } from '../../utils/persistentStore';
 
 const dropdownItems: DropdownItem[] = [
     {
         value: DigitalChannelTriggerStatesEnum.Active,
-        label: DigitalChannelTriggerStatesEnum.Active,
+        label: 'Active',
     },
     {
         value: DigitalChannelTriggerStatesEnum.Inactive,
-        label: DigitalChannelTriggerStatesEnum.Inactive,
+        label: 'Inactive',
     },
     {
-        value: DigitalChannelTriggerStatesEnum.DontCare,
-        label: DigitalChannelTriggerStatesEnum.DontCare,
+        value: DigitalChannelTriggerStatesEnum.DoNotCare,
+        label: "Don't care",
     },
 ];
 
@@ -41,9 +41,11 @@ export default () => {
 
     const handleDigitalChannelsTriggerStateChange = (
         index: number,
-        state: DigitalChannelTriggerState
+        state: DigitalChannelTriggerStatesEnum
     ) => {
-        const newStates = [...digitalChannelTriggerStates];
+        const newStates = [
+            ...digitalChannelTriggerStates,
+        ] as digitalChannelStateTupleOf8;
         newStates[index] = state;
         dispatch(
             setDigitalChannelsTriggersStates({
@@ -64,7 +66,7 @@ export default () => {
                         onSelect={value => {
                             handleDigitalChannelsTriggerStateChange(
                                 index,
-                                value.value as DigitalChannelTriggerState
+                                value.value as DigitalChannelTriggerStatesEnum
                             );
                         }}
                         items={dropdownItems}
