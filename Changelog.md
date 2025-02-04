@@ -1,3 +1,9 @@
+## 4.3.0 - UNRELEASED
+
+### Added
+
+-   Digital channels can now be configured as triggers in the `Scope` pane.
+
 ## 4.2.1 - 2024-11-11
 
 ### Changed
