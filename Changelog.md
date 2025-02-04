@@ -2,6 +2,7 @@
 
 ### Added
 
+-   Digital channels can now be configured as triggers in the `Scope` pane.
 -   Option for cooshing a trigger bias level.
 -   Option for choosing the triggering edge.
 

@@ -9,7 +9,12 @@ import {
     getPersistentStore,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import type { TriggerEdge, TriggerType } from '../slices/triggerSlice';
+import {
+    type DigitalChannelTriggerStatesEnum,
+    type TriggerCategory,
+    type TriggerEdge,
+    type TriggerType,
+} from '../slices/triggerSlice';
 
 const LAST_SAVE_DIR = 'lastSaveDir';
 const SPIKE_FILTER_SAMPLES = 'spikeFilter.samples';
@@ -17,6 +22,7 @@ const SPIKE_FILTER_ALPHA = 'spikeFilter.alpha';
 const SPIKE_FILTER_ALPHA5 = 'spikeFilter.alpha5';
 const DIGITAL_CHANNELS_VISIBLE = 'digitalChannelsVisible';
 const DIGITAL_CHANNELS = 'digitalChannels';
+const DIGITAL_CHANNELS_TRIGGERS = 'digitalChannelsTriggers';
 const TIMESTAMPS_VISIBLE = 'timestampsVisible';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
 
@@ -48,6 +54,17 @@ export type booleanTupleOf8 = [
     boolean
 ];
 
+export type digitalChannelStateTupleOf8 = [
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum,
+    DigitalChannelTriggerStatesEnum
+];
+
 export type TimeUnit = 's' | 'm' | 'h' | 'd' | 'inf';
 
 interface StoreSchema {
@@ -59,6 +76,8 @@ interface StoreSchema {
     [DIGITAL_CHANNELS_VISIBLE]: boolean;
     [DIGITAL_CHANNELS]: booleanTupleOf8;
     [TIMESTAMPS_VISIBLE]: boolean;
+
+    [DIGITAL_CHANNELS_TRIGGERS]: digitalChannelStateTupleOf8;
 
     [VOLTAGE_REGULATOR_MAX_CAP_PPK2]: number;
 
@@ -141,6 +160,11 @@ export const getTriggerBias = (defaultValue: number) =>
 export const setTriggerBias = (value: number) => {
     store.set(`trigger-bias-ms`, value);
 };
+export const getTriggerCategory = (defaultValue: TriggerCategory) =>
+    store.get(`trigger-category`, defaultValue);
+export const setTriggerCategory = (value: TriggerCategory) => {
+    store.set(`trigger-category`, value);
+};
 export const getTriggerType = (defaultValue: TriggerType) =>
     store.get(`trigger-mode-type`, defaultValue);
 export const setTriggerType = (value: TriggerType) => {
@@ -151,6 +175,12 @@ export const getTriggerEdge = (defaultValue: TriggerEdge) =>
 export const setTriggerEdge = (value: TriggerEdge) => {
     store.set(`trigger-edge`, value);
 };
+export const getDigitalChannelsTriggers = (
+    defaultValue: digitalChannelStateTupleOf8
+) => store.get(DIGITAL_CHANNELS_TRIGGERS, defaultValue);
+export const setDigitalChannelsTriggers = (
+    triggers: digitalChannelStateTupleOf8
+) => store.set(DIGITAL_CHANNELS_TRIGGERS, triggers);
 
 export const getDurationUnit = (
     maxSampleFreq: number,
