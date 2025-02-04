@@ -9,7 +9,7 @@ import {
     getPersistentStore,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { type TriggerEdge, type TriggerType } from '../slices/triggerSlice';
+import type { TriggerEdge, TriggerType } from '../slices/triggerSlice';
 
 const LAST_SAVE_DIR = 'lastSaveDir';
 const SPIKE_FILTER_SAMPLES = 'spikeFilter.samples';
