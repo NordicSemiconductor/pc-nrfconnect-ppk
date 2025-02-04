@@ -8,6 +8,7 @@ import {
     AppThunk,
     setCurrentPane,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import logger from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging';
 import { exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -212,7 +213,7 @@ export class RecoveryManager {
             }
 
             if (error) {
-                // TODO: Should we consider the session as orphaned as the error is raised by the command itself, but not the process?
+                logger.error(error);
                 return null;
             }
 
@@ -329,9 +330,10 @@ export class RecoveryManager {
                             const progress = (offset / fileSize) * 100;
                             onProgress(progress);
 
-                            queueMicrotask(processChunk);
+                            setTimeout(() => processChunk(), 0);
                         });
                 } catch (error) {
+                    this.#releaseBuffers();
                     if (error instanceof Error) {
                         onFail(
                             new Error(
@@ -347,7 +349,7 @@ export class RecoveryManager {
                 }
             };
 
-            queueMicrotask(processChunk);
+            setTimeout(() => processChunk(), 0);
         };
 
     async searchOrphanedSessions(
