@@ -296,7 +296,6 @@ export const open =
                     }
                     dispatch(setTriggerActive(true));
                     const biasPercentage = getTriggerBias(getState());
-                    console.log('biasPercentage', biasPercentage);
                     dispatch(
                         processTrigger(
                             cappedValue,

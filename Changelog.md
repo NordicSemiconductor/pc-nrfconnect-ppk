@@ -1,3 +1,9 @@
+## 4.3.0 - UNRELEASED
+
+### Added
+
+-   Option for cooshing a trigger bias level.
+
 ## 4.2.1 - 2024-11-11
 
 ### Changed

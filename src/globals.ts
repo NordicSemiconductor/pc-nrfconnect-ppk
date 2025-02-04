@@ -367,7 +367,7 @@ export const DataManager = () => ({
     },
     addTimeReachedTrigger: (
         recordingLengthMicroSeconds: number,
-        biasPercent = 10
+        biasPercent: number
     ) =>
         new Promise<{
             writeBuffer: WriteBuffer;

@@ -119,30 +119,33 @@ export default () => {
                 disabled={dataLoggerActive}
                 showSlider
             />
-            <NumberInput
-                range={{
-                    min: 0,
-                    max: 100,
-                    decimals: 0,
-                    step: 1,
-                }}
-                title='Trigger bias from "Start of trigger window"'
-                value={triggerBiasValue}
-                onChange={setTriggerBiasValue}
-                onChangeComplete={(value: number) => {
-                    dispatch(setTriggerBias(value));
-                    setComputedBias(
-                        calculateBiasTime(internalTriggerLength, value)
-                    );
-                }}
-                unit="%"
-                label="Bias"
-                disabled={dataLoggerActive}
-                showSlider
-            />
-            <span className="tw-mb-2 tw-text-sm tw-text-gray-500">
-                Computed bias: {computedBias} ms
-            </span>
+            <div className="tw-flex tw-flex-col tw-gap-2">
+                <NumberInput
+                    range={{
+                        min: 0,
+                        max: 100,
+                        decimals: 0,
+                        step: 1,
+                    }}
+                    title='Trigger bias from "Start of trigger window"'
+                    value={triggerBiasValue}
+                    onChange={setTriggerBiasValue}
+                    onChangeComplete={(value: number) => {
+                        dispatch(setTriggerBias(value));
+                        setComputedBias(
+                            calculateBiasTime(internalTriggerLength, value)
+                        );
+                    }}
+                    unit="%"
+                    label="Bias"
+                    disabled={dataLoggerActive}
+                    showSlider
+                />
+                <div className="tw-text-sm tw-text-gray-500">
+                    Computed bias: {computedBias} ms
+                </div>
+            </div>
+
             <NumberInput
                 range={{
                     min: getMin(levelUnit),
