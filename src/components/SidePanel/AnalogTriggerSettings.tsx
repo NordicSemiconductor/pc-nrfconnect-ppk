@@ -16,15 +16,10 @@ import { appState } from '../../slices/appSlice';
 import { getRecordingMode } from '../../slices/chartSlice';
 import {
     getTriggerEdge,
-    getTriggerRecordingLength,
-    getTriggerType,
     getTriggerValue,
     setTriggerEdge,
     setTriggerLevel,
-    setTriggerRecordingLength,
-    setTriggerType,
     TriggerEdgeValues,
-    TriggerTypeValues,
 } from '../../slices/triggerSlice';
 
 const CurrentUnitValues = ['mA', '\u00B5A'] as const;
@@ -50,9 +45,7 @@ const convertToMicroAmps = (unit: CurrentUnit, value: number) => {
 
 export default () => {
     const dispatch = useDispatch();
-    const recordingLength = useSelector(getTriggerRecordingLength);
     const triggerValue = useSelector(getTriggerValue);
-    const triggerType = useSelector(getTriggerType);
     const triggerEdge = useSelector(getTriggerEdge);
     const { samplingRunning } = useSelector(appState);
     const dataLoggerActive =
@@ -67,8 +60,6 @@ export default () => {
 
     const [internalTriggerValue, setInternalTriggerValue] =
         useState(triggerValue);
-    const [internalTriggerLength, setInternalTriggerLength] =
-        useState(recordingLength);
 
     useEffect(() => {
         if (triggerValue > 1000) {
@@ -80,30 +71,8 @@ export default () => {
         }
     }, [triggerValue]);
 
-    useEffect(() => {
-        setInternalTriggerLength(recordingLength);
-    }, [recordingLength]);
-
     return (
         <>
-            <NumberInput
-                range={{
-                    min: 1,
-                    max: 1000,
-                    decimals: 2,
-                    step: 0.01,
-                }}
-                title="Duration of trigger window"
-                value={internalTriggerLength}
-                onChange={setInternalTriggerLength}
-                onChangeComplete={(value: number) => {
-                    dispatch(setTriggerRecordingLength(value));
-                }}
-                unit="ms"
-                label="Length"
-                disabled={dataLoggerActive}
-                showSlider
-            />
             <NumberInput
                 range={{
                     min: getMin(levelUnit),
@@ -136,12 +105,6 @@ export default () => {
                 label="Level"
                 disabled={dataLoggerActive}
                 showSlider
-            />
-            <StateSelector
-                items={[...TriggerTypeValues]}
-                onSelect={m => dispatch(setTriggerType(TriggerTypeValues[m]))}
-                selectedItem={triggerType}
-                disabled={samplingRunning}
             />
             <StateSelector
                 items={[...TriggerEdgeValues]}
