@@ -38,6 +38,7 @@ jest.mock('../../utils/persistentStore', () => ({
     getPreferredSessionLocation: () => '/tmp',
     getDiskFullTrigger: () => 4096,
     getTriggerCategory: () => 'Analog',
+    getDigitalChannelsTriggerLogic: () => 'AND',
     getDigitalChannelsTriggers: () => [
         'Active',
         'Active',

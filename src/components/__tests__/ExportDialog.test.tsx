@@ -10,6 +10,7 @@ import type { AnyAction } from 'redux';
 import { indexToTimestamp } from '../../globals';
 import { showExportDialog } from '../../slices/appSlice';
 import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
+import { getDigitalChannels } from '../../utils/persistentStore';
 import { fireEvent, render, screen } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 
@@ -38,6 +39,7 @@ jest.mock('../../utils/persistentStore', () => ({
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
     getTriggerEdge: () => 'Raising Edge',
+    getDigitalChannelsTriggerLogic: () => 'AND',
     getTriggerCategory: () => 'Analog',
     getDigitalChannelsTriggers: () => [
         'Active',
