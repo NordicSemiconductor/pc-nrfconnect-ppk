@@ -9,35 +9,31 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Dropdown,
     DropdownItem,
+    StateSelector,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
+    DigitalChannelTriggerLogicOptions,
     DigitalChannelTriggerStatesEnum,
+    getDigitalChannelsTriggerLogic,
     getDigitalChannelsTriggersStates,
+    setDigitalChannelsTriggerLogic,
     setDigitalChannelsTriggersStates,
 } from '../../slices/triggerSlice';
 import { digitalChannelStateTupleOf8 } from '../../utils/persistentStore';
 
-const dropdownItems: DropdownItem[] = [
-    {
-        value: DigitalChannelTriggerStatesEnum.Active,
-        label: 'Active',
-    },
-    {
-        value: DigitalChannelTriggerStatesEnum.Inactive,
-        label: 'Inactive',
-    },
-    {
-        value: DigitalChannelTriggerStatesEnum.DoNotCare,
-        label: "Don't care",
-    },
-];
+const dropdownItems: DropdownItem[] = Object.entries(
+    DigitalChannelTriggerStatesEnum
+).map(([key, value]) => ({
+    value,
+    label: key,
+}));
 
-export default () => {
-    const dispatch = useDispatch();
+const ChannelsList = () => {
     const digitalChannelTriggerStates = useSelector(
         getDigitalChannelsTriggersStates
     );
+    const dispatch = useDispatch();
 
     const handleDigitalChannelsTriggerStateChange = (
         index: number,
@@ -55,28 +51,59 @@ export default () => {
     };
 
     return (
-        <div className="tw-flex tw-flex-col tw-gap-3">
+        <div className="tw-ml-px tw-mt-px">
             {digitalChannelTriggerStates.map((state, index) => (
                 <div
-                    key={`d-trigger-${index + 1}`}
-                    className="tw-flex tw-flex-row tw-gap-3"
+                    className="tw-h-10x -tw-mt-px tw-flex tw-w-full tw-items-center tw-border tw-border-solid tw-border-gray-200"
+                    key={`d-triggerr-${index + 1}`}
                 >
-                    <div>{`Digital channel ${index}:`}</div>
-                    <Dropdown
-                        onSelect={value => {
-                            handleDigitalChannelsTriggerStateChange(
-                                index,
-                                value.value as DigitalChannelTriggerStatesEnum
-                            );
-                        }}
-                        items={dropdownItems}
-                        selectedItem={
-                            dropdownItems.find(item => item.value === state) ??
-                            dropdownItems[0]
-                        }
-                    />
+                    <div className="tw-mr-1x -tw-ml-px tw-flex tw-h-8 tw-flex-1 tw-items-center tw-truncate">
+                        <div className="dip-label-text tw-w-full tw-flex-1 tw-truncate tw-pl-1">
+                            Channel {index}
+                        </div>
+                    </div>
+                    <div className="tw-p-1x -tw-ml-px tw-flex tw-h-8 tw-w-1/2 tw-flex-none tw-items-center">
+                        <Dropdown
+                            onSelect={value => {
+                                handleDigitalChannelsTriggerStateChange(
+                                    index,
+                                    value.value as DigitalChannelTriggerStatesEnum
+                                );
+                            }}
+                            items={dropdownItems}
+                            selectedItem={
+                                dropdownItems.find(
+                                    item => item.value === state
+                                ) ?? dropdownItems[0]
+                            }
+                        />
+                    </div>
                 </div>
             ))}
         </div>
+    );
+};
+
+export default () => {
+    const dispatch = useDispatch();
+    const digitalChannelTriggerLogic = useSelector(
+        getDigitalChannelsTriggerLogic
+    );
+
+    return (
+        <>
+            <ChannelsList />
+            <StateSelector
+                items={[...DigitalChannelTriggerLogicOptions]}
+                onSelect={m =>
+                    dispatch(
+                        setDigitalChannelsTriggerLogic(
+                            DigitalChannelTriggerLogicOptions[m]
+                        )
+                    )
+                }
+                selectedItem={digitalChannelTriggerLogic}
+            />
+        </>
     );
 };

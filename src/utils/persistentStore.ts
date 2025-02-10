@@ -10,6 +10,7 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
+    type DigitalChannelTriggerLogic,
     type DigitalChannelTriggerStatesEnum,
     type TriggerCategory,
     type TriggerEdge,
@@ -174,6 +175,14 @@ export const getTriggerEdge = (defaultValue: TriggerEdge) =>
     store.get(`trigger-edge`, defaultValue);
 export const setTriggerEdge = (value: TriggerEdge) => {
     store.set(`trigger-edge`, value);
+};
+export const getDigitalChannelsTriggerLogic = (
+    defaultValue: DigitalChannelTriggerLogic
+) => store.get(`digital-channels-trigger-logic`, defaultValue);
+export const setDigitalChannelsTriggerLogic = (
+    value: DigitalChannelTriggerLogic
+) => {
+    store.set(`digital-channels-trigger-logic`, value);
 };
 export const getDigitalChannelsTriggers = (
     defaultValue: digitalChannelStateTupleOf8
