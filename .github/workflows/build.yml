@@ -1,0 +1,11 @@
+name: Build
+
+on:
+    workflow_dispatch:
+    push:
+        branches-ignore:
+            - main # Skip for main because we build while releasing to "latest"
+
+jobs:
+    build:
+        uses: NordicSemiconductor/pc-nrfconnect-shared/.github/workflows/build-app.yml@main
