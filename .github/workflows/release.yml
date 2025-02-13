@@ -1,0 +1,25 @@
+name: Release
+
+on:
+    workflow_dispatch:
+        inputs:
+            source:
+                description: 'Source to release to'
+                type: choice
+                options:
+                    - release-test (internal)
+                    - experimental (internal)
+                    - official (external)
+            ref:
+                description:
+                    'Ref (Tag, branch, commit SHA) to release. Default to the
+                    default branch'
+                type: string
+
+jobs:
+    release:
+        uses: NordicSemiconductor/pc-nrfconnect-shared/.github/workflows/release-app.yml@main
+        with:
+            source: ${{ inputs.source }}
+            ref: ${{ inputs.ref }}
+        secrets: inherit

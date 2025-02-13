@@ -7,8 +7,6 @@ on:
             - labeled
             - unlabeled
             - synchronize
-        branches:
-            - main
 
 jobs:
     check_labels:

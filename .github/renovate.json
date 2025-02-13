@@ -1,0 +1,13 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:recommended"],
+    "labels": ["doc not required", "ui not required"],
+    "packageRules": [
+        {
+            "excludePackageNames": [
+                "@nordicsemiconductor/pc-nrfconnect-shared"
+            ],
+            "enabled": false
+        }
+    ]
+}
