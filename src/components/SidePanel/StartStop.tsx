@@ -11,6 +11,7 @@ import {
     Group,
     logger,
     StartStopButton,
+    StateSelector,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
@@ -34,7 +35,12 @@ import {
     dataLoggerState,
     getSampleFrequency,
 } from '../../slices/dataLoggerSlice';
-import { resetTriggerOrigin } from '../../slices/triggerSlice';
+import {
+    getTriggerCategory,
+    resetTriggerOrigin,
+    setTriggerCategory,
+    TriggerCategoryValues,
+} from '../../slices/triggerSlice';
 import { convertTimeToSeconds, formatDuration } from '../../utils/duration';
 import {
     calcFileSize,
@@ -47,8 +53,10 @@ import {
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import { resetCache } from '../Chart/data/dataAccumulator';
+import AnalogTriggerSettings from './AnalogTriggerSettings';
+import DigitalTriggerSettings from './DigitalTriggerSettings';
 import LiveModeSettings from './LiveModeSettings';
-import TriggerSettings from './TriggerSettings';
+import SamplingSettings from './SamplingSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
@@ -70,6 +78,7 @@ export default () => {
     const savePending = useSelector(isSavePending);
     const sessionFolder = useSelector(getSessionRootFolder);
     const diskFullTrigger = useSelector(getDiskFullTrigger);
+    const triggerCategory = useSelector(getTriggerCategory);
 
     const sampleIndefinitely = durationUnit === 'inf';
 
@@ -155,9 +164,26 @@ export default () => {
 
     return (
         <>
+            {scopePane && (
+                <StateSelector
+                    items={[...TriggerCategoryValues]}
+                    onSelect={m =>
+                        dispatch(setTriggerCategory(TriggerCategoryValues[m]))
+                    }
+                    selectedItem={triggerCategory}
+                />
+            )}
             <Group heading="Sampling parameters" gap={4}>
                 {dataLoggerPane && <LiveModeSettings />}
-                {scopePane && <TriggerSettings />}
+                {scopePane && <SamplingSettings />}
+            </Group>
+            <Group heading="Trigger settings" gap={4} collapsible>
+                {scopePane && triggerCategory === 'Analog' && (
+                    <AnalogTriggerSettings />
+                )}
+                {scopePane && triggerCategory === 'Digital' && (
+                    <DigitalTriggerSettings />
+                )}
             </Group>
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton

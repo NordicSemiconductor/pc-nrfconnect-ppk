@@ -1,3 +1,11 @@
+## 4.3.0 - UNRELEASED
+
+### Added
+
+-   Digital channels can now be configured as triggers in the `Scope` pane.
+-   Option for cooshing a trigger bias level.
+-   Option for choosing the triggering edge.
+
 ## 4.2.1 - 2024-11-11
 
 ### Changed
