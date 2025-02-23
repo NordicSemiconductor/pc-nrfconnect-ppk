@@ -16,11 +16,14 @@ import {
     DialogButton,
     GenericDialog,
     logger,
-    Overlay,
     useStopwatch,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { isSessionRecoveryPending } from '../../slices/appSlice';
+import {
+    isSavePending,
+    isSessionRecoveryPending,
+    setSavePending,
+} from '../../slices/appSlice';
 import { formatDuration, formatTimestamp } from '../../utils/formatters';
 import TimeComponent from '../ProgressDialog/TimeComponent';
 import { RecoveryManager } from './RecoveryManager';
@@ -111,6 +114,7 @@ export default () => {
     const recoveryManager = RecoveryManager.getInstance();
 
     const pendingRecovery = useSelector(isSessionRecoveryPending);
+    const savePending = useSelector(isSavePending);
     const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
         useState(false);
     const [orphanedSessions, setOrphanedSessions] = useState<Session[]>([]);
@@ -166,6 +170,20 @@ export default () => {
             dispatch(clearConfirmBeforeClose('unsavedData'));
         }
     }, [dispatch, pendingRecovery]);
+
+    useEffect(() => {
+        if (savePending) {
+            dispatch(
+                addConfirmBeforeClose({
+                    id: 'unsavedData',
+                    message:
+                        'You have unsaved data. If you close the application this data will be lost. Are you sure you want to close?',
+                })
+            );
+        } else {
+            dispatch(clearConfirmBeforeClose('unsavedData'));
+        }
+    }, [dispatch, savePending]);
 
     useEffect(() => {
         recoveryManager.searchOrphanedSessions(
@@ -281,7 +299,7 @@ export default () => {
                                                 session
                                             )
                                         );
-
+                                        dispatch(setSavePending(true));
                                         return;
                                     }
                                     setIsRecovering(true);
@@ -297,6 +315,7 @@ export default () => {
                                             () => {
                                                 pause();
                                                 setIsRecovering(false);
+                                                dispatch(setSavePending(true));
                                             },
                                             (error: Error) => {
                                                 pause();
