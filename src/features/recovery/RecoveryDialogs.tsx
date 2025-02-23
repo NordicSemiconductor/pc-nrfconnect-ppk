@@ -286,57 +286,38 @@ export default () => {
                             <ItemizedSessions
                                 orphanedSessions={orphanedSessions}
                                 onRecoverClick={session => {
+                                    setIsSessionsListDialogVisible(false);
                                     if (session.alreadyRecovered) {
                                         dispatch(
                                             RecoveryManager.renderSessionData(
                                                 session
                                             )
                                         );
-                                        setIsSessionsListDialogVisible(false);
+
                                         return;
                                     }
-                                    setConfirmationDialogConfig({
-                                        isVisible: true,
-                                        title: 'Recover Session',
-                                        message:
-                                            'Do you want to recover the session? You will be able to recover the other sessions afterwards as well.',
-                                        confirmText: 'Recover',
-                                        cancelText: 'Cancel',
-                                        onConfirm: () => {
-                                            closeConfirmationDialog();
-                                            setIsRecovering(true);
-                                            setIsSessionsListDialogVisible(
-                                                false
-                                            );
-                                            setRecoveryProgress(0);
-                                            setRecoveryError(null);
-                                            reset();
-                                            dispatch(
-                                                recoveryManager.recoverSession(
-                                                    session,
-                                                    (progress: number) =>
-                                                        setRecoveryProgress(
-                                                            progress
-                                                        ),
-                                                    () => {
-                                                        pause();
-                                                        setIsRecovering(false);
-                                                    },
-                                                    (error: Error) => {
-                                                        pause();
-                                                        setRecoveryError(
-                                                            error.message
-                                                        );
-                                                        logger.error(
-                                                            error.message
-                                                        );
-                                                    },
-                                                    pause
-                                                )
-                                            );
-                                        },
-                                        onCancel: closeConfirmationDialog,
-                                    });
+                                    setIsRecovering(true);
+                                    setRecoveryProgress(0);
+                                    setRecoveryError(null);
+                                    reset();
+
+                                    dispatch(
+                                        recoveryManager.recoverSession(
+                                            session,
+                                            (progress: number) =>
+                                                setRecoveryProgress(progress),
+                                            () => {
+                                                pause();
+                                                setIsRecovering(false);
+                                            },
+                                            (error: Error) => {
+                                                pause();
+                                                setRecoveryError(error.message);
+                                                logger.error(error.message);
+                                            },
+                                            pause
+                                        )
+                                    );
                                 }}
                                 onRemoveClick={session => {
                                     setConfirmationDialogConfig({
