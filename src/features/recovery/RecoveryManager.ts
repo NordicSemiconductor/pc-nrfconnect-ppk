@@ -89,7 +89,7 @@ export class RecoveryManager {
         const startTime = stats.birthtimeMs;
         const endTime = stats.mtimeMs;
 
-        return Math.floor((endTime - startTime) / 1000);
+        return Math.round((endTime - startTime) / 1000);
     }
 
     static renderSessionData =
@@ -328,7 +328,14 @@ export class RecoveryManager {
                             );
 
                             const progress = (offset / fileSize) * 100;
-                            onProgress(progress);
+                            if (
+                                Math.floor(progress) >
+                                Math.floor(
+                                    ((offset - bytesToRead) / fileSize) * 100
+                                )
+                            ) {
+                                onProgress(Math.floor(progress));
+                            }
 
                             setTimeout(() => processChunk(), 0);
                         });
@@ -349,6 +356,7 @@ export class RecoveryManager {
                 }
             };
 
+            onProgress(0);
             setTimeout(() => processChunk(), 0);
         };
 

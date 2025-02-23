@@ -16,11 +16,14 @@ import {
     DialogButton,
     GenericDialog,
     logger,
-    Overlay,
     useStopwatch,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { isSessionRecoveryPending } from '../../slices/appSlice';
+import {
+    isSavePending,
+    isSessionRecoveryPending,
+    setSavePending,
+} from '../../slices/appSlice';
 import { formatDuration, formatTimestamp } from '../../utils/formatters';
 import TimeComponent from '../ProgressDialog/TimeComponent';
 import { RecoveryManager } from './RecoveryManager';
@@ -39,7 +42,7 @@ const SessionItem = ({
     onRecoverClick: (session: Session) => void;
     onRemoveClick: (session: Session) => void;
 }) => (
-    <div className="tw-flex tw-flex-row tw-justify-end tw-gap-11 tw-bg-gray-800 tw-p-3 tw-text-white">
+    <div className="tw-flex tw-flex-col tw-justify-end tw-gap-11 tw-bg-gray-800 tw-p-3 tw-text-white">
         <div className="tw-flex tw-flex-grow tw-flex-col tw-justify-between tw-gap-2">
             <div className="tw-flex tw-flex-row tw-justify-between">
                 <div>
@@ -54,45 +57,33 @@ const SessionItem = ({
                     <div className="tw-text-xs">Sampling rate</div>
                     <div>{session.samplingRate}</div>
                 </div>
+                <div className="tw-content-center tw-align-middle">
+                    <div className="tw-flex tw-flex-row tw-gap-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => onRemoveClick(session)}
+                        >
+                            Delete
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className="tw-w-[60px]"
+                            onClick={() => onRecoverClick(session)}
+                        >
+                            {session.alreadyRecovered ? 'Load' : 'Recover'}
+                        </Button>
+                    </div>
+                </div>
             </div>
             {session.alreadyRecovered && (
-                <Overlay
-                    tooltipChildren={
-                        <span>
-                            The session has already been recovered or loaded by
-                            using a ppk2 file. You can load it again or delete
-                            it.
-                        </span>
-                    }
-                    keepShowingOnHoverTooltip
-                    tooltipId="test"
-                    placement="bottom"
-                >
-                    <div className="tw-flex tw-flex-row tw-gap-1 tw-text-orange-400">
-                        <span className="mdi mdi-information-outline info-icon ml-1" />
-                        <span className="tw-grid tw-items-center tw-text-xs">
-                            This session has already been recovered.
-                        </span>
-                    </div>
-                </Overlay>
+                <div className="tw-flex tw-flex-row tw-gap-1 tw-text-orange-400">
+                    <span className="mdi mdi-information-outline info-icon" />
+                    <span className="tw-grid tw-items-center tw-text-xs">
+                        The session has already been recovered or loaded by
+                        using a ppk2 file. You can load it again or delete it.
+                    </span>
+                </div>
             )}
-        </div>
-        <div className="tw-content-center tw-align-middle">
-            <div className="tw-flex tw-flex-row tw-gap-2">
-                <Button
-                    variant="secondary"
-                    onClick={() => onRemoveClick(session)}
-                >
-                    Delete
-                </Button>
-                <Button
-                    variant="primary"
-                    className="tw-w-[60px]"
-                    onClick={() => onRecoverClick(session)}
-                >
-                    {session.alreadyRecovered ? 'Load' : 'Recover'}
-                </Button>
-            </div>
         </div>
     </div>
 );
@@ -123,6 +114,7 @@ export default () => {
     const recoveryManager = RecoveryManager.getInstance();
 
     const pendingRecovery = useSelector(isSessionRecoveryPending);
+    const savePending = useSelector(isSavePending);
     const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
         useState(false);
     const [orphanedSessions, setOrphanedSessions] = useState<Session[]>([]);
@@ -178,6 +170,20 @@ export default () => {
             dispatch(clearConfirmBeforeClose('unsavedData'));
         }
     }, [dispatch, pendingRecovery]);
+
+    useEffect(() => {
+        if (savePending) {
+            dispatch(
+                addConfirmBeforeClose({
+                    id: 'unsavedData',
+                    message:
+                        'You have unsaved data. If you close the application this data will be lost. Are you sure you want to close?',
+                })
+            );
+        } else {
+            dispatch(clearConfirmBeforeClose('unsavedData'));
+        }
+    }, [dispatch, savePending]);
 
     useEffect(() => {
         recoveryManager.searchOrphanedSessions(
@@ -286,57 +292,39 @@ export default () => {
                             <ItemizedSessions
                                 orphanedSessions={orphanedSessions}
                                 onRecoverClick={session => {
+                                    setIsSessionsListDialogVisible(false);
                                     if (session.alreadyRecovered) {
                                         dispatch(
                                             RecoveryManager.renderSessionData(
                                                 session
                                             )
                                         );
-                                        setIsSessionsListDialogVisible(false);
+                                        dispatch(setSavePending(true));
                                         return;
                                     }
-                                    setConfirmationDialogConfig({
-                                        isVisible: true,
-                                        title: 'Recover Session',
-                                        message:
-                                            'Do you want to recover the session? You will be able to recover the other sessions afterwards as well.',
-                                        confirmText: 'Recover',
-                                        cancelText: 'Cancel',
-                                        onConfirm: () => {
-                                            closeConfirmationDialog();
-                                            setIsRecovering(true);
-                                            setIsSessionsListDialogVisible(
-                                                false
-                                            );
-                                            setRecoveryProgress(0);
-                                            setRecoveryError(null);
-                                            reset();
-                                            dispatch(
-                                                recoveryManager.recoverSession(
-                                                    session,
-                                                    (progress: number) =>
-                                                        setRecoveryProgress(
-                                                            progress
-                                                        ),
-                                                    () => {
-                                                        pause();
-                                                        setIsRecovering(false);
-                                                    },
-                                                    (error: Error) => {
-                                                        pause();
-                                                        setRecoveryError(
-                                                            error.message
-                                                        );
-                                                        logger.error(
-                                                            error.message
-                                                        );
-                                                    },
-                                                    pause
-                                                )
-                                            );
-                                        },
-                                        onCancel: closeConfirmationDialog,
-                                    });
+                                    setIsRecovering(true);
+                                    setRecoveryProgress(0);
+                                    setRecoveryError(null);
+                                    reset();
+
+                                    dispatch(
+                                        recoveryManager.recoverSession(
+                                            session,
+                                            (progress: number) =>
+                                                setRecoveryProgress(progress),
+                                            () => {
+                                                pause();
+                                                setIsRecovering(false);
+                                                dispatch(setSavePending(true));
+                                            },
+                                            (error: Error) => {
+                                                pause();
+                                                setRecoveryError(error.message);
+                                                logger.error(error.message);
+                                            },
+                                            pause
+                                        )
+                                    );
                                 }}
                                 onRemoveClick={session => {
                                     setConfirmationDialogConfig({
