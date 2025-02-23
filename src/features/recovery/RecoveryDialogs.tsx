@@ -39,7 +39,7 @@ const SessionItem = ({
     onRecoverClick: (session: Session) => void;
     onRemoveClick: (session: Session) => void;
 }) => (
-    <div className="tw-flex tw-flex-row tw-justify-end tw-gap-11 tw-bg-gray-800 tw-p-3 tw-text-white">
+    <div className="tw-flex tw-flex-col tw-justify-end tw-gap-11 tw-bg-gray-800 tw-p-3 tw-text-white">
         <div className="tw-flex tw-flex-grow tw-flex-col tw-justify-between tw-gap-2">
             <div className="tw-flex tw-flex-row tw-justify-between">
                 <div>
@@ -54,45 +54,33 @@ const SessionItem = ({
                     <div className="tw-text-xs">Sampling rate</div>
                     <div>{session.samplingRate}</div>
                 </div>
+                <div className="tw-content-center tw-align-middle">
+                    <div className="tw-flex tw-flex-row tw-gap-2">
+                        <Button
+                            variant="secondary"
+                            onClick={() => onRemoveClick(session)}
+                        >
+                            Delete
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className="tw-w-[60px]"
+                            onClick={() => onRecoverClick(session)}
+                        >
+                            {session.alreadyRecovered ? 'Load' : 'Recover'}
+                        </Button>
+                    </div>
+                </div>
             </div>
             {session.alreadyRecovered && (
-                <Overlay
-                    tooltipChildren={
-                        <span>
-                            The session has already been recovered or loaded by
-                            using a ppk2 file. You can load it again or delete
-                            it.
-                        </span>
-                    }
-                    keepShowingOnHoverTooltip
-                    tooltipId="test"
-                    placement="bottom"
-                >
-                    <div className="tw-flex tw-flex-row tw-gap-1 tw-text-orange-400">
-                        <span className="mdi mdi-information-outline info-icon ml-1" />
-                        <span className="tw-grid tw-items-center tw-text-xs">
-                            This session has already been recovered.
-                        </span>
-                    </div>
-                </Overlay>
+                <div className="tw-flex tw-flex-row tw-gap-1 tw-text-orange-400">
+                    <span className="mdi mdi-information-outline info-icon" />
+                    <span className="tw-grid tw-items-center tw-text-xs">
+                        The session has already been recovered or loaded by
+                        using a ppk2 file. You can load it again or delete it.
+                    </span>
+                </div>
             )}
-        </div>
-        <div className="tw-content-center tw-align-middle">
-            <div className="tw-flex tw-flex-row tw-gap-2">
-                <Button
-                    variant="secondary"
-                    onClick={() => onRemoveClick(session)}
-                >
-                    Delete
-                </Button>
-                <Button
-                    variant="primary"
-                    className="tw-w-[60px]"
-                    onClick={() => onRecoverClick(session)}
-                >
-                    {session.alreadyRecovered ? 'Load' : 'Recover'}
-                </Button>
-            </div>
         </div>
     </div>
 );
