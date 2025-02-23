@@ -89,7 +89,7 @@ export class RecoveryManager {
         const startTime = stats.birthtimeMs;
         const endTime = stats.mtimeMs;
 
-        return Math.floor((endTime - startTime) / 1000);
+        return Math.round((endTime - startTime) / 1000);
     }
 
     static renderSessionData =
