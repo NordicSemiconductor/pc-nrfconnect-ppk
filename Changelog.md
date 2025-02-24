@@ -1,3 +1,10 @@
+## 4.3.0 - UNRELEASED
+
+### Added
+
+-   Session recovery: option to recover a session after a crash or unexpected
+    shutdown.
+
 ## 4.2.1 - 2024-11-11
 
 ### Changed

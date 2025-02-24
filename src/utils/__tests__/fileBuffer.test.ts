@@ -9,6 +9,14 @@ import path from 'path';
 
 import { FileBuffer } from '../FileBuffer';
 
+jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
+    ReadSessions: jest.fn(() => []),
+    WriteSessions: jest.fn(),
+    AddSession: jest.fn(),
+    RemoveSessionByFilePath: jest.fn(),
+    ClearSessions: jest.fn(),
+}));
+
 jest.mock('fs-extra', () => ({
     openSync: jest.fn(() => 1),
     mkdirSync: jest.fn(() => {}),
