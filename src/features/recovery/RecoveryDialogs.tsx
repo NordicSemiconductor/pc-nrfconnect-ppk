@@ -20,7 +20,6 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    isSavePending,
     isSessionRecoveryPending,
     setSavePending,
 } from '../../slices/appSlice';
@@ -114,7 +113,6 @@ export default () => {
     const recoveryManager = RecoveryManager.getInstance();
 
     const pendingRecovery = useSelector(isSessionRecoveryPending);
-    const savePending = useSelector(isSavePending);
     const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
         useState(false);
     const [orphanedSessions, setOrphanedSessions] = useState<Session[]>([]);
@@ -161,29 +159,15 @@ export default () => {
         if (pendingRecovery) {
             dispatch(
                 addConfirmBeforeClose({
-                    id: 'unsavedData',
+                    id: 'sessionRecoveryInProgress',
                     message:
                         'There is a session recovery in progress. If you close the application the recovery progress will be lost and the session will remain in the recovery list. Are you sure you want to close?',
                 })
             );
         } else {
-            dispatch(clearConfirmBeforeClose('unsavedData'));
+            dispatch(clearConfirmBeforeClose('sessionRecoveryInProgress'));
         }
     }, [dispatch, pendingRecovery]);
-
-    useEffect(() => {
-        if (savePending) {
-            dispatch(
-                addConfirmBeforeClose({
-                    id: 'unsavedData',
-                    message:
-                        'You have unsaved data. If you close the application this data will be lost. Are you sure you want to close?',
-                })
-            );
-        } else {
-            dispatch(clearConfirmBeforeClose('unsavedData'));
-        }
-    }, [dispatch, savePending]);
 
     useEffect(() => {
         recoveryManager.searchOrphanedSessions(
