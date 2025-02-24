@@ -8,7 +8,7 @@ on:
                 type: choice
                 options:
                     - release-test (internal)
-                    - experimental (internal)
+                    - test (internal)
                     - official (external)
             ref:
                 description:
