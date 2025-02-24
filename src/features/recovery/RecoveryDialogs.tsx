@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import ProgressBar from 'react-bootstrap/ProgressBar';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     addConfirmBeforeClose,
@@ -116,8 +115,6 @@ export default () => {
     const [isSessionsListDialogVisible, setIsSessionsListDialogVisible] =
         useState(false);
     const [orphanedSessions, setOrphanedSessions] = useState<Session[]>([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [sessionSearchProgress, setSessionSearchProgress] = useState(0);
     const [isRecovering, setIsRecovering] = useState(false);
     const [recoveryProgress, setRecoveryProgress] = useState(0);
     const [recoveryError, setRecoveryError] = useState<string | null>(null);
@@ -174,34 +171,10 @@ export default () => {
             () => {},
             (orphanSessions: Session[]) => {
                 if (orphanSessions.length > 0) {
-                    setConfirmationDialogConfig({
-                        isVisible: true,
-                        title: 'Recover Session',
-                        message:
-                            'There are sessions that were not properly closed on your system. Would you like to recover them?',
-                        confirmText: 'Confirm',
-                        cancelText: 'Cancel',
-                        onConfirm: () => {
-                            setIsSessionsListDialogVisible(true);
-                            setIsSearching(true);
-                            setSessionSearchProgress(0);
-                            recoveryManager.searchOrphanedSessions(
-                                (progress: number) =>
-                                    setSessionSearchProgress(progress),
-                                (sessions: Session[]) => {
-                                    setIsSearching(false);
-                                    setOrphanedSessions(sessions);
-                                    if (sessions.length > 0)
-                                        setIsSessionsListDialogVisible(true);
-                                }
-                            );
-                            closeConfirmationDialog();
-                        },
-                        onCancel: closeConfirmationDialog,
-                    });
+                    setOrphanedSessions(orphanSessions);
+                    setIsSessionsListDialogVisible(true);
                 }
-            },
-            true
+            }
         );
     }, [recoveryManager]);
 
@@ -217,7 +190,6 @@ export default () => {
                             onClick={() =>
                                 setIsSessionsListDialogVisible(false)
                             }
-                            disabled={isSearching}
                         >
                             Close
                         </DialogButton>
@@ -243,9 +215,7 @@ export default () => {
                                     onCancel: closeConfirmationDialog,
                                 });
                             }}
-                            disabled={
-                                isSearching || orphanedSessions.length === 0
-                            }
+                            disabled={orphanedSessions.length === 0}
                         >
                             Delete All
                         </DialogButton>
@@ -255,94 +225,80 @@ export default () => {
                 closeOnEsc
                 closeOnUnfocus
             >
-                {isSearching ? (
-                    <>
-                        <div>
-                            Searching for sessions that can be recovered. Please
-                            wait.
-                        </div>
-                        <ProgressBar
-                            now={sessionSearchProgress}
-                            style={{ height: '4px' }}
-                            animated={false}
-                        />
-                    </>
-                ) : (
-                    <>
-                        <div className="tw-mb-4">
-                            The following sessions can be recovered:
-                        </div>
-                        <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
-                            <ItemizedSessions
-                                orphanedSessions={orphanedSessions}
-                                onRecoverClick={session => {
-                                    setIsSessionsListDialogVisible(false);
-                                    if (session.alreadyRecovered) {
-                                        dispatch(
-                                            RecoveryManager.renderSessionData(
-                                                session
-                                            )
-                                        );
-                                        dispatch(setSavePending(true));
-                                        return;
-                                    }
-                                    setIsRecovering(true);
-                                    setRecoveryProgress(0);
-                                    setRecoveryError(null);
-                                    reset();
-
+                <>
+                    <div className="tw-mb-4">
+                        The following sessions can be recovered:
+                    </div>
+                    <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
+                        <ItemizedSessions
+                            orphanedSessions={orphanedSessions}
+                            onRecoverClick={session => {
+                                setIsSessionsListDialogVisible(false);
+                                if (session.alreadyRecovered) {
                                     dispatch(
-                                        recoveryManager.recoverSession(
-                                            session,
-                                            (progress: number) =>
-                                                setRecoveryProgress(progress),
-                                            () => {
-                                                pause();
-                                                setIsRecovering(false);
-                                                dispatch(setSavePending(true));
-                                            },
-                                            (error: Error) => {
-                                                pause();
-                                                setRecoveryError(error.message);
-                                                logger.error(error.message);
-                                            },
-                                            pause
+                                        RecoveryManager.renderSessionData(
+                                            session
                                         )
                                     );
-                                }}
-                                onRemoveClick={session => {
-                                    setConfirmationDialogConfig({
-                                        isVisible: true,
-                                        title: 'Delete Session',
-                                        message:
-                                            'Are you sure you want to delete the session? This action cannot be undone.',
-                                        confirmText: 'Delete',
-                                        cancelText: 'Cancel',
-                                        onConfirm: () => {
-                                            RemoveSessionByFilePath(
-                                                session.filePath,
-                                                () => {
-                                                    setOrphanedSessions(
-                                                        orphanedSessions.filter(
-                                                            s =>
-                                                                s.filePath !==
-                                                                session.filePath
-                                                        )
-                                                    );
-                                                    closeConfirmationDialog();
-                                                }
-                                            );
+                                    dispatch(setSavePending(true));
+                                    return;
+                                }
+                                setIsRecovering(true);
+                                setRecoveryProgress(0);
+                                setRecoveryError(null);
+                                reset();
+
+                                dispatch(
+                                    recoveryManager.recoverSession(
+                                        session,
+                                        (progress: number) =>
+                                            setRecoveryProgress(progress),
+                                        () => {
+                                            pause();
+                                            setIsRecovering(false);
+                                            dispatch(setSavePending(true));
                                         },
-                                        onCancel: closeConfirmationDialog,
-                                    });
-                                }}
-                            />
-                            {orphanedSessions.length === 0 && (
-                                <div>No sessions found</div>
-                            )}
-                        </div>
-                    </>
-                )}
+                                        (error: Error) => {
+                                            pause();
+                                            setRecoveryError(error.message);
+                                            logger.error(error.message);
+                                        },
+                                        pause
+                                    )
+                                );
+                            }}
+                            onRemoveClick={session => {
+                                setConfirmationDialogConfig({
+                                    isVisible: true,
+                                    title: 'Delete Session',
+                                    message:
+                                        'Are you sure you want to delete the session? This action cannot be undone.',
+                                    confirmText: 'Delete',
+                                    cancelText: 'Cancel',
+                                    onConfirm: () => {
+                                        RemoveSessionByFilePath(
+                                            session.filePath,
+                                            () => {
+                                                setOrphanedSessions(
+                                                    orphanedSessions.filter(
+                                                        s =>
+                                                            s.filePath !==
+                                                            session.filePath
+                                                    )
+                                                );
+                                                closeConfirmationDialog();
+                                            }
+                                        );
+                                    },
+                                    onCancel: closeConfirmationDialog,
+                                });
+                            }}
+                        />
+                        {orphanedSessions.length === 0 && (
+                            <div>No sessions found</div>
+                        )}
+                    </div>
+                </>
             </GenericDialog>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
