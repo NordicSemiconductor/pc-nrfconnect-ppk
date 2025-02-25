@@ -84,12 +84,9 @@ export class RecoveryManager {
         this.#cancelRecovery = true;
     }
 
-    static #getSamplingDurationInSec(filePath: string) {
-        const stats = fs.statSync(filePath);
-        const startTime = stats.birthtimeMs;
-        const endTime = stats.mtimeMs;
-
-        return Math.round((endTime - startTime) / 1000) + 10;
+    static #getSamplingDurationInSec(session: Session) {
+        const stats = fs.statSync(session.filePath);
+        return Math.round(stats.size / (session.samplingRate * frameSize));
     }
 
     static renderSessionData =
@@ -407,7 +404,7 @@ export class RecoveryManager {
             }
 
             session.samplingDuration =
-                RecoveryManager.#getSamplingDurationInSec(session.filePath);
+                RecoveryManager.#getSamplingDurationInSec(session);
 
             if (!processList.includes(Number(session.pid))) {
                 orphanedSessions.push(session);
