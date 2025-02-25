@@ -6,6 +6,10 @@
 
 import { DataManager, timestampToIndex } from '../globals';
 
+jest.mock('../features/recovery/SessionsListFileHandler', () => ({
+    ReadSessions: jest.fn(() => []),
+}));
+
 beforeEach(() => {
     DataManager().reset();
 });
