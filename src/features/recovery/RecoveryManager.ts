@@ -89,7 +89,7 @@ export class RecoveryManager {
         const startTime = stats.birthtimeMs;
         const endTime = stats.mtimeMs;
 
-        return Math.round((endTime - startTime) / 1000);
+        return Math.round((endTime - startTime) / 1000) + 10;
     }
 
     static renderSessionData =
@@ -194,48 +194,59 @@ export class RecoveryManager {
         return records;
     }
 
-    static getProcessInfo(processId: number) {
-        const platform = process.platform;
-        let command: string;
+    static getPIDs = (processName: string): Promise<number[]> =>
+        new Promise((resolve, reject) => {
+            const platform = process.platform;
+            let command: string;
 
-        if (platform === 'win32') {
-            command = `wmic process where ProcessId=${processId} get name,processid`;
-        } else if (platform === 'linux' || platform === 'darwin') {
-            // Use `ps` to get process details on Linux/macOS
-            command = `ps -p ${processId} -o comm=`;
-        } else {
-            throw new Error(`Unsupported platform: ${platform}`);
-        }
-
-        exec(command, (error, stdout, stderr) => {
-            if (stderr) {
-                return null;
+            if (platform === 'win32') {
+                command = `tasklist | findstr "nRF electron"`;
+            } else if (platform === 'linux' || platform === 'darwin') {
+                command = `pgrep -f ${processName}`;
+            } else {
+                reject(new Error(`Unsupported platform: ${platform}`));
+                return;
             }
 
-            if (error) {
-                logger.error(error);
-                return null;
-            }
-
-            const lines = stdout.trim().split('\n');
-
-            if (lines.length >= 1) {
-                // For Windows, split process details; for Linux/macOS, return process name directly
-                if (platform === 'win32') {
-                    const [processName, pid] =
-                        lines[1]?.trim().split(/\s+/) || [];
-                    return { processName, pid };
+            exec(command, (error, stdout, stderr) => {
+                if (stderr) {
+                    return [];
                 }
 
-                return {
-                    processName: lines[0].trim(),
-                    pid: processId.toString(),
-                };
-            }
-        });
+                if (error) {
+                    logger.error(error);
+                    return [];
+                }
 
-        return null;
-    }
+                const lines = stdout.trim().split('\n');
+                const pids: number[] = [];
+
+                if (lines.length > 0) {
+                    if (process.platform === 'win32') {
+                        lines.forEach(line => {
+                            const parts = line.trim().split(/\s+/);
+
+                            // The PID is typically the second element, but check for cases with extra spaces in the name
+                            const pidIndex = parts.length - 5; // PID should be 5th from last
+                            const pid = parseInt(parts[pidIndex], 10);
+
+                            if (!Number.isNaN(pid)) {
+                                pids.push(pid);
+                            }
+                        });
+                    } else {
+                        lines.forEach(line => {
+                            const pid = parseInt(line.trim(), 10);
+                            if (!Number.isNaN(pid)) {
+                                pids.push(pid);
+                            }
+                        });
+                    }
+                }
+
+                resolve(pids);
+            });
+        });
 
     #releaseBuffers() {
         this.#fileBuffer?.close();
@@ -362,18 +373,23 @@ export class RecoveryManager {
 
     async searchOrphanedSessions(
         onProgress: (progress: number) => void,
-        onComplete: (orphanedSessions: Session[]) => void,
-        findOnlyOne = false
+        onComplete: (orphanedSessions: Session[]) => void
     ) {
         const orphanedSessions: Session[] = [];
         const sessions = await ReadSessions();
         let nonExistingFile = false;
 
+        if (sessions.length === 0) {
+            onComplete(orphanedSessions);
+            return;
+        }
+
+        const processList: number[] = await RecoveryManager.getPIDs(
+            this.#currentProcessName
+        );
+
         const checkSession = (index: number) => {
-            if (
-                index >= sessions.length ||
-                (findOnlyOne && orphanedSessions.length === 1)
-            ) {
+            if (index >= sessions.length) {
                 if (nonExistingFile) {
                     WriteSessions(sessions);
                 }
@@ -390,22 +406,10 @@ export class RecoveryManager {
                 return;
             }
 
-            const processInfo = RecoveryManager.getProcessInfo(
-                parseInt(session.pid, 10)
-            );
-
             session.samplingDuration =
                 RecoveryManager.#getSamplingDurationInSec(session.filePath);
 
-            if (processInfo) {
-                const { processName, pid } = processInfo;
-                if (
-                    pid === session.pid &&
-                    processName !== this.#currentProcessName
-                ) {
-                    orphanedSessions.push(session);
-                }
-            } else {
+            if (!processList.includes(Number(session.pid))) {
                 orphanedSessions.push(session);
             }
 
