@@ -201,7 +201,9 @@ export class RecoveryManager {
             } else if (platform === 'linux') {
                 command = `pgrep -f ${processName}`;
             } else if (platform === 'darwin') {
-                command = `pgrep -f ${processName.replace('(Renderer)', '').trim()}`
+                command = `pgrep -f ${processName
+                    .replace('(Renderer)', '')
+                    .trim()}`;
             } else {
                 reject(new Error(`Unsupported platform: ${platform}`));
                 return;
