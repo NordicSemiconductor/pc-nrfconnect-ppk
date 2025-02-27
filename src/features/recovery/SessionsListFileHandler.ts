@@ -12,11 +12,17 @@ const appDataFolder = getAppDataDir();
 const sessionsListFilePath = path.join(appDataFolder, 'sessions.ppksess');
 const lineFormatRegex = /^\d+\t\d+(\.\d+)?\t\d+\t.+$/;
 
+export enum SessionFlag {
+    NotRecovered = 0,
+    Recovered = 1,
+    PPK2Loaded = 2,
+}
+
 export type Session = {
     pid: string;
     startTime: number;
     samplingRate: number;
-    alreadyRecovered: boolean;
+    flag: SessionFlag;
     filePath: string;
     samplingDuration?: number;
 };
@@ -36,13 +42,13 @@ export const ReadSessions = async (): Promise<Session[]> => {
     const validLines: Session[] = lines
         .filter(line => line.trim() !== '' && lineFormatRegex.test(line))
         .map(line => {
-            const [pid, startTime, samplingRate, alreadyRecovered, filePath] =
+            const [pid, startTime, samplingRate, flag, filePath] =
                 line.split('\t');
             return {
                 pid,
                 startTime: Number(startTime),
                 samplingRate: Number(samplingRate),
-                alreadyRecovered: alreadyRecovered === '1',
+                flag: Number(flag) as SessionFlag,
                 filePath,
             };
         });
@@ -56,7 +62,7 @@ export const WriteSessions = async (sessions: Session[]) => {
             session =>
                 `${session.pid}\t${session.startTime}\t${
                     session.samplingRate
-                }\t${Number(session.alreadyRecovered)}\t${session.filePath}`
+                }\t${Number(session.flag)}\t${session.filePath}`
         )
         .join('\n');
 
@@ -66,14 +72,14 @@ export const WriteSessions = async (sessions: Session[]) => {
 export const AddSession = async (
     startTime: number,
     samplingRate: number,
-    alreadyRecovered: boolean,
+    flag: SessionFlag,
     filePath: string
 ) => {
     const session: Session = {
         pid: process.pid.toString(),
         startTime,
         samplingRate,
-        alreadyRecovered,
+        flag,
         filePath,
     };
 
@@ -135,7 +141,7 @@ export const DeleteAllSessions = async (
 
 export const ChangeSessionStatus = async (
     filePath: string,
-    status: boolean
+    flag: SessionFlag
 ) => {
     const sessions = await ReadSessions();
     const sessionIndex = sessions.findIndex(
@@ -143,7 +149,7 @@ export const ChangeSessionStatus = async (
     );
 
     if (sessionIndex !== -1) {
-        sessions[sessionIndex].alreadyRecovered = status;
+        sessions[sessionIndex].flag = flag;
         await WriteSessions(sessions);
     }
 };

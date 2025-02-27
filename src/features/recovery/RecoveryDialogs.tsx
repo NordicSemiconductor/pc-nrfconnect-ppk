@@ -29,6 +29,7 @@ import {
     DeleteAllSessions,
     RemoveSessionByFilePath,
     Session,
+    SessionFlag,
 } from './SessionsListFileHandler';
 
 const SessionItem = ({
@@ -40,48 +41,34 @@ const SessionItem = ({
     onRecoverClick: (session: Session) => void;
     onRemoveClick: (session: Session) => void;
 }) => (
-    <div className="tw-flex tw-flex-col tw-justify-end tw-gap-11 tw-bg-gray-800 tw-p-3 tw-text-white">
-        <div className="tw-flex tw-flex-grow tw-flex-col tw-justify-between tw-gap-2">
-            <div className="tw-flex tw-flex-row tw-justify-between">
-                <div>
-                    <div className="tw-text-xs">Start time</div>
-                    <div>{formatTimestamp(session.startTime)}</div>
-                </div>
-                <div>
-                    <div className="tw-text-xs">Duration</div>
-                    <div>{formatDuration(session.samplingDuration || 0)}</div>
-                </div>
-                <div>
-                    <div className="tw-text-xs">Sampling rate</div>
-                    <div>{session.samplingRate}</div>
-                </div>
-                <div className="tw-content-center tw-align-middle">
-                    <div className="tw-flex tw-flex-row tw-gap-2">
-                        <Button
-                            variant="secondary"
-                            onClick={() => onRemoveClick(session)}
-                        >
-                            Delete
-                        </Button>
-                        <Button
-                            variant="primary"
-                            className="tw-w-[60px]"
-                            onClick={() => onRecoverClick(session)}
-                        >
-                            {session.alreadyRecovered ? 'Load' : 'Recover'}
-                        </Button>
-                    </div>
-                </div>
+    <div className=" tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
+        <div>
+            <div className="tw-text-xs">Start time</div>
+            <div>{formatTimestamp(session.startTime)}</div>
+        </div>
+        <div>
+            <div className="tw-text-xs">Duration</div>
+            <div>{formatDuration(session.samplingDuration || 0)}</div>
+        </div>
+        <div>
+            <div className="tw-text-xs">Sampling rate</div>
+            <div>{session.samplingRate}</div>
+        </div>
+        <div className="tw-content-center tw-align-middle">
+            <div className="tw-flex tw-flex-row tw-gap-2">
+                <Button
+                    variant="secondary"
+                    onClick={() => onRemoveClick(session)}
+                >
+                    Delete
+                </Button>
+                <Button
+                    variant="primary"
+                    onClick={() => onRecoverClick(session)}
+                >
+                    Recover
+                </Button>
             </div>
-            {session.alreadyRecovered && (
-                <div className="tw-flex tw-flex-row tw-gap-1 tw-text-orange-400">
-                    <span className="mdi mdi-information-outline info-icon" />
-                    <span className="tw-grid tw-items-center tw-text-xs">
-                        The session has already been recovered or loaded by
-                        using a ppk2 file. You can load it again or delete it.
-                    </span>
-                </div>
-            )}
         </div>
     </div>
 );
@@ -158,7 +145,7 @@ export default () => {
                 addConfirmBeforeClose({
                     id: 'sessionRecoveryInProgress',
                     message:
-                        'There is a session recovery in progress. If you close the application the recovery progress will be lost and the session will remain in the recovery list. Are you sure you want to close?',
+                        'There is a session recovery in progress. If you close the application, the progress will be lost and the session will remain in the recovery list. Are you sure you want to close?',
                 })
             );
         } else {
@@ -227,14 +214,15 @@ export default () => {
             >
                 <>
                     <div className="tw-mb-4">
-                        The following sessions can be recovered:
+                        The following sampling sessions did not close properly
+                        and can be recovered:
                     </div>
                     <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
                         <ItemizedSessions
                             orphanedSessions={orphanedSessions}
                             onRecoverClick={session => {
                                 setIsSessionsListDialogVisible(false);
-                                if (session.alreadyRecovered) {
+                                if (session.flag === SessionFlag.Recovered) {
                                     dispatch(
                                         RecoveryManager.renderSessionData(
                                             session

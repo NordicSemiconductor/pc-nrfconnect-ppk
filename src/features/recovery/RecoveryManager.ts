@@ -44,7 +44,9 @@ import {
 import {
     ChangeSessionStatus,
     ReadSessions,
+    RemoveSessionByFilePath,
     Session,
+    SessionFlag,
     WriteSessions,
 } from './SessionsListFileHandler';
 
@@ -144,7 +146,7 @@ export class RecoveryManager {
                     session.startTime
                 );
 
-                ChangeSessionStatus(session.filePath, true);
+                ChangeSessionStatus(session.filePath, SessionFlag.Recovered);
 
                 await dispatch(RecoveryManager.renderSessionData(session));
             } catch (error) {
@@ -407,7 +409,11 @@ export class RecoveryManager {
                 RecoveryManager.#getSamplingDurationInSec(session);
 
             if (!processList.includes(Number(session.pid))) {
-                orphanedSessions.push(session);
+                if (session.flag === SessionFlag.PPK2Loaded) {
+                    RemoveSessionByFilePath(session.filePath, () => {});
+                } else {
+                    orphanedSessions.push(session);
+                }
             }
 
             onProgress(((index + 1) / sessions.length) * 100);
