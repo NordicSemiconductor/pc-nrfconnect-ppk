@@ -15,6 +15,11 @@ jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
     AddSession: jest.fn(),
     RemoveSessionByFilePath: jest.fn(),
     ClearSessions: jest.fn(),
+    SessionFlag: {
+        NotRecovered: 0,
+        Recovered: 1,
+        PPK2Loaded: 2,
+    },
 }));
 
 jest.mock('fs-extra', () => ({
