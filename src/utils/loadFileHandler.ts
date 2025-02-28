@@ -19,7 +19,10 @@ import { v4 } from 'uuid';
 import { createInflateRaw } from 'zlib';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { AddSession } from '../features/recovery/SessionsListFileHandler';
+import {
+    AddSession,
+    SessionFlag,
+} from '../features/recovery/SessionsListFileHandler';
 import { DataManager, timestampToIndex } from '../globals';
 import { canFileFit } from './fileUtils';
 import saveFile, { PPK2Metadata } from './saveFileHandler';
@@ -247,7 +250,7 @@ const loadPPK2File = async (
         AddSession(
             metadata.metadata.startSystemTime ?? Date.now(),
             metadata.metadata.samplesPerSecond,
-            true,
+            SessionFlag.PPK2Loaded,
             sessionFilePath
         );
 

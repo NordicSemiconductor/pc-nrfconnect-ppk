@@ -2,8 +2,8 @@
 
 ### Added
 
--   Session recovery: option to recover a session after a crash or unexpected
-    shutdown.
+-   Session recovery feature, which lets you recover a session after a crash or
+    an unexpected shutdown.
 
 ## 4.2.1 - 2024-11-11
 

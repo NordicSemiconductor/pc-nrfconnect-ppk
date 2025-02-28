@@ -11,6 +11,7 @@ import path from 'path';
 import {
     AddSession,
     RemoveSessionByFilePath,
+    SessionFlag,
 } from '../features/recovery/SessionsListFileHandler';
 import {
     fullOverlap,
@@ -127,7 +128,7 @@ export class FileBuffer {
                 AddSession(
                     Date.now(),
                     this.samplingRate ? this.samplingRate : 100000,
-                    false,
+                    SessionFlag.NotRecovered,
                     this.#filePath
                 );
             }
