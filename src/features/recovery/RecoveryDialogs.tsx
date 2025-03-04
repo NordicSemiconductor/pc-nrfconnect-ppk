@@ -40,65 +40,70 @@ const SessionItem = ({
     session: Session;
     onRecoverClick: (session: Session) => void;
     onRemoveClick: (session: Session) => void;
-}) => (
-    <div className="tw-relative">
-        <div className=" tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
-            <div>
-                <div className="tw-text-xs">Start time</div>
-                <div>{formatTimestamp(session.startTime)}</div>
-            </div>
-            <div>
-                <div className="tw-text-xs">Duration</div>
-                <div>{formatDuration(session.samplingDuration || 0)}</div>
-            </div>
-            <div>
-                <div className="tw-text-xs">Sampling rate</div>
-                <div>{session.samplingRate}</div>
-            </div>
-            <div className="tw-content-center tw-align-middle">
-                <div className="tw-flex tw-flex-row tw-gap-2">
-                    <Button
-                        variant="secondary"
-                        className="tw-w-[60px]"
-                        onClick={() => onRemoveClick(session)}
-                    >
-                        Delete
-                    </Button>
-                    <Button
-                        variant="primary"
-                        className="tw-w-[60px]"
-                        onClick={() => onRecoverClick(session)}
-                    >
-                        Recover
-                    </Button>
+}) => {
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    return (
+        <div className="tw-relative">
+            <div className=" tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
+                <div>
+                    <div className="tw-text-xs">Start time</div>
+                    <div>{formatTimestamp(session.startTime)}</div>
+                </div>
+                <div>
+                    <div className="tw-text-xs">Duration</div>
+                    <div>{formatDuration(session.samplingDuration || 0)}</div>
+                </div>
+                <div>
+                    <div className="tw-text-xs">Sampling rate</div>
+                    <div>{session.samplingRate}</div>
+                </div>
+                <div className="tw-content-center tw-align-middle">
+                    <div className="tw-flex tw-flex-row tw-gap-2">
+                        <Button
+                            variant="secondary"
+                            className="tw-w-[60px]"
+                            onClick={() => setShowDeleteConfirmation(true)}
+                        >
+                            Delete
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className="tw-w-[60px]"
+                            onClick={() => onRecoverClick(session)}
+                        >
+                            Recover
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div className="tw-absolute tw-inset-0 tw-z-10 tw-flex tw-min-h-full tw-flex-row tw-items-center tw-justify-center tw-gap-3 tw-bg-gray-900 tw-p-3 tw-text-white">
-            <div className="tw-flex-1">
-                Are you sure? This action cannot be undone.
-            </div>
-            <div className="tw-content-center tw-align-middle">
-                <div className="tw-flex tw-flex-row tw-gap-2">
-                    <Button
-                        variant="secondary"
-                        className="tw-w-[60px]"
-                        onClick={() => onRemoveClick(session)}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="danger"
-                        className="tw-w-[60px]"
-                        onClick={() => onRecoverClick(session)}
-                    >
-                        Delete
-                    </Button>
+            {showDeleteConfirmation && (
+                <div className="tw-absolute tw-inset-0 tw-z-10 tw-flex tw-min-h-full tw-flex-row tw-items-center tw-justify-center tw-gap-3 tw-bg-gray-900 tw-p-3 tw-text-white">
+                    <div className="tw-flex-1">
+                        Are you sure? This action cannot be undone.
+                    </div>
+                    <div className="tw-content-center tw-align-middle">
+                        <div className="tw-flex tw-flex-row tw-gap-2">
+                            <Button
+                                variant="secondary"
+                                className="tw-w-[60px]"
+                                onClick={() => setShowDeleteConfirmation(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="danger"
+                                className="tw-w-[60px]"
+                                onClick={() => onRemoveClick(session)}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 const ItemizedSessions = ({
     orphanedSessions,
@@ -286,60 +291,50 @@ export default () => {
                                     );
                                 }}
                                 onRemoveClick={session => {
-                                    setConfirmationDialogConfig({
-                                        isVisible: true,
-                                        title: 'Delete Session',
-                                        message:
-                                            'Are you sure you want to delete the session? This action cannot be undone.',
-                                        confirmText: 'Delete',
-                                        cancelText: 'Cancel',
-                                        onConfirm: () => {
-                                            RemoveSessionByFilePath(
-                                                session.filePath,
-                                                () => {
-                                                    setOrphanedSessions(
-                                                        orphanedSessions.filter(
-                                                            s =>
-                                                                s.filePath !==
-                                                                session.filePath
-                                                        )
-                                                    );
-                                                    closeConfirmationDialog();
-                                                }
+                                    RemoveSessionByFilePath(
+                                        session.filePath,
+                                        () => {
+                                            setOrphanedSessions(
+                                                orphanedSessions.filter(
+                                                    s =>
+                                                        s.filePath !==
+                                                        session.filePath
+                                                )
                                             );
-                                        },
-                                        onCancel: closeConfirmationDialog,
-                                    });
+                                        }
+                                    );
                                 }}
                             />
                             {orphanedSessions.length === 0 && (
                                 <div>No sessions found</div>
                             )}
                         </div>
-                        <div className="tw-absolute tw-inset-0 tw-z-10 tw-flex tw-items-center tw-justify-center tw-bg-black/70">
-                            <div className="tw-flex tw-flex-col tw-gap-2 tw-bg-white tw-p-4">
-                                <div>
-                                    Are you sure you want to delete all
-                                    sessions? This action cannot be undone.
-                                </div>
-                                <div className="tw-flex tw-justify-end tw-gap-2">
-                                    <Button
-                                        variant="secondary"
-                                        onClick={closeConfirmationDialog}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant="danger"
-                                        onClick={() => {
-                                            closeConfirmationDialog();
-                                        }}
-                                    >
-                                        Delete All
-                                    </Button>
+                        {false && (
+                            <div className="tw-absolute tw-inset-0 tw-z-10 tw-flex tw-items-center tw-justify-center tw-bg-black/70">
+                                <div className="tw-flex tw-flex-col tw-gap-2 tw-bg-white tw-p-4">
+                                    <div>
+                                        Are you sure you want to delete all
+                                        sessions? This action cannot be undone.
+                                    </div>
+                                    <div className="tw-flex tw-justify-end tw-gap-2">
+                                        <Button
+                                            variant="secondary"
+                                            onClick={closeConfirmationDialog}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            variant="danger"
+                                            onClick={() => {
+                                                closeConfirmationDialog();
+                                            }}
+                                        >
+                                            Delete All
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </>
             </GenericDialog>
