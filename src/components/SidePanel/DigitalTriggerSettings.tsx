@@ -61,7 +61,7 @@ export default () => {
                     key={`d-trigger-${index + 1}`}
                     className="tw-flex tw-flex-row tw-gap-3"
                 >
-                    <div>{`Digital channel ${index}:`}</div>
+                    <div className="tw-flex tw-min-w-fit tw-items-center">{`Channel ${index}`}</div>
                     <Dropdown
                         onSelect={value => {
                             handleDigitalChannelsTriggerStateChange(

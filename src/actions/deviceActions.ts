@@ -258,12 +258,12 @@ function checkAnalogTriggerValidity(
     triggerLevel: number,
     triggerEdge: TriggerEdge
 ): boolean {
-    const isRaisingEdge = triggerEdge === 'Raising Edge';
-    const isLoweringEdge = triggerEdge === 'Lowering Edge';
+    const isRisingEdge = triggerEdge === 'Rising edge';
+    const isLoweringEdge = triggerEdge === 'Falling edge';
 
     let validTriggerValue = false;
 
-    if (isRaisingEdge) {
+    if (isRisingEdge) {
         validTriggerValue =
             prevCappedValue != null &&
             prevCappedValue < triggerLevel &&

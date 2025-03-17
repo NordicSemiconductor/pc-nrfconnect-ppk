@@ -29,7 +29,7 @@ export const TriggerCategoryValues = ['Digital', 'Analog'] as const;
 export type TriggerCategory = (typeof TriggerCategoryValues)[number];
 export const TriggerTypeValues = ['Single', 'Continuous'] as const;
 export type TriggerType = (typeof TriggerTypeValues)[number];
-export const TriggerEdgeValues = ['Raising Edge', 'Lowering Edge'] as const;
+export const TriggerEdgeValues = ['Rising edge', 'Falling edge'] as const;
 export type TriggerEdge = (typeof TriggerEdgeValues)[number];
 export enum DigitalChannelTriggerStatesEnum {
     Active = '1',
@@ -58,7 +58,7 @@ const initialState = (): DataLoggerState => ({
     active: false,
     category: getPersistedTriggerCategory('Analog'),
     type: getPersistedTriggerType('Single'),
-    edge: getPersistedTriggerEdge('Raising Edge'),
+    edge: getPersistedTriggerEdge('Rising edge'),
     digitalChannelsTriggersStates: getPersistedDigitalChannelsTriggers(
         [] as unknown as digitalChannelStateTupleOf8
     ),

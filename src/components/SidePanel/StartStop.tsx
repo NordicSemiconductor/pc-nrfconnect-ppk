@@ -37,9 +37,12 @@ import {
 } from '../../slices/dataLoggerSlice';
 import {
     getTriggerCategory,
+    getTriggerType,
     resetTriggerOrigin,
     setTriggerCategory,
+    setTriggerType,
     TriggerCategoryValues,
+    TriggerTypeValues,
 } from '../../slices/triggerSlice';
 import { convertTimeToSeconds, formatDuration } from '../../utils/duration';
 import {
@@ -162,29 +165,44 @@ export default () => {
         setRemainingTime(calcRemainingTime(freeSpace, sampleFreq));
     }, [freeSpace, sampleFreq]);
 
+    const triggerType = useSelector(getTriggerType);
+
     return (
         <>
-            {scopePane && (
-                <StateSelector
-                    items={[...TriggerCategoryValues]}
-                    onSelect={m =>
-                        dispatch(setTriggerCategory(TriggerCategoryValues[m]))
-                    }
-                    selectedItem={triggerCategory}
-                />
-            )}
             <Group heading="Sampling parameters" gap={4}>
                 {dataLoggerPane && <LiveModeSettings />}
                 {scopePane && <SamplingSettings />}
             </Group>
-            <Group heading="Trigger settings" gap={4} collapsible>
-                {scopePane && triggerCategory === 'Analog' && (
-                    <AnalogTriggerSettings />
-                )}
-                {scopePane && triggerCategory === 'Digital' && (
-                    <DigitalTriggerSettings />
-                )}
-            </Group>
+            {scopePane && (
+                <>
+                    <Group heading="Trigger settings" gap={4} collapsible>
+                        <StateSelector
+                            items={[...TriggerCategoryValues]}
+                            onSelect={m =>
+                                dispatch(
+                                    setTriggerCategory(TriggerCategoryValues[m])
+                                )
+                            }
+                            selectedItem={triggerCategory}
+                            disabled={samplingRunning}
+                        />
+                        {triggerCategory === 'Analog' && (
+                            <AnalogTriggerSettings />
+                        )}
+                        {triggerCategory === 'Digital' && (
+                            <DigitalTriggerSettings />
+                        )}
+                    </Group>
+                    <StateSelector
+                        items={[...TriggerTypeValues]}
+                        onSelect={m =>
+                            dispatch(setTriggerType(TriggerTypeValues[m]))
+                        }
+                        selectedItem={triggerType}
+                        disabled={samplingRunning}
+                    />
+                </>
+            )}
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton
                     title={startStopTitle}

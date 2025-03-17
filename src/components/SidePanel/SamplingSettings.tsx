@@ -6,21 +6,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    NumberInput,
-    StateSelector,
-} from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { NumberInput } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { appState } from '../../slices/appSlice';
 import { getRecordingMode } from '../../slices/chartSlice';
 import {
     getTriggerBias,
     getTriggerRecordingLength,
-    getTriggerType,
     setTriggerBias,
     setTriggerRecordingLength,
-    setTriggerType,
-    TriggerTypeValues,
 } from '../../slices/triggerSlice';
 
 const calculateBiasTime = (recordingLength: number, bias: number) =>
@@ -30,7 +24,6 @@ export default () => {
     const dispatch = useDispatch();
     const recordingLength = useSelector(getTriggerRecordingLength);
     const triggerBias = useSelector(getTriggerBias);
-    const triggerType = useSelector(getTriggerType);
     const { samplingRunning } = useSelector(appState);
     const dataLoggerActive =
         useSelector(getRecordingMode) === 'DataLogger' && samplingRunning;
@@ -95,12 +88,6 @@ export default () => {
             <span className="tw-mb-2 tw-text-sm tw-text-gray-500">
                 Computed bias: {computedBias} ms
             </span>
-            <StateSelector
-                items={[...TriggerTypeValues]}
-                onSelect={m => dispatch(setTriggerType(TriggerTypeValues[m]))}
-                selectedItem={triggerType}
-                disabled={samplingRunning}
-            />
         </>
     );
 };
