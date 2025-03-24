@@ -37,7 +37,8 @@ jest.mock('../../utils/persistentStore', () => ({
     getTriggerOffset: () => 0,
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
-    getTriggerEdge: () => 'Rising edge',
+    getTriggerEdge: () => 'Rising Edge',
+    getDigitalChannelsTriggerLogic: () => 'AND',
     getTriggerCategory: () => 'Analog',
     getDigitalChannelsTriggers: () => [
         'Active',

@@ -64,6 +64,7 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
+    DigitalChannelTriggerLogic,
     DigitalChannelTriggerStatesEnum,
     getTriggerOffset,
     getTriggerRecordingLength,
@@ -218,39 +219,39 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
 function checkDigitalTriggerValidity(
     unsignedBits: number,
     previousUnsignedBits: number,
-    channelTriggerStatuses: digitalChannelStateTupleOf8
+    channelTriggerStatuses: digitalChannelStateTupleOf8,
+    digitalTriggerLogic: DigitalChannelTriggerLogic
 ): boolean {
-    const channelTriggerStatusesReversed = [
-        ...channelTriggerStatuses,
-    ].reverse();
+    if (unsignedBits === previousUnsignedBits) {
+        return false;
+    }
 
-    const doNotCareMask = Number.parseInt(
-        channelTriggerStatusesReversed
-            .map(status =>
-                status === DigitalChannelTriggerStatesEnum.DoNotCare ? '0' : '1'
-            )
-            .join(''),
-        2
-    );
+    const result = channelTriggerStatuses
+        .map((state, index) => {
+            const prevBit = getBit(previousUnsignedBits, index);
+            const currBit = getBit(unsignedBits, index);
 
-    const validMask = Number.parseInt(
-        channelTriggerStatusesReversed
-            .map(status =>
-                status === DigitalChannelTriggerStatesEnum.DoNotCare
-                    ? '0'
-                    : status
-            )
-            .join(''),
-        2
-    );
+            if (state === DigitalChannelTriggerStatesEnum.High)
+                return currBit === 1;
+            if (state === DigitalChannelTriggerStatesEnum.Low)
+                return currBit === 0;
+            if (state === DigitalChannelTriggerStatesEnum.Any)
+                return prevBit !== currBit;
+            return null;
+        })
+        .filter(r => r !== null);
 
-    const isTriggerValid = (bits: number) =>
-        ((bits & doNotCareMask) ^ validMask) === 0;
-
-    return (
-        !isTriggerValid(previousUnsignedBits) && isTriggerValid(unsignedBits)
-    );
+    switch (digitalTriggerLogic) {
+        case 'AND':
+            return result.every(Boolean);
+        case 'OR':
+            return result.some(Boolean);
+        default:
+            return false;
+    }
 }
+
+const getBit = (number: number, position: number) => (number >> position) & 1;
 
 function checkAnalogTriggerValidity(
     cappedValue: number,
@@ -258,8 +259,8 @@ function checkAnalogTriggerValidity(
     triggerLevel: number,
     triggerEdge: TriggerEdge
 ): boolean {
-    const isRisingEdge = triggerEdge === 'Rising edge';
-    const isLoweringEdge = triggerEdge === 'Falling edge';
+    const isRisingEdge = triggerEdge === 'Rising Edge';
+    const isLoweringEdge = triggerEdge === 'Falling Edge';
 
     let validTriggerValue = false;
 
@@ -339,6 +340,8 @@ export const open =
 
             if (getRecordingMode(state) === 'Scope') {
                 const triggerCategory = state.app.trigger.category;
+                const digitalTriggerLogic =
+                    state.app.trigger.digitalChannelsTriggerLogic;
 
                 const validTriggerValue =
                     triggerCategory === 'Analog'
@@ -348,11 +351,11 @@ export const open =
                               state.app.trigger.level,
                               state.app.trigger.edge
                           )
-                        : prevUnsignedBits !== unsignedBits &&
-                          checkDigitalTriggerValidity(
+                        : checkDigitalTriggerValidity(
                               unsignedBits,
                               prevUnsignedBits,
-                              channelTriggerStatuses
+                              channelTriggerStatuses,
+                              digitalTriggerLogic
                           );
 
                 prevCappedValue = cappedValue;

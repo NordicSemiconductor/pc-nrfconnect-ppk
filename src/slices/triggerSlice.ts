@@ -8,6 +8,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
     digitalChannelStateTupleOf8,
+    getDigitalChannelsTriggerLogic as getPersistedDigitaTriggerLogic,
     getDigitalChannelsTriggers as getPersistedDigitalChannelsTriggers,
     getRecordingLength as getPersistedRecordingLength,
     getTriggerCategory as getPersistedTriggerCategory,
@@ -15,6 +16,7 @@ import {
     getTriggerLevel as getPersistedTriggerLevel,
     getTriggerOffset as getPersistedTriggerOffset,
     getTriggerType as getPersistedTriggerType,
+    setDigitalChannelsTriggerLogic as persistDigitaTriggerLogic,
     setDigitalChannelsTriggers as persistDigitalChannelsTriggers,
     setRecordingLength as persistRecordingLength,
     setTriggerCategory as persistTriggerCategory,
@@ -29,12 +31,16 @@ export const TriggerCategoryValues = ['Digital', 'Analog'] as const;
 export type TriggerCategory = (typeof TriggerCategoryValues)[number];
 export const TriggerTypeValues = ['Single', 'Continuous'] as const;
 export type TriggerType = (typeof TriggerTypeValues)[number];
-export const TriggerEdgeValues = ['Rising edge', 'Falling edge'] as const;
+export const TriggerEdgeValues = ['Rising Edge', 'Falling Edge'] as const;
 export type TriggerEdge = (typeof TriggerEdgeValues)[number];
+export const DigitalChannelTriggerLogicOptions = ['AND', 'OR'] as const;
+export type DigitalChannelTriggerLogic =
+    (typeof DigitalChannelTriggerLogicOptions)[number];
 export enum DigitalChannelTriggerStatesEnum {
-    Active = '1',
-    Inactive = '0',
-    DoNotCare = 'X',
+    High = '1',
+    Low = '0',
+    Any = '*',
+    Off = 'X',
 }
 
 export interface DataLoggerState {
@@ -48,6 +54,7 @@ export interface DataLoggerState {
     progressMessage?: string;
     progress?: number;
     triggerOrigin?: number;
+    digitalChannelsTriggerLogic: DigitalChannelTriggerLogic;
     digitalChannelsTriggersStates: digitalChannelStateTupleOf8;
 }
 
@@ -58,7 +65,8 @@ const initialState = (): DataLoggerState => ({
     active: false,
     category: getPersistedTriggerCategory('Analog'),
     type: getPersistedTriggerType('Single'),
-    edge: getPersistedTriggerEdge('Rising edge'),
+    edge: getPersistedTriggerEdge('Rising Edge'),
+    digitalChannelsTriggerLogic: getPersistedDigitaTriggerLogic('AND'),
     digitalChannelsTriggersStates: getPersistedDigitalChannelsTriggers(
         [] as unknown as digitalChannelStateTupleOf8
     ),
@@ -95,6 +103,13 @@ const triggerSlice = createSlice({
         setTriggerEdge: (state, action: PayloadAction<TriggerEdge>) => {
             state.edge = action.payload;
             persistTriggerEdge(action.payload);
+        },
+        setDigitalChannelsTriggerLogic: (
+            state,
+            action: PayloadAction<DigitalChannelTriggerLogic>
+        ) => {
+            state.digitalChannelsTriggerLogic = action.payload;
+            persistDigitaTriggerLogic(action.payload);
         },
         setDigitalChannelsTriggersStates: (
             state,
@@ -140,6 +155,8 @@ export const getTriggerCategory = (state: RootState) =>
     state.app.trigger.category;
 export const getTriggerType = (state: RootState) => state.app.trigger.type;
 export const getTriggerEdge = (state: RootState) => state.app.trigger.edge;
+export const getDigitalChannelsTriggerLogic = (state: RootState) =>
+    state.app.trigger.digitalChannelsTriggerLogic;
 export const getDigitalChannelsTriggersStates = (state: RootState) =>
     state.app.trigger.digitalChannelsTriggersStates;
 export const getProgress = (state: RootState) => ({
@@ -157,6 +174,7 @@ export const {
     setTriggerCategory,
     setTriggerType,
     setTriggerEdge,
+    setDigitalChannelsTriggerLogic,
     setDigitalChannelsTriggersStates,
     setProgress,
     clearProgress,
