@@ -175,7 +175,12 @@ export default () => {
             </Group>
             {scopePane && (
                 <>
-                    <Group heading="Trigger settings" gap={4} collapsible>
+                    <Group
+                        heading="Trigger settings"
+                        gap={4}
+                        collapsible
+                        defaultCollapsed={false}
+                    >
                         <StateSelector
                             items={[...TriggerCategoryValues]}
                             onSelect={m =>

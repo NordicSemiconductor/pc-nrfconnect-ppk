@@ -65,7 +65,7 @@ import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
     DigitalChannelTriggerStatesEnum,
-    getTriggerBias,
+    getTriggerOffset,
     getTriggerRecordingLength,
     resetTriggerOrigin,
     setProgress,
@@ -371,12 +371,14 @@ export const open =
                         dispatch(setSavePending(true));
                     }
                     dispatch(setTriggerActive(true));
-                    const biasPercentage = getTriggerBias(getState());
+                    const offsetLength = getTriggerOffset(getState());
+                    const totalRecordingLength =
+                        getTriggerRecordingLength(getState()) + offsetLength;
                     dispatch(
                         processTrigger(
                             cappedValue,
-                            getTriggerRecordingLength(getState()) * 1000, // ms to uS
-                            biasPercentage,
+                            totalRecordingLength * 1000, // ms to uS
+                            offsetLength * 1000,
                             (progressMessage, prog) => {
                                 dispatch(
                                     setProgress({
@@ -586,13 +588,13 @@ export const processTrigger =
     (
         triggerValue: number,
         triggerLength: number,
-        biasPercentage: number,
+        offsetLength: number,
         onProgress?: (message: string, progress?: number) => void
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
         const trigger = DataManager().addTimeReachedTrigger(
             triggerLength,
-            biasPercentage
+            offsetLength
         );
 
         const triggerTime = Date.now();
