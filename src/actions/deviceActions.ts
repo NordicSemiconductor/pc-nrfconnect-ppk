@@ -222,15 +222,19 @@ function checkDigitalTriggerValidity(
     channelTriggerStatuses: digitalChannelStateTupleOf8,
     digitalTriggerLogic: DigitalChannelTriggerLogic
 ): boolean {
+    if (unsignedBits === previousUnsignedBits) {
+        return false;
+    }
+
     const result = channelTriggerStatuses
         .map((state, index) => {
             const prevBit = getBit(previousUnsignedBits, index);
             const currBit = getBit(unsignedBits, index);
 
             if (state === DigitalChannelTriggerStatesEnum.High)
-                return prevBit === 0 && currBit === 1;
+                return currBit === 1;
             if (state === DigitalChannelTriggerStatesEnum.Low)
-                return prevBit === 1 && currBit === 0;
+                return currBit === 0;
             if (state === DigitalChannelTriggerStatesEnum.Any)
                 return prevBit !== currBit;
             return null;
@@ -255,8 +259,8 @@ function checkAnalogTriggerValidity(
     triggerLevel: number,
     triggerEdge: TriggerEdge
 ): boolean {
-    const isRisingEdge = triggerEdge === 'Rising edge';
-    const isLoweringEdge = triggerEdge === 'Falling edge';
+    const isRisingEdge = triggerEdge === 'Rising Edge';
+    const isLoweringEdge = triggerEdge === 'Falling Edge';
 
     let validTriggerValue = false;
 
@@ -347,8 +351,7 @@ export const open =
                               state.app.trigger.level,
                               state.app.trigger.edge
                           )
-                        : prevUnsignedBits !== unsignedBits &&
-                          checkDigitalTriggerValidity(
+                        : checkDigitalTriggerValidity(
                               unsignedBits,
                               prevUnsignedBits,
                               channelTriggerStatuses,
