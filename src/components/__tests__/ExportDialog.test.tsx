@@ -10,7 +10,6 @@ import type { AnyAction } from 'redux';
 import { indexToTimestamp } from '../../globals';
 import { showExportDialog } from '../../slices/appSlice';
 import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
-import { getDigitalChannels } from '../../utils/persistentStore';
 import { fireEvent, render, screen } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 
@@ -35,7 +34,7 @@ jest.mock('../../utils/persistentStore', () => ({
     getSamplingMode: () => 'Live',
     getTriggerLevel: () => 1000,
     getRecordingLength: () => 1000,
-    getTriggerBias: () => 50,
+    getTriggerOffset: () => 0,
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
     getTriggerEdge: () => 'Raising Edge',

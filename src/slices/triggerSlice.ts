@@ -11,18 +11,18 @@ import {
     getDigitalChannelsTriggerLogic as getPersistedDigitaTriggerLogic,
     getDigitalChannelsTriggers as getPersistedDigitalChannelsTriggers,
     getRecordingLength as getPersistedRecordingLength,
-    getTriggerBias as getPersistedTriggerBias,
     getTriggerCategory as getPersistedTriggerCategory,
     getTriggerEdge as getPersistedTriggerEdge,
     getTriggerLevel as getPersistedTriggerLevel,
+    getTriggerOffset as getPersistedTriggerOffset,
     getTriggerType as getPersistedTriggerType,
     setDigitalChannelsTriggerLogic as persistDigitaTriggerLogic,
     setDigitalChannelsTriggers as persistDigitalChannelsTriggers,
     setRecordingLength as persistRecordingLength,
-    setTriggerBias as persistTriggerBias,
     setTriggerCategory as persistTriggerCategory,
     setTriggerEdge as persistTriggerEdge,
     setTriggerLevel as persistTriggerLevel,
+    setTriggerOffset as persistTriggerOffset,
     setTriggerType as persistTriggerType,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
@@ -31,7 +31,7 @@ export const TriggerCategoryValues = ['Digital', 'Analog'] as const;
 export type TriggerCategory = (typeof TriggerCategoryValues)[number];
 export const TriggerTypeValues = ['Single', 'Continuous'] as const;
 export type TriggerType = (typeof TriggerTypeValues)[number];
-export const TriggerEdgeValues = ['Raising Edge', 'Lowering Edge'] as const;
+export const TriggerEdgeValues = ['Rising edge', 'Falling edge'] as const;
 export type TriggerEdge = (typeof TriggerEdgeValues)[number];
 export const DigitalChannelTriggerLogicOptions = ['AND', 'OR'] as const;
 export type DigitalChannelTriggerLogic =
@@ -46,7 +46,7 @@ export enum DigitalChannelTriggerStatesEnum {
 export interface DataLoggerState {
     level: number;
     recordingLength: number;
-    bias: number;
+    offsetLength: number;
     active: boolean;
     category: TriggerCategory;
     type: TriggerType;
@@ -61,7 +61,7 @@ export interface DataLoggerState {
 const initialState = (): DataLoggerState => ({
     level: getPersistedTriggerLevel(1000),
     recordingLength: getPersistedRecordingLength(1000),
-    bias: getPersistedTriggerBias(0),
+    offsetLength: getPersistedTriggerOffset(0),
     active: false,
     category: getPersistedTriggerCategory('Analog'),
     type: getPersistedTriggerType('Single'),
@@ -85,9 +85,9 @@ const triggerSlice = createSlice({
             state.recordingLength = action.payload;
             persistRecordingLength(action.payload);
         },
-        setTriggerBias: (state, action: PayloadAction<number>) => {
-            state.bias = action.payload;
-            persistTriggerBias(action.payload);
+        setTriggerOffset: (state, action: PayloadAction<number>) => {
+            state.offsetLength = action.payload;
+            persistTriggerOffset(action.payload);
         },
         setTriggerActive: (state, action: PayloadAction<boolean>) => {
             state.active = action.payload;
@@ -148,7 +148,8 @@ const triggerSlice = createSlice({
 export const getTriggerValue = (state: RootState) => state.app.trigger.level;
 export const getTriggerRecordingLength = (state: RootState) =>
     state.app.trigger.recordingLength;
-export const getTriggerBias = (state: RootState) => state.app.trigger.bias;
+export const getTriggerOffset = (state: RootState) =>
+    state.app.trigger.offsetLength;
 export const getTriggerActive = (state: RootState) => state.app.trigger.active;
 export const getTriggerCategory = (state: RootState) =>
     state.app.trigger.category;
@@ -168,7 +169,7 @@ export const getTriggerOrigin = (state: RootState) =>
 export const {
     setTriggerLevel,
     setTriggerRecordingLength,
-    setTriggerBias,
+    setTriggerOffset,
     setTriggerActive,
     setTriggerCategory,
     setTriggerType,

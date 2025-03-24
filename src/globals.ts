@@ -367,7 +367,7 @@ export const DataManager = () => ({
     },
     addTimeReachedTrigger: (
         recordingLengthMicroSeconds: number,
-        biasPercent: number
+        offsetLengthMicroSeconds: number
     ) =>
         new Promise<{
             writeBuffer: WriteBuffer;
@@ -385,14 +385,13 @@ export const DataManager = () => ({
                 options.writeBuffer.getBytesWritten() / frameSize - 1;
             const timestamp = indexToTimestamp(currentIndex);
 
-            const beforeTrigger =
-                (recordingLengthMicroSeconds * biasPercent) / 100;
-            const afterTrigger = recordingLengthMicroSeconds - beforeTrigger;
+            const afterTriggerLength =
+                recordingLengthMicroSeconds - offsetLengthMicroSeconds;
 
             // const splitRecordingLengthMicroSeconds = recordingLengthMicroSeconds / 2;
             const timeRange = {
-                start: Math.max(0, timestamp - beforeTrigger),
-                end: timestamp + afterTrigger - indexToTimestamp(1), // we must exclude current sample the one that triggered all this
+                start: Math.max(0, timestamp - offsetLengthMicroSeconds),
+                end: timestamp + afterTriggerLength - indexToTimestamp(1), // we must exclude current sample the one that triggered all this
             };
 
             const bytesRange = {
