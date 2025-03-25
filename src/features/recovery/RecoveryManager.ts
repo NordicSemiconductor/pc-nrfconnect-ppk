@@ -200,8 +200,12 @@ export class RecoveryManager {
 
             if (platform === 'win32') {
                 command = `tasklist | findstr "nRF electron"`;
-            } else if (platform === 'linux' || platform === 'darwin') {
+            } else if (platform === 'linux') {
                 command = `pgrep -f ${processName}`;
+            } else if (platform === 'darwin') {
+                command = `pgrep -f ${processName
+                    .replace('(Renderer)', '')
+                    .trim()}`;
             } else {
                 reject(new Error(`Unsupported platform: ${platform}`));
                 return;
