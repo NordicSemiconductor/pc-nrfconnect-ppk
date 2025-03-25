@@ -2,9 +2,12 @@
 
 ### Added
 
--   Digital channels can now be configured as triggers in the `Scope` pane.
--   Option for cooshing a trigger bias level.
--   Option for choosing the triggering edge.
+-   Added "Offset" Configuration. Allows defining a pre-trigger data length to
+    be recorded before the trigger fires.
+-   Support for analog trigger activation based on either the Rising or Falling
+    edge.
+-   Added Digital Triggers and configurable trigger conditions based on digital
+    channel states.
 
 ## 4.2.1 - 2024-11-11
 
