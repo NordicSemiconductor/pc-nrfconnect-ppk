@@ -32,9 +32,9 @@ export const deviceSetupConfig: DeviceSetupConfig = {
                 {
                     key: 'ppk2',
                     application: getAppFile(
-                        'firmware/pca63100_ppk2_1.2.0_97a781b.hex'
+                        'firmware/pca63100_ppk2_1.2.4_db16a94.hex'
                     ),
-                    semver: 'power_profiler_kit_2 1.2.0-97a781b',
+                    semver: 'power_profiler_kit_2 1.2.4_db16a94',
                     params: {},
                 },
             ],
