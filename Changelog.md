@@ -1,3 +1,10 @@
+## 4.3.0 - unreleased
+
+### Changed
+
+-   Updated PPK 2 Firmware to 1.2.4: LDO offset calibration data is now applied
+    properly.
+
 ## 4.2.1 - 2024-11-11
 
 ### Changed
