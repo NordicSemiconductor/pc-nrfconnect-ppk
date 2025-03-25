@@ -16,6 +16,11 @@ import ExportDialog from '../SaveExport/ExportDialog';
 jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
     ReadSessions: jest.fn(() => []),
     WriteSessions: jest.fn(),
+    SessionFlag: {
+        NotRecovered: 0,
+        Recovered: 1,
+        PPK2Loaded: 2,
+    },
 }));
 
 jest.mock('../../utils/persistentStore', () => ({

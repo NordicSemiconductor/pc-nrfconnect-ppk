@@ -11,7 +11,6 @@ import {
     Alert,
     Button,
     clearConfirmBeforeClose,
-    ConfirmationDialog,
     DialogButton,
     GenericDialog,
     logger,
@@ -40,38 +39,70 @@ const SessionItem = ({
     session: Session;
     onRecoverClick: (session: Session) => void;
     onRemoveClick: (session: Session) => void;
-}) => (
-    <div className=" tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
-        <div>
-            <div className="tw-text-xs">Start time</div>
-            <div>{formatTimestamp(session.startTime)}</div>
-        </div>
-        <div>
-            <div className="tw-text-xs">Duration</div>
-            <div>{formatDuration(session.samplingDuration || 0)}</div>
-        </div>
-        <div>
-            <div className="tw-text-xs">Sampling rate</div>
-            <div>{session.samplingRate}</div>
-        </div>
-        <div className="tw-content-center tw-align-middle">
-            <div className="tw-flex tw-flex-row tw-gap-2">
-                <Button
-                    variant="secondary"
-                    onClick={() => onRemoveClick(session)}
-                >
-                    Delete
-                </Button>
-                <Button
-                    variant="primary"
-                    onClick={() => onRecoverClick(session)}
-                >
-                    Recover
-                </Button>
+}) => {
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    return (
+        <div className="tw-relative">
+            <div className=" tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
+                <div>
+                    <div className="tw-text-xs">Start time</div>
+                    <div>{formatTimestamp(session.startTime)}</div>
+                </div>
+                <div>
+                    <div className="tw-text-xs">Duration</div>
+                    <div>{formatDuration(session.samplingDuration || 0)}</div>
+                </div>
+                <div>
+                    <div className="tw-text-xs">Sampling rate</div>
+                    <div>{session.samplingRate}</div>
+                </div>
+                <div className="tw-content-center tw-align-middle">
+                    <div className="tw-flex tw-flex-row tw-gap-2">
+                        <Button
+                            variant="secondary"
+                            className="tw-w-[60px]"
+                            onClick={() => setShowDeleteConfirmation(true)}
+                        >
+                            Delete
+                        </Button>
+                        <Button
+                            variant="primary"
+                            className="tw-w-[60px]"
+                            onClick={() => onRecoverClick(session)}
+                        >
+                            Recover
+                        </Button>
+                    </div>
+                </div>
             </div>
+            {showDeleteConfirmation && (
+                <div className="tw-absolute tw-inset-0 tw-z-10 tw-flex tw-min-h-full tw-flex-row tw-items-center tw-justify-center tw-gap-3 tw-bg-gray-900 tw-p-3 tw-text-white">
+                    <div className="tw-flex-1">
+                        Are you sure? This action cannot be undone.
+                    </div>
+                    <div className="tw-content-center tw-align-middle">
+                        <div className="tw-flex tw-flex-row tw-gap-2">
+                            <Button
+                                variant="secondary"
+                                className="tw-w-[60px]"
+                                onClick={() => setShowDeleteConfirmation(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="danger"
+                                className="tw-w-[60px]"
+                                onClick={() => onRemoveClick(session)}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 const ItemizedSessions = ({
     orphanedSessions,
@@ -105,18 +136,7 @@ export default () => {
     const [isRecovering, setIsRecovering] = useState(false);
     const [recoveryProgress, setRecoveryProgress] = useState(0);
     const [recoveryError, setRecoveryError] = useState<string | null>(null);
-    const [confirmationDialogConfig, setConfirmationDialogConfig] = useState({
-        isVisible: false,
-        title: '',
-        message: '',
-        confirmText: 'Confirm',
-        cancelText: 'Cancel',
-        onConfirm: () => {},
-        onCancel: () => {},
-    });
 
-    const closeConfirmationDialog = () =>
-        setConfirmationDialogConfig(c => ({ ...c, isVisible: false }));
     const lastProgress = useRef(-1);
     const { time, reset, pause, start } = useStopwatch({
         autoStart: true,
@@ -165,105 +185,133 @@ export default () => {
         );
     }, [recoveryManager]);
 
+    const [showDeleteAllConfirmation, setShowDeleteAllConfirmation] =
+        useState(false);
+
     return (
         <>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
-                title="Session Recovery"
+                title={
+                    showDeleteAllConfirmation
+                        ? 'Delete all sessions'
+                        : 'Session Recovery'
+                }
                 footer={
                     <>
-                        <DialogButton
-                            variant="secondary"
-                            onClick={() =>
-                                setIsSessionsListDialogVisible(false)
-                            }
-                        >
-                            Close
-                        </DialogButton>
-                        <DialogButton
-                            variant="secondary"
-                            onClick={() => {
-                                setConfirmationDialogConfig({
-                                    isVisible: true,
-                                    title: 'Delete All Sessions',
-                                    message:
-                                        'Are you sure you want to delete all sessions? This action cannot be undone.',
-                                    confirmText: 'Delete',
-                                    cancelText: 'Cancel',
-                                    onConfirm: () => {
+                        {!showDeleteAllConfirmation && (
+                            <>
+                                <DialogButton
+                                    variant="secondary"
+                                    onClick={() =>
+                                        setIsSessionsListDialogVisible(false)
+                                    }
+                                >
+                                    Close
+                                </DialogButton>
+                                <DialogButton
+                                    variant="secondary"
+                                    onClick={() => {
+                                        setShowDeleteAllConfirmation(true);
+                                    }}
+                                    disabled={orphanedSessions.length === 0}
+                                >
+                                    Delete All
+                                </DialogButton>
+                            </>
+                        )}
+                        {showDeleteAllConfirmation && (
+                            <>
+                                <DialogButton
+                                    variant="secondary"
+                                    onClick={() => {
+                                        setShowDeleteAllConfirmation(false);
+                                    }}
+                                >
+                                    Cancel
+                                </DialogButton>
+                                <DialogButton
+                                    variant="danger"
+                                    onClick={() =>
                                         DeleteAllSessions(
                                             () => {},
                                             () => {
-                                                closeConfirmationDialog();
+                                                setIsSessionsListDialogVisible(
+                                                    false
+                                                );
                                                 setOrphanedSessions([]);
                                             }
-                                        );
-                                    },
-                                    onCancel: closeConfirmationDialog,
-                                });
-                            }}
-                            disabled={orphanedSessions.length === 0}
-                        >
-                            Delete All
-                        </DialogButton>
+                                        )
+                                    }
+                                >
+                                    Delete All
+                                </DialogButton>
+                            </>
+                        )}
                     </>
                 }
-                isVisible={isSessionsListDialogVisible}
+                isVisible={
+                    isSessionsListDialogVisible && orphanedSessions.length > 0
+                }
                 closeOnEsc
                 closeOnUnfocus
             >
                 <>
-                    <div className="tw-mb-4">
-                        The following sampling sessions did not close properly
-                        and can be recovered:
-                    </div>
-                    <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
-                        <ItemizedSessions
-                            orphanedSessions={orphanedSessions}
-                            onRecoverClick={session => {
-                                setIsSessionsListDialogVisible(false);
-                                if (session.flag === SessionFlag.Recovered) {
-                                    dispatch(
-                                        RecoveryManager.renderSessionData(
-                                            session
-                                        )
-                                    );
-                                    dispatch(setSavePending(true));
-                                    return;
-                                }
-                                setIsRecovering(true);
-                                setRecoveryProgress(0);
-                                setRecoveryError(null);
-                                reset();
+                    {!showDeleteAllConfirmation && (
+                        <>
+                            <div className="tw-mb-4">
+                                The following sampling sessions did not close
+                                properly and can be recovered:
+                            </div>
 
-                                dispatch(
-                                    recoveryManager.recoverSession(
-                                        session,
-                                        (progress: number) =>
-                                            setRecoveryProgress(progress),
-                                        () => {
-                                            pause();
-                                            setIsRecovering(false);
+                            <div className="core19-app tw-max-h-96 tw-overflow-y-auto tw-bg-white">
+                                <ItemizedSessions
+                                    orphanedSessions={orphanedSessions}
+                                    onRecoverClick={session => {
+                                        setIsSessionsListDialogVisible(false);
+                                        if (
+                                            session.flag ===
+                                            SessionFlag.Recovered
+                                        ) {
+                                            dispatch(
+                                                RecoveryManager.renderSessionData(
+                                                    session
+                                                )
+                                            );
                                             dispatch(setSavePending(true));
-                                        },
-                                        (error: Error) => {
-                                            pause();
-                                            setRecoveryError(error.message);
-                                            logger.error(error.message);
-                                        },
-                                        pause
-                                    )
-                                );
-                            }}
-                            onRemoveClick={session => {
-                                setConfirmationDialogConfig({
-                                    isVisible: true,
-                                    title: 'Delete Session',
-                                    message:
-                                        'Are you sure you want to delete the session? This action cannot be undone.',
-                                    confirmText: 'Delete',
-                                    cancelText: 'Cancel',
-                                    onConfirm: () => {
+                                            return;
+                                        }
+                                        setIsRecovering(true);
+                                        setRecoveryProgress(0);
+                                        setRecoveryError(null);
+                                        reset();
+
+                                        dispatch(
+                                            recoveryManager.recoverSession(
+                                                session,
+                                                (progress: number) =>
+                                                    setRecoveryProgress(
+                                                        progress
+                                                    ),
+                                                () => {
+                                                    pause();
+                                                    setIsRecovering(false);
+                                                    dispatch(
+                                                        setSavePending(true)
+                                                    );
+                                                },
+                                                (error: Error) => {
+                                                    pause();
+                                                    setRecoveryError(
+                                                        error.message
+                                                    );
+                                                    logger.error(error.message);
+                                                },
+                                                pause
+                                            )
+                                        );
+                                    }}
+                                    onRemoveClick={session => {
                                         RemoveSessionByFilePath(
                                             session.filePath,
                                             () => {
@@ -274,18 +322,23 @@ export default () => {
                                                             session.filePath
                                                     )
                                                 );
-                                                closeConfirmationDialog();
                                             }
                                         );
-                                    },
-                                    onCancel: closeConfirmationDialog,
-                                });
-                            }}
-                        />
-                        {orphanedSessions.length === 0 && (
-                            <div>No sessions found</div>
-                        )}
-                    </div>
+                                    }}
+                                />
+                                {orphanedSessions.length === 0 && (
+                                    <div>No sessions found</div>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                    {showDeleteAllConfirmation && (
+                        <div>
+                            Are you sure you want to delete all sessions? This
+                            action cannot be undone.
+                        </div>
+                    )}
                 </>
             </GenericDialog>
             <GenericDialog
@@ -323,16 +376,6 @@ export default () => {
                     )}
                 </div>
             </GenericDialog>
-            <ConfirmationDialog
-                title={confirmationDialogConfig.title}
-                isVisible={confirmationDialogConfig.isVisible}
-                confirmLabel={confirmationDialogConfig.confirmText}
-                cancelLabel={confirmationDialogConfig.cancelText}
-                onConfirm={confirmationDialogConfig.onConfirm}
-                onCancel={confirmationDialogConfig.onCancel}
-            >
-                {confirmationDialogConfig.message}
-            </ConfirmationDialog>
         </>
     );
 };
