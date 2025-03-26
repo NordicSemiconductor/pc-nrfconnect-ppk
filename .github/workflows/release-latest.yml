@@ -1,0 +1,12 @@
+name: Release to latest
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    release:
+        uses: NordicSemiconductor/pc-nrfconnect-shared/.github/workflows/release-app.yml@main
+        with:
+            source: latest (internal)
+        secrets: inherit
