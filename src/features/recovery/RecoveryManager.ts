@@ -316,7 +316,7 @@ export class RecoveryManager {
                             } else {
                                 onFail(
                                     new Error(
-                                        'Unknown error during finalizeRecovery.'
+                                        'Unknown error during finalize recovery.'
                                     )
                                 );
                             }

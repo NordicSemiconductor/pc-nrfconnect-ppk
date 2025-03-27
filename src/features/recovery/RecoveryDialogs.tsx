@@ -195,7 +195,7 @@ export default () => {
                 title={
                     showDeleteAllConfirmation
                         ? 'Delete all sessions'
-                        : 'Session Recovery'
+                        : 'Session recovery'
                 }
                 footer={
                     <>
@@ -343,7 +343,7 @@ export default () => {
             </GenericDialog>
             <GenericDialog
                 className="tw-preflight tw-max-h-screen"
-                title="Session Recovery"
+                title="Session recovery"
                 footer={
                     <DialogButton
                         variant="secondary"
