@@ -1,7 +1,9 @@
 ## 4.3.0 - UNRELEASED
 
--   Session recovery feature, which lets you recover a session after a crash or
-    an unexpected shutdown.
+### Added
+
+-   Session recovery feature that lets you recover a session after a crash or an
+    unexpected shutdown.
 
 ### Changed
 
