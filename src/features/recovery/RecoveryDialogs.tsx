@@ -216,7 +216,7 @@ export default () => {
                                     }}
                                     disabled={orphanedSessions.length === 0}
                                 >
-                                    Delete All
+                                    Delete all
                                 </DialogButton>
                             </>
                         )}
@@ -244,7 +244,7 @@ export default () => {
                                         )
                                     }
                                 >
-                                    Delete All
+                                    Delete all
                                 </DialogButton>
                             </>
                         )}
