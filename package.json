@@ -68,8 +68,5 @@
     },
     "bundledDependencies": [
         "archiver"
-    ],
-    "bundleDependencies": [
-        "archiver"
     ]
 }
