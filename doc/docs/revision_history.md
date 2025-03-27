@@ -2,6 +2,7 @@
 
 | Date       | Description                                                                                          |
 |------------|------------------------------------------------------------------------------------------------------|
+| April 2025 | Added the information about the session recovery feature to the [Overview](./overview.md#sampling-parameters) and [Using the Power Profiler app](using_ppk_app.md) pages |
 | January 2025 | Added the [Application source code](./index.md#application-source-code) section on the [Home](./index.md) page |
 | November 2024 | Editorial changes   |
 | March 2024 | Updated the documentation for the {{app_name}} [v4.0.0](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md)    |
