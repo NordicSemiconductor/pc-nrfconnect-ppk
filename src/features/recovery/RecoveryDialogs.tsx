@@ -195,7 +195,7 @@ export default () => {
                 title={
                     showDeleteAllConfirmation
                         ? 'Delete all sessions'
-                        : 'Session Recovery'
+                        : 'Session recovery'
                 }
                 footer={
                     <>
