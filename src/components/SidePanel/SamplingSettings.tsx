@@ -64,7 +64,7 @@ export default () => {
                     decimals: 2,
                     step: 0.01,
                 }}
-                title="Duration of the pre-trigger data"
+                title="Duration of the pre-trigger data sampling"
                 value={triggerOffsetValue}
                 onChange={setTriggerOffsetValue}
                 onChangeComplete={(value: number) => {
