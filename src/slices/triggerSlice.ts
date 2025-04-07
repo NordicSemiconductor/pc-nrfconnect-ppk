@@ -67,9 +67,16 @@ const initialState = (): DataLoggerState => ({
     type: getPersistedTriggerType('Single'),
     edge: getPersistedTriggerEdge('Rising Edge'),
     digitalChannelsTriggerLogic: getPersistedDigitaTriggerLogic('AND'),
-    digitalChannelsTriggersStates: getPersistedDigitalChannelsTriggers(
-        [] as unknown as digitalChannelStateTupleOf8
-    ),
+    digitalChannelsTriggersStates: getPersistedDigitalChannelsTriggers([
+        'X',
+        'X',
+        'X',
+        'X',
+        'X',
+        'X',
+        'X',
+        'X',
+    ] as digitalChannelStateTupleOf8),
 });
 
 const triggerSlice = createSlice({
