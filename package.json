@@ -66,9 +66,6 @@
     "dependencies": {
         "archiver": "^6.0.1"
     },
-    "bundledDependencies": [
-        "archiver"
-    ],
     "bundleDependencies": [
         "archiver"
     ]
