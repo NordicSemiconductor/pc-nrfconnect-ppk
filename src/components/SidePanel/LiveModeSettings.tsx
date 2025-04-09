@@ -49,6 +49,7 @@ export default () => {
                     id="data-logger-sampling-frequency"
                     values={[sampleFreqLog10]}
                     range={{ min: 0, max: maxFreqLog10 }}
+                    ticks
                     onChange={[
                         v =>
                             dispatch(

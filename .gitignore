@@ -7,3 +7,4 @@ jest.json
 log.txt
 node_modules
 npm-debug.log
+.vscode/settings.json
