@@ -9,6 +9,11 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import {
+    AddSession,
+    RemoveSessionByFilePath,
+    SessionFlag,
+} from '../features/recovery/SessionsListFileHandler';
+import {
     fullOverlap,
     overlaps,
     Page,
@@ -36,13 +41,16 @@ export class FileBuffer {
         new WeakMap();
     #firstWriteTime: number | undefined; // only needed for read only
     #fileSize: number | undefined; // only needed for read only
+    samplingRate: number | undefined;
+    #autoClean: boolean;
 
     constructor(
         bufferPageSize: number,
         filePath: fs.PathLike,
         numberOfWritePages = 14,
         numberOfReadPages = 2,
-        firstWriteTime: number | undefined = undefined
+        firstWriteTime: number | undefined = undefined,
+        autoClean = true
     ) {
         if (numberOfWritePages < 2) {
             throw new Error('numberOfWritePages cannot be less then 2');
@@ -51,6 +59,8 @@ export class FileBuffer {
         if (numberOfReadPages < 1) {
             throw new Error('numberOfReadPages cannot be less then 1');
         }
+
+        this.#autoClean = autoClean;
 
         this.#numberOfReadPages = numberOfReadPages;
 
@@ -85,7 +95,10 @@ export class FileBuffer {
             await this.close(false);
             this.release();
         };
-        window.addEventListener('beforeunload', this.#beforeUnload);
+
+        if (this.#autoClean) {
+            window.addEventListener('beforeunload', this.#beforeUnload);
+        }
     }
 
     #getPages() {
@@ -111,6 +124,13 @@ export class FileBuffer {
                     }`
                 );
                 this.#fileHandle = fs.openSync(this.#filePath, 'as+');
+
+                AddSession(
+                    Date.now(),
+                    this.samplingRate ? this.samplingRate : 100000,
+                    SessionFlag.NotRecovered,
+                    this.#filePath
+                );
             }
 
             const writePages = writeBuffer.getPages();
@@ -552,6 +572,7 @@ export class FileBuffer {
             logger.debug(`Deleting temporary ppk session at ${dir}`);
             fs.unlinkSync(this.#filePath);
             fs.rmSync(dir, { recursive: true, force: true });
+            RemoveSessionByFilePath(this.#filePath, () => {});
         }
     }
 
