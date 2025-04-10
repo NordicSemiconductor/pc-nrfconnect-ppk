@@ -10,6 +10,11 @@ const buffer = [7, 8, 9, 10];
 const bitsData = [0xaaaa, 0x5555, 0x6566];
 const startingPoint = 2;
 
+jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
+    ReadSessions: jest.fn(() => []),
+    WriteSessions: jest.fn(),
+}));
+
 // There seems to be a discrepancy between the length parameter
 // (in this example we have a length of 2, but the resulting string has 3 samples)
 // and the actual number of samples we get. However, the solution as a whole seems

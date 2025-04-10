@@ -50,7 +50,7 @@ const options: GlobalOptions = {
     lastInSyncTime: 0,
 };
 
-class FileData {
+export class FileData {
     data: Uint8Array;
     dataView: DataView;
     length: number;
@@ -283,11 +283,12 @@ export const DataManager = () => ({
         const sessionPath = path.join(sessionRootPath, v4());
 
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * frameSize, // 6 bytes per sample for and 10sec buffers at highest sampling rate
+            10 * getSamplesPerSecond() * frameSize, // 6 bytes per sample for and 10sec buffers at chosen sampling rate (save data every 10 seconds)
             sessionPath,
             14,
             14
         );
+        options.fileBuffer.samplingRate = options.samplesPerSecond;
         options.foldingBuffer = new FoldingBuffer();
     },
     initializeTriggerSession: (timeToRecordSeconds: number) => {
@@ -339,7 +340,7 @@ export const DataManager = () => ({
 
     loadData: (sessionPath: string, startSystemTime?: number) => {
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
+            10 * 100_000 * frameSize, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
             2,
             30,
@@ -427,7 +428,7 @@ export const DataManager = () => ({
  * @param {number} samplingRate number of samples per second
  * @returns {number} samplingTime which is the time in microseconds between samples
  */
-const getSamplingTime = (samplingRate: number): number =>
+export const getSamplingTime = (samplingRate: number): number =>
     microSecondsPerSecond / samplingRate;
 
 export const getSamplesPerSecond = () => options.samplesPerSecond;
