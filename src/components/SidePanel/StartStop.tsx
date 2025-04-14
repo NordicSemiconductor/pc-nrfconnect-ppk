@@ -36,8 +36,14 @@ import {
     getSampleFrequency,
 } from '../../slices/dataLoggerSlice';
 import {
+    getDigitalChannelsTriggerLogic,
+    getDigitalChannelsTriggersStates,
     getTriggerCategory,
+    getTriggerEdge,
+    getTriggerOffset,
+    getTriggerRecordingLength,
     getTriggerType,
+    getTriggerValue,
     resetTriggerOrigin,
     setTriggerCategory,
     setTriggerType,
@@ -82,6 +88,12 @@ export default () => {
     const sessionFolder = useSelector(getSessionRootFolder);
     const diskFullTrigger = useSelector(getDiskFullTrigger);
     const triggerCategory = useSelector(getTriggerCategory);
+    const triggerRecordingLength = useSelector(getTriggerRecordingLength);
+    const triggerOffset = useSelector(getTriggerOffset);
+    const triggerEdge = useSelector(getTriggerEdge);
+    const triggerLogic = useSelector(getDigitalChannelsTriggerLogic);
+    const triggerStates = useSelector(getDigitalChannelsTriggersStates);
+    const triggerValue = useSelector(getTriggerValue);
 
     const sampleIndefinitely = durationUnit === 'inf';
 
@@ -102,10 +114,28 @@ export default () => {
 
         const mode: RecordingMode = scopePane ? 'Scope' : 'DataLogger';
 
-        telemetry.sendEvent('StartSampling', {
+        const telemetryMetadata = {
             mode,
-            samplesPerSecond: DataManager().getSamplesPerSecond(),
-        });
+            ...(mode === 'DataLogger' && {
+                samplesPerSecond: DataManager().getSamplesPerSecond(),
+            }),
+            ...(mode === 'Scope' && {
+                triggerRecordingLength,
+                triggerOffset,
+                triggerCategory,
+                triggerType,
+                ...(triggerCategory === 'Analog' && {
+                    triggerValue,
+                    triggerEdge,
+                }),
+                ...(triggerCategory === 'Digital' && {
+                    triggerLogic,
+                    triggerStates,
+                }),
+            }),
+        };
+
+        telemetry.sendEvent('StartSampling', telemetryMetadata);
 
         if (mode === 'DataLogger') {
             if (!fs.existsSync(sessionFolder)) {
