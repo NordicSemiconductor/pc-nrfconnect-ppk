@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     Dropdown,
     DropdownItem,
+    Overlay,
     StateSelector,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -90,11 +91,36 @@ export default () => {
         getDigitalChannelsTriggerLogic
     );
 
+    const digitalChannelTriggerLogicOptions = [
+        {
+            key: 'AND',
+            renderItem: (
+                <Overlay
+                    tooltipId="testt"
+                    tooltipChildren="Trigger only when all selected conditions are met at the same time"
+                >
+                    AND
+                </Overlay>
+            ),
+        },
+        {
+            key: 'OR',
+            renderItem: (
+                <Overlay
+                    tooltipId="testt"
+                    tooltipChildren="Trigger when at least one of the selected conditions is met"
+                >
+                    OR
+                </Overlay>
+            ),
+        },
+    ];
+
     return (
         <>
             <ChannelsList />
             <StateSelector
-                items={[...DigitalChannelTriggerLogicOptions]}
+                items={[...digitalChannelTriggerLogicOptions]}
                 onSelect={m =>
                     dispatch(
                         setDigitalChannelsTriggerLogic(

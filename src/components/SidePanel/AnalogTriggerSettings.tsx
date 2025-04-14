@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     DropdownItem,
     NumberInput,
+    Overlay,
     StateSelector,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -71,6 +72,31 @@ export default () => {
         }
     }, [triggerValue]);
 
+    const edgeItems = [
+        {
+            key: 'Rising Edge',
+            renderItem: (
+                <Overlay
+                    tooltipId="testt"
+                    tooltipChildren="Trigger when the signal rises above the threshold (low to high transition)"
+                >
+                    Rising edge
+                </Overlay>
+            ),
+        },
+        {
+            key: 'Falling Edge',
+            renderItem: (
+                <Overlay
+                    tooltipId="testt"
+                    tooltipChildren="Trigger when the signal falls below the threshold (high to low transition)"
+                >
+                    Falling edge
+                </Overlay>
+            ),
+        },
+    ] as const;
+
     return (
         <>
             <NumberInput
@@ -80,7 +106,7 @@ export default () => {
                     decimals: levelUnit === 'µA' ? 3 : 4,
                     step: 0.001,
                 }}
-                title="Rising edge level to run trigger"
+                title="Edge level to run trigger"
                 value={internalTriggerValue}
                 onChange={v => setInternalTriggerValue(v)}
                 onChangeComplete={(value: number) => {
@@ -107,7 +133,7 @@ export default () => {
                 showSlider
             />
             <StateSelector
-                items={[...TriggerEdgeValues]}
+                items={[...edgeItems]}
                 onSelect={m => {
                     dispatch(setTriggerEdge(TriggerEdgeValues[m]));
                 }}

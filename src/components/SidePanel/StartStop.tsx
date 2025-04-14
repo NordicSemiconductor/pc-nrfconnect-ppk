@@ -10,6 +10,7 @@ import {
     ConfirmationDialog,
     Group,
     logger,
+    Overlay,
     StartStopButton,
     StateSelector,
     telemetry,
@@ -197,6 +198,31 @@ export default () => {
 
     const triggerType = useSelector(getTriggerType);
 
+    const triggerCategoryItems = [
+        {
+            key: 'Digital',
+            renderItem: (
+                <Overlay
+                    tooltipId="triggerCategoryDigital"
+                    tooltipChildren="Trigger based on the logic state (High/Low) of selected digital input channels"
+                >
+                    Digital
+                </Overlay>
+            ),
+        },
+        {
+            key: 'Analog',
+            renderItem: (
+                <Overlay
+                    tooltipId="triggerCategoryAnalog"
+                    tooltipChildren="Trigger based on the current measurement crossing a specified threshold"
+                >
+                    Analog
+                </Overlay>
+            ),
+        },
+    ];
+
     return (
         <>
             <Group heading="Sampling parameters" gap={4}>
@@ -212,7 +238,7 @@ export default () => {
                         defaultCollapsed={false}
                     >
                         <StateSelector
-                            items={[...TriggerCategoryValues]}
+                            items={[...triggerCategoryItems]}
                             onSelect={m =>
                                 dispatch(
                                     setTriggerCategory(TriggerCategoryValues[m])
