@@ -11,7 +11,6 @@ import {
     DeviceSetupConfig,
     getAppFile,
     isDeviceInDFUBootloader,
-    logger,
     sdfuDeviceSetup,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
