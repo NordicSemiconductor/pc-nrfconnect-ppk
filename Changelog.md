@@ -1,4 +1,4 @@
-## 4.3.0 - unreleased
+## 4.2.2 - unreleased
 
 ### Changed
 
