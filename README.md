@@ -57,3 +57,38 @@ for details.
 ## License
 
 See the [LICENSE](LICENSE) file for details.
+
+## File format
+
+The app stores data in and reads data from `*.ppk2` files. There are no
+guarantees that the format will remain the same. But you can see in the source
+code, that it currently is like this:
+
+A ppk2 file is a zip compressed file, containing 3 files:
+
+-   `session.raw`
+-   `minimap.raw`
+-   `metadata.json`
+
+Manditoary Data:
+
+-   `session.raw` in
+    [class FileData](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/globals.ts#L53-L112)
+
+    -   4 byes for current -> decimal in uA
+    -   2 bytes for the digital channels -> 2 bits per channel LSB is Digital
+        channel 1 (D8-D7-D6-D5-D4-D3-D2-D1). Convertsion of the 8bit digital
+        input to the 16bit format is done in
+        [the function `convertBits16`](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/utils/bitConversion.ts#L21)
+
+-   Minimap condensed data in
+    [FoldingBuffer#saveToFile](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/utils/foldingBuffer.ts#L118-L128)
+-   Metadata stored in
+    [`saveFileHandler`](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/utils/saveFileHandler.ts#L57-L60)
+    (samples per second must be the same as supported by our app
+
+**Important**: No negative values are supported! Any values < 0.2uA is
+interpreted as 0.
+
+Final compression of the 3 files into ppk2 in
+[`saveFileHandler`](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/utils/saveFileHandler.ts#L40).
