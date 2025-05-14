@@ -70,24 +70,24 @@ A ppk2 file is a zip compressed file, containing 3 files:
 -   `minimap.raw`
 -   `metadata.json`
 
-Manditoary Data:
+Mandatory Data:
 
 -   `session.raw` in
     [class FileData](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/globals.ts#L53-L112)
 
-    -   4 byes for current -> decimal in uA
-    -   2 bytes for the digital channels -> 2 bits per channel LSB is Digital
-        channel 1 (D8-D7-D6-D5-D4-D3-D2-D1). Convertsion of the 8bit digital
-        input to the 16bit format is done in
+    -   4 bytes for current: decimal in μA
+    -   2 bytes for the digital channels: 2 bits per channel, LSB is digital
+        channel 1 (D8-D7-D6-D5-D4-D3-D2-D1). Conversion of the 8-bit digital
+        input to the 16-bit format is done in
         [the function `convertBits16`](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/utils/bitConversion.ts#L21)
 
 -   Minimap condensed data in
     [FoldingBuffer#saveToFile](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/utils/foldingBuffer.ts#L118-L128)
 -   Metadata stored in
     [`saveFileHandler`](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/6e4da637f07d5f6995d96362368c781b71b5bc61/src/utils/saveFileHandler.ts#L57-L60)
-    (samples per second must be the same as supported by our app
+    (samples per second must be the same as supported by our app)
 
-**Important**: No negative values are supported! Any values < 0.2uA is
+**Important**: No negative values are supported! Any values < 0.2 μA are
 interpreted as 0.
 
 Final compression of the 3 files into ppk2 in
