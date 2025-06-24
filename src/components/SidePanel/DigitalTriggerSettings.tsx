@@ -84,6 +84,19 @@ const ChannelsList = () => {
     );
 };
 
+const digitalChannelTriggerLogicOptions = [
+    {
+        key: 'AND',
+        renderItem: 'AND',
+        title: 'Trigger only when all selected conditions are met at the same time',
+    },
+    {
+        key: 'OR',
+        renderItem: 'OR',
+        title: 'Trigger when at least one of the selected conditions is met',
+    },
+];
+
 export default () => {
     const dispatch = useDispatch();
     const digitalChannelTriggerLogic = useSelector(
@@ -94,11 +107,13 @@ export default () => {
         <>
             <ChannelsList />
             <StateSelector
-                items={[...DigitalChannelTriggerLogicOptions]}
+                items={[...digitalChannelTriggerLogicOptions]}
                 onSelect={m =>
                     dispatch(
                         setDigitalChannelsTriggerLogic(
-                            DigitalChannelTriggerLogicOptions[m]
+                            digitalChannelTriggerLogicOptions[m].key as
+                                | 'AND'
+                                | 'OR'
                         )
                     )
                 }
