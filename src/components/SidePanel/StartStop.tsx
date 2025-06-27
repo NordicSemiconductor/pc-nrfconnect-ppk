@@ -11,6 +11,7 @@ import {
     Group,
     logger,
     StartStopButton,
+    StateSelector,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
@@ -34,7 +35,21 @@ import {
     dataLoggerState,
     getSampleFrequency,
 } from '../../slices/dataLoggerSlice';
-import { resetTriggerOrigin } from '../../slices/triggerSlice';
+import {
+    getDigitalChannelsTriggerLogic,
+    getDigitalChannelsTriggersStates,
+    getTriggerCategory,
+    getTriggerEdge,
+    getTriggerOffset,
+    getTriggerRecordingLength,
+    getTriggerType,
+    getTriggerValue,
+    resetTriggerOrigin,
+    setTriggerCategory,
+    setTriggerType,
+    TriggerCategoryValues,
+    TriggerTypeValues,
+} from '../../slices/triggerSlice';
 import { convertTimeToSeconds, formatDuration } from '../../utils/duration';
 import {
     calcFileSize,
@@ -47,8 +62,10 @@ import {
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import { resetCache } from '../Chart/data/dataAccumulator';
+import AnalogTriggerSettings from './AnalogTriggerSettings';
+import DigitalTriggerSettings from './DigitalTriggerSettings';
 import LiveModeSettings from './LiveModeSettings';
-import TriggerSettings from './TriggerSettings';
+import SamplingSettings from './SamplingSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
@@ -70,6 +87,13 @@ export default () => {
     const savePending = useSelector(isSavePending);
     const sessionFolder = useSelector(getSessionRootFolder);
     const diskFullTrigger = useSelector(getDiskFullTrigger);
+    const triggerCategory = useSelector(getTriggerCategory);
+    const triggerRecordingLength = useSelector(getTriggerRecordingLength);
+    const triggerOffset = useSelector(getTriggerOffset);
+    const triggerEdge = useSelector(getTriggerEdge);
+    const triggerLogic = useSelector(getDigitalChannelsTriggerLogic);
+    const triggerStates = useSelector(getDigitalChannelsTriggersStates);
+    const triggerValue = useSelector(getTriggerValue);
 
     const sampleIndefinitely = durationUnit === 'inf';
 
@@ -90,10 +114,28 @@ export default () => {
 
         const mode: RecordingMode = scopePane ? 'Scope' : 'DataLogger';
 
-        telemetry.sendEvent('StartSampling', {
+        const telemetryMetadata = {
             mode,
-            samplesPerSecond: DataManager().getSamplesPerSecond(),
-        });
+            ...(mode === 'DataLogger' && {
+                samplesPerSecond: DataManager().getSamplesPerSecond(),
+            }),
+            ...(mode === 'Scope' && {
+                triggerRecordingLength,
+                triggerOffset,
+                triggerCategory,
+                triggerType,
+                ...(triggerCategory === 'Analog' && {
+                    triggerValue,
+                    triggerEdge,
+                }),
+                ...(triggerCategory === 'Digital' && {
+                    triggerLogic,
+                    triggerStates,
+                }),
+            }),
+        };
+
+        telemetry.sendEvent('StartSampling', telemetryMetadata);
 
         if (mode === 'DataLogger') {
             if (!fs.existsSync(sessionFolder)) {
@@ -153,12 +195,49 @@ export default () => {
         setRemainingTime(calcRemainingTime(freeSpace, sampleFreq));
     }, [freeSpace, sampleFreq]);
 
+    const triggerType = useSelector(getTriggerType);
+
     return (
         <>
             <Group heading="Sampling parameters" gap={4}>
                 {dataLoggerPane && <LiveModeSettings />}
-                {scopePane && <TriggerSettings />}
+                {scopePane && <SamplingSettings />}
             </Group>
+            {scopePane && (
+                <>
+                    <Group
+                        heading="Trigger settings"
+                        gap={4}
+                        collapsible
+                        defaultCollapsed={false}
+                    >
+                        <StateSelector
+                            items={[...TriggerCategoryValues]}
+                            onSelect={m =>
+                                dispatch(
+                                    setTriggerCategory(TriggerCategoryValues[m])
+                                )
+                            }
+                            selectedItem={triggerCategory}
+                            disabled={samplingRunning}
+                        />
+                        {triggerCategory === 'Analog' && (
+                            <AnalogTriggerSettings />
+                        )}
+                        {triggerCategory === 'Digital' && (
+                            <DigitalTriggerSettings />
+                        )}
+                    </Group>
+                    <StateSelector
+                        items={[...TriggerTypeValues]}
+                        onSelect={m =>
+                            dispatch(setTriggerType(TriggerTypeValues[m]))
+                        }
+                        selectedItem={triggerType}
+                        disabled={samplingRunning}
+                    />
+                </>
+            )}
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton
                     title={startStopTitle}
