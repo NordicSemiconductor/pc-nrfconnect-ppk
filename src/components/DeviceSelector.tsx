@@ -11,7 +11,6 @@ import {
     DeviceSetupConfig,
     getAppFile,
     isDeviceInDFUBootloader,
-    logger,
     sdfuDeviceSetup,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -57,26 +56,15 @@ export default () => {
         <DeviceSelector
             deviceSetupConfig={deviceSetupConfig}
             deviceListing={deviceListing}
-            onDeviceConnected={device =>
-                logger.info(`Device Connected SN:${device.serialNumber}`)
-            }
-            onDeviceDisconnected={device =>
-                logger.info(`Device Disconnected SN:${device.serialNumber}`)
-            }
             onDeviceSelected={device => {
                 if (device.traits.jlink) {
                     dispatch(setShowPPK1Dialog(true));
                 }
-                logger.info(
-                    `Validating firmware for device with s/n ${device.serialNumber}`
-                );
             }}
             onDeviceIsReady={device => {
-                logger.info(`Opening device with s/n ${device.serialNumber}`);
                 dispatch(open(device));
             }}
             onDeviceDeselected={() => {
-                logger.info('Deselecting device');
                 dispatch(close());
             }}
         />

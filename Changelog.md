@@ -5,8 +5,11 @@
 -   Session recovery feature that lets you recover a session after a crash or an
     unexpected shutdown.
 
+## 4.2.2 - 2025-05-22
+
 ### Changed
 
+-   Update dependencies to support the nRF Connect for Desktop v5.2.0 release.
 -   Updated Power Profiler Kit 2 firmware to v1.2.4. In this version, the data
     for the LDO offset calibration is now applied properly.
 
