@@ -220,6 +220,7 @@ export default () => {
                             }
                             selectedItem={triggerCategory}
                             disabled={samplingRunning}
+                            size="sm"
                         />
                         {triggerCategory === 'Analog' && (
                             <AnalogTriggerSettings />

@@ -113,6 +113,7 @@ export default () => {
                 }}
                 selectedItem={triggerEdge}
                 disabled={samplingRunning}
+                size="sm"
             />
         </>
     );

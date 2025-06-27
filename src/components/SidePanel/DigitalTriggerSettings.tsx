@@ -13,7 +13,6 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import {
-    DigitalChannelTriggerLogicOptions,
     DigitalChannelTriggerStatesEnum,
     getDigitalChannelsTriggerLogic,
     getDigitalChannelsTriggersStates,
@@ -118,6 +117,7 @@ export default () => {
                     )
                 }
                 selectedItem={digitalChannelTriggerLogic}
+                size="sm"
             />
         </>
     );
