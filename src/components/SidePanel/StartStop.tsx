@@ -202,42 +202,39 @@ export default () => {
             <Group heading="Sampling parameters" gap={4}>
                 {dataLoggerPane && <LiveModeSettings />}
                 {scopePane && <SamplingSettings />}
+                <StateSelector
+                    items={[...TriggerTypeValues]}
+                    onSelect={m =>
+                        dispatch(setTriggerType(TriggerTypeValues[m]))
+                    }
+                    selectedItem={triggerType}
+                    disabled={samplingRunning}
+                    size="sm"
+                />
             </Group>
             {scopePane && (
-                <>
-                    <Group
-                        heading="Trigger settings"
-                        gap={4}
-                        collapsible
-                        defaultCollapsed={false}
-                    >
-                        <StateSelector
-                            items={[...TriggerCategoryValues]}
-                            onSelect={m =>
-                                dispatch(
-                                    setTriggerCategory(TriggerCategoryValues[m])
-                                )
-                            }
-                            selectedItem={triggerCategory}
-                            disabled={samplingRunning}
-                            size="sm"
-                        />
-                        {triggerCategory === 'Analog' && (
-                            <AnalogTriggerSettings />
-                        )}
-                        {triggerCategory === 'Digital' && (
-                            <DigitalTriggerSettings />
-                        )}
-                    </Group>
+                <Group
+                    heading="Trigger settings"
+                    gap={4}
+                    collapsible
+                    defaultCollapsed
+                >
                     <StateSelector
-                        items={[...TriggerTypeValues]}
+                        items={[...TriggerCategoryValues]}
                         onSelect={m =>
-                            dispatch(setTriggerType(TriggerTypeValues[m]))
+                            dispatch(
+                                setTriggerCategory(TriggerCategoryValues[m])
+                            )
                         }
-                        selectedItem={triggerType}
+                        selectedItem={triggerCategory}
                         disabled={samplingRunning}
+                        size="sm"
                     />
-                </>
+                    {triggerCategory === 'Analog' && <AnalogTriggerSettings />}
+                    {triggerCategory === 'Digital' && (
+                        <DigitalTriggerSettings />
+                    )}
+                </Group>
             )}
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton

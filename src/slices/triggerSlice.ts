@@ -27,7 +27,7 @@ import {
 } from '../utils/persistentStore';
 import type { RootState } from '.';
 
-export const TriggerCategoryValues = ['Digital', 'Analog'] as const;
+export const TriggerCategoryValues = ['Analog', 'Digital'] as const;
 export type TriggerCategory = (typeof TriggerCategoryValues)[number];
 export const TriggerTypeValues = ['Single', 'Continuous'] as const;
 export type TriggerType = (typeof TriggerTypeValues)[number];
