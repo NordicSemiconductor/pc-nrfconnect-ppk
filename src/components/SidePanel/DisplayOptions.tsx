@@ -8,6 +8,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Group,
+    NumberInput,
     StateSelector,
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -17,13 +18,15 @@ import {
     showMinimap as getShowMinimap,
 } from '../../features/minimap/minimapSlice';
 import { DataManager } from '../../globals';
-import { deviceOpen as isDeviceOpen } from '../../slices/appSlice';
+import { appState, deviceOpen as isDeviceOpen } from '../../slices/appSlice';
 import {
     getChartDigitalChannelInfo,
     isTimestampsVisible,
     setShowSystemTime,
+    showEnergyInAmpereMeter,
     showSystemTime,
     toggleDigitalChannels,
+    toggleEnergyInAmpereMeter,
     toggleTimestamps,
 } from '../../slices/chartSlice';
 import { isDataLoggerPane } from '../../utils/panes';
@@ -31,12 +34,16 @@ import DigitalChannels from './DigitalChannels';
 
 export default () => {
     const dispatch = useDispatch();
+    const { isSmuMode } = useSelector(appState);
     const { digitalChannelsVisible } = useSelector(getChartDigitalChannelInfo);
     const timestampsVisible = useSelector(isTimestampsVisible);
     const systemTime = useSelector(showSystemTime);
     const showMinimap = useSelector(getShowMinimap);
     const dataLoggerPane = useSelector(isDataLoggerPane);
     const deviceOpen = useSelector(isDeviceOpen);
+    const showEnergy = useSelector(showEnergyInAmpereMeter);
+
+    console.log(showEnergy);
 
     return (
         <Group
@@ -62,6 +69,29 @@ export default () => {
                         disabled={!timestampsVisible}
                     />
                 )}
+
+            {!isSmuMode && (
+                <Toggle
+                    onToggle={() => dispatch(toggleEnergyInAmpereMeter())}
+                    isToggled={showEnergy}
+                    label="Energy calculation"
+                />
+            )}
+
+            {!isSmuMode && showEnergy && (
+                <NumberInput
+                    label="Provided voltage"
+                    value={3300}
+                    showSlider
+                    unit="mV"
+                    range={{ min: 800, max: 5000 }}
+                    onChange={(value: any) => {
+                        console.log('Setting VDD to', value);
+                    }}
+                    onChangeComplete={() => console.log('VDD set')}
+                    title="This value is used only for energy calculations. It does not affect the device."
+                />
+            )}
 
             <Toggle
                 onToggle={() => dispatch(toggleDigitalChannels())}

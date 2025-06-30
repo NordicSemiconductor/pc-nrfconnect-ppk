@@ -12,9 +12,11 @@ import {
     booleanTupleOf8,
     getDigitalChannels,
     getDigitalChannelsVisible,
+    getShowEnergyInAmpereMeter,
     getTimestampsVisible,
     setDigitalChannels as persistDigitalChannels,
     setDigitalChannelsVisible as persistDigitalChannelsVisible,
+    setShowEnergyInAmpereMeter as persistShowEnergyInAmpereMeter,
     setTimestampsVisible as persistTimestampsVisible,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
@@ -35,6 +37,7 @@ export interface ChartState {
     digitalChannelsVisible: boolean;
     timestampsVisible: boolean;
     showSystemTime: boolean;
+    showEnergyInAmpereMeter: boolean;
     yAxisLog: boolean;
     windowBeginLock: null | number;
     windowEndLock: null | number;
@@ -64,6 +67,7 @@ const initialState = (): ChartState => ({
     latestDataTimestamp: 0,
     forceRerender: false,
     showSystemTime: false,
+    showEnergyInAmpereMeter: getShowEnergyInAmpereMeter(),
 });
 
 export const MIN_WINDOW_DURATION = 5e7;
@@ -207,6 +211,11 @@ const chartSlice = createSlice({
             persistTimestampsVisible(newVisibilityValue);
             state.timestampsVisible = newVisibilityValue;
         },
+        toggleEnergyInAmpereMeter: state => {
+            const newVisibilityValue = !state.showEnergyInAmpereMeter;
+            persistShowEnergyInAmpereMeter(newVisibilityValue);
+            state.showEnergyInAmpereMeter = newVisibilityValue;
+        },
         toggleYAxisLock(
             state,
             action: PayloadAction<{ yMin: number | null; yMax: number | null }>
@@ -245,6 +254,9 @@ const chartSlice = createSlice({
         },
         setShowSystemTime: (state, action: PayloadAction<boolean>) => {
             state.showSystemTime = action.payload;
+        },
+        setShowEnergyInAmpereMeter: (state, action: PayloadAction<boolean>) => {
+            state.showEnergyInAmpereMeter = action.payload;
         },
         setRecordingMode: (state, action: PayloadAction<RecordingMode>) => {
             state.recordingMode = action.payload;
@@ -373,6 +385,8 @@ export const isTimestampsVisible = (state: RootState) =>
     state.app.chart.timestampsVisible;
 export const showSystemTime = (state: RootState) =>
     state.app.chart.showSystemTime;
+export const showEnergyInAmpereMeter = (state: RootState) =>
+    state.app.chart.showEnergyInAmpereMeter;
 
 export const isSessionActive = (state: RootState) =>
     state.app.chart.latestDataTimestamp !== 0;
@@ -396,6 +410,7 @@ export const {
     setYMax,
     toggleDigitalChannels,
     toggleTimestamps,
+    toggleEnergyInAmpereMeter,
     toggleYAxisLock,
     toggleYAxisLog,
     setShowSettings,
@@ -404,6 +419,7 @@ export const {
     resetChartTime,
     triggerForceRerender,
     setShowSystemTime,
+    setShowEnergyInAmpereMeter,
     setRecordingMode,
     clearRecordingMode,
 } = chartSlice.actions;

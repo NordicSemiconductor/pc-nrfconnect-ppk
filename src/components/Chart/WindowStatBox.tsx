@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { unit } from 'mathjs';
 
 import { appState } from '../../slices/appSlice';
+import { showEnergyInAmpereMeter } from '../../slices/chartSlice';
 import { voltageRegulatorState } from '../../slices/voltageRegulatorSlice';
 import { formatDurationHTML } from '../../utils/duration';
 import { Value, ValueRaw } from './StatBoxHelpers';
@@ -27,6 +28,7 @@ export default ({
 }: StatBoxProperties) => {
     const { isSmuMode } = useSelector(appState);
     const { vdd, currentVDD } = useSelector(voltageRegulatorState);
+    const showEnergyInAM = useSelector(showEnergyInAmpereMeter);
 
     // Get voltage based on power supply mode
     // In Source meter mode, use the set voltage (vdd)
@@ -39,7 +41,7 @@ export default ({
     const chargeCoulombs = averageAmps * timeSeconds;
     const energyMilliwattHours = voltage * chargeCoulombs * 3.6;
 
-    console.log(voltage, currentVDD, isSmuMode);
+    // console.log(voltage, currentVDD, isSmuMode);
 
     return (
         <div className="tw-preflight tw-flex tw-w-80 tw-grow tw-flex-col tw-gap-1 tw-text-center">
@@ -61,7 +63,7 @@ export default ({
                     label="charge"
                     u={unit(average! * ((delta || 1) / 1e6), 'uC')}
                 />
-                {isSmuMode && (
+                {(isSmuMode || showEnergyInAM) && (
                     <Value
                         white
                         label="energy"

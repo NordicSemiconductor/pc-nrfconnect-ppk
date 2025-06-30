@@ -11,11 +11,14 @@ import { Spinner } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { unit } from 'mathjs';
 
 import { DataManager } from '../../globals';
+import { appState } from '../../slices/appSlice';
 import {
     chartCursorAction,
     getCursorRange,
     setLiveMode,
+    showEnergyInAmpereMeter,
 } from '../../slices/chartSlice';
+import { voltageRegulatorState } from '../../slices/voltageRegulatorSlice';
 import { formatDurationHTML } from '../../utils/duration';
 import { Value, ValueRaw } from './StatBoxHelpers';
 
@@ -46,10 +49,21 @@ export default ({
     const dispatch = useDispatch();
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
 
+    const { isSmuMode } = useSelector(appState);
+    const { vdd, currentVDD } = useSelector(voltageRegulatorState);
+    const showEnergyInAM = useSelector(showEnergyInAmpereMeter);
+
     const chartCursorActive = useMemo(
         () => cursorBegin !== null || cursorEnd !== null,
         [cursorBegin, cursorEnd]
     );
+
+    const voltage = currentVDD / 1000; // Convert mV to V
+
+    const timeSeconds = (delta || 1) / 1e6; // Convert µs to seconds
+    const averageAmps = (average || 0) / 1e6; // Convert µA to A
+    const chargeCoulombs = averageAmps * timeSeconds;
+    const energyMilliwattHours = voltage * chargeCoulombs * 3.6;
 
     return (
         <div className="tw-preflight tw-flex tw-w-80 tw-grow tw-flex-col tw-gap-1 tw-text-center">
@@ -133,6 +147,14 @@ export default ({
                         />
                     </>
                 )}
+                {(isSmuMode || showEnergyInAM) &&
+                    !processing &&
+                    energyMilliwattHours > 0 && (
+                        <Value
+                            label="energy"
+                            u={unit(energyMilliwattHours, 'mWh')}
+                        />
+                    )}
             </div>
         </div>
     );

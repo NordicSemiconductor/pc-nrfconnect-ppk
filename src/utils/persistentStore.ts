@@ -18,6 +18,7 @@ const SPIKE_FILTER_ALPHA5 = 'spikeFilter.alpha5';
 const DIGITAL_CHANNELS_VISIBLE = 'digitalChannelsVisible';
 const DIGITAL_CHANNELS = 'digitalChannels';
 const TIMESTAMPS_VISIBLE = 'timestampsVisible';
+const SHOW_ENERGY_IN_AMPERE_METER = 'showEnergyInAmpereMeter';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
 
 const store = getPersistentStore<StoreSchema>({
@@ -59,6 +60,7 @@ interface StoreSchema {
     [DIGITAL_CHANNELS_VISIBLE]: boolean;
     [DIGITAL_CHANNELS]: booleanTupleOf8;
     [TIMESTAMPS_VISIBLE]: boolean;
+    [SHOW_ENERGY_IN_AMPERE_METER]: boolean;
 
     [VOLTAGE_REGULATOR_MAX_CAP_PPK2]: number;
 
@@ -102,6 +104,11 @@ export const setDigitalChannelsVisible = (digitalChannelsVisible: boolean) =>
 export const getTimestampsVisible = () => store.get(TIMESTAMPS_VISIBLE, false);
 export const setTimestampsVisible = (timestampsVisible: boolean) =>
     store.set(TIMESTAMPS_VISIBLE, timestampsVisible);
+
+export const getShowEnergyInAmpereMeter = () =>
+    store.get(SHOW_ENERGY_IN_AMPERE_METER, false);
+export const setShowEnergyInAmpereMeter = (showEnergy: boolean) =>
+    store.set(SHOW_ENERGY_IN_AMPERE_METER, showEnergy);
 
 export const getSampleFreq = (maxSampleFreq: number) =>
     store.get(`sampleFreq-${maxSampleFreq}`, maxSampleFreq);
