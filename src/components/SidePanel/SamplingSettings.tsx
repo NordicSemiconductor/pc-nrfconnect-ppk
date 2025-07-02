@@ -43,8 +43,8 @@ export default () => {
                 range={{
                     min: 1,
                     max: 1000,
-                    decimals: 2,
-                    step: 0.01,
+                    decimals: 0,
+                    step: 1,
                 }}
                 title="Duration of trigger window"
                 value={internalTriggerLength}
@@ -61,8 +61,8 @@ export default () => {
                 range={{
                     min: 0,
                     max: 1000,
-                    decimals: 2,
-                    step: 0.01,
+                    decimals: 0,
+                    step: 1,
                 }}
                 title="Duration of the pre-trigger data sampling"
                 value={triggerOffsetValue}
