@@ -50,18 +50,16 @@ const ChannelsList = () => {
     };
 
     return (
-        <div className="tw-ml-px tw-mt-px">
+        <div className="tw-flex tw-flex-col tw-border tw-border-solid tw-border-gray-200">
             {digitalChannelTriggerStates.map((state, index) => (
                 <div
-                    className="tw-h-10x -tw-mt-px tw-flex tw-w-full tw-items-center tw-border tw-border-solid tw-border-gray-200"
+                    className="tw-flex tw-flex-row tw-items-center tw-border tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-gray-200 last:tw-border-b-0"
                     key={`d-triggerr-${index + 1}`}
                 >
-                    <div className="tw-mr-1x -tw-ml-px tw-flex tw-h-8 tw-flex-1 tw-items-center tw-truncate">
-                        <div className="dip-label-text tw-w-full tw-flex-1 tw-truncate tw-pl-1">
-                            Channel {index}
-                        </div>
+                    <div className="tw-w-1/2 tw-pl-2 tw-text-[10px]">
+                        Channel {index}
                     </div>
-                    <div className="tw-p-1x -tw-ml-px tw-flex tw-h-8 tw-w-1/2 tw-flex-none tw-items-center">
+                    <div className="tw-w-1/2">
                         <Dropdown
                             onSelect={value => {
                                 handleDigitalChannelsTriggerStateChange(
@@ -75,6 +73,7 @@ const ChannelsList = () => {
                                     item => item.value === state
                                 ) ?? dropdownItems[0]
                             }
+                            className="tw-text-[10px]"
                         />
                     </div>
                 </div>
