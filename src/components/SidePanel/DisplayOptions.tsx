@@ -60,6 +60,7 @@ export default () => {
                         }}
                         selectedItem={systemTime ? 'Absolute' : 'Relative'}
                         disabled={!timestampsVisible}
+                        size="sm"
                     />
                 )}
 
