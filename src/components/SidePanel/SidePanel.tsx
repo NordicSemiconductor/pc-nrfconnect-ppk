@@ -98,7 +98,9 @@ export default () => {
             {(fileLoaded || deviceOpen || sessionActive) &&
                 (scopePane || dataLoggerPane) && (
                     <>
-                        <Save />
+                        <div className="tw-hidden">
+                            <Save />
+                        </div>
                         <DisplayOptions />
                     </>
                 )}

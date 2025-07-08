@@ -65,6 +65,7 @@ import { resetCache } from '../Chart/data/dataAccumulator';
 import AnalogTriggerSettings from './AnalogTriggerSettings';
 import DigitalTriggerSettings from './DigitalTriggerSettings';
 import LiveModeSettings from './LiveModeSettings';
+import { Save } from './LoadSave';
 import SamplingSettings from './SamplingSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
@@ -212,30 +213,6 @@ export default () => {
                     size="sm"
                 />
             </Group>
-            {scopePane && (
-                <Group
-                    heading="Trigger settings"
-                    gap={4}
-                    collapsible
-                    defaultCollapsed
-                >
-                    <StateSelector
-                        items={[...TriggerCategoryValues]}
-                        onSelect={m =>
-                            dispatch(
-                                setTriggerCategory(TriggerCategoryValues[m])
-                            )
-                        }
-                        selectedItem={triggerCategory}
-                        disabled={samplingRunning}
-                        size="sm"
-                    />
-                    {triggerCategory === 'Analog' && <AnalogTriggerSettings />}
-                    {triggerCategory === 'Digital' && (
-                        <DigitalTriggerSettings />
-                    )}
-                </Group>
-            )}
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton
                     title={startStopTitle}
@@ -295,6 +272,7 @@ export default () => {
                     </div>
                 )}
             </div>
+            <Save />
             <ConfirmationDialog
                 confirmLabel="Yes"
                 cancelLabel="No"
@@ -312,6 +290,30 @@ export default () => {
                 You have unsaved data and this will be lost. Are you sure you
                 want to proceed?
             </ConfirmationDialog>
+            {scopePane && (
+                <Group
+                    heading="Trigger settings"
+                    gap={4}
+                    collapsible
+                    defaultCollapsed
+                >
+                    <StateSelector
+                        items={[...TriggerCategoryValues]}
+                        onSelect={m =>
+                            dispatch(
+                                setTriggerCategory(TriggerCategoryValues[m])
+                            )
+                        }
+                        selectedItem={triggerCategory}
+                        disabled={samplingRunning}
+                        size="sm"
+                    />
+                    {triggerCategory === 'Analog' && <AnalogTriggerSettings />}
+                    {triggerCategory === 'Digital' && (
+                        <DigitalTriggerSettings />
+                    )}
+                </Group>
+            )}
         </>
     );
 };
