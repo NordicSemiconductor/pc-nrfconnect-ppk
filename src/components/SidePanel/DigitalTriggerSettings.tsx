@@ -73,7 +73,7 @@ const ChannelsList = () => {
                                     item => item.value === state
                                 ) ?? dropdownItems[0]
                             }
-                            className="tw-text-[10px]"
+                            size="sm"
                         />
                     </div>
                 </div>
