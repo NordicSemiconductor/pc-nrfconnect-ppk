@@ -12,15 +12,15 @@ import {
     StateSelector,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
-import { appState } from '../../slices/appSlice';
-import { getRecordingMode } from '../../slices/chartSlice';
+import { appState } from '../../../slices/appSlice';
+import { getRecordingMode } from '../../../slices/chartSlice';
 import {
     getTriggerEdge,
     getTriggerValue,
     setTriggerEdge,
     setTriggerLevel,
     TriggerEdgeValues,
-} from '../../slices/triggerSlice';
+} from '../../../slices/triggerSlice';
 
 const CurrentUnitValues = ['mA', '\u00B5A'] as const;
 type CurrentUnit = (typeof CurrentUnitValues)[number];

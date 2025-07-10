@@ -18,8 +18,8 @@ import {
     getDigitalChannelsTriggersStates,
     setDigitalChannelsTriggerLogic,
     setDigitalChannelsTriggersStates,
-} from '../../slices/triggerSlice';
-import { digitalChannelStateTupleOf8 } from '../../utils/persistentStore';
+} from '../../../slices/triggerSlice';
+import { digitalChannelStateTupleOf8 } from '../../../utils/persistentStore';
 
 const dropdownItems: DropdownItem[] = Object.entries(
     DigitalChannelTriggerStatesEnum

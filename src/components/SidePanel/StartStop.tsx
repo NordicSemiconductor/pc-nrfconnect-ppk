@@ -8,10 +8,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     ConfirmationDialog,
-    Group,
     logger,
     StartStopButton,
-    StateSelector,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
@@ -45,10 +43,6 @@ import {
     getTriggerType,
     getTriggerValue,
     resetTriggerOrigin,
-    setTriggerCategory,
-    setTriggerType,
-    TriggerCategoryValues,
-    TriggerTypeValues,
 } from '../../slices/triggerSlice';
 import { convertTimeToSeconds, formatDuration } from '../../utils/duration';
 import {
@@ -62,11 +56,6 @@ import {
     setDoNotAskStartAndClear,
 } from '../../utils/persistentStore';
 import { resetCache } from '../Chart/data/dataAccumulator';
-import AnalogTriggerSettings from './AnalogTriggerSettings';
-import DigitalTriggerSettings from './DigitalTriggerSettings';
-import LiveModeSettings from './LiveModeSettings';
-import { Save } from './LoadSave';
-import SamplingSettings from './SamplingSettings';
 
 const fmtOpts = { notation: 'fixed' as const, precision: 1 };
 
@@ -200,19 +189,6 @@ export default () => {
 
     return (
         <>
-            <Group heading="Sampling parameters" gap={4}>
-                {dataLoggerPane && <LiveModeSettings />}
-                {scopePane && <SamplingSettings />}
-                <StateSelector
-                    items={[...TriggerTypeValues]}
-                    onSelect={m =>
-                        dispatch(setTriggerType(TriggerTypeValues[m]))
-                    }
-                    selectedItem={triggerType}
-                    disabled={samplingRunning}
-                    size="sm"
-                />
-            </Group>
             <div className="tw-flex tw-flex-col tw-gap-2">
                 <StartStopButton
                     title={startStopTitle}
@@ -272,7 +248,6 @@ export default () => {
                     </div>
                 )}
             </div>
-            <Save />
             <ConfirmationDialog
                 confirmLabel="Yes"
                 cancelLabel="No"
@@ -290,30 +265,6 @@ export default () => {
                 You have unsaved data and this will be lost. Are you sure you
                 want to proceed?
             </ConfirmationDialog>
-            {scopePane && (
-                <Group
-                    heading="Trigger settings"
-                    gap={4}
-                    collapsible
-                    defaultCollapsed
-                >
-                    <StateSelector
-                        items={[...TriggerCategoryValues]}
-                        onSelect={m =>
-                            dispatch(
-                                setTriggerCategory(TriggerCategoryValues[m])
-                            )
-                        }
-                        selectedItem={triggerCategory}
-                        disabled={samplingRunning}
-                        size="sm"
-                    />
-                    {triggerCategory === 'Analog' && <AnalogTriggerSettings />}
-                    {triggerCategory === 'Digital' && (
-                        <DigitalTriggerSettings />
-                    )}
-                </Group>
-            )}
         </>
     );
 };
