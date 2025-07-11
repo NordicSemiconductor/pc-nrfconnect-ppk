@@ -26,7 +26,13 @@ export default () => {
     const triggerCategory = useSelector(getTriggerCategory);
 
     return (
-        <Group heading="Trigger settings" gap={4} collapsible defaultCollapsed>
+        <Group
+            heading="Trigger settings"
+            gap={4}
+            collapsible
+            defaultCollapsed
+            collapseStatePersistanceId="trigger-settings-group"
+        >
             <StateSelector
                 items={[...TriggerCategoryValues]}
                 onSelect={m =>
