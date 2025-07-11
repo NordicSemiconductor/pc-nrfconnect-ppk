@@ -49,7 +49,6 @@ jest.mock('../../utils/persistentStore', () => ({
         'Inactive',
         'Inactive',
     ],
-    getTriggerSettingsCollapsed: () => true,
 }));
 
 const getTimestampMock = jest.fn(() => 100);

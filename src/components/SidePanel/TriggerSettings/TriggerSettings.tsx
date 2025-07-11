@@ -14,9 +14,7 @@ import {
 import { appState } from '../../../slices/appSlice';
 import {
     getTriggerCategory,
-    getTriggerSettingsCollapsed,
     setTriggerCategory,
-    setTriggersSettingsCollapsed,
     TriggerCategoryValues,
 } from '../../../slices/triggerSlice';
 import AnalogTriggerSettings from './AnalogTriggerSettings';
@@ -26,18 +24,9 @@ export default () => {
     const dispatch = useDispatch();
     const { samplingRunning } = useSelector(appState);
     const triggerCategory = useSelector(getTriggerCategory);
-    const isTriggerSettingsCollapsed = useSelector(getTriggerSettingsCollapsed);
 
     return (
-        <Group
-            heading="Trigger settings"
-            gap={4}
-            collapsible
-            defaultCollapsed={isTriggerSettingsCollapsed}
-            onToggled={(isExpanded: boolean) => {
-                dispatch(setTriggersSettingsCollapsed(!isExpanded));
-            }}
-        >
+        <Group heading="Trigger settings" gap={4} collapsible defaultCollapsed>
             <StateSelector
                 items={[...TriggerCategoryValues]}
                 onSelect={m =>

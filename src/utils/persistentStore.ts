@@ -26,7 +26,6 @@ const DIGITAL_CHANNELS = 'digitalChannels';
 const DIGITAL_CHANNELS_TRIGGERS = 'digitalChannelsTriggers';
 const TIMESTAMPS_VISIBLE = 'timestampsVisible';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
-const TRIGGER_SETTINGS_COLLAPSED = 'triggerSettingsCollapsed';
 
 const store = getPersistentStore<StoreSchema>({
     migrations: {
@@ -82,8 +81,6 @@ interface StoreSchema {
     [DIGITAL_CHANNELS_TRIGGERS]: digitalChannelStateTupleOf8;
 
     [VOLTAGE_REGULATOR_MAX_CAP_PPK2]: number;
-
-    [TRIGGER_SETTINGS_COLLAPSED]: boolean;
 
     [maxSampleFrequency: SAMPLE_FREQUENCY]: number;
     [maxSampleFrequency: DURATION_SECONDS]: number;
@@ -201,11 +198,6 @@ export const getDurationUnit = (
 export const setDurationUnit = (maxSampleFreq: number, timeUnit: TimeUnit) => {
     store.set(`durationUnit-${maxSampleFreq}`, timeUnit);
 };
-
-export const getTriggerSettingsCollapsed = (defaultState: boolean) =>
-    store.get(TRIGGER_SETTINGS_COLLAPSED, defaultState);
-export const setTriggerSettingsCollapsed = (collapsed: boolean) =>
-    store.set(TRIGGER_SETTINGS_COLLAPSED, collapsed);
 
 export const getVoltageRegulatorMaxCapPPK2 = (defaultMaxCap: number) =>
     store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);

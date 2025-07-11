@@ -15,7 +15,6 @@ import {
     getTriggerEdge as getPersistedTriggerEdge,
     getTriggerLevel as getPersistedTriggerLevel,
     getTriggerOffset as getPersistedTriggerOffset,
-    getTriggerSettingsCollapsed as getPersistedTriggersSettingsCollapsed,
     getTriggerType as getPersistedTriggerType,
     setDigitalChannelsTriggerLogic as persistDigitaTriggerLogic,
     setDigitalChannelsTriggers as persistDigitalChannelsTriggers,
@@ -24,7 +23,6 @@ import {
     setTriggerEdge as persistTriggerEdge,
     setTriggerLevel as persistTriggerLevel,
     setTriggerOffset as persistTriggerOffset,
-    setTriggerSettingsCollapsed as persistTriggersSettingsCollapsed,
     setTriggerType as persistTriggerType,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
@@ -58,7 +56,6 @@ export interface DataLoggerState {
     triggerOrigin?: number;
     digitalChannelsTriggerLogic: DigitalChannelTriggerLogic;
     digitalChannelsTriggersStates: digitalChannelStateTupleOf8;
-    triggerSettingsCollapsed: boolean;
 }
 
 const initialState = (): DataLoggerState => ({
@@ -80,7 +77,6 @@ const initialState = (): DataLoggerState => ({
         'X',
         'X',
     ] as digitalChannelStateTupleOf8),
-    triggerSettingsCollapsed: getPersistedTriggersSettingsCollapsed(true),
 });
 
 const triggerSlice = createSlice({
@@ -134,13 +130,6 @@ const triggerSlice = createSlice({
                 action.payload.digitalChannelsTriggers
             );
         },
-        setTriggersSettingsCollapsed: (
-            state,
-            action: PayloadAction<boolean>
-        ) => {
-            state.triggerSettingsCollapsed = action.payload;
-            persistTriggersSettingsCollapsed(action.payload);
-        },
         setProgress: (
             state,
             action: PayloadAction<{
@@ -177,8 +166,6 @@ export const getDigitalChannelsTriggerLogic = (state: RootState) =>
     state.app.trigger.digitalChannelsTriggerLogic;
 export const getDigitalChannelsTriggersStates = (state: RootState) =>
     state.app.trigger.digitalChannelsTriggersStates;
-export const getTriggerSettingsCollapsed = (state: RootState) =>
-    state.app.trigger.triggerSettingsCollapsed;
 export const getProgress = (state: RootState) => ({
     progressMessage: state.app.trigger.progressMessage,
     progress: state.app.trigger.progress,
@@ -196,7 +183,6 @@ export const {
     setTriggerEdge,
     setDigitalChannelsTriggerLogic,
     setDigitalChannelsTriggersStates,
-    setTriggersSettingsCollapsed,
     setProgress,
     clearProgress,
     setTriggerOrigin,
