@@ -26,6 +26,10 @@ import {
     showProgressDialog,
     updateProgress,
 } from '../features/ProgressDialog/progressSlice';
+import {
+    ChangeSessionStatus,
+    SessionFlag,
+} from '../features/recovery/SessionsListFileHandler';
 import { DataManager } from '../globals';
 import type { RootState } from '../slices';
 import {
@@ -105,6 +109,12 @@ export const save =
                     dispatch(updateProgress({ indeterminate: true, message }));
                 }
             );
+
+            const sessionPath = DataManager().getSessionFolder();
+            if (sessionPath) {
+                const filePath = join(sessionPath, 'session.raw');
+                ChangeSessionStatus(filePath, SessionFlag.Recovered);
+            }
 
             dispatch(setSavePending(false));
             dispatch(closeProgressDialog());
