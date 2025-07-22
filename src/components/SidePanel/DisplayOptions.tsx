@@ -42,8 +42,9 @@ export default () => {
         <Group
             heading="Display options"
             collapsible
-            defaultCollapsed={false}
             gap={4}
+            defaultCollapsed
+            collapseStatePersistanceId="display-options-group"
         >
             <Toggle
                 onToggle={() => dispatch(toggleTimestamps())}
@@ -60,6 +61,7 @@ export default () => {
                         }}
                         selectedItem={systemTime ? 'Absolute' : 'Relative'}
                         disabled={!timestampsVisible}
+                        size="sm"
                     />
                 )}
 

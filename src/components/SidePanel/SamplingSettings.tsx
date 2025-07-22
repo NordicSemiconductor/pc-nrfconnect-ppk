@@ -6,15 +6,21 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { NumberInput } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    NumberInput,
+    StateSelector,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { appState } from '../../slices/appSlice';
 import { getRecordingMode } from '../../slices/chartSlice';
 import {
     getTriggerOffset,
     getTriggerRecordingLength,
+    getTriggerType,
     setTriggerOffset,
     setTriggerRecordingLength,
+    setTriggerType,
+    TriggerTypeValues,
 } from '../../slices/triggerSlice';
 
 export default () => {
@@ -28,6 +34,7 @@ export default () => {
     const [internalTriggerLength, setInternalTriggerLength] =
         useState(recordingLength);
     const [triggerOffsetValue, setTriggerOffsetValue] = useState(triggerOffset);
+    const triggerType = useSelector(getTriggerType);
 
     useEffect(() => {
         setInternalTriggerLength(recordingLength);
@@ -43,8 +50,8 @@ export default () => {
                 range={{
                     min: 1,
                     max: 1000,
-                    decimals: 2,
-                    step: 0.01,
+                    decimals: 0,
+                    step: 1,
                 }}
                 title="Duration of trigger window"
                 value={internalTriggerLength}
@@ -61,8 +68,8 @@ export default () => {
                 range={{
                     min: 0,
                     max: 1000,
-                    decimals: 2,
-                    step: 0.01,
+                    decimals: 0,
+                    step: 1,
                 }}
                 title="Duration of the pre-trigger data sampling"
                 value={triggerOffsetValue}
@@ -74,6 +81,13 @@ export default () => {
                 label="Offset"
                 disabled={dataLoggerActive}
                 showSlider
+            />
+            <StateSelector
+                items={[...TriggerTypeValues]}
+                onSelect={m => dispatch(setTriggerType(TriggerTypeValues[m]))}
+                selectedItem={triggerType}
+                disabled={samplingRunning}
+                size="sm"
             />
         </>
     );
