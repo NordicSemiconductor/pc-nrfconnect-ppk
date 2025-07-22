@@ -2,6 +2,12 @@
 
 ### Added
 
+-   Offset configuration feature that lets you define a pre-trigger data length
+    to be recorded before the trigger.
+-   Support for analog trigger activation based on either the rising or falling
+    edge.
+-   Added Digital Triggers and configurable trigger conditions based on digital
+    channel states.
 -   Session recovery feature that lets you recover a session after a crash or an
     unexpected shutdown.
 

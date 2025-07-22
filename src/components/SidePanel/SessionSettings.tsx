@@ -31,7 +31,13 @@ export default () => {
     const diskFullTrigger = useSelector(getDiskFullTrigger);
 
     return (
-        <Group heading="Temp Disk" collapsible gap={4}>
+        <Group
+            heading="Temp Disk"
+            collapsible
+            defaultCollapsed
+            collapseStatePersistanceId="temp-disk-group"
+            gap={4}
+        >
             <div className="tw-flex tw-flex-col tw-justify-between tw-gap-2">
                 <div className="tw-flex tw-flex-col tw-justify-between tw-gap-1">
                     <span>Root directory</span>

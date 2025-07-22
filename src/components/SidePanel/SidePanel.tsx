@@ -34,11 +34,14 @@ import { CapVoltageSettings } from './CapVoltageSettings';
 import DisplayOptions from './DisplayOptions';
 import Gains from './Gains';
 import Instructions from './Instructions';
+import LiveModeSettings from './LiveModeSettings';
 import { Load, Save } from './LoadSave';
 import PowerMode from './PowerMode';
+import SamplingSettings from './SamplingSettings';
 import SessionSettings from './SessionSettings';
 import SpikeFilter from './SpikeFilter';
 import StartStop from './StartStop';
+import TriggerSettings from './TriggerSettings/TriggerSettings';
 
 const useConfirmBeforeClose = () => {
     const pendingSave = useSelector(isSavePending);
@@ -72,6 +75,17 @@ export default () => {
     useConfirmBeforeClose();
 
     const connecting = deviceConnected && !deviceOpen;
+    const canInteract = fileLoaded || deviceOpen || sessionActive;
+    const paneActive = scopePane || dataLoggerPane;
+
+    const showLoad = !deviceConnected;
+    const showInstructions = !fileLoaded && !deviceConnected && !sessionActive;
+    const showControls = !fileLoaded && deviceOpen && paneActive;
+    const showSave = canInteract && paneActive;
+    const showTriggerSettings = deviceConnected && scopePane;
+    const showDisplayOptions = canInteract && paneActive;
+    const showSessionSettings = dataLoggerPane || !deviceConnected;
+    const showAdvancedConfiguration = !fileLoaded && deviceOpen && paneActive;
 
     if (connecting) {
         return (
@@ -85,26 +99,30 @@ export default () => {
 
     return (
         <SidePanel className="side-panel tw-mt-9">
-            {!deviceConnected && <Load />}
-            {!fileLoaded && !deviceConnected && !sessionActive && (
-                <Instructions />
-            )}
-            {!fileLoaded && deviceOpen && (scopePane || dataLoggerPane) && (
+            {showLoad && <Load />}
+            {showInstructions && <Instructions />}
+            {showControls && (
                 <>
                     <PowerMode />
+                    <Group heading="Sampling parameters" gap={4}>
+                        {dataLoggerPane && <LiveModeSettings />}
+                        {scopePane && <SamplingSettings />}
+                    </Group>
                     <StartStop />
                 </>
             )}
-            {(fileLoaded || deviceOpen || sessionActive) &&
-                (scopePane || dataLoggerPane) && (
-                    <>
-                        <Save />
-                        <DisplayOptions />
-                    </>
-                )}
-            {(dataLoggerPane || !deviceConnected) && <SessionSettings />}
-            {!fileLoaded && deviceOpen && (dataLoggerPane || scopePane) && (
-                <Group collapsible heading="Advanced Configuration" gap={8}>
+            {showSave && <Save />}
+            {showTriggerSettings && <TriggerSettings />}
+            {showDisplayOptions && <DisplayOptions />}
+            {showSessionSettings && <SessionSettings />}
+            {showAdvancedConfiguration && (
+                <Group
+                    collapsible
+                    heading="Advanced Configuration"
+                    defaultCollapsed
+                    collapseStatePersistanceId="advanced-configuration-group"
+                    gap={8}
+                >
                     <div className="tw-border tw-border-solid tw-border-gray-400 tw-p-2 tw-text-[10px] tw-text-gray-400">
                         WARNING Only change values if you know what you are
                         doing
