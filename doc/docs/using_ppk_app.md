@@ -20,3 +20,7 @@ The Power Profiler Kit II (PPK2) must be connected to your computer and powered 
 1. Click **Stop** to stop sampling.
 
 At the end of the sampling, you can click [**Save/Export**](./overview.md#save-options) to save the sampling data to a `.ppk2` or `.csv` file.
+
+!!! note "Note"
+
+    {{session_recovery_info}}

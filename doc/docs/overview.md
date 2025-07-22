@@ -68,6 +68,10 @@ After sampling starts, the **Start** button changes to **Stop**.
 Before you can start sampling again, [**Save/Export**](#other-options) the session data or take a [**Screenshot**](#other-options)
 If you don't, you will be prompted about saving any unsaved sampling data before you start sampling again.
 
+!!! note "Note"
+
+    {{session_recovery_info}}
+
 #### Data logger parameters
 
 ![Sampling parameters for Data logger](./screenshots/ppk2_device_panel_sampling_live.png "Sampling parameters for Data logger")

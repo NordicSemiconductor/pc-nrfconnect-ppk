@@ -97,8 +97,11 @@ export const setupOptions =
             dispatch(resetChartTime());
             dispatch(resetMinimap());
 
+            const sampleFreq = getSampleFrequency(getState());
+
             switch (recordingMode) {
                 case 'DataLogger':
+                    DataManager().setSamplesPerSecond(sampleFreq);
                     DataManager().initializeLiveSession(
                         getSessionRootFolder(getState())
                     );

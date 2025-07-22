@@ -29,6 +29,7 @@ interface AppState {
     diskFullLimitMb?: number;
     sessionFolder?: string;
     savePending: boolean;
+    sessionRecoveryPending: boolean;
 }
 
 const initialState = (): AppState => ({
@@ -41,6 +42,7 @@ const initialState = (): AppState => ({
     isSaveChoiceDialogVisible: false,
     isExportDialogVisible: false,
     savePending: false,
+    sessionRecoveryPending: false,
 });
 
 const appSlice = createSlice({
@@ -60,6 +62,7 @@ const appSlice = createSlice({
         deviceClosedAction: state => ({
             ...initialState(),
             savePending: state.savePending,
+            sessionRecoveryPending: state.sessionRecoveryPending,
         }),
         setDeviceRunningAction: (
             state,
@@ -103,6 +106,9 @@ const appSlice = createSlice({
         setSavePending: (state, action: PayloadAction<boolean>) => {
             state.savePending = action.payload;
         },
+        setSessionRecoveryPending: (state, action: PayloadAction<boolean>) => {
+            state.sessionRecoveryPending = action.payload;
+        },
     },
 });
 
@@ -116,6 +122,8 @@ export const getSessionRootFolder = (state: RootState) =>
 export const getDiskFullTrigger = (state: RootState) =>
     state.app.app.diskFullLimitMb ?? getPersistedDiskFullTrigger(4096);
 export const isSavePending = (state: RootState) => state.app.app.savePending;
+export const isSessionRecoveryPending = (state: RootState) =>
+    state.app.app.sessionRecoveryPending;
 export const getFileLoaded = (state: RootState) => state.app.app.fileLoadedName;
 export const isFileLoaded = (state: RootState) =>
     !!state.app.app.fileLoadedName;
@@ -134,6 +142,7 @@ export const {
     setSessionRootFolder,
     setDiskFullTrigger,
     setSavePending,
+    setSessionRecoveryPending,
     clearFileLoadedAction,
 } = appSlice.actions;
 

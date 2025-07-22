@@ -8,6 +8,8 @@
     edge.
 -   Added Digital Triggers and configurable trigger conditions based on digital
     channel states.
+-   Session recovery feature that lets you recover a session after a crash or an
+    unexpected shutdown.
 
 ## 4.2.2 - 2025-05-22
 
