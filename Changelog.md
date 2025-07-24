@@ -11,6 +11,11 @@
 -   Session recovery feature that lets you recover a session after a crash or an
     unexpected shutdown.
 
+### Changed
+
+-   Group components are now persisting their own collapse state between app’s
+    sessions.
+
 ## 4.2.2 - 2025-05-22
 
 ### Changed
