@@ -11,6 +11,11 @@
 -   Session recovery feature that lets you recover a session after a crash or an
     unexpected shutdown.
 
+### Fixed
+
+-   An issue where the Power Profiler's specific shortcuts were not listed in
+    the shortcuts menu in the `About` tab.
+
 ## 4.2.2 - 2025-05-22
 
 ### Changed
