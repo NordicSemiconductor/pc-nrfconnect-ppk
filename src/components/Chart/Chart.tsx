@@ -15,7 +15,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     AppDispatch,
     AppThunk,
-    useHotKey,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import {
     Chart as ChartJS,
@@ -33,6 +32,10 @@ import {
     indexToTimestamp,
     timestampToIndex,
 } from '../../globals';
+import {
+    HotkeyActionType,
+    useHotkeyActions,
+} from '../../hooks/useHotkeyAction';
 import {
     DataAccumulatorInstance,
     isInitialised,
@@ -249,45 +252,42 @@ const Chart = () => {
         [dispatch]
     );
 
-    useHotKey({
-        hotKey: 'alt+a',
-        title: 'Select all',
-        isGlobal: false,
-        action: () => {
-            if (DataManager().getTimestamp() > 0) {
-                return chartCursor(0, DataManager().getTimestamp());
-            }
-            return false;
+    useHotkeyActions([
+        {
+            actionType: HotkeyActionType.SELECT_ALL,
+            handler: () => {
+                if (DataManager().getTimestamp() > 0) {
+                    chartCursor(0, DataManager().getTimestamp());
+                    return true;
+                }
+                return false;
+            },
         },
-    });
-
-    useHotKey({
-        hotKey: 'esc',
-        title: 'Select none',
-        isGlobal: false,
-        action: () => {
-            resetCursor();
+        {
+            actionType: HotkeyActionType.SELECT_NONE,
+            handler: () => {
+                resetCursor();
+                return true;
+            },
         },
-    });
+        {
+            actionType: HotkeyActionType.ZOOM_TO_SELECTION,
+            handler: () => {
+                const zoomToSelectedArea =
+                    (): AppThunk<RootState> => (_dispatch, getState) => {
+                        const { cursorBegin, cursorEnd } = getCursorRange(
+                            getState()
+                        );
+                        if (cursorBegin != null && cursorEnd != null) {
+                            chartWindow(cursorBegin, cursorEnd);
+                        }
+                    };
 
-    useHotKey({
-        hotKey: 'alt+z',
-        title: 'Zoom to selected area',
-        isGlobal: false,
-        action: () => {
-            const zoomToSelectedArea =
-                (): AppThunk<RootState> => (_dispatch, getState) => {
-                    const { cursorBegin, cursorEnd } = getCursorRange(
-                        getState()
-                    );
-                    if (cursorBegin != null && cursorEnd != null) {
-                        chartWindow(cursorBegin, cursorEnd);
-                    }
-                };
-
-            dispatch(zoomToSelectedArea());
+                dispatch(zoomToSelectedArea());
+                return true;
+            },
         },
-    });
+    ]);
 
     const { digitalChannels, digitalChannelsVisible } = useSelector(
         getChartDigitalChannelInfo
