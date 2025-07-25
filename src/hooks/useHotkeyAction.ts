@@ -23,22 +23,5 @@ export const useHotkeyAction = (
     }, [actionType, handler]);
 };
 
-export const useHotkeyActions = (
-    subscriptions: Array<{
-        actionType: HotkeyActionType;
-        handler: HotkeySubscriber;
-    }>
-) => {
-    useEffect(() => {
-        const unsubscribers = subscriptions.map(({ actionType, handler }) =>
-            hotkeyEventManager.subscribe(actionType, handler)
-        );
-
-        return () => {
-            unsubscribers.forEach(unsubscribe => unsubscribe());
-        };
-    }, [subscriptions]);
-};
-
 export type { HotkeyEvent, HotkeySubscriber };
 export { HotkeyActionType };

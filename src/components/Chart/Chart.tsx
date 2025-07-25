@@ -32,10 +32,7 @@ import {
     indexToTimestamp,
     timestampToIndex,
 } from '../../globals';
-import {
-    HotkeyActionType,
-    useHotkeyActions,
-} from '../../hooks/useHotkeyAction';
+import { HotkeyActionType, useHotkeyAction } from '../../hooks/useHotkeyAction';
 import {
     DataAccumulatorInstance,
     isInitialised,
@@ -252,42 +249,27 @@ const Chart = () => {
         [dispatch]
     );
 
-    useHotkeyActions([
-        {
-            actionType: HotkeyActionType.SELECT_ALL,
-            handler: () => {
-                if (DataManager().getTimestamp() > 0) {
-                    chartCursor(0, DataManager().getTimestamp());
-                    return true;
-                }
-                return false;
-            },
-        },
-        {
-            actionType: HotkeyActionType.SELECT_NONE,
-            handler: () => {
-                resetCursor();
-                return true;
-            },
-        },
-        {
-            actionType: HotkeyActionType.ZOOM_TO_SELECTION,
-            handler: () => {
-                const zoomToSelectedArea =
-                    (): AppThunk<RootState> => (_dispatch, getState) => {
-                        const { cursorBegin, cursorEnd } = getCursorRange(
-                            getState()
-                        );
-                        if (cursorBegin != null && cursorEnd != null) {
-                            chartWindow(cursorBegin, cursorEnd);
-                        }
-                    };
+    useHotkeyAction(HotkeyActionType.SELECT_ALL, () => {
+        if (DataManager().getTimestamp() > 0) {
+            chartCursor(0, DataManager().getTimestamp());
+        }
+    });
 
-                dispatch(zoomToSelectedArea());
-                return true;
-            },
-        },
-    ]);
+    useHotkeyAction(HotkeyActionType.SELECT_NONE, () => {
+        resetCursor();
+    });
+
+    useHotkeyAction(HotkeyActionType.ZOOM_TO_SELECTION, () => {
+        const zoomToSelectedArea =
+            (): AppThunk<RootState> => (_dispatch, getState) => {
+                const { cursorBegin, cursorEnd } = getCursorRange(getState());
+                if (cursorBegin != null && cursorEnd != null) {
+                    chartWindow(cursorBegin, cursorEnd);
+                }
+            };
+
+        dispatch(zoomToSelectedArea());
+    });
 
     const { digitalChannels, digitalChannelsVisible } = useSelector(
         getChartDigitalChannelInfo

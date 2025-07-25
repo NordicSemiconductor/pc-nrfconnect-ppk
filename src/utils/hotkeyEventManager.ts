@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { EventEmitter } from 'events';
 
 export enum HotkeyActionType {
     SELECT_ALL = 'SELECT_ALL',
@@ -20,72 +20,23 @@ export interface HotkeyEvent {
 
 export type HotkeySubscriber = (event: HotkeyEvent) => boolean | void;
 
-class HotkeyEventManager {
-    private subscribers: Map<HotkeyActionType, Set<HotkeySubscriber>> =
-        new Map();
-
+class HotkeyEventManager extends EventEmitter {
     subscribe(
         actionType: HotkeyActionType,
         subscriber: HotkeySubscriber
     ): () => void {
-        if (!this.subscribers.has(actionType)) {
-            this.subscribers.set(actionType, new Set());
-        }
-
-        const subscribersSet = this.subscribers.get(actionType);
-        if (subscribersSet) {
-            subscribersSet.add(subscriber);
-        }
-
-        return () => {
-            const currentSubscribers = this.subscribers.get(actionType);
-            if (currentSubscribers) {
-                currentSubscribers.delete(subscriber);
-                if (currentSubscribers.size === 0) {
-                    this.subscribers.delete(actionType);
-                }
-            }
-        };
+        this.on(actionType, subscriber);
+        return () => this.off(actionType, subscriber);
     }
 
-    publish(actionType: HotkeyActionType, payload?: unknown): boolean {
+    publish(actionType: HotkeyActionType, payload?: unknown) {
         const event: HotkeyEvent = {
             type: actionType,
             timestamp: Date.now(),
             payload,
         };
 
-        const subscribers = this.subscribers.get(actionType);
-        if (!subscribers || subscribers.size === 0) {
-            return false;
-        }
-
-        let handled = false;
-        const subscriberArray = Array.from(subscribers);
-        subscriberArray.forEach(subscriber => {
-            try {
-                const result = subscriber(event);
-                if (result === true) {
-                    handled = true;
-                }
-            } catch (error) {
-                logger.error(
-                    `Hotkey subscriber error for ${actionType}: ${
-                        error instanceof Error ? error.message : String(error)
-                    }`
-                );
-            }
-        });
-
-        return handled;
-    }
-
-    getSubscriberCount(actionType: HotkeyActionType): number {
-        return this.subscribers.get(actionType)?.size ?? 0;
-    }
-
-    clear(): void {
-        this.subscribers.clear();
+        this.emit(actionType, event);
     }
 }
 
