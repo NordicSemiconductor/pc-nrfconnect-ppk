@@ -11,6 +11,11 @@
 -   Session recovery feature that lets you recover a session after a crash or an
     unexpected shutdown.
 
+### Fixed
+
+-   Disk space check for PPK2 file loading now correctly uses the decompression
+    target.
+
 ## 4.2.2 - 2025-05-22
 
 ### Changed
