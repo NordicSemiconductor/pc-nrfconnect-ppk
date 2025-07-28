@@ -13,8 +13,8 @@
 
 ### Changed
 
--   Group components are now persisting their own collapse state between app’s
-    sessions.
+-   The expanded or collapsed state of device panel components is now persistent
+    between the app sessions.
 
 ## 4.2.2 - 2025-05-22
 
