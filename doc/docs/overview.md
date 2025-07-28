@@ -39,7 +39,7 @@ The sampling will automatically stop when the hard drive has less than the defin
 
 ## Device panel sections after device selection
 
-More options become available after selecting a device. Some options are specific to the chosen sampling mode.
+More options become available after selecting a device. Some options are specific to the selected [sampling mode tab](#sampling-mode-tabs).
 
 ![{{app_name}} default view after selecting a device](./screenshots/ppk2_standard_view_connected.png "{{app_name}} default view after selecting a device")
 
@@ -58,7 +58,7 @@ Both modes let you **Enable power output** on or off, which turns DUT on or off.
 
 ### Sampling parameters
 
-Here you can select the sampling parameters. The parameters are different depending on the sampling mode.
+Here you can select the sampling parameters. The parameters are different depending on the [sampling mode tab selected](#sampling-mode-tabs).
 
 This is also where you can **Start** sampling.
 
@@ -89,17 +89,52 @@ Based on the chosen options, the Power Profiler application estimates the disk s
 
 ![Sampling parameters for Scope](./screenshots/ppk2_device_panel_sampling_trigger.png "Sampling parameters for Scope")
 
-When sampling in the **Scope** mode, the sampling starts only when the specified **Length** and **Level** values are reached.
+When sampling in the **Scope** mode, the sampling starts only when the specified [**Trigger settings**](#trigger-settings) are reached. The sampling then lasts for the specified **Length** value.
 The sampling always happens at 100 000 samples per second (100 kHz).
 
 The following table lists all available Scope parameters.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Length**                        | Total time before and after the **Level** current value is reached. The application will try to record the trigger at the middle of the provided value.  |
-| **Level**                         | The current value at which the trigger takes place. The trigger always happens at the rising edge. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.PNG "Arrow for setting Level value")        |
+| **Length**                        | Total time before and after the trigger event. The application will try to record the trigger at the middle of the provided value.  |
+| **Offset**                         | Duration of pre-trigger data sampling. This specifies how much data to capture before the trigger event occurs (based on the **Length** value). |
 | **Single**                        | Select this option to stop sampling after one trigger event takes place.       |
 | **Continuous**                    | Select this option to continue sampling after one trigger event, and display trigger events until you click **Stop**. The first trigger must be fulfilled for the specified **Length** before another trigger can be displayed.       |
+
+### Trigger settings
+
+Trigger settings are only available when sampling in the **Scope** sampling mode.
+You can set either analog or digital trigger conditions.
+
+#### Analog trigger settings
+
+![Analog trigger settings for Scope](./screenshots/ppk2_device_panel_trigger_settings_analog.png "Analog trigger settings for Scope")
+
+For analog triggers, you can set the level and the edge at which the trigger happens.
+
+The following table lists the available analog trigger settings.
+
+| Option                            | Description                                                                                          |
+|-----------------------------------|------------------------------------------------------------------------------------------------------|
+| **Level**                         | The current value at which the trigger takes place. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.PNG "Arrow for setting Level value")        |
+| **Rising Edge**                        | Trigger happens when the signal transitions from low to high (0 to 1).        |
+| **Falling Edge**                    | Trigger happens when the signal transitions from high to low (1 to 0).        |
+
+#### Digital trigger settings
+
+![Digital trigger settings for Scope](./screenshots/ppk2_device_panel_trigger_settings_digital.png "Digital trigger settings for Scope")
+
+For digital triggers, you can configure the conditions for digital channels 0 through 7 and the logic that should be applied to the conditions.
+
+The following table lists the available digital trigger settings.
+
+|       Option       |                                 Description                                 |
+| ------------------ | --------------------------------------------------------------------------- |
+| **High**           | Set the trigger to happen when the channel goes from 0 to 1, low to high.   |
+| **Low**            | Set the trigger to happen when the channel goes from 1 to 0, high to low.   |
+| **Any**            | Set the trigger to happen when the channel goes either **High** or **Low**. |
+| **Off**            | Channel state is not considered.                                            |
+| **AND** and **OR** | Select the logic operator to combine multiple channel conditions.           |
 
 ### Display options
 
