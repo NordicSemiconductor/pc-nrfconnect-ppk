@@ -1,3 +1,10 @@
+## 4.3.1 - UNRELEASED
+
+### Fixed
+
+-   Disk space check for PPK2 file loading now correctly uses the decompression
+    target.
+
 ## 4.3.0 - UNRELEASED
 
 ### Added
@@ -11,10 +18,10 @@
 -   Session recovery feature that lets you recover a session after a crash or an
     unexpected shutdown.
 
-### Fixed
+### Changed
 
--   Disk space check for PPK2 file loading now correctly uses the decompression
-    target.
+-   The expanded or collapsed state of device panel components is now persistent
+    between the app sessions.
 
 ## 4.2.2 - 2025-05-22
 
