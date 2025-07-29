@@ -96,9 +96,9 @@ The following table lists all available Scope parameters.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Length**                        | Total time after the trigger event. The application will try to record the trigger at the middle of the provided value.  |
-| **Offset**                        | Duration of the pre-trigger data sampling. This specifies how much data to show before the trigger event has occurred (based on the **Length** value). |
-| **Single**                        | Select this option to stop sampling after one trigger event takes place.       |
+| **Length**                        | Total time *after* the trigger event during which the application samples and displays the data.     |
+| **Offset**                        | Total time *before* the trigger event during which the application samples and displays the data. If sampling runs for a shorter period of time than the value of **Offset** when the trigger happens, only sampling for this shorter period of time is displayed.                 |
+| **Single**                        | Select this option to stop sampling after one trigger event takes place.                             |
 | **Continuous**                    | Select this option to continue sampling after one trigger event, and display trigger events until you click **Stop**. The first trigger must be fulfilled for the specified **Length** before another trigger can be displayed.       |
 
 ### Trigger settings
