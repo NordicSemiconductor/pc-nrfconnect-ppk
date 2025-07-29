@@ -11,6 +11,11 @@
 -   Session recovery feature that lets you recover a session after a crash or an
     unexpected shutdown.
 
+### Changed
+
+-   The expanded or collapsed state of device panel components is now persistent
+    between the app sessions.
+
 ## 4.2.2 - 2025-05-22
 
 ### Changed
