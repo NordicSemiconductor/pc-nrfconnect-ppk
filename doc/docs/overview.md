@@ -96,8 +96,8 @@ The following table lists all available Scope parameters.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Length**                        | Total time before and after the trigger event. The application will try to record the trigger at the middle of the provided value.  |
-| **Offset**                         | Duration of pre-trigger data sampling. This specifies how much data to capture before the trigger event occurs (based on the **Length** value). |
+| **Length**                        | Total time after the trigger event. The application will try to record the trigger at the middle of the provided value.  |
+| **Offset**                        | Duration of the pre-trigger data sampling. This specifies how much data to show before the trigger event has occurred (based on the **Length** value). |
 | **Single**                        | Select this option to stop sampling after one trigger event takes place.       |
 | **Continuous**                    | Select this option to continue sampling after one trigger event, and display trigger events until you click **Stop**. The first trigger must be fulfilled for the specified **Length** before another trigger can be displayed.       |
 
@@ -110,15 +110,15 @@ You can set either analog or digital trigger conditions.
 
 ![Analog trigger settings for Scope](./screenshots/ppk2_device_panel_trigger_settings_analog.png "Analog trigger settings for Scope")
 
-For analog triggers, you can set the level and the edge at which the trigger happens.
+For analog triggers, you can set the level value and when the trigger happens in relation to the level value.
 
 The following table lists the available analog trigger settings.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
 | **Level**                         | The current value at which the trigger takes place. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.PNG "Arrow for setting Level value")        |
-| **Rising Edge**                        | Trigger happens when the signal transitions from low to high (0 to 1).        |
-| **Falling Edge**                    | Trigger happens when the signal transitions from high to low (1 to 0).        |
+| **Rising Edge**                   | Trigger happens when the signal transitions from a value lower than the value of **Level** to a higher value.        |
+| **Falling Edge**                  | Trigger happens when the signal transitions from a value higher than the value of **Level** to a lower value.        |
 
 #### Digital trigger settings
 
