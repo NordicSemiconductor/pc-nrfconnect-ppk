@@ -153,3 +153,16 @@ export const ChangeSessionStatus = async (
         await WriteSessions(sessions);
     }
 };
+
+export const UpdateSessionData = async (session: Partial<Session>) => {
+    const sessions = await ReadSessions();
+    const sessionIndex = sessions.findIndex(
+        s => s.filePath === session.filePath
+    );
+
+    if (sessionIndex !== -1) {
+        const updatedSession = { ...sessions[sessionIndex], ...session };
+        sessions[sessionIndex] = updatedSession;
+        await WriteSessions(sessions);
+    }
+};
