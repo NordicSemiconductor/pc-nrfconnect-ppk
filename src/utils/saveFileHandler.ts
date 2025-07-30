@@ -89,13 +89,21 @@ export default async (
     archive.directory(sessionFolder, false);
 
     const cleanUp = () => {
-        fs.rmSync(filename, { recursive: true, force: true });
+        fs.rm(filename, { recursive: true, force: true }, e => {
+            if (e) {
+                logger.error(describeError(e));
+            }
+        });
     };
     window.addEventListener('beforeunload', cleanUp);
     try {
         await archive.finalize();
         window.removeEventListener('beforeunload', cleanUp);
-        fs.rmSync(metaPath);
+        fs.rm(metaPath, e => {
+            if (e) {
+                logger.error(describeError(e));
+            }
+        });
         telemetry.sendEvent(EventAction.EXPORT_DATA, {
             timestampBegin: 0,
             timestampEnd: indexToTimestamp(

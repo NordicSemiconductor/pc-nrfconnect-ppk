@@ -6,7 +6,11 @@
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
-import { logger, telemetry } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    describeError,
+    logger,
+    telemetry,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { deserialize, Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
@@ -170,7 +174,11 @@ const loadPPK2File = async (
     const sessionFilePath = path.join(sessionPath, 'session.raw');
     fs.mkdirSync(sessionPath);
     const cleanUp = () => {
-        fs.rmSync(sessionPath, { recursive: true, force: true });
+        fs.rm(sessionPath, { recursive: true, force: true }, e => {
+            if (e) {
+                logger.error(describeError(e));
+            }
+        });
     };
     window.addEventListener('beforeunload', cleanUp);
 

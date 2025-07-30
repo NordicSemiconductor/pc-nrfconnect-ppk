@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { getAppDataDir } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    describeError,
+    getAppDataDir,
+    logger,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs';
 import path from 'path';
 
@@ -100,8 +104,16 @@ export const RemoveSessionByFilePath = async (
 
     if (sessionIndex !== -1) {
         if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            fs.rmSync(directory, { recursive: true, force: true });
+            fs.unlink(filePath, e => {
+                if (e) {
+                    logger.error(describeError(e));
+                }
+            });
+            fs.rm(directory, { recursive: true, force: true }, e => {
+                if (e) {
+                    logger.error(describeError(e));
+                }
+            });
         }
 
         sessions.splice(sessionIndex, 1);
@@ -127,8 +139,16 @@ export const DeleteAllSessions = async (
         const directory = path.dirname(session.filePath);
 
         if (fs.existsSync(session.filePath)) {
-            fs.unlinkSync(session.filePath);
-            fs.rmSync(directory, { recursive: true, force: true });
+            fs.unlink(session.filePath, e => {
+                if (e) {
+                    logger.error(describeError(e));
+                }
+            });
+            fs.rm(directory, { recursive: true, force: true }, e => {
+                if (e) {
+                    logger.error(describeError(e));
+                }
+            });
         }
 
         onProgress(((index + 1) / totalSessions) * 100);

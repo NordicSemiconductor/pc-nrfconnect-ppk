@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import {
+    describeError,
+    logger,
+} from '@nordicsemiconductor/pc-nrfconnect-shared';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -570,8 +573,16 @@ export class FileBuffer {
         if (fs.existsSync(this.#filePath)) {
             const dir = path.parse(this.#filePath).dir;
             logger.debug(`Deleting temporary ppk session at ${dir}`);
-            fs.unlinkSync(this.#filePath);
-            fs.rmSync(dir, { recursive: true, force: true });
+            fs.unlink(this.#filePath, e => {
+                if (e) {
+                    logger.error(describeError(e));
+                }
+            });
+            fs.rm(dir, { recursive: true, force: true }, e => {
+                if (e) {
+                    logger.error(describeError(e));
+                }
+            });
             RemoveSessionByFilePath(this.#filePath, () => {});
         }
     }
