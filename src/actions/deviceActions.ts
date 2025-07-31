@@ -227,14 +227,14 @@ function checkDigitalTriggerValidity(
 ): boolean {
     if (unsignedBits === previousUnsignedBits) return false;
 
-    let hasValidChanges = false;
+    let hasRelevantChanges = false;
     const result = channelTriggerStatuses
         .map((state, index) => {
             if (state === DigitalChannelTriggerStatesEnum.Off) return null;
             const prevBit = getBit(previousUnsignedBits, index);
             const currBit = getBit(unsignedBits, index);
             const isBitChanged = prevBit !== currBit;
-            if (isBitChanged) hasValidChanges = true;
+            if (isBitChanged) hasRelevantChanges = true;
 
             if (digitalTriggerLogic === 'AND') {
                 if (state === DigitalChannelTriggerStatesEnum.High)
@@ -250,13 +250,13 @@ function checkDigitalTriggerValidity(
                 if (state === DigitalChannelTriggerStatesEnum.Low)
                     return currBit === 0 && prevBit === 1;
                 if (state === DigitalChannelTriggerStatesEnum.Any)
-                    return prevBit !== currBit;
+                    return isBitChanged;
             }
             return null;
         })
         .filter(r => r !== null);
 
-    if (!hasValidChanges || result.length === 0) return false;
+    if (!hasRelevantChanges || result.length === 0) return false;
 
     switch (digitalTriggerLogic) {
         case 'AND':
