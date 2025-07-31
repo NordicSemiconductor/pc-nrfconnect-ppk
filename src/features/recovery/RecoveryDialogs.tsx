@@ -275,10 +275,19 @@ export default () => {
                                         ) {
                                             dispatch(
                                                 RecoveryManager.renderSessionData(
-                                                    session
+                                                    session,
+                                                    () => {
+                                                        dispatch(
+                                                            setSavePending(true)
+                                                        );
+                                                    },
+                                                    error => {
+                                                        logger.error(
+                                                            error.message
+                                                        );
+                                                    }
                                                 )
                                             );
-                                            dispatch(setSavePending(true));
                                             return;
                                         }
                                         setIsRecovering(true);
@@ -301,11 +310,12 @@ export default () => {
                                                     );
                                                 },
                                                 (error: Error) => {
-                                                    pause();
-                                                    setRecoveryError(
-                                                        error.message
-                                                    );
                                                     logger.error(error.message);
+                                                    pause();
+                                                    setIsRecovering(false);
+                                                    dispatch(
+                                                        setSavePending(false)
+                                                    );
                                                 },
                                                 pause
                                             )
