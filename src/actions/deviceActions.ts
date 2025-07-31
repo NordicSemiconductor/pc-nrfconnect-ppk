@@ -225,24 +225,38 @@ function checkDigitalTriggerValidity(
     channelTriggerStatuses: digitalChannelStateTupleOf8,
     digitalTriggerLogic: DigitalChannelTriggerLogic
 ): boolean {
-    if (unsignedBits === previousUnsignedBits) {
-        return false;
-    }
+    if (unsignedBits === previousUnsignedBits) return false;
 
+    let hasValidChanges = false;
     const result = channelTriggerStatuses
         .map((state, index) => {
+            if (state === DigitalChannelTriggerStatesEnum.Off) return null;
             const prevBit = getBit(previousUnsignedBits, index);
             const currBit = getBit(unsignedBits, index);
+            const isBitChanged = prevBit !== currBit;
+            if (isBitChanged) hasValidChanges = true;
 
-            if (state === DigitalChannelTriggerStatesEnum.High)
-                return currBit === 1;
-            if (state === DigitalChannelTriggerStatesEnum.Low)
-                return currBit === 0;
-            if (state === DigitalChannelTriggerStatesEnum.Any)
-                return prevBit !== currBit;
+            if (digitalTriggerLogic === 'AND') {
+                if (state === DigitalChannelTriggerStatesEnum.High)
+                    return currBit === 1;
+                if (state === DigitalChannelTriggerStatesEnum.Low)
+                    return currBit === 0;
+                if (state === DigitalChannelTriggerStatesEnum.Any) return true;
+            }
+
+            if (digitalTriggerLogic === 'OR') {
+                if (state === DigitalChannelTriggerStatesEnum.High)
+                    return currBit === 1 && prevBit === 0;
+                if (state === DigitalChannelTriggerStatesEnum.Low)
+                    return currBit === 0 && prevBit === 1;
+                if (state === DigitalChannelTriggerStatesEnum.Any)
+                    return prevBit !== currBit;
+            }
             return null;
         })
         .filter(r => r !== null);
+
+    if (!hasValidChanges || result.length === 0) return false;
 
     switch (digitalTriggerLogic) {
         case 'AND':
