@@ -4,7 +4,7 @@
 
 -   Scenarios where session files become unavailable during recovery operations.
 
-## 4.3.0 - 2025-07-30
+## 4.3.0 - 2025-07-31
 
 ### Added
 
