@@ -11,14 +11,14 @@ import { HotkeyActionType, hotkeyEventManager } from './hotkeyEventManager';
 export const useGlobalHotkeys = () => {
     useHotKey({
         hotKey: 'alt+a',
-        title: 'Select all',
+        title: 'Sampling chart: Select all',
         isGlobal: false,
         action: () => hotkeyEventManager.publish(HotkeyActionType.SELECT_ALL),
     });
 
     useHotKey({
         hotKey: 'esc',
-        title: 'Select none',
+        title: 'Sampling chart: Select none',
         isGlobal: false,
         action: () => {
             hotkeyEventManager.publish(HotkeyActionType.SELECT_NONE);
@@ -27,7 +27,7 @@ export const useGlobalHotkeys = () => {
 
     useHotKey({
         hotKey: 'alt+z',
-        title: 'Zoom to selected area',
+        title: 'Sampling chart: Zoom to area',
         isGlobal: false,
         action: () =>
             hotkeyEventManager.publish(HotkeyActionType.ZOOM_TO_SELECTION),
