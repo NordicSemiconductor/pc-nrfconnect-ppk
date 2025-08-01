@@ -87,6 +87,7 @@ import {
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
 let releaseFileWriteListener: (() => void) | undefined;
+let previousUnsignedBits: number | undefined;
 
 export const setupOptions =
     (recordingMode: RecordingMode): AppThunk<RootState, Promise<void>> =>
@@ -143,6 +144,10 @@ export const samplingStart =
         dispatch(setRecordingMode(mode));
         dispatch(setTriggerActive(false));
         dispatch(resetTriggerOrigin());
+
+        // Reset previous values for trigger detection
+        previousUnsignedBits = undefined;
+
         // Prepare global options
         await dispatch(setupOptions(mode));
 
@@ -221,28 +226,41 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
 
 function checkDigitalTriggerValidity(
     unsignedBits: number,
-    previousUnsignedBits: number,
     channelTriggerStatuses: digitalChannelStateTupleOf8,
     digitalTriggerLogic: DigitalChannelTriggerLogic
 ): boolean {
-    if (unsignedBits === previousUnsignedBits) {
-        return false;
-    }
+    if (unsignedBits === previousUnsignedBits) return false;
 
+    let hasRelevantChanges = false;
     const result = channelTriggerStatuses
         .map((state, index) => {
+            if (state === DigitalChannelTriggerStatesEnum.Off) return null;
             const prevBit = getBit(previousUnsignedBits, index);
             const currBit = getBit(unsignedBits, index);
+            const isBitChanged = prevBit === null || prevBit !== currBit;
+            if (isBitChanged) hasRelevantChanges = true;
 
-            if (state === DigitalChannelTriggerStatesEnum.High)
-                return currBit === 1;
-            if (state === DigitalChannelTriggerStatesEnum.Low)
-                return currBit === 0;
-            if (state === DigitalChannelTriggerStatesEnum.Any)
-                return prevBit !== currBit;
+            if (digitalTriggerLogic === 'AND') {
+                if (state === DigitalChannelTriggerStatesEnum.High)
+                    return currBit === 1;
+                if (state === DigitalChannelTriggerStatesEnum.Low)
+                    return currBit === 0;
+                if (state === DigitalChannelTriggerStatesEnum.Any) return true;
+            }
+
+            if (digitalTriggerLogic === 'OR') {
+                if (state === DigitalChannelTriggerStatesEnum.High)
+                    return currBit === 1 && prevBit === 0;
+                if (state === DigitalChannelTriggerStatesEnum.Low)
+                    return currBit === 0 && prevBit === 1;
+                if (state === DigitalChannelTriggerStatesEnum.Any)
+                    return isBitChanged;
+            }
             return null;
         })
         .filter(r => r !== null);
+
+    if (!hasRelevantChanges || result.length === 0) return false;
 
     switch (digitalTriggerLogic) {
         case 'AND':
@@ -254,7 +272,10 @@ function checkDigitalTriggerValidity(
     }
 }
 
-const getBit = (number: number, position: number) => (number >> position) & 1;
+const getBit = (value: number | undefined, position: number): number | null => {
+    if (value === undefined) return null;
+    return (value >> position) & 1;
+};
 
 function checkAnalogTriggerValidity(
     cappedValue: number,
@@ -294,7 +315,6 @@ export const open =
         let prevValue = 0;
         let prevCappedValue: number | undefined;
         let prevBits = 0;
-        let prevUnsignedBits = 0;
         let nbSamples = 0;
         let nbSamplesTotal = 0;
 
@@ -356,13 +376,12 @@ export const open =
                           )
                         : checkDigitalTriggerValidity(
                               unsignedBits,
-                              prevUnsignedBits,
                               channelTriggerStatuses,
                               digitalTriggerLogic
                           );
 
                 prevCappedValue = cappedValue;
-                prevUnsignedBits = unsignedBits;
+                previousUnsignedBits = unsignedBits;
 
                 if (!DataManager().isInSync()) {
                     return;
