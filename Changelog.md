@@ -1,3 +1,10 @@
+## 4.3.1 - UNRELEASED
+
+### Fixed
+
+-   An issue where the Power Profiler's specific shortcuts were not listed in
+    the shortcuts menu in the `About` tab.
+
 ## 4.3.0 - 2025-07-31
 
 ### Added
