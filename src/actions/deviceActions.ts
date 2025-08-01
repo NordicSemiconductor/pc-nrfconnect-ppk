@@ -224,18 +224,19 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
     );
 };
 
-function checkDigitalTriggerValidity(
+export function checkDigitalTriggerValidity(
     unsignedBits: number,
+    prevUnsignedBits: number | undefined,
     channelTriggerStatuses: digitalChannelStateTupleOf8,
     digitalTriggerLogic: DigitalChannelTriggerLogic
 ): boolean {
-    if (unsignedBits === previousUnsignedBits) return false;
+    if (unsignedBits === prevUnsignedBits) return false;
 
     let hasRelevantChanges = false;
     const result = channelTriggerStatuses
         .map((state, index) => {
             if (state === DigitalChannelTriggerStatesEnum.Off) return null;
-            const prevBit = getBit(previousUnsignedBits, index);
+            const prevBit = getBit(prevUnsignedBits, index);
             const currBit = getBit(unsignedBits, index);
             const isBitChanged = prevBit === null || prevBit !== currBit;
             if (isBitChanged) hasRelevantChanges = true;
@@ -277,7 +278,7 @@ const getBit = (value: number | undefined, position: number): number | null => {
     return (value >> position) & 1;
 };
 
-function checkAnalogTriggerValidity(
+export function checkAnalogTriggerValidity(
     cappedValue: number,
     prevCappedValue: number | undefined,
     triggerLevel: number,
@@ -376,6 +377,7 @@ export const open =
                           )
                         : checkDigitalTriggerValidity(
                               unsignedBits,
+                              previousUnsignedBits,
                               channelTriggerStatuses,
                               digitalTriggerLogic
                           );
