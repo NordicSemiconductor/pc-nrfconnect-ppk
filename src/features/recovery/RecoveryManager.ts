@@ -147,7 +147,7 @@ export class RecoveryManager {
                     );
                 } else {
                     onFail?.(
-                        new Error('Unknown error while rendering session.')
+                        new Error('Unknown error while rendering the session.')
                     );
                 }
             }
