@@ -2,8 +2,8 @@
 
 ### Fixed
 
--   Issue with the PPK2 file loading where the disk space checker would
-    incorrectly use the decompression target.
+-   Issue with the loading of the PPK2 file caused by the disk space checker
+    incorrectly using the decompression target.
 
 ## 4.3.0 - 2025-07-31
 
