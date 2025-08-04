@@ -4,6 +4,8 @@
 
 -   Issue with the loading of the PPK2 file caused by the disk space checker
     incorrectly using the decompression target.
+-   Issue with scenarios where session files would become unavailable during
+    recovery operations.
 
 ## 4.3.0 - 2025-07-31
 
