@@ -1,3 +1,10 @@
+## 4.3.1 - UNRELEASED
+
+### Fixed
+
+-   Issue with scenarios where session files would become unavailable during
+    recovery operations.
+
 ## 4.3.0 - 2025-07-31
 
 ### Added
