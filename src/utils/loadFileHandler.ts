@@ -196,7 +196,7 @@ const loadPPK2File = async (
         const willFit = await canFileFit(
             minSpaceTriggerLimit,
             totalSize,
-            path.parse(filename).dir
+            sessionPath
         );
 
         if (!willFit) {
