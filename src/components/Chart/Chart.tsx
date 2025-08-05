@@ -15,7 +15,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     AppDispatch,
     AppThunk,
-    useHotKey,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import {
     Chart as ChartJS,
@@ -33,6 +32,7 @@ import {
     indexToTimestamp,
     timestampToIndex,
 } from '../../globals';
+import { HotkeyActionType, useHotkeyAction } from '../../hooks/useHotkeyAction';
 import {
     DataAccumulatorInstance,
     isInitialised,
@@ -249,44 +249,26 @@ const Chart = () => {
         [dispatch]
     );
 
-    useHotKey({
-        hotKey: 'alt+a',
-        title: 'Select all',
-        isGlobal: false,
-        action: () => {
-            if (DataManager().getTimestamp() > 0) {
-                return chartCursor(0, DataManager().getTimestamp());
-            }
-            return false;
-        },
+    useHotkeyAction(HotkeyActionType.SELECT_ALL, () => {
+        if (DataManager().getTimestamp() > 0) {
+            chartCursor(0, DataManager().getTimestamp());
+        }
     });
 
-    useHotKey({
-        hotKey: 'esc',
-        title: 'Select none',
-        isGlobal: false,
-        action: () => {
-            resetCursor();
-        },
+    useHotkeyAction(HotkeyActionType.SELECT_NONE, () => {
+        resetCursor();
     });
 
-    useHotKey({
-        hotKey: 'alt+z',
-        title: 'Zoom to selected area',
-        isGlobal: false,
-        action: () => {
-            const zoomToSelectedArea =
-                (): AppThunk<RootState> => (_dispatch, getState) => {
-                    const { cursorBegin, cursorEnd } = getCursorRange(
-                        getState()
-                    );
-                    if (cursorBegin != null && cursorEnd != null) {
-                        chartWindow(cursorBegin, cursorEnd);
-                    }
-                };
+    useHotkeyAction(HotkeyActionType.ZOOM_TO_SELECTION, () => {
+        const zoomToSelectedArea =
+            (): AppThunk<RootState> => (_dispatch, getState) => {
+                const { cursorBegin, cursorEnd } = getCursorRange(getState());
+                if (cursorBegin != null && cursorEnd != null) {
+                    chartWindow(cursorBegin, cursorEnd);
+                }
+            };
 
-            dispatch(zoomToSelectedArea());
-        },
+        dispatch(zoomToSelectedArea());
     });
 
     const { digitalChannels, digitalChannelsVisible } = useSelector(
