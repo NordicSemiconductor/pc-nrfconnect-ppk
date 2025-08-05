@@ -92,45 +92,64 @@ export class RecoveryManager {
     }
 
     static renderSessionData =
-        (session: Session): AppThunk<RootState, Promise<void>> =>
+        (
+            session: Session,
+            onComplete?: () => void,
+            onFail?: (error: Error) => void
+        ): AppThunk<RootState, Promise<void>> =>
         async (dispatch, getState) => {
-            const sessionPath = path.dirname(session.filePath);
+            try {
+                const sessionPath = path.dirname(session.filePath);
 
-            await DataManager().reset();
-            dispatch(resetChartTime());
-            dispatch(resetMinimap());
-            dispatch(setLiveMode(false));
-            dispatch(resetCursor());
+                await DataManager().reset();
+                dispatch(resetChartTime());
+                dispatch(resetMinimap());
+                dispatch(setLiveMode(false));
+                dispatch(resetCursor());
 
-            await DataManager().setSamplesPerSecond(session.samplingRate);
-            await DataManager().loadData(sessionPath, session.startTime);
+                await DataManager().setSamplesPerSecond(session.samplingRate);
+                await DataManager().loadData(sessionPath, session.startTime);
 
-            const timestamp = DataManager().getTimestamp();
+                const timestamp = DataManager().getTimestamp();
 
-            dispatch(setCurrentPane(Panes.DATA_LOGGER));
+                dispatch(setCurrentPane(Panes.DATA_LOGGER));
 
-            if (timestamp) {
-                dispatch(setLatestDataTimestamp(timestamp));
-                dispatch(
-                    updateSampleFreqLog10({
-                        sampleFreqLog10: Math.log10(
-                            DataManager().getSamplesPerSecond()
-                        ),
-                    })
-                );
-                if (
-                    DataManager().getTimestamp() <=
-                    getWindowDuration(getState())
-                ) {
+                if (timestamp) {
+                    dispatch(setLatestDataTimestamp(timestamp));
                     dispatch(
-                        chartWindowAction(0, DataManager().getTimestamp())
+                        updateSampleFreqLog10({
+                            sampleFreqLog10: Math.log10(
+                                DataManager().getSamplesPerSecond()
+                            ),
+                        })
+                    );
+                    if (
+                        DataManager().getTimestamp() <=
+                        getWindowDuration(getState())
+                    ) {
+                        dispatch(
+                            chartWindowAction(0, DataManager().getTimestamp())
+                        );
+                    } else {
+                        dispatch(scrollToEnd());
+                    }
+                    dispatch(triggerForceRerenderMainChart());
+                    dispatch(triggerForceRerenderMiniMap());
+                    dispatch(miniMapAnimationAction());
+                }
+                onComplete?.();
+            } catch (error) {
+                if (error instanceof Error) {
+                    onFail?.(
+                        new Error(
+                            `Failed to render the session: ${error.message}`
+                        )
                     );
                 } else {
-                    dispatch(scrollToEnd());
+                    onFail?.(
+                        new Error('Unknown error while rendering the session.')
+                    );
                 }
-                dispatch(triggerForceRerenderMainChart());
-                dispatch(triggerForceRerenderMiniMap());
-                dispatch(miniMapAnimationAction());
             }
         };
 
@@ -272,6 +291,12 @@ export class RecoveryManager {
 
             const sessionFilePath = session.filePath;
             const sessionPath = path.dirname(sessionFilePath);
+
+            if (!fs.existsSync(sessionFilePath)) {
+                dispatch(setSessionRecoveryPending(false));
+                onFail(new Error(`Session file not found: ${sessionFilePath}`));
+                return;
+            }
 
             const stats = await stat(sessionFilePath);
 
