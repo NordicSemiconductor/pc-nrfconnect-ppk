@@ -701,3 +701,9 @@ export const processTrigger =
             logger.debug(describeError(e));
         }
     };
+
+export const toggleDeviceRunning =
+    (): AppThunk<RootState, Promise<void>> => async (dispatch, getState) => {
+        const isRunning = getState().app.app.deviceRunning;
+        await dispatch(setDeviceRunning(!isRunning));
+    };
