@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2015 Nordic Semiconductor ASA
+ * Copyright (c) 2025 Nordic Semiconductor ASA
  *
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Group,
@@ -13,6 +13,7 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { setDeviceRunning, setPowerMode } from '../../actions/deviceActions';
+import { HotkeyActionType, useHotkeyAction } from '../../hooks/useHotkeyAction';
 import { appState, isSamplingRunning } from '../../slices/appSlice';
 import VoltageRegulator from './VoltageRegulator';
 
@@ -22,6 +23,17 @@ export default () => {
     const samplingRunning = useSelector(isSamplingRunning);
 
     const togglePowerMode = () => dispatch(setPowerMode(!isSmuMode));
+
+    const toggleWrapperRef = useRef<HTMLDivElement>(null);
+    useHotkeyAction(HotkeyActionType.TOGGLE_POWER, () => {
+        toggleWrapperRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+        });
+        setTimeout(() => {
+            dispatch(setDeviceRunning(!deviceRunning));
+        }, 100);
+    });
 
     const items = [
         {
@@ -69,13 +81,17 @@ export default () => {
             )}
             <VoltageRegulator />
             {capabilities.ppkDeviceRunning && (
-                <Toggle
-                    title="Turn power on/off for device under test"
-                    onToggle={() => dispatch(setDeviceRunning(!deviceRunning))}
-                    isToggled={deviceRunning}
-                    label="Enable power output"
-                    variant="primary"
-                />
+                <div ref={toggleWrapperRef}>
+                    <Toggle
+                        title="Turn power on/off for device under test"
+                        onToggle={() =>
+                            dispatch(setDeviceRunning(!deviceRunning))
+                        }
+                        isToggled={deviceRunning}
+                        label="Enable power output"
+                        variant="primary"
+                    />
+                </div>
             )}
         </Group>
     );
