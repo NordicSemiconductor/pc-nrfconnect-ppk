@@ -10,6 +10,7 @@ export enum HotkeyActionType {
     SELECT_ALL = 'SELECT_ALL',
     SELECT_NONE = 'SELECT_NONE',
     ZOOM_TO_SELECTION = 'ZOOM_TO_SELECTION',
+    TOGGLE_POWER = 'TOGGLE_POWER',
 }
 
 export interface HotkeyEvent {
