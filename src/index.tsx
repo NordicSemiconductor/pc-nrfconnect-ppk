@@ -17,15 +17,22 @@ import Chart from './components/Chart/Chart';
 import DeviceSelector from './components/DeviceSelector';
 import DocumentationSections from './components/DocumentationSections';
 import SidePanel from './components/SidePanel/SidePanel';
+import RecoveryDialogs from './features/recovery/RecoveryDialogs';
 import { updateTitle } from './globals';
 import reducers from './slices';
 import { getFileLoaded, isSavePending } from './slices/appSlice';
 import { getRecordingMode } from './slices/chartSlice';
+import { useGlobalHotkeys } from './utils/globalHotkeys';
 import { isDataLoggerPane, isScopePane, Panes } from './utils/panes';
 
 import './index.scss';
 
 telemetry.enableTelemetry();
+
+const GlobalHotkeysProvider = () => {
+    useGlobalHotkeys();
+    return null;
+};
 
 const AppTitleHook = () => {
     const device = useSelector(selectedDevice);
@@ -87,6 +94,8 @@ render(
             { name: Panes.SCOPE, Main: ChartWrapper },
         ]}
     >
+        <GlobalHotkeysProvider />
+        <RecoveryDialogs />
         <AppTitleHook />
     </App>
 );

@@ -64,22 +64,30 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
+    DigitalChannelTriggerLogic,
+    DigitalChannelTriggerStatesEnum,
+    getTriggerOffset,
     getTriggerRecordingLength,
     resetTriggerOrigin,
     setProgress,
     setTriggerActive,
     setTriggerOrigin,
+    TriggerEdge,
 } from '../slices/triggerSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import { convertBits16 } from '../utils/bitConversion';
 import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
 import { isDataLoggerPane } from '../utils/panes';
-import { setSpikeFilter as persistSpikeFilter } from '../utils/persistentStore';
+import {
+    digitalChannelStateTupleOf8,
+    setSpikeFilter as persistSpikeFilter,
+} from '../utils/persistentStore';
 
 let device: null | SerialDevice = null;
 let updateRequestInterval: NodeJS.Timeout | undefined;
 let releaseFileWriteListener: (() => void) | undefined;
+let previousUnsignedBits: number | undefined;
 
 export const setupOptions =
     (recordingMode: RecordingMode): AppThunk<RootState, Promise<void>> =>
@@ -90,8 +98,11 @@ export const setupOptions =
             dispatch(resetChartTime());
             dispatch(resetMinimap());
 
+            const sampleFreq = getSampleFrequency(getState());
+
             switch (recordingMode) {
                 case 'DataLogger':
+                    DataManager().setSamplesPerSecond(sampleFreq);
                     DataManager().initializeLiveSession(
                         getSessionRootFolder(getState())
                     );
@@ -133,6 +144,10 @@ export const samplingStart =
         dispatch(setRecordingMode(mode));
         dispatch(setTriggerActive(false));
         dispatch(resetTriggerOrigin());
+
+        // Reset previous values for trigger detection
+        previousUnsignedBits = undefined;
+
         // Prepare global options
         await dispatch(setupOptions(mode));
 
@@ -209,6 +224,85 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
     );
 };
 
+export function checkDigitalTriggerValidity(
+    unsignedBits: number,
+    prevUnsignedBits: number | undefined,
+    channelTriggerStatuses: digitalChannelStateTupleOf8,
+    digitalTriggerLogic: DigitalChannelTriggerLogic
+): boolean {
+    if (unsignedBits === prevUnsignedBits) return false;
+
+    let hasRelevantChanges = false;
+    const result = channelTriggerStatuses
+        .map((state, index) => {
+            if (state === DigitalChannelTriggerStatesEnum.Off) return null;
+            const prevBit = getBit(prevUnsignedBits, index);
+            const currBit = getBit(unsignedBits, index);
+            const isBitChanged = prevBit === null || prevBit !== currBit;
+            if (isBitChanged) hasRelevantChanges = true;
+
+            if (digitalTriggerLogic === 'AND') {
+                if (state === DigitalChannelTriggerStatesEnum.High)
+                    return currBit === 1;
+                if (state === DigitalChannelTriggerStatesEnum.Low)
+                    return currBit === 0;
+                if (state === DigitalChannelTriggerStatesEnum.Any) return true;
+            }
+
+            if (digitalTriggerLogic === 'OR') {
+                if (state === DigitalChannelTriggerStatesEnum.High)
+                    return currBit === 1 && prevBit === 0;
+                if (state === DigitalChannelTriggerStatesEnum.Low)
+                    return currBit === 0 && prevBit === 1;
+                if (state === DigitalChannelTriggerStatesEnum.Any)
+                    return isBitChanged;
+            }
+            return null;
+        })
+        .filter(r => r !== null);
+
+    if (!hasRelevantChanges || result.length === 0) return false;
+
+    switch (digitalTriggerLogic) {
+        case 'AND':
+            return result.every(Boolean);
+        case 'OR':
+            return result.some(Boolean);
+        default:
+            return false;
+    }
+}
+
+const getBit = (value: number | undefined, position: number): number | null => {
+    if (value === undefined) return null;
+    return (value >> position) & 1;
+};
+
+export function checkAnalogTriggerValidity(
+    cappedValue: number,
+    prevCappedValue: number | undefined,
+    triggerLevel: number,
+    triggerEdge: TriggerEdge
+): boolean {
+    const isRisingEdge = triggerEdge === 'Rising Edge';
+    const isLoweringEdge = triggerEdge === 'Falling Edge';
+
+    let validTriggerValue = false;
+
+    if (isRisingEdge) {
+        validTriggerValue =
+            prevCappedValue != null &&
+            prevCappedValue < triggerLevel &&
+            cappedValue >= triggerLevel;
+    } else if (isLoweringEdge) {
+        validTriggerValue =
+            prevCappedValue != null &&
+            prevCappedValue > triggerLevel &&
+            cappedValue <= triggerLevel;
+    }
+    return validTriggerValue;
+}
+
 export const open =
     (deviceInfo: Device): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
@@ -226,11 +320,12 @@ export const open =
         let nbSamplesTotal = 0;
 
         const onSample = ({ value, bits }: SampleValues) => {
+            const state = getState();
             const {
                 app: { samplingRunning },
                 dataLogger: { maxSampleFreq },
-            } = getState().app;
-            const sampleFreq = getSampleFrequency(getState());
+            } = state.app;
+            const sampleFreq = getSampleFrequency(state);
             if (!samplingRunning) {
                 return;
             }
@@ -241,6 +336,9 @@ export const open =
                 cappedValue = 0;
             }
 
+            const channelTriggerStatuses =
+                state.app.trigger.digitalChannelsTriggersStates;
+            const unsignedBits = bits !== undefined ? bits & 0xff : 0;
             const b16 = convertBits16(bits!);
 
             if (samplingRunning && sampleFreq < maxSampleFreq) {
@@ -264,30 +362,50 @@ export const open =
             DataManager().addData(cappedValue, b16 | prevBits);
             prevBits = 0;
 
-            if (getRecordingMode(getState()) === 'Scope') {
+            if (getRecordingMode(state) === 'Scope') {
+                const triggerCategory = state.app.trigger.category;
+                const digitalTriggerLogic =
+                    state.app.trigger.digitalChannelsTriggerLogic;
+
                 const validTriggerValue =
-                    prevCappedValue != null &&
-                    prevCappedValue < getState().app.trigger.level &&
-                    cappedValue >= getState().app.trigger.level;
+                    triggerCategory === 'Analog'
+                        ? checkAnalogTriggerValidity(
+                              cappedValue,
+                              prevCappedValue,
+                              state.app.trigger.level,
+                              state.app.trigger.edge
+                          )
+                        : checkDigitalTriggerValidity(
+                              unsignedBits,
+                              previousUnsignedBits,
+                              channelTriggerStatuses,
+                              digitalTriggerLogic
+                          );
+
                 prevCappedValue = cappedValue;
+                previousUnsignedBits = unsignedBits;
 
                 if (!DataManager().isInSync()) {
                     return;
                 }
 
-                if (!getState().app.trigger.active && validTriggerValue) {
+                if (!state.app.trigger.active && validTriggerValue) {
                     if (latestTrigger !== undefined) {
                         return;
                     }
 
-                    if (!isSavePending(getState())) {
+                    if (!isSavePending(state)) {
                         dispatch(setSavePending(true));
                     }
                     dispatch(setTriggerActive(true));
+                    const offsetLength = getTriggerOffset(getState());
+                    const totalRecordingLength =
+                        getTriggerRecordingLength(getState()) + offsetLength;
                     dispatch(
                         processTrigger(
                             cappedValue,
-                            getTriggerRecordingLength(getState()) * 1000, // ms to uS
+                            totalRecordingLength * 1000, // ms to uS
+                            offsetLength * 1000,
                             (progressMessage, prog) => {
                                 dispatch(
                                     setProgress({
@@ -306,26 +424,26 @@ export const open =
                         }
                         if (
                             samplingRunning &&
-                            getState().app.trigger.type === 'Single'
+                            state.app.trigger.type === 'Single'
                         ) {
                             dispatch(samplingStop());
                         }
                     });
                 } else if (
-                    getState().app.trigger.active &&
+                    state.app.trigger.active &&
                     !validTriggerValue &&
-                    getState().app.trigger.type === 'Continuous'
+                    state.app.trigger.type === 'Continuous'
                 ) {
                     dispatch(setTriggerActive(false));
                 }
-            } else if (!isSavePending(getState())) {
+            } else if (!isSavePending(state)) {
                 dispatch(setSavePending(true));
             }
 
             const durationInMicroSeconds =
                 convertTimeToSeconds(
-                    getState().app.dataLogger.duration,
-                    getState().app.dataLogger.durationUnit
+                    state.app.dataLogger.duration,
+                    state.app.dataLogger.durationUnit
                 ) * microSecondsPerSecond;
             if (durationInMicroSeconds <= DataManager().getTimestamp()) {
                 if (samplingRunning) {
@@ -497,10 +615,14 @@ export const processTrigger =
     (
         triggerValue: number,
         triggerLength: number,
+        offsetLength: number,
         onProgress?: (message: string, progress?: number) => void
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
-        const trigger = DataManager().addTimeReachedTrigger(triggerLength);
+        const trigger = DataManager().addTimeReachedTrigger(
+            triggerLength,
+            offsetLength
+        );
 
         const triggerTime = Date.now();
         const remainingRecordingLength = triggerLength / 2;

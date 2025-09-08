@@ -1,3 +1,32 @@
+## 4.3.1 - 2025-08-13
+
+### Fixed
+
+-   An issue where the Power Profiler's specific shortcuts were not listed in
+    the shortcuts menu in the `About` tab.
+-   Issue with the loading of the PPK2 file caused by the disk space checker
+    incorrectly using the decompression target.
+-   Issue with scenarios where session files would become unavailable during
+    recovery operations.
+
+## 4.3.0 - 2025-07-31
+
+### Added
+
+-   Offset configuration feature that lets you define a pre-trigger data length
+    to be recorded before the trigger.
+-   Support for analog trigger activation based on either the rising or falling
+    edge.
+-   Digital Triggers and configurable trigger conditions based on digital
+    channel states.
+-   Session recovery feature that lets you recover a session after a crash or an
+    unexpected shutdown.
+
+### Changed
+
+-   The expanded or collapsed state of device panel components is now persistent
+    between the app sessions.
+
 ## 4.2.2 - 2025-05-22
 
 ### Changed

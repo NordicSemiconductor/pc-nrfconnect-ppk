@@ -13,6 +13,16 @@ import { chartCursorAction, chartWindowAction } from '../../slices/chartSlice';
 import { fireEvent, render, screen } from '../../utils/testUtils';
 import ExportDialog from '../SaveExport/ExportDialog';
 
+jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
+    ReadSessions: jest.fn(() => []),
+    WriteSessions: jest.fn(),
+    SessionFlag: {
+        NotRecovered: 0,
+        Recovered: 1,
+        PPK2Loaded: 2,
+    },
+}));
+
 jest.mock('../../utils/persistentStore', () => ({
     getLastSaveDir: () => 'mocked/save/dir',
     getMaxBufferSize: () => 200,
@@ -35,8 +45,22 @@ jest.mock('../../utils/persistentStore', () => ({
     getSamplingMode: () => 'Live',
     getTriggerLevel: () => 1000,
     getRecordingLength: () => 1000,
+    getTriggerOffset: () => 0,
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
+    getTriggerEdge: () => 'Rising Edge',
+    getDigitalChannelsTriggerLogic: () => 'AND',
+    getTriggerCategory: () => 'Analog',
+    getDigitalChannelsTriggers: () => [
+        'Active',
+        'Active',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+    ],
 }));
 
 const getTimestampMock = jest.fn(() => 0);

@@ -19,6 +19,11 @@ import { v4 } from 'uuid';
 import { createInflateRaw } from 'zlib';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
+import {
+    AddSession,
+    SessionFlag,
+    UpdateSessionData,
+} from '../features/recovery/SessionsListFileHandler';
 import { DataManager, timestampToIndex } from '../globals';
 import { canFileFit } from './fileUtils';
 import saveFile, { PPK2Metadata } from './saveFileHandler';
@@ -162,11 +167,15 @@ const loadPPK2File = async (
     let lastUpdate = 0;
 
     const sessionPath = path.join(sessionRootPath, v4());
+    const sessionFilePath = path.join(sessionPath, 'session.raw');
     fs.mkdirSync(sessionPath);
     const cleanUp = () => {
         fs.rmSync(sessionPath, { recursive: true, force: true });
     };
     window.addEventListener('beforeunload', cleanUp);
+
+    AddSession(0, 0, SessionFlag.PPK2Loaded, sessionFilePath);
+
     try {
         let totalSize = 0;
 
@@ -187,7 +196,7 @@ const loadPPK2File = async (
         const willFit = await canFileFit(
             minSpaceTriggerLimit,
             totalSize,
-            path.parse(filename).dir
+            sessionPath
         );
 
         if (!willFit) {
@@ -240,6 +249,12 @@ const loadPPK2File = async (
         const metadata: PPK2Metadata = JSON.parse(
             fs.readFileSync(path.join(sessionPath, 'metadata.json')).toString()
         );
+
+        UpdateSessionData({
+            filePath: sessionFilePath,
+            startTime: metadata.metadata.startSystemTime ?? Date.now(),
+            samplingRate: metadata.metadata.samplesPerSecond,
+        });
 
         DataManager().setSamplesPerSecond(metadata.metadata.samplesPerSecond);
         DataManager().loadData(sessionPath, metadata.metadata.startSystemTime);

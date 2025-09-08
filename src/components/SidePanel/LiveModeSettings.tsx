@@ -59,6 +59,7 @@ export default () => {
                     ]}
                     onChangeComplete={() => {}}
                     disabled={samplingRunning}
+                    ticks
                 />
             </div>
             <NumberInput

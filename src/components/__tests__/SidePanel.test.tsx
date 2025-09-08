@@ -10,6 +10,11 @@ import { setLatestDataTimestamp } from '../../slices/chartSlice';
 import { fireEvent, render, screen } from '../../utils/testUtils';
 import SidePanel from '../SidePanel/SidePanel';
 
+jest.mock('../../features/recovery/SessionsListFileHandler', () => ({
+    ReadSessions: jest.fn(() => []),
+    WriteSessions: jest.fn(),
+}));
+
 jest.mock('../../utils/persistentStore', () => ({
     getLastSaveDir: () => 'mocked/save/dir',
     getMaxBufferSize: () => 200,
@@ -32,10 +37,24 @@ jest.mock('../../utils/persistentStore', () => ({
     getSamplingMode: () => 'Live',
     getTriggerLevel: () => 1000,
     getRecordingLength: () => 1000,
+    getTriggerOffset: () => 0,
     getAutoExport: () => false,
     getTriggerType: () => 'Single',
+    getTriggerEdge: () => 'Rising Edge',
     getPreferredSessionLocation: () => '/tmp',
     getDiskFullTrigger: () => 4096,
+    getTriggerCategory: () => 'Analog',
+    getDigitalChannelsTriggerLogic: () => 'AND',
+    getDigitalChannelsTriggers: () => [
+        'Active',
+        'Active',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+        'Inactive',
+    ],
 }));
 
 const getTimestampMock = jest.fn(() => 100);

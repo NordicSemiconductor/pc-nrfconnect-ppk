@@ -50,7 +50,7 @@ const options: GlobalOptions = {
     lastInSyncTime: 0,
 };
 
-class FileData {
+export class FileData {
     data: Uint8Array;
     dataView: DataView;
     length: number;
@@ -283,11 +283,12 @@ export const DataManager = () => ({
         const sessionPath = path.join(sessionRootPath, v4());
 
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * frameSize, // 6 bytes per sample for and 10sec buffers at highest sampling rate
+            10 * getSamplesPerSecond() * frameSize, // 6 bytes per sample for and 10sec buffers at chosen sampling rate (save data every 10 seconds)
             sessionPath,
             14,
             14
         );
+        options.fileBuffer.samplingRate = options.samplesPerSecond;
         options.foldingBuffer = new FoldingBuffer();
     },
     initializeTriggerSession: (timeToRecordSeconds: number) => {
@@ -339,7 +340,7 @@ export const DataManager = () => ({
 
     loadData: (sessionPath: string, startSystemTime?: number) => {
         options.fileBuffer = new FileBuffer(
-            10 * 100_000 * 6, // 6 bytes per sample for and 10sec buffers at highest sampling rate
+            10 * 100_000 * frameSize, // 6 bytes per sample for and 10sec buffers at highest sampling rate
             sessionPath,
             2,
             30,
@@ -365,7 +366,10 @@ export const DataManager = () => ({
             foldingBuffer: options.foldingBuffer,
         };
     },
-    addTimeReachedTrigger: (recordingLengthMicroSeconds: number) =>
+    addTimeReachedTrigger: (
+        recordingLengthMicroSeconds: number,
+        offsetLengthMicroSeconds: number
+    ) =>
         new Promise<{
             writeBuffer: WriteBuffer;
             timeRange: Range;
@@ -382,17 +386,13 @@ export const DataManager = () => ({
                 options.writeBuffer.getBytesWritten() / frameSize - 1;
             const timestamp = indexToTimestamp(currentIndex);
 
-            const splitRecordingLengthMicroSeconds =
-                recordingLengthMicroSeconds / 2;
+            const afterTriggerLength =
+                recordingLengthMicroSeconds - offsetLengthMicroSeconds;
+
+            // const splitRecordingLengthMicroSeconds = recordingLengthMicroSeconds / 2;
             const timeRange = {
-                start: Math.max(
-                    0,
-                    timestamp - splitRecordingLengthMicroSeconds
-                ),
-                end:
-                    timestamp +
-                    splitRecordingLengthMicroSeconds -
-                    indexToTimestamp(1), // we must exclude current sample the one that triggered all this
+                start: Math.max(0, timestamp - offsetLengthMicroSeconds),
+                end: timestamp + afterTriggerLength - indexToTimestamp(1), // we must exclude current sample the one that triggered all this
             };
 
             const bytesRange = {
@@ -428,7 +428,7 @@ export const DataManager = () => ({
  * @param {number} samplingRate number of samples per second
  * @returns {number} samplingTime which is the time in microseconds between samples
  */
-const getSamplingTime = (samplingRate: number): number =>
+export const getSamplingTime = (samplingRate: number): number =>
     microSecondsPerSecond / samplingRate;
 
 export const getSamplesPerSecond = () => options.samplesPerSecond;
