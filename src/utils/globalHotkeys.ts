@@ -32,4 +32,11 @@ export const useGlobalHotkeys = () => {
         action: () =>
             hotkeyEventManager.publish(HotkeyActionType.ZOOM_TO_SELECTION),
     });
+
+    useHotKey({
+        hotKey: 'alt+p',
+        title: 'Toggle power output',
+        isGlobal: false,
+        action: () => hotkeyEventManager.publish(HotkeyActionType.TOGGLE_POWER),
+    });
 };
