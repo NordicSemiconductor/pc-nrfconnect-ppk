@@ -18,7 +18,7 @@
                 "2.10.2"
             ]
         },
-        "nrfutilCore": "8.0.0"
+        "nrfutilCore": "8.1.1"
     },
     "engines": {
         "nrfconnect": ">=5.2.0"
