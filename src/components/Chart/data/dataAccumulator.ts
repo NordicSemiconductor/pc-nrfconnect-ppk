@@ -18,7 +18,7 @@ import bitDataAccumulator from './bitDataAccumulator';
 import {
     AmpereState,
     BitStateIndexType,
-    BitStateType,
+    ChartLineValue,
     DigitalChannelState,
     DigitalChannelStates,
     TimestampType,
@@ -417,22 +417,22 @@ const findMissingRanges = (
 let cacheValidTimeGroup: number;
 let cachedDigitalChannelsToCompute: number[];
 
-const stateToIndex = (
-    mainLineState: BitStateType | undefined,
-    uncertaintyLineState: BitStateType | undefined
+const chartLineToBitState = (
+    mainLineState: ChartLineValue | undefined,
+    uncertaintyLineState: ChartLineValue | undefined
 ): BitStateIndexType => {
     if (mainLineState === undefined && uncertaintyLineState === undefined) {
         return 0;
     }
     if (
-        mainLineState === BitStateType.one &&
-        uncertaintyLineState === BitStateType.one
+        mainLineState === ChartLineValue.one &&
+        uncertaintyLineState === ChartLineValue.one
     ) {
         return always1;
     }
     if (
-        mainLineState === BitStateType.zero &&
-        uncertaintyLineState === BitStateType.zero
+        mainLineState === ChartLineValue.zero &&
+        uncertaintyLineState === ChartLineValue.zero
     ) {
         return always0;
     }
@@ -461,7 +461,10 @@ const joinBitLines = (
             );
             for (let i = 0; i < numberOfElement; i += 1) {
                 bitDataProcessor?.processBitState(
-                    stateToIndex(line.mainLine[i].y, line.uncertaintyLine[i].y),
+                    chartLineToBitState(
+                        line.mainLine[i].y,
+                        line.uncertaintyLine[i].y
+                    ),
                     index
                 );
 

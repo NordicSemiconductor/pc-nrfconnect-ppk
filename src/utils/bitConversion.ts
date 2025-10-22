@@ -6,7 +6,7 @@
 
 import {
     BitStateIndexType,
-    BitStateType,
+    ChartLineValue,
 } from '../components/Chart/data/dataTypes';
 
 /* eslint-disable no-bitwise */
@@ -57,8 +57,8 @@ export const always1: BitStateIndexType = 2;
 export const sometimes0And1: BitStateIndexType = 3;
 
 export interface LineDataBitState {
-    mainLine: BitStateType | undefined;
-    uncertaintyLine: BitStateType | undefined;
+    mainLine: ChartLineValue | undefined;
+    uncertaintyLine: ChartLineValue | undefined;
 }
 
 export const lineDataForBitState: LineDataBitState[] = [
@@ -67,15 +67,15 @@ export const lineDataForBitState: LineDataBitState[] = [
         uncertaintyLine: undefined,
     },
     /* 1: always 0 */ {
-        mainLine: BitStateType.zero,
-        uncertaintyLine: BitStateType.zero,
+        mainLine: ChartLineValue.zero,
+        uncertaintyLine: ChartLineValue.zero,
     },
     /* 2: always 1 */ {
-        mainLine: BitStateType.one,
-        uncertaintyLine: BitStateType.one,
+        mainLine: ChartLineValue.one,
+        uncertaintyLine: ChartLineValue.one,
     },
     /* sometimes 0 and sometimes 1 */ {
-        mainLine: BitStateType.zero,
-        uncertaintyLine: BitStateType.one,
+        mainLine: ChartLineValue.zero,
+        uncertaintyLine: ChartLineValue.one,
     },
 ];

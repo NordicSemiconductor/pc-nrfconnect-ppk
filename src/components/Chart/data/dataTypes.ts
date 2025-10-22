@@ -10,7 +10,7 @@ export type BitNumberType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type TimestampType = number | undefined;
 export type AmpereStateType = number | null | undefined;
 
-export enum BitStateType {
+export enum ChartLineValue {
     zero = -0.4,
     one = 0.4,
 }
@@ -22,7 +22,7 @@ export enum BitStateType {
  */
 export interface DigitalChannelState {
     x: TimestampType;
-    y: BitStateType | undefined;
+    y: ChartLineValue | undefined;
 }
 
 export interface DigitalChannelStates {
