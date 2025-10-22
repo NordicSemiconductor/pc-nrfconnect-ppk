@@ -17,7 +17,7 @@ import { always0, always1, sometimes0And1 } from '../../../utils/bitConversion';
 import bitDataAccumulator from './bitDataAccumulator';
 import {
     AmpereState,
-    BitStateIndexType,
+    BitState,
     ChartLineValue,
     DigitalChannelState,
     DigitalChannelStates,
@@ -420,7 +420,7 @@ let cachedDigitalChannelsToCompute: number[];
 const chartLineToBitState = (
     mainLineState: ChartLineValue | undefined,
     uncertaintyLineState: ChartLineValue | undefined
-): BitStateIndexType => {
+): BitState => {
     if (mainLineState === undefined && uncertaintyLineState === undefined) {
         return 0;
     }

@@ -14,19 +14,15 @@ import {
     sometimes0And1,
 } from '../../../utils/bitConversion';
 import bitDataStorage, { BitDataStorage } from './bitDataStorage';
-import {
-    BitStateIndexType,
-    DigitalChannelStates,
-    TimestampType,
-} from './dataTypes';
+import { BitState, DigitalChannelStates, TimestampType } from './dataTypes';
 
 export interface BitDataAccumulator {
     bitDataStorage: BitDataStorage;
-    accumulator: Array<BitStateIndexType | null>;
+    accumulator: Array<BitState | null>;
     digitalChannelsToCompute: number[] | undefined;
     initialise: (digitalChannelsToCompute: number[]) => void;
     processBits: (bits: number) => void;
-    processBitState: (bitState: BitStateIndexType, channel: number) => void;
+    processBitState: (bitState: BitState, channel: number) => void;
     processAccumulatedBits: (timestamp: TimestampType) => void;
     getLineData: () => DigitalChannelStates[];
 }

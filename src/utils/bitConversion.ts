@@ -4,10 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import {
-    BitStateIndexType,
-    ChartLineValue,
-} from '../components/Chart/data/dataTypes';
+import { BitState, ChartLineValue } from '../components/Chart/data/dataTypes';
 
 /* eslint-disable no-bitwise */
 
@@ -29,8 +26,7 @@ export const convertBits16 = (b8: number): number =>
     ((b8 & 1) + 1);
 
 /**
- * Extract out of a 16 bit value the averaged bit state.
- * There are 3 valid states as described in the return value.
+ * Extract out of a 16 bit value the two bits for the averaged bit state.
  *
  * E.g. averagedBitState(0b00011011, 0) => 0b11
  *                               ^^
@@ -43,18 +39,14 @@ export const convertBits16 = (b8: number): number =>
  *
  * @param {number} b16 16-bit input of 8 bit-pairs
  * @param {number} n index of bit-pair
- * @returns {BitStateIndexType}
- * - 0 (b00): invalid (undefined)
- * - 1 (b01): was always 0
- * - 2 (b10): was always 1
- * - 3 (b11): was sometimes 0 and sometimes 1
+ * @returns {BitState} the single bit state
  */
-export const averagedBitState = (b16: number, n: number): BitStateIndexType =>
-    (3 & (b16 >> (n + n))) as BitStateIndexType;
+export const averagedBitState = (b16: number, n: number): BitState =>
+    (3 & (b16 >> (n + n))) as BitState;
 
-export const always0: BitStateIndexType = 1;
-export const always1: BitStateIndexType = 2;
-export const sometimes0And1: BitStateIndexType = 3;
+export const always0: BitState = 1;
+export const always1: BitState = 2;
+export const sometimes0And1: BitState = 3;
 
 export interface LineDataBitState {
     mainLine: ChartLineValue | undefined;
