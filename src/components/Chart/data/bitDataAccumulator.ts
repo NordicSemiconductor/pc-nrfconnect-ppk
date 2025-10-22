@@ -18,7 +18,7 @@ import { BitState, DigitalChannelStates, TimestampType } from './dataTypes';
 
 export interface BitDataAccumulator {
     bitDataStorage: BitDataStorage;
-    accumulator: Array<BitState | null>;
+    accumulatedBitStates: Array<BitState | null>;
     digitalChannelsToCompute: number[] | undefined;
     initialise: (digitalChannelsToCompute: number[]) => void;
     processBits: (bits: number) => void;
@@ -29,15 +29,15 @@ export interface BitDataAccumulator {
 
 export default (): BitDataAccumulator => ({
     bitDataStorage: bitDataStorage(),
-    accumulator: new Array(numberOfDigitalChannels),
+    accumulatedBitStates: new Array(numberOfDigitalChannels),
     digitalChannelsToCompute: undefined as number[] | undefined,
 
     initialise(digitalChannelsToCompute) {
         this.bitDataStorage.initialise(digitalChannelsToCompute);
         this.digitalChannelsToCompute = digitalChannelsToCompute;
         // .fill is slower then a normal for loop when array is large
-        for (let i = 0; i < this.accumulator.length; i += 1) {
-            this.accumulator[i] = null;
+        for (let i = 0; i < this.accumulatedBitStates.length; i += 1) {
+            this.accumulatedBitStates[i] = null;
         }
     },
 
@@ -49,26 +49,28 @@ export default (): BitDataAccumulator => ({
     },
 
     processBitState(bitState, channel) {
-        if (this.accumulator[channel] === null) {
-            this.accumulator[channel] = bitState;
+        if (this.accumulatedBitStates[channel] === null) {
+            this.accumulatedBitStates[channel] = bitState;
         } else if (
-            (this.accumulator[channel] === always1 && bitState !== always1) ||
-            (this.accumulator[channel] === always0 && bitState !== always0)
+            (this.accumulatedBitStates[channel] === always1 &&
+                bitState !== always1) ||
+            (this.accumulatedBitStates[channel] === always0 &&
+                bitState !== always0)
         ) {
-            this.accumulator[channel] = sometimes0And1;
+            this.accumulatedBitStates[channel] = sometimes0And1;
         }
     },
 
     processAccumulatedBits(timestamp) {
         this.digitalChannelsToCompute!.forEach(i => {
-            const bitState = this.accumulator[i];
+            const bitState = this.accumulatedBitStates[i];
             if (bitState != null)
                 this.bitDataStorage.storeBit(timestamp, i, bitState);
         });
 
         // .fill is slower then a normal for loop when array is large
-        for (let i = 0; i < this.accumulator.length; i += 1) {
-            this.accumulator[i] = null;
+        for (let i = 0; i < this.accumulatedBitStates.length; i += 1) {
+            this.accumulatedBitStates[i] = null;
         }
     },
 
