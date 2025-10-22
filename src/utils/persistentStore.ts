@@ -52,7 +52,7 @@ export type booleanTupleOf8 = [
     boolean,
     boolean,
     boolean,
-    boolean
+    boolean,
 ];
 
 export type digitalChannelStateTupleOf8 = [
@@ -63,7 +63,7 @@ export type digitalChannelStateTupleOf8 = [
     DigitalChannelTriggerStatesEnum,
     DigitalChannelTriggerStatesEnum,
     DigitalChannelTriggerStatesEnum,
-    DigitalChannelTriggerStatesEnum
+    DigitalChannelTriggerStatesEnum,
 ];
 
 export type TimeUnit = 's' | 'm' | 'h' | 'd' | 'inf';
@@ -177,23 +177,23 @@ export const setTriggerEdge = (value: TriggerEdge) => {
     store.set(`trigger-edge`, value);
 };
 export const getDigitalChannelsTriggerLogic = (
-    defaultValue: DigitalChannelTriggerLogic
+    defaultValue: DigitalChannelTriggerLogic,
 ) => store.get(`digital-channels-trigger-logic`, defaultValue);
 export const setDigitalChannelsTriggerLogic = (
-    value: DigitalChannelTriggerLogic
+    value: DigitalChannelTriggerLogic,
 ) => {
     store.set(`digital-channels-trigger-logic`, value);
 };
 export const getDigitalChannelsTriggers = (
-    defaultValue: digitalChannelStateTupleOf8
+    defaultValue: digitalChannelStateTupleOf8,
 ) => store.get(DIGITAL_CHANNELS_TRIGGERS, defaultValue);
 export const setDigitalChannelsTriggers = (
-    triggers: digitalChannelStateTupleOf8
+    triggers: digitalChannelStateTupleOf8,
 ) => store.set(DIGITAL_CHANNELS_TRIGGERS, triggers);
 
 export const getDurationUnit = (
     maxSampleFreq: number,
-    defaultValue: TimeUnit
+    defaultValue: TimeUnit,
 ) => store.get(`durationUnit-${maxSampleFreq}`, defaultValue);
 export const setDurationUnit = (maxSampleFreq: number, timeUnit: TimeUnit) => {
     store.set(`durationUnit-${maxSampleFreq}`, timeUnit);

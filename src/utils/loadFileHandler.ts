@@ -71,7 +71,7 @@ const getContentFromFile = async (buffer: Buffer, filename: string) => {
         await promisify(pipeline)(
             fs.createReadStream(filename),
             createInflateRaw(),
-            content
+            content,
         );
     } catch (err) {
         console.error('Error while loading file', err);
@@ -94,11 +94,11 @@ const setupBuffer = async (filename: string) => {
         logger.error(
             `The file: ${filename} requires ${unit(
                 requiredBufferSize,
-                'bytes'
+                'bytes',
             )}, but the application you are using is limited to ${unit(
                 maxBufferLengthForSystem,
-                'bytes'
-            )}`
+                'bytes',
+            )}`,
         );
         return null;
     }
@@ -161,7 +161,7 @@ const loadPPK2File = async (
     filename: string,
     sessionRootPath: string,
     minSpaceTriggerLimit: number,
-    onProgress: (message: string, percentage: number) => void
+    onProgress: (message: string, percentage: number) => void,
 ) => {
     let progress = 0;
     let lastUpdate = 0;
@@ -189,26 +189,26 @@ const loadPPK2File = async (
                             totalSize += f.uncompressedSize;
                             resolve();
                         });
-                    })
-            )
+                    }),
+            ),
         );
 
         const willFit = await canFileFit(
             minSpaceTriggerLimit,
             totalSize,
-            sessionPath
+            sessionPath,
         );
 
         if (!willFit) {
             throw new Error(
-                'Cannot decompress. File does not fit in the available disk space'
+                'Cannot decompress. File does not fit in the available disk space',
             );
         }
 
         await Promise.all(
             directory.files.map(
                 f =>
-                    new Promise((resolve, reject) => {
+                    new Promise<void>((resolve, reject) => {
                         f.stream()
                             .pipe(
                                 new Transform({
@@ -217,7 +217,7 @@ const loadPPK2File = async (
 
                                         const roundToFixedPercentage =
                                             Math.trunc(
-                                                (progress / totalSize) * 100
+                                                (progress / totalSize) * 100,
                                             );
 
                                         if (
@@ -226,28 +226,28 @@ const loadPPK2File = async (
                                         ) {
                                             onProgress(
                                                 'Decompressing file',
-                                                (progress / totalSize) * 100
+                                                (progress / totalSize) * 100,
                                             );
                                             lastUpdate = roundToFixedPercentage;
                                         }
                                         cb(null, d);
                                     },
-                                })
+                                }),
                             )
                             .pipe(
                                 fs.createWriteStream(
-                                    path.join(sessionPath, f.path)
-                                )
+                                    path.join(sessionPath, f.path),
+                                ),
                             )
                             .on('error', reject)
                             .on('finish', resolve);
-                    })
-            )
+                    }),
+            ),
         );
 
         logger.info(`Decompression session information to ${sessionPath}`);
         const metadata: PPK2Metadata = JSON.parse(
-            fs.readFileSync(path.join(sessionPath, 'metadata.json')).toString()
+            fs.readFileSync(path.join(sessionPath, 'metadata.json')).toString(),
         );
 
         UpdateSessionData({
@@ -274,21 +274,21 @@ export default async (
     onProgress: (
         message: string,
         percentage: number,
-        indeterminate?: boolean
-    ) => void
+        indeterminate?: boolean,
+    ) => void,
 ) => {
     if (filename.endsWith('.ppk2')) {
         return loadPPK2File(
             filename,
             sessionRootFolder,
             minSpaceTriggerLimit,
-            onProgress
+            onProgress,
         );
     }
 
     logger.warn(`This PPK file format is deprecated.`);
     logger.warn(
-        `Support for this format may be removed in any of the future versions.`
+        `Support for this format may be removed in any of the future versions.`,
     );
 
     try {
@@ -310,14 +310,14 @@ export default async (
 
         DataManager().initializeLiveSession(sessionRootFolder);
         DataManager().setSamplesPerSecond(
-            result.metadata.options.samplesPerSecond
+            result.metadata.options.samplesPerSecond,
         );
 
         await loadPPKData(
             result.metadata.options.timestamp,
             result.dataBuffer,
             result.bits,
-            onProgress
+            onProgress,
         );
 
         DataManager().getSessionBuffers().fileBuffer.clearStartSystemTime();
@@ -325,7 +325,7 @@ export default async (
         const pos = filename.lastIndexOf('.');
         const newFilename = `${filename.substring(
             0,
-            pos < 0 ? filename.length : pos
+            pos < 0 ? filename.length : pos,
         )}.ppk2`;
 
         const session = DataManager().getSessionBuffers();
@@ -343,17 +343,17 @@ export default async (
                 },
                 session.fileBuffer,
                 session.foldingBuffer,
-                message => onProgress(message, -1, true)
+                message => onProgress(message, -1, true),
             );
 
             logger.info(
-                `File was converted from ".ppk" to the latest format ".ppk2" and saved to ${newFilename}`
+                `File was converted from ".ppk" to the latest format ".ppk2" and saved to ${newFilename}`,
             );
         }
 
         await stopPreventSleep();
         return DataManager().getTimestamp();
-    } catch (err) {
+    } catch {
         await stopPreventSleep();
         return false;
     }
@@ -363,7 +363,7 @@ const loadPPKData = (
     duration: number,
     current: Float32Array,
     bits: Uint16Array,
-    onProgress: (message: string, percentage: number) => void
+    onProgress: (message: string, percentage: number) => void,
 ) =>
     new Promise<void>(resolve => {
         onProgress('Converting ".ppk" format to  ".ppk2"', 0);
@@ -380,14 +380,14 @@ const loadPPKData = (
                         begin: e,
                         end: Math.min(
                             e + maxNumberOfSamplesToProcess,
-                            maxIndex
+                            maxIndex,
                         ),
                     });
                 });
             }).then(range => {
                 onProgress(
                     'Converting ".ppk" format to  ".ppk2"',
-                    (range.end / maxIndex) * 100
+                    (range.end / maxIndex) * 100,
                 );
                 if (range.end === maxIndex) {
                     resolve();

@@ -30,7 +30,7 @@ interface StatBoxProperties {
         windowBegin: number,
         windowEnd: number,
         yMin?: number | null,
-        yMax?: number | null
+        yMax?: number | null,
     ) => void;
 }
 
@@ -48,7 +48,7 @@ export default ({
 
     const chartCursorActive = useMemo(
         () => cursorBegin !== null || cursorEnd !== null,
-        [cursorBegin, cursorEnd]
+        [cursorBegin, cursorEnd],
     );
 
     return (
@@ -80,7 +80,7 @@ export default ({
                                 chartCursorAction({
                                     cursorBegin: 0,
                                     cursorEnd: DataManager().getTimestamp(),
-                                })
+                                }),
                             )
                         }
                     >

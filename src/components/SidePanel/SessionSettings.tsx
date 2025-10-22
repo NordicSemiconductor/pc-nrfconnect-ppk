@@ -59,7 +59,7 @@ export default () => {
                                 filePath => {
                                     dispatch(setSessionRootFolder(filePath));
                                     setPreferredSessionLocation(filePath);
-                                }
+                                },
                             );
                         }}
                     >

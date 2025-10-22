@@ -49,7 +49,7 @@ const calculateSliderCenterXPosition = (
     chart: MinimapChart,
     offsetX: number,
     clickedOnSlider: boolean,
-    deltaFromCenter: number
+    deltaFromCenter: number,
 ) => {
     if (chart.windowNavigateCallback == null) return;
     if (chart.data.datasets[0].data.length === 0) return;
@@ -108,7 +108,7 @@ const pointerDown = (event: PointerEvent) => {
                 chartRef,
                 event.offsetX,
                 false,
-                0
+                0,
             );
             if (!metaData.clickedOnSlider && center != null) {
                 chartRef.windowNavigateCallback?.(center);
@@ -137,7 +137,7 @@ const pointerMove = (event: PointerEvent) => {
             chartRef,
             event.offsetX,
             clickOnSlider,
-            lastClickDeltaFromCenter
+            lastClickDeltaFromCenter,
         );
         if (center != null) chartRef.windowNavigateCallback?.(center);
     } else {

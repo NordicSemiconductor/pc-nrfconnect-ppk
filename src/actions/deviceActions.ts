@@ -104,7 +104,7 @@ export const setupOptions =
                 case 'DataLogger':
                     DataManager().setSamplesPerSecond(sampleFreq);
                     DataManager().initializeLiveSession(
-                        getSessionRootFolder(getState())
+                        getSessionRootFolder(getState()),
                     );
                     break;
                 case 'Scope':
@@ -116,11 +116,11 @@ export const setupOptions =
             releaseFileWriteListener = DataManager().onFileWrite?.(() => {
                 isDiskFull(
                     getDiskFullTrigger(getState()),
-                    getSessionRootFolder(getState())
+                    getSessionRootFolder(getState()),
                 ).then(isFull => {
                     if (isFull) {
                         logger.warn(
-                            'Session stopped. Disk full trigger value reached.'
+                            'Session stopped. Disk full trigger value reached.',
                         );
                         dispatch(samplingStop());
                     }
@@ -210,7 +210,7 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
     // if any value is ug is outside of [0.9..1.1] range:
     if (ug.reduce((p, c) => Math.abs(c - 1) > 0.1 || p, false)) {
         logger.info(
-            'Found out-of-range user gain, setting all gains back to 1.0'
+            'Found out-of-range user gain, setting all gains back to 1.0',
         );
         ug.splice(0, 5, 1, 1, 1, 1, 1);
         await device!.ppkSetUserGains(0, ug[0]);
@@ -220,7 +220,7 @@ const initGains = (): AppThunk<RootState, Promise<void>> => async dispatch => {
         await device!.ppkSetUserGains(4, ug[4]);
     }
     [0, 1, 2, 3, 4].forEach(n =>
-        dispatch(updateGainsAction({ value: ug[n] * 100, range: n }))
+        dispatch(updateGainsAction({ value: ug[n] * 100, range: n })),
     );
 };
 
@@ -228,7 +228,7 @@ export function checkDigitalTriggerValidity(
     unsignedBits: number,
     prevUnsignedBits: number | undefined,
     channelTriggerStatuses: digitalChannelStateTupleOf8,
-    digitalTriggerLogic: DigitalChannelTriggerLogic
+    digitalTriggerLogic: DigitalChannelTriggerLogic,
 ): boolean {
     if (unsignedBits === prevUnsignedBits) return false;
 
@@ -282,7 +282,7 @@ export function checkAnalogTriggerValidity(
     cappedValue: number,
     prevCappedValue: number | undefined,
     triggerLevel: number,
-    triggerEdge: TriggerEdge
+    triggerEdge: TriggerEdge,
 ): boolean {
     const isRisingEdge = triggerEdge === 'Rising Edge';
     const isLoweringEdge = triggerEdge === 'Falling Edge';
@@ -373,13 +373,13 @@ export const open =
                               cappedValue,
                               prevCappedValue,
                               state.app.trigger.level,
-                              state.app.trigger.edge
+                              state.app.trigger.edge,
                           )
                         : checkDigitalTriggerValidity(
                               unsignedBits,
                               previousUnsignedBits,
                               channelTriggerStatuses,
-                              digitalTriggerLogic
+                              digitalTriggerLogic,
                           );
 
                 prevCappedValue = cappedValue;
@@ -414,10 +414,10 @@ export const open =
                                             prog && prog >= 0
                                                 ? prog
                                                 : undefined,
-                                    })
+                                    }),
                                 );
-                            }
-                        )
+                            },
+                        ),
                     ).then(() => {
                         if (!DataManager().hasPendingTriggers()) {
                             dispatch(clearProgress());
@@ -443,7 +443,7 @@ export const open =
             const durationInMicroSeconds =
                 convertTimeToSeconds(
                     state.app.dataLogger.duration,
-                    state.app.dataLogger.durationUnit
+                    state.app.dataLogger.durationUnit,
                 ) * microSecondsPerSecond;
             if (durationInMicroSeconds <= DataManager().getTimestamp()) {
                 if (samplingRunning) {
@@ -459,13 +459,13 @@ export const open =
                 setSamplingAttrsAction({
                     maxContiniousSamplingTimeUs:
                         device.capabilities.maxContinuousSamplingTimeUs!,
-                })
+                }),
             );
 
             dispatch(
                 setDeviceRunningAction({
                     isRunning: device.isRunningInitially,
-                })
+                }),
             );
             const metadata = device.parseMeta(await device.start());
 
@@ -475,7 +475,7 @@ export const open =
                     vdd: metadata.vdd,
                     currentVDD: metadata.vdd,
                     ...device.vddRange,
-                })
+                }),
             );
             await dispatch(initGains());
             dispatch(updateSpikeFilter());
@@ -498,7 +498,7 @@ export const open =
             deviceOpenedAction({
                 portName: deviceInfo.serialNumber,
                 capabilities: device!.capabilities,
-            })
+            }),
         );
 
         logger.info('PPK opened');
@@ -514,41 +514,44 @@ export const open =
         clearInterval(updateRequestInterval);
         let renderIndex: number;
         let lastRenderRequestTime = 0;
-        updateRequestInterval = setInterval(() => {
-            const now = Date.now();
-            if (
-                renderIndex !== DataManager().getTotalSavedRecords() &&
-                getState().app.app.samplingRunning &&
-                isDataLoggerPane(getState()) &&
-                (DataManager().isInSync() ||
-                    now - lastRenderRequestTime >= 1000) // force 1 FPS
-            ) {
-                const timestamp = now;
-                lastRenderRequestTime = now;
-                if (getState().app.chart.liveMode) {
-                    requestAnimationFrame(() => {
-                        /*
+        updateRequestInterval = setInterval(
+            () => {
+                const now = Date.now();
+                if (
+                    renderIndex !== DataManager().getTotalSavedRecords() &&
+                    getState().app.app.samplingRunning &&
+                    isDataLoggerPane(getState()) &&
+                    (DataManager().isInSync() ||
+                        now - lastRenderRequestTime >= 1000) // force 1 FPS
+                ) {
+                    const timestamp = now;
+                    lastRenderRequestTime = now;
+                    if (getState().app.chart.liveMode) {
+                        requestAnimationFrame(() => {
+                            /*
                             requestAnimationFrame pauses when app is in the background.
                             If timestamp is more than 10ms ago, do not dispatch animationAction.
                         */
-                        if (Date.now() - timestamp < 100) {
-                            dispatch(animationAction());
-                        }
-                    });
-                }
+                            if (Date.now() - timestamp < 100) {
+                                dispatch(animationAction());
+                            }
+                        });
+                    }
 
-                requestAnimationFrame(() => {
-                    /*
+                    requestAnimationFrame(() => {
+                        /*
                         requestAnimationFrame pauses when app is in the background.
                         If timestamp is more than 10ms ago, do not dispatch animationAction.
                     */
-                    if (Date.now() - timestamp < 100) {
-                        dispatch(miniMapAnimationAction());
-                    }
-                });
-                renderIndex = DataManager().getTotalSavedRecords();
-            }
-        }, Math.max(30, DataManager().getSamplingTime() / 1000));
+                        if (Date.now() - timestamp < 100) {
+                            dispatch(miniMapAnimationAction());
+                        }
+                    });
+                    renderIndex = DataManager().getTotalSavedRecords();
+                }
+            },
+            Math.max(30, DataManager().getSamplingTime() / 1000),
+        );
     };
 
 export const updateRegulator =
@@ -616,12 +619,12 @@ export const processTrigger =
         triggerValue: number,
         triggerLength: number,
         offsetLength: number,
-        onProgress?: (message: string, progress?: number) => void
+        onProgress?: (message: string, progress?: number) => void,
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
         const trigger = DataManager().addTimeReachedTrigger(
             triggerLength,
-            offsetLength
+            offsetLength,
         );
 
         const triggerTime = Date.now();
@@ -634,7 +637,7 @@ export const processTrigger =
                     notation: 'fixed',
                     precision: 2,
                 })}. Collecting data after trigger.`,
-                Math.min(100, (delta / remainingRecordingLength) * 100)
+                Math.min(100, (delta / remainingRecordingLength) * 100),
             );
         };
 
@@ -656,18 +659,18 @@ export const processTrigger =
             info.writeBuffer.readFromCachedData(
                 buffer,
                 info.bytesRange.start,
-                info.bytesRange.end - info.bytesRange.start + 1
+                info.bytesRange.end - info.bytesRange.start + 1,
             );
 
             const recordingDuration = indexToTimestamp(
-                numberOfBytes / frameSize
+                numberOfBytes / frameSize,
             );
 
             const createSessionData = DataManager().createSessionData;
             const session = await createSessionData(
                 buffer,
                 getSessionRootFolder(getState()),
-                info.absoluteTime
+                info.absoluteTime,
             );
 
             dispatch(setTriggerOrigin(indexToTimestamp(info.triggerOrigin)));
@@ -677,7 +680,7 @@ export const processTrigger =
             // Auto load triggered data
             await DataManager().loadSession(
                 session.fileBuffer,
-                session.foldingBuffer
+                session.foldingBuffer,
             );
             dispatch(setLatestDataTimestamp(recordingDuration));
             dispatch(chartWindowAction(recordingDuration, recordingDuration));

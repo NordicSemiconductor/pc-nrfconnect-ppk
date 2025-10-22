@@ -81,7 +81,7 @@ export const readFromCachedData = (
     pages: Page[],
     buffer: Buffer,
     byteOffset: number,
-    numberOfBytesToRead: number
+    numberOfBytesToRead: number,
 ) => {
     if (!isRequiredDataAllCached(pages, byteOffset, numberOfBytesToRead)) {
         throw new Error('Data was not cached. Cannot use this method');
@@ -95,8 +95,8 @@ export const readFromCachedData = (
             {
                 start: byteOffset,
                 end: byteOffset + numberOfBytesToRead - 1,
-            }
-        )
+            },
+        ),
     );
 
     if (pageHit.length > 0) {
@@ -104,12 +104,12 @@ export const readFromCachedData = (
             const startOffset = Math.max(page.startAddress, byteOffset);
             const endOffset = Math.min(
                 page.startAddress + page.bytesWritten - 1,
-                byteOffset + numberOfBytesToRead - 1
+                byteOffset + numberOfBytesToRead - 1,
             );
 
             const subResult = page.page.subarray(
                 startOffset - page.startAddress,
-                endOffset - page.startAddress + 1
+                endOffset - page.startAddress + 1,
             );
 
             buffer.set(subResult, startOffset - byteOffset);
@@ -124,7 +124,7 @@ export const readFromCachedData = (
 export const isRequiredDataAllCached = (
     pages: Page[],
     byteOffset: number,
-    numberOfBytesToRead: number
+    numberOfBytesToRead: number,
 ) => {
     const pageHit = pages.filter(p =>
         overlaps(
@@ -135,8 +135,8 @@ export const isRequiredDataAllCached = (
             {
                 start: byteOffset,
                 end: byteOffset + numberOfBytesToRead - 1,
-            }
-        )
+            },
+        ),
     );
 
     const completedRanges: { start: number; end: number }[] = [];
@@ -146,7 +146,7 @@ export const isRequiredDataAllCached = (
             const startOffset = Math.max(page.startAddress, byteOffset);
             const endOffset = Math.min(
                 page.startAddress + page.bytesWritten - 1,
-                byteOffset + numberOfBytesToRead - 1
+                byteOffset + numberOfBytesToRead - 1,
             );
             completedRanges.push({
                 start: startOffset,
@@ -194,7 +194,7 @@ export class WriteBuffer {
                 Buffer.alloc(this.#bufferPageSize),
         },
         fileSize: number | undefined = undefined,
-        firstWriteTime: number | undefined = undefined
+        firstWriteTime: number | undefined = undefined,
     ) {
         if (numberOfPages < 2) {
             throw new Error('numberOfPages cannot be less then 2');
@@ -222,7 +222,7 @@ export class WriteBuffer {
         return {
             start: Math.max(
                 0,
-                1 + normalizedEnd - this.#numberOfPages * this.#bufferPageSize
+                1 + normalizedEnd - this.#numberOfPages * this.#bufferPageSize,
             ),
             end: normalizedEnd,
         };
@@ -230,7 +230,7 @@ export class WriteBuffer {
 
     #updateCacheWrite(data: Uint8Array, onComplete?: () => void) {
         const idealBufferRange: Range = this.#calculateWriteIdealBufferRange(
-            data.length
+            data.length,
         );
 
         this.#pages = this.#pages.filter(p => {
@@ -284,7 +284,7 @@ export class WriteBuffer {
         return {
             start: Math.min(...this.#pages.map(p => p.startAddress)),
             end: Math.max(
-                ...this.#pages.map(p => p.startAddress + p.bytesWritten - 1)
+                ...this.#pages.map(p => p.startAddress + p.bytesWritten - 1),
             ),
         };
     }
@@ -320,13 +320,13 @@ export class WriteBuffer {
     readFromCachedData(
         buffer: Buffer,
         byteOffset: number,
-        numberOfBytesToRead: number
+        numberOfBytesToRead: number,
     ) {
         return readFromCachedData(
             this.#pages,
             buffer,
             byteOffset,
-            numberOfBytesToRead
+            numberOfBytesToRead,
         );
     }
 }

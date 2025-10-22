@@ -166,7 +166,7 @@ export default () => {
                     id: 'sessionRecoveryInProgress',
                     message:
                         'There is a session recovery in progress. If you close the application, the progress will be lost and the session will remain in the recovery list. Are you sure you want to close?',
-                })
+                }),
             );
         } else {
             dispatch(clearConfirmBeforeClose('sessionRecoveryInProgress'));
@@ -181,7 +181,7 @@ export default () => {
                     setOrphanedSessions(orphanSessions);
                     setIsSessionsListDialogVisible(true);
                 }
-            }
+            },
         );
     }, [recoveryManager]);
 
@@ -237,10 +237,10 @@ export default () => {
                                             () => {},
                                             () => {
                                                 setIsSessionsListDialogVisible(
-                                                    false
+                                                    false,
                                                 );
                                                 setOrphanedSessions([]);
-                                            }
+                                            },
                                         )
                                     }
                                 >
@@ -278,15 +278,17 @@ export default () => {
                                                     session,
                                                     () => {
                                                         dispatch(
-                                                            setSavePending(true)
+                                                            setSavePending(
+                                                                true,
+                                                            ),
                                                         );
                                                     },
                                                     error => {
                                                         logger.error(
-                                                            error.message
+                                                            error.message,
                                                         );
-                                                    }
-                                                )
+                                                    },
+                                                ),
                                             );
                                             return;
                                         }
@@ -300,13 +302,13 @@ export default () => {
                                                 session,
                                                 (progress: number) =>
                                                     setRecoveryProgress(
-                                                        progress
+                                                        progress,
                                                     ),
                                                 () => {
                                                     pause();
                                                     setIsRecovering(false);
                                                     dispatch(
-                                                        setSavePending(true)
+                                                        setSavePending(true),
                                                     );
                                                 },
                                                 (error: Error) => {
@@ -314,11 +316,11 @@ export default () => {
                                                     pause();
                                                     setIsRecovering(false);
                                                     dispatch(
-                                                        setSavePending(false)
+                                                        setSavePending(false),
                                                     );
                                                 },
-                                                pause
-                                            )
+                                                pause,
+                                            ),
                                         );
                                     }}
                                     onRemoveClick={session => {
@@ -329,10 +331,10 @@ export default () => {
                                                     orphanedSessions.filter(
                                                         s =>
                                                             s.filePath !==
-                                                            session.filePath
-                                                    )
+                                                            session.filePath,
+                                                    ),
                                                 );
-                                            }
+                                            },
                                         );
                                     }}
                                 />

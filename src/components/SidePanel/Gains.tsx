@@ -45,7 +45,7 @@ export default () => {
                             updateGainsAction({
                                 value: value * 100,
                                 range: index,
-                            })
+                            }),
                         );
                     }}
                     onChangeComplete={() => dispatch(updateGains(index))}

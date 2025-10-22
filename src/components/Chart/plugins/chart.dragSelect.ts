@@ -135,11 +135,11 @@ const plugin: Plugin<'line'> = {
             const offsetX = dragStart.target.getBoundingClientRect().left;
             const startX = Math.max(
                 Math.min(dragStart.clientX, dragEnd.clientX) - offsetX,
-                left
+                left,
             );
             const endX = Math.min(
                 Math.max(dragStart.clientX, dragEnd.clientX) - offsetX,
-                right
+                right,
             );
             ctx.fillStyle = CHART_DRAG_COLOR;
             ctx.fillRect(startX, top, endX - startX, areaBottom - top);

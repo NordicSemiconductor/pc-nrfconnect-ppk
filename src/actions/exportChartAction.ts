@@ -38,14 +38,14 @@ const indexer = (indexBegin: number, indexEnd: number, length: number) => {
 
 const selectivePrint = (
     strArr: [number | string, string, string, string],
-    selectArr: readonly [boolean, boolean, boolean, boolean]
+    selectArr: readonly [boolean, boolean, boolean, boolean],
 ) => `${strArr.filter((_, i) => selectArr[i]).join(',')}\n`;
 
 export const formatDataForExport = (
     start: number,
     bufferData: Float32Array,
     bitsData: Uint16Array | null,
-    selection: readonly [boolean, boolean, boolean, boolean]
+    selection: readonly [boolean, boolean, boolean, boolean],
 ) => {
     let content = '';
     const dc = Array(8).fill(0);
@@ -55,7 +55,7 @@ export const formatDataForExport = (
             if (bitsData) {
                 const bitstring = dc.map(
                     (_, i) =>
-                        ['-', '0', '1', 'X'][getSingleBitState(bitsData[n], i)]
+                        ['-', '0', '1', 'X'][getSingleBitState(bitsData[n], i)],
                 );
                 content += selectivePrint(
                     [
@@ -64,7 +64,7 @@ export const formatDataForExport = (
                         bitstring.join(''),
                         bitstring.join(','),
                     ],
-                    selection
+                    selection,
                 );
             } else {
                 content += selectivePrint(
@@ -74,7 +74,7 @@ export const formatDataForExport = (
                         '',
                         '',
                     ],
-                    selection
+                    selection,
                 );
             }
         }
@@ -89,7 +89,7 @@ export default (
         contentSelection: readonly [boolean, boolean, boolean, boolean],
         setProgress: (progress: number) => void,
         setExporting: (value: boolean) => void,
-        cancel: React.RefObject<boolean>
+        cancel: React.RefObject<boolean>,
     ): AppThunk<RootState, Promise<void>> =>
     dispatch => {
         if (!filename) {
@@ -105,8 +105,8 @@ export default (
                     'D0-D7',
                     'D0,D1,D2,D3,D4,D5,D6,D7',
                 ],
-                contentSelection
-            )
+                contentSelection,
+            ),
         );
 
         const indexBegin = timestampToIndex(timestampBegin);
@@ -128,14 +128,14 @@ export default (
                                         buffer,
                                         indexToTimestamp(start),
                                         indexToTimestamp(start + len),
-                                        'end'
+                                        'end',
                                     )
                                     .then(data => {
                                         const content = formatDataForExport(
                                             start,
                                             data.getAllCurrentData(),
                                             data.getAllBitData(),
-                                            contentSelection
+                                            contentSelection,
                                         );
                                         fs.write(fd, content, () => {
                                             setProgress(
@@ -143,13 +143,13 @@ export default (
                                                     ((start - timestampBegin) /
                                                         (timestampEnd -
                                                             timestampBegin)) *
-                                                        100
-                                                )
+                                                        100,
+                                                ),
                                             );
                                             resolve(undefined);
                                         });
                                     });
-                            })
+                            }),
                 )
                 // @ts-expect-error dunno how to fix this at the moment.
                 .reduce((prev, task) => prev.then(task), Promise.resolve())

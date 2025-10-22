@@ -67,7 +67,7 @@ export class FileData {
             const byteOffset = index * frameSize;
             result.set(
                 this.data.subarray(byteOffset, byteOffset + currentFrameSize),
-                index * currentFrameSize
+                index * currentFrameSize,
             );
         }
 
@@ -115,7 +115,7 @@ const getTimestamp = () =>
     !options.fileBuffer
         ? 0
         : indexToTimestamp(
-              options.fileBuffer.getSessionInBytes() / frameSize - 1
+              options.fileBuffer.getSessionInBytes() / frameSize - 1,
           );
 
 export const normalizeTimeFloor = (time: number) =>
@@ -136,7 +136,7 @@ export const DataManager = () => ({
         fromTime = 0,
         toTime = getTimestamp(),
         bias: 'start' | 'end' | undefined = undefined,
-        onLoading: (loading: boolean) => void = () => {}
+        onLoading: (loading: boolean) => void = () => {},
     ) => {
         // NOTE: only one getData per buffer should bhe executed at any given time
 
@@ -162,14 +162,14 @@ export const DataManager = () => ({
             byteOffset,
             numberOfBytesToRead,
             bias,
-            onLoading
+            onLoading,
         );
 
         if (readBytes !== numberOfBytesToRead) {
             console.log(
                 `missing ${
                     (numberOfBytesToRead - readBytes) / frameSize
-                } records`
+                } records`,
             );
         }
         return new FileData(buffer, readBytes);
@@ -237,10 +237,10 @@ export const DataManager = () => ({
         const writeBuffer = options.writeBuffer;
         if (writeBuffer) {
             const timestamp = indexToTimestamp(
-                writeBuffer.getBytesWritten() / frameSize - 1
+                writeBuffer.getBytesWritten() / frameSize - 1,
             );
             const readyTriggers = options.timeReachedTriggers.filter(
-                trigger => trigger.timeRange.end <= timestamp
+                trigger => trigger.timeRange.end <= timestamp,
             );
             readyTriggers.forEach(trigger => {
                 const bufferedRangeBytes = writeBuffer.getBufferRange();
@@ -249,19 +249,19 @@ export const DataManager = () => ({
                     trigger.onSuccess(
                         writeBuffer,
                         (writeBuffer.getFirstWriteTime() ?? 0) +
-                            trigger.timeRange.start / 1000 // micro to milli
+                            trigger.timeRange.start / 1000, // micro to milli
                     );
                 } else {
                     trigger.onFail(
                         new Error(
-                            'Buffer is too small, missing data from range'
-                        )
+                            'Buffer is too small, missing data from range',
+                        ),
                     );
                 }
             });
 
             options.timeReachedTriggers = options.timeReachedTriggers.filter(
-                trigger => trigger.timeRange.end > timestamp
+                trigger => trigger.timeRange.end > timestamp,
             );
         }
     },
@@ -286,21 +286,21 @@ export const DataManager = () => ({
             10 * getSamplesPerSecond() * frameSize, // 6 bytes per sample for and 10sec buffers at chosen sampling rate (save data every 10 seconds)
             sessionPath,
             14,
-            14
+            14,
         );
         options.fileBuffer.samplingRate = options.samplesPerSecond;
         options.foldingBuffer = new FoldingBuffer();
     },
     initializeTriggerSession: (timeToRecordSeconds: number) => {
         options.writeBuffer = new WriteBuffer(
-            timeToRecordSeconds * getSamplesPerSecond() * frameSize
+            timeToRecordSeconds * getSamplesPerSecond() * frameSize,
         );
     },
     createSessionData: async (
         buffer: Uint8Array,
         sessionRootPath: string,
         startSystemTime: number,
-        onProgress?: (message: string, progress?: number) => void
+        onProgress?: (message: string, progress?: number) => void,
     ) => {
         const sessionPath = path.join(sessionRootPath, v4());
 
@@ -309,7 +309,7 @@ export const DataManager = () => ({
             sessionPath,
             2,
             30,
-            startSystemTime
+            startSystemTime,
         );
         const foldingBuffer = new FoldingBuffer();
 
@@ -329,7 +329,7 @@ export const DataManager = () => ({
 
             foldingBuffer.addData(
                 fileData.getCurrentData(i),
-                i * getSamplingTime(options.samplesPerSecond)
+                i * getSamplingTime(options.samplesPerSecond),
             );
         }
 
@@ -344,7 +344,7 @@ export const DataManager = () => ({
             sessionPath,
             2,
             30,
-            startSystemTime
+            startSystemTime,
         );
         options.foldingBuffer = new FoldingBuffer();
         options.foldingBuffer.loadFromFile(sessionPath);
@@ -368,7 +368,7 @@ export const DataManager = () => ({
     },
     addTimeReachedTrigger: (
         recordingLengthMicroSeconds: number,
-        offsetLengthMicroSeconds: number
+        offsetLengthMicroSeconds: number,
     ) =>
         new Promise<{
             writeBuffer: WriteBuffer;
@@ -435,7 +435,7 @@ export const getSamplesPerSecond = () => options.samplesPerSecond;
 
 export const timestampToIndex = (
     timestamp: number,
-    samplesPerSecond: number = options.samplesPerSecond
+    samplesPerSecond: number = options.samplesPerSecond,
 ): number =>
     timestamp < 0
         ? -1
@@ -445,12 +445,12 @@ export const timestampToCeilIndex = (timestamp: number): number =>
     timestamp < 0
         ? -1
         : Math.ceil(
-              (timestamp * options.samplesPerSecond) / microSecondsPerSecond
+              (timestamp * options.samplesPerSecond) / microSecondsPerSecond,
           );
 
 export const indexToTimestamp = (
     index: number,
-    samplesPerSecond: number = options.samplesPerSecond
+    samplesPerSecond: number = options.samplesPerSecond,
 ): number =>
     index >= 0 ? (microSecondsPerSecond * index) / samplesPerSecond : 0;
 

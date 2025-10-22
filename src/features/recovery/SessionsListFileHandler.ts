@@ -62,7 +62,7 @@ export const WriteSessions = async (sessions: Session[]) => {
             session =>
                 `${session.pid}\t${session.startTime}\t${
                     session.samplingRate
-                }\t${Number(session.flag)}\t${session.filePath}`
+                }\t${Number(session.flag)}\t${session.filePath}`,
         )
         .join('\n');
 
@@ -73,7 +73,7 @@ export const AddSession = async (
     startTime: number,
     samplingRate: number,
     flag: SessionFlag,
-    filePath: string
+    filePath: string,
 ) => {
     const session: Session = {
         pid: process.pid.toString(),
@@ -90,12 +90,12 @@ export const AddSession = async (
 
 export const RemoveSessionByFilePath = async (
     filePath: string,
-    onComplete: () => void
+    onComplete: () => void,
 ) => {
     const directory = path.dirname(filePath);
     const sessions = await ReadSessions();
     const sessionIndex = sessions.findIndex(
-        session => session.filePath === filePath
+        session => session.filePath === filePath,
     );
 
     if (sessionIndex !== -1) {
@@ -112,7 +112,7 @@ export const RemoveSessionByFilePath = async (
 
 export const DeleteAllSessions = async (
     onProgress: (progress: number) => void,
-    onComplete: () => void
+    onComplete: () => void,
 ) => {
     const sessions = await ReadSessions();
     const totalSessions = sessions.length;
@@ -141,11 +141,11 @@ export const DeleteAllSessions = async (
 
 export const ChangeSessionStatus = async (
     filePath: string,
-    flag: SessionFlag
+    flag: SessionFlag,
 ) => {
     const sessions = await ReadSessions();
     const sessionIndex = sessions.findIndex(
-        session => session.filePath === filePath
+        session => session.filePath === filePath,
     );
 
     if (sessionIndex !== -1) {
@@ -157,7 +157,7 @@ export const ChangeSessionStatus = async (
 export const UpdateSessionData = async (session: Partial<Session>) => {
     const sessions = await ReadSessions();
     const sessionIndex = sessions.findIndex(
-        s => s.filePath === session.filePath
+        s => s.filePath === session.filePath,
     );
 
     if (sessionIndex !== -1) {

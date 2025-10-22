@@ -99,7 +99,7 @@ const ChartTop = ({
                                 toggleYAxisLock({
                                     yMin: null,
                                     yMax: null,
-                                })
+                                }),
                             );
                             zoomToWindow(windowDuration);
                         } else {
@@ -112,7 +112,7 @@ const ChartTop = ({
                                 toggleYAxisLock({
                                     yMin: min,
                                     yMax: max,
-                                })
+                                }),
                             );
                         }
                     }}
@@ -198,7 +198,7 @@ const ChartSettingsDialog = ({
                                         toggleYAxisLock({
                                             yMin: null,
                                             yMax: null,
-                                        })
+                                        }),
                                     );
                                     zoomToWindow(windowDuration);
                                 } else {
@@ -211,7 +211,7 @@ const ChartSettingsDialog = ({
                                         toggleYAxisLock({
                                             yMin: min,
                                             yMax: max,
-                                        })
+                                        }),
                                     );
                                 }
                             }}

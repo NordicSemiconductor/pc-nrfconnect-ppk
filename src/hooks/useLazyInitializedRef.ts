@@ -18,10 +18,10 @@ export type DataAccumulatorInstance =
     | typeof uninitialisedToken;
 
 export const useLazyInitializedRef = (
-    initialiser: DataAccumulatorInitialiser
+    initialiser: DataAccumulatorInitialiser,
 ) => {
     const ref = useRef<DataAccumulator | typeof uninitialisedToken>(
-        uninitialisedToken
+        uninitialisedToken,
     );
     if (ref.current === uninitialisedToken) {
         ref.current = initialiser();
@@ -30,5 +30,5 @@ export const useLazyInitializedRef = (
 };
 
 export const isInitialised = (
-    processor: DataAccumulator | typeof uninitialisedToken
+    processor: DataAccumulator | typeof uninitialisedToken,
 ): processor is DataAccumulator => processor !== uninitialisedToken;

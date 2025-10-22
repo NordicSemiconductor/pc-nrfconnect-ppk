@@ -108,14 +108,14 @@ const timestampToLabel = (usecs: number, systemTime?: number) => {
         const time = new Date(milliSeconds + systemTime);
         const subsecond =
             Number(
-                ((microseconds + time.getMilliseconds() * 1000) / 1e3) % 1e3
+                ((microseconds + time.getMilliseconds() * 1000) / 1e3) % 1e3,
             ) ?? 0;
 
         return [
             `${time.getFullYear()}-${padL(time.getMonth() + 1)}-${padL(
-                time.getDate()
+                time.getDate(),
             )} ${padL(time.getHours())}:${padL(time.getMinutes())}:${padL(
-                time.getSeconds()
+                time.getSeconds(),
             )}`,
             `${subsecond.toFixed(3)}`.padStart(7, '0'),
         ];
@@ -208,7 +208,7 @@ export default ({
                             Number.parseInt(value.toString(), 10),
                             systemTime
                                 ? DataManager().getStartSystemTime()
-                                : undefined
+                                : undefined,
                         ),
                     maxTicksLimit: 7,
                 },
@@ -291,7 +291,7 @@ export default ({
                 <div
                     className={classNames(
                         'tw-pointer-events-none tw-absolute tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-pl-16 tw-pr-8',
-                        timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]'
+                        timestampsVisible ? 'tw-pb-[54px]' : 'tw-pb-[21px]',
                     )}
                 >
                     <div className="tw-relative tw-top-[10px] tw-flex tw-h-full tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-bg-gray-300 tw-bg-opacity-20 tw-px-16">

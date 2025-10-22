@@ -73,7 +73,7 @@ class SerialDevice extends Device {
 
     constructor(
         device: SharedDevice,
-        onSampleCallback: (values: SampleValues) => void
+        onSampleCallback: (values: SampleValues) => void,
     ) {
         super(onSampleCallback);
 
@@ -88,7 +88,7 @@ class SerialDevice extends Device {
         };
         this.path = device.serialPorts?.at(0)?.comName;
         this.child = fork(
-            path.resolve(getAppDir(), 'worker', 'serialDevice.js')
+            path.resolve(getAppDir(), 'worker', 'serialDevice.js'),
         );
         this.parser = null;
         this.resetDataLossCounter();
@@ -191,7 +191,7 @@ class SerialDevice extends Device {
                     modifierArray[index] =
                         meta[`${modifierKey}${index}`] || modifier;
                 });
-            }
+            },
         );
         return meta;
     }
@@ -205,7 +205,7 @@ class SerialDevice extends Device {
             this.emit(
                 'error',
                 'Unable to issue command',
-                'Command is not an array'
+                'Command is not an array',
             );
             return undefined;
         }
@@ -226,7 +226,7 @@ class SerialDevice extends Device {
             this.dataLossCounter + missingSamples >= DATALOSS_THRESHOLD
         ) {
             logger.error(
-                'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/main/doc/docs/troubleshooting.md#data-loss-with-ppk2'
+                'Data loss detected. See https://github.com/Nordicsemiconductor/pc-nrfconnect-ppk/blob/main/doc/docs/troubleshooting.md#data-loss-with-ppk2',
             );
         }
         this.dataLossCounter += missingSamples;
@@ -236,7 +236,7 @@ class SerialDevice extends Device {
         try {
             const currentMeasurementRange = Math.min(
                 getMaskedValue(adcValue, MEAS_RANGE),
-                this.modifiers.r.length
+                this.modifiers.r.length,
             );
             const counter = getMaskedValue(adcValue, MEAS_COUNTER);
             const adcResult = getMaskedValue(adcValue, MEAS_ADC) * 4;
@@ -285,14 +285,14 @@ class SerialDevice extends Device {
         }
     }
 
-    remainder = Buffer.alloc(0);
+    remainder: Buffer = Buffer.alloc(0);
 
     parseMeasurementData(buf: Buffer) {
         const sampleSize = 4;
         let ofs = this.remainder.length;
         const first = Buffer.concat(
             [this.remainder, buf.subarray(0, sampleSize - ofs)],
-            sampleSize
+            sampleSize,
         );
         ofs = sampleSize - ofs;
         this.handleRawDataSet(first.readUIntLE(0, sampleSize));

@@ -22,7 +22,7 @@ import {
 import { digitalChannelStateTupleOf8 } from '../../../utils/persistentStore';
 
 const dropdownItems: DropdownItem[] = Object.entries(
-    DigitalChannelTriggerStatesEnum
+    DigitalChannelTriggerStatesEnum,
 ).map(([key, value]) => ({
     value,
     label: key,
@@ -30,13 +30,13 @@ const dropdownItems: DropdownItem[] = Object.entries(
 
 const ChannelsList = () => {
     const digitalChannelTriggerStates = useSelector(
-        getDigitalChannelsTriggersStates
+        getDigitalChannelsTriggersStates,
     );
     const dispatch = useDispatch();
 
     const handleDigitalChannelsTriggerStateChange = (
         index: number,
-        state: DigitalChannelTriggerStatesEnum
+        state: DigitalChannelTriggerStatesEnum,
     ) => {
         const newStates = [
             ...digitalChannelTriggerStates,
@@ -45,7 +45,7 @@ const ChannelsList = () => {
         dispatch(
             setDigitalChannelsTriggersStates({
                 digitalChannelsTriggers: newStates,
-            })
+            }),
         );
     };
 
@@ -64,13 +64,13 @@ const ChannelsList = () => {
                             onSelect={value => {
                                 handleDigitalChannelsTriggerStateChange(
                                     index,
-                                    value.value as DigitalChannelTriggerStatesEnum
+                                    value.value as DigitalChannelTriggerStatesEnum,
                                 );
                             }}
                             items={dropdownItems}
                             selectedItem={
                                 dropdownItems.find(
-                                    item => item.value === state
+                                    item => item.value === state,
                                 ) ?? dropdownItems[0]
                             }
                             size="sm"
@@ -98,7 +98,7 @@ const digitalChannelTriggerLogicOptions = [
 export default () => {
     const dispatch = useDispatch();
     const digitalChannelTriggerLogic = useSelector(
-        getDigitalChannelsTriggerLogic
+        getDigitalChannelsTriggerLogic,
     );
 
     return (
@@ -111,8 +111,8 @@ export default () => {
                         setDigitalChannelsTriggerLogic(
                             digitalChannelTriggerLogicOptions[m].key as
                                 | 'AND'
-                                | 'OR'
-                        )
+                                | 'OR',
+                        ),
                     )
                 }
                 selectedItem={digitalChannelTriggerLogic}

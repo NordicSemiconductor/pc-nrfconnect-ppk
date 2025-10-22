@@ -97,5 +97,5 @@ render(
         <GlobalHotkeysProvider />
         <RecoveryDialogs />
         <AppTitleHook />
-    </App>
+    </App>,
 );

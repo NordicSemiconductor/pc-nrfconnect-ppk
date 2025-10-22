@@ -19,7 +19,7 @@ type ZoomPanCallback = (
     beginX?: number,
     endX?: number,
     beginY?: null | number,
-    endY?: null | number
+    endY?: null | number,
 ) => void;
 
 export interface ZoomPan {
@@ -51,7 +51,7 @@ const zoomAtOrigin = (
     pY?: number,
     factorY?: number,
     yMin?: number,
-    yMax?: number
+    yMax?: number,
 ) => {
     const zX = factorX === 0 ? 0 : Math.max(factorX, 0.1);
     let newMinX = xMin;
@@ -150,7 +150,7 @@ const processWheelEvents = () => {
             if (pX == null) {
                 // As xScale.getValueForPixel may return undefined, we need to handle it appropriately.
                 logger.debug(
-                    'zoomPan.ts-->processWheelEvents: getValueForPixel returned undefined.'
+                    'zoomPan.ts-->processWheelEvents: getValueForPixel returned undefined.',
                 );
                 return;
             }
@@ -164,7 +164,7 @@ const processWheelEvents = () => {
                 py,
                 z,
                 yMin,
-                yMax
+                yMax,
             );
         } else {
             let z = 0;
@@ -179,7 +179,7 @@ const processWheelEvents = () => {
             if (p == null) {
                 // As xScale.getValueForPixel may return undefined, we need to handle it appropriately.
                 logger.debug(
-                    'zoomPan.ts-->processWheelEvents: getValueForPixel returned undefined.'
+                    'zoomPan.ts-->processWheelEvents: getValueForPixel returned undefined.',
                 );
                 return;
             }
@@ -223,7 +223,7 @@ const processWheelEvents = () => {
                 pY,
                 fy,
                 yMin,
-                yMax
+                yMax,
             );
         } else {
             const pX =
@@ -243,7 +243,7 @@ const processWheelEvents = () => {
                 pY,
                 fy,
                 yMin,
-                yMax
+                yMax,
             );
         }
     } else if (isTrackPadPan) {
@@ -406,7 +406,7 @@ const plugin: Plugin<'line'> = {
                 const windowDuration = xMax - xMin;
                 const end = Math.min(
                     windowDuration,
-                    DataManager().getTimestamp()
+                    DataManager().getTimestamp(),
                 );
                 zoomPan.zoomPanCallback(0, end);
                 return;
@@ -488,13 +488,13 @@ const plugin: Plugin<'line'> = {
         canvas.addEventListener(
             'pointermove',
             zoomPan.pointerMoveHandler,
-            false
+            false,
         );
 
         zoomPan.pointerUpHandler = () => {
             if (zoomPan.zoomPanCallback == null) {
                 logger.error(
-                    'zoomPan-->zoomPan.pointerUpHandler: no callback defined'
+                    'zoomPan-->zoomPan.pointerUpHandler: no callback defined',
                 );
                 return;
             }
@@ -505,7 +505,7 @@ const plugin: Plugin<'line'> = {
         canvas.addEventListener(
             'pointerleave',
             zoomPan.pointerUpHandler,
-            false
+            false,
         );
     },
 };

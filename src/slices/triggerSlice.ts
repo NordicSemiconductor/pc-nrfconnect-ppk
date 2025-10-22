@@ -113,7 +113,7 @@ const triggerSlice = createSlice({
         },
         setDigitalChannelsTriggerLogic: (
             state,
-            action: PayloadAction<DigitalChannelTriggerLogic>
+            action: PayloadAction<DigitalChannelTriggerLogic>,
         ) => {
             state.digitalChannelsTriggerLogic = action.payload;
             persistDigitaTriggerLogic(action.payload);
@@ -122,12 +122,12 @@ const triggerSlice = createSlice({
             state,
             action: PayloadAction<{
                 digitalChannelsTriggers: digitalChannelStateTupleOf8;
-            }>
+            }>,
         ) => {
             state.digitalChannelsTriggersStates =
                 action.payload.digitalChannelsTriggers;
             persistDigitalChannelsTriggers(
-                action.payload.digitalChannelsTriggers
+                action.payload.digitalChannelsTriggers,
             );
         },
         setProgress: (
@@ -135,7 +135,7 @@ const triggerSlice = createSlice({
             action: PayloadAction<{
                 progressMessage: string;
                 progress?: number;
-            }>
+            }>,
         ) => {
             state.progress = action.payload.progress;
             state.progressMessage = action.payload.progressMessage;

@@ -92,7 +92,7 @@ const chartSlice = createSlice({
             action: PayloadAction<{
                 cursorBegin: null | number;
                 cursorEnd: null | number;
-            }>
+            }>,
         ) => {
             const end =
                 action.payload.cursorEnd != null
@@ -100,15 +100,15 @@ const chartSlice = createSlice({
                           0,
                           Math.min(
                               DataManager().getTimestamp(),
-                              action.payload.cursorEnd
-                          )
+                              action.payload.cursorEnd,
+                          ),
                       )
                     : null;
             const begin =
                 action.payload.cursorBegin != null
                     ? Math.min(
                           Math.max(0, action.payload.cursorBegin),
-                          DataManager().getTimestamp()
+                          DataManager().getTimestamp(),
                       )
                     : null;
 
@@ -122,7 +122,7 @@ const chartSlice = createSlice({
                 windowDuration: number;
                 yMin?: null | number;
                 yMax?: null | number;
-            }>
+            }>,
         ) {
             let { yMin, yMax } = action.payload;
 
@@ -149,7 +149,7 @@ const chartSlice = createSlice({
             if (windowEnd > DataManager().getTimestamp()) {
                 windowEnd = Math.max(
                     windowDuration,
-                    DataManager().getTimestamp()
+                    DataManager().getTimestamp(),
                 );
             }
 
@@ -175,7 +175,7 @@ const chartSlice = createSlice({
                 windowBegin: number;
                 windowEnd: number;
                 windowDuration: number;
-            }>
+            }>,
         ) {
             const { windowBegin, windowEnd, windowDuration } = action.payload;
 
@@ -191,7 +191,7 @@ const chartSlice = createSlice({
         },
         setDigitalChannels(
             state,
-            action: PayloadAction<{ digitalChannels: booleanTupleOf8 }>
+            action: PayloadAction<{ digitalChannels: booleanTupleOf8 }>,
         ) {
             const { digitalChannels } = action.payload;
             persistDigitalChannels(digitalChannels);
@@ -209,7 +209,7 @@ const chartSlice = createSlice({
         },
         toggleYAxisLock(
             state,
-            action: PayloadAction<{ yMin: number | null; yMax: number | null }>
+            action: PayloadAction<{ yMin: number | null; yMax: number | null }>,
         ) {
             return {
                 ...state,
@@ -223,7 +223,7 @@ const chartSlice = createSlice({
         chartWindowLockAction: state => {
             state.windowBeginLock = Math.max(
                 0,
-                state.windowEnd - state.windowDuration
+                state.windowEnd - state.windowDuration,
             );
             state.windowEndLock = state.windowEnd;
         },
@@ -257,11 +257,11 @@ const chartSlice = createSlice({
 
 const calculateDuration = (
     sampleFrequency: number,
-    windowDuration: number
+    windowDuration: number,
 ): number =>
     Math.min(
         MAX_WINDOW_DURATION / sampleFrequency,
-        Math.max(MIN_WINDOW_DURATION / sampleFrequency, windowDuration)
+        Math.max(MIN_WINDOW_DURATION / sampleFrequency, windowDuration),
     );
 
 export const chartWindowAction =
@@ -269,7 +269,7 @@ export const chartWindowAction =
         windowEnd: number,
         windowDuration: number,
         yMin?: number | null,
-        yMax?: number | null
+        yMax?: number | null,
     ): AppThunk<RootState> =>
     (dispatch, getState) => {
         const sampleFreq = getSampleFrequency(getState());
@@ -281,7 +281,7 @@ export const chartWindowAction =
                 windowDuration: duration,
                 yMin,
                 yMax,
-            })
+            }),
         );
 
         if (windowEnd >= DataManager().getTimestamp()) {
@@ -305,10 +305,10 @@ export const scrollToEnd = (): AppThunk<RootState> => (dispatch, getState) =>
         chartWindowAction(
             Math.max(
                 DataManager().getTimestamp(),
-                getWindowDuration(getState())
+                getWindowDuration(getState()),
             ),
-            getWindowDuration(getState())
-        )
+            getWindowDuration(getState()),
+        ),
     );
 
 export const resetCursorAndChart = (): AppThunk<RootState> => dispatch => {
@@ -325,7 +325,7 @@ export const getChartXAxisRange = (state: RootState) => {
         state.app.chart.liveMode
             ? DataManager().getTimestamp()
             : state.app.chart.windowEnd,
-        state.app.chart.windowDuration
+        state.app.chart.windowDuration,
     );
 
     const windowDuration = state.app.chart.windowDuration;

@@ -27,7 +27,7 @@ const spikeFilterSlice = createSlice({
     reducers: {
         updateSpikeFilterAction(
             state,
-            action: PayloadAction<{ spikeFilter: Partial<SpikeFilter> }>
+            action: PayloadAction<{ spikeFilter: Partial<SpikeFilter> }>,
         ) {
             return { ...state, ...action.payload.spikeFilter };
         },

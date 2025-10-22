@@ -54,7 +54,7 @@ const useConfirmBeforeClose = () => {
                     id: 'unsavedData',
                     message:
                         'You have unsaved data. if you close the application this data will be lost. Are you sure you want to close?',
-                })
+                }),
             );
         } else {
             dispatch(clearConfirmBeforeClose('unsavedData'));

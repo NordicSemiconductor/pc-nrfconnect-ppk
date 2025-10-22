@@ -15,7 +15,7 @@ import {
 
 export const useHotkeyAction = (
     actionType: HotkeyActionType,
-    handler: HotkeySubscriber
+    handler: HotkeySubscriber,
 ) => {
     useEffect(() => {
         const unsubscribe = hotkeyEventManager.subscribe(actionType, handler);

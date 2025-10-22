@@ -18,12 +18,12 @@ const gainsSlice = createSlice({
     reducers: {
         updateGainsAction: (
             state,
-            action: PayloadAction<{ value?: number; range: number }>
+            action: PayloadAction<{ value?: number; range: number }>,
         ) => {
             const value = action.payload.value || 100;
 
             return state.map((oldValue, range) =>
-                range === action.payload.range ? value : oldValue
+                range === action.payload.range ? value : oldValue,
             ) as GainsState;
         },
         resetGainsToDefaults() {

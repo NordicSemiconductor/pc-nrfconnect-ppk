@@ -50,7 +50,7 @@ const TimeSpanBottom = ({
     const chartCursor = useCallback(
         (begin, end) =>
             dispatch(chartCursorAction({ cursorBegin: begin, cursorEnd: end })),
-        [dispatch]
+        [dispatch],
     );
 
     const [drag, setDrag] = useState<Drag | null>(null);
@@ -94,7 +94,7 @@ const TimeSpanBottom = ({
             ? Math.abs(
                   normalizeTimeFloor(cursorEnd) -
                       normalizeTimeCeil(cursorBegin) +
-                      indexToTimestamp(1)
+                      indexToTimestamp(1),
               )
             : windowDuration;
     return (
@@ -119,7 +119,7 @@ const TimeSpanBottom = ({
                                     windowDuration *
                                         ((clientX - drag.clientX) /
                                             target.parentElement.offsetWidth),
-                                cursorEnd
+                                cursorEnd,
                             );
                         }
                     }}
@@ -156,7 +156,7 @@ const TimeSpanBottom = ({
                                 drag.cursorEnd +
                                     windowDuration *
                                         ((clientX - drag.clientX) /
-                                            target.parentElement.offsetWidth)
+                                            target.parentElement.offsetWidth),
                             );
                         }
                     }}

@@ -74,7 +74,7 @@ ChartJS.register(
     PointElement,
     LinearScale,
     LogarithmicScale,
-    Title
+    Title,
 );
 
 export type CursorData = {
@@ -122,8 +122,8 @@ const updateChart = async (
             average: number;
             max: number;
             delta: number;
-        } | null
-    ) => void
+        } | null,
+    ) => void,
 ) => {
     if (
         !isInitialised(dataProcessor) ||
@@ -155,7 +155,7 @@ const updateChart = async (
             : (digitalChannelsToCompute as number[]),
         Math.min(indexToTimestamp(windowDuration), numberOfPixelsInWindow),
         windowDuration,
-        setProcessing
+        setProcessing,
     );
 
     const avgTemp = processedData.averageLine.reduce(
@@ -166,12 +166,12 @@ const updateChart = async (
         {
             sum: 0,
             count: 0,
-        }
+        },
     );
     const average = avgTemp.sum / avgTemp.count / 1000;
 
     const filteredAmpereLine = processedData.ampereLineData.filter(
-        v => v.y != null && !Number.isNaN(v.y)
+        v => v.y != null && !Number.isNaN(v.y),
     );
     let max = filteredAmpereLine.length > 0 ? -Number.MAX_VALUE : 0;
 
@@ -219,17 +219,17 @@ const Chart = () => {
             windowBegin: number,
             windowEnd: number,
             yMin?: number | null,
-            yMax?: number | null
+            yMax?: number | null,
         ) =>
             dispatch(
                 chartWindowAction(
                     windowEnd,
                     windowEnd - windowBegin,
                     yMin,
-                    yMax
-                )
+                    yMax,
+                ),
             ),
-        [dispatch]
+        [dispatch],
     );
 
     const chartReset = useCallback(
@@ -237,16 +237,16 @@ const Chart = () => {
             dispatch(
                 chartWindowAction(
                     DataManager().getTimestamp() - windowDuration,
-                    windowDuration
-                )
+                    windowDuration,
+                ),
             ),
-        [dispatch]
+        [dispatch],
     );
 
     const chartCursor = useCallback(
         (cursorBegin, cursorEnd) =>
             dispatch(chartCursorAction({ cursorBegin, cursorEnd })),
-        [dispatch]
+        [dispatch],
     );
 
     useHotkeyAction(HotkeyActionType.SELECT_ALL, () => {
@@ -272,7 +272,7 @@ const Chart = () => {
     });
 
     const { digitalChannels, digitalChannelsVisible } = useSelector(
-        getChartDigitalChannelInfo
+        getChartDigitalChannelInfo,
     );
 
     const { cursorBegin, cursorEnd } = useSelector(getCursorRange);
@@ -289,7 +289,7 @@ const Chart = () => {
     const chartRef = useRef<AmpereChartJS | null>(null);
 
     const dataProcessor = useLazyInitializedRef(
-        dataAccumulatorInitialiser
+        dataAccumulatorInitialiser,
     ).current;
 
     const sampleFreq = useSelector(getSamplesPerSecond);
@@ -305,7 +305,7 @@ const Chart = () => {
             begin: windowBegin,
             end: windowEnd,
         }),
-        [cursorBegin, cursorEnd, windowBegin, windowEnd]
+        [cursorBegin, cursorEnd, windowBegin, windowEnd],
     );
 
     const [numberOfPixelsInWindow, setNumberOfPixelsInWindow] = useState(0);
@@ -321,7 +321,7 @@ const Chart = () => {
             beginX?: number,
             endX?: number,
             beginY?: number | null,
-            endY?: number | null
+            endY?: number | null,
         ) => {
             if (beginX === undefined || endX === undefined) {
                 chartReset(windowDuration);
@@ -351,7 +351,7 @@ const Chart = () => {
             chartWindow,
             chartReset,
             dispatch,
-        ]
+        ],
     );
 
     /** Center the graph inside the window
@@ -373,7 +373,7 @@ const Chart = () => {
             }
             chartWindow(localWindowBegin, localWindowEnd);
         },
-        [liveMode, windowBegin, windowEnd, chartWindow, chartReset]
+        [liveMode, windowBegin, windowEnd, chartWindow, chartReset],
     );
 
     useEffect(() => {
@@ -391,7 +391,7 @@ const Chart = () => {
     const samplesPerPixel = useMemo(() => {
         const samplesInWindowView = timestampToIndex(
             windowDuration,
-            sampleFreq
+            sampleFreq,
         );
         return numberOfPixelsInWindow === 0
             ? 2
@@ -431,7 +431,7 @@ const Chart = () => {
             setSelectionStatsProcessingProgress(0);
             selectionStateAbortController.current.signal.addEventListener(
                 'abort',
-                () => setSelectionStatsProcessing(false)
+                () => setSelectionStatsProcessing(false),
             );
             const debounce = setTimeout(
                 () =>
@@ -443,9 +443,9 @@ const Chart = () => {
                         cursorBegin,
                         cursorEnd,
                         selectionStateAbortController.current,
-                        setSelectionStatsProcessingProgress
+                        setSelectionStatsProcessingProgress,
                     ),
-                300
+                300,
             );
             return () => {
                 clearTimeout(debounce);
@@ -482,7 +482,7 @@ const Chart = () => {
                     windowEnd,
                     setData,
                     setProcessing,
-                    setWindowStats
+                    setWindowStats,
                 );
             };
             executeChartUpdateOperation();
@@ -527,7 +527,7 @@ const Chart = () => {
                     windowEnd,
                     setData,
                     setProcessing,
-                    setWindowStats
+                    setWindowStats,
                 );
             executeChartUpdateOperation();
 
@@ -564,8 +564,8 @@ const Chart = () => {
                     processing={processing || waitingForTrigger}
                     processingMessage={
                         waitingForTrigger
-                            ? triggerProgress.progressMessage ??
-                              'Waiting for trigger'
+                            ? (triggerProgress.progressMessage ??
+                              'Waiting for trigger')
                             : undefined
                     }
                     processingPercent={triggerProgress.progress}

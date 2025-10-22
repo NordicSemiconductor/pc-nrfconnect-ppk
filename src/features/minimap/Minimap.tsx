@@ -42,12 +42,12 @@ export interface MinimapChart extends Chart<'line'> {
         minimapRef: MinimapChart,
         windowEnd: number,
         windowDuration: number,
-        liveMode: boolean
+        liveMode: boolean,
     ) => void;
     onSliderRangeChange?: (
         windowEnd: number,
         windowDuration: number,
-        liveMode: boolean
+        liveMode: boolean,
     ) => void;
     redrawSlider?: () => void;
 }
@@ -74,7 +74,7 @@ const Minimap = () => {
     minimapRef.current = initializeMinimapChart(
         minimapRef.current,
         canvasRef.current,
-        yAxisLog
+        yAxisLog,
     );
 
     if (minimapRef.current) {
@@ -105,7 +105,7 @@ const Minimap = () => {
                     minimapRef.current.onSliderRangeChange?.(
                         windowEnd,
                         windowDuration,
-                        liveMode
+                        liveMode,
                     );
                 }
             });
@@ -113,8 +113,9 @@ const Minimap = () => {
             resizeObserver.observe(minimapRef.current.canvas);
 
             return () => {
-                minimapRef.current &&
+                if (minimapRef.current) {
                     resizeObserver.unobserve(minimapRef.current.canvas);
+                }
             };
         }
     }, [
@@ -151,7 +152,7 @@ const Minimap = () => {
         <div
             className={classNames(
                 'tw-relative tw-h-20 tw-w-full',
-                showMinimap ? 'tw-block' : 'tw-hidden'
+                showMinimap ? 'tw-block' : 'tw-hidden',
             )}
         >
             {isWindowDurationFull ? null : MinimapDefaultState()}
@@ -160,7 +161,7 @@ const Minimap = () => {
                 id="minimap"
                 className={classNames(
                     'tw-max-h-20 tw-w-full tw-border tw-border-solid',
-                    isWindowDurationFull ? 'tw-block' : 'tw-hidden'
+                    isWindowDurationFull ? 'tw-block' : 'tw-hidden',
                 )}
                 style={{
                     contain: 'strict',
@@ -171,7 +172,7 @@ const Minimap = () => {
                 ref={minimapSlider}
                 className={classNames(
                     'tw-pointer-events-none tw-absolute tw-top-0 tw-max-h-20 tw-overflow-hidden tw-bg-gray-400 tw-opacity-50',
-                    isWindowDurationFull ? 'tw-block' : 'tw-hidden'
+                    isWindowDurationFull ? 'tw-block' : 'tw-hidden',
                 )}
                 style={{
                     contain: 'strict',
@@ -192,7 +193,7 @@ function drawSlider(
     slider: HTMLDivElement,
     windowEnd: number,
     windowDuration: number,
-    liveMode: boolean
+    liveMode: boolean,
 ) {
     if (DataManager().getTimestamp() === 0) {
         slider.style.display = 'none';
@@ -220,12 +221,12 @@ function drawSlider(
         left = canvasRectangle.width + offsetLeft - width;
     } else {
         const beginWithoutOffset = xScale.getPixelForValue(
-            Math.max(0, windowEnd - windowDuration)
+            Math.max(0, windowEnd - windowDuration),
         );
 
         const endWithoutOffset = Math.min(
             canvasRectangle.width + offsetLeft,
-            xScale.getPixelForValue(windowEnd)
+            xScale.getPixelForValue(windowEnd),
         );
 
         const beginWithOffset =
@@ -270,7 +271,7 @@ function updateSlider(
     minimapSliderRef: HTMLDivElement | null,
     windowEnd: number,
     windowDuration: number,
-    liveMode: boolean
+    liveMode: boolean,
 ) {
     if (minimapRef == null || minimapSliderRef == null) return;
 
@@ -279,7 +280,7 @@ function updateSlider(
         minimapSliderRef,
         windowEnd,
         windowDuration,
-        liveMode
+        liveMode,
     );
 
     const { options: chartOptions } = minimapRef;
@@ -309,7 +310,7 @@ function updateSlider(
 function initializeMinimapChart(
     minimapRef: MinimapChart | null,
     canvasRef: HTMLCanvasElement | null,
-    yAxisLog: boolean
+    yAxisLog: boolean,
 ) {
     if (minimapRef != null) {
         return minimapRef;

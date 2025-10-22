@@ -35,7 +35,7 @@ const { unit } = mathjs;
 
 const useToggledSetting = (
     initialState: boolean,
-    label: string
+    label: string,
 ): [boolean, React.ElementType] => {
     const [value, setValue] = useState(initialState);
 
@@ -59,7 +59,7 @@ const calculateTotalSize = (
         bitsToggled,
         bitsSeparatedToggled,
     ]: readonly [boolean, boolean, boolean, boolean],
-    numberOfRecords: number
+    numberOfRecords: number,
 ) => {
     const recordLength =
         (timestampToggled ? 1 : 0) * 10 +
@@ -93,16 +93,16 @@ export default () => {
 
     const [timestampToggled, TimestampToggle] = useToggledSetting(
         true,
-        'Timestamp'
+        'Timestamp',
     );
     const [currentToggled, CurrentToggle] = useToggledSetting(true, 'Current');
     const [bitsToggled, BitsToggle] = useToggledSetting(
         true,
-        'Digital logic pins (single string field)'
+        'Digital logic pins (single string field)',
     );
     const [bitsSeparatedToggled, BitsSeparatedToggle] = useToggledSetting(
         false,
-        'Digital logic pins (separate fields)'
+        'Digital logic pins (separate fields)',
     );
     const contentSelection: readonly [boolean, boolean, boolean, boolean] =
         useMemo(
@@ -118,7 +118,7 @@ export default () => {
                 bitsToggled,
                 currentToggled,
                 timestampToggled,
-            ]
+            ],
         );
     const cancel = useRef(false);
     const [exporting, setExporting] = useState(false);
@@ -152,7 +152,7 @@ export default () => {
                     notation: 'auto',
                     precision: 4,
                 })
-                .replace('u', '\u00B5')
+                .replace('u', '\u00B5'),
         );
     }, [duration]);
 
@@ -173,7 +173,7 @@ export default () => {
                         extensions: ['csv'],
                     },
                 ],
-            }
+            },
         );
         if (!fn || timestampBegin == null || timestampEnd == null) return;
         setLastSaveDir(dirname(fn));
@@ -186,8 +186,8 @@ export default () => {
                 contentSelection,
                 setProgress,
                 setExporting,
-                cancel
-            )
+                cancel,
+            ),
         );
     };
     return (

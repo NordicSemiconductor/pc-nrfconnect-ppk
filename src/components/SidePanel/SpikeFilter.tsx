@@ -37,7 +37,7 @@ export default () => {
                     dispatch(
                         updateSpikeFilterAction({
                             spikeFilter: { samples: value },
-                        })
+                        }),
                     );
                 }}
                 showSlider
@@ -52,7 +52,7 @@ export default () => {
                     dispatch(
                         updateSpikeFilterAction({
                             spikeFilter: { alpha: value },
-                        })
+                        }),
                     );
                 }}
                 showSlider
@@ -67,7 +67,7 @@ export default () => {
                     dispatch(
                         updateSpikeFilterAction({
                             spikeFilter: { alpha5: value },
-                        })
+                        }),
                     );
                 }}
                 showSlider
