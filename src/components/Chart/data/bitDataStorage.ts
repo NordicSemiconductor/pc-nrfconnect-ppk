@@ -7,14 +7,14 @@
 import { numberOfDigitalChannels } from '../../../globals';
 import { lineDataForBitState } from '../../../utils/bitConversion';
 import type {
-    BitStateType,
+    BitStateIndexType,
     DigitalChannelStates,
     TimestampType,
 } from './dataTypes';
 
 export interface BitDataStorage {
     lineData: DigitalChannelStates[];
-    previousBitStates: Array<BitStateType | null>;
+    previousBitStates: Array<BitStateIndexType | null>;
     digitalChannelsToCompute: number[] | undefined;
     latestTimestamp: TimestampType;
 
@@ -22,12 +22,12 @@ export interface BitDataStorage {
     storeEntry: (
         timestamp: TimestampType,
         bitNumber: number,
-        bitState: BitStateType
+        bitState: BitStateIndexType
     ) => void;
     storeBit: (
         timestamp: TimestampType,
         bitNumber: number,
-        bitState: BitStateType
+        bitState: BitStateIndexType
     ) => void;
     addFinalEntries: () => void;
     getLineData: () => DigitalChannelStates[];

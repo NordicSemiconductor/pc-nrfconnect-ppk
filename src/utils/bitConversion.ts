@@ -34,7 +34,7 @@ export const convertBits16 = (b8: number): number =>
  *
  * @param {number} b16 16-bit input of 8 bit-pairs
  * @param {number} n index of bit-pair
- * @returns {number}
+ * @returns {BitStateIndexType}
  * - 0 (b00): invalid (undefined)
  * - 1 (b01): was always 0
  * - 2 (b10): was always 1
