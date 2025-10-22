@@ -5,7 +5,7 @@
  */
 
 import { numberOfDigitalChannels } from '../../../globals';
-import { averagedBitState } from '../../../utils/bitConversion';
+import { getSingleBitState } from '../../../utils/bitConversion';
 import bitDataStorage, { BitDataStorage } from './bitDataStorage';
 import { DigitalChannelStates, TimestampType } from './dataTypes';
 
@@ -31,7 +31,7 @@ export default (): BitDataSelector => ({
             this.bitDataStorage.storeBit(
                 timestamp,
                 i,
-                averagedBitState(bits, i)
+                getSingleBitState(bits, i)
             );
         });
     },

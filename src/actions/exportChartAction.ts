@@ -20,7 +20,7 @@ import {
 import { RootState } from '../slices';
 import { hideExportDialog } from '../slices/appSlice';
 import EventAction from '../usageDataActions';
-import { averagedBitState } from '../utils/bitConversion';
+import { getSingleBitState } from '../utils/bitConversion';
 
 // create and array of [index, length] to split longer range
 const indexer = (indexBegin: number, indexEnd: number, length: number) => {
@@ -55,7 +55,7 @@ export const formatDataForExport = (
             if (bitsData) {
                 const bitstring = dc.map(
                     (_, i) =>
-                        ['-', '0', '1', 'X'][averagedBitState(bitsData[n], i)]
+                        ['-', '0', '1', 'X'][getSingleBitState(bitsData[n], i)]
                 );
                 content += selectivePrint(
                     [

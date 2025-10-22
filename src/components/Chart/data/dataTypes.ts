@@ -5,12 +5,17 @@
  */
 
 export type DigitalChannelsType = boolean[];
-export type BitStateIndexType = 0 | 1 | 2 | 3;
 export type BitNumberType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type TimestampType = number | undefined;
 export type AmpereStateType = number | null | undefined;
 
-export enum BitStateType {
+export type BitState =
+    | 0b00 //  = 0: invalid (undefined)
+    | 0b01 //  = 1: was always 0
+    | 0b10 //  = 2: was always 1
+    | 0b11; // = 3: was sometimes 0 and sometimes 1
+
+export enum ChartLineValue {
     zero = -0.4,
     one = 0.4,
 }
@@ -22,7 +27,7 @@ export enum BitStateType {
  */
 export interface DigitalChannelState {
     x: TimestampType;
-    y: BitStateType | undefined;
+    y: ChartLineValue | undefined;
 }
 
 export interface DigitalChannelStates {
@@ -33,13 +38,4 @@ export interface DigitalChannelStates {
 export interface AmpereState {
     x: TimestampType;
     y: AmpereStateType;
-}
-
-export function isBitStateIndexType(
-    value: unknown
-): value is BitStateIndexType {
-    return (
-        typeof value === 'number' &&
-        (value === 0 || value === 1 || value === 2 || value === 3)
-    );
 }
