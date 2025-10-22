@@ -34,12 +34,3 @@ export interface AmpereState {
     x: TimestampType;
     y: AmpereStateType;
 }
-
-export function isBitStateIndexType(
-    value: unknown
-): value is BitStateIndexType {
-    return (
-        typeof value === 'number' &&
-        (value === 0 || value === 1 || value === 2 || value === 3)
-    );
-}
