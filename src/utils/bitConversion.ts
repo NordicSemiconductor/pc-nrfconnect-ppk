@@ -26,22 +26,22 @@ export const convertBits16 = (b8: number): number =>
     ((b8 & 1) + 1);
 
 /**
- * Extract out of a 16 bit value the two bits for the averaged bit state.
+ * Extract out of a 16 bit value the two bits for the single bit state.
  *
- * E.g. averagedBitState(0b00011011, 0) => 0b11
+ * E.g. getSingleBitState(0b00011011, 0) => 0b11
  *                               ^^
- * E.g. averagedBitState(0b00011011, 1) => 0b10
+ * E.g. getSingleBitState(0b00011011, 1) => 0b10
  *                             ^^
- * E.g. averagedBitState(0b00011011, 2) => 0b01
+ * E.g. getSingleBitState(0b00011011, 2) => 0b01
  *                           ^^
- * E.g. averagedBitState(0b00011011, 3) => 0b00
+ * E.g. getSingleBitState(0b00011011, 3) => 0b00
  *                         ^^
  *
  * @param {number} b16 16-bit input of 8 bit-pairs
  * @param {number} n index of bit-pair
  * @returns {BitState} the single bit state
  */
-export const averagedBitState = (b16: number, n: number): BitState =>
+export const getSingleBitState = (b16: number, n: number): BitState =>
     (3 & (b16 >> (n + n))) as BitState;
 
 export const always0: BitState = 1;

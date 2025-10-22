@@ -10,7 +10,7 @@ import { numberOfDigitalChannels } from '../../../globals';
 import {
     always0,
     always1,
-    averagedBitState,
+    getSingleBitState,
     sometimes0And1,
 } from '../../../utils/bitConversion';
 import bitDataStorage, { BitDataStorage } from './bitDataStorage';
@@ -43,7 +43,7 @@ export default (): BitDataAccumulator => ({
 
     processBits(bits) {
         this.digitalChannelsToCompute!.forEach(i => {
-            const bitState = averagedBitState(bits, i);
+            const bitState = getSingleBitState(bits, i);
             this.processBitState(bitState, i);
         });
     },
