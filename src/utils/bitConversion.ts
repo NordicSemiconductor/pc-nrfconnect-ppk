@@ -32,6 +32,15 @@ export const convertBits16 = (b8: number): number =>
  * Extract out of a 16 bit value the averaged bit state.
  * There are 3 valid states as described in the return value.
  *
+ * E.g. averagedBitState(0b00011011, 0) => 0b11
+ *                               ^^
+ * E.g. averagedBitState(0b00011011, 1) => 0b10
+ *                             ^^
+ * E.g. averagedBitState(0b00011011, 2) => 0b01
+ *                           ^^
+ * E.g. averagedBitState(0b00011011, 3) => 0b00
+ *                         ^^
+ *
  * @param {number} b16 16-bit input of 8 bit-pairs
  * @param {number} n index of bit-pair
  * @returns {BitStateIndexType}
