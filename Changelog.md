@@ -1,3 +1,9 @@
+## 4.3.2 - Unreleased
+
+### Fixed
+
+- Do not send big, unneeded telemetry data for dependencies.
+
 ## 4.3.1 - 2025-08-13
 
 ### Fixed
