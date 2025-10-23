@@ -54,7 +54,7 @@ const appSlice = createSlice({
             action: PayloadAction<{
                 capabilities: any;
                 portName: any;
-            }>
+            }>,
         ) => {
             state.portName = action.payload.portName;
             state.capabilities = action.payload.capabilities;
@@ -66,13 +66,13 @@ const appSlice = createSlice({
         }),
         setDeviceRunningAction: (
             state,
-            action: PayloadAction<{ isRunning: boolean }>
+            action: PayloadAction<{ isRunning: boolean }>,
         ) => {
             state.deviceRunning = action.payload.isRunning;
         },
         setPowerModeAction: (
             state,
-            action: PayloadAction<{ isSmuMode: boolean }>
+            action: PayloadAction<{ isSmuMode: boolean }>,
         ) => {
             state.isSmuMode = action.payload.isSmuMode;
         },

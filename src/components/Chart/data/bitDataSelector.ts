@@ -31,7 +31,7 @@ export default (): BitDataSelector => ({
             this.bitDataStorage.storeBit(
                 timestamp,
                 i,
-                getSingleBitState(bits, i)
+                getSingleBitState(bits, i),
             );
         });
     },

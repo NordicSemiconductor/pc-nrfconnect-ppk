@@ -95,7 +95,7 @@ export class RecoveryManager {
         (
             session: Session,
             onComplete?: () => void,
-            onFail?: (error: Error) => void
+            onFail?: (error: Error) => void,
         ): AppThunk<RootState, Promise<void>> =>
         async (dispatch, getState) => {
             try {
@@ -119,16 +119,16 @@ export class RecoveryManager {
                     dispatch(
                         updateSampleFreqLog10({
                             sampleFreqLog10: Math.log10(
-                                DataManager().getSamplesPerSecond()
+                                DataManager().getSamplesPerSecond(),
                             ),
-                        })
+                        }),
                     );
                     if (
                         DataManager().getTimestamp() <=
                         getWindowDuration(getState())
                     ) {
                         dispatch(
-                            chartWindowAction(0, DataManager().getTimestamp())
+                            chartWindowAction(0, DataManager().getTimestamp()),
                         );
                     } else {
                         dispatch(scrollToEnd());
@@ -142,12 +142,12 @@ export class RecoveryManager {
                 if (error instanceof Error) {
                     onFail?.(
                         new Error(
-                            `Failed to render the session: ${error.message}`
-                        )
+                            `Failed to render the session: ${error.message}`,
+                        ),
                     );
                 } else {
                     onFail?.(
-                        new Error('Unknown error while rendering the session.')
+                        new Error('Unknown error while rendering the session.'),
                     );
                 }
             }
@@ -162,7 +162,7 @@ export class RecoveryManager {
                 await RecoveryManager.#saveMetadataToFile(
                     sessionPath,
                     session.samplingRate,
-                    session.startTime
+                    session.startTime,
                 );
 
                 ChangeSessionStatus(session.filePath, SessionFlag.Recovered);
@@ -176,7 +176,7 @@ export class RecoveryManager {
     static async #saveMetadataToFile(
         sessionPath: string,
         samplesPerSecond: number,
-        startSystemTime: number
+        startSystemTime: number,
     ) {
         const metadata = {
             metadata: {
@@ -190,7 +190,7 @@ export class RecoveryManager {
         try {
             await fs.promises.writeFile(
                 metadataPath,
-                JSON.stringify(metadata, null, 2)
+                JSON.stringify(metadata, null, 2),
             );
         } catch (error) {
             throw new Error(`Error saving metadata: ${error}`);
@@ -282,7 +282,7 @@ export class RecoveryManager {
             onProgress: (progress: number) => void,
             onComplete: () => void,
             onFail: (error: Error) => void,
-            onCancel: () => void
+            onCancel: () => void,
         ): AppThunk<RootState, Promise<void>> =>
         async dispatch => {
             dispatch(setSessionRecoveryPending(true));
@@ -310,7 +310,7 @@ export class RecoveryManager {
                 2,
                 30,
                 session.startTime,
-                false
+                false,
             );
 
             this.#foldingBuffer = new FoldingBuffer();
@@ -341,8 +341,8 @@ export class RecoveryManager {
                             } else {
                                 onFail(
                                     new Error(
-                                        'Unknown error during finalize recovery.'
-                                    )
+                                        'Unknown error during finalize recovery.',
+                                    ),
                                 );
                             }
                         }
@@ -352,7 +352,7 @@ export class RecoveryManager {
                     const remainingBytes = fileSize - offset;
                     const bytesToRead = Math.min(
                         this.#pageSize,
-                        remainingBytes
+                        remainingBytes,
                     );
 
                     this.#fileBuffer
@@ -363,14 +363,14 @@ export class RecoveryManager {
                             recordCount = this.#processBuffer(
                                 buffer,
                                 bytesToRead,
-                                recordCount
+                                recordCount,
                             );
 
                             const progress = (offset / fileSize) * 100;
                             if (
                                 Math.floor(progress) >
                                 Math.floor(
-                                    ((offset - bytesToRead) / fileSize) * 100
+                                    ((offset - bytesToRead) / fileSize) * 100,
                                 )
                             ) {
                                 onProgress(Math.floor(progress));
@@ -383,14 +383,14 @@ export class RecoveryManager {
                     if (error instanceof Error) {
                         onFail(
                             new Error(
-                                `Error recovering session: ${error.message}`
-                            )
+                                `Error recovering session: ${error.message}`,
+                            ),
                         );
                         return;
                     }
 
                     onFail(
-                        new Error('Error recovering session: Unknown error')
+                        new Error('Error recovering session: Unknown error'),
                     );
                 }
             };
@@ -401,7 +401,7 @@ export class RecoveryManager {
 
     async searchOrphanedSessions(
         onProgress: (progress: number) => void,
-        onComplete: (orphanedSessions: Session[]) => void
+        onComplete: (orphanedSessions: Session[]) => void,
     ) {
         const orphanedSessions: Session[] = [];
         const sessions = await ReadSessions();
@@ -413,7 +413,7 @@ export class RecoveryManager {
         }
 
         const processList: number[] = await RecoveryManager.getPIDs(
-            this.#currentProcessName
+            this.#currentProcessName,
         );
 
         const checkSession = (index: number) => {

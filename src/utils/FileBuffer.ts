@@ -50,7 +50,7 @@ export class FileBuffer {
         numberOfWritePages = 14,
         numberOfReadPages = 2,
         firstWriteTime: number | undefined = undefined,
-        autoClean = true
+        autoClean = true,
     ) {
         if (numberOfWritePages < 2) {
             throw new Error('numberOfWritePages cannot be less then 2');
@@ -70,7 +70,7 @@ export class FileBuffer {
         this.#filePath = path.join(filePath.toString(), 'session.raw');
         if (fs.existsSync(filePath)) {
             logger.debug(
-                `Loading temporary ppk session file sessionFile ${filePath}`
+                `Loading temporary ppk session file sessionFile ${filePath}`,
             );
             this.#fileSize = fs.statSync(this.#filePath).size;
             this.#fileHandle = fs.openSync(this.#filePath, 'r');
@@ -86,7 +86,7 @@ export class FileBuffer {
                     get: () => this.#getFreeBufferPage(),
                 },
                 0,
-                firstWriteTime
+                firstWriteTime,
             );
         }
 
@@ -121,7 +121,7 @@ export class FileBuffer {
                 logger.debug(
                     `Creating temporary ppk session file sessionFile ${
                         this.#filePath
-                    }`
+                    }`,
                 );
                 this.#fileHandle = fs.openSync(this.#filePath, 'as+');
 
@@ -129,7 +129,7 @@ export class FileBuffer {
                     Date.now(),
                     this.samplingRate ? this.samplingRate : 100000,
                     SessionFlag.NotRecovered,
-                    this.#filePath
+                    this.#filePath,
                 );
             }
 
@@ -159,7 +159,10 @@ export class FileBuffer {
                     return fs
                         .appendFile(
                             this.#fileHandle,
-                            activePage.page.subarray(0, activePage.bytesWritten)
+                            activePage.page.subarray(
+                                0,
+                                activePage.bytesWritten,
+                            ),
                         )
                         .finally(() => {
                             this.#fileWriteListeners.forEach(l => l());
@@ -211,13 +214,13 @@ export class FileBuffer {
         bytesToRead: number,
         fileOffset: number,
         beforeRun?: () => void,
-        abortController?: AbortController
+        abortController?: AbortController,
     ) =>
         new Promise<number>(res => {
             const fileHandle = this.#fileHandle;
             if (!fileHandle) {
                 throw new Error(
-                    'Unable to read data from file. File was never created'
+                    'Unable to read data from file. File was never created',
                 );
             }
 
@@ -240,9 +243,9 @@ export class FileBuffer {
                             (_, bytesRead) => {
                                 resolve();
                                 res(bytesRead);
-                            }
+                            },
                         );
-                    })
+                    }),
             );
             this.#executeFileOperation();
         });
@@ -255,7 +258,7 @@ export class FileBuffer {
             page.page.length,
             startAddress,
             undefined,
-            cancelOperation
+            cancelOperation,
         ).then(bytesRead => {
             page.bytesWritten = bytesRead;
             page.startAddress = startAddress;
@@ -266,7 +269,7 @@ export class FileBuffer {
             this.#cancelBufferOperations.delete(bufferingRequest);
 
             const index = this.#bufferingRequests.findIndex(
-                r => bufferingRequest === r
+                r => bufferingRequest === r,
             );
 
             if (index !== -1) {
@@ -283,7 +286,7 @@ export class FileBuffer {
 
         bufferingRequest.finally(() => {
             const index = this.#bufferingRequests.findIndex(
-                r => bufferingRequest === r
+                r => bufferingRequest === r,
             );
 
             if (index !== -1) {
@@ -297,7 +300,7 @@ export class FileBuffer {
     #calculateIdealReadBufferRange(
         startOffset: number,
         endOffset: number,
-        bias?: 'start' | 'end'
+        bias?: 'start' | 'end',
     ): Range {
         const writeBufferRange = this.#writeBuffer?.getBufferRange();
 
@@ -315,13 +318,13 @@ export class FileBuffer {
                     Math.min(
                         normalizedBeforeOffset -
                             this.#numberOfReadPages * this.#bufferPageSize,
-                        writeBufferRange?.start ?? Infinity
-                    )
+                        writeBufferRange?.start ?? Infinity,
+                    ),
                 ),
                 end: Math.min(
                     this.getSessionInBytes() - 1,
                     normalizedAfterOffset,
-                    (writeBufferRange?.start ?? Infinity) - 1
+                    (writeBufferRange?.start ?? Infinity) - 1,
                 ),
             };
         }
@@ -332,14 +335,14 @@ export class FileBuffer {
                     0,
                     Math.min(
                         normalizedBeforeOffset,
-                        writeBufferRange?.start ?? Infinity
-                    )
+                        writeBufferRange?.start ?? Infinity,
+                    ),
                 ),
                 end: Math.min(
                     this.getSessionInBytes() - 1,
                     normalizedAfterOffset +
                         this.#numberOfReadPages * this.#bufferPageSize,
-                    (writeBufferRange?.start ?? Infinity) - 1
+                    (writeBufferRange?.start ?? Infinity) - 1,
                 ),
             };
         }
@@ -351,15 +354,15 @@ export class FileBuffer {
                     normalizedBeforeOffset -
                         Math.ceil(this.#numberOfReadPages / 2) *
                             this.#bufferPageSize,
-                    writeBufferRange?.start ?? Infinity
-                )
+                    writeBufferRange?.start ?? Infinity,
+                ),
             ),
             end: Math.min(
                 this.getSessionInBytes() - 1,
                 (writeBufferRange?.start ?? Infinity) - 1,
                 normalizedAfterOffset +
                     Math.ceil(this.#numberOfReadPages / 2) *
-                        this.#bufferPageSize
+                        this.#bufferPageSize,
             ),
         };
     }
@@ -367,12 +370,12 @@ export class FileBuffer {
     #updateReadPages(
         beforeOffset: number,
         afterOffset: number,
-        bias?: 'start' | 'end'
+        bias?: 'start' | 'end',
     ) {
         const idealBufferRange = this.#calculateIdealReadBufferRange(
             beforeOffset,
             afterOffset,
-            bias
+            bias,
         );
 
         if (idealBufferRange.start >= idealBufferRange.end) {
@@ -410,10 +413,10 @@ export class FileBuffer {
                             start: i,
                             end: Math.min(
                                 i + this.#bufferPageSize - 1,
-                                endOffFileOffset
+                                endOffFileOffset,
                             ),
-                        }
-                    )
+                        },
+                    ),
                 ) === -1;
 
             if (missing) {
@@ -443,21 +446,21 @@ export class FileBuffer {
         buffer: Buffer,
         byteOffset: number,
         numberOfBytesToRead: number,
-        bias?: 'start' | 'end'
+        bias?: 'start' | 'end',
     ) {
         readFromCachedData(
             this.#getPages(),
             buffer,
             byteOffset,
-            numberOfBytesToRead
+            numberOfBytesToRead,
         );
 
         Promise.allSettled(this.#bufferingRequests).then(() =>
             this.#updateReadPages(
                 byteOffset,
                 byteOffset + numberOfBytesToRead,
-                bias
-            )
+                bias,
+            ),
         );
     }
 
@@ -466,7 +469,7 @@ export class FileBuffer {
         byteOffset: number,
         numberOfBytesToRead: number,
         bias?: 'start' | 'end',
-        onLoading?: (loading: boolean) => void
+        onLoading?: (loading: boolean) => void,
     ) {
         if (buffer.length < numberOfBytesToRead) {
             throw new Error('Buffer is too small');
@@ -481,7 +484,7 @@ export class FileBuffer {
                 buffer,
                 byteOffset,
                 numberOfBytesToRead,
-                bias
+                bias,
             );
 
             return numberOfBytesToRead;
@@ -498,7 +501,7 @@ export class FileBuffer {
         const bytesRead = await this.#readRange(
             buffer,
             numberOfBytesToRead,
-            byteOffset
+            byteOffset,
         );
 
         const normalizedBegin =
@@ -523,7 +526,7 @@ export class FileBuffer {
                     page,
                     0,
                     offset + i - normalizedBegin,
-                    offset + i + this.#bufferPageSize - normalizedBegin - 1
+                    offset + i + this.#bufferPageSize - normalizedBegin - 1,
                 );
 
                 const newPage = {
@@ -539,8 +542,8 @@ export class FileBuffer {
             this.#updateReadPages(
                 byteOffset,
                 byteOffset + numberOfBytesToRead,
-                bias
-            )
+                bias,
+            ),
         );
 
         onLoading?.(false);
@@ -597,7 +600,7 @@ export class FileBuffer {
 
         return () => {
             const index = this.#bufferingListeners.findIndex(
-                l => l === listener
+                l => l === listener,
             );
 
             if (index !== -1) {
@@ -611,7 +614,7 @@ export class FileBuffer {
 
         return () => {
             const index = this.#fileWriteListeners.findIndex(
-                l => l === listener
+                l => l === listener,
             );
 
             if (index !== -1) {

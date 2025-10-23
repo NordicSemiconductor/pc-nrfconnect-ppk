@@ -123,13 +123,13 @@ export class FoldingBuffer {
                 data: this.data,
                 maxNumberOfElements: this.maxNumberOfElements,
                 numberOfTimesToFold: this.numberOfTimesToFold,
-            })
+            }),
         );
     }
 
     loadFromFile(sessionPath: string) {
         const result = JSON.parse(
-            fs.readFileSync(path.join(sessionPath, 'minimap.raw')).toString()
+            fs.readFileSync(path.join(sessionPath, 'minimap.raw')).toString(),
         );
         this.lastElementFoldCount = result.lastElementFoldCount;
         this.data = result.data;

@@ -19,12 +19,12 @@ export interface HotkeyEvent {
     payload?: unknown;
 }
 
-export type HotkeySubscriber = (event: HotkeyEvent) => boolean | void;
+export type HotkeySubscriber = (event: HotkeyEvent) => unknown;
 
 class HotkeyEventManager extends EventEmitter {
     subscribe(
         actionType: HotkeyActionType,
-        subscriber: HotkeySubscriber
+        subscriber: HotkeySubscriber,
     ): () => void {
         this.on(actionType, subscriber);
         return () => this.off(actionType, subscriber);

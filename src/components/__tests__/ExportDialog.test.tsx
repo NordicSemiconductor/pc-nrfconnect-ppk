@@ -89,7 +89,7 @@ describe('ExportDialog', () => {
         const numberOfRecordsText = `${expectedNumberOfRecords} records`;
 
         getTimestampMock.mockImplementation(() =>
-            indexToTimestamp(expectedNumberOfRecords)
+            indexToTimestamp(expectedNumberOfRecords),
         );
 
         render(<ExportDialog />, initialStateActions);
@@ -110,7 +110,7 @@ describe('ExportDialog', () => {
         const numberOfRecordsText = '100000 records';
 
         getTimestampMock.mockImplementation(() =>
-            indexToTimestamp(expectedNumberOfRecords)
+            indexToTimestamp(expectedNumberOfRecords),
         );
 
         render(<ExportDialog />, initialStateActions);

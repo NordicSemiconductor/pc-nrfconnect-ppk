@@ -121,16 +121,16 @@ const plugin: TriggerLevelPlugin = {
         chart.triggerLine = { y: null };
         const { canvas } = chart.ctx;
         canvas.addEventListener('pointerdown', evt =>
-            plugin.pointerDownHandler(evt, chart)
+            plugin.pointerDownHandler(evt, chart),
         );
         canvas.addEventListener('pointermove', evt =>
-            plugin.pointerMoveHandler(evt, chart)
+            plugin.pointerMoveHandler(evt, chart),
         );
         canvas.addEventListener('pointerup', () =>
-            plugin.pointerLeaveHandler(chart)
+            plugin.pointerLeaveHandler(chart),
         );
         canvas.addEventListener('pointerleave', () =>
-            plugin.pointerLeaveHandler(chart)
+            plugin.pointerLeaveHandler(chart),
         );
     },
 
@@ -174,7 +174,7 @@ const plugin: TriggerLevelPlugin = {
                 label.w,
                 label.h / 2,
                 label.w,
-                label.h / 2
+                label.h / 2,
             );
             ctx.bezierCurveTo(
                 label.w,
@@ -182,7 +182,7 @@ const plugin: TriggerLevelPlugin = {
                 label.w - 5,
                 label.h,
                 curveStart,
-                label.h
+                label.h,
             );
             ctx.lineTo(2, label.h);
             ctx.bezierCurveTo(1, label.h, 0, label.h - 1, 0, label.h - 2);

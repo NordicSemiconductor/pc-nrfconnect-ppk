@@ -85,7 +85,7 @@ export default () => {
                 onChange={v => setInternalTriggerValue(v)}
                 onChangeComplete={(value: number) => {
                     dispatch(
-                        setTriggerLevel(convertToMicroAmps(levelUnit, value))
+                        setTriggerLevel(convertToMicroAmps(levelUnit, value)),
                     );
                 }}
                 unit={{
@@ -95,9 +95,9 @@ export default () => {
                             setTriggerLevel(
                                 convertToMicroAmps(
                                     unit.value,
-                                    internalTriggerValue
-                                )
-                            )
+                                    internalTriggerValue,
+                                ),
+                            ),
                         );
                     },
                     selectedItem: items.find(item => item.value === levelUnit),

@@ -22,12 +22,12 @@ export interface BitDataStorage {
     storeEntry: (
         timestamp: TimestampType,
         bitNumber: number,
-        bitState: BitState
+        bitState: BitState,
     ) => void;
     storeBit: (
         timestamp: TimestampType,
         bitNumber: number,
-        bitState: BitState
+        bitState: BitState,
     ) => void;
     addFinalEntries: () => void;
     getLineData: () => DigitalChannelStates[];
@@ -92,7 +92,7 @@ export default (): BitDataStorage => ({
                         this.storeEntry(
                             this.latestTimestamp,
                             i,
-                            previousBitStates
+                            previousBitStates,
                         );
                     }
                 }

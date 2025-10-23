@@ -18,7 +18,7 @@ jest.mock(
     '@nordicsemiconductor/pc-nrfconnect-shared/ipc/launcherConfig',
     () => ({
         getConfig: jest.fn(() => ({ appDataDir: '/mock/app/data' })),
-    })
+    }),
 );
 
 jest.mock('electron', () => ({
@@ -58,7 +58,7 @@ describe('checkAnalogTriggerValidity', () => {
                 5.0, // cappedValue
                 3.0, // prevCappedValue
                 4.0, // triggerLevel
-                'Rising Edge'
+                'Rising Edge',
             );
             expect(result).toBe(true);
         });
@@ -68,7 +68,7 @@ describe('checkAnalogTriggerValidity', () => {
                 4.0, // cappedValue (exactly at threshold)
                 3.0, // prevCappedValue
                 4.0, // triggerLevel
-                'Rising Edge'
+                'Rising Edge',
             );
             expect(result).toBe(true);
         });
@@ -78,7 +78,7 @@ describe('checkAnalogTriggerValidity', () => {
                 5.0, // cappedValue
                 undefined, // prevCappedValue
                 4.0, // triggerLevel
-                'Rising Edge'
+                'Rising Edge',
             );
             expect(result).toBe(false);
         });
@@ -88,7 +88,7 @@ describe('checkAnalogTriggerValidity', () => {
                 5.0, // cappedValue
                 4.5, // prevCappedValue (above threshold)
                 4.0, // triggerLevel
-                'Rising Edge'
+                'Rising Edge',
             );
             expect(result).toBe(false);
         });
@@ -98,7 +98,7 @@ describe('checkAnalogTriggerValidity', () => {
                 3.5, // cappedValue (below threshold)
                 3.0, // prevCappedValue
                 4.0, // triggerLevel
-                'Rising Edge'
+                'Rising Edge',
             );
             expect(result).toBe(false);
         });
@@ -108,7 +108,7 @@ describe('checkAnalogTriggerValidity', () => {
                 5.0, // cappedValue
                 4.5, // prevCappedValue
                 4.0, // triggerLevel
-                'Rising Edge'
+                'Rising Edge',
             );
             expect(result).toBe(false);
         });
@@ -120,7 +120,7 @@ describe('checkAnalogTriggerValidity', () => {
                 3.0, // cappedValue
                 5.0, // prevCappedValue
                 4.0, // triggerLevel
-                'Falling Edge'
+                'Falling Edge',
             );
             expect(result).toBe(true);
         });
@@ -130,7 +130,7 @@ describe('checkAnalogTriggerValidity', () => {
                 4.0, // cappedValue (exactly at threshold)
                 5.0, // prevCappedValue
                 4.0, // triggerLevel
-                'Falling Edge'
+                'Falling Edge',
             );
             expect(result).toBe(true);
         });
@@ -140,7 +140,7 @@ describe('checkAnalogTriggerValidity', () => {
                 3.0, // cappedValue
                 undefined, // prevCappedValue
                 4.0, // triggerLevel
-                'Falling Edge'
+                'Falling Edge',
             );
             expect(result).toBe(false);
         });
@@ -150,7 +150,7 @@ describe('checkAnalogTriggerValidity', () => {
                 3.0, // cappedValue
                 3.5, // prevCappedValue (below threshold)
                 4.0, // triggerLevel
-                'Falling Edge'
+                'Falling Edge',
             );
             expect(result).toBe(false);
         });
@@ -160,7 +160,7 @@ describe('checkAnalogTriggerValidity', () => {
                 4.5, // cappedValue (above threshold)
                 5.0, // prevCappedValue
                 4.0, // triggerLevel
-                'Falling Edge'
+                'Falling Edge',
             );
             expect(result).toBe(false);
         });
@@ -170,7 +170,7 @@ describe('checkAnalogTriggerValidity', () => {
                 3.0, // cappedValue
                 3.5, // prevCappedValue
                 4.0, // triggerLevel
-                'Falling Edge'
+                'Falling Edge',
             );
             expect(result).toBe(false);
         });
@@ -182,7 +182,7 @@ describe('checkAnalogTriggerValidity', () => {
                 5.0, // cappedValue
                 3.0, // prevCappedValue
                 4.0, // triggerLevel
-                'Invalid Edge' as TriggerEdge
+                'Invalid Edge' as TriggerEdge,
             );
             expect(result).toBe(false);
         });
@@ -194,7 +194,7 @@ describe('checkAnalogTriggerValidity', () => {
                 5.0, // cappedValue
                 4.0, // prevCappedValue (exactly at threshold)
                 4.0, // triggerLevel
-                'Rising Edge'
+                'Rising Edge',
             );
             expect(result).toBe(false);
         });
@@ -204,7 +204,7 @@ describe('checkAnalogTriggerValidity', () => {
                 3.0, // cappedValue
                 4.0, // prevCappedValue (exactly at threshold)
                 4.0, // triggerLevel
-                'Falling Edge'
+                'Falling Edge',
             );
             expect(result).toBe(false);
         });
@@ -218,7 +218,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b00000001,
                 undefined,
                 strToTriggerStateArray('HXXXXXXX'),
-                'AND'
+                'AND',
             );
             // This should return false because channel 0 expects High but bit is 0
             expect(result).toBe(true);
@@ -229,7 +229,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001,
                 0b11110000,
                 strToTriggerStateArray('HLLLHHHH'),
-                'AND'
+                'AND',
             );
             // This should return false because channel 0 expects High but bit is 0
             expect(result).toBe(true);
@@ -240,7 +240,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110000,
                 0b00000000,
                 strToTriggerStateArray('XXXXHHHH'),
-                'AND'
+                'AND',
             );
             expect(result).toBe(true);
         });
@@ -250,7 +250,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001, // channels 7,6,5,4,0 are high
                 0b11110000, // channels 7,6,5,4 were high, 0 was low
                 strToTriggerStateArray('HXXXXXXX'), // channel 0 expects High
-                'AND'
+                'AND',
             );
             expect(result).toBe(true);
         });
@@ -260,7 +260,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110000, // channel 0 is low
                 0b11110001, // channel 0 was high
                 strToTriggerStateArray('LXXXXXXX'), // channel 0 expects Low
-                'AND'
+                'AND',
             );
             expect(result).toBe(true);
         });
@@ -270,7 +270,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001, // channel 0 changed from 0 to 1
                 0b11110000,
                 strToTriggerStateArray('*XXXXXXX'), // channel 0 expects Any change
-                'AND'
+                'AND',
             );
             expect(result).toBe(true);
         });
@@ -280,7 +280,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001, // channels: 0=1, 1=0, 4=1
                 0b11110010, // channels: 0=0, 1=1, 4=1
                 strToTriggerStateArray('HLXXHXXX'), // 0=High, 1=Low, 4=High others off
-                'AND'
+                'AND',
             );
             expect(result).toBe(true);
         });
@@ -290,7 +290,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110000,
                 0b11110000, // same as current
                 strToTriggerStateArray('HXXXXXXX'),
-                'AND'
+                'AND',
             );
             expect(result).toBe(false);
         });
@@ -300,7 +300,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110000, // channel 1 changed
                 0b11110010,
                 strToTriggerStateArray('HXXXXXXX'), // only channel 0 is enabled, but it didn't change
-                'AND'
+                'AND',
             );
             expect(result).toBe(false);
         });
@@ -312,7 +312,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001, // channel 0 is now high
                 0b11110000, // channel 0 was low
                 strToTriggerStateArray('HXXXXXXX'), // channel 0 expects High transition
-                'OR'
+                'OR',
             );
             expect(result).toBe(true);
         });
@@ -322,7 +322,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110000, // channel 0 is now low
                 0b11110001, // channel 0 was high
                 strToTriggerStateArray('LXXXXXXX'), // channel 0 expects Low transition
-                'OR'
+                'OR',
             );
             expect(result).toBe(true);
         });
@@ -332,7 +332,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001, // channel 0 changed
                 0b11110000,
                 strToTriggerStateArray('*XXXXXXX'), // channel 0 expects Any change
-                'OR'
+                'OR',
             );
             expect(result).toBe(true);
         });
@@ -342,7 +342,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001, // channel 0: 0->1 (satisfies High), channel 1: 1->0 (doesn't satisfy High)
                 0b11110010,
                 strToTriggerStateArray('HHXXXXXX'), // both channels 0,1 expect High transition
-                'OR'
+                'OR',
             );
             expect(result).toBe(true);
         });
@@ -352,7 +352,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110000, // channel 0: 1->0 (expects High transition but got Low)
                 0b11110001,
                 strToTriggerStateArray('HXXXXXXX'), // channel 0 expects High transition
-                'OR'
+                'OR',
             );
             expect(result).toBe(false);
         });
@@ -362,7 +362,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110010, // channel 0: 1->0, channel 1: 0->1
                 0b11110001,
                 strToTriggerStateArray('HLXXXXXX'), // 0 expects High (but went low), 1 expects Low (but went high)
-                'OR'
+                'OR',
             );
             expect(result).toBe(false);
         });
@@ -374,7 +374,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110001,
                 0b11110000,
                 strToTriggerStateArray('XXXXXXXX'), // all channels off
-                'AND'
+                'AND',
             );
             expect(result).toBe(false);
         });
@@ -384,7 +384,7 @@ describe('checkDigitalTriggerValidity', () => {
                 0b11110000,
                 0b11110000, // same value
                 strToTriggerStateArray('HXXXXXXX'),
-                'OR'
+                'OR',
             );
             expect(result).toBe(false);
         });
@@ -397,7 +397,7 @@ describe('checkDigitalTriggerValidity', () => {
                     const currentBits = 1 << i; // set bit i
                     const prevBits = 0; // all bits were 0
                     const triggerStates = Array(8).fill(
-                        DigitalChannelTriggerStatesEnum.Off
+                        DigitalChannelTriggerStatesEnum.Off,
                     );
                     triggerStates[i] = DigitalChannelTriggerStatesEnum.High;
 
@@ -405,7 +405,7 @@ describe('checkDigitalTriggerValidity', () => {
                         currentBits,
                         prevBits,
                         triggerStates as digitalChannelStateTupleOf8,
-                        'AND'
+                        'AND',
                     );
                     expect(result).toBe(true);
                 }

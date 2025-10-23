@@ -5,7 +5,7 @@
  */
 
 export function isCanvasElement(
-    element: EventTarget | null
+    element: EventTarget | null,
 ): element is HTMLCanvasElement {
     return element instanceof HTMLCanvasElement;
 }

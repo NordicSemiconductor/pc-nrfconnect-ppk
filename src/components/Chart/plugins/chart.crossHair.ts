@@ -50,7 +50,7 @@ const plugin: CrossHairPlugin = {
                 event,
                 'nearest',
                 {},
-                true
+                true,
             )[0];
             if (hit) {
                 const { x, y } = hit.element;
@@ -72,7 +72,7 @@ const plugin: CrossHairPlugin = {
 
         const { canvas } = chart.ctx;
         canvas.addEventListener('pointermove', event =>
-            plugin.pointerMoveHandler(event, chart)
+            plugin.pointerMoveHandler(event, chart),
         );
         canvas.addEventListener('pointerleave', plugin.pointerLeaveHandler);
     },
@@ -122,12 +122,12 @@ const plugin: CrossHairPlugin = {
                         ctx.fillText(
                             time,
                             left + offsetX + 5 + tsWidth / 2,
-                            top + 13
+                            top + 13,
                         );
                         ctx.fillText(
                             subsecond,
                             left + offsetX + 5 + tsWidth / 2,
-                            top + 28
+                            top + 28,
                         );
                     }
                 }
@@ -169,7 +169,7 @@ const plugin: CrossHairPlugin = {
                     right - nAWidth - 10,
                     offsetY - 20,
                     nAWidth + 10,
-                    20
+                    20,
                 );
                 ctx.fillStyle = white;
                 ctx.fillText(nA, right - 5, offsetY - 7);
@@ -181,7 +181,7 @@ const plugin: CrossHairPlugin = {
 
     afterDestroy(chartInstance) {
         const i = plugin.instances.findIndex(
-            ({ id }) => id === chartInstance.id
+            ({ id }) => id === chartInstance.id,
         );
         if (i > -1) {
             plugin.instances.splice(i, 1);

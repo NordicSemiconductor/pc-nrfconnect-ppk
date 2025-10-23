@@ -31,7 +31,7 @@ export const deviceSetupConfig: DeviceSetupConfig = {
                 {
                     key: 'ppk2',
                     application: getAppFile(
-                        'firmware/pca63100_ppk2_1.2.4_db16a94.hex'
+                        'firmware/pca63100_ppk2_1.2.4_db16a94.hex',
                     ),
                     semver: 'power_profiler_kit_2 1.2.4-db16a94',
                     params: {},
@@ -44,7 +44,7 @@ export const deviceSetupConfig: DeviceSetupConfig = {
                 d.serialPorts.length > 0 &&
                 !!d.traits.nordicUsb &&
                 !!d.usb &&
-                d.usb.device.descriptor.idProduct === 0xc00a
+                d.usb.device.descriptor.idProduct === 0xc00a,
         ),
     ],
 };

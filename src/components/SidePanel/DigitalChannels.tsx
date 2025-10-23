@@ -36,7 +36,7 @@ export default () => {
                         'tw-h-6 tw-grow tw-border tw-border-solid tw-border-gray-700 tw-leading-none',
                         channel
                             ? 'tw-bg-white tw-text-gray-700'
-                            : 'tw-bg-gray-700 tw-text-white'
+                            : 'tw-bg-gray-700 tw-text-white',
                     )}
                     value={i}
                     onClick={() => toggle(i)}

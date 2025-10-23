@@ -130,7 +130,7 @@ export default () => {
         if (mode === 'DataLogger') {
             if (!fs.existsSync(sessionFolder)) {
                 logger.error(
-                    `Temp Disk root folder '${sessionFolder}' does not exists. Change the root directory in the Temp Disk settings on the side panel.`
+                    `Temp Disk root folder '${sessionFolder}' does not exists. Change the root directory in the Temp Disk settings on the side panel.`,
                 );
                 setShowDialog(false);
                 return;
@@ -138,14 +138,14 @@ export default () => {
 
             const space = Math.max(
                 0,
-                await getFreeSpace(diskFullTrigger, sessionFolder)
+                await getFreeSpace(diskFullTrigger, sessionFolder),
             );
 
             setFreeSpace(space);
 
             if (space === 0) {
                 logger.warn(
-                    'Disk is full. Unable to start sampling. Change the disk full trigger threshold or free up disk memory.'
+                    'Disk is full. Unable to start sampling. Change the disk full trigger threshold or free up disk memory.',
                 );
                 setShowDialog(false);
                 return;
@@ -227,21 +227,24 @@ export default () => {
                             <div>
                                 {`Estimated disk space required ${calcFileSizeString(
                                     sampleFreq,
-                                    convertTimeToSeconds(duration, durationUnit)
+                                    convertTimeToSeconds(
+                                        duration,
+                                        durationUnit,
+                                    ),
                                 )}. Current available space ${calcFileSize(
-                                    freeSpace
+                                    freeSpace,
                                 )}`}
                             </div>
                         )}
                         {sampleIndefinitely && (
                             <div>
                                 {`Estimated space limit ~${formatDuration(
-                                    remainingTime
+                                    remainingTime,
                                 )} at ${calcFileSizeString(
                                     sampleFreq,
-                                    convertTimeToSeconds(1, 'h')
+                                    convertTimeToSeconds(1, 'h'),
                                 )}/h. Available disk space ${calcFileSize(
-                                    freeSpace
+                                    freeSpace,
                                 )}`}
                             </div>
                         )}

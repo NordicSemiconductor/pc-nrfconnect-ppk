@@ -42,7 +42,7 @@ export default async (
     metadata: PPK2Metadata,
     fileBuffer: FileBuffer,
     foldingBuffer: FoldingBuffer,
-    onProgress?: (message: string) => void
+    onProgress?: (message: string) => void,
 ) => {
     await startPreventSleep();
     const sessionFolder = fileBuffer.getSessionFolder();
@@ -56,7 +56,7 @@ export default async (
 
     fs.writeFileSync(
         metaPath,
-        JSON.stringify({ ...metadata, formatVersion: CURRENT_VERSION })
+        JSON.stringify({ ...metadata, formatVersion: CURRENT_VERSION }),
     );
 
     const output = fs.createWriteStream(filename);
@@ -83,7 +83,7 @@ export default async (
         processed += data.length;
 
         onProgress?.(
-            `Compressing Data. Compressed file size ${calcFileSize(processed)}`
+            `Compressing Data. Compressed file size ${calcFileSize(processed)}`,
         );
     });
     archive.directory(sessionFolder, false);
@@ -100,7 +100,7 @@ export default async (
             timestampBegin: 0,
             timestampEnd: indexToTimestamp(
                 fileBuffer.getSessionInBytes() / frameSize - 1,
-                metadata.metadata.samplesPerSecond
+                metadata.metadata.samplesPerSecond,
             ),
             exportType: 'ppk2',
         });

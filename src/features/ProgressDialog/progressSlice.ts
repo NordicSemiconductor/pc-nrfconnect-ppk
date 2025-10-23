@@ -33,7 +33,7 @@ const progressSlice = createSlice({
     reducers: {
         showProgressDialog: (
             state,
-            action: PayloadAction<{ title?: string; message: string }>
+            action: PayloadAction<{ title?: string; message: string }>,
         ) => {
             state.title = action.payload.title ?? initialState.title;
             state.progress = -1;
@@ -48,7 +48,7 @@ const progressSlice = createSlice({
                 progress?: number;
                 message: string;
                 indeterminate?: boolean;
-            }>
+            }>,
         ) => {
             state.message = action.payload.message;
             state.progress = action.payload.progress ?? -1;

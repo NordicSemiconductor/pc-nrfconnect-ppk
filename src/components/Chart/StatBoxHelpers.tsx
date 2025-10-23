@@ -27,7 +27,7 @@ export const ValueRaw = ({
     <div
         className={classNames(
             'tw-flex tw-h-14 tw-grow tw-flex-col tw-justify-center tw-p-0.5 tw-text-gray-700',
-            white ? 'tw-bg-white' : 'tw-bg-gray-100'
+            white ? 'tw-bg-white' : 'tw-bg-gray-100',
         )}
     >
         <div className=" tw-h-7 tw-whitespace-nowrap tw-text-lg">{value}</div>

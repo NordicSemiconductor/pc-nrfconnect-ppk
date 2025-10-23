@@ -54,7 +54,7 @@ export default () => {
                             dispatch(
                                 updateSampleFreqLog10({
                                     sampleFreqLog10: v,
-                                })
+                                }),
                             ),
                     ]}
                     onChangeComplete={() => {}}

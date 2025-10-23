@@ -36,7 +36,7 @@ export default ({
             setTimestampBegin(begin);
             setTimestampEnd(end);
         },
-        [setTimestampBegin, setTimestampEnd]
+        [setTimestampBegin, setTimestampEnd],
     );
 
     const [radioValue, setRadioValue] = useState(0);
@@ -57,7 +57,7 @@ export default ({
                 onSelect: () => {
                     const end = Math.min(
                         windowEnd,
-                        DataManager().getTimestamp()
+                        DataManager().getTimestamp(),
                     );
 
                     setExportTimestamp(Math.max(0, end - windowDuration), end);
@@ -71,13 +71,13 @@ export default ({
                     if (cursorBegin != null && cursorEnd != null) {
                         setExportTimestamp(
                             Math.ceil(cursorBegin),
-                            Math.trunc(cursorEnd)
+                            Math.trunc(cursorEnd),
                         );
                     }
                 },
             },
         ],
-        [cursorBegin, cursorEnd, setExportTimestamp, windowDuration, windowEnd]
+        [cursorBegin, cursorEnd, setExportTimestamp, windowDuration, windowEnd],
     );
 
     const updateRadioSelected = useCallback(
@@ -99,7 +99,7 @@ export default ({
                     logger.error(`Unexpected radio selected: ${value}`);
             }
         },
-        [exportSelection]
+        [exportSelection],
     );
 
     useEffect(() => {

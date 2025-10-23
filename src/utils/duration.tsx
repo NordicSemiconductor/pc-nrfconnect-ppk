@@ -13,7 +13,7 @@ const toString = (
     value: any,
     unit: any,
     value2: any = null,
-    unit2: any = null
+    unit2: any = null,
 ): string =>
     value2 === null ? `${value}${unit}` : `${value}${unit} ${value2}${unit2}`;
 
@@ -21,7 +21,7 @@ const toHTML = (
     value: any,
     unit: any,
     value2: any = null,
-    unit2: any = null
+    unit2: any = null,
 ): ReactElement<any, any> => (
     <div className="value">
         {value}
@@ -38,7 +38,7 @@ const toHTML = (
 
 const format = (
     microseconds: number,
-    formatter: any
+    formatter: any,
 ): ReactElement<any, any> | string | null => {
     if (Number.isNaN(microseconds)) return null;
     const usec = Math.trunc(microseconds);
@@ -63,7 +63,7 @@ const format = (
     if (usec < 600000000)
         return formatter(
             `${m}:${s.padStart(2, '0')}.${z.padStart(3, '0').substr(0, 1)}`,
-            'm'
+            'm',
         );
     if (usec < 3600000000) return formatter(`${m}:${s.padStart(2, '0')}`, 'm');
 
@@ -71,7 +71,7 @@ const format = (
     if (usec < 86400000000)
         return formatter(
             `${h}:${m.padStart(2, '0')}:${s.padStart(2, '0')}`,
-            'h'
+            'h',
         );
 
     const d = Math.trunc(usec / 86400000000);

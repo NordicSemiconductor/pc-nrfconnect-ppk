@@ -12,7 +12,7 @@ import { frameSize, indexToTimestamp } from '../globals';
 
 export const calcFileSize = (
     bytes: number,
-    formatOptions: FormatOptions = { notation: 'fixed' as const, precision: 1 }
+    formatOptions: FormatOptions = { notation: 'fixed' as const, precision: 1 },
 ) => {
     if (bytes > 1024 * 1024 * 1024 * 1024) {
         return unit(bytes, 'byte').to('TB').format(formatOptions);
@@ -68,7 +68,7 @@ export const remainingTime = (freeSpaceMB: number, samplesPerSecond: number) =>
 export const canFileFit = async (
     triggerLimit: number,
     fileSizeBytes: number,
-    dstPath: string
+    dstPath: string,
 ) => {
     const stats = await fs.statfs(dstPath);
     const freeDiskSpaceBytes =

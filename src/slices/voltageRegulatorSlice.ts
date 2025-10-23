@@ -44,7 +44,7 @@ const voltageRegulatorSlice = createSlice({
                 currentVDD?: number;
                 min?: number;
                 max?: number;
-            }>
+            }>,
         ) {
             state.vdd = vdd || state.vdd;
             state.currentVDD = currentVDD || state.currentVDD;
@@ -54,14 +54,14 @@ const voltageRegulatorSlice = createSlice({
         },
         moveVoltageRegulatorVdd(
             state,
-            { payload: vdd }: PayloadAction<number>
+            { payload: vdd }: PayloadAction<number>,
         ) {
             state.vdd = vdd;
         },
 
         updateVoltageRegulatorMaxCapPPK2(
             state,
-            { payload: newMaxCap }: PayloadAction<number>
+            { payload: newMaxCap }: PayloadAction<number>,
         ) {
             persistVoltageRegulatorMaxCapPPK2(newMaxCap);
             state.maxCap = newMaxCap;

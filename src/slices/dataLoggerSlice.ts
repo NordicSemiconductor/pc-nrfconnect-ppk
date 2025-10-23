@@ -45,7 +45,7 @@ const dataLoggerSlice = createSlice({
     reducers: {
         setSamplingAttrsAction: (
             state,
-            action: PayloadAction<{ maxContiniousSamplingTimeUs: number }>
+            action: PayloadAction<{ maxContiniousSamplingTimeUs: number }>,
         ) => {
             const samplingTime = action.payload.maxContiniousSamplingTimeUs;
             const maxSampleFreq = Math.round(10000 / samplingTime) * 100;
@@ -54,7 +54,7 @@ const dataLoggerSlice = createSlice({
             const savedDuration = getDuration(maxSampleFreq, state.duration);
             const savedDurationUnit = getDurationUnit(
                 maxSampleFreq,
-                state.durationUnit
+                state.durationUnit,
             );
 
             return {
@@ -70,7 +70,7 @@ const dataLoggerSlice = createSlice({
         },
         updateSampleFreqLog10: (
             state,
-            action: PayloadAction<{ sampleFreqLog10: number }>
+            action: PayloadAction<{ sampleFreqLog10: number }>,
         ) => {
             const { sampleFreqLog10 } = action.payload;
 
@@ -94,7 +94,7 @@ const dataLoggerSlice = createSlice({
         },
         setDataLoggerState: (
             state,
-            action: PayloadAction<{ state: DataLoggerState }>
+            action: PayloadAction<{ state: DataLoggerState }>,
         ) => ({ ...state, ...action.payload.state }),
     },
 });

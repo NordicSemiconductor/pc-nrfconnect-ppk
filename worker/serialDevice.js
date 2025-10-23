@@ -18,13 +18,13 @@ const asarPath = (() => {
             return resolve(
                 execPath.split('/Frameworks/')[0],
                 'Resources',
-                'app.asar'
+                'app.asar',
             );
         case platform === 'linux':
             return resolve(
                 execPath.split('/').slice(0, -1).join('/'),
                 'resources',
-                'app.asar'
+                'app.asar',
             );
         default:
             return null;

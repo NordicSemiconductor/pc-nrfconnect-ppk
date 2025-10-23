@@ -51,10 +51,10 @@ const ChartOptions = () => {
 
     /** Mapping to the {UNIT_POWER} to satisfy transformation to and from uA */
     const [yMinExponent, setYMinExponent] = useState(
-        UNIT_EXPONENT.MICRO_AMPERE
+        UNIT_EXPONENT.MICRO_AMPERE,
     );
     const [yMaxExponent, setYMaxExponent] = useState(
-        UNIT_EXPONENT.MICRO_AMPERE
+        UNIT_EXPONENT.MICRO_AMPERE,
     );
 
     /** Get the appropriate exponent to decide what unit to use given the number of nanoAmpere, nA
@@ -108,7 +108,7 @@ const ChartOptions = () => {
     const getPrettyValue = (
         initialNumber: number,
         power: number,
-        precision = 4
+        precision = 4,
     ) => {
         const rawResult = Number(initialNumber / 1000 ** power);
         const precisionResult = rawResult.toPrecision(precision);
@@ -174,7 +174,7 @@ const ChartOptions = () => {
                     }}
                     selectedItem={
                         UNIT_ITEMS.find(
-                            item => item.value === `${yMinExponent}`
+                            item => item.value === `${yMinExponent}`,
                         ) ?? UNIT_ITEMS[0]
                     }
                 />
@@ -211,7 +211,7 @@ const ChartOptions = () => {
                     }}
                     selectedItem={
                         UNIT_ITEMS.find(
-                            item => item.value === `${yMaxExponent}`
+                            item => item.value === `${yMaxExponent}`,
                         ) ?? UNIT_ITEMS[0]
                     }
                 />

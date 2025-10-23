@@ -57,7 +57,7 @@ export default abstract class Device extends EventEmitter {
         getAllPropertyNames(this)
             .filter((k: any) => k.startsWith('ppk'))
             .forEach((k: any) =>
-                Object.assign(this.capabilities, { [k]: true })
+                Object.assign(this.capabilities, { [k]: true }),
             );
         this.onSampleCallback = onSampleCallback;
     }

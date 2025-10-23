@@ -73,7 +73,7 @@ export const save =
                         extensions: ['ppk2'],
                     },
                 ],
-            }
+            },
         );
         if (!filename) {
             return;
@@ -96,7 +96,7 @@ export const save =
                 showProgressDialog({
                     title: 'Exporting',
                     message: 'Exporting PPK File',
-                })
+                }),
             );
             const session = DataManager().getSessionBuffers();
 
@@ -107,7 +107,7 @@ export const save =
                 session.foldingBuffer,
                 message => {
                     dispatch(updateProgress({ indeterminate: true, message }));
-                }
+                },
             );
 
             const sessionPath = DataManager().getSessionFolder();
@@ -128,7 +128,7 @@ export const save =
 
 export const load =
     (
-        setLoading: (value: boolean) => void
+        setLoading: (value: boolean) => void,
     ): AppThunk<RootState, Promise<void>> =>
     async (dispatch, getState) => {
         const {
@@ -161,7 +161,7 @@ export const load =
             showProgressDialog({
                 title: 'Importing',
                 message: 'Loading PPK File',
-            })
+            }),
         );
         try {
             const timestamp = await loadData(
@@ -170,9 +170,9 @@ export const load =
                 getDiskFullTrigger(getState()),
                 (message, progress, indeterminate) => {
                     dispatch(
-                        updateProgress({ message, progress, indeterminate })
+                        updateProgress({ message, progress, indeterminate }),
                     );
-                }
+                },
             );
 
             dispatch(setCurrentPane(Panes.DATA_LOGGER));
@@ -183,16 +183,16 @@ export const load =
                 dispatch(
                     updateSampleFreqLog10({
                         sampleFreqLog10: Math.log10(
-                            DataManager().getSamplesPerSecond()
+                            DataManager().getSamplesPerSecond(),
                         ),
-                    })
+                    }),
                 );
                 if (
                     DataManager().getTimestamp() <=
                     getWindowDuration(getState())
                 ) {
                     dispatch(
-                        chartWindowAction(0, DataManager().getTimestamp())
+                        chartWindowAction(0, DataManager().getTimestamp()),
                     );
                 } else {
                     dispatch(scrollToEnd());
@@ -238,7 +238,7 @@ export const screenshot = () => async () => {
         {
             defaultPath: join(getLastSaveDir(), `ppk-${timestamp}.png`),
             filters,
-        }
+        },
     );
     if (!filename) {
         return;

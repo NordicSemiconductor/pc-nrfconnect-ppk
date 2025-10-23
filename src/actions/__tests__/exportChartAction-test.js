@@ -27,7 +27,7 @@ describe('formatData', () => {
             startingPoint,
             buffer,
             bitsData,
-            selection
+            selection,
         );
         // Test that we only get current
         expect(content).toMatch(/^7\.000\s/);
@@ -42,7 +42,7 @@ describe('formatData', () => {
             startingPoint,
             buffer,
             bitsData,
-            selection
+            selection,
         );
         // Test that we only get timestamp and current
         expect(content).toMatch(/0\.02,7\.000\s/);
@@ -57,7 +57,7 @@ describe('formatData', () => {
             startingPoint,
             buffer,
             bitsData,
-            selection
+            selection,
         );
         // Test that we only get timestamp and current
         expect(content).toMatch(/0\.02,7\.000,11111111,1,1,1,1,1,1,1,1/);

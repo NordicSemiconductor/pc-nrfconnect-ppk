@@ -29,7 +29,7 @@ export const calcStats = (
     begin: number,
     end: number,
     abortController?: AbortController,
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
 ) => {
     if (begin > end) {
         const temp = begin;
@@ -75,8 +75,8 @@ export const calcStats = (
                                 end,
                                 e +
                                     indexToTimestamp(
-                                        maxNumberOfSamplesToProcess
-                                    )
+                                        maxNumberOfSamplesToProcess,
+                                    ),
                             ),
                         });
                     });
@@ -98,8 +98,8 @@ export const calcStats = (
             end,
             begin +
                 indexToTimestamp(maxNumberOfSamplesToProcess) -
-                indexToTimestamp(1)
-        )
+                indexToTimestamp(1),
+        ),
     );
 };
 
@@ -112,7 +112,7 @@ export interface DataAccumulator {
         digitalChannelsToCompute: number[],
         len: number,
         windowDuration: number,
-        onLoading?: (loading: boolean) => void
+        onLoading?: (loading: boolean) => void,
     ) => Promise<{
         ampereLineData: AmpereState[];
         bitsLineData: DigitalChannelStates[];
@@ -138,7 +138,7 @@ const accumulate = async (
     numberOfPointsPerGrouped: number,
     digitalChannelsToCompute: number[],
     bias?: 'start' | 'end',
-    onLoading?: (loading: boolean) => void
+    onLoading?: (loading: boolean) => void,
 ) => {
     begin = Math.trunc(begin / timeGroup) * timeGroup;
     end = begin + Math.ceil((end - begin) / timeGroup) * timeGroup;
@@ -158,7 +158,7 @@ const accumulate = async (
         begin,
         end,
         bias,
-        onLoading
+        onLoading,
     );
     const bitAccumulator =
         digitalChannelsToCompute.length > 0 ? bitDataAccumulator() : undefined;
@@ -169,7 +169,7 @@ const accumulate = async (
 
     if (!needMinMaxLine) {
         const ampereLineData: AmpereState[] = new Array(
-            Math.ceil(noOfPointToRender)
+            Math.ceil(noOfPointToRender),
         );
         for (let index = 0; index < numberOfElements; index += 1) {
             const v = data.getCurrentData(index);
@@ -196,12 +196,12 @@ const accumulate = async (
                 }),
             averageLine: ampereLineData
                 .filter(d => !Number.isNaN(d.y))
-                .map(d => ({ ...d, count: 1 } as AverageLine)),
+                .map(d => ({ ...d, count: 1 }) as AverageLine),
         };
     }
 
     const ampereLineData: AmpereState[] = new Array(
-        Math.ceil(noOfPointToRender) * 2
+        Math.ceil(noOfPointToRender) * 2,
     );
 
     const averageLine: AverageLine[] = new Array(Math.ceil(noOfPointToRender));
@@ -275,13 +275,13 @@ const accumulate = async (
 const removeCurrentSamplesOutsideScopes = <T extends AmpereState | AverageLine>(
     current: T[],
     begin: number,
-    end: number
+    end: number,
 ) => current.filter(v => v.x !== undefined && v.x >= begin && v.x <= end);
 
 const removeDigitalChannelsSamplesOutsideScopes = (
     dataChannel: DigitalChannelState[],
     begin: number,
-    end: number
+    end: number,
 ) => {
     if (dataChannel.length >= 2) {
         let y = dataChannel[1].y;
@@ -335,33 +335,33 @@ const removeDigitalChannelsSamplesOutsideScopes = (
 const removeDigitalChannelStateSamplesOutsideScopes = (
     dataChannel: DigitalChannelStates,
     begin: number,
-    end: number
+    end: number,
 ) => ({
     mainLine: removeDigitalChannelsSamplesOutsideScopes(
         dataChannel.mainLine,
         begin,
-        end
+        end,
     ),
     uncertaintyLine: removeDigitalChannelsSamplesOutsideScopes(
         dataChannel.uncertaintyLine,
         begin,
-        end
+        end,
     ),
 });
 
 const removeDigitalChannelsStatesSamplesOutsideScopes = (
     dataChannel: DigitalChannelStates[],
     begin: number,
-    end: number
+    end: number,
 ) =>
     dataChannel.map(c =>
-        removeDigitalChannelStateSamplesOutsideScopes(c, begin, end)
+        removeDigitalChannelStateSamplesOutsideScopes(c, begin, end),
     );
 
 const findMissingRanges = (
     accumulatedResult: AccumulatedResult,
     begin: number,
-    end: number
+    end: number,
 ) => {
     const timestamps =
         accumulatedResult.ampereLineData
@@ -419,7 +419,7 @@ let cachedDigitalChannelsToCompute: number[];
 
 const chartLineToBitState = (
     mainLineState: ChartLineValue | undefined,
-    uncertaintyLineState: ChartLineValue | undefined
+    uncertaintyLineState: ChartLineValue | undefined,
 ): BitState => {
     if (mainLineState === undefined && uncertaintyLineState === undefined) {
         return 0;
@@ -441,10 +441,8 @@ const chartLineToBitState = (
 };
 
 const joinBitLines = (
-    begin: number,
-    end: number,
     dataLines: DigitalChannelStates[][],
-    digitalChannelsToCompute: number[]
+    digitalChannelsToCompute: number[],
 ) => {
     const timestamp: TimestampType[] = Array(8).fill(undefined);
     const bitDataProcessor =
@@ -457,15 +455,15 @@ const joinBitLines = (
         dataLine.forEach((line, index) => {
             const numberOfElement = Math.min(
                 line.mainLine.length,
-                line.uncertaintyLine.length
+                line.uncertaintyLine.length,
             );
             for (let i = 0; i < numberOfElement; i += 1) {
                 bitDataProcessor?.processBitState(
                     chartLineToBitState(
                         line.mainLine[i].y,
-                        line.uncertaintyLine[i].y
+                        line.uncertaintyLine[i].y,
                     ),
-                    index
+                    index,
                 );
 
                 if (timestamp[index] !== line.mainLine[i].x) {
@@ -503,7 +501,7 @@ export default (): DataAccumulator => ({
         digitalChannelsToCompute,
         maxNumberOfPoints,
         windowDuration,
-        onLoading?: (loading: boolean) => void
+        onLoading?: (loading: boolean) => void,
     ) {
         // We want an extra sample from both end to show line going out of chart
         begin = Math.max(0, normalizeTimeFloor(begin)); // normalizeTime floors
@@ -512,7 +510,7 @@ export default (): DataAccumulator => ({
             DataManager().getTimestamp(),
             normalizeTimeFloor(end) === end
                 ? end
-                : normalizeTimeFloor(end) + DataManager().getSamplingTime()
+                : normalizeTimeFloor(end) + DataManager().getSamplingTime(),
         );
 
         if (maxNumberOfPoints === 0) {
@@ -527,7 +525,7 @@ export default (): DataAccumulator => ({
             DataManager().getNumberOfSamplesInWindow(windowDuration);
 
         const numberOfPointsPerGroup = Math.ceil(
-            suggestedNoOfRawSamples / maxNumberOfPoints
+            suggestedNoOfRawSamples / maxNumberOfPoints,
         );
 
         const timeGroup = indexToTimestamp(numberOfPointsPerGroup);
@@ -536,7 +534,7 @@ export default (): DataAccumulator => ({
             timeGroup !== cacheValidTimeGroup ||
             !compareDigitalChanel(
                 cachedDigitalChannelsToCompute,
-                digitalChannelsToCompute
+                digitalChannelsToCompute,
             )
         ) {
             cachedResult = undefined;
@@ -556,12 +554,12 @@ export default (): DataAccumulator => ({
                     numberOfPointsPerGroup,
                     digitalChannelsToCompute,
                     undefined,
-                    onLoading
+                    onLoading,
                 );
 
             const requiredEnd = Math.min(
                 Math.ceil(end / timeGroup) * timeGroup,
-                DataManager().getTimestamp()
+                DataManager().getTimestamp(),
             );
 
             const requiredBegin = Math.trunc(begin / timeGroup) * timeGroup;
@@ -570,17 +568,17 @@ export default (): DataAccumulator => ({
                 ampereLineData: removeCurrentSamplesOutsideScopes(
                     cachedResult.ampereLineData,
                     requiredBegin,
-                    requiredEnd
+                    requiredEnd,
                 ),
                 bitsLineData: removeDigitalChannelsStatesSamplesOutsideScopes(
                     cachedResult.bitsLineData,
                     requiredBegin,
-                    requiredEnd
+                    requiredEnd,
                 ),
                 averageLine: removeCurrentSamplesOutsideScopes(
                     cachedResult.averageLine,
                     requiredBegin,
-                    requiredEnd
+                    requiredEnd,
                 ),
             };
 
@@ -592,14 +590,14 @@ export default (): DataAccumulator => ({
                     numberOfPointsPerGroup,
                     digitalChannelsToCompute,
                     undefined,
-                    onLoading
+                    onLoading,
                 );
             }
 
             const rangesToLoad = findMissingRanges(
                 usableCachedData,
                 begin,
-                end
+                end,
             );
 
             const frontRange = rangesToLoad.find(r => r.location === 'front');
@@ -616,7 +614,7 @@ export default (): DataAccumulator => ({
                     numberOfPointsPerGroup,
                     digitalChannelsToCompute,
                     undefined,
-                    onLoading
+                    onLoading,
                 );
             }
 
@@ -628,7 +626,7 @@ export default (): DataAccumulator => ({
                     numberOfPointsPerGroup,
                     digitalChannelsToCompute,
                     undefined,
-                    onLoading
+                    onLoading,
                 );
             }
 
@@ -639,14 +637,12 @@ export default (): DataAccumulator => ({
                     ...(backData?.ampereLineData ?? []),
                 ],
                 bitsLineData: joinBitLines(
-                    begin,
-                    end,
                     [
                         frontData?.bitsLineData ?? [],
                         usableCachedData.bitsLineData,
                         backData?.bitsLineData ?? [],
                     ],
-                    digitalChannelsToCompute
+                    digitalChannelsToCompute,
                 ),
                 averageLine: [
                     ...(frontData?.averageLine ?? []),

@@ -22,7 +22,7 @@ import EventAction from '../../usageDataActions';
 
 export const useSynchronizationIfChangedFromOutside = <T,>(
     externalValue: T,
-    setInternalValue: (value: T) => void
+    setInternalValue: (value: T) => void,
 ) => {
     const previousExternalValue = useRef(externalValue);
     useEffect(() => {
