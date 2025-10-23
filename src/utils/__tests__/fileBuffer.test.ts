@@ -37,9 +37,9 @@ jest.mock('fs-extra', () => ({
     fdatasyncSync: jest.fn(() => {}),
     read: jest.fn(
         (
-            fd: number,
+            _fd: number,
             buffer: Uint8Array,
-            offset: number,
+            _offset: number,
             length: number,
             position: fs.ReadPosition | null,
             callback: (
@@ -63,11 +63,11 @@ const castToJest = (fn: any) => fn as jest.Mock<any, any, any>;
 const mockFsRead = (cb?: () => number) => {
     castToJest(fs.read).mockImplementationOnce(
         (
-            fd: number,
+            _fd: number,
             buffer: Uint8Array,
             offset: number,
             length: number,
-            position: fs.ReadPosition | null,
+            _position: fs.ReadPosition | null,
             callback: (
                 err: NodeJS.ErrnoException | null,
                 bytesRead: number,

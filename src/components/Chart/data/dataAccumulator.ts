@@ -441,8 +441,6 @@ const chartLineToBitState = (
 };
 
 const joinBitLines = (
-    begin: number,
-    end: number,
     dataLines: DigitalChannelStates[][],
     digitalChannelsToCompute: number[],
 ) => {
@@ -639,8 +637,6 @@ export default (): DataAccumulator => ({
                     ...(backData?.ampereLineData ?? []),
                 ],
                 bitsLineData: joinBitLines(
-                    begin,
-                    end,
                     [
                         frontData?.bitsLineData ?? [],
                         usableCachedData.bitsLineData,
