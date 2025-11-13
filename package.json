@@ -60,9 +60,6 @@
         "redux-mock-store": "^1.5.4",
         "unzipper": "^0.10.14"
     },
-    "eslintConfig": {
-        "extends": "./node_modules/@nordicsemiconductor/pc-nrfconnect-shared/config/eslintrc"
-    },
     "prettier": "@nordicsemiconductor/pc-nrfconnect-shared/config/prettier.config.js",
     "dependencies": {
         "archiver": "^6.0.1"
