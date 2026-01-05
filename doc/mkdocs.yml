@@ -56,7 +56,7 @@ extra:
   app_name: Power Profiler app
   session_recovery_info: If the Power Profiler app closes or crashes before you save the sampling data, you can recover the session later.
     The **Session recovery** window appears when you restart the app, listing the sampling sessions that are unsaved.
-    Click **Recover** to recover sampling results from a listed session.<br/><br/>![Session recovery window](./screenshots/ppk2_session_recovery.png "Session recovery window")
+    Click **Recover** to recover sampling results from a listed session.
 
 nav:
   - Home: index.md

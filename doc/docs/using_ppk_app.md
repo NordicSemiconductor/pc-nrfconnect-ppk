@@ -24,3 +24,5 @@ At the end of the sampling, you can click [**Save/Export**](./overview.md#save-o
 !!! note "Note"
 
     {{session_recovery_info}}
+
+    ![Session recovery window](./screenshots/ppk2_session_recovery.png "Session recovery window")
