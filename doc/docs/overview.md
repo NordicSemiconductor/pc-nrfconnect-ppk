@@ -65,12 +65,14 @@ This is also where you can **Start** sampling.
 ![Start button](./screenshots/ppk2_device_panel_sampling_start.PNG "Start button")
 
 After sampling starts, the **Start** button changes to **Stop**.
-Before you can start sampling again, [**Save/Export**](#other-options) the session data or take a [**Screenshot**](#other-options)
+Before you can start sampling again, [**Save/Export**](#save-options) the session data or take a [**Screenshot**](#save-options)
 If you don't, you will be prompted about saving any unsaved sampling data before you start sampling again.
 
 !!! note "Note"
 
     {{session_recovery_info}}
+
+    ![Session recovery window](./screenshots/ppk2_session_recovery.png "Session recovery window")
 
 #### Data logger parameters
 
@@ -116,7 +118,7 @@ The following table lists the available analog trigger settings.
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Level**                         | The current value at which the trigger takes place. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.PNG "Arrow for setting Level value")        |
+| **Level**                         | The level value at which the trigger takes place. After you record some data, you can also set this value using an arrow in the **Data logger** chart.</br></br>![Arrow for setting Level value](./screenshots/ppk2_device_panel_sampling_trigger_arrow.PNG "Arrow for setting Level value")        |
 | **Rising Edge**                   | Trigger happens when the signal transitions from a value lower than the value of **Level** to a higher value.        |
 | **Falling Edge**                  | Trigger happens when the signal transitions from a value higher than the value of **Level** to a lower value.        |
 
@@ -153,8 +155,26 @@ The following options let you save the results of the sampling. They are only av
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Save/Export**                   | Available only after sampling is stopped. Saves the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of the {{app_name}}. |
-| **Screenshot**                    | Saves the current data from either the **Data logger** or the **Scope** view as a PNG image.                                          |
+| **Save/Export**                   | Available only after sampling is stopped.<br/><br/>- You can save the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of the {{app_name}}.<br/>- You can export to the results to a CSV file, which you can use in other applications. See [Export to CSV options](#export-to-csv-options) for details. |
+| **Screenshot**                    | Saves the visible data from either the **Data logger** or the **Scope** view as a PNG image.                                          |
+
+#### Export to CSV options
+
+When you select **Save/Export** and choose to export to CSV format, a dialog appears that lets you configure the export settings.
+
+![Export selection to CSV dialog](./screenshots/ppk2_export_to_csv.png "Export selection to CSV dialog")
+
+The dialog provides the following options:
+
+| Option                            | Description                                                                                          |
+|-----------------------------------|------------------------------------------------------------------------------------------------------|
+| **Area to Export**                | Choose between **All** (export all recorded data), **Window** (export only the data visible in the present window view), or **Selected** (export only the selected area, available when a selection is made in the chart). |
+| **Timestamp**                     | Include timestamp values for each data point.                                                         |
+| **Current**                       | Include current measurement values.                                                                    |
+| **Digital logic pins (single string field)** | Include digital channel data as a single combined string field.                                    |
+| **Digital logic pins (separate fields)** | Include digital channel data as separate fields for each channel.                                  |
+
+The dialog also displays an estimation of the export size, including the number of records, file size, and estimated export time.
 
 ### Advanced configuration
 
@@ -246,7 +266,7 @@ The bottom sections of the sampling chart display the average and maximum measur
 
 ### Digital channels
 
-The digital signals are visible in the charting section below the current measurement.
+The digital signals are visible in the charting section below the main measurement.
 
 ![Digital channels](./screenshots/ppk2_digital_channels.PNG "Digital channels")
 
