@@ -1,8 +1,8 @@
 # Overview and user interface
 
-The {{app_name}} has two views that provide detailed power consumption information.
+The Power Profiler app has two views that provide detailed power consumption information.
 
-![{{app_name}} default view at startup](./screenshots/ppk2_standard_view.png "{{app_name}} default view at startup")
+![Power Profiler app default view at startup](./screenshots/ppk2_standard_view.png "Power Profiler app default view at startup")
 
 ## Select Device
 
@@ -41,7 +41,7 @@ The sampling will automatically stop when the hard drive has less than the defin
 
 More options become available after selecting a device. Some options are specific to the selected [sampling mode tab](#sampling-mode-tabs).
 
-![{{app_name}} default view after selecting a device](./screenshots/ppk2_standard_view_connected.png "{{app_name}} default view after selecting a device")
+![Power Profiler app default view after selecting a device](./screenshots/ppk2_standard_view_connected.png "Power Profiler app default view after selecting a device")
 
 ### Power supply mode
 
@@ -155,7 +155,7 @@ The following options let you save the results of the sampling. They are only av
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Save/Export**                   | Available only after sampling is stopped.<br/><br/>- You can save the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of the {{app_name}}.<br/>- You can export to the results to a CSV file, which you can use in other applications. See [Export to CSV options](#export-to-csv-options) for details. |
+| **Save/Export**                   | Available only after sampling is stopped.<br/><br/>- You can save the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of the Power Profiler app.<br/>- You can export to the results to a CSV file, which you can use in other applications. See [Export to CSV options](#export-to-csv-options) for details. |
 | **Screenshot**                    | Saves the visible data from either the **Data logger** or the **Scope** view as a PNG image.                                          |
 
 #### Export to CSV options
@@ -206,7 +206,7 @@ Use this control to set the voltage limit for the measurement.
 
 ## Sampling mode tabs
 
-The {{app_name}} comes with two sampling modes: **Data logger** and **Scope**.
+The Power Profiler app comes with two sampling modes: **Data logger** and **Scope**.
 
 - The **Data logger** sampling mode lets you examine the power continuously over a period of time.
   It has its own [sampling parameters](#data-logger-parameters) and lets you use the **Live Now** toggle to jump back to displaying the live measurement.
@@ -276,13 +276,13 @@ To select which digital channels you see, use the **Digital channels** menu in [
 
 ## Feedback tab
 
-The Feedback tab lets you send feedback about the {{app_name}} to the application development team.
+The Feedback tab lets you send feedback about the Power Profiler app to the application development team.
 
 ## About tab
 
 Here you can view application information, restore settings to default, access source code, and documentation. You also can find information on the selected device, access support tools, and enable verbose logging.
 
-![{{app_name}} About tab](./screenshots/ppk2_about_tab.png "{{app_name}} About tab")
+![Power Profiler app About tab](./screenshots/ppk2_about_tab.png "Power Profiler app About tab")
 
 ## Log
 
