@@ -2,7 +2,7 @@
 
 | Date       | Description                                                                                          |
 |------------|------------------------------------------------------------------------------------------------------|
-| January 2026 | Added information about the [Export to CSV](./overview.md#export-to-csv-options) dialog and its options. |
+| January 2026 | - Renamed the Home page to [Get started](./index.md).<br/>- Removed the separate Installing the Power Profiler app page. This page is now a section of the Get started page.<br/>- Added information about the [Export to CSV](./overview.md#export-to-csv-options) dialog and its options. |
 | July 2025  | - Added information about the [trigger settings](./overview.md#trigger-settings) available for the **Scope** sampling mode<br/><br/>- Added information about the session recovery feature to the [Overview](./overview.md#sampling-parameters) and [Using the Power Profiler app](using_ppk_app.md) pages<br/><br/>- Added information about the [**Offset**](./overview.md#scope-parameters) sampling parameter for the **Scope** sampling mode.  |
 | January 2025 | Added the [Application source code](./index.md#application-source-code) section on the [Home](./index.md) page |
 | November 2024 | Editorial changes   |
