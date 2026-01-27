@@ -1,66 +1,51 @@
 site_name: Power Profiler app documentation
-site_url:
+site_url: null
 use_directory_urls: false
-
 theme:
   name: material
   palette:
-    - scheme: custom-blue
-      toggle:
-        icon: material/lightbulb-outline
-        name: Switch to dark mode
-    - scheme: custom-blue-dark
-      toggle:
-        icon: material/lightbulb
-        name: Switch to light mode
-  # logo: assets/logo.png
-  # favicon: assets/logo.png
+  - scheme: custom-blue
+    toggle:
+      icon: material/lightbulb-outline
+      name: Switch to dark mode
+  - scheme: custom-blue-dark
+    toggle:
+      icon: material/lightbulb
+      name: Switch to light mode
   features:
-    - content.code.annotate
-    - content.tooltips
-    - content.tabs.link
-    - navigation.indexes
-    - navigation.top
-    - navigation.tracking
-    - search.highlight
-    - toc.follow
-
-
+  - content.code.annotate
+  - content.tooltips
+  - content.tabs.link
+  - navigation.indexes
+  - navigation.top
+  - navigation.tracking
+  - search.highlight
+  - toc.follow
 extra_css:
-  - stylesheets/style.css
-
-copyright:
-  Copyright &copy; 2019-2024
-
+- stylesheets/style.css
+copyright: Copyright &copy; 2019-2024
 markdown_extensions:
-  - abbr
-  - admonition
-  - attr_list
-  - md_in_html
-  - meta
-  - pymdownx.details
-  - pymdownx.keys
-  - pymdownx.tabbed
-  - pymdownx.superfences
-  - toc:
-      permalink: true
-      toc_depth: 4
-
+- abbr
+- admonition
+- attr_list
+- md_in_html
+- meta
+- pymdownx.details
+- pymdownx.keys
+- pymdownx.tabbed
+- pymdownx.superfences
+- toc:
+    permalink: true
+    toc_depth: 4
 plugins:
-  - macros
-  - search
-
-
+- macros
+- search
 extra:
   test: This is a test abbreviation snippet
-  session_recovery_info: If the Power Profiler app closes or crashes before you save the sampling data, you can recover the session later.
-    The **Session recovery** window appears when you restart the app, listing the sampling sessions that are unsaved.
-    Click **Recover** to recover sampling results from a listed session.
-
+  session_recovery_info: If the Power Profiler app closes or crashes before you save the sampling data, you can recover the session later. The **Session recovery** window appears when you restart the app, listing the sampling sessions that are unsaved. Click **Recover** to recover sampling results from a listed session.
 nav:
-  - Home: index.md
-  - Installing the Power Profiler app: installing.md
-  - Overview and user interface: overview.md
-  - Using the Power Profiler app: using_ppk_app.md
-  - Troubleshooting: troubleshooting.md
-  - Revision history: revision_history.md
+- Get started: index.md
+- Overview and user interface: overview.md
+- Using the Power Profiler app: using_ppk_app.md
+- Troubleshooting: troubleshooting.md
+- Revision history: revision_history.md

@@ -4,6 +4,10 @@ The Power Profiler app in [nRF Connect for Desktop](https://docs.nordicsemi.com/
 
 The PPK measures current consumption for a connected Nordic Development Kit or any external board. It gives a detailed picture of the current profile for the user application.
 
+## Installing the Power Profiler app
+
+For installation instructions, see [Installing nRF Connect for Desktop apps](https://docs.nordicsemi.com/bundle/nrf-connect-desktop/page/installing_apps.html) in the nRF Connect for Desktop documentation.
+
 ## Supported devices
 
 - Power Profiler Kit II (PPK2)
