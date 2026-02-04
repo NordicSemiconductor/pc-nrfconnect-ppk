@@ -155,7 +155,7 @@ The following options let you save the results of the sampling. They are only av
 
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
-| **Save/Export**                   | Available only after sampling is stopped.<br/><br/>- You can save the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections) in a new session of the Power Profiler app.<br/>- You can export to the results to a CSV file, which you can use in other applications. See [Export to CSV options](#export-to-csv-options) for details. |
+| **Save/Export**                   | Available only after sampling is stopped.<br/><br/>- You can save the results of the data sampling to a `.ppk2` file, which you can [**Load**](#device-panel-sections-before-device-selection) in a new session of the Power Profiler app.<br/>- You can export to the results to a CSV file, which you can use in other applications. See [Export to CSV options](#export-to-csv-options) for details. |
 | **Screenshot**                    | Saves the visible data from either the **Data logger** or the **Scope** view as a PNG image.                                          |
 
 #### Export to CSV options
