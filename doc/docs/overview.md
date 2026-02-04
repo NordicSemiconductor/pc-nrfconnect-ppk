@@ -32,7 +32,7 @@ The **Load** button lets you open a `.ppk2` or a `.ppk` power profiler file.
 
 ![Temp disk data controls](./screenshots/ppk2_temp_disk_data.png "Temp disk data controls")
 
-These options only appear before selecting the device or when the device is selected and in the [**Data logger** sampling mode](#sampling-tabs).
+These options only appear before selecting the device or when the device is selected and in the [**Data logger** sampling mode](#sampling-mode-tabs).
 
 Here you can set the root directory where the sampling file will be saved by default and define how much hard drive space you want to keep free when you start sampling.
 The sampling will automatically stop when the hard drive has less than the defined amount.
@@ -145,7 +145,7 @@ The following table lists the available display options.
 | Option                            | Description                                                                                          |
 |-----------------------------------|------------------------------------------------------------------------------------------------------|
 | **Timestamps**                    | Show or hide the timestamps at the bottom of the sampling chart.                                     |
-| **Relative** and **Absolute**     | Select how the time value of the **Timestamps** is to be displayed: relative to the start of the sampling or using machine time (UTC, adjusted per time zone of the machine settings).<br/><br/>If you [**Load**](#device-panel-sections) an old `.ppk` file, the timestamp value will not be shown because of the lack of metadata.         |
+| **Relative** and **Absolute**     | Select how the time value of the **Timestamps** is to be displayed: relative to the start of the sampling or using machine time (UTC, adjusted per time zone of the machine settings).<br/><br/>If you [**Load**](#device-panel-sections-before-device-selection) an old `.ppk` file, the timestamp value will not be shown because of the lack of metadata.         |
 | **Digital channels**              | Show or hide the [digital channels](#digital-channels) under the sampling chart.                     |
 | **Show Minimap**                  | Toggle to show or hide the navigable minimap under the **Data logger**'s chart. You can use the minimap to inspect the logged sampling results and navigate quickly in the time range of the recording. |
 
@@ -213,7 +213,7 @@ The Power Profiler app comes with two sampling modes: **Data logger** and **Scop
 
     ![Data logger mode at work](./screenshots/ppk2_logger_tab.PNG "Data logger mode at work")
 
-- The **Scope** sampling mode lets you sample only when the values specified for the **Length** and **Level** [sampling parameters](#real-time-parameters) have been reached.
+- The **Scope** sampling mode lets you sample only when the values specified for the **Length** and **Level** [sampling parameters](#scope-parameters) have been reached.
   You can use the blue slider on the Y-axis to dynamically select the value of the **Level** parameter.
 
     ![Scope mode at work](./screenshots/ppk2_scope_tab.PNG "Scope mode at work")
