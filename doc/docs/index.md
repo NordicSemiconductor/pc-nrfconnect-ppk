@@ -1,4 +1,4 @@
-# Power Profiler app
+# Get started
 
 The Power Profiler app in [nRF Connect for Desktop](https://docs.nordicsemi.com/bundle/nrf-connect-desktop/page/index.html) lets you communicate with the Power Profiler Kit II (PPK2) in order to obtain real-time current measurements of your designs.
 
