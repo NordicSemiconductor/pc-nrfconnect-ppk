@@ -7,7 +7,6 @@
 import { NrfConnectState } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
-import deprecatedDevices from '../features/DeprecatedDevice/DeprecatedDeviceSlice';
 import minimap from '../features/minimap/minimapSlice';
 import progressDialog from '../features/ProgressDialog/progressSlice';
 import app from './appSlice';
@@ -30,7 +29,6 @@ const appReducer = combineReducers({
     gains,
     spikeFilter,
     dataLogger,
-    deprecatedDevices,
     progressDialog,
     trigger,
 });

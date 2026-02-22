@@ -17,7 +17,6 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { updateAllGains, updateSpikeFilter } from '../../actions/deviceActions';
-import DeprecatedDeviceDialog from '../../features/DeprecatedDevice/DeprecatedDevice';
 import ProgressDialog from '../../features/ProgressDialog/ProgressDialog';
 import { getShowProgressDialog } from '../../features/ProgressDialog/progressSlice';
 import {
@@ -146,7 +145,6 @@ export default () => {
                     </Button>
                 </Group>
             )}
-            <DeprecatedDeviceDialog />
             {showProgressDialog && <ProgressDialog />}
         </SidePanel>
     );

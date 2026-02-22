@@ -15,13 +15,11 @@ import {
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
 import { close, open } from '../actions/deviceActions';
-import { setShowPPK1Dialog } from '../features/DeprecatedDevice/DeprecatedDeviceSlice';
 
 const deviceListing = {
     nordicUsb: true,
     nordicDfu: true,
     serialPorts: true,
-    jlink: true,
 };
 
 export const deviceSetupConfig: DeviceSetupConfig = {
@@ -56,11 +54,10 @@ export default () => {
         <DeviceSelector
             deviceSetupConfig={deviceSetupConfig}
             deviceListing={deviceListing}
-            onDeviceSelected={device => {
-                if (device.traits.jlink) {
-                    dispatch(setShowPPK1Dialog(true));
-                }
-            }}
+            deviceFilter={device =>
+                isDeviceInDFUBootloader(device) ||
+                device.usb?.device.descriptor.idProduct === 0xc00a
+            }
             onDeviceIsReady={device => {
                 dispatch(open(device));
             }}
