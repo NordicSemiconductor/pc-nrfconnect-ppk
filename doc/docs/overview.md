@@ -4,15 +4,9 @@ The Power Profiler app has two views that provide detailed power consumption inf
 
 ![Power Profiler app default view at startup](./screenshots/ppk2_standard_view.png "Power Profiler app default view at startup")
 
-## Select Device
+## Common interface
 
-Once you connect a device to the system, it becomes visible and available when you click on the **Select device** drop-down list. You can choose a device from the list of connected devices to perform further actions on the device such as programming.
-
-You can access the following options by selecting the arrow under the device name.
-
-- Show the device at the top of the list by making it favorite.
-- Rename the device.
-- View device COM ports.
+This app uses the nRF Connect for Desktop UI framework. Shared UI elements such as **Select device**, **About** tab, and **Log** panel are described in the [Common user interface](https://docs.nordicsemi.com/bundle/swtools_docs/page/common_interface.html) documentation.
 
 ## Device panel sections before device selection
 
@@ -273,22 +267,3 @@ The digital signals are visible in the charting section below the main measureme
 The digital signals are connected to the PPK2's Logic port as described in [Logic port](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/logic_port.html). To view the digital values, enable digital channels and zoom in on the main chart until the values are visible.
 
 To select which digital channels you see, use the **Digital channels** menu in [**Display options**](#display-options).
-
-## Feedback tab
-
-The Feedback tab lets you send feedback about the Power Profiler app to the application development team.
-
-## About tab
-
-Here you can view application information, restore settings to default, access source code, and documentation. You also can find information on the selected device, access support tools, and enable verbose logging.
-
-![Power Profiler app About tab](./screenshots/ppk2_about_tab.png "Power Profiler app About tab")
-
-## Log
-
-The Log panel allows you to view the most important log events, tagged with a timestamp. Each time you open the app, a new session log file is created. You can find the Log panel and its controls, below the main application Window.
-
-- When troubleshooting, to view more detailed information than shown in the Log panel, use **Open log file** to open the current log file in a text editor.
-- To clear the information currently displayed in the Log panel, use **Clear Log**. The contents of the log file are not affected.
-- To hide or display the Log panel in the user interface, use **Show Log**.
-- To freeze Log panel scrolling, use **Autoscroll Log**.
