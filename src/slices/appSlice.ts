@@ -6,10 +6,10 @@
 // TODO: Remove next line
 /* eslint-disable @typescript-eslint/no-explicit-any -- included for conservative refactoring to typescript */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import os from 'os';
 
-import { Capabilities } from '../device/abstractDevice';
+import { type Capabilities } from '../device/abstractDevice';
 import {
     getDiskFullTrigger as getPersistedDiskFullTrigger,
     getPreferredSessionLocation,

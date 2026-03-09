@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { classNames } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { Unit } from 'mathjs';
+import { type Unit } from 'mathjs';
 
 interface ValueProperties {
     label: string;
@@ -30,7 +30,7 @@ export const ValueRaw = ({
             white ? 'tw-bg-white' : 'tw-bg-gray-100',
         )}
     >
-        <div className=" tw-h-7 tw-whitespace-nowrap tw-text-lg">{value}</div>
+        <div className="tw-h-7 tw-whitespace-nowrap tw-text-lg">{value}</div>
         <span className="tw-text-xs">{label}</span>
     </div>
 );

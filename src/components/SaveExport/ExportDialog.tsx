@@ -219,7 +219,7 @@ export default () => {
         >
             <div className="tw-flex tw-flex-col tw-gap-4">
                 <div className="tw-flex tw-flex-row tw-gap-4">
-                    <div className="tw-flex tw-h-full tw-flex-1 tw-grow-[2] tw-flex-col tw-gap-2 tw-border tw-border-gray-200 tw-p-4 ">
+                    <div className="tw-flex tw-h-full tw-flex-1 tw-grow-[2] tw-flex-col tw-gap-2 tw-border tw-border-gray-200 tw-p-4">
                         <ExportSelection
                             isExportDialogVisible={isExportDialogVisible}
                             setTimestampBegin={setTimestampBegin}
@@ -229,7 +229,7 @@ export default () => {
                             cursorEnd={cursorEnd}
                             windowDuration={windowDuration}
                         />
-                        <p className=" tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
+                        <p className="tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                             Export fields
                         </p>
                         <div className="tw-w-fit">
@@ -240,7 +240,7 @@ export default () => {
                         </div>
                     </div>
 
-                    <div className="tw-flex-1 tw-grow tw-border tw-border-gray-200 ">
+                    <div className="tw-flex-1 tw-grow tw-border tw-border-gray-200">
                         <div className="tw-flex tw-flex-col tw-gap-2 tw-p-4">
                             <p className="tw-pt-8 tw-text-[10px] tw-uppercase tw-tracking-[0.2rem] tw-text-gray-400">
                                 Estimation

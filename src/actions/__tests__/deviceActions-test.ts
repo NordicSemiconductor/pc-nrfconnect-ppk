@@ -5,9 +5,9 @@
  */
 import {
     DigitalChannelTriggerStatesEnum,
-    TriggerEdge,
+    type TriggerEdge,
 } from '../../slices/triggerSlice';
-import { digitalChannelStateTupleOf8 } from '../../utils/persistentStore';
+import { type digitalChannelStateTupleOf8 } from '../../utils/persistentStore';
 import {
     checkAnalogTriggerValidity,
     checkDigitalTriggerValidity,

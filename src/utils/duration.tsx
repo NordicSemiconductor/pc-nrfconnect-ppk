@@ -5,9 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any -- conservative refactoring, TODO: remove this line */
 
-import React, { ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 
-import { TimeUnit } from './persistentStore';
+import { type TimeUnit } from './persistentStore';
 
 const toString = (
     value: any,

@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import {
-    digitalChannelStateTupleOf8,
+    type digitalChannelStateTupleOf8,
     getDigitalChannelsTriggerLogic as getPersistedDigitaTriggerLogic,
     getDigitalChannelsTriggers as getPersistedDigitalChannelsTriggers,
     getRecordingLength as getPersistedRecordingLength,

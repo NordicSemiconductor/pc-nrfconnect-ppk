@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import {
-    Device as SharedDevice,
+    type Device as SharedDevice,
     getAppDir,
     logger,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -15,9 +15,14 @@ import { fork } from 'child_process';
 import path from 'path';
 
 import PPKCmd from '../constants';
-import { SpikeFilter } from '../utils/persistentStore';
+import { type SpikeFilter } from '../utils/persistentStore';
 import Device, { convertFloatToByteBuffer } from './abstractDevice';
-import { Mask, modifiers, SampleValues, serialDeviceMessage } from './types';
+import {
+    type Mask,
+    type modifiers,
+    type SampleValues,
+    type serialDeviceMessage,
+} from './types';
 
 /* eslint-disable no-bitwise */
 

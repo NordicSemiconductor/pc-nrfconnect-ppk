@@ -12,7 +12,7 @@ import {
     getChartDigitalChannelInfo,
     setDigitalChannels,
 } from '../../slices/chartSlice';
-import { booleanTupleOf8 } from '../../utils/persistentStore';
+import { type booleanTupleOf8 } from '../../utils/persistentStore';
 
 import './digital-channels.scss';
 

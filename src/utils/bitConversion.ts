@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { BitState, ChartLineValue } from '../components/Chart/data/dataTypes';
+import {
+    type BitState,
+    ChartLineValue,
+} from '../components/Chart/data/dataTypes';
 
 /* eslint-disable no-bitwise */
 

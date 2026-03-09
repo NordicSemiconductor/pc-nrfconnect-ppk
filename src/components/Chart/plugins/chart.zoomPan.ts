@@ -5,7 +5,12 @@
  */
 
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { Chart, CoreScaleOptions, Plugin, Scale } from 'chart.js';
+import {
+    type Chart,
+    type CoreScaleOptions,
+    type Plugin,
+    type Scale,
+} from 'chart.js';
 
 import { DataManager, getSamplesPerSecond } from '../../../globals';
 import {

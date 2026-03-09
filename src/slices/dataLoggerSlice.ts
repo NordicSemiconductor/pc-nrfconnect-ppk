@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { isScopePane } from '../utils/panes';
 import {
@@ -14,7 +14,7 @@ import {
     setDuration as persistDuration,
     setDurationUnit as persistDurationUnit,
     setSampleFreq as persistSampleFreq,
-    TimeUnit,
+    type TimeUnit,
 } from '../utils/persistentStore';
 import type { RootState } from '.';
 

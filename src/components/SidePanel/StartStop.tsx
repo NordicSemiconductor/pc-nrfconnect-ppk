@@ -25,7 +25,7 @@ import {
 } from '../../slices/appSlice';
 import {
     getRecordingMode,
-    RecordingMode,
+    type RecordingMode,
     resetChartTime,
     resetCursor,
 } from '../../slices/chartSlice';

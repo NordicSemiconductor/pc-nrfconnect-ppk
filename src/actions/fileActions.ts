@@ -6,7 +6,7 @@
 
 import { dialog, getCurrentWindow } from '@electron/remote';
 import {
-    AppThunk,
+    type AppThunk,
     logger,
     setCurrentPane,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -52,7 +52,7 @@ import { updateSampleFreqLog10 } from '../slices/dataLoggerSlice';
 import loadData from '../utils/loadFileHandler';
 import { Panes } from '../utils/panes';
 import { getLastSaveDir, setLastSaveDir } from '../utils/persistentStore';
-import saveData, { PPK2Metadata } from '../utils/saveFileHandler';
+import saveData, { type PPK2Metadata } from '../utils/saveFileHandler';
 
 const getTimestamp = () =>
     new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15);

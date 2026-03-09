@@ -27,7 +27,7 @@ import { RecoveryManager } from './RecoveryManager';
 import {
     DeleteAllSessions,
     RemoveSessionByFilePath,
-    Session,
+    type Session,
     SessionFlag,
 } from './SessionsListFileHandler';
 
@@ -43,7 +43,7 @@ const SessionItem = ({
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     return (
         <div className="tw-relative">
-            <div className=" tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
+            <div className="tw-flex tw-flex-row tw-justify-between tw-bg-gray-800 tw-p-3 tw-text-white">
                 <div>
                     <div className="tw-text-xs">Start time</div>
                     <div>{formatTimestamp(session.startTime)}</div>

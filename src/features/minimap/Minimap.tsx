@@ -7,7 +7,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { classNames, colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { Chart, ChartOptions } from 'chart.js';
+import { Chart, type ChartOptions } from 'chart.js';
 
 import minimapScroll from '../../components/Chart/plugins/minimap.scroll';
 import { DataManager, indexToTimestamp } from '../../globals';

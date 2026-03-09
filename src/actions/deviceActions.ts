@@ -8,8 +8,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: Remove, only added for conservative refactoring to typescript */
 
 import {
-    AppThunk,
-    Device,
+    type AppThunk,
+    type Device,
     logger,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import describeError from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging/describeError';
@@ -17,7 +17,7 @@ import { unit } from 'mathjs';
 
 import { resetCache } from '../components/Chart/data/dataAccumulator';
 import SerialDevice from '../device/serialDevice';
-import { SampleValues } from '../device/types';
+import { type SampleValues } from '../device/types';
 import {
     miniMapAnimationAction,
     resetMinimap,
@@ -30,7 +30,7 @@ import {
     indexToTimestamp,
     microSecondsPerSecond,
 } from '../globals';
-import { RootState } from '../slices';
+import { type RootState } from '../slices';
 import {
     clearFileLoadedAction,
     deviceClosedAction,
@@ -50,7 +50,7 @@ import {
     chartWindowUnLockAction,
     clearRecordingMode,
     getRecordingMode,
-    RecordingMode,
+    type RecordingMode,
     resetChartTime,
     resetCursorAndChart,
     setLatestDataTimestamp,
@@ -64,7 +64,7 @@ import {
 import { updateGainsAction } from '../slices/gainsSlice';
 import {
     clearProgress,
-    DigitalChannelTriggerLogic,
+    type DigitalChannelTriggerLogic,
     DigitalChannelTriggerStatesEnum,
     getTriggerOffset,
     getTriggerRecordingLength,
@@ -72,7 +72,7 @@ import {
     setProgress,
     setTriggerActive,
     setTriggerOrigin,
-    TriggerEdge,
+    type TriggerEdge,
 } from '../slices/triggerSlice';
 import { updateRegulator as updateRegulatorAction } from '../slices/voltageRegulatorSlice';
 import { convertBits16 } from '../utils/bitConversion';
@@ -80,7 +80,7 @@ import { convertTimeToSeconds } from '../utils/duration';
 import { isDiskFull } from '../utils/fileUtils';
 import { isDataLoggerPane } from '../utils/panes';
 import {
-    digitalChannelStateTupleOf8,
+    type digitalChannelStateTupleOf8,
     setSpikeFilter as persistSpikeFilter,
 } from '../utils/persistentStore';
 

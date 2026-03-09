@@ -5,7 +5,7 @@
  */
 
 import {
-    AppThunk,
+    type AppThunk,
     logger,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -17,7 +17,7 @@ import {
     indexToTimestamp,
     timestampToIndex,
 } from '../globals';
-import { RootState } from '../slices';
+import { type RootState } from '../slices';
 import { hideExportDialog } from '../slices/appSlice';
 import EventAction from '../usageDataActions';
 import { getSingleBitState } from '../utils/bitConversion';

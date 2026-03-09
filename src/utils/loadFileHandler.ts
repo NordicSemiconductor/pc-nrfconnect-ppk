@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
 import { logger, telemetry } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { deserialize, Document as BsonDocument } from 'bson';
+import { deserialize, type Document as BsonDocument } from 'bson';
 import { Buffer, kMaxLength as maxBufferLengthForSystem } from 'buffer';
 import fs from 'fs';
 import { unit } from 'mathjs';
@@ -26,7 +26,7 @@ import {
 } from '../features/recovery/SessionsListFileHandler';
 import { DataManager, timestampToIndex } from '../globals';
 import { canFileFit } from './fileUtils';
-import saveFile, { PPK2Metadata } from './saveFileHandler';
+import saveFile, { type PPK2Metadata } from './saveFileHandler';
 
 /*
         File outline .ppk v1

@@ -16,8 +16,8 @@ import {
 import {
     fullOverlap,
     overlaps,
-    Page,
-    Range,
+    type Page,
+    type Range,
     readFromCachedData,
     WriteBuffer,
 } from './WriteBuffer';

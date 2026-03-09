@@ -5,7 +5,7 @@
  */
 
 import {
-    AppThunk,
+    type AppThunk,
     setCurrentPane,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import logger from '@nordicsemiconductor/pc-nrfconnect-shared/src/logging';
@@ -20,7 +20,7 @@ import {
     frameSize,
     getSamplingTime,
 } from '../../globals';
-import { RootState } from '../../slices';
+import { type RootState } from '../../slices';
 import { setSessionRecoveryPending } from '../../slices/appSlice';
 import {
     chartWindowAction,
@@ -45,7 +45,7 @@ import {
     ChangeSessionStatus,
     ReadSessions,
     RemoveSessionByFilePath,
-    Session,
+    type Session,
     SessionFlag,
     WriteSessions,
 } from './SessionsListFileHandler';
