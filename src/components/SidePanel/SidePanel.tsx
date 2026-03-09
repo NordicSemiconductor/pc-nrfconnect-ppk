@@ -120,7 +120,7 @@ export default () => {
                     collapsible
                     heading="Advanced Configuration"
                     defaultCollapsed
-                    collapseStatePersistanceId="advanced-configuration-group"
+                    collapseStatePersistenceId="advanced-configuration-group"
                     gap={8}
                 >
                     <div className="tw-border tw-border-solid tw-border-gray-400 tw-p-2 tw-text-[10px] tw-text-gray-400">

@@ -35,7 +35,7 @@ export default () => {
             heading="Temp Disk"
             collapsible
             defaultCollapsed
-            collapseStatePersistanceId="temp-disk-group"
+            collapseStatePersistenceId="temp-disk-group"
             gap={4}
         >
             <div className="tw-flex tw-flex-col tw-justify-between tw-gap-2">

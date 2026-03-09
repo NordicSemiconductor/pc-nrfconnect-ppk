@@ -44,7 +44,7 @@ export default () => {
             collapsible
             gap={4}
             defaultCollapsed
-            collapseStatePersistanceId="display-options-group"
+            collapseStatePersistenceId="display-options-group"
         >
             <Toggle
                 onToggle={() => dispatch(toggleTimestamps())}

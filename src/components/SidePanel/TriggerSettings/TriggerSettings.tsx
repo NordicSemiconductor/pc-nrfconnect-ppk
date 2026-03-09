@@ -31,7 +31,7 @@ export default () => {
             gap={4}
             collapsible
             defaultCollapsed
-            collapseStatePersistanceId="trigger-settings-group"
+            collapseStatePersistenceId="trigger-settings-group"
         >
             <StateSelector
                 items={[...TriggerCategoryValues]}
