@@ -11,13 +11,13 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import { startPreventSleep, stopPreventSleep } from '../features/preventSleep';
-import { frameSize, GlobalOptions, indexToTimestamp } from '../globals';
-import { ChartState } from '../slices/chartSlice';
-import { DataLoggerState } from '../slices/dataLoggerSlice';
+import { frameSize, type GlobalOptions, indexToTimestamp } from '../globals';
+import { type ChartState } from '../slices/chartSlice';
+import { type DataLoggerState } from '../slices/dataLoggerSlice';
 import EventAction from '../usageDataActions';
-import { FileBuffer } from './FileBuffer';
+import { type FileBuffer } from './FileBuffer';
 import { calcFileSize } from './fileUtils';
-import { FoldingBuffer } from './foldingBuffer';
+import { type FoldingBuffer } from './foldingBuffer';
 
 export interface SaveData {
     data: Float32Array;

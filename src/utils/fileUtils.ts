@@ -6,7 +6,7 @@
 
 import { dialog, getCurrentWindow } from '@electron/remote';
 import fs from 'fs/promises';
-import { FormatOptions, unit } from 'mathjs';
+import { type FormatOptions, unit } from 'mathjs';
 
 import { frameSize, indexToTimestamp } from '../globals';
 

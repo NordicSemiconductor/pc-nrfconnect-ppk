@@ -7,7 +7,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    DropdownItem,
+    type DropdownItem,
     NumberInput,
     Slider,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
@@ -20,7 +20,7 @@ import {
     updateDurationUnit,
     updateSampleFreqLog10,
 } from '../../slices/dataLoggerSlice';
-import { TimeUnit } from '../../utils/persistentStore';
+import { type TimeUnit } from '../../utils/persistentStore';
 
 export default () => {
     const dispatch = useDispatch();

@@ -8,9 +8,9 @@ import { useEffect } from 'react';
 
 import {
     HotkeyActionType,
-    HotkeyEvent,
+    type HotkeyEvent,
     hotkeyEventManager,
-    HotkeySubscriber,
+    type HotkeySubscriber,
 } from '../utils/hotkeyEventManager';
 
 export const useHotkeyAction = (

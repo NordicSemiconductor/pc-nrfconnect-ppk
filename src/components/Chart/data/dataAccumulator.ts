@@ -16,12 +16,12 @@ import {
 import { always0, always1, sometimes0And1 } from '../../../utils/bitConversion';
 import bitDataAccumulator from './bitDataAccumulator';
 import {
-    AmpereState,
-    BitState,
+    type AmpereState,
+    type BitState,
     ChartLineValue,
-    DigitalChannelState,
-    DigitalChannelStates,
-    TimestampType,
+    type DigitalChannelState,
+    type DigitalChannelStates,
+    type TimestampType,
 } from './dataTypes';
 
 export const calcStats = (

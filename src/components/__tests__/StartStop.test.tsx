@@ -8,7 +8,7 @@ import React from 'react';
 
 import { deviceOpenedAction } from '../../slices/appSlice';
 import {
-    DataLoggerState,
+    type DataLoggerState,
     setDataLoggerState,
 } from '../../slices/dataLoggerSlice';
 import { render, screen } from '../../utils/testUtils';

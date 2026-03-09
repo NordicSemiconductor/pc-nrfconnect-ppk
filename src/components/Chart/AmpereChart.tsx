@@ -16,7 +16,12 @@ import {
     colors,
     Spinner,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { Chart, ChartConfiguration, ChartData, ChartOptions } from 'chart.js';
+import {
+    type Chart,
+    type ChartConfiguration,
+    type ChartData,
+    type ChartOptions,
+} from 'chart.js';
 import { unit } from 'mathjs';
 
 import { DataManager } from '../../globals';
@@ -36,12 +41,12 @@ import {
 } from '../../slices/triggerSlice';
 import { isScopePane } from '../../utils/panes';
 import { type CursorData } from './Chart';
-import { AmpereState } from './data/dataTypes';
+import { type AmpereState } from './data/dataTypes';
 import crossHairPlugin from './plugins/chart.crossHair';
-import dragSelectPlugin, { DragSelect } from './plugins/chart.dragSelect';
+import dragSelectPlugin, { type DragSelect } from './plugins/chart.dragSelect';
 import triggerLevelPlugin from './plugins/chart.triggerLevel';
 import triggerOriginPlugin from './plugins/chart.triggerOrigin';
-import zoomPanPlugin, { ZoomPan } from './plugins/chart.zoomPan';
+import zoomPanPlugin, { type ZoomPan } from './plugins/chart.zoomPan';
 
 const yAxisWidth = 64;
 const rightMargin = 32;
@@ -302,10 +307,7 @@ export default ({
                                     : ''
                             }`}</div>
                         )}
-                        <Spinner
-                            size="lg"
-                            className=" tw-text-nordicBlue-900"
-                        />
+                        <Spinner size="lg" className="tw-text-nordicBlue-900" />
                     </div>
                 </div>
             )}

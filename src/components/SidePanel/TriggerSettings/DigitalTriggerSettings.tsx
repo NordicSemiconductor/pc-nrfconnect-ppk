@@ -8,7 +8,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Dropdown,
-    DropdownItem,
+    type DropdownItem,
     StateSelector,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 
@@ -19,7 +19,7 @@ import {
     setDigitalChannelsTriggerLogic,
     setDigitalChannelsTriggersStates,
 } from '../../../slices/triggerSlice';
-import { digitalChannelStateTupleOf8 } from '../../../utils/persistentStore';
+import { type digitalChannelStateTupleOf8 } from '../../../utils/persistentStore';
 
 const dropdownItems: DropdownItem[] = Object.entries(
     DigitalChannelTriggerStatesEnum,

@@ -7,11 +7,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- TODO: only temporary whilst refactoring from javascript */
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO: only temporary whilst refactoring from javascript */
 
-import { DeviceTraits } from '@nordicsemiconductor/pc-nrfconnect-shared/nrfutil/device/common';
+import { type DeviceTraits } from '@nordicsemiconductor/pc-nrfconnect-shared/nrfutil/device/common';
 import EventEmitter from 'events';
 
 import PPKCmd from '../constants';
-import { SampleValues } from './types';
+import { type SampleValues } from './types';
 
 const getAllPropertyNames = (obj: any): any => {
     const proto = Object.getPrototypeOf(obj);

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { NrfConnectState } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { type NrfConnectState } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
 import deprecatedDevices from '../features/DeprecatedDevice/DeprecatedDeviceSlice';

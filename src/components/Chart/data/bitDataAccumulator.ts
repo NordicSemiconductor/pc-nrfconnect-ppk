@@ -13,8 +13,12 @@ import {
     getSingleBitState,
     sometimes0And1,
 } from '../../../utils/bitConversion';
-import bitDataStorage, { BitDataStorage } from './bitDataStorage';
-import { BitState, DigitalChannelStates, TimestampType } from './dataTypes';
+import bitDataStorage, { type BitDataStorage } from './bitDataStorage';
+import {
+    type BitState,
+    type DigitalChannelStates,
+    type TimestampType,
+} from './dataTypes';
 
 export interface BitDataAccumulator {
     bitDataStorage: BitDataStorage;

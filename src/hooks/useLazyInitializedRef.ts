@@ -7,8 +7,8 @@
 import { useRef } from 'react';
 
 import {
-    DataAccumulator,
-    DataAccumulatorInitialiser,
+    type DataAccumulator,
+    type DataAccumulatorInitialiser,
 } from '../components/Chart/data/dataAccumulator';
 
 const uninitialisedToken = Symbol('uninitialisedToken');

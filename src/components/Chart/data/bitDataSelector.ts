@@ -6,8 +6,8 @@
 
 import { numberOfDigitalChannels } from '../../../globals';
 import { getSingleBitState } from '../../../utils/bitConversion';
-import bitDataStorage, { BitDataStorage } from './bitDataStorage';
-import { DigitalChannelStates, TimestampType } from './dataTypes';
+import bitDataStorage, { type BitDataStorage } from './bitDataStorage';
+import { type DigitalChannelStates, type TimestampType } from './dataTypes';
 
 export interface BitDataSelector {
     bitDataStorage: BitDataStorage;

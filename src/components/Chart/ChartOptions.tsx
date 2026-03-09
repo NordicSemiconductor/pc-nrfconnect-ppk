@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Dropdown,
-    DropdownItem,
+    type DropdownItem,
     NumberInlineInput,
     telemetry,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';

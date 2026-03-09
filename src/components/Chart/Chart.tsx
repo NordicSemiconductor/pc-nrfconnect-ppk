@@ -13,8 +13,8 @@ import React, {
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    AppDispatch,
-    AppThunk,
+    type AppDispatch,
+    type AppThunk,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import {
     Chart as ChartJS,
@@ -34,11 +34,11 @@ import {
 } from '../../globals';
 import { HotkeyActionType, useHotkeyAction } from '../../hooks/useHotkeyAction';
 import {
-    DataAccumulatorInstance,
+    type DataAccumulatorInstance,
     isInitialised,
     useLazyInitializedRef,
 } from '../../hooks/useLazyInitializedRef';
-import { RootState } from '../../slices';
+import { type RootState } from '../../slices';
 import { isSamplingRunning } from '../../slices/appSlice';
 import {
     chartCursorAction,
@@ -60,7 +60,7 @@ import type { AmpereChartJS } from './AmpereChart';
 import AmpereChart from './AmpereChart';
 import ChartTop from './ChartTop';
 import dataAccumulatorInitialiser, { calcStats } from './data/dataAccumulator';
-import { AmpereState, DigitalChannelStates } from './data/dataTypes';
+import { type AmpereState, type DigitalChannelStates } from './data/dataTypes';
 import DigitalChannels from './DigitalChannels';
 import SelectionStatBox from './SelectionStatBox';
 import TimeSpanBottom from './TimeSpan/TimeSpanBottom';

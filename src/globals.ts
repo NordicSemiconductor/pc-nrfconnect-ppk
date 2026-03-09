@@ -10,7 +10,7 @@ import { v4 } from 'uuid';
 
 import { FileBuffer } from './utils/FileBuffer';
 import { FoldingBuffer } from './utils/foldingBuffer';
-import { fullOverlap, Range, WriteBuffer } from './utils/WriteBuffer';
+import { fullOverlap, type Range, WriteBuffer } from './utils/WriteBuffer';
 
 export const currentFrameSize = 4;
 export const bitFrameSize = 2; // 6 bytes, 4 current 2 buts

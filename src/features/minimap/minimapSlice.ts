@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { AppThunk } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { type AppThunk } from '@nordicsemiconductor/pc-nrfconnect-shared';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { DataManager } from '../../globals';
 import type { RootState } from '../../slices/index';

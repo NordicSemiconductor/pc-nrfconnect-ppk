@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import React, { MutableRefObject } from 'react';
+import React, { type MutableRefObject } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Dialog,
     InfoDialog,
     Toggle,
 } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { BigNumber, Fraction, unit } from 'mathjs';
+import { type BigNumber, type Fraction, unit } from 'mathjs';
 
 import { isSamplingRunning } from '../../slices/appSlice';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../../slices/chartSlice';
 import { dataLoggerState } from '../../slices/dataLoggerSlice';
 import { isDataLoggerPane } from '../../utils/panes';
-import { AmpereChartJS } from './AmpereChart';
+import { type AmpereChartJS } from './AmpereChart';
 import ChartOptions from './ChartOptions';
 
 type TimeWindowButton = {
@@ -34,8 +34,7 @@ type TimeWindowButton = {
 const TimeWindowButton = ({ label, zoomToWindow }: TimeWindowButton) => (
     <button
         type="button"
-        className="tw-h-5 tw-w-12 tw-min-w-[3rem] tw-border tw-border-solid tw-border-gray-200 tw-bg-white
-        tw-text-xs tw-text-gray-700 hover:tw-bg-gray-50 active:enabled:tw-bg-gray-50 lg:tw-w-16"
+        className="tw-h-5 tw-w-12 tw-min-w-[3rem] tw-border tw-border-solid tw-border-gray-200 tw-bg-white tw-text-xs tw-text-gray-700 hover:tw-bg-gray-50 active:enabled:tw-bg-gray-50 lg:tw-w-16"
         onClick={() => zoomToWindow(unit(label).to('us').toNumeric())}
     >
         {label}

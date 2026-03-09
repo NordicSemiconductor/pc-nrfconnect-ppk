@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
  */
 
-import { Plugin } from 'chart.js';
+import { type Plugin } from 'chart.js';
 
 import type { MinimapChart } from '../../../features/minimap/Minimap';
 import { DataManager } from '../../../globals';

@@ -5,7 +5,7 @@
  */
 
 import { colors } from '@nordicsemiconductor/pc-nrfconnect-shared';
-import { Plugin } from 'chart.js';
+import { type Plugin } from 'chart.js';
 
 import type { AmpereChartJS } from '../AmpereChart';
 import { isCanvasElement } from './utility';

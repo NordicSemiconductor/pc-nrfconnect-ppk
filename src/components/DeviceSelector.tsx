@@ -8,7 +8,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import {
     DeviceSelector,
-    DeviceSetupConfig,
+    type DeviceSetupConfig,
     getAppFile,
     isDeviceInDFUBootloader,
     sdfuDeviceSetup,
