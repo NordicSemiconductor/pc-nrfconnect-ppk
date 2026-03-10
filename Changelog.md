@@ -1,4 +1,9 @@
-## 4.3.2 - Unreleased
+## 4.4.0 - Unreleased
+
+### Added
+
+- Shortcut Alt+P on Windows and Linux and Option-P on macOS to toggle the power
+  output of the Device Under Test.
 
 ### Fixed
 
