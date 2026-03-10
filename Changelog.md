@@ -2,8 +2,8 @@
 
 ### Added
 
-- Shortcut Alt+P on Windows and Linux and Option-P on macOS to toggle the
-  power output of the Device Under Test.
+- Shortcut Alt+P on Windows and Linux and Option-P on macOS to toggle the power
+  output of the Device Under Test.
 
 ### Fixed
 
