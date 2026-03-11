@@ -1,0 +1,49 @@
+tool:
+- name: Power Profiler app
+  link: true
+sections:
+- name: January 2026
+  entries:
+  - "Renamed the Home page to [Get started](./index.md)."
+  - "Removed the separate Installing the Power Profiler app page. This page is now a section of the Get started page."
+  - "Added information about the [Export to CSV](./overview.md#export-to-csv-options) dialog and its options."
+- name: July 2025
+  entries:
+  - "Added information about the [trigger settings](./overview.md#trigger-settings) available for the **Scope** sampling mode"
+  - "Added information about the session recovery feature to the [Overview](./overview.md#sampling-parameters) and [Using the Power Profiler app](using_ppk_app.md) pages"
+  - "Added information about the [**Offset**](./overview.md#scope-parameters) sampling parameter for the **Scope** sampling mode."
+- name: January 2025
+  entries:
+  - "Added the [Application source code](./index.md#application-source-code) section on the [Home](./index.md) page"
+- name: November 2024
+  entries:
+  - "Editorial changes"
+- name: March 2024
+  entries:
+  - "Updated the documentation for the Power Profiler app [v4.0.0](https://github.com/NordicSemiconductor/pc-nrfconnect-ppk/blob/main/Changelog.md)"
+- name: February 2024
+  entries:
+  - "Separated the application documentation from the [PPK2 hardware documentation](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/PPK_user_guide_Intro.html)"
+- name: August 2022
+  entries:
+  - "Updated the following topics based on nRF9160 DK v0.9.0 or later:"
+  - "Quick start"
+  - "[Measuring current in Source Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_source_meter.html)"
+  - "[Measuring current in Ampere Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_ampere_meter.html)"
+- name: November 2021
+  entries:
+  - "Updated [Measuring current in Ampere Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_ampere_meter.html)"
+  - "Editorial changes"
+- name: June 2021
+  entries:
+  - "Updated Pin connections in Ampere Meter mode"
+- name: February 2021
+  entries:
+  - "Updated [Using the Power Profiler app](using_ppk_app.md)"
+  - "Updated [Measuring current in Source Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_source_meter.html)"
+  - "Updated [Measuring current in Ampere Meter mode](https://docs.nordicsemi.com/bundle/ug_ppk2/page/UG/ppk/measure_current_ampere_meter.html)"
+  - "Added [Views](overview.md)"
+  - "Editorial changes"
+- name: December 2020
+  entries:
+  - "First release"
