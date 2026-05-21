@@ -24,3 +24,11 @@ jobs:
             ref: ${{ inputs.ref }}
             doc_bundle_name: nrf-connect-ppk
         secrets: inherit
+
+    notify-swtools-docs:
+        needs: release
+        if: inputs.source == 'official (external)'
+        uses: ./.github/workflows/docs-notify-swtools-repo.yml
+        with:
+            ref: ${{ inputs.ref || github.ref }}
+        secrets: inherit
