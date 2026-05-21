@@ -16,11 +16,6 @@ import {
 
 import { close, open } from '../actions/deviceActions';
 
-const deviceListing = {
-    nordicUsb: true,
-    nordicDfu: true,
-};
-
 export const deviceSetupConfig: DeviceSetupConfig = {
     deviceSetups: [
         sdfuDeviceSetup(
@@ -52,7 +47,7 @@ export default () => {
     return (
         <DeviceSelector
             deviceSetupConfig={deviceSetupConfig}
-            deviceListing={deviceListing}
+            deviceListing={{}} // we have manual filter, so we want all devies from nrfutil to be able to shoe "No Supported Device Found" vs "Connect a Nordic Development kit...."
             deviceFilter={device =>
                 isDeviceInDFUBootloader(device) ||
                 device.usb?.device.descriptor.idProduct === 0xc00a
