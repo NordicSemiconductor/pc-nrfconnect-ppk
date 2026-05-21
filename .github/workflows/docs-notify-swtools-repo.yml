@@ -2,12 +2,58 @@ name: Notify swtools-app-docs about release
 
 on:
   release:
-    types: [published]   # fires when a release is created/published
+    types: [published]
+  workflow_call:
+    inputs:
+      ref:
+        description: Ref to read the release version from (branch, tag, or SHA)
+        type: string
+        required: false
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Ref to read the release version from (branch, tag, or SHA)
+        type: string
+        required: false
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      # #region agent log
+      - name: Debug — record trigger context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || '' }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id || '' }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion || '' }}
+        run: |
+          echo "trigger_event=$EVENT_NAME" >> "$GITHUB_STEP_SUMMARY"
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "workflow_run_id=$WORKFLOW_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "workflow_run_conclusion=$WORKFLOW_RUN_CONCLUSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::docs-notify triggered by event=$EVENT_NAME release_tag=$RELEASE_TAG"
+      # #endregion
+
+      - uses: actions/checkout@v4
+        if: github.event_name != 'release'
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Resolve release tag
+        id: tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || '' }}
+        run: |
+          if [ "$EVENT_NAME" = "release" ] && [ -n "$RELEASE_TAG" ]; then
+            echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "resolved_tag=$(cat "$GITHUB_OUTPUT" | grep '^tag=' | cut -d= -f2-)" >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/create-github-app-token@v3
         id: app-token
         with:
@@ -17,16 +63,24 @@ jobs:
           repositories: swtools-app-docs
 
       - uses: actions/github-script@v7
+        id: dispatch
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
+            const tag = '${{ steps.tag.outputs.tag }}';
+            // #region agent log
+            core.info(`docs-notify dispatching app-release for tag=${tag}`);
+            core.summary.addHeading('Dispatch payload', 3);
+            core.summary.addRaw(`tag: ${tag}\nproject: pc-nrfconnect-ppk`);
+            await core.summary.write();
+            // #endregion
             await github.rest.repos.createDispatchEvent({
               owner: 'nordicsemi',
               repo: 'swtools-app-docs',
               event_type: 'app-release',
               client_payload: {
                 project: 'pc-nrfconnect-ppk',
-                tag: context.payload.release.tag_name,
+                tag,
                 repo: 'https://github.com/nordicsemi/pc-nrfconnect-ppk',
               },
             });
