@@ -47,7 +47,7 @@ export default () => {
     return (
         <DeviceSelector
             deviceSetupConfig={deviceSetupConfig}
-            deviceListing={{}} // we have manual filter, so we want all devies from nrfutil to be able to shoe "No Supported Device Found" vs "Connect a Nordic Development kit...."
+            deviceListing={{}} // we have custom filter, so we want all devies from nrfutil to be able to show "No Supported Device Found" instead of "Connect a Nordic Development kit...."
             deviceFilter={device =>
                 isDeviceInDFUBootloader(device) ||
                 device.usb?.device.descriptor.idProduct === 0xc00a
