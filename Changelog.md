@@ -2,17 +2,18 @@
 
 ### Added
 
-- Shortcut Alt+P on Windows and Linux and Option-P on macOS to toggle the power
-  output of the Device Under Test.
+- Shortcut Alt+P (on Windows and Linux) and Option-P (on macOS) to toggle the
+  power output of the Device Under Test.
 
 ### Fixed
 
-- Do not send big, unneeded telemetry data for dependencies.
+- Issue with sending big, unneeded telemetry data for dependencies.
+- MacOS-only issue where testing would stall during long sessions.
 
 ### Removed
 
-- Removed PPK1 deprecation notice. PPK1 devices will no longer show in the list
-  of connected devices.
+- The PPK1 deprecation notice. PPK1 devices no longer show in the list of
+  connected devices.
 
 ## 4.3.1 - 2025-08-13
 
