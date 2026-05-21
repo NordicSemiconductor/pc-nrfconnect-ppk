@@ -1,0 +1,24 @@
+name: Notify swtools-app-docs about release
+
+on:
+  release:
+    types: [published]   # fires when a release is created/published
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.SWTOOLS_DOCS_DISPATCH_TOKEN }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: 'nordicsemi',
+              repo: 'swtools-app-docs',
+              event_type: 'app-release',          # custom name you choose
+              client_payload: {
+                project: 'pc-nrfconnect-ppk',
+                tag: context.payload.release.tag_name,
+                repo: 'https://github.com/nordicsemi/pc-nrfconnect-ppk',
+              },
+            });
