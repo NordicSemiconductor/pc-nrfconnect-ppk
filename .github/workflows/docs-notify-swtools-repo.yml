@@ -8,14 +8,22 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ secrets.JENKINS_NCS_APP_ID }}
+          private-key: ${{ secrets.JENKINS_NCS_APP_PRIVATE_KEY }}
+          owner: nordicsemi
+          repositories: swtools-app-docs
+
       - uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.SWTOOLS_DOCS_DISPATCH_TOKEN }}
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             await github.rest.repos.createDispatchEvent({
               owner: 'nordicsemi',
               repo: 'swtools-app-docs',
-              event_type: 'app-release',          # custom name you choose
+              event_type: 'app-release',
               client_payload: {
                 project: 'pc-nrfconnect-ppk',
                 tag: context.payload.release.tag_name,
