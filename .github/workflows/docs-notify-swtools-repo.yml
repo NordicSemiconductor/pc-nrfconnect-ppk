@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
         if: github.event_name != 'release'
         with:
-          ref: ${{ inputs.ref || github.ref }}
+          ref: ${{ inputs.ref }}
 
       - name: Resolve release tag
         id: tag
