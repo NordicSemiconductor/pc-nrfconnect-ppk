@@ -12,7 +12,7 @@ on:
       ref:
         description: Ref to read the release version from (branch, tag, or SHA)
         type: string
-        required: false
+        required: true
 
 jobs:
   notify:
