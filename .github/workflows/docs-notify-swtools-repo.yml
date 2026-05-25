@@ -25,7 +25,7 @@ jobs:
       - uses: actions/create-github-app-token@v3
         id: app-token
         with:
-          app-id: ${{ secrets.JENKINS_NCS_APP_ID }}
+          client-id: ${{ secrets.JENKINS_NCS_APP_ID }}
           private-key: ${{ secrets.JENKINS_NCS_APP_PRIVATE_KEY }}
           owner: nordicsemi
           repositories: swtools-app-docs
