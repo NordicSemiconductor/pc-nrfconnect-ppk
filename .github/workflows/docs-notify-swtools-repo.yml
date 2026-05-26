@@ -1,8 +1,6 @@
 name: Notify swtools-app-docs about release
 
 on:
-  release:
-    types: [published]
   workflow_call:
     inputs:
       ref:
@@ -14,34 +12,20 @@ on:
       ref:
         description: Ref to read the release version from (branch, tag, or SHA)
         type: string
-        required: false
+        required: true
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        if: github.event_name != 'release'
         with:
-          ref: ${{ inputs.ref || github.ref }}
-
-      - name: Resolve release tag
-        id: tag
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          RELEASE_TAG: ${{ github.event.release.tag_name || '' }}
-        run: |
-          if [ "$EVENT_NAME" = "release" ] && [ -n "$RELEASE_TAG" ]; then
-            echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          else
-            VERSION=$(node -p "require('./package.json').version")
-            echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
-          fi
+          ref: ${{ inputs.ref }}
 
       - uses: actions/create-github-app-token@v3
         id: app-token
         with:
-          app-id: ${{ secrets.JENKINS_NCS_APP_ID }}
+          client-id: ${{ secrets.JENKINS_NCS_APP_ID }}
           private-key: ${{ secrets.JENKINS_NCS_APP_PRIVATE_KEY }}
           owner: nordicsemi
           repositories: swtools-app-docs
@@ -50,14 +34,14 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
-            const tag = '${{ steps.tag.outputs.tag }}';
+            const version = require('./package.json').version;
             await github.rest.repos.createDispatchEvent({
               owner: 'nordicsemi',
               repo: 'swtools-app-docs',
-              event_type: 'app-release',
+              event_type: 'bump-project-tag',
               client_payload: {
                 project: 'pc-nrfconnect-ppk',
-                tag,
+                tag: `v${version}`,
                 repo: 'https://github.com/nordicsemi/pc-nrfconnect-ppk',
               },
             });
