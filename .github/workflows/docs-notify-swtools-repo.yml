@@ -38,7 +38,7 @@ jobs:
             await github.rest.repos.createDispatchEvent({
               owner: 'nordicsemi',
               repo: 'swtools-app-docs',
-              event_type: 'app-release',
+              event_type: 'bump-project-tag',
               client_payload: {
                 project: 'pc-nrfconnect-ppk',
                 tag: `v${version}`,
