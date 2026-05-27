@@ -1,4 +1,4 @@
-name: Release
+﻿name: Release
 
 on:
     workflow_dispatch:
@@ -22,13 +22,5 @@ jobs:
         with:
             source: ${{ inputs.source }}
             ref: ${{ inputs.ref }}
-            doc_bundle_name: nrf-connect-ppk
-        secrets: inherit
-
-    notify-swtools-docs:
-        needs: release
-        if: inputs.source == 'official (external)'
-        uses: ./.github/workflows/docs-notify-swtools-repo.yml
-        with:
-            ref: ${{ inputs.ref }}
+            unified_doc_project_name: pc-nrfconnect-ppk
         secrets: inherit
