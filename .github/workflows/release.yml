@@ -1,4 +1,4 @@
-name: Release
+﻿name: Release
 
 on:
     workflow_dispatch:
@@ -22,7 +22,7 @@ jobs:
         with:
             source: ${{ inputs.source }}
             ref: ${{ inputs.ref }}
-            doc_bundle_name: nrf-connect-ppk
+            unified_doc_project_name: pc-nrfconnect-ppk
         secrets: inherit
 
     notify-swtools-docs:
