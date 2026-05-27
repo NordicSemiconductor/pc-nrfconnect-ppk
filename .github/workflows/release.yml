@@ -24,11 +24,3 @@ jobs:
             ref: ${{ inputs.ref }}
             unified_doc_project_name: pc-nrfconnect-ppk
         secrets: inherit
-
-    notify-swtools-docs:
-        needs: release
-        if: inputs.source == 'official (external)'
-        uses: ./.github/workflows/docs-notify-swtools-repo.yml
-        with:
-            ref: ${{ inputs.ref }}
-        secrets: inherit
