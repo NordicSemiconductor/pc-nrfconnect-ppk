@@ -6,12 +6,6 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- the thunk dispatch is intentionally loose here */
 
-// SDK type-only imports are erased at build/test time. The SDK is heavy and
-// Node-only, so its runtime classes are pulled in lazily via loadSdk() when the
-// server starts, keeping it out of the module graph during normal rendering.
-
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
-import type { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp';
 import { logger } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import http from 'http';
 import { z } from 'zod';
@@ -34,12 +28,7 @@ import {
     voltageRegulatorState,
 } from '../../slices/voltageRegulatorSlice';
 import { sampleCount, statsForLast } from './measurementTap';
-
-type McpServerCtor = new (info: { name: string; version: string }) => McpServer;
-type TransportCtor = new (options: {
-    sessionIdGenerator: undefined;
-    enableJsonResponse: boolean;
-}) => StreamableHTTPServerTransport;
+import { McpServer, StreamableHTTPServerTransport } from './sdkRuntime';
 
 const SERVER_NAME = 'ppk2';
 const SERVER_VERSION = '1.0.0';
@@ -77,11 +66,11 @@ const statusOf = (getState: () => RootState) => {
     };
 };
 
-const buildServer = (
-    McpServerClass: McpServerCtor,
-    { dispatch, getState }: McpContext,
-): McpServer => {
-    const server = new McpServerClass({
+const buildServer = ({
+    dispatch,
+    getState,
+}: McpContext): InstanceType<typeof McpServer> => {
+    const server = new McpServer({
         name: SERVER_NAME,
         version: SERVER_VERSION,
     });
@@ -121,6 +110,7 @@ const buildServer = (
                     `Voltage ${millivolts} mV is outside the allowed range [${lower}, ${upper}] mV for the current configuration.`,
                 );
             }
+            logger.info(`[mcp] set_source_voltage ${millivolts} mV`);
             dispatch(moveVoltageRegulatorVdd(millivolts));
             await dispatch(updateRegulator());
             return jsonResult(statusOf(getState));
@@ -140,6 +130,7 @@ const buildServer = (
             },
         },
         async ({ mode }) => {
+            logger.info(`[mcp] set_power_mode ${mode}`);
             await dispatch(setPowerMode(mode === 'source'));
             return jsonResult(statusOf(getState));
         },
@@ -158,6 +149,7 @@ const buildServer = (
             },
         },
         async ({ enable }) => {
+            logger.info(`[mcp] set_device_power ${enable ? 'on' : 'off'}`);
             await dispatch(setDeviceRunning(enable));
             return jsonResult(statusOf(getState));
         },
@@ -180,6 +172,7 @@ const buildServer = (
             },
         },
         async ({ duration_ms: durationMs }) => {
+            logger.info(`[mcp] measure ${durationMs} ms`);
             const wasSampling = isSamplingRunning(getState());
             if (!wasSampling) {
                 if (!deviceOpenSelector(getState())) {
@@ -244,39 +237,12 @@ const readBody = (req: http.IncomingMessage): Promise<unknown> =>
         req.on('error', reject);
     });
 
-interface Sdk {
-    McpServerClass: McpServerCtor;
-    TransportClass: TransportCtor;
-}
-
-let sdk: Sdk | null = null;
-
-const loadSdk = async (): Promise<Sdk> => {
-    if (sdk) return sdk;
-    const [mcpModule, transportModule] = await Promise.all([
-        // eslint-disable-next-line import/no-unresolved -- resolved via the SDK's exports map at runtime
-        import('@modelcontextprotocol/sdk/server/mcp'),
-        // eslint-disable-next-line import/no-unresolved -- resolved via the SDK's exports map at runtime
-        import('@modelcontextprotocol/sdk/server/streamableHttp'),
-    ]);
-    sdk = {
-        McpServerClass: mcpModule.McpServer,
-        TransportClass: transportModule.StreamableHTTPServerTransport,
-    };
-    return sdk;
-};
-
 let httpServer: http.Server | null = null;
 
 export const isRunning = () => httpServer !== null;
 
-export const startServer = async (
-    port: number,
-    ctx: McpContext,
-): Promise<void> => {
-    if (httpServer) return;
-
-    const { McpServerClass, TransportClass } = await loadSdk();
+export const startServer = (port: number, ctx: McpContext): Promise<void> => {
+    if (httpServer) return Promise.resolve();
 
     const requestHandler = async (
         req: http.IncomingMessage,
@@ -292,14 +258,14 @@ export const startServer = async (
                 req.method === 'POST' ? await readBody(req) : undefined;
             // Stateless: a fresh server + transport per request avoids any
             // cross-request session/initialization coupling.
-            const transport = new TransportClass({
+            const transport = new StreamableHTTPServerTransport({
                 sessionIdGenerator: undefined,
                 enableJsonResponse: true,
             });
             res.on('close', () => {
                 transport.close();
             });
-            const server = buildServer(McpServerClass, ctx);
+            const server = buildServer(ctx);
             await server.connect(transport);
             await transport.handleRequest(req, res, body);
         } catch (e) {
@@ -310,7 +276,7 @@ export const startServer = async (
         }
     };
 
-    await new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         const created = http.createServer((req, res) => {
             requestHandler(req, res).catch(e =>
                 logger.error(`MCP handler error: ${e}`),
