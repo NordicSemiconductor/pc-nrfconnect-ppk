@@ -18,6 +18,7 @@ import { unit } from 'mathjs';
 import { resetCache } from '../components/Chart/data/dataAccumulator';
 import SerialDevice from '../device/serialDevice';
 import { type SampleValues } from '../device/types';
+import { recordSample } from '../features/mcp/measurementTap';
 import {
     miniMapAnimationAction,
     resetMinimap,
@@ -360,6 +361,7 @@ export const open =
             }
 
             DataManager().addData(cappedValue, b16 | prevBits);
+            recordSample(cappedValue);
             prevBits = 0;
 
             if (getRecordingMode(state) === 'Scope') {

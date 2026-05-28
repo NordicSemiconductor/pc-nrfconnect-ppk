@@ -21,6 +21,24 @@ The Power Profiler Kit II (PPK2) must be connected to your computer and powered 
 
 At the end of the sampling, you can click [**Save/Export**](./overview.md#save-options) to save the sampling data to a `.ppk2` or `.csv` file.
 
+## Controlling the device from an AI agent (MCP server)
+
+The app can expose the connected PPK2 to AI agents through a local
+[Model Context Protocol](https://modelcontextprotocol.io) (MCP) server.
+
+1. In the side panel, expand **MCP server** and toggle **Enable MCP server**.
+1. The panel shows the local endpoint (`http://127.0.0.1:<port>/mcp`) and
+   ready-to-paste client configuration. For example, to register it with
+   Claude Code:
+
+    ```
+    claude mcp add --transport http ppk2 http://127.0.0.1:8730/mcp
+    ```
+
+The server exposes these tools: `get_status`, `measure`, `set_source_voltage`,
+`set_power_mode`, and `set_device_power`. The server only listens on localhost
+and operates on the device that is currently open in the app.
+
 !!! note "Note"
 
     {{session_recovery_info}}

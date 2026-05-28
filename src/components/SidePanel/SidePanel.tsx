@@ -35,6 +35,7 @@ import Gains from './Gains';
 import Instructions from './Instructions';
 import LiveModeSettings from './LiveModeSettings';
 import { Load, Save } from './LoadSave';
+import McpServer from './McpServer';
 import PowerMode from './PowerMode';
 import SamplingSettings from './SamplingSettings';
 import SessionSettings from './SessionSettings';
@@ -85,6 +86,7 @@ export default () => {
     const showDisplayOptions = canInteract && paneActive;
     const showSessionSettings = dataLoggerPane || !deviceConnected;
     const showAdvancedConfiguration = !fileLoaded && deviceOpen && paneActive;
+    const showMcpServer = deviceOpen && paneActive;
 
     if (connecting) {
         return (
@@ -145,6 +147,7 @@ export default () => {
                     </Button>
                 </Group>
             )}
+            {showMcpServer && <McpServer />}
             {showProgressDialog && <ProgressDialog />}
         </SidePanel>
     );

@@ -7,6 +7,7 @@
 import { type NrfConnectState } from '@nordicsemiconductor/pc-nrfconnect-shared';
 import { combineReducers } from 'redux';
 
+import mcp from '../features/mcp/mcpSlice';
 import minimap from '../features/minimap/minimapSlice';
 import progressDialog from '../features/ProgressDialog/progressSlice';
 import app from './appSlice';
@@ -31,6 +32,7 @@ const appReducer = combineReducers({
     dataLogger,
     progressDialog,
     trigger,
+    mcp,
 });
 
 export default appReducer;

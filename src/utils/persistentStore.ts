@@ -26,6 +26,7 @@ const DIGITAL_CHANNELS = 'digitalChannels';
 const DIGITAL_CHANNELS_TRIGGERS = 'digitalChannelsTriggers';
 const TIMESTAMPS_VISIBLE = 'timestampsVisible';
 const VOLTAGE_REGULATOR_MAX_CAP_PPK2 = 'voltageRegulatorMaxCap';
+const MCP_SERVER_PORT = 'mcpServerPort';
 
 const store = getPersistentStore<StoreSchema>({
     migrations: {
@@ -81,6 +82,7 @@ interface StoreSchema {
     [DIGITAL_CHANNELS_TRIGGERS]: digitalChannelStateTupleOf8;
 
     [VOLTAGE_REGULATOR_MAX_CAP_PPK2]: number;
+    [MCP_SERVER_PORT]: number;
 
     [maxSampleFrequency: SAMPLE_FREQUENCY]: number;
     [maxSampleFrequency: DURATION_SECONDS]: number;
@@ -203,6 +205,11 @@ export const getVoltageRegulatorMaxCapPPK2 = (defaultMaxCap: number) =>
     store.get(VOLTAGE_REGULATOR_MAX_CAP_PPK2, defaultMaxCap);
 export const setVoltageRegulatorMaxCapPPK2 = (maxCap: number) =>
     store.set(VOLTAGE_REGULATOR_MAX_CAP_PPK2, maxCap);
+
+export const getMcpServerPort = (defaultPort: number) =>
+    store.get(MCP_SERVER_PORT, defaultPort);
+export const setMcpServerPort = (port: number) =>
+    store.set(MCP_SERVER_PORT, port);
 
 export const getDoNotAskStartAndClear = (defaultValue: boolean) =>
     store.get(`start-and-clear-data`, defaultValue);

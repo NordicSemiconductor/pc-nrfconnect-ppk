@@ -1,3 +1,12 @@
+## Unreleased
+
+### Added
+
+- Embedded MCP (Model Context Protocol) server, toggled from the side panel,
+  that lets AI agents read current measurements and control the device (set
+  source voltage, switch power mode, enable/disable the DUT output) over a local
+  HTTP endpoint. The panel shows ready-to-paste client configuration.
+
 ## 4.4.0 - 2026-05-21
 
 ### Added
