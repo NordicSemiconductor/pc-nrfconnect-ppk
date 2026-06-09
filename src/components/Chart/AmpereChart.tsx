@@ -252,7 +252,11 @@ export default ({
         parsing: false,
         maintainAspectRatio: false,
         animation: false,
-        formatX: timestampToLabel,
+        formatX: value =>
+            timestampToLabel(
+                value,
+                systemTime ? DataManager().getStartSystemTime() : undefined,
+            ),
         formatY: formatCurrent,
         snapping,
         live,

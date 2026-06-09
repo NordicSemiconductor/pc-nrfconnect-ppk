@@ -1,3 +1,10 @@
+## Unreleased
+
+### Fixed
+
+- If “Absolute” timestamps are selected in the display options, the tooltip was
+  still a relative timestamp.
+
 ## 4.4.0 - 2026-05-21
 
 ### Added
