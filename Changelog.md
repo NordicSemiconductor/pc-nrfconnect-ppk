@@ -1,9 +1,9 @@
-## Unreleased
+## 4.4.1 - 2026-06-10
 
 ### Fixed
 
-- If “Absolute” timestamps are selected in the display options, the tooltip was
-  still a relative timestamp.
+- Issue where timestamps would be displayed with relative values in the chart
+  even if absolute timestamps were selected.
 
 ## 4.4.0 - 2026-05-21
 
