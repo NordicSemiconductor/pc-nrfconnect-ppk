@@ -105,12 +105,16 @@ const formatCurrent = (nA: number) =>
 
 const padL = (nr: number, len = 2, chr = `0`) => `${nr}`.padStart(len, chr);
 
-const timestampToLabel = (usecs: number, systemTime?: number) => {
+const timestampToLabel = (usecs: number, useSystemTime: boolean) => {
     const microseconds = Math.abs(usecs);
 
-    if (systemTime != null) {
+    const systemStartTime = useSystemTime
+        ? DataManager().getStartSystemTime()
+        : null;
+
+    if (systemStartTime != null) {
         const milliSeconds = Math.trunc(microseconds / 1000);
-        const time = new Date(milliSeconds + systemTime);
+        const time = new Date(milliSeconds + systemStartTime);
         const subsecond =
             Number(
                 ((microseconds + time.getMilliseconds() * 1000) / 1e3) % 1e3,
@@ -211,9 +215,7 @@ export default ({
                     callback: value =>
                         timestampToLabel(
                             Number.parseInt(value.toString(), 10),
-                            systemTime
-                                ? DataManager().getStartSystemTime()
-                                : undefined,
+                            systemTime,
                         ),
                     maxTicksLimit: 7,
                 },
@@ -252,7 +254,7 @@ export default ({
         parsing: false,
         maintainAspectRatio: false,
         animation: false,
-        formatX: timestampToLabel,
+        formatX: value => timestampToLabel(value, systemTime),
         formatY: formatCurrent,
         snapping,
         live,
