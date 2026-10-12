@@ -197,7 +197,7 @@ shared_features:
 supported_devices:
   - device: PPK2
     pca: PCA63100
-    verification_version:
+    verification_version: 4.4.1
     support:
 
 unsupported_devices:
