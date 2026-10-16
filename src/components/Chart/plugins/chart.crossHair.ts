@@ -133,25 +133,25 @@ interface Tag {
 }
 
 // Draws value tags at the right edge, each joined to its value by a dotted
-// leader. Tags that would overlap are spread apart.
+// leader. Tags must be given top to bottom; that order is kept when tags that
+// would overlap are spread apart.
 const drawTags = (chart: AmpereChartJS, tags: Tag[]) => {
     const {
         ctx,
         chartArea: { right, top, bottom },
     } = chart;
 
-    const sorted = [...tags].sort((a, b) => a.y - b.y);
     const width =
-        Math.max(...sorted.map(tag => ctx.measureText(tag.text).width)) + 10;
+        Math.max(...tags.map(tag => ctx.measureText(tag.text).width)) + 10;
     const tagLeft = right - width;
     const centers = spreadPositions(
-        sorted.map(tag => tag.y),
+        tags.map(tag => tag.y),
         tagGap,
         top + tagHeight / 2,
         bottom - tagHeight / 2,
     );
 
-    sorted.forEach((tag, i) => {
+    tags.forEach((tag, i) => {
         const center = centers[i];
 
         ctx.save();
@@ -248,12 +248,6 @@ const drawTraceValue = (
             fill: color,
             leaderFrom: x + capHalfWidth + 1,
         },
-        {
-            y: minY,
-            text: `min ${formatY(min)}`,
-            fill: color,
-            leaderFrom: x + capHalfWidth + 1,
-        },
     ];
 
     if (avg != null) {
@@ -268,6 +262,13 @@ const drawTraceValue = (
             leaderFrom: x + avgTickHalfWidth + 1,
         });
     }
+
+    tags.push({
+        y: minY,
+        text: `min ${formatY(min)}`,
+        fill: color,
+        leaderFrom: x + capHalfWidth + 1,
+    });
 
     drawTags(chart, tags);
 };
